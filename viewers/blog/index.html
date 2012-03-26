@@ -73,7 +73,7 @@ $(document).ready(function() {
 	}
 
 	if (! record_type  &&  ! query) {
-		record_type = HRecordTypeManager.getRecordTypeById(137);	// blog entry record type
+		record_type = HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers.RT_BLOG_ENTRY);	// blog entry record type
 	}
 
 	if (user) {
@@ -112,7 +112,7 @@ $(document).ready(function() {
 		$("<option value='" + rectypes[i].getID() + "'>" + rectypes[i].getName() + "</option>").appendTo("#record-type");
 	}
 //	$("#record-type").val(record_type ? record_type.getID() : 0);
-	$("#record-type").val(query ?  0 : ( record_type?record_type.getID() :HRecordTypeManager.getRecordTypeById(137)));
+	$("#record-type").val(query ?  0 : ( record_type?record_type.getID() :HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers.RT_BLOG_ENTRY)));
 	$("#record-type").change(function() { //fixme what if user and group are null???
 		window.location.href = "?" + (user ? "u="+user.getID() : "g="+group.getID()) + "&t="+this.value +"db=" + database;
 	});
@@ -126,7 +126,7 @@ $(document).ready(function() {
 		else if (matches[4]) search["tag"] = matches[4];
 	}
 
-	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"/login.php?logout=1"+ + (database ? "&db="+database : "")+"'>log out</a>");
+	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"common/connect/login.php?logout=1" + (database ? "&db="+database : "")+"'>log out</a>");
 	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (database ? "&db="+database : "");
 
 	if ((user  &&  HCurrentUser == user) ||
@@ -257,7 +257,7 @@ function reload() {
 		  </p>
 		 </div>
        </div>
-		 
+
 <div id=page>
 <div id=header></div>
 
@@ -266,8 +266,8 @@ function reload() {
         <h1 id="blog-owner" class="tableCell"></h1>
     </div>
     <div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
-    
-	
+
+
 
 	</div>
 	<div id=page-inner>

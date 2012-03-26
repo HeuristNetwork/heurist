@@ -349,6 +349,8 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#' title='Click to add a thumbnail image'><img src='no_image.png'/></a>")
 				.click(function () {
 					that.edit();
+					$(".entry-thumb-input-row input", this.$table).trigger('click');
+					// $("input[name=entry-thumb-input]").trigger('click');
 					return false;
 				})
 				.appendTo($(".entry-left", this.$outerTbody));
@@ -1073,6 +1075,10 @@ newEntry: function(related) {
 	record.setDetails(Blog.titleDetailType, ["Enter title here"]);
 	if (Blog.user) {
 		record.addToPersonalised();
+		var wg = HCurrentUser.getWorkgroups();
+		if(wg && wg.length>0){
+			record.setWorkgroup(wg[0]);
+		}
 	} else {
 		record.setWorkgroup(Blog.group);
 		record.setNonWorkgroupVisible(false);
