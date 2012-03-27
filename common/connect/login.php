@@ -19,7 +19,7 @@ require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
 //require_once('applyCredentials.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
-//error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
+error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
 //error_log(" params =". $_SERVER['QUERY_STRING']);
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
@@ -92,8 +92,9 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		mysql_connection_db_select(USERS_DATABASE);
 
-		if ($last_uri)
+		if ($last_uri){
 			header('Location: ' . $last_uri);
+		}
 
 
 	} else {
@@ -192,7 +193,7 @@ if (@$_REQUEST['logout']) {
     <td class="input-cell"></td>
    </tr>
 
-   
+
    <tr class="input-row">
     <td class="input-header-cell"></td>
     <td class="input-cell"><input type="radio" name="session_type" value="public">Expire on browser close (public computer)<br>

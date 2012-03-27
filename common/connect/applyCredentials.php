@@ -25,7 +25,7 @@ session_cache_limiter('none');
 session_start();
 
 if (_is_logged_in()) {
-//	error_log("in applyCred with valid login");
+//error_log("in applyCred with valid login");
 	if ((! defined('SAVE_URI'))  ||  strtoupper(SAVE_URI) != 'DISABLED') {
 		if (defined('HEURIST_SESSION_DB_PREFIX')) {
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'] = $_SERVER['REQUEST_URI'];

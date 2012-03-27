@@ -49,7 +49,18 @@
 					top.HEURIST.baseURL = "http://"+ location.hostname + top.HEURIST.basePath;
 				}
 				if (! top.HEURIST.is_logged_in()) {
-					top.location.replace(top.HEURIST.baseURL + "common/connect/login.php?last_uri=" +escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + top.location.search ));//saw TODO add db=
+
+					var lsearch = top.location.search;
+					//extract dbname
+					var dbname = top.HEURIST.getQueryVar("db");
+					if(dbname){
+						dbname = "db="+dbname+"&";
+					}
+
+					//redirect to login
+					top.location.replace(top.HEURIST.baseURL +
+					"common/connect/login.php?"+dbname+
+					"last_uri=" + escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + lsearch ));
 				}
 			});
 		</script>

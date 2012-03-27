@@ -494,9 +494,14 @@ function get_uploaded_file_info_internal($fileID, $needConnect)
 
 			$origName = urlencode($res["origName"]);
 
-			$res["thumbURL"] =
+			$thumbnail_file = "ulf_".$res["nonce"].".png";
+			if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
+				$res["thumbURL"] = HEURIST_THUNB_URL_BASE.$thumbnail_file;
+			}else{
+				$res["thumbURL"] =
 				HEURIST_URL_BASE."common/php/resizeImage.php?".
 					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
+			}
 
 
 			$downloadURL = HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
@@ -589,7 +594,13 @@ function getThumbnailURL($recordId){
 
 		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
+
+			$thumbnail_file = "ulf_".$file['ulf_ObfuscatedFileID'].".png";
+			if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
+				$thumb_url = HEURIST_THUNB_URL_BASE.$thumbnail_file;
+			}else{
+				$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
+			}
 		}
 	}
 	//check freetext (url) type details for a something to represent this record as an icon

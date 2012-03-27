@@ -189,6 +189,20 @@
 		define('HEURIST_ICON_URL_BASE', "/HEURIST_FILESTORE/".$dbName."/".HEURIST_ICON_DIRNAME); // uploaded-heurist-files to 14 Nov 2011
 	}
 
+	define('HEURIST_THUNB_URL_BASE', 'http://'.HEURIST_HOST_NAME."/HEURIST_FILESTORE/".$dbName."/filethumbs/");
+	define('HEURIST_THUMB_DIR', HEURIST_UPLOAD_DIR."filethumbs/");
+
+	//temporary - to remove
+		if(!file_exists(HEURIST_THUMB_DIR)){
+			if (!mkdir(HEURIST_THUMB_DIR, 0777, true)) {
+    			error_log('Failed to create folder for thumbnails');
+			}
+		}
+	//end temporary - to remove
+
+
+
+
 	// smarty template path  - note code now assumes that this is within the fielstore for the database
 	define('HEURIST_SMARTY_TEMPLATES_DIRNAME',"smarty-templates/");
 	define('HEURIST_SMARTY_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);

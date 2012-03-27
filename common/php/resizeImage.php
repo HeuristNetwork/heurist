@@ -44,11 +44,24 @@ mysql_query('set character set binary');
 
 if (array_key_exists('ulf_ID', $_REQUEST))
 {
+	$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$_REQUEST['ulf_ID'].".png";
+	/* if we here we create file. See uploadFile, there we check the existence of file
+	if($standard_thumb && file_exists($thumbnail_file)){
+		header("Location: ".HEURIST_THUNB_URL_BASE."ulf_".$_REQUEST['ulf_ID'].".png");
+		return;
+	}*/
+
+
 	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
 
-	if (@$standard_thumb  &&  $file['ulf_Thumbnail']) {
+	if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
+
+		//save as file
+		$img = imagecreatefromstring($file['ulf_Thumbnail']);
+		imagepng($img, $thumbnail_file);
+
 		// thumbnail exists
 		echo $file['ulf_Thumbnail'];
 		return;
@@ -154,16 +167,24 @@ $new_y = ceil($orig_y * $scale);
 
 $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
 imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
-$resized_file = tempnam('/tmp', 'resized');
+
+if ($standard_thumb  &&  @$file) {
+	$resized_file = $thumbnail_file;
+}else{
+	$resized_file = tempnam('/tmp', 'resized');
+}
+
 imagepng($img_resized, $resized_file);
 imagedestroy($img);
 imagedestroy($img_resized);
+
 $resized = file_get_contents($resized_file);
-unlink($resized_file);
 
 if ($standard_thumb  &&  @$file) {
 	// store to database
 	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . addslashes($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
+}else{
+	unlink($resized_file);
 }
 
 // output to browser
