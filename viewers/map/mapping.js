@@ -403,6 +403,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				// finally, draw the zoom control for timeline
 				M.renderTimelineZoom();
 
+				if(M.mapdata.count_mapobjects>0){
 				if (bounds) { //extent was defined as given parameter
 					tm.map.setCenterAndZoom(bounds.getCenter(), tm.map.getZoomLevelForBoundingBox(bounds));
 				} else {
@@ -439,6 +440,7 @@ if (typeof mxn.LatLonPoint == "function") {
 						tm.map.setZoom(tm.opts.mapZoom);
 					}
 
+				}
 				}
 
 
