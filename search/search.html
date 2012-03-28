@@ -202,7 +202,7 @@
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
-							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait" 
+							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait"
 								title="Navigate to and login to another Heurist database">
 								Select database</a></li>
 							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
@@ -236,7 +236,7 @@
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
 								title="Update or add fields in existing records from delimited text" name="auto-popup">
 								Update records <br>( << CSV,&nbsp;tab)</a></li>
-							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" 
+							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
 								title="Import KML files (geographic data in WKT can be imported from CSV & tab delimtied files)">
 								Geographic import <br>( << KML)</a></li>
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
@@ -261,6 +261,12 @@
 								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
 								title="Export records as delimited text">
 								Filtered record dump <br>( >> CSV, tab)</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate RSS feed current set of search results"
+									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main, '_blank')">
+								Current query as RSS feed</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate Atom feed current set of search results"
+									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?feed=atom&amp;'+top.HEURIST.currentQuery_main, '_blank')">
+								Current query as Atom feed</a></li>
 						</ul>
 					</li>
 
@@ -323,8 +329,8 @@
 						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
 						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
 						</div>
-					<!-- TODO: We need a better position for the Add New Record button. Needs to be separated from search button --> 
-	<div id="add-record" > 
+					<!-- TODO: We need a better position for the Add New Record button. Needs to be separated from search button -->
+	<div id="add-record" >
 	<input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
 	</div>
 </div>

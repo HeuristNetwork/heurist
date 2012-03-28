@@ -2560,9 +2560,6 @@ top.HEURIST.search = {
 	// couples this code to the application and is not maintainable in the long run.
 	updateMapOrSmarty: function(){
 
-			if(!_tabView) return;
-			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
-			if(!(currentTab==_TAB_MAP || currentTab==_TAB_SMARTY)) return;
 
 			var p = top.HEURIST.parameters,
 				query_string = "w=all",
@@ -2581,6 +2578,12 @@ top.HEURIST.search = {
 			query_string = query_string+"&db="+db;
 
 			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
+
+			top.HEURIST.currentQuery_main = query_string_main;
+
+			if(!_tabView) return;
+			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+			if(!(currentTab==_TAB_MAP || currentTab==_TAB_SMARTY)) return;
 
 			var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
 			if(isNaN(limit)) {
@@ -2639,7 +2642,6 @@ top.HEURIST.search = {
 
 
 			top.HEURIST.currentQuery_sel = query_string_sel;
-			top.HEURIST.currentQuery_main = query_string_main;
 
 			if(currentTab===_TAB_MAP){ //map
 
