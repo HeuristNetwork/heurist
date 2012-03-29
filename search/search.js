@@ -2793,6 +2793,18 @@ top.HEURIST.search = {
 				top.HEURIST.search.selectedRecordIds[level].push(recID);
 			});
 
+		$("div.recordDiv:not(.filtered,.selected)",$("#results-level0")).each(function(i,recDiv) {
+				var recID = $(recDiv).attr("recID");
+				recDiv.className += " selected";
+				if (!top.HEURIST.search.selectedRecordDivs[0]) {
+					top.HEURIST.search.selectedRecordDivs[0] = {};
+				}
+				if (!top.HEURIST.search.selectedRecordIds[0]) {
+					top.HEURIST.search.selectedRecordIds[0] = [];
+				}
+				top.HEURIST.search.selectedRecordDivs[0][recID] = recDiv;
+				top.HEURIST.search.selectedRecordIds[0].push(recID);
+			});
 		var viewerFrame = document.getElementById("viewer-frame");
 
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");

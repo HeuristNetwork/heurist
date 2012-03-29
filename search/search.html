@@ -83,12 +83,12 @@
 				//	and simplifies management of saved searches
 				top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
 					if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
-						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "true") {
+						var preferMyBookmarks = top.HEURIST.displayPreferences.defaultMyBookmarksSearch;
+						if (preferMyBookmarks) {
 							document.body.className = "w-bookmark";
 							document.getElementById("w-input").value = "bookmark";
 							top.HEURIST.parameters["w"] = "bookmark";
-						}
-						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "false"){
+						}else{
 							document.body.className = "w-all";
 							document.getElementById("w-input").value = "all";
 							top.HEURIST.parameters["w"] = "all";
@@ -100,8 +100,8 @@
 				});
 			}
 
-			if (! document.body.className) {
-				document.body.className = "w-" + top.HEURIST.parameters["w"];
+			if ( document.body.className.search("w-") == -1) {
+				document.body.className += "w-" + (top.HEURIST.parameters["w"] ? top.HEURIST.parameters["w"] : "all");
 			}
 			// start loading this early
 			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data

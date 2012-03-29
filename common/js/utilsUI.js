@@ -1297,6 +1297,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 	},
 
+	countObjElements: function(obj) {
+		var i =0;
+		for ( var j in obj) i++;
+		return i;
+	},
+
+
 /**
 * helper function. utilized in recreateTermsPreviewSelector only
 * converts json string to array

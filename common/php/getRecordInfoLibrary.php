@@ -415,7 +415,7 @@ function updateTermData() {
 	function setChildDepth($parentID, $parentDepth){
 //error_log(" parentID = $parentID and parentDepth = $parentDepth");
 		$children = getChildTerms($parentID);
-//error_log(" children = ". print_r($children,true));
+//error_log(" $parentID - children = ". print_r($children,true));
 		if (!$children) {
 			return;
 		}
@@ -674,14 +674,14 @@ function getAllRectypeConstraint() {
 			$cnstrnts[$srcID] = array('byTerm'=>array(),'byTarget'=>array());
 		}
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
-			$cnstrnts[$srcID]['byTerm'][$trmID]= array($trgID=>$max);
+			$cnstrnts[$srcID]['byTerm'][$trmID]= array($trgID=>array('limit'=>$max));
 		}
 		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
-			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>$max);
+			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>array('limit'=>$max));
 		}
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {
-			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = $max;
-			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = $max;
+			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = array('limit'=>$max);
+			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max);
 		}
 		if (@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['addsTo']) {
 			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['limit'] = $max;
@@ -1115,6 +1115,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 
 	$res = mysql_query($query);
 
+	$dtStructs['sortedNames'] = mysql__select_assoc('defDetailTypes','dty_Name','dty_ID','1 order by dty_Name');
 
 	while ($row = mysql_fetch_row($res)) {
 		array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'],$row[2]);
@@ -1124,6 +1125,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 		$dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row,2);
 		$dtStructs['names'][$row[2]] = $row[3];
 	}
+
 	setCachedData($cacheKey,$dtStructs);
 //error_log(print_r($dtStructs['typedefs'],true));
 	return $dtStructs;
