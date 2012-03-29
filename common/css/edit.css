@@ -1055,11 +1055,12 @@ hr {
 #overall-rating option {
 	border-right:1px solid #CCC
 }
-#overall-rating option[value="5"] {
+/*#overall-rating option[value="5"] {
 	background-image:url("../images/star-yellow.png");
 	background-repeat: repeat-x;
 	width:100px;
 }
+*/
 /***** other ******/
 .file-size {
 	margin:0 6px;

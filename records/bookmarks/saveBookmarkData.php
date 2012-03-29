@@ -33,7 +33,7 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 	$updatable = array(
 	/* map database column to array($_POST variable name, JSON response name) */
 		"bkm_PwdReminder" => array("password-reminder", "passwordReminder"),
-		"bkm_Rating" => array("rating", "overallRating")//,
+		"bkm_Rating" => array("overall-rating", "rating")//,
 //		"pers_notes" => array("quick-notes", "quickNotes")
 	);
 	$updates = array();
