@@ -80,7 +80,7 @@ init: function(options) {
 		}
 	);
 	HeuristScholarDB.loadRecords (
-		new HSearch("type:"+Blog.type.getID() + (Blog.query ? " "+Blog.query : (Blog.user ? " user:"+Blog.user.getID() : " workgroup:"+Blog.group.getID())) + " sortby:-a"),
+		new HSearch(Blog.getQuery()),
 		bulkLoader
 	);
 },
@@ -343,7 +343,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$(".entry-left", this.$outerTbody).empty();	//blog image
 		var thumb = this.record.getDetail(Blog.thumbnailDetailType);
 		if (thumb) {
-			$(".entry-left", this.$outerTbody).append("<a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL() + "&w=170&h=170'/></a>");
+			$(".entry-left", this.$outerTbody).append("<a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL()+"'/></a>"); //+ "&w=170&h=170'/></a>");
 		}
 		else {
 			$("<a href='#' title='Click to add a thumbnail image'><img src='no_image.png'/></a>")
@@ -766,11 +766,44 @@ BlogEntry: function(record, parentElement, isNew) {
 		// buttons
 		var $saveButton = $("<input type='button'/>").val("save").click(function() { that.saveButtonClick(); });
 		var $cancelButton = $("<input type='button'/>").val("cancel").click(function() { that.cancelButtonClick(); });
+		var $deleteButton = $("<input type='button'/>").val("delete").click(function() { that.deleteButtonClick(); });
 
-		$td = $("<td/>").append($saveButton).append($cancelButton);
+		$td = $("<td/>").append($saveButton).append($cancelButton).append($deleteButton);
 		var $tr = $("<tr/>").addClass("save-cancel-button-row").append("<td/>").append($td);
 		$(".entry-show-comments-row", this.$table).before($tr);	// inserts our tr before the last tr in the table
 	};
+
+	/**
+	* AO: Delete does not worj in HAPI!!!
+	*/
+	this.deleteButtonClick = function() {
+
+			var rec_tobedeleted = that.record;
+
+			HeuristScholarDB.deleteRecord(that.record, new HDeletor(
+				function() {
+
+					var ind = Blog.records.indexOf(rec_tobedeleted);
+					if(ind>=0){
+						Blog.records.splice(ind,1);
+					}
+					Blog.displayArchives();
+
+					if (Blog.user  &&  ! Blog.canEdit()) {
+						Blog.loadTags();
+					} else {
+						Blog.displayBlogEntries();
+						Blog.displayTagList();
+						Blog.displayArchives();
+					}
+
+				},
+				function(r,e) {
+					alert("record delete failed: " + e);
+				}
+			));
+	};
+
 
 	this.saveButtonClick = function() {
 
@@ -1065,6 +1098,10 @@ addRelationship: function (r1, r2, onSave) {
 			alert("record save failed: " + e);
 		}
 	));
+},
+
+getQuery: function(){
+	return "type:"+Blog.type.getID() + (Blog.query ? " "+Blog.query : (Blog.user ? " user:"+Blog.user.getID() : " workgroup:"+Blog.group.getID())) + " sortby:-a";
 },
 
 newEntry: function(related) {

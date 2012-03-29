@@ -16,6 +16,7 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -44,14 +45,28 @@ mysql_connection_db_overwrite(DATABASE);
 <body class="popup" width=450 height=350>
 
 <?php
+	// AO: this stuff is nearly duplicated in hapi/deleteRecordInfo
 	function delete_bib($rec_id) {
+
+		unregister_for_recid($rec_id);
+
+		mysql_query('delete from recDetails where dtl_RecID = ' . $rec_id);
 		mysql_query('delete from Records where rec_ID = ' . $rec_id);
 		$bibs = mysql_affected_rows();
-		mysql_query('delete from recDetails where dtl_RecID = ' . $rec_id);
 		mysql_query('delete from usrReminders where rem_RecID = ' . $rec_id);
 		mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $rec_id);
 		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
 		$bkmks = mysql_affected_rows();
+
+		//delete from woot
+		mysql_query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
+		'(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$rec_id.'")');
+		mysql_query('delete from woot_Chunks where chunk_WootID in '.
+		'(SELECT woot_ID FROM woots where woot_Title="record:'.$rec_id.'")');
+		mysql_query('delete from woot_RecPermissions where wrprm_WootID in '.
+		'(SELECT woot_ID FROM woots where woot_Title="record:'.$rec_id.'")');
+		mysql_query('delete from woots where woot_Title="record:'.$rec_id.'"');
+
 		return array($bibs, $bkmks);
 	}
 

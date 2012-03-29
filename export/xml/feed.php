@@ -74,7 +74,7 @@ if($isAtom){
 		$squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo ";
 		$joinTable = " left join recDetails  on (dtl_RecID=rec_ID and dtl_Geo is not null) ";
 
-		if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
+		if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
 			$search_type = BOOKMARK;	// my bookmarks
 		else
 			$search_type = BOTH;	// all records
@@ -151,15 +151,15 @@ print '</rss>';
 // the same in kml.php
 function prepareQuery($squery, $search_type, $joinTable, $where, $limit)
 {
-			$squery = REQUEST_to_query($squery, $search_type, '', null, true); //public only
+			$squery = REQUEST_to_query($squery, $search_type, '', null, false); //public only
 			//remove order by
 			$pos = strpos($squery," order by ");
 			if($pos>0){
 				$squery = substr($squery, 0, $pos);
 			}
 
-			//add recDetails
-			$squery = str_replace(" where ", $joinTable." where ", $squery);
+			//$squery = str_replace(" where ", $joinTable." where ", $squery);
+			$squery = preg_replace('/ where /', $joinTable." where ", $squery, 1);
 
 			//add our where clause and limit
 			$squery = $squery.$where." limit ".$limit;

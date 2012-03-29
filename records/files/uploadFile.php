@@ -218,7 +218,70 @@ function register_file($fullname, $description, $needConnect) {
 	}
 }
 
+/**
+* Unregister file: delete record from table and remove file
+*/
+function unregister_for_recid($recid, $needConnect=false){
 
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	// find all files associated with this record
+	$res = mysql_query("select dtl_UploadedFileID from recDetails where dtl_RecID=".$recid);
+	while ($row = mysql_fetch_array($res)) {
+		deleteUploadedFiles($row[0], false);
+	}
+
+	//remove from database
+	mysql_query('SET foreign_key_checks = 0');
+	mysql_query('delete from recUploadedFiles where ulf_ID in (select dtl_UploadedFileID from recDetails where dtl_RecID="'.$recid.'")');
+	mysql_query('SET foreign_key_checks = 1');
+
+	if (mysql_error()) {
+		return mysql_error();
+	}else{
+		return null;
+	}
+}
+/**
+*
+*/
+function deleteUploadedFiles($fileid, $needConnect){
+
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	$filedata = get_uploaded_file_info_internal($fileid, false);
+	if($filedata!=null){
+
+		$type_source = $filedata['remoteSource'];
+		if ($type_source==null || $type_source=='heurist')  //Local/Uploaded resources
+		{
+			// set the actual filename. Up to 18/11/11 this is jsut a bare nubmer corresponding with ulf_ID
+			// from 18/11/11, it is a disambiguated concatenation of 'ulf_' plus ulf_id plus ulfFileName
+			if ($filedata['fullpath']) {
+				$filename = $filedata['fullpath']; // post 18/11/11 proper file path and name
+			} else {
+				$filename = HEURIST_UPLOAD_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
+			}
+
+			$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
+			$filename = str_replace('//', '/', $filename);
+
+			if(file_exists($filename)){
+				unlink($filename);
+			}
+
+			//remove thumbnail
+			$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
+			if(file_exists($thumbnail_file)){
+				unlink($thumbnail_file);
+			}
+		}
+	}
+}
 
 
 /**

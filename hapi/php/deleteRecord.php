@@ -1,17 +1,13 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
-?>
-
-<?php
 
 function mysql_query_($x) {
 	print $x . "\n";
@@ -26,7 +22,7 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once("deleting.php");
+require_once("deleteRecordInfo.php");
 
 
 if (! is_logged_in()) {

@@ -265,6 +265,10 @@ function reload() {
 	<div style="display:table">
         <h1 id="blog-owner" class="tableCell"></h1>
     </div>
+    <div id=blog-rss>
+    	<a href="#" id=result-style-icons-link title="Generate RSS feed current set of search results"
+onClick="window.open(HAPI.XHR.defaultURLPrefix+'export/xml/feed.php?db='+HAPI.database+'&amp;q='+Blog.getQuery(), '_blank')">
+					<img src="../../common/images/rss_feed_add.gif"/></a></div>
     <div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
 
 

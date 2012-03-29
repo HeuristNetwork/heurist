@@ -488,6 +488,11 @@ body.mode-public .public-visible {
 	right:10px;
 	top: 5px;
 }
+#blog-rss {
+	position: absolute;
+	right:210px;
+	top: 8px;
+}
 h1 {
 	display:inline
 }

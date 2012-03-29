@@ -2581,7 +2581,7 @@ top.HEURIST.search = {
 
 			top.HEURIST.currentQuery_main = query_string_main;
 
-			if(!_tabView) return;
+			if ((typeof _tabView==="undefined") || (_tabView===null)) return;
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 			if(!(currentTab==_TAB_MAP || currentTab==_TAB_SMARTY)) return;
 

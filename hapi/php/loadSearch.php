@@ -23,10 +23,10 @@ define('SEARCH_VERSION', 1);
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 
 $args = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
-error_log("load hapi request - ".print_r($_REQUEST,true));
+//DEBUG error_log("load hapi request - ".print_r($_REQUEST,true));
 
 $result = loadSearch($args);
-error_log("load hapi result - ".print_r($result,true));
+//DEBUG error_log("load hapi result - ".print_r($result,true));
 if (array_key_exists("records", $result)) {
 	// turn the associative array into the non-associative one HAPI expects
 	foreach ($result["records"] as $i => $record) {

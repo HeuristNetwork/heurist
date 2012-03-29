@@ -93,7 +93,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
 		if($islist){
 
-			if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
+			if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
 				$search_type = BOOKMARK;	// my bookmarks
 			else
 				$search_type = BOTH;	// all records
@@ -195,8 +195,8 @@ function prepareQuery($squery, $search_type, $detailsTable, $where, $limit)
 				$squery = substr($squery, 0, $pos);
 			}
 
-			//add recDetails
-			$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
+			//$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
+			$squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
 
 			//add our where clause and limit
 			$squery = $squery.$where." limit ".$limit;
