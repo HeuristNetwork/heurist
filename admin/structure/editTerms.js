@@ -797,7 +797,7 @@ function EditTerms() {
 			Hul.popupURL(top, sURL, {
 					"close-on-blur": false,
 					"no-resize": false,
-					height: 140,
+					height: 160,
 					width: 500,
 					callback: _import_complete
 			});

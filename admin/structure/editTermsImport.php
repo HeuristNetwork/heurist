@@ -24,14 +24,16 @@
 	$parent_id = intval($_REQUEST['parent']);
 	$domain = $_REQUEST['domain'];
 
+	$has_codes = (@$_REQUEST['has_codes']=="1");
+	$has_descr = (@$_REQUEST['has_descr']=="1");
+
 	if (!$parent_id) return;
 
 	$success_msg = null;
 	$failure_msg = null;
 	$res_array = null;
 
-	//list($result_array, $failure_msg) = upload_file($parent_id);
-	$res = upload_file($parent_id, $domain);
+	$res = upload_termsfile($parent_id, $domain, $has_codes, $has_descr);
 	if($res!=null){
 		if(array_key_exists('error', $res)){
 			$failure_msg = $res['error'];
@@ -67,7 +69,7 @@
 <script type="text/javascript">
   		var result = null;
 <?php   if ($res_array) { ?>
-			result = <?= $res_array ?>;
+			result = <?=$res_array?>;
 <?php	}  ?>
 </script>
 
@@ -88,6 +90,13 @@
     	<div class="input-header-cell">Select file to import <br>(text file with one term per line)</div>
         <div class="input-cell"><input type="file" name="import_file" style="display:inline-block;"></div>
    </div>
+   <div class="input-row">
+    	<div class="input-header-cell">Does the file contain</div>
+        <div class="input-cell">
+        		<input type="checkbox" name="has_codes" value="1" style="display:inline-block;">Codes?
+        		<input type="checkbox" name="has_descr" value="1" style="display:inline-block;">Description?
+        </div>
+   </div>
    <div class="actionButtons" style="padding-right:80px">
    		Terms are imported as children of the currently selected term<p>
    		<input type="button" onclick="window.document.forms[0].submit();" value="Import" style="margin-right:10px">
@@ -100,7 +109,7 @@
 
 /***** END OF OUTPUT *****/
 
-function upload_file($parent_id,$domain) {
+function upload_termsfile($parent_id, $domain, $has_codes, $has_descr) {
 
 	if (! @$_REQUEST['uploading']) return null;
 	if (! $_FILES['import_file']['size']) return array('error'=>'Error occurred during import - file had zero size');
@@ -114,16 +123,30 @@ function upload_file($parent_id,$domain) {
     	while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
         	$num = count($data);
         	if($num>0){
-        		$label = substr(trim($data[0]), 0, 399);
-        		$len = strlen($label);
-        		if($len>0 && $len<400){
-					$desc = "";
-        			for ($c=1; $c < $num; $c++) {
-        				if($c>1) $desc = $desc.",";
-        				$desc = $desc.$data[$c];
-        			}
-        			array_push($parsed, array($label,substr($desc, 0, 999),$domain,$parent_id,1));
-        			$row++;
+        		if($has_codes){
+        			$code = substr(trim($data[0]), 0, 99);
+        			$ind = 1;
+				}else{
+					$code = '';
+        			$ind = 0;
+				}
+
+				if($num>$ind){
+
+        			$label = substr(trim($data[$ind]), 0, 399);
+        			$len = strlen($label);
+        			if($len>0 && $len<400){
+						$desc = "";
+						if($has_descr){
+							$ind++;
+        					for ($c=$ind; $c < $num; $c++) {
+        						if($c>1) $desc = $desc.",";
+        						$desc = $desc.$data[$c];
+        					}
+						}
+        				array_push($parsed, array($code, $label,substr($desc, 0, 999),$domain,$parent_id,1));
+        				$row++;
+					}
 				}
 			}
     	}
@@ -136,7 +159,7 @@ function upload_file($parent_id,$domain) {
 
 	$db = mysqli_connection_overwrite(DATABASE); //artem's
 
-	$colNames = array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_AddedByImport');
+	$colNames = array('trm_Code','trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_AddedByImport');
 
 	$rv['parent'] = $parent_id;
 	$rv['result'] = array(); //result

@@ -1381,8 +1381,20 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var termID;
 			var localLookup = termLookupInner;
 			for(termID in termSubTree) { // For every term in 'term'
-				var termName = (localLookup[termID] ? localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] : "");
-				if (termName == "") continue;
+				var termName = "",
+					termCode = "";
+
+				if(localLookup[termID]){
+				 	termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
+				 	termCode = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Code']];
+				 	if(top.HEURIST.util.isempty(termCode)){
+				 		termCode = '';
+					}else{
+				 		termCode = " ("+termCode+")";
+					}
+				}
+
+				if(top.HEURIST.util.isempty(termName)) continue;
 				if(isNotFirefox && depth>1){
 					//for non mozilla add manual indent
 					var a = new Array(depth*2);
@@ -1409,12 +1421,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					//A dept of 8 (depth starts at 0) is maximum, to keep it organised
 					createSubTreeOptions( new_optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID)
 				}else{
-					var opt = new Option(termName, termID);
+					var opt = new Option(termName+termCode, termID);
 					opt.className = "depth" + depth;
 					opt.disabled = isDisabled;
-				if (termID == defaultTermID) {
-					opt.selected = true;
-				}
+
+					if (termID == defaultTermID) {
+						opt.selected = true;
+					}
+
 					if(optgroup==null){
 						selObj.appendChild(opt);
 					}else{
