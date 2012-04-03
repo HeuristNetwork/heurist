@@ -53,14 +53,17 @@
     print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
+	print ">>>".(defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+
 	$dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 	if($dt_SourceRecordID==0){  //getDetailTypeLocalID
 		//add missed detail type
-mysql_query("INSERT INTO `defDetailTypes` ( dty_Name,  dty_Documentation,  dty_Type,  dty_HelpText,  dty_ExtendedDescription,  dty_EntryMask,  dty_Status,
+mysql_query("INSERT INTO `defDetailTypes` ( dty_Name,  dty_Documentation,  dty_Type,  dty_HelpText,  dty_EntryMask,  dty_Status,
   dty_OriginatingDBID,  dty_NameInOriginatingDB,  dty_IDInOriginatingDB,  dty_DetailTypeGroupID,  dty_OrderInGroup,  dty_JsonTermIDTree,  dty_TermIDTreeNonSelectableIDs,
   dty_PtrTargetRectypeIDs,  dty_FieldSetRectypeID,  dty_ShowInLists,  dty_NonOwnerVisibility,  dty_Modified,  dty_LocallyModified) VALUES ('Original ID',' ','freetext','The original ID of the record in a source database from which these data were imported','','reserved',2,'Original ID',589,99,0,'','','',0,1,'viewable','2011-10-12 09:05:19',0)");
 
 			if (mysql_error()) {
+  				error_log(mysql_error());
 			}else{
 				$dt_SourceRecordID = mysql_insert_id();
 				define('DT_ORIGINAL_RECORD_ID', $dt_SourceRecordID);
