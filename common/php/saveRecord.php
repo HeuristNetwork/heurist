@@ -652,7 +652,7 @@ function handleNotifications($recordID, $removals, $additions) {
 			$insertVals["rem_ToWorkgroupID"] = intval($addition["workgroup"]);
 		}
 		else if (@$addition["email"]) {
-			$insertVals["rem_Email"] = $addition["email"];
+			$insertVals["rem_ToEmail"] = $addition["email"];
 		}
 		else {	// can't happen
 			array_push($newIDs, array("error" => "invalid recipient"));

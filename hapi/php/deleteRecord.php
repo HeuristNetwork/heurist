@@ -22,7 +22,7 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once("deleteRecordInfo.php");
+require_once(dirname(__FILE__)."/../../records/edit/deleteRecordInfo.php");
 
 
 if (! is_logged_in()) {
@@ -37,10 +37,13 @@ mysql_query("start transaction");
 
 $out = deleteRecord(@$_REQUEST["id"]);
 
+if( array_key_exists("error", $out) ){
+	jsonError($out["error"]);
+}
+
 mysql_query("commit");
 
 print json_format($out);
-
 
 function jsonError($message) {
 	mysql_query("rollback");

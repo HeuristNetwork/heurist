@@ -20,10 +20,10 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 	if ($BASE_URL === NULL) $BASE_URL = HEURIST_URL_BASE;
 
 	$recipients = array();
-	if (@$reminder['rem_Email']) {
+	if (@$reminder['rem_ToEmail']) {
 		array_push($recipients, array(
-			"email" => $reminder['rem_Email'],
-			"e"		=> $reminder['rem_Email'],
+			"email" => $reminder['rem_ToEmail'],
+			"e"		=> $reminder['rem_ToEmail'],
 			"u"		=> null));
 	}
 	else if (@$reminder['rem_ToUserID']) {
@@ -57,7 +57,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 	$res = mysql_query('select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from '.$USERS_DATABASE.'.sysUGrps usr where usr.ugr_Type = "User" and usr.ugr_ID = '.$reminder['rem_OwnerUGrpID']);
 	$owner = mysql_fetch_assoc($res);
 	if ($owner) {
-		if (@$reminder['rem_Email']  || (@$reminder['rem_user_id']  &&  @$reminder['rem_ToUserID'] != @$reminder['rem_OwnerUGrpID']))
+		if (@$reminder['rem_ToEmail']  || (@$reminder['rem_user_id']  &&  @$reminder['rem_ToUserID'] != @$reminder['rem_OwnerUGrpID']))
 			$email_headers .= "\r\nCc: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 		$email_headers .= "\r\nReply-To: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 	}

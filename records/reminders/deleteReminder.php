@@ -39,7 +39,7 @@ if ($h != $row["rem_Nonce"]) {
 }
 
 if ($e) {
-	mysql_query("delete from usrReminders where rem_ID = ".$r." and rem_Email = '".addslashes($e)."'");
+	mysql_query("delete from usrReminders where rem_ID = ".$r." and rem_ToEmail = '".addslashes($e)."'");
 	if (! mysql_affected_rows()) {
 		return;
 	}

@@ -50,20 +50,38 @@
     print "and writes the records into the current logged-in database. It also transfers uploaded file records. It does not (at present) transfer tags and othe user data";
     print "The current database can already contain data, new records are appended and IDs adjsuted for records and files.<br>";
     print "<br>";
-     print "Make sure the target records and field types are compatible. <b>";
+    print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
-	$dt_SourceRecordID = getDetailTypeLocalID("3-678"); // initially 2-589
-	if(!$dt_SourceRecordID){
-		print "<hr><b>Original record IDs</b> ".
-            "<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 3-678) for each record".
-            "<br/>This field does not exist in the database - please import it from the Heurist Reference database (db#3)".
+	$dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+	if($dt_SourceRecordID==0){  //getDetailTypeLocalID
+		//add missed detail type
+mysql_query("INSERT INTO `defDetailTypes` ( dty_Name,  dty_Documentation,  dty_Type,  dty_HelpText,  dty_ExtendedDescription,  dty_EntryMask,  dty_Status,
+  dty_OriginatingDBID,  dty_NameInOriginatingDB,  dty_IDInOriginatingDB,  dty_DetailTypeGroupID,  dty_OrderInGroup,  dty_JsonTermIDTree,  dty_TermIDTreeNonSelectableIDs,
+  dty_PtrTargetRectypeIDs,  dty_FieldSetRectypeID,  dty_ShowInLists,  dty_NonOwnerVisibility,  dty_Modified,  dty_LocallyModified) VALUES ('Original ID',' ','freetext','The original ID of the record in a source database from which these data were imported','','reserved',2,'Original ID',589,99,0,'','','',0,1,'viewable','2011-10-12 09:05:19',0)");
+
+			if (mysql_error()) {
+			}else{
+				$dt_SourceRecordID = mysql_insert_id();
+				define('DT_ORIGINAL_RECORD_ID', $dt_SourceRecordID);
+			}
+
+	}
+	if($dt_SourceRecordID==0){
+	print "<hr><b>Original record IDs</b> ".
+            "<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-589) for each record".
+            "<br/>This field does not exist in the database - please import it from the Heurist Core definitions database (db#2)".
             "<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.".
             "<p><a href=../../admin/structure/selectDBForImport.php?db=" . HEURIST_DBNAME . " title='Import database structure elements' target=_blank><b>Import structure elements</b></a> (loads in new tab)".
-            "<br/>(choose H3 Reference database (#3), import the <i>Original ID container record</i>, then delete it - the required field remains)".
+            "<br/>(choose H3 Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)".
             "<br/>Reload this page after importing the field<hr><p>";
+	}else{
+	print "<hr><b>Original record IDs</b> ".
+            "<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-589) for each record".
+            "<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.";
+	}
 
-    }
+
 
 	$sourcedbname = NULL;
 
@@ -497,7 +515,8 @@ print "<br>It reports this in the form Old ID => New ID";
 			}
 
 			//special detailtype to keep original record id
-			$dt_SourceRecordID = getDetailTypeLocalID("2-589");
+			$dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+
 
 			while ($row2 = mysql_fetch_array($res2)) {
 
@@ -531,7 +550,7 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 				$values = array();
 
 				//add special detail type 2-589 - reference to original record id
-				if($dt_SourceRecordID){
+				if($dt_SourceRecordID>0){
 					$details["t:".$dt_SourceRecordID] = array('0'=>$rid);
 				}
 
@@ -745,9 +764,9 @@ print "<br>It reports in form: source RecID => now target pointer RecID => in Re
 			}
 		}
 
-		print "<br><br><br><h3>Transfer completed - <a href=../../index.php?db=" . HEURIST_DBNAME . 
+		print "<br><br><br><h3>Transfer completed - <a href=../../index.php?db=" . HEURIST_DBNAME .
               " title='Return to the main search page of the current database'><b>return to main page</b></a></h3>";
-              
+
 	} // function doTransfer
 
     /**

@@ -99,7 +99,7 @@ if (mysql_num_rows($res) == 0) {
 
 while ($row = mysql_fetch_assoc($res)) {
 	$recipient = $row[GROUPS_NAME_FIELD] ? $row[GROUPS_NAME_FIELD] :
-					($row["username"] ? $row["username"] : $row["rem_Email"]);
+					($row["username"] ? $row["username"] : $row["rem_ToEmail"]);
 ?>
     <tr>
      <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>

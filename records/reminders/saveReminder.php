@@ -45,7 +45,7 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 		"rem_OwnerUGrpID" => get_user_id(),
 		"rem_ToUserID" => ($_POST["reminder-user"] > 0 ? $_POST["reminder-user"] : null),
 		"rem_ToWorkgroupID" => ($_POST["reminder-group"] > 0 ? $_POST["reminder-group"] : null),
-		"rem_Email" => $_POST["reminder-email"],
+		"rem_ToEmail" => $_POST["reminder-email"],
 		"rem_StartDate" => $_POST["reminder-when"],
 		"rem_Freq" => $_POST["reminder-frequency"],
 		"rem_Message" => $_POST["reminder-message"],
@@ -71,7 +71,7 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
      id: <?= $rem["rem_ID"] ?>,
      user: <?= intval($rem["rem_ToUserID"]) ?>,
      group: <?= intval($rem["rem_ToWorkgroupID"]) ?>,
-     email: "<?= slash($rem["rem_Email"]) ?>",
+     email: "<?= slash($rem["rem_ToEmail"]) ?>",
      message: "<?= slash($rem["rem_Message"]) ?>",
      when: "<?= slash($rem["rem_StartDate"]) ?>",
      frequency: "<?= slash($rem["rem_Freq"]) ?>"

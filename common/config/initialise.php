@@ -337,7 +337,7 @@
 	'DT_START_DATE' => array(2,2),
 	'DT_END_DATE' => array(2,3),
 	'DT_INTERPRETATION_REFERENCE' => array(2,13),
-	'DT_ORIGINAL RECORD_ID' => array(2,589), //for import
+	'DT_ORIGINAL_RECORD_ID' => array(2,589), //for import
 	'DT_DOI' => array(3,99),
 	'DT_WEBSITE_ICON' => array(3,347),
 	'DT_ISBN' => array(3,97),

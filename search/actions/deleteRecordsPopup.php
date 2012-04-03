@@ -16,7 +16,7 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -45,65 +45,44 @@ mysql_connection_db_overwrite(DATABASE);
 <body class="popup" width=450 height=350>
 
 <?php
-	// AO: this stuff is nearly duplicated in hapi/deleteRecordInfo
-	function delete_bib($rec_id) {
-
-		unregister_for_recid($rec_id);
-
-		mysql_query('delete from recDetails where dtl_RecID = ' . $rec_id);
-		mysql_query('delete from Records where rec_ID = ' . $rec_id);
-		$bibs = mysql_affected_rows();
-		mysql_query('delete from usrReminders where rem_RecID = ' . $rec_id);
-		mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $rec_id);
-		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
-		$bkmks = mysql_affected_rows();
-
-		//delete from woot
-		mysql_query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
-		'(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$rec_id.'")');
-		mysql_query('delete from woot_Chunks where chunk_WootID in '.
-		'(SELECT woot_ID FROM woots where woot_Title="record:'.$rec_id.'")');
-		mysql_query('delete from woot_RecPermissions where wrprm_WootID in '.
-		'(SELECT woot_ID FROM woots where woot_Title="record:'.$rec_id.'")');
-		mysql_query('delete from woots where woot_Title="record:'.$rec_id.'"');
-
-		return array($bibs, $bkmks);
-	}
 
 	if (@$_REQUEST['delete'] == 1) {
-		$bibs = 0;
-		$bkmks = 0;
-		$rels = 0;
+		$recs_count = 0;
+		$bkmk_count = 0;
+		$rels_count = 0;
+		$errors = array();
+
+
 		foreach ($_REQUEST['bib'] as $rec_id) {
-			$rec_id = intval($rec_id);
-			$res = mysql_query('select rec_AddedByUGrpID from Records where rec_ID = ' . $rec_id);
-			$row = mysql_fetch_assoc($res);
-			$owner = $row['rec_AddedByUGrpID'];
 
-			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from Records left join usrBookmarks on bkm_recID=rec_ID left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_ID = ' . $rec_id);
-			$bkmk_count = mysql_num_rows($res);
-			$bkmk_users = array();
-			while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
+			mysql_query("start transaction");
 
-			if (is_admin()  ||
-				($owner == get_user_id()  &&
-				 ($bkmk_count == 0  ||
-				 ($bkmk_count == 1  &&  $bkmk_users[0] == get_user_username())))) {
+			$res = deleteRecord($rec_id);
 
-				list($a, $b) = delete_bib($rec_id);
-				$bibs += $a;
-				$bkmks += $b;
-				$refs_res = mysql_query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$rec_id.' and rec_RecTypeID=52');//MAGIC NUMBER
-				while ($row = mysql_fetch_assoc($refs_res)) {
-					list($a, $b) = delete_bib($row['rec_ID']);
-					$rels += $a;
-					$bkmks += $b;
-				}
+			if( array_key_exists("error", $res) ){
 
+				mysql_query("rollback");
+
+				array_push($errors, "Rec#".$rec_id."  ".$res["error"]);
+
+			}else{
+				mysql_query("commit");
+
+				$recs_count++;
+				$rels_count += $res["bkmk_count"];
+				$bkmk_count += $res["rel_count"];
 			}
 		}
-		print '<p><b>' . $bibs . '</b> records, <b>' . $rels . '</b> relationships and <b>' . $bkmks . '</b> associated bookmarks deleted</p>' . "\n";
-		print '<input type="button" value="close" onclick="top.location.reload(true);">' . "\n";
+
+
+		print '<p><b>' . $recs_count . '</b> records, <b>' . $rels_count . '</b> relationships and <b>' . $bkmk_count . '</b> associated bookmarks deleted</p>';
+
+		if(count($errors)>0){
+			print '<p color="#ff0000"><b>Errors</b></p><p>'.implode("<br>",$errors).'</p>';
+		}
+
+		print '<input type="button" value="close" onclick="top.location.reload(true);">';
+
 	} else {
 ?>
 
@@ -141,24 +120,24 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 				   ($bkmk_count == 0  ||
 				   ($bkmk_count == 1  &&  $bkmk_users[0] == get_user_username())));
 
-		print "<div".(! $allowed ? ' class=greyed' : '').">\n";
-		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($bkmk_count <= 1  &&  $refs == 0  &&  $allowed ? ' checked' : '').(! $allowed ? ' disabled' : '').'>' ."\n";
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>' ."\n";
-		print ' ' . $rec_title ."</p>\n";
+		print "<div".(! $allowed ? ' class=greyed' : '').">";
+		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($bkmk_count <= 1  &&  $refs == 0  &&  $allowed ? ' checked' : '').(! $allowed ? ' disabled' : '').'>';
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>';
+		print ' ' . $rec_title ."</p>";
 
-		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "\n  ";
+		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "  ";
 		print join(', ', $bkmk_users);
-		print "\n </p>\n";
+		print " </p>";
 
 		if ($refs) {
-			print ' <p style="margin-left: 20px;">Referenced by: '."\n";
+			print ' <p style="margin-left: 20px;">Referenced by: ';
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
+				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>';
 			}
-			print "\n </p>\n";
+			print "</p>";
 		}
 
-		print "\n<div class='separator_row'></div></div>\n\n";
+		print "<div class='separator_row'></div></div>";
 	}
 ?>
 

@@ -2481,9 +2481,9 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 			this.emailTextbox.value = reminderDetails.email;
 
 		var ut = this.userTextbox, gd = this.groupDropdown, et = this.emailTextbox;
-		ut.onchange = function() { gd.selectedIndex = cd.selectedIndex = 0; et.value = ""; }
-		gd.onchange = function() { cd.selectedIndex = 0; ut.value = et.value = ""; }
-		et.onchange = function() { gd.selectedIndex = cd.selectedIndex = 0; ut.value = ""; }
+		ut.onchange = function() { gd.selectedIndex = 0; et.value = ""; }
+		gd.onchange = function() { ut.value = et.value = ""; }
+		et.onchange = function() { gd.selectedIndex = 0; ut.value = ""; }
 
 	var tr2 = tbody.appendChild(this.document.createElement("div"));
 		var td = tr2.appendChild(this.document.createElement("span"));
