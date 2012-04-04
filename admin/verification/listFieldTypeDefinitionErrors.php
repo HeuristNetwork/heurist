@@ -10,7 +10,12 @@
 	-->*/
 
 ?>
+		<?php
 
+			require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+			require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+
+?>
 <html>
 
 	<head>
@@ -47,9 +52,6 @@
 
 	<body class="popup">
 		<?php
-
-			require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-			require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 			mysql_connection_db_select(DATABASE);
 			// lookup detail type enum values
@@ -106,7 +108,7 @@
 				// Validate termIDs
 				foreach ($termIDs as $trmID) {
 					// check that the term valid
-					if ( !$trmID ){ // invalid trm ID
+					if ( !$trmID ){ // invalid trm ID null or 0 is not allowed
 						array_push($invalidTermIDs,"blank");
 					}else if ( !$TL[$trmID]){ // invalid trm ID
 						array_push($invalidTermIDs,$trmID);
@@ -115,7 +117,7 @@
 				return $invalidTermIDs;
 			}
 
-			// function that translates all term ids in the passed string to there local/imported value
+			// function that check the existaance of all rectype ids in the passed string
 			function getInvalidRectypes($formattedStringOfRectypeIDs) {
 				global $RTN;
 				$invalidRectypeIDs = array();
@@ -126,8 +128,8 @@
 				$rtyIDs = explode(",",$formattedStringOfRectypeIDs);
 				// Validate rectypeIDs
 				foreach ($rtyIDs as $rtID) {
-					// check that the term valid
-					if (!$RTN[$rtID]){ // invalid trm ID
+					// check that the rectype is valid
+					if (!$RTN[$rtID]){ // invalid rty ID
 						array_push($invalidRectypeIDs,$rtID);
 					}
 				}
@@ -227,7 +229,7 @@
 			<hr/>
 
 			<div>
-				<h3>Reference/Resource Pointer or Relmarker Field Types with invalid rectype constraint definitions</h3>
+				<h3>Reference/Resource Pointer or Relmarker Field Types with invalid rectype(s) in constraint definitions</h3>
 			</div>
 			<table>
 				<?php

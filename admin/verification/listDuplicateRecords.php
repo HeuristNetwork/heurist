@@ -164,7 +164,7 @@
 						$diffHash = join(',',$diffHash );
 						if (in_array($diffHash,$dupeDifferences)) continue;
 						print '<div>';
-						print '<input type="checkbox" name="dupeDiffHash[] title="Check to idicate that all records in this set are unique." id="'.$key.
+						print '<input type="checkbox" name="dupeDiffHash[]" title="Check to idicate that all records in this set are unique." id="'.$key.
 						'" value="' . $diffHash . '">&nbsp;&nbsp;';
 						print '<label style="font-weight: bold;">'.$rectype .'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<input type="submit" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';

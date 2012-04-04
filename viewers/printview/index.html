@@ -189,7 +189,7 @@
 					parentDiv.className += " show";
 
 					var xmlRecDepth1 = loadXMLDocFromFile(top.HEURIST.baseURL+
-										"export/xml/hml.php?q=ids:"+recID+"&depth=1&woot=1"+
+										"export/xml/flathml.php?q=ids:"+recID+"&depth=1&woot=1"+
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:""));
 					if (!xmlRecDepth1) return;
 					if (!relatedRecListXSL) {
@@ -232,7 +232,7 @@
 				}
 				//set query limits
 				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (loadingPage-1)*resultsPerPage);
-				var url = hBase + "export/xml/hml.php"+aquery;
+				var url = hBase + "export/xml/flathml.php"+aquery;
 				var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 				try {
 					aReq = new XMLHttpRequest();
@@ -309,7 +309,7 @@
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
 							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
-							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
+							var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
 						}

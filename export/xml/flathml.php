@@ -190,7 +190,7 @@ $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including rev
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
 $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ?  $_REQUEST['hinclude'] : 99;	//default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ?  true : false;	//default to not output xinclude format for related records
-$OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;	//default to not output stubs
+$OUTPUT_STUBS = @$_REQUEST['stub'] == '1'? true : false;	//default to not output stubs
 $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
 //TODO: supress loopback by default unless there is a filter.
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
@@ -533,7 +533,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 * @param $relationships an out array of recIDs to store look up relationRecID by supplied target/source recIDs
 **/
 function buildGraphStructure($rec_ids, &$recSet) {
-	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR;
+	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
 	$depth = 0;
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ($rtfilter){
@@ -547,14 +547,18 @@ function buildGraphStructure($rec_ids, &$recSet) {
 		}
 		$rec_ids = array_keys($filteredIDs);
 	}
-	while ($depth++ < $MAX_DEPTH  &&  count($rec_ids) > 0) {
-		$rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
-		$relfilter = (@$RELTYPE_FILTERS && array_key_exists($depth, $RELTYPE_FILTERS) ? $RELTYPE_FILTERS[$depth]: null );
-		$ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth]: null );
-		$p_rec_ids = findPointers($rec_ids,$recSet, $depth, $rtfilter, $ptrfilter);
-		$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $recSet, $depth, $rtfilter, $ptrfilter) : array();
-		$rel_rec_ids = findRelatedRecords($rec_ids, $recSet, $depth, $rtfilter, $relfilter);
-		$rec_ids = array_merge($p_rec_ids, ($EXPAND_REV_PTR?$rp_rec_ids:array()), $rel_rec_ids); // record set for a given level
+	if ($MAX_DEPTH == 0 && $OUTPUT_STUBS &&  count($rec_ids) > 0){
+		findPointers($rec_ids,$recSet, 1, null, null);
+	}else{
+		while ($depth++ < $MAX_DEPTH  &&  count($rec_ids) > 0) {
+			$rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
+			$relfilter = (@$RELTYPE_FILTERS && array_key_exists($depth, $RELTYPE_FILTERS) ? $RELTYPE_FILTERS[$depth]: null );
+			$ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth]: null );
+			$p_rec_ids = findPointers($rec_ids,$recSet, $depth, $rtfilter, $ptrfilter);
+			$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $recSet, $depth, $rtfilter, $ptrfilter) : array();
+			$rel_rec_ids = findRelatedRecords($rec_ids, $recSet, $depth, $rtfilter, $relfilter);
+			$rec_ids = array_merge($p_rec_ids, ($EXPAND_REV_PTR?$rp_rec_ids:array()), $rel_rec_ids); // record set for a given level
+		}
 	}
 }
 
@@ -564,7 +568,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
 
 
 function outputRecords($result) {
-	global $OUTPUT_STUBS,$FRESH;
+	global $OUTPUT_STUBS,$FRESH,$MAX_DEPTH;
 	$recSet = array('count'=> 0,
 					'relatedSet'=>array());
 	$rec_ids = explode(",",$result['recIDs']);
@@ -577,10 +581,11 @@ function outputRecords($result) {
 	foreach ($recSet['relatedSet'] as $recID => $recInfo) {
 		$recSet['relatedSet'][$recID]['record'] = loadRecord($recID,$FRESH,true);
 	}
-
 	openTag('records',array('count'=> $recSet['count']));
 	foreach ($recSet['relatedSet'] as $recID => $recInfo) {
-		outputRecord($recInfo, $recSet['relatedSet'],$OUTPUT_STUBS);
+		if (intval($recInfo['depth']) <= $MAX_DEPTH) {
+			outputRecord($recInfo, $recSet['relatedSet'],$OUTPUT_STUBS);
+		}
 	}
 	closeTag('records');
 }
@@ -597,7 +602,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 	$depth = $recordInfo['depth'];
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
-		if ($record['rec_RecTypeID'] != $relRT) {
+		if ($record['rec_RecTypeID'] != $relRT) {//not a relationship rectype
 			if ($depth > 0) {
 //				if ($USEXINCLUDELEVEL){
 //					outputXInclude($record);
@@ -660,110 +665,110 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 		}
 	}
 
-		if (array_key_exists('revPtrLinks', $recordInfo) && $recordInfo['revPtrLinks']['byRecIDs']) {
-			foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
-				foreach($dtIDs as $dtID) {
-					$linkedRec = $recInfos[$rec_id]['record'];
-					makeTag('reversePointer',
-							array('id' => $dtID,
-									'conceptID'=>getDetailTypeConceptID($dtID),
-									'type' => $DTN[$dtID],
-									'name' => $RQS[$linkedRec['rec_RecTypeID']][$dtID]),
-							$rec_id);
-				}
+	if (array_key_exists('revPtrLinks', $recordInfo) && $recordInfo['revPtrLinks']['byRecIDs']) {
+		foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
+			foreach($dtIDs as $dtID) {
+				$linkedRec = $recInfos[$rec_id]['record'];
+				makeTag('reversePointer',
+						array('id' => $dtID,
+								'conceptID'=>getDetailTypeConceptID($dtID),
+								'type' => $DTN[$dtID],
+								'name' => $RQS[$linkedRec['rec_RecTypeID']][$dtID]),
+						$rec_id);
 			}
 		}
-		if ( array_key_exists('revRelLinks', $recordInfo) && $recordInfo['revRelLinks']['relRecIDs'] ) {
-			$recID = $record['rec_ID'];
-			foreach ($recordInfo['revRelLinks']['relRecIDs'] as $relRec_id) {
-				$relRec = $recInfos[$relRec_id]['record'];
-				$attrs = array();
-				if ( $details = $relRec['details']){
-					if ( $details[$relTrgDT]) {
-						list($key, $value) = each($details[$relTrgDT]);
-						$toRecord = $value;
-						if ( intval($toRecord['id']) != $recID) {
-							$relatedRecID = $toRecord['id'];
-						}else {
-							$attrs['useInverse'] = 'true';
-							if ($details[$relSrcDT]) {
-								list($key, $value) = each($details[$relSrcDT]);
-								$fromRecord = $value;
-								if ( intval($fromRecord['id']) != $recID) {
-									$relatedRecID = $fromRecord['id'];
-								}
-							}
-						}
-					}
-					if ($details[$relTypDT]) {
-						list($key, $value) = each($details[$relTypDT]);
-						preg_replace("/-/","",$value);
-						$trmID = $value;
-						if ($trmID ) {	//saw Enum change
-							$attrs['type'] = $TL[$trmID]['trm_Label'];
-							$attrs['termID'] = $trmID;
-							$attrs['termConceptID'] = getTermConceptID($trmID);
-							if ($TL[$trmID]['trm_Code']){
-								$attrs['code'] = $TL[$trmID]['trm_Code'];
-							};
-							if ($relatedRecID){
-								$attrs['relatedRecordID'] = $relatedRecID;
-							}
-							if (array_key_exists($trmID, $INV) && $INV[$trmID]){
-								$attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-								$attrs['invTermID'] = $INV[$trmID];
-								$attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
+	}
+	if ( array_key_exists('revRelLinks', $recordInfo) && $recordInfo['revRelLinks']['relRecIDs'] ) {
+		$recID = $record['rec_ID'];
+		foreach ($recordInfo['revRelLinks']['relRecIDs'] as $relRec_id) {
+			$relRec = $recInfos[$relRec_id]['record'];
+			$attrs = array();
+			if ( $details = $relRec['details']){
+				if ( $details[$relTrgDT]) {
+					list($key, $value) = each($details[$relTrgDT]);
+					$toRecord = $value;
+					if ( intval($toRecord['id']) != $recID) {
+						$relatedRecID = $toRecord['id'];
+					}else {
+						$attrs['useInverse'] = 'true';
+						if ($details[$relSrcDT]) {
+							list($key, $value) = each($details[$relSrcDT]);
+							$fromRecord = $value;
+							if ( intval($fromRecord['id']) != $recID) {
+								$relatedRecID = $fromRecord['id'];
 							}
 						}
 					}
 				}
-				makeTag('relationship',$attrs,$relRec_id);
-			}
-		}
-		if ( array_key_exists('relLinks', $recordInfo) && $recordInfo['relLinks']['relRecIDs'] ) {
-			$recID = $record['rec_ID'];
-			foreach ($recordInfo['relLinks']['relRecIDs'] as $relRec_id) {
-				$relRec = $recInfos[$relRec_id]['record'];
-				$attrs = array();
-				if ( $details = $relRec['details']){
-					if ( $details[$relTrgDT]) {
-						list($key, $value) = each($details[$relTrgDT]);
-						$toRecord = $value;
-						if ( intval($toRecord['id']) != $recID) {
-							$relatedRecID = $toRecord['id'];
-						}else {
-							$attrs['useInverse'] = 'true';
-							if ($details[$relSrcDT]) {
-								list($key, $value) = each($details[$relSrcDT]);
-								$fromRecord = $value;
-								if ( intval($fromRecord['id']) != $recID) {
-									$relatedRecID = $fromRecord['id'];
-								}
-							}
+				if ($details[$relTypDT]) {
+					list($key, $value) = each($details[$relTypDT]);
+					preg_replace("/-/","",$value);
+					$trmID = $value;
+					if ($trmID ) {	//saw Enum change
+						$attrs['type'] = $TL[$trmID]['trm_Label'];
+						$attrs['termID'] = $trmID;
+						$attrs['termConceptID'] = getTermConceptID($trmID);
+						if ($TL[$trmID]['trm_Code']){
+							$attrs['code'] = $TL[$trmID]['trm_Code'];
+						};
+						if ($relatedRecID){
+							$attrs['relatedRecordID'] = $relatedRecID;
+						}
+						if (array_key_exists($trmID, $INV) && $INV[$trmID]){
+							$attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
+							$attrs['invTermID'] = $INV[$trmID];
+							$attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
 						}
 					}
-					if ($details[$relTypDT]) {
-						list($key, $value) = each($details[$relTypDT]);
-						preg_replace("/-/","",$value);
-						$trmID = $value;
-						if ($trmID ) {	//saw Enum change
-							$attrs['type'] = $TL[$trmID]['trm_Label'];
-							$attrs['termID'] = $trmID;
-							$attrs['termConceptID'] = getTermConceptID($trmID);
-							if ($relatedRecID){
-								$attrs['relatedRecordID'] = $relatedRecID;
-							}
-							if (array_key_exists($trmID, $INV) && $INV[$trmID]){
-								$attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-								$attrs['invTermID'] = $INV[$trmID];
-								$attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
+				}
+			}
+			makeTag('relationship',$attrs,$relRec_id);
+		}
+	}
+	if ( array_key_exists('relLinks', $recordInfo) && $recordInfo['relLinks']['relRecIDs'] ) {
+		$recID = $record['rec_ID'];
+		foreach ($recordInfo['relLinks']['relRecIDs'] as $relRec_id) {
+			$relRec = $recInfos[$relRec_id]['record'];
+			$attrs = array();
+			if ( $details = $relRec['details']){
+				if ( $details[$relTrgDT]) {
+					list($key, $value) = each($details[$relTrgDT]);
+					$toRecord = $value;
+					if ( intval($toRecord['id']) != $recID) {
+						$relatedRecID = $toRecord['id'];
+					}else {
+						$attrs['useInverse'] = 'true';
+						if ($details[$relSrcDT]) {
+							list($key, $value) = each($details[$relSrcDT]);
+							$fromRecord = $value;
+							if ( intval($fromRecord['id']) != $recID) {
+								$relatedRecID = $fromRecord['id'];
 							}
 						}
 					}
 				}
-				makeTag('relationship',$attrs,$relRec_id);
+				if ($details[$relTypDT]) {
+					list($key, $value) = each($details[$relTypDT]);
+					preg_replace("/-/","",$value);
+					$trmID = $value;
+					if ($trmID ) {	//saw Enum change
+						$attrs['type'] = $TL[$trmID]['trm_Label'];
+						$attrs['termID'] = $trmID;
+						$attrs['termConceptID'] = getTermConceptID($trmID);
+						if ($relatedRecID){
+							$attrs['relatedRecordID'] = $relatedRecID;
+						}
+						if (array_key_exists($trmID, $INV) && $INV[$trmID]){
+							$attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
+							$attrs['invTermID'] = $INV[$trmID];
+							$attrs['invTermConceptID'] = getTermConceptID($INV[$trmID]);
+						}
+					}
+				}
 			}
+			makeTag('relationship',$attrs,$relRec_id);
 		}
+	}
 	closeTag('record');
 }
 
@@ -858,7 +863,14 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 	if (is_array($value)) {
 		if (array_key_exists('id', $value)) {
 			// record pointer
+			$attrs['isRecordPointer'] = "true";
+			if ($MAX_DEPTH == 0 && $outputStub) {
+				openTag('detail', $attrs);
+				outputRecordStub($recInfos[$value['id']]['record']);
+				closeTag('detail');
+			}else{
 				makeTag('detail', $attrs, $value['id']);
+			}
 		} else if (array_key_exists('file', $value)) {
 			$file = $value['file'];
 			openTag('detail', $attrs);
@@ -906,7 +918,14 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 		}
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'resource') {
-		makeTag('detail', $attrs, $value['id']);
+		$attrs['isRecordPointer'] = "true";
+		if ($MAX_DEPTH == 0 && $outputStub) {
+			openTag('detail', $attrs);
+			outputRecordStub($recInfos[$value['id']]['record']);
+			closeTag('detail');
+		}else{
+			makeTag('detail', $attrs, $value['id']);
+		}
 	} else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype' ) && array_key_exists($value,$TL)) {
 		$attrs['termID'] = $value;
 		$attrs['termConceptID'] = getTermConceptID($value);
