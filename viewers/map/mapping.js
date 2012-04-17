@@ -241,12 +241,12 @@ if (typeof mxn.LatLonPoint == "function") {
 		}; //end internal zoom function
 
 
-		$("<div id='divZoomIn' title='Zoom In'><img src='"+RelBrowser.baseURL+"common/images/plus.png'></img></div>")
+		$("<div id='divZoomIn' title='Zoom In'><img src='"+RelBrowser.baseURL+"common/images/zoom_plus.png'></img></div>")
 			.click(function () {
 				zoom(true);
 			})
 			.appendTo($div);
-		$("<div  id='divZoomOut' title='Zoom Out'><img src='"+RelBrowser.baseURL+"common/images/minus.png'></img></div>")
+		$("<div  id='divZoomOut' title='Zoom Out'><img src='"+RelBrowser.baseURL+"common/images/zoom_minus.png'></img></div>")
 			.click(function () {
 				zoom(false);
 			})
@@ -298,7 +298,7 @@ if (typeof mxn.LatLonPoint == "function") {
 	/**
 	*
 	*/
-	initMap: function (mini) {
+	initMap: function (map_div_id) {
 			var matches, coords, points, l, i, lnglat, bounds = null, M = RelBrowser.Mapping;
 
 			if (M.mapdata.focus) {
@@ -325,12 +325,12 @@ if (typeof mxn.LatLonPoint == "function") {
 			}
 
 			if (window["Timeline"]) { //there is Timeline object
-				M.initMapAndTimeline(mini, bounds); //init timemap+timeline and fill with the custom data
+				M.initMapAndTimeline(map_div_id, bounds); //init timemap+timeline and fill with the custom data
 			} else {
 				//init empty map (for digitizer)
 				// wihout timeline without simile timemap - only mapstraction map
 				// without custom data (except background image layer)
-				M.map = new mxn.Mapstraction($("#map")[0]);
+				M.map = new mxn.Mapstraction($("#"+map_div_id)[0]);
 
 				M.map.setMapType(M.customMapTypes[0] || mxn.Mapstraction.ROAD);
 
@@ -346,9 +346,7 @@ if (typeof mxn.LatLonPoint == "function") {
 
 
 			//???? M.map.setUIToDefault();
-			if (! mini) {
-				M.addCustomMapTypeControl();
-			}
+			M.addCustomMapTypeControl();
 
 			return errors;
 	}, //end initMap
@@ -356,7 +354,7 @@ if (typeof mxn.LatLonPoint == "function") {
 	/**
 	* init timemap+timeline and fill with the custom data
 	*/
-	initMapAndTimeline: function (mini, bounds)
+	initMapAndTimeline: function (map_div_id, bounds)
 	{
 			var tl_theme, tl_theme2, M = RelBrowser.Mapping;
 
@@ -459,7 +457,7 @@ if (typeof mxn.LatLonPoint == "function") {
 			var editLinkIcon = "<div id='rec_edit_link' style='display:inline-block;' class='logged-in-only'><a href='"+
 							basePath+ "records/edit/editRecord.html?recID={{recid}}&db="+ db +
 							 "' target='_blank' title='Click to edit record'><img src='"+
-							 basePath + "common/images/edit_pencil_small.png'/></a></div>";
+							 basePath + "common/images/edit-pencil.png'/></a></div>";
 
 			var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
 							"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
@@ -492,7 +490,7 @@ if (typeof mxn.LatLonPoint == "function") {
     		});
 
 			M.tmap = TimeMap.init({
-				mapId: "map", // Id of map div element (required)
+				mapId: map_div_id, // Id of map div element (required)
 				timelineId: "timeline", // Id of timeline div element (required)
 				datasets: M.mapdata.timemap,
 				options: {
@@ -749,7 +747,9 @@ if (typeof mxn.LatLonPoint == "function") {
 	RelBrowser.Mapping.initTimeZoomIndex = RelBrowser.Mapping.timeZoomSteps.length - 1;
 
 	// returns error string in case wrong image layer definition
-	function initMapping() {
+	function initMapping(map_div_id) {
+		return RelBrowser.Mapping.initMap(map_div_id);
+		/*
 		var mini, $img, M = RelBrowser.Mapping;
 
 		mini = M.mapdata.mini || false;
@@ -760,6 +760,7 @@ if (typeof mxn.LatLonPoint == "function") {
 		} else {
 			return M.initMap(mini);
 		}
+		*/
 	}
 
 }

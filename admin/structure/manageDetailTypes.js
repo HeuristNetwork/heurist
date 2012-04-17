@@ -365,7 +365,7 @@ function DetailTypeManager() {
 			/*{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },*/
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
+			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
 			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("status");
@@ -705,7 +705,7 @@ function DetailTypeManager() {
 	}
 
 	//
-	//
+	//  Removes and recreates table from given tab (group)
 	//
 	function _removeTable(grpID, needRefresh){
 
@@ -1015,7 +1015,10 @@ function DetailTypeManager() {
 				top.HEURIST.detailTypes = context.detailTypes;
 				_cloneHEU = null;
 
-				if(grpID<0){
+				if(Number(grpID)<0){
+					
+					_refreshAllTables();
+					
 					grpID = context['0'].result;
 					ind = _groups.length;
 					_addNewTab(ind, grpID, name, description);
@@ -1028,6 +1031,7 @@ function DetailTypeManager() {
 						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
 						_groups[ind].text = name;
 					}
+					_refreshAllTables();
 				}
 				tabView.set("activeIndex", ind);
 			}
@@ -1048,7 +1052,20 @@ function DetailTypeManager() {
 
 	}
 
-	//
+    //
+    //
+    //
+    function _refreshAllTables(){
+        
+        var ind;
+        for(ind in arrTables){
+             if(!(Hul.isnull(ind) || Hul.isnull(arrTables[ind]))){
+                  _removeTable( _getGroupByIndex(ind), true);
+                           //arrTables[ind].render();
+              }
+        }
+    }
+    //
 	//
 	//
 	function _doGroupDelete(){
@@ -1081,6 +1098,7 @@ function DetailTypeManager() {
 						tabView.set("activeIndex", 0);
 						top.HEURIST.detailTypes = context.detailTypes;
 						_cloneHEU = null;
+						_refreshAllTables();
 					}
 				}
 

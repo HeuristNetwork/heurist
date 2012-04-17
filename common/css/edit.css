@@ -247,7 +247,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	-webkit-border-top-left-radius:10px;
 	border-bottom-left-radius:10px;
 	border-top-left-radius:10px;
-	background:url("../images/32x32.gif") no-repeat scroll 8px center rgba(255, 255, 255, 0.3);
+	background:url("../images/31x31.gif") no-repeat scroll 8px center rgba(255, 255, 255, 0.3);
 	border-color:#E0E0E0 #E0E0E0 #C0C0C0 #C0C0C0;
 	border-left:1px solid;
 	border-style:solid;
@@ -401,7 +401,7 @@ div.draggable table {
 }
 div.draggable td.header {
 	background-color:RGBA(247,209,0,0.5);
-	background-image:url("../images/rectype-icons/57.png");
+	background-image:url("../images/drag_pin.png");
 	background-position: right;
 	background-repeat:no-repeat;
 	border-bottom:1px solid #CC9933;
@@ -420,7 +420,7 @@ div.draggable td.header div.resize-div {
 	top: 0;
 	left: 0;
 	position: absolute;
-	background: url(../images/nw-resize.gif) transparent scroll top left no-repeat;
+	background: url(../images/drag-resize.gif) transparent scroll top left no-repeat;
 	width: 16px;
 	height: 16px;
 }
@@ -429,7 +429,7 @@ div.draggable td.header div.minimise-div {
 	top: 0;
 	right: 18px;
 	position: absolute;
-	background: url(../images/nw-minimise.gif) transparent scroll top right no-repeat;
+	background: url(../images/drag-minimise.gif) transparent scroll top right no-repeat;
 	width: 16px;
 	height: 16px;
 }

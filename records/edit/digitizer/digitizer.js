@@ -11,6 +11,12 @@ if(top.HAPI){
 	top.HAPI.importSymbols(top, this);
 }
 
+RelBrowser = {
+	pipelineBaseURL: "../"
+};
+
+var isReadOnly = false;
+
 var _keepZoom; //art
 var systemAllLayers;
 var currentBackgroundLayer;
@@ -247,18 +253,20 @@ function activateCircle() {
 		strokeWeight: circlestyles[ccur].width
 	});
 }
+// creates marker for single point shape
+//
 function activateMarker() {
 	markerShape = new google.maps.Marker({
 		map: map,
 		icon: markerstyles[mcur].icon,
-		draggable: (toolID == 5),
+		draggable: (toolID == 5 && !isReadOnly),
 		raiseOnDrag: false
 	});
-	if(toolID == 5){
+	if(toolID == 5 && !isReadOnly){
 		google.maps.event.addListener(markerShape, 'drag', logCoords);
 	}
 }
-function initmap(){
+function initmap(map_div_id, geovalue){
 
 	var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
 	var viewBits;
@@ -292,7 +300,7 @@ function initmap(){
 		layers: [],
 		count_mapobjects: 0
 	};
-	initMapping(); //from mapping.js
+	initMapping(map_div_id); //from mapping.js
 
 	map = RelBrowser.Mapping.map.maps.googlev3;
 
@@ -308,7 +316,11 @@ function initmap(){
 	google.maps.event.addListener(map,'zoom_changed',mapzoom);
 	cursorposition(map);
 
-	if (document.location.search.match(/\?edit/)) {
+    if(geovalue){
+
+        loadParameters(geovalue);
+
+    } else if (document.location.search.match(/\?edit/)) {
 		HAPI.PJ.retrieve("gigitiser_geo_object",
 		function(_, val) {
 			loadParameters(val);
@@ -338,6 +350,35 @@ function initmap(){
 
 
 }
+
+//
+// simple viewer
+//
+function initmap_viewer(map_div_id, geovalue){
+
+	if(map==null){
+
+		RelBrowser.Mapping.mapdata = {
+			timemap: [],
+			layers: [],
+			count_mapobjects: 0
+		};
+		initMapping(map_div_id); //from mapping.js
+
+		map = RelBrowser.Mapping.map.maps.googlev3;
+
+		polyPoints = new google.maps.MVCArray(); // collects coordinates
+		createplacemarkobject();
+		createlinestyleobject();
+		createpolygonstyleobject();
+		createcirclestyleobject();
+		createmarkerstyleobject();
+		preparePolyline(); // create a Polyline object
+	}
+    isReadOnly = true;
+	loadParameters(geovalue);
+}
+
 // Called by initmap, addLatLng, drawRectangle, drawCircle, drawpolywithhole
 function cursorposition(mapregion){
 	google.maps.event.addListener(mapregion,'mousemove',function(point){
@@ -373,8 +414,8 @@ function addLatLng2(point){
 		startpoint = point;
 		placemarks[plmcur].point = startpoint; // stored because it's to be used when the shape is clicked on as a stored shape
 		setstartMarker(startpoint);
-		if(toolID == 5) {
-			drawMarkers(startpoint);
+		if(toolID == 5) {    //point tool
+			drawPointMarker(startpoint);
 		}
 	}
 	if(polyPoints.length == 2 && toolID == 3) createrectangle(point);
@@ -402,26 +443,28 @@ function addLatLng2(point){
 	}
 }
 function setstartMarker(point){
-	startMarker = new google.maps.Marker({
-		position: point,
-		map: map
-	});
-	startMarker.setTitle("#" + polyPoints.length);
+
+	    startMarker = new google.maps.Marker({
+		    position: point,
+		    map: (isReadOnly)?null:map
+	    });
+	    startMarker.setTitle("#" + polyPoints.length);
 }
 function createrectangle(point) {
-	// startMarker is southwest point. now set northeast
-	nemarker = new google.maps.Marker({
-		position: point,
-		draggable: true,
-		raiseOnDrag: false,
-		title: "Draggable",
-		map: map});
-	google.maps.event.addListener(startMarker, 'drag', drawRectangle);
-	google.maps.event.addListener(nemarker, 'drag', drawRectangle);
-	startMarker.setDraggable(true);
-	startMarker.setAnimation(null);
-	startMarker.setTitle("Draggable");
-
+	    // startMarker i southwest point. now set northeast
+    nemarker = new google.maps.Marker({
+		    position: point,
+		    draggable: true,
+		    raiseOnDrag: false,
+		    title: "Draggable",
+		    map: (isReadOnly)?null:map});
+    if(!isReadOnly){
+	    google.maps.event.addListener(startMarker, 'drag', drawRectangle);
+	    google.maps.event.addListener(nemarker, 'drag', drawRectangle);
+	    startMarker.setDraggable(true);
+	    startMarker.setAnimation(null);
+	    startMarker.setTitle("Draggable");
+    }
 	drawRectangle();
 }
 function drawRectangle() {
@@ -511,7 +554,7 @@ function distance(lat1,lon1,lat2,lon2) {
 	return d;
 }
 
-function drawMarkers(point) {
+function drawPointMarker(point) {
 	if(startMarker) startMarker.setMap(null);
 	if(polyShape) polyShape.setMap(null);
 	var id = plmcur;
@@ -731,14 +774,17 @@ function setTool(newToolID){
 
 	var oldToolID = toolID;
 	toolID = newToolID;
-	gob('toolchoice').value = newToolID;
 
-	if(toolID == 1 || toolID == 2){
-		showthis('btnDelLastPoint');
-		showthis('btnEditPoly');
-	}else{
-		closethis('btnDelLastPoint');
-		closethis('btnEditPoly');
+	var el = gob('toolchoice');
+	if(el){
+		el.value = newToolID;
+		if(toolID == 1 || toolID == 2){
+			showthis('btnDelLastPoint');
+			showthis('btnEditPoly');
+		}else{
+			closethis('btnDelLastPoint');
+			closethis('btnEditPoly');
+		}
 	}
 
 	if(polyPoints.length==0) {
@@ -1413,7 +1459,7 @@ function searchAddress(address) {
             var pos = results[0].geometry.location;
             map.setCenter(pos);
             //artem if(directionsYes == 1) drawDirections(pos);
-            if(toolID == 5 && markerShape==null) drawMarkers(pos);
+            if(toolID == 5 && markerShape==null) drawPointMarker(pos);
         } else {
             alert("Geocode was not successful for the following reason: " + status);
         }
@@ -1425,10 +1471,16 @@ function activateDirections() {
 	directionsintroduction();
 }
 function closethis(name){
-	gob(name).style.visibility = 'hidden';
+	var el = gob(name);
+	if(el){
+		el.style.visibility = 'hidden';
+	}
 }
 function showthis(name){
-	gob(name).style.visibility = 'visible';
+	var el = gob(name);
+	if(el){
+		el.style.visibility = 'visible';
+	}
 }
 function iconoptions(chosenicon) {
 	gob("st2").value = chosenicon;
@@ -1800,47 +1852,54 @@ placemarks[plmcur].plmtext = kmlcode = kmlMarkers;
 gob('coords1').value = kmlheading()+kmlMarkers+kmlend();
 }
 END LOG FUNCTIONS */
+function setinfo(text) {
+	var el = gob('coords1');
+	if(el){
+		el.value = text;
+	}
+}
 function directionsintroduction() {
-	gob('coords1').value = 'Ready for Directions. Create a route along roads with markers at chosen locations.\n'
+	setinfo('Ready for Directions. Create a route along roads with markers at chosen locations.\n'
 	+'Click on the map, or enter an address and click "Search", to place a marker.\n'
 	+'Lines will be drawn along roads from marker to marker.\n'
 	+'Use "Delete Last Point" if you want to undo.\n'
 	+'KML input may be done at any time for markers by clicking on them.\n'
 	+'KML input for the line may be done by clicking on it after you have finished '
-	+'drawing and clicked "Next shape".';
+	+'drawing and clicked "Next shape".');
 }
+
 function markerintroduction() {
-	gob('coords1').value = 'Ready for Marker. Click on the map, or enter an address and click "Search", to place a marker.\n';
+	setinfo('Ready for Marker. Click on the map, or enter an address and click "Search", to place a marker.\n');
 	//+'You may enter your content for the infowindow with "KML input" even if your code choice is Javascript.\n'
 	//+'Click "Next shape" before each additional marker.';
 }
 function polylineintroduction() {
-	gob('coords1').value = 'Ready for Polyline. Click on the map. The code for the shape you create will be presented here.\n\n'
+	setinfo('Ready for Polyline. Click on the map. The code for the shape you create will be presented here.\n\n'
 	//+'When finished with a shape, click Next shape and draw another shape, if you wish.\n'
 	+'\nIf you want to edit a saved polyline or polygon, click on it. Then click Edit lines. '
-	+'When editing, you may remove a point with a click on it.\n';
+	+'When editing, you may remove a point with a click on it.\n');
 	//+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function polygonintroduction() {
-	gob('coords1').value = 'Ready for Polygon. Click on the map. The code for the shape you create will be presented here. '
+	setinfo('Ready for Polygon. Click on the map. The code for the shape you create will be presented here. '
 	+'The Maps API will automatically "close" any polygons by drawing a stroke connecting the last coordinate back to the '
 	+'first coordinate for any given paths.\n'
 	//+'\nTo create a polygon with hole(-s), click "Hole" before you start the drawing.\n'
 	//+'\nWhen finished with a shape, click Next shape and draw another shape, if you wish.\n'
 	+'\nIf you want to edit a saved polyline or polygon, click on it. Then click Edit lines. '
-	+'When editing, you may remove a point with a click on it.\n';
+	+'When editing, you may remove a point with a click on it.\n');
 	//+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function rectangleintroduction() {
-	gob('coords1').value = 'Ready for Rectangle. Click two times on the map - first for the southwest and '+
+	setinfo('Ready for Rectangle. Click two times on the map - first for the southwest and '+
 	'then for the northeast corner. You may resize and move '+
-	'the rectangle with the two draggable markers you then have.\n\n';
+	'the rectangle with the two draggable markers you then have.\n\n');
 	//'The v3 Rectangle is a polygon. But in Javascript code mode an extra code for '+
 	//'polyline is presented here in the text area.';
 }
 function circleintroduction() {
-	gob('coords1').value = 'Ready for Circle. Click for center. Then click for radius distance. '+
-	'You may resize and move the circle with the two draggable markers you then have.\n\n';
+	setinfo('Ready for Circle. Click for center. Then click for radius distance. '+
+	'You may resize and move the circle with the two draggable markers you then have.\n\n');
 	//'KML code is not available for Circle.';
 }
 
@@ -1872,110 +1931,111 @@ function loadParameters(val) {
 
 	switch (type) {
 		case "p":
-		var matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
-		if (! matches) break;
-		var point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-		__point = point;
+		    var matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
+		    if (! matches) break;
+		    var point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		    __point = point;
 
-		setTool(5);
-		addLatLng2(point);
+		    setTool(5);
+		    addLatLng2(point);
 
-		bounds = new google.maps.LatLngBounds(new google.maps.LatLng(point.lat() - 0.5, point.lng() - 0.5),
-		new google.maps.LatLng(point.lat() + 0.5, point.lng() + 0.5));
+		    bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(point.lat() - 0.5, point.lng() - 0.5),
+		                    new google.maps.LatLng(point.lat() + 0.5, point.lng() + 0.5));
 
 		break;
 
 		case "r":  //rectangle
-		var matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
-		if (! matches) break;
+		    var matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+		    if (! matches) break;
 
-		setTool(3);
+		    setTool(3);
 
-		//var point1 = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-		//var point2 = new GLatLng(parseFloat(matches[6]), parseFloat(matches[5]));
+		    //var point1 = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		    //var point2 = new GLatLng(parseFloat(matches[6]), parseFloat(matches[5]));
 
-		southWest = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-		northEast = new google.maps.LatLng(parseFloat(matches[6]), parseFloat(matches[5]));
-		bounds = new google.maps.LatLngBounds(southWest, northEast);
+		    southWest = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		    northEast = new google.maps.LatLng(parseFloat(matches[6]), parseFloat(matches[5]));
+		    bounds = new google.maps.LatLngBounds(southWest, northEast);
 
-		setstartMarker(southWest);
-		createrectangle(northEast);
+            setstartMarker(southWest);
+		    createrectangle(northEast);
 
 		break;
 
 		case "c":  //circle
-		var matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
-		if (! matches) break;
-		var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-		var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
-		//var radius = google.maps.geometry.spherical.computeDistanceBetween (centre, oncircle);  // (parseFloat(matches[3])-parseFloat(matches[1]));
+		    var matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+		    if (! matches) break;
+		    var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		    var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
+		    //var radius = google.maps.geometry.spherical.computeDistanceBetween (centre, oncircle);  // (parseFloat(matches[3])-parseFloat(matches[1]));
 
-		setTool(4);
-		setstartMarker(centre);
-		createcircle(oncircle);
+		    setTool(4);
+		    setstartMarker(centre);
+		    createcircle(oncircle);
 
-		/*
-		southWest = new google.maps.LatLng(centre.lat() - radius, centre.lng() - radius);
-		northEast = new google.maps.LatLng(centre.lat() + radius, centre.lng() + radius);
-		bounds = new google.maps.LatLngBounds(southWest, northEast);*/
+		    /*
+		    southWest = new google.maps.LatLng(centre.lat() - radius, centre.lng() - radius);
+		    northEast = new google.maps.LatLng(centre.lat() + radius, centre.lng() + radius);
+		    bounds = new google.maps.LatLngBounds(southWest, northEast);*/
 
-		bounds = circle.getBounds();
+		    bounds = circle.getBounds();
 
 		break;
 
 		case "l":  ///polyline
-		var matches = value.match(/LINESTRING\((.+)\)/i);
-		if (! matches) break;
+		    var matches = value.match(/LINESTRING\((.+)\)/i);
+		    if (! matches) break;
 
-		matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
-		var points = [];
-		var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-		for (var j=0; j < matches.length-1; ++j) {
-			var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
-			var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
-			points.push(point);
+		    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+		    var points = [];
+		    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+		    for (var j=0; j < matches.length-1; ++j) {
+			    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+			    var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
+			    points.push(point);
 
-			if (point.lat() < minLat) minLat = point.lat();
-			if (point.lat() > maxLat) maxLat = point.lat();
-			if (point.lng() < minLng) minLng = point.lng();
-			if (point.lng() > maxLng) maxLng = point.lng();
-		}
+			    if (point.lat() < minLat) minLat = point.lat();
+			    if (point.lat() > maxLat) maxLat = point.lat();
+			    if (point.lng() < minLng) minLng = point.lng();
+			    if (point.lng() > maxLng) maxLng = point.lng();
+		    }
 
-		setTool(1);
-		polyPoints = points;
-		southWest = new google.maps.LatLng(minLat, minLng);
-		northEast = new google.maps.LatLng(maxLat, maxLng);
-		bounds = new google.maps.LatLngBounds(southWest, northEast);
+		    setTool(1);
+		    polyPoints = points;
+		    southWest = new google.maps.LatLng(minLat, minLng);
+		    northEast = new google.maps.LatLng(maxLat, maxLng);
+		    bounds = new google.maps.LatLngBounds(southWest, northEast);
 
-		preparePolyline();
+		    preparePolyline();
 
 		break;
 
 		case "pl": //polygon
-		var matches = value.match(/POLYGON\(\((.+)\)\)/i);
-		if (! matches) break;
+		    var matches = value.match(/POLYGON\(\((.+)\)\)/i);
+		    if (! matches) break;
 
-		matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
-		var points = [];
-		var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-		for (var j=0; j < matches.length-1; ++j) {
-			var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
-			var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
-			points.push(point);
+		    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+		    var points = [];
+		    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+		    for (var j=0; j < matches.length-1; ++j) {
+			    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+			    var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
+			    points.push(point);
 
-			if (point.lat() < minLat) minLat = point.lat();
-			if (point.lat() > maxLat) maxLat = point.lat();
-			if (point.lng() < minLng) minLng = point.lng();
-			if (point.lng() > maxLng) maxLng = point.lng();
-		}
+			    if (point.lat() < minLat) minLat = point.lat();
+			    if (point.lat() > maxLat) maxLat = point.lat();
+			    if (point.lng() < minLng) minLng = point.lng();
+			    if (point.lng() > maxLng) maxLng = point.lng();
+		    }
 
-		setTool(2);
-		polyPoints = points;
-		southWest = new google.maps.LatLng(minLat, minLng);
-		northEast = new google.maps.LatLng(maxLat, maxLng);
-		bounds = new google.maps.LatLngBounds(southWest, northEast);
+		    setTool(2);
+		    polyPoints = points;
+		    southWest = new google.maps.LatLng(minLat, minLng);
+		    northEast = new google.maps.LatLng(maxLat, maxLng);
+		    bounds = new google.maps.LatLngBounds(southWest, northEast);
 
-		preparePolygon();
+		    preparePolygon();
 
 		break;
 		default:
@@ -2017,7 +2077,9 @@ function zoomToBounds(bounds) {
 //
 function logCoords(event){
 
-	if(codeID==0){
+	var el = gob('coords1');
+
+	if(el && codeID==0){
 
 		var r = function(x) { return Math.round(x*100000)/100000; };
 		var value = "";
@@ -2035,7 +2097,7 @@ function logCoords(event){
 			value = pointsArrayKml.join("\n");
 		}
 
-		gob('coords1').value = value;
+		el.value = value;
 
 		gob('btnSave').disabled = (value!="")?"":"disabled";
 

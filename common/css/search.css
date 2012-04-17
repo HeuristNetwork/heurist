@@ -180,7 +180,7 @@ body.w-bookmark #results {
 }
 #left-panel {
 	background-color:#EFF2F6;
-	background-image:url(../images/left-panel-bg.png);
+	background-image:url(../images/backgrounds/left-panel-bg.png);
 	-moz-border-radius-bottomleft:5px;
 	-moz-border-radius-bottomright:5px;
 	-moz-border-radius-topleft:0;
@@ -1254,7 +1254,7 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	padding:3px 30px;
 }
 .right_margin_info {
-	background-image:url("../images/white_fade.png");
+	background-image:url("../images/backgrounds/white_fade.png");
 	background-position:0px 50%;
 	background-repeat:repeat-y;
 	color:#4C5F76;
@@ -1279,7 +1279,7 @@ input[type=checkbox] {
 }
 .banner a:hover {
 	background: none;
-\  background-repeat: no-repeat;
+  	background-repeat: no-repeat;
 	text-decoration: underline;
 }
 .passwordIcon {
@@ -1290,7 +1290,7 @@ input[type=checkbox] {
 	top:9px;
 }
 #printingLink {
-	background-image:url("../images/print.png");
+	background-image:url("../images/tool_print.png");
 	background-position:left center;
 	background-repeat:no-repeat;
 	border-right:1px solid rgba(0, 0, 0, 0.1);
@@ -1301,7 +1301,7 @@ input[type=checkbox] {
 	cursor:pointer
 }
 #filterLink {
-	background-image:url("../images/filter.png");
+	background-image:url("../images/tool_filter.png");
 	background-position:left center;
 	background-repeat:no-repeat;
 	border-right:1px solid rgba(0, 0, 0, 0.1);
@@ -1580,7 +1580,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	vertical-align: middle;
 	white-space: nowrap;
 }
-.list .recordDiv .recordIcons, .two-col .recordDiv .recordIcons, {
+.list .recordDiv .recordIcons, .two-col .recordDiv .recordIcons {
  display:table-cell;
  min-width:50px;
 }
@@ -1687,7 +1687,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .icons .recTypeThumb {
 	opacity:0.6;
 }
-.1col .recordDiv .thumbnail, .2col .recordDiv .thumbnail {
+.recordDiv .thumbnail, .recordDiv .thumbnail {
 	display:none
 }
 .thumbnails .recordDiv, .thumbs .recordDiv {
@@ -1904,7 +1904,7 @@ div.recorddiv:hover {
 	color: #999;
 }
 .filter ul li ul li a {
-	background-image: none);
+	background-image: none;
 	background-repeat: no-repeat;
 	background-position: left;
 	padding-left:16px;

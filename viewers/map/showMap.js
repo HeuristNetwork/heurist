@@ -142,7 +142,7 @@ function ShowMap() {
 
 		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0));
 
-		var errors = initMapping(); //from mapping.js
+		var errors = initMapping("map"); //from mapping.js
 		_showErrorSign(errors);
 
 		_showMessage();

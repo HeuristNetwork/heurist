@@ -563,29 +563,6 @@
 		}
 	}
 
-
-	/**
-	* Edit title mask
-	*/
-	function _onEditMask(){
-
-		var maskvalue = document.getElementById("rty_TitleMask").value;
-
-		Hul.popupURL(top, top.HEURIST.basePath +
-			"admin/structure/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
-		{
-		"close-on-blur": false,
-		"no-resize": false,
-		height: 600,
-		width: 800,
-		callback: function(newvalue) {
-			if(!Hul.isnull(newvalue)){
-				document.getElementById("rty_TitleMask").value = newvalue;
-			}
-		}
-	});
-	}
-
 	//
 	function updateRectypeOnServer() {
 		testTitleMask(); //then it calls updateRectypeOnServer_continue
@@ -948,7 +925,7 @@
 			{
 			"close-on-blur": false,
 			"no-resize": true,
-			height: 300,
+			height: 800,
 			width: 800,
 			callback: function(newvalue) {
 				if(!Hul.isnull(newvalue)){
@@ -957,7 +934,6 @@
 			}
 		});
 	}
-
 
 	var EditPopup = (function () {
 

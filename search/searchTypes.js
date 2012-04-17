@@ -1,5 +1,9 @@
 /*
- * filename, brief description, date of creation, by whom
+ * Small popup that is invoked by click on icon left to main search input field - it determines 3 main search types
+ * 1) record title
+ * 2) tags
+ * 3) all fields
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt

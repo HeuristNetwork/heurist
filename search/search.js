@@ -103,6 +103,7 @@ top.HEURIST.search = {
 						top.HEURIST.search.clearResultRows();
 						top.HEURIST.search.clearRelatesRows();
 						top.HEURIST.search.renderNavigation();
+						top.HEURIST.search.updateRssFeedLink();
 			});
 		}
 //			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
@@ -152,6 +153,9 @@ top.HEURIST.search = {
 					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 			});
 		}
+
+		top.HEURIST.search.updateRssFeedLink();
+
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
 			(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" ||
@@ -868,10 +872,10 @@ top.HEURIST.search = {
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '');
 		if (top.HEURIST.user && res[6] && (top.HEURIST.user.isInWorkgroup(res[6])|| res[6] == top.HEURIST.get_user_id()) || res[6] == 0) {
 			editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
-							top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
+							top.HEURIST.basePath + "common/images/edit-pencil.png'/></a></div>";
 		}else{
 			editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-							top.HEURIST.basePath + "common/images/no_edit_pencil_small.png'/></a></div>";
+							top.HEURIST.basePath + "common/images/edit-pencil-no.png'/></a></div>";
 		}
 		var newSearchWindow = "<div><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
@@ -1583,9 +1587,9 @@ top.HEURIST.search = {
 		}
 
 		if (firstRes > 1) {
-			innerHTML += "<a id=prev_page href=# onclick=\"top.HEURIST.search.gotoPage('prev'); return false;\"><img src=\'../common/images/previous_page.png\'></a>";
+			innerHTML += "<a id=prev_page href=# onclick=\"top.HEURIST.search.gotoPage('prev'); return false;\"><img src=\'../common/images/nav_prev.png\'></a>";
 		} else if (pageCount > 1) {	// don't display this, but let it affect the layout
-			innerHTML += "<a id=prev_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/previous_page.png\'></a>";
+			innerHTML += "<a id=prev_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/nav_prev.png\'></a>";
 		}
 
 		if (start != 1) {
@@ -1599,9 +1603,9 @@ top.HEURIST.search = {
 			innerHTML += " ... <a href=# id=p"+(pageCount-1)+" onclick=\"top.HEURIST.search.gotoPage("+(pageCount-1)+"); return false;\">"+pageCount+"</a>";
 		}
 		if (lastRes < totalRecordCount) {
-			innerHTML += "<a id=next_page href=# onclick=\"top.HEURIST.search.gotoPage('next'); return false;\"><img src=\'../common/images/next_page.png\'></a>";
+			innerHTML += "<a id=next_page href=# onclick=\"top.HEURIST.search.gotoPage('next'); return false;\"><img src=\'../common/images/nav_next.png\'></a>";
 		} else if (pageCount > 1) {
-			innerHTML += "<a id=next_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/next_page.png\'></a>";
+			innerHTML += "<a id=next_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/nav_next.png\'></a>";
 			// innerHTML += "&nbsp;&nbsp;<span id=next_page>next&nbsp;page</span>";
 		}
 
@@ -2553,6 +2557,20 @@ top.HEURIST.search = {
 		mapDiv.parentNode.removeChild(mapDiv);
 	},
 
+	//
+	//
+	//
+	updateRssFeedLink: function(){
+
+			if(top.HEURIST.search.results.infoByDepth[0].count>0){
+					$("#rss_feed_link").attr('href', top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main);
+					$("#rss_feed_link").css('visibility','visible');
+			}else{
+					$("#rss_feed_link").css('visibility','hidden');
+			}
+
+	},
+
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
 	//
@@ -2581,6 +2599,7 @@ top.HEURIST.search = {
 			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
 
 			top.HEURIST.currentQuery_main = query_string_main;
+
 
 			if ((typeof _tabView==="undefined") || (_tabView===null)) return;
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));

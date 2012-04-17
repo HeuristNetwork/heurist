@@ -272,12 +272,12 @@ top.HEURIST.edit = {
 				if (top.HEURIST.edit.userCanEdit()){
 					document.getElementById('workgroup-edit').onclick = openWorkgroupChanger;
 					document.getElementById('workgroup-edit').title = "Restrict access by workgroup";
-					document.getElementById('wg-edit-img').src = "../../common/images/edit_pencil_small.png"
+					document.getElementById('wg-edit-img').src = "../../common/images/edit-pencil.png"
 					top.HEURIST.edit.setAllInputsReadOnly(false);
 				}else{
 					document.getElementById('workgroup-edit').onclick = null;
 					document.getElementById('workgroup-edit').title = "Access denied";
-					document.getElementById('wg-edit-img').src = "../../common/images/no_edit_pencil_small.png"
+					document.getElementById('wg-edit-img').src = "../../common/images/edit-pencil-no.png"
 					top.HEURIST.edit.setAllInputsReadOnly(true);
 				}
 			}
@@ -892,7 +892,7 @@ top.HEURIST.edit = {
 								windowRef.parent.HEURIST.edit.record.bibID == recID &&
 								windowRef.parent.HEURIST.edit.record.url)? windowRef.parent.HEURIST.edit.record.url : "";
 			var required = (rectypeID == top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']);	// URL input is only REQUIRED for internet bookmark
-			var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
+			var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required, null, true);
 			top.HEURIST.edit.allInputs.push(URLInput);
 			inputs.push(URLInput);
 		}
@@ -1635,7 +1635,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 			if (bibID) element.input.setResource(element, bibID, bibTitle);
 			thisRef.choosing = false;
 			setTimeout(function() { element.textElt.focus(); }, 100);
-		}
+            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"));
+		},
+        height: (window.innerHeight<700?window.innerHeight-40:660)
 	} );
 };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.clearResource = function(element) { this.setResource(element, 0, ""); };
@@ -2168,6 +2170,9 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 	var geoImg = this.document.createElement("img");
 		geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
 		geoImg.className = "geo-image";
+		geoImg.onmouseover= function(e) { mapViewer.showAt(e, null); };
+		geoImg.onmouseout = function(e) { mapViewer.hide(); };
+
 		newDiv.appendChild(geoImg);
 
 	var descriptionSpan = newDiv.appendChild(this.document.createElement("span"));
@@ -2222,6 +2227,8 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 
 	if (bdValue && bdValue.geo) {
 		input.value = bdValue.geo.value;
+
+		geoImg.onmouseover= function(e) { mapViewer.showAt(e, bdValue.geo.value); };
 
 		var description = this.geoValueToDescription(bdValue.geo);
 		descriptionSpan.appendChild(this.document.createElement("b")).appendChild(this.document.createTextNode(" " + description.type));
@@ -2365,7 +2372,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 		}
 
 	var removeImg = this.reminderDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = top.HEURIST.basePath+"common/images/cross.gif";
+		removeImg.src = top.HEURIST.basePath+"common/images/cross.png";
 		removeImg.title = "Remove this reminder";
 		var thisRef = this;
 		removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
@@ -2649,7 +2656,7 @@ top.HEURIST.edit.inputs.ReminderInput.prototype.save = function(immediate, auto)
 };
 
 
-top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, required) {
+top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, required, displayValue, canEdit) {
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
@@ -2689,30 +2696,36 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		var urlOutput = this.document.createElement("a");
 			urlOutput.target = "_blank";
 			urlOutput.href = defaultValue;
+
 		var linkImg = urlOutput.appendChild(this.document.createElement("img"));
 			linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
 			linkImg.className = "link-image";
-		urlOutput.appendChild(this.document.createTextNode(defaultValue));
+        if(!displayValue) displayValue =  defaultValue;
+        displayValue = (displayValue.length>60)? displayValue.substr(0, 60)+'...':displayValue;
+		urlOutput.appendChild(this.document.createTextNode(displayValue));
 
-		var urlSpan = this.document.createElement("span");
-			urlSpan.style.paddingLeft = "1em";
-			urlSpan.style.color = "blue";
-			urlSpan.style.cursor = "pointer";
-		var editImg = urlSpan.appendChild(this.document.createElement("img"));
-			editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
-		urlSpan.appendChild(editImg);
-		urlSpan.appendChild(this.document.createTextNode("edit"));
+        inputCell.editImg = editImg;
+        inputCell.appendChild(urlOutput);
+
+       if(canEdit){
+		    var urlSpan = this.document.createElement("span");
+			    urlSpan.style.paddingLeft = "1em";
+			    urlSpan.style.color = "blue";
+			    urlSpan.style.cursor = "pointer";
+		    var editImg = urlSpan.appendChild(this.document.createElement("img"));
+			    editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+		    urlSpan.appendChild(editImg);
+		    urlSpan.appendChild(this.document.createTextNode("edit"));
 
 
-		urlSpan.onclick = function() {
-			inputCell.removeChild(urlOutput);
-			inputCell.removeChild(urlSpan);
-			inputField.style.display = "";
-		};
+		    urlSpan.onclick = function() {
+			    inputCell.removeChild(urlOutput);
+			    inputCell.removeChild(urlSpan);
+			    inputField.style.display = "";
+		    };
+            inputCell.appendChild(urlSpan);
+        }
 
-		inputCell.editImg = editImg;
-		inputCell.appendChild(urlOutput);
-		inputCell.appendChild(urlSpan);
 	}
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;

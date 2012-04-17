@@ -184,7 +184,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var helpDiv = titleDiv.appendChild(top.document.createElement("div"));
 				helpDiv.className = "help-button";
 				helpDiv.id = "help";
-				helpDiv.innerHTML = "<span>Help is " + ((top.HEURIST.util.getDisplayPreference("help") === "hide")? "off" : "on") + "</span>";
+                //top.HEURIST.util.setHelpDiv(helpDiv);
 		}
 		if (options["title"]) {
 			titleSpan = top.document.createElement("span");
@@ -223,8 +223,21 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					top.HEURIST.util.closePopup.apply(this, newArgs);
 				};
 
-				if (options["width"]) { popupBody.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
-				if (options["height"]) { popupBody.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
+				var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
+				if (options["width"]) { 
+					if (options["width"]>topWindowDims.w-40){
+						options["width"] = topWindowDims.w-40; 
+					}
+					popupBody.style.width = options["width"] + "px"; 
+					width = parseInt(options["width"]); 
+				}
+				if (options["height"]) { 
+					if (options["height"]>topWindowDims.h-40){
+						options["height"] = topWindowDims.h-40; 
+					}
+					popupBody.style.height = options["height"] + "px"; 
+					height = parseInt(options["height"]); 
+				}
 
 				var oneTimeOnload = function() {
 					// One time onload to set the position and possibly the width and height of the bodyCell
@@ -295,10 +308,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(closeDiv, "click", function() { newIframe.close(); });
 			}
 			if (! options["no-help"]) {
-				var u = top.HEURIST.util;
-				var alts = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
-
-				helpDiv.title = alts[u.getDisplayPreference("help")];
+				top.HEURIST.util.setHelpDiv(helpDiv);
 				top.HEURIST.registerEvent(helpDiv, "click", function() { top.HEURIST.util.helpToggler(helpDiv); });
 			}
 
@@ -320,6 +330,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				element.parentNode.removeChild(element);
 			}
 
+			var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
+			
 			if (! options["width"]) {
 				if (element.offsetWidth) options["width"] = element.offsetWidth;
 				else if (element.style.width) options["width"] = parseInt(element.style.width);
@@ -329,13 +341,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				if (element.offsetHeight) options["height"] = element.offsetHeight;
 				else if (element.style.height) options["height"] = parseInt(element.style.height);
 				else options["height"] = 200;
+			}else if (options["height"]>topWindowDims.h-40){
+				options["height"] = topWindowDims.h-40; 
 			}
 
 			if (options["width"]) { popupBody.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
 			if (options["height"]) { popupBody.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
 
 			if (! options["auto-position"]) {
-				var topWindowDims = top.HEURIST.util.innerDimensions(top);
 				if (options["x"] < 0) options["x"] = topWindowDims.w - width + parseInt(options["x"]);
 				if (options["y"] < 0) options["y"] = topWindowDims.h - height + parseInt(options["y"]);
 
@@ -1161,12 +1174,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var confirmOption = confirmList.appendChild(this.document.createElement("li"));
 			confirmOption.className = "option";
 //			confirmOption.style.top = "2px";
-			confirmOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/tick-white.gif'></div>Confirm New Tag";
+			confirmOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/tick-grey.gif'></div>Confirm New Tag";
 			confirmOption.onmousedown = function() { top.HEURIST.util.autocompleteConfirm.call(that); return false; };
 		var changeOption = confirmList.appendChild(this.document.createElement("li"));
 			changeOption.className = "option";
 //			changeOption.style.top = "14px";
-			changeOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/black-cross.gif'></div>Change Tag";
+			changeOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/cross.png'></div>Change Tag";
 			changeOption.onmousedown = function() { top.HEURIST.util.autocompleteChange.call(that); return false; };
 
 
@@ -1281,20 +1294,28 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		return otherMatches;
 	},
 
+    setHelpDiv: function(helpDiv){
+        if(!top.HEURIST.util.isnull(helpDiv))
+        {
+                var alts2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
+                var alts1 = { "hide": "<span>Show Help</span>", "show": "<span>Hide Help</span>" };
+
+                var helpStatus = top.HEURIST.util.getDisplayPreference("help");
+                helpDiv.title = alts2[helpStatus];
+                helpDiv.innerHTML = alts1[helpStatus];
+        }
+    },
+    
 	helpToggler: function(helpDiv) {
 		var u = top.HEURIST.util;
-		var alts = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
 
 		if (u.getDisplayPreference("help") === "hide") {
 			u.setDisplayPreference("help", "show");
-			helpDiv.title = alts["show"];
-			helpDiv.innerHTML = "<span>Hide Help</span>";
 		}
 		else {
 			u.setDisplayPreference("help", "hide");
-			helpDiv.title = alts["hide"];
-			helpDiv.innerHTML = "<span>Show Help</span>";
 		}
+        u.setHelpDiv(helpDiv);
 	},
 
 	countObjElements: function(obj) {
@@ -1583,7 +1604,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					top:top_pos+'px',
 					visibility:'visible',
 					opacity:'1'});
-					},
+	},
 
 	/**
 	* write script - should be used in top of page

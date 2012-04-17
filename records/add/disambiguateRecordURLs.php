@@ -87,9 +87,9 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 		<div><b>Please choose URL to bookmark, then:&nbsp;&nbsp;</b>
 			<input type="submit" value="Save bookmark">
 		</div>
-		
+
 		<!-- duplicates table FIXME: convert to DIV with 2-column view-->
-		
+
 		<div id="comparoTable">
 			<div class="roundedBoth existingRecords">
 				<h2>URLs already in Heurist:</h2>
@@ -174,7 +174,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 			<!-- <td colspan="4" style="text-align: right;">
   If choosing an existing URL, you can <label><b>check this box <input type="checkbox" name="force_new" value="1" style="margin: 0px; padding: 0px; border: 0px;"></b></label> to attach an additional bookmark<br>
  (this creates multiple bookmarks attached to one URL - use sparingly)
- </td>   --> 
+ </td>   -->
 		</tr>
 		<tr>
 			<td colspan="5">&nbsp;</td>
@@ -226,7 +226,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 						</label>
 					</div>
 					<div class=url><a class="externalLink" target="_testwindow" href="<?= htmlspecialchars($bkmk_url) ?>" onClick="return checkURL(&quot;<?= htmlspecialchars($bkmk_url) ?>&quot;);"></a><tt title="<?= htmlspecialchars($bkmk_url) ?>">
-						<?php 
+						<?php
 				print '<span class="common_url" title="'.htmlspecialchars($bkmk_url).'">'.htmlspecialchars($common_url).'</span>'.substr($bkmk_url, $common_url_len, $bkmk_url_len-$common_url_len + 10);
 				?>
 						</tt> </div>
@@ -245,7 +245,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 ?>
 	</form>
 </div>
-<div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100.gif');" id="popupProtector"></div>
+<div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100-check.gif');" id="popupProtector"></div>
 <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">
 	<table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" style="font-size: 12px;">
 		<tr>

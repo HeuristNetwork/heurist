@@ -225,7 +225,7 @@ while ($row = mysql_fetch_row($res)) {
 '<tr>
  <td><nobr>
   <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-  <img src="'.HEURIST_URL_BASE.'common/images/cross.gif" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
+  <img src="'.HEURIST_URL_BASE.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
   <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
  </nobr></td>
  <td><nobr>' . $row[2] . '</nobr></td>

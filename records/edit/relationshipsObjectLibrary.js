@@ -34,7 +34,7 @@ if (!top.Relationship) {
 		var deleteTd = this.tr.appendChild(this.document.createElement("div"));
 		deleteTd.className = "delete";
 		deleteTd.title = "Delete this relationship";
-		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.gif";
+		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
 		deleteTd.onclick = function() { thisRef.remove(); };
 		var editTd = this.tr.appendChild(this.document.createElement("div"));
 		editTd.className = "edit";

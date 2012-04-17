@@ -73,6 +73,14 @@ init: function(options) {
 					Blog.displayBlogEntries();
 					Blog.displayTagList();
 				}
+
+				if(Blog.records.length>0){
+					$("#result-style-icons-link").attr('href', HAPI.XHR.defaultURLPrefix+'export/xml/feed.php?db='+HAPI.database+'&q='+Blog.getQuery());
+					$("#result-style-icons-link").css('visibility','visible');
+				}else{
+					$("#result-style-icons-link").css('visibility','hidden');
+				}
+
 			}
 		},
 		function(s,e) {	// onerror
@@ -377,7 +385,16 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if ($content) {
-			$mapDiv.append("<p class='show-map'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Show map</a></p>");
+
+			var geos = record.getDetails(Blog.geoDetailType);
+			var l = geos.length;
+			var desc = "";
+			for (var i = 0; i < l; ++i) {
+					desc += (desc.length > 0 ? ", " : "") + HGeographicType.abbreviationForType(geos[i].getType())+" "+geos[i].getWKT(); //geos[i].toString();
+			}
+
+			$mapDiv.append("<p class='show-map'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#' onmouseover='mapViewer.showAt(event, \""+
+						desc+"\")' onmouseout='mapViewer.hide()'>Show map</a></p>");
 			$mapDiv.append("<p class='hide-map' style='display: none;'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Hide map</a></p>");
 			$mapDiv.append("<div class='map-content' style='display: none;'>");
 			$(".map-content", $mapDiv).append($content);
@@ -1011,7 +1028,7 @@ createRemoveTagLink: function(blogEntry, tag) {
 	a.title = "remove tag";
 	a.href = "#";
 	a.onclick = function() { blogEntry.removeTag(tag); return false; };
-	a.appendChild(document.createElement("img")).src = "../../common/images/cross.gif";
+	a.appendChild(document.createElement("img")).src = "../../common/images/cross.png";
 	return a;
 },
 */

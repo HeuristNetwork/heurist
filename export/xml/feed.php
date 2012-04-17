@@ -25,6 +25,7 @@ $isAtom = (array_key_exists("feed", $_REQUEST) && $_REQUEST['feed'] == "atom");
 //header("Content-Disposition: attachment; filename=\"heuristfeed.xml\"");
 header("Content-Type: application/".($isAtom?"atom":"rss")."+xml");
 
+$explanation="This feed returns the results of a HEURIST search. The search URL specifies the search parameters and the search results are built live from the HEURIST database. If you are not logged in you may see fewer records than you expect, as only records marked as 'Publicly Visible' will be rendered in the feed";
 
 print "<?xml version='1.0' encoding='UTF-8'?>\n";
 if($isAtom){
@@ -32,7 +33,7 @@ if($isAtom){
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss">
 	<title>HEURIST Search results</title>
 	<link href="<?=HEURIST_URL_BASE?>"/>
-	<subtitle>This feed returns the results of a HEURIST search. The search URL specififes the search parameters and the search results are built live from the HEURIST database</subtitle>
+	<subtitle><?=$explanation?></subtitle>
 	<updated><?=date("r")?></updated>
 	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
 	<generator>HEURIST search</generator>
@@ -54,7 +55,7 @@ if($isAtom){
 <channel>
 	<title>HEURIST Search results</title>
 	<link><?=HEURIST_URL_BASE?></link>
-	<description>This feed returns the results of a HEURIST search. The search URL specififes the search parameters and the search results are built live from the HEURIST database</description>
+	<description><?=$explanation?></description>
 	<language>en-gb</language>
 	<pubDate><?=date("r")?></pubDate>
 	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
@@ -97,13 +98,13 @@ if($isAtom){
 
 				while ($row = mysql_fetch_row($res)) {
 
-	$url = 	($row[1]) ?$row[1] : HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
 	$uid = HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
 
 if($isAtom){
 ?>
 <entry>
-	<title><?=$row[2]?></title>
+	<title><?=htmlspecialchars($row[2])?></title>
 	<summary><![CDATA[<?=$row[3]?>]]></summary>
 	<category>type/<?=$row[4]?></category>
 	<published><?=$row[5]?></published>
@@ -113,7 +114,7 @@ if($isAtom){
 }else{
 ?>
 <item>
-	<title><?=$row[2]?></title>
+	<title><?=htmlspecialchars($row[2])?></title>
 	<description><![CDATA[<?=$row[3]?>]]></description>
 	<category>type/<?=$row[4]?></category>
 	<pubDate><?=$row[5]?></pubDate>

@@ -9,9 +9,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -34,9 +32,9 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 
 <div class="column left">
 	<h3>Search list icons </h3>
-	<div><img src="<?=HEURIST_SITE_PATH?>common/images/rss_feed_add.gif" height=12 width=12>&nbsp;Add live bookmark</div>
+	<div><img src="<?=HEURIST_SITE_PATH?>common/images/logo_rss_feed.png" height=12 width=12>&nbsp;Add live bookmark</div>
     <!-- <div><img src="../../pix/home_favourite.gif">&nbsp;Favourite search</div> -->
-    <div><img src="<?=HEURIST_SITE_PATH?>common/images/edit_pencil_16x16.gif">&nbsp;Edit the reference</div>
+    <div><img src="<?=HEURIST_SITE_PATH?>common/images/edit-pencil.png">&nbsp;Edit the reference</div>
     <div><img src="<?=HEURIST_SITE_PATH?>common/images/follow_links_16x16.gif">&nbsp;Detail/tools</div>
     <!-- <div><img src="../external_link_16x16.gif">&nbsp;Open in new window</div> -->
     <div><img src="<?=HEURIST_SITE_PATH?>common/images/key.gif">&nbsp;Password reminder</div>

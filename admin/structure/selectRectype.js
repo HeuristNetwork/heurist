@@ -182,8 +182,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										}
 								}
 						}
-						
-						_showSelectCount();						
+
+						_showSelectCount();
 				}
 
 
@@ -242,7 +242,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 								{ key: "status", label: "<u>Status</u>", hidden:false, sortable:false },
 								{ key: "group",   hidden:true},
 								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="'+
+elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="'+
 oRecord.getData('description')+'"/>';}
 								}
 
@@ -444,7 +444,7 @@ oRecord.getData('description')+'"/>';}
 											_arr_selection.splice(ind,1);
 										}
 									}
-									
+
 									_showSelectCount();
 
 	}
@@ -455,7 +455,7 @@ oRecord.getData('description')+'"/>';}
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
 	}
-	
+
 	/**
 	* Fills the selector (combobox) with names of group
 	* @see _init

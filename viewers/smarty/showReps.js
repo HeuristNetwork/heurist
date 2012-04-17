@@ -695,7 +695,7 @@ function ShowReps() {
 					term.dtype = dtype;
 
 					if(is_enum){
-							term.label = term.label + label + '&nbsp;(enum)';
+							term.label = term.label + label + '&nbsp;(enum)</div>';
 					}else if( is_record ){
 /* Ian's reuest 10-28
 							term.label = term.label +

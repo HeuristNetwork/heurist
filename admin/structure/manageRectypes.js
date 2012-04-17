@@ -361,7 +361,7 @@ function RectypeManager() {
 
 			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
 				formatter: YAHOO.widget.DataTable.formatDropdown,
-				dropdownOptions:_groups},
+				dropdownOptions: _groups },
 			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
@@ -675,9 +675,9 @@ function RectypeManager() {
 
 	}
 
-	//
-	//
-	//
+    //
+    //  Removes and recreates table from given tab (group)
+    //
 	function _removeTable(grpID, needRefresh){
 
 		var tabIndex = _getIndexByGroupId(grpID);
@@ -1101,6 +1101,9 @@ function RectypeManager() {
 				_cloneHEU = null;
 
 				if(grpID<0){
+
+					_refreshAllTables();
+					
 					grpID = context['0'].result;
 					ind = _groups.length;
 					_addNewTab(ind, grpID, name, description);
@@ -1114,6 +1117,7 @@ function RectypeManager() {
 						_groups[ind].text = name;
 						break;
 					}}
+					_refreshAllTables();
 				}
 				tabView.set("activeIndex", ind);
 			}
@@ -1131,7 +1135,21 @@ function RectypeManager() {
 
 
 	}
-	//
+    
+    //
+    //
+    //
+    function _refreshAllTables(){
+        
+        var ind;
+        for(ind in arrTables){
+             if(!(Hul.isnull(ind) || Hul.isnull(arrTables[ind]))){
+                  _removeTable( _getGroupByIndex(ind), true);
+                           //arrTables[ind].render();
+              }
+        }
+    }	
+    //
 	//
 	//
 	function _doGroupDelete(){
@@ -1164,6 +1182,8 @@ function RectypeManager() {
 						tabView.set("activeIndex", 0);
 						top.HEURIST.rectypes = context.rectypes;
 						_cloneHEU = null;
+						
+						_refreshAllTables();
 					}
 				}
 
@@ -1199,8 +1219,8 @@ function RectypeManager() {
 
 		var ind;
 		for (ind in _groups){
-			if(!Hul.isnull(ind) && _groups[ind].value===grpID){
-				return ind;
+			if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
+				return Number(ind);
 			}
 		}
 		return -1;

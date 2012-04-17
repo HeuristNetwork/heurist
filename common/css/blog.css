@@ -1,5 +1,6 @@
 /*
- * filename, brief description, date of creation, by whom
+ * Styles for viewers/blog/index.html
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -379,7 +380,7 @@ h4.archive-month-title {
 	-webkit-border-top-left-radius:10px;
 	border-bottom-left-radius:10px;
 	border-top-left-radius:10px;
-	background:url("../images/32x32.gif") no-repeat scroll 8px center rgba(255, 255, 255, 0.3);
+	background:url("../images/31x31.gif") no-repeat scroll 8px center rgba(255, 255, 255, 0.3);
 	border-color:#E0E0E0 #E0E0E0 #C0C0C0 #C0C0C0;
 	border-left:1px solid;
 	border-style:solid;
@@ -490,7 +491,7 @@ body.mode-public .public-visible {
 }
 #blog-rss {
 	position: absolute;
-	right:210px;
+	right:310px;
 	top: 8px;
 }
 h1 {

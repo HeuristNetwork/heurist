@@ -32,7 +32,7 @@
     background-color: #ffffff;
 }
 */
-#map {
+#map_digitizer {
     position: absolute;
     top: 30px;
     left: 0px;
@@ -68,4 +68,23 @@
 	margin-right: 5px;
 	width: 80px;
 	padding-top: 5px;
+}
+
+.map_popup {
+	position:absolute;
+	z-index:9999;
+	left:-9999px;
+	top:0px;
+	width:300px;
+	height:300px;
+	background-color:RGBA(0,0,0,0.75);
+	padding:5px;
+	border:1px solid #fff;
+	min-width:200;
+	max-width:500;
+	color:#EDEDED;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	box-shadow:0px 1px 5px RGBA(0,0,0,0.5);
 }

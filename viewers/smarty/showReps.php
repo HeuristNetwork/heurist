@@ -158,6 +158,7 @@ function add_javascript_wrap5($tpl_source, Smarty_Internal_Template $template)
 function add_javascript_wrap4($tpl_source)
 {
 	$tpl_source = str_replace("\n","",$tpl_source);
+	$tpl_source = str_replace("\r","",$tpl_source);
 	$tpl_source = str_replace("'","&#039;",$tpl_source);
     return "document.write('". $tpl_source."');";
 }

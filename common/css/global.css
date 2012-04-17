@@ -246,7 +246,7 @@ div.popup div.close-button, .close-button, .yui-skin-sam .container-close {
 	border: 2px solid #FFF !important;
 }
 div.popup div.close-button:hover, .close-button, .yui-skin-sam .container-close:hover {
-	background-image: url(../images/black-cross.gif);
+	background-image: url(	../images/black-cross.gif);
 }
 body table.popup div.help-button {
 	float: right;
@@ -273,7 +273,7 @@ div.resize-handle {
 	width: 10px;
 	height: 10px;
 	cursor: se-resize;
-	background-image:url("../images/resize-handle.png");
+	background-image:url("../images/resize-handle.gif");
 	background-repeat:no-repeat;
 	background-position:left bottom;
 }
@@ -543,7 +543,7 @@ body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;t
 body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;top:0px;}
 
 .outline {border:1px solid #999;padding:0 10px 0 5px;background-image:url("../images/backgrounds/banner_bg_dark.png");background-position:bottom;display:inline-block;height: 22px;/* overflow: hidden; */vertical-align:middle;}
-#my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
+#my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(	../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
 #my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide, .relType.hide {background-image:url(../images/heading_saved_search-hidden.png);}
 #saved .search-type, .relTypeHeading  {color: #6A7C99;font-weight:bold;cursor: pointer;padding-top: 5px;padding-right: 6px;padding-bottom: 4px;padding-left: 18px;background-position: bottom;border: 1px none #999;}
 
@@ -716,7 +716,7 @@ option {padding-left:15px;background-color: #FFF;}
 #quicklinks {position: absolute;right: 5px;top: 0;z-index: 200000;}
 #quicklink-cell {vertical-align: top;text-align: right;color: #666;font-size:3ex;clear:both;right:10px;top:20px;}
 div#tabbar {z-index:9;clear:left;margin:0;vertical-align:bottom;position:relative;display:block;}
-div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;clear:both; white-space:nowrap;}
+div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/backgrounds/black_gradient.png);background-repeat: repeat-x;clear:both; white-space:nowrap;}
 #viewsButton {position:absolute; top:3px; left:0px; z-index:1000;}
 #tabs, #quicklink-cell, #views, ul.menu {
 	list-style:none;

@@ -219,13 +219,38 @@ function EditRectypeTitle() {
 				if(!Hul.isnull(child)){
 					nodeIndex = tv.getNodeCount()+1;
 
-					var fullid = parentNode[child];
+					var fullid = parentNode[child],
+						_varnames = varnames.vars,
+						_detailtypes = varnames.detailtypes,
+						is_enum = false,
+						dt_type = '',
+						label = '';
 
 					var is_record = ((typeof(fullid) == "object") &&
 									Object.keys(fullid).length > 0);
 
-					var _varnames = varnames.vars;
-					var label = is_record?child:_varnames[fullid];
+					//check if child is related record
+					var is_record = ((typeof(fullid) == "object") &&
+									Object.keys(fullid).length > 0);
+
+					if(is_record)
+					{ //nodes - records or enum detail types
+
+							//check if child is enumeration detail type
+							is_enum = (_detailtypes && child.indexOf(parent_id+".")==0 && _detailtypes[child]==='enum');
+							if(is_enum){
+								dtype = 'enum';
+								label = child.substr(parent_id.length+1);
+							}else{
+								dtype = '';
+								label = child;
+							}
+
+					}else{ //usual variables
+						label = _varnames[fullid];
+						dtype = (_detailtypes)?_detailtypes[fullid]:'';
+					}
+
 
 					if(!Hul.isnull(label)){
 
@@ -234,8 +259,13 @@ function EditRectypeTitle() {
 					term.parent_id = parent_id;
 					term.this_id = label;
 					term.label = '<div style="padding-left:10px;">'; //???arVars[0];
+					term.labelonly = label;
+					term.dtype = dtype;
 
-					if( is_record ){
+					if(is_enum){
+							term.label = term.label + label + '&nbsp;(enum)</div>';
+					}else if( is_record ){
+
 							term.label = term.label + '<b>' + label + '</b></div>';
 							//'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
 							//				child+'\')">All</a>&nbsp;&nbsp';
@@ -350,7 +380,13 @@ function EditRectypeTitle() {
 		function __loopNodes(node){
 				if(node.children.length===0 && node.highlightState===1){
 						node.highlightState=0;
+
 						var parent = (node.data.parent_id=='r')?'':(node.data.parent_id+'.');
+
+						while(parent.indexOf('r.')==0){
+							parent = parent.substring(2);
+						}
+					
 						_text = _text + '['+parent + node.data.this_id+']';
 				}
 				return false;

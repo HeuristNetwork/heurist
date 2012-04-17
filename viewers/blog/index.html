@@ -19,6 +19,7 @@
 
 <script src="../../external/jquery/jquery.js"></script>
 
+<!-- to remove this absolte stuff -->
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
 
 <script src="../../common/php/getMagicNumbers.php"></script>
@@ -26,8 +27,8 @@
 <script src="../../hapi/js/goi.js"></script>
 
 <script>
-	if (! HCurrentUser.isLoggedIn()) {
-		window.location = HAPI.HeuristBaseURL + "common/connect/login.php" + (database ? "?db="+database : "");
+	if (!(HCurrentUser && HCurrentUser.isLoggedIn())) {
+		window.location = HAPI.XHR.defaultURLPrefix + "common/connect/login.php" + (HAPI.database ? "?db="+HAPI.database : "");
 	}
 </script>
 
@@ -43,10 +44,60 @@
 <script src="../../external/yui/2.8.2r1/build/history/history-debug.js"></script>
 <script src="blog.js"></script>
 
+<!-- scripts for map popup -->
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="../../records/edit/digitizer/digitizer.js"></script>
+<script type="text/javascript" src="../../external/timemap.2.0/lib/mxn/mxn.js?(googlev3)"></script>
+<script type="text/javascript" src="../../external/timemap.2.0/lib/markerclusterer.js"></script>
+<script type="text/javascript" src="../../external/timemap.2.0/src/timemap.js"></script>
+<script type="text/javascript" src="../../viewers/map/mapping.js"></script>
+<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+
 <script>
 
 $(document).ready(function() {
 	var user, group, record_type, query, matches;
+
+
+	//
+	// similar in search.js
+	//
+	function createUsedRectypeSelector(useIDs) {
+		var rectypes = top.HEURIST.rectypes;
+		var rectypeValSelect = document.getElementById("record-type");
+		rectypeValSelect.innerHTML = '<option value="" selected>Any rectype</option>';
+		rectypeValSelect.onchange = function(){
+			if(user || group){
+				window.location.href = "?" + (user ? "u="+user.getID() : "g="+group.getID()) + "&t="+this.value +"db=" + HAPI.database;
+			}
+		}
+		// rectypes displayed in Groups by group display order then by display order within group
+		for (var index in rectypes.groups){
+			if (index == 'groupIDToIndex' || top.HEURIST.rectypes.groups[index].showTypes.length < 1){
+				continue;
+			}
+			var grp = document.createElement("optgroup");
+			var firstInGroup = true,
+				i=0;
+			grp.label = rectypes.groups[index].name;
+			for (; i < rectypes.groups[index].showTypes.length; i++) {
+				var recTypeID = rectypes.groups[index].showTypes[i];
+				if (recTypeID && rectypes.usageCount[recTypeID]) {
+					if (firstInGroup){
+						rectypeValSelect.appendChild(grp);
+						firstInGroup = false;
+					}
+					var name = rectypes.names[recTypeID];
+					var value =  (useIDs ? recTypeID : '"'+name+'"');
+					var opt = new Option(name,value);
+					$(opt).attr("rectype",recTypeID);
+					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
+					rectypeValSelect.appendChild(opt);
+				}
+			}
+		}
+	}
+
 
 	matches = location.href.match(/[?&]u=(\d+)/);	// extract the userID from the URI
 	if (matches) {
@@ -107,15 +158,15 @@ $(document).ready(function() {
 	}
 
 	// record type select
+	createUsedRectypeSelector(true);
+	$("#record-type").val(query ?  0 : ( record_type?record_type.getID() :HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers.RT_BLOG_ENTRY)));
+
+	/* old way
 	var rectypes = HRecordTypeManager.getRecordTypes().sort(nameSort);
 	for (var i = 0; i < rectypes.length; ++i) {
 		$("<option value='" + rectypes[i].getID() + "'>" + rectypes[i].getName() + "</option>").appendTo("#record-type");
-	}
-//	$("#record-type").val(record_type ? record_type.getID() : 0);
-	$("#record-type").val(query ?  0 : ( record_type?record_type.getID() :HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers.RT_BLOG_ENTRY)));
-	$("#record-type").change(function() { //fixme what if user and group are null???
-		window.location.href = "?" + (user ? "u="+user.getID() : "g="+group.getID()) + "&t="+this.value +"db=" + database;
-	});
+	}*/
+
 
 	// later?
 	var search = {};
@@ -127,7 +178,7 @@ $(document).ready(function() {
 	}
 
 	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"common/connect/login.php?logout=1" + (database ? "&db="+database : "")+"'>log out</a>");
-	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (database ? "&db="+database : "");
+	//$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (database ? "&db="+database : "");
 
 	if ((user  &&  HCurrentUser == user) ||
 		(group  &&  HCurrentUser.isInWorkgroup(group))) {
@@ -149,13 +200,19 @@ $(document).ready(function() {
 		}
 	};
 
+
+	document.getElementById("home-link").href = HAPI.XHR.defaultURLPrefix + "index.php?db=" +HAPI.database;
+
 	var opts = { "type" : record_type };
 	if (query) opts.query = query;
 	if (user) opts.user = user;
 	else if (group) opts.group = group;
 
 	Blog.init(opts);
-});
+
+
+}); //document ready
+
 
 function toggleSpiel() {
 	$("#spiel").slideToggle("slow", function() {
@@ -176,12 +233,15 @@ function reload() {
 
 </head>
 <body>
- <!-- iframe id=yui-history-iframe src="../../common/images/hlogo-small-blog-only.gif"></iframe -->
  <input id=yui-history-field type=hidden>
 
  <script src=autocompleteBlogTags.js></script>
+ <script src="../../common/php/loadCommonInfo.php"></script>
+ <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
-<a id=home-link href="/h3-ig/">
+<!-- div class="tooltip" id="mapPopup"><p></p></div -->
+
+<a id="home-link" href="#">
 <div title="Click the logo at top left of any Heurist page to return to your Favourites" id="logo"></div>
 </a>
 <div id=version></div>
@@ -189,14 +249,14 @@ function reload() {
 <div id=dbname ></div>
 <div id=sidebar>
 	<div class=banner>
-		<div id="add-fav"><a id=add-fav-link href="../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
+		<div id="add-fav"><!-- <a id=add-fav-link href="../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites">Add page to favourites</a>--> </div>
 	</div>
 
 	<div id="sidebar-inner">
 	<div id="right">
 		<div class=detailRow>
 		Show<select id=record-type><option value=0 disabled>(search results)</option></select>
-		<input type="button" value="&lt;&lt; Back" onClick="history.go(-1);">
+		<!-- <input type="button" value="&lt;&lt; Back" onClick="history.go(-1);"> -->
 		</div>
 		<div class="detailRow">
 			<div id="tags"></div>
@@ -265,11 +325,11 @@ function reload() {
 	<div style="display:table">
         <h1 id="blog-owner" class="tableCell"></h1>
     </div>
-    <div id=blog-rss>
-    	<a href="#" id=result-style-icons-link title="Generate RSS feed current set of search results"
-onClick="window.open(HAPI.XHR.defaultURLPrefix+'export/xml/feed.php?db='+HAPI.database+'&amp;q='+Blog.getQuery(), '_blank')">
-					<img src="../../common/images/rss_feed_add.gif"/></a></div>
-    <div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
+    <div id="blog-rss">
+    	<a href="#" id="result-style-icons-link" title="Data feed, drag to bookmarks or a feed reader" target="_blank">
+					<img src="../../common/images/logo_rss_feed.png"/></a>
+	</div>
+    <div id="blog-selector">Other blogs <select id="blog-select" style="max-width:200px"><option selected>select...</option></select></div>
 
 
 

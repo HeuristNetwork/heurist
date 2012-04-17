@@ -72,6 +72,7 @@ require_once('libs.inc.php');
 		array_push($resVarsByType, array("id"=>$rectypeID,
 										"name"=>$rtStructs['names'][$rectypeID],
 										"vars"=>array_merge($res0['vars'], $res['vars']), //header+details
+										"detailtypes"=>$res['detailtypes'],
 										"tree"=>$res['tree']));
 
 		$qresult = loadSearch($_REQUEST);

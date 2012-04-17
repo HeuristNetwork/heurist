@@ -82,16 +82,24 @@ function initPage() {
 		var rfr = ["File", "File", null, "005", "60", "", "0", null, "optional", "viewable", "open", null, "1", "0", "1",
 			null,null,null,null,"","9",null,null];
 
-		var sUrl = "";
-		var sType = "";
-		var sSource = "";
+		var sUrl = "",
+		    sType = "",
+		    sSource = "",
+            sDisplay = null,
+            canEdit = true;
 
 		if(location.search.length > 1) {
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
 			_filedata = Hul.expandJsonStructure(top.HEURIST.parameters['value']);
-
-			sUrl    = _filedata.remoteURL?_filedata.remoteURL:_filedata.URL;
+        
+            if(_filedata.remoteURL){
+                sUrl    = _filedata.remoteURL;
+            }else{
+                sDisplay = _filedata.origName;
+                canEdit = false
+                sUrl    = _filedata.URL;
+            }
 			sType   = _filedata.mediaType;
 			sSource = _filedata.remoteSource;
 
@@ -126,7 +134,8 @@ function initPage() {
 
 		//add URL component
 		container = document.getElementById("div_url");
-		URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, sUrl, false);
+		URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, sUrl, false, sDisplay, canEdit);
+
 		//URLInput.headerCell.innerHTML = "URL or Absolute Path";
 
 		// access to input element URLInput.inputs[0]

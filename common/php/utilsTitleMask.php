@@ -70,10 +70,20 @@ $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $authRT = (defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:0);
 $titleDT = (defined('DT_TITLE')?DT_TITLE:0);
 $surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
+$enum_params = array('id','code','label','conceptid');
 
 
-function fill_title_mask($mask, $rec_id, $rt) {
-global $titleDT;
+/**
+*
+*
+* @param mixed $mask - mask string
+* @param mixed $rec_id
+* @param mixed $rt
+* @return string
+*/
+function fill_title_mask($mask, $rec_id, $rt)
+{
+	global $titleDT;
 	/* Fill the title mask for the given records record */
 
 	///mask not defined - take value from fieldtype "dt_title"
@@ -116,10 +126,17 @@ global $titleDT;
 	return trim($title);
 }
 
-function _title_mask__check_field_name($field_name, $rt) {
-global $relRT;
-	/* Check that the given field name exists for the given reference type */
-	/* Returns an error string if it isn't */
+/**
+* Check that the given field name exists for the given reference type
+* Returns an error string if it isn't
+*
+* @param mixed $field_name
+* @param mixed $rt
+*/
+function _title_mask__check_field_name($field_name, $rt)
+{
+	global $relRT, $enum_params;
+
 	$rdr = _title_mask__get_rec_detail_requirements();
 	$rdt = _title_mask__get_rec_detail_types();
 	if (is_array($rt)){
@@ -127,7 +144,7 @@ global $relRT;
 	}else if (!$rt){
 		return "Record type is not defined";
 	}
-	$rct = _title_mask__get_rec_types();//$rt);
+	$rct = _title_mask__get_rec_types(null);//get all rec types.  AO: it stores in static array - will it be updated if strcture is changed ???
 //error_log("fieldname = $field_name and rt = $rt   ".array_key_exists($rt, $rct));
 	if (! array_key_exists($rt, $rct) ){
 		return "Title mask cannot be tested with the existing record type. Record type $rt not found";
@@ -174,8 +191,8 @@ global $relRT;
 		}
 		$rdt_id = $matches[1];
 		$rdt_type = $rdt[$rdt_id]['dty_Type'];
-		if ( $rdt_type !== 'resource') {
-			return 'Field "'. $rdr[$rdt_id]['rst_DisplayName']. "\" id type \"$rdt_type\" which doesn't support subfields like $matches[2]";
+		if (!( $rdt_type === 'resource' || $rdt_type === 'enum' || $rdt_type === 'relationtype')) {
+			return 'Field "'. $rdr[$rdt_id]['rst_DisplayName']. "\" field type \"$rdt_type\" which doesn't support subfields like $matches[2]";
 		}
 		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_field_name = $matches[2];
@@ -191,7 +208,7 @@ global $relRT;
 		}
 		$rdt_type = $rdt[$rdt_id]['dty_Type'];
 
-		if ( $rdt_type !== 'resource') {
+		if (!( $rdt_type === 'resource' || $rdt_type === 'enum' || $rdt_type === 'relationtype')) {
 			return 'Field "'. $rdr[$rdt_id]['rst_DisplayName']. "\" id type \"$rdt_type\" which doesn't support subfields like $matches[2]";
 		}
 		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
@@ -210,7 +227,14 @@ global $relRT;
 		} else {
 			if (! array_key_exists(strtolower($inner_field_name), $rdt)&&
 					strtolower($inner_field_name) !== 'rectitle') {
-				return 'Field type "' . $inner_field_name . '" does not exist';
+				if($rdt_type === 'enum' || $rdt_type === 'relationtype'){
+
+					if(! in_array(strtolower($inner_field_name), $enum_params)){
+						return 'Parameter "' . $inner_field_name . '" is not allowed for enumeration field '.$rdr[$rdt_id]['rst_DisplayName'];
+					}
+				}else{
+					return 'Field type "' . $inner_field_name . '" does not exist';
+				}
 			}
 		}
 		return '';
@@ -233,9 +257,17 @@ global $relRT;
 	return _title_mask__check_field_name($inner_field_name, $inner_rec_type);
 }
 
+/**
+* gets value of field
+*
+* @param mixed $field_name - name of field
+* @param mixed $rec_id - record id to get values
+* @param array $rt  - record type
+*/
+function _title_mask__get_field_value($field_name, $rec_id, $rt)
+{
+	global $surnameDT, $authRT, $enum_params;
 
-function _title_mask__get_field_value($field_name, $rec_id, $rt) {
-global $surnameDT, $authRT;
 //error_log("[$field_name]   [$rec_id]   [$rt]");
 
 	if (!$rec_id) { // return blank can't lookup values without a recID
@@ -255,16 +287,46 @@ global $surnameDT, $authRT;
 		}
 		$rt = $rt[0];
 	}
-	/* Return the value for the given field in the given records record */
-	if (strpos($field_name, '.') === FALSE) {	/* direct field-name lookup */
+
+//	if (! @$rdt) $rdt = _title_mask__get_rec_detail_types();
+	if (! @$rdr) $rdr = _title_mask__get_rec_detail_requirements();
+
+	//check if this is term (enum or relationship)
+	if(strpos($field_name, '.')>0){
+		$rdt_id = 0;
+		if (preg_match('/^(\\d+)\\s*(?:-[^.]*?)?\\.\\s*(.+)$/', $field_name, $matches)) {
+			$rdt_id = $matches[1];
+			$enum_param_name = $matches[2];
+		// match all characters before and after a fullstop
+		} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
+
+			$rdts = @$rdr[$rt][strtolower($matches[1])];
+			if($rdts) $rdt_id = $rdts['dty_ID'];
+			$enum_param_name = $matches[2];
+		}
+		if($rdt_id>0 && in_array(strtolower($enum_param_name), $enum_params)){ //this is enum
+
+			$val = _title_mask__get_enum_value($rec_id, $rdt_id, strtolower($enum_param_name));
+			if($val!=''){
+				return $val;
+			}
+		}
+	}
+
+	/* Returns the value for the given field in the given records record */
+	if (strpos($field_name, '.') === FALSE) {	/* this is field name - direct field-name lookup */
+
 		if (preg_match('/^(\\d+)/', $field_name, $matches)) {	// field is dtyID
 			$rdt_id = $matches[1];
 		} else {	// do a field name lookup
-			$rdr = _title_mask__get_rec_detail_requirements();
+
 			$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
+
 			if (!@$rdt_id && strtolower($field_name) === "title") {
 				return '"title" field not defined for rectype '.$rt;
-			}else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
+			}
+			else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
+
 				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
 				if (mysql_error()) {
 					return '';
@@ -279,9 +341,6 @@ global $surnameDT, $authRT;
 
 		return _title_mask__get_rec_detail($rec_id, $rdt_id);
 	}
-
-//	if (! @$rdt) $rdt = _title_mask__get_rec_detail_types();
-	if (! @$rdr) $rdr = _title_mask__get_rec_detail_requirements();
 
 	//find any starting numbers stripping following charaters upto a fullstop
 	if (preg_match('/^(\\d+)\\s*(?:-[^.]*?)?\\.\\s*(.+)$/', $field_name, $matches)) {
@@ -303,7 +362,8 @@ global $surnameDT, $authRT;
 							where dtl_RecID='.$rec_id.' and dty_ID='.$rdt_id.' order by dtl_ID asc');
 	$value = '';
 
-	if ($rt_id != 0 &&  $inner_field_name) {
+	if ($rt_id != 0 &&  $inner_field_name) { //reference to another record
+
 		if ($rt_id != $authRT) {	// not an AuthorEditor
 			while ($inner_rec_id = mysql_fetch_row($res)) {
 				$inner_rec_id = $inner_rec_id[0];
@@ -355,8 +415,44 @@ global $surnameDT, $authRT;
 	return '';
 }
 
+/**
+* get value of specific parameter of enumeration field
+*/
+function _title_mask__get_enum_value($rec_id, $rdt_id, $enum_param_name)
+{
+	$resval = null;
 
-function _title_mask__get_rec_detail($rec_id, $rdt_id) {
+	//find enum values in details
+	$res = mysql_query('
+		select rd.dtl_value from recDetails rd, defDetailTypes dt where dtl_DetailTypeId=dty_Id and dtl_RecId='.
+		intval($rec_id).' and dt.dty_Type="enum" and dty_Id='.intval($rdt_id) );
+
+	while ($rd = mysql_fetch_array($res)) {
+
+		$ress = mysql_query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$rd[0]);
+		if(!mysql_error()){
+			$relval = mysql_fetch_assoc($ress);
+			$str = $relval['trm_'.$enum_param_name];
+
+			if ($resval==null)
+				$resval = $str;
+			else
+				$resval .=', ' . $str;
+		}
+	}
+
+	return $resval;
+}
+
+/**
+* retuns value of given detail id for record id
+*
+* @param mixed $rec_id
+* @param mixed $rdt_id - detail type id
+* @return mixed
+*/
+function _title_mask__get_rec_detail($rec_id, $rdt_id)
+{
 	static $rec_details;
 	if (! $rec_details) $rec_details = array();
 
@@ -373,6 +469,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 
 	$res = mysql_query('select recDetails.* from recDetails'.
 						' where dtl_RecID = ' . intval($rec_id) . ' order by dtl_ID asc');
+
 	while ($rd = mysql_fetch_assoc($res)) {
 		$rdt_type = $rdt[$rd['dtl_DetailTypeID']]['dty_Type'];
 
@@ -450,6 +547,18 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 					$relval = mysql_fetch_assoc($ress);
 					$rd['dtl_Value'] = $relval['trm_Label'];
 				}
+
+
+			/*
+			$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = 'enum';
+			$rec_details[$rec_id][$rd['dtl_DetailTypeID']]['id'] = 'label enum';
+			$rec_details[$rec_id][$rd['dtl_DetailTypeID']]['code']
+			$rec_details[$rec_id][$rd['dtl_DetailTypeID']]['label']
+			$rec_details[$rec_id][$rd['dtl_DetailTypeID']]['conceptid']
+			*/
+
+
+
 			}
 			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] .= ', ' . $rd['dtl_Value'];
@@ -474,9 +583,9 @@ function _title_mask__get_rec_types($rt) {
 	return $rct;
 }
 
-
-
-
+/*
+*
+*/
 function _title_mask__get_rec_detail_requirements() {
 	static $rdr;
 
@@ -507,7 +616,9 @@ function _title_mask__get_rec_detail_requirements() {
 	return $rdr;
 }
 
-
+/**
+* Returns ALL (AO: !!!!!) field types definitions into static array
+*/
 function _title_mask__get_rec_detail_types() {
 	static $rdt;
 

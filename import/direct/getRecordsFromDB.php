@@ -53,7 +53,7 @@
     print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
-	print ">>>".(defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+	//print ">>>".(defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 
 	$dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 	if($dt_SourceRecordID==0){  //getDetailTypeLocalID

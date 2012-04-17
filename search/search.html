@@ -198,7 +198,7 @@
 						</ul>
 					</li>
 
-					<li class="logged-in-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" title="Administer database structure"><b>DB Admin</b></a></li>
+					<li class="logged-in-only"><a href="#" id="link_admin" title="Administer database structure"><b>DB Admin</b></a></li>
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
@@ -290,6 +290,10 @@
 							+ "})();\"><b>>> "+database+" </b></a>";
 							document.write(html);
 						</script>
+					</li>
+					<li>
+    					<a href="#" id="rss_feed_link" title="Data feed, drag to bookmarks or a feed reader" target="_blank">
+								<img src="../common/images/logo_rss_feed.png"/></a>
 					</li>
 				</ul>
 			</div>
@@ -583,6 +587,8 @@ top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				//
 top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/inputUrlInclude.js");				// edit-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
+
+$("#link_admin").attr('href', top.HEURIST.basePath+'admin/adminMenu.php?db='+database);
 
 </script>
 <!-- hidden iFrame for printing -->
