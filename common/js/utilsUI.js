@@ -224,19 +224,19 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				};
 
 				var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
-				if (options["width"]) { 
+				if (options["width"]) {
 					if (options["width"]>topWindowDims.w-40){
-						options["width"] = topWindowDims.w-40; 
+						options["width"] = topWindowDims.w-40;
 					}
-					popupBody.style.width = options["width"] + "px"; 
-					width = parseInt(options["width"]); 
+					popupBody.style.width = options["width"] + "px";
+					width = parseInt(options["width"]);
 				}
-				if (options["height"]) { 
+				if (options["height"]) {
 					if (options["height"]>topWindowDims.h-40){
-						options["height"] = topWindowDims.h-40; 
+						options["height"] = topWindowDims.h-40;
 					}
-					popupBody.style.height = options["height"] + "px"; 
-					height = parseInt(options["height"]); 
+					popupBody.style.height = options["height"] + "px";
+					height = parseInt(options["height"]);
 				}
 
 				var oneTimeOnload = function() {
@@ -331,7 +331,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			}
 
 			var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
-			
+
 			if (! options["width"]) {
 				if (element.offsetWidth) options["width"] = element.offsetWidth;
 				else if (element.style.width) options["width"] = parseInt(element.style.width);
@@ -342,7 +342,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				else if (element.style.height) options["height"] = parseInt(element.style.height);
 				else options["height"] = 200;
 			}else if (options["height"]>topWindowDims.h-40){
-				options["height"] = topWindowDims.h-40; 
+				options["height"] = topWindowDims.h-40;
 			}
 
 			if (options["width"]) { popupBody.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
@@ -1305,7 +1305,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 helpDiv.innerHTML = alts1[helpStatus];
         }
     },
-    
+
 	helpToggler: function(helpDiv) {
 		var u = top.HEURIST.util;
 
@@ -1615,16 +1615,19 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 };
 
-top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.util.setVersion);
+if(top.HEURIST.registerEvent) //AJ: it would be better to remove from here
+{
+	top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.util.setVersion);
 
-/* Invoke  autosizeAllElements()  when the window loads or is resized */
-top.HEURIST.registerEvent(window, "load", function() { setTimeout(top.HEURIST.util.autosizeAllElements, 0); }, false, 99);	// need to autosize very late
-top.HEURIST.registerEvent(window, "resize", function() {
-	if (window.resizeTimeout) {
-		window.clearTimeout(window.resizeTimeout);
-	}
-	window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
-});
+	/* Invoke  autosizeAllElements()  when the window loads or is resized */
+	top.HEURIST.registerEvent(window, "load", function() { setTimeout(top.HEURIST.util.autosizeAllElements, 0); }, false, 99);	// need to autosize very late
+	top.HEURIST.registerEvent(window, "resize", function() {
+		if (window.resizeTimeout) {
+			window.clearTimeout(window.resizeTimeout);
+		}
+		window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
+	});
+}
 
 if (!Array.prototype.indexOf)
 {

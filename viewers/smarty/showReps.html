@@ -320,6 +320,17 @@ if(isInited){
 	}
 
 	//
+	function onPublish()
+	{
+		var sel = document.getElementById('selTemplates');
+
+		if(sel.selectedIndex>=0){
+			window.showReps.onPublish(sel.options[sel.selectedIndex].value);
+		}
+	}
+
+
+	//
 	//
 	function onGenerate()
 	{
@@ -384,10 +395,17 @@ if(isInited){
 		//$('.linkadmin').css('visibility', 'visible');
 
 
-		var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print</a></li><li><a href="#" onClick="onFile()">Get URL</a></li>';
+		var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print</a></li>'+
+		'<li><a href="#" onClick="onFile()">Get URL</a></li>';
+
+		if(top.HEURIST.is_logged_in()){
+			s = s + '<li><a href="#" onClick="onPublish()">Publish</a></li>';
+		}
 
 		if(top.HEURIST.is_admin()){
-			s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li><li><a href="#" onClick="onShowEditor()">Edit Template</a></li><li><a href="#" onClick="onGenerate()">New Template</a></li>';
+			s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
+			'<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
+			'<li><a href="#" onClick="onGenerate()">New Template</a></li>';
 		}
 
 		var elem = document.getElementById('toolMenuItems');

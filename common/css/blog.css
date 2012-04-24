@@ -577,5 +577,19 @@ h4 {
 	font-size:11px;
 	line-height:14px;
 }
+
+.geo-div.empty img.geo-image {
+	background-image: url(../images/geo-grey.gif);
+}
+.geo-div img.geo-image {
+	background-image: url(../images/geo.gif);
+}
+.geo-edit {
+	padding-left: 20px;
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
+}
+
 /*#new-entry-button { background-color:rgba(100, 100, 100, 0.1);border:1px solid #999999;height:21px;margin-right:20px;position:relative;top:-3px;vertical-align:top;width:84px;}
 #new-entry-button:hover { background-color:rgba(100, 100, 100, 0.2)*/

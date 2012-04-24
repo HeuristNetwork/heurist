@@ -264,7 +264,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 	HAPI.WOOT.loadWoot("record:"+this.record.getID(), {
-		onload: function(_,woot) { that.wootLoaded(woot); }
+		onload: function(_,woot) { if(that.wootLoaded) that.wootLoaded(woot); }
 	});
 	this.commentManager = new CommentManager($(".entry-comments", $tbody)[0], this.record);
 	this.commentManager.printAllComments();
@@ -364,6 +364,70 @@ BlogEntry: function(record, parentElement, isNew) {
 				.appendTo($(".entry-left", this.$outerTbody));
 		}
 
+		//geo location
+
+		var geos = record.getDetails(Blog.geoDetailType);
+		var l = geos.length;
+		var geovalue = "";
+		for (var i = 0; i < l; ++i) {
+			geovalue += (geovalue.length > 0 ? ", " : "") + HGeographicType.abbreviationForType(geos[i].getType())+" "+geos[i].getWKT(); //geos[i].toString();
+			break; //only one location per blog
+		}
+
+
+		var newDiv = document.createElement("div");
+			newDiv.className = (geovalue) ? "geo-div" : "geo-div empty";
+
+		var input = document.createElement("input");
+			input.type = "hidden";
+			input.value = geovalue;
+			newDiv.appendChild(input);
+
+		var geoImg = document.createElement("img");
+				geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
+				geoImg.className = "geo-image";
+				if(geovalue){
+					geoImg.onmouseover= function(e) { mapViewer.showAt(e, geovalue); };
+					geoImg.onmouseout = function(e) { mapViewer.hide(); };
+				}
+				newDiv.appendChild(geoImg);
+
+		if (Blog.canEdit()) {
+			var editLink = document.createElement("span")
+				editLink.className = "geo-edit";
+				editLink.innerHTML = (geovalue)?"Click to edit a location":"Click to add a location";
+				editLink.onclick = function() {
+
+					var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+					top.HEURIST.util.popupURL(
+					windowRef,
+					"../../records/edit/digitizer/index.html?" + encodeURIComponent(input.value),
+					{ callback: function(type, value)
+							{
+								if(type && value){
+									that.edit(); //set to edit mode
+									//assign new values
+									var geos = new HGeographicValue(type, value);
+									record.setDetails(Blog.geoDetailType, [geos]);
+									//update
+									editLink.innerHTML = "Click to edit a location";
+									newDiv.className = "geo-div";
+									input.value = type+' '+value;
+									geoImg.onmouseover= function(e) { mapViewer.showAt(e, input.value); };
+								}
+							}
+					}
+					);
+
+				};
+				newDiv.appendChild(editLink);
+		}
+
+		var $mapDiv = $("<div class='map-section'>").appendTo($(".entry-left", this.$outerTbody));
+		$mapDiv.append(newDiv);
+
+/* OBSOLETE
+
 		var $mapDiv = $("<div class='map-section'>").appendTo($(".entry-left", this.$outerTbody));
 		var $content = null;
 		var mapURL = Blog.getStaticMapURL(this.record);
@@ -386,15 +450,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 		if ($content) {
 
-			var geos = record.getDetails(Blog.geoDetailType);
-			var l = geos.length;
-			var desc = "";
-			for (var i = 0; i < l; ++i) {
-					desc += (desc.length > 0 ? ", " : "") + HGeographicType.abbreviationForType(geos[i].getType())+" "+geos[i].getWKT(); //geos[i].toString();
-			}
-
-			$mapDiv.append("<p class='show-map'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#' onmouseover='mapViewer.showAt(event, \""+
-						desc+"\")' onmouseout='mapViewer.hide()'>Show map</a></p>");
+			$mapDiv.append("<p class='show-map'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Show map</a></p>");
 			$mapDiv.append("<p class='hide-map' style='display: none;'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Hide map</a></p>");
 			$mapDiv.append("<div class='map-content' style='display: none;'>");
 			$(".map-content", $mapDiv).append($content);
@@ -409,7 +465,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				return false;
 			});
 		}
-
+*/
 		$(".entry-left", this.$outerTbody).append("<p class='loading'>loading ...</p>");
 
 		// related records
@@ -758,6 +814,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			.append($td)
 			.appendTo($(".entry-fields tbody", this.$table));
 
+/* OBSOLETE
 		// geos
 		var geos = record.getDetails(Blog.geoDetailType);
 		var l = geos.length;
@@ -779,7 +836,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			.append("<td>Location:</td>")
 			.append($td)
 			.appendTo($(".entry-fields tbody", this.$table));
-
+*/
 		// buttons
 		var $saveButton = $("<input type='button'/>").val("save").click(function() { that.saveButtonClick(); });
 		var $cancelButton = $("<input type='button'/>").val("cancel").click(function() { that.cancelButtonClick(); });

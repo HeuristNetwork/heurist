@@ -2170,9 +2170,10 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 	var geoImg = this.document.createElement("img");
 		geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
 		geoImg.className = "geo-image";
-		geoImg.onmouseover= function(e) { mapViewer.showAt(e, null); };
+		//geoImg.onmouseover= function(e) { mapViewer.showAt(e, null); };
 		geoImg.onmouseout = function(e) { mapViewer.hide(); };
 
+		newDiv.geoImg = geoImg;
 		newDiv.appendChild(geoImg);
 
 	var descriptionSpan = newDiv.appendChild(this.document.createElement("span"));
@@ -2205,7 +2206,11 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					top.HEURIST.util.popupURL(
 						windowRef,
 						"digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),
-						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
+						{ callback: function(type, value)
+								{
+									thisRef.setGeo(newDiv, value? (type+" "+value) : "");
+								}
+						}
 					);
 				}
 			});
@@ -2253,6 +2258,8 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(ele
 	element.descriptionSpan.innerHTML = "";
 	element.descriptionSpan.appendChild(this.document.createElement("b")).appendChild(this.document.createTextNode(" " + description.type));
 	element.descriptionSpan.appendChild(this.document.createTextNode(" " + description.summary + " "));
+	element.geoImg.onmouseover= function(e) { mapViewer.showAt(e, value); };
+
 	element.editLink.innerHTML = "edit";
 	element.className = "geo-div";	// not empty
 

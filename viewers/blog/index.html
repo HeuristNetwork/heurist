@@ -19,10 +19,10 @@
 
 <script src="../../external/jquery/jquery.js"></script>
 
-<!-- to remove this absolte stuff -->
+<!-- to remove this absolte stuff
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
+-->
 
-<script src="../../common/php/getMagicNumbers.php"></script>
 <script src="../../common/php/loadHAPI.php"></script>
 <script src="../../hapi/js/goi.js"></script>
 
@@ -42,7 +42,6 @@
 <script src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script src="../../external/yui/2.8.2r1/build/event/event-min.js"></script>
 <script src="../../external/yui/2.8.2r1/build/history/history-debug.js"></script>
-<script src="blog.js"></script>
 
 <!-- scripts for map popup -->
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
@@ -52,6 +51,21 @@
 <script type="text/javascript" src="../../external/timemap.2.0/src/timemap.js"></script>
 <script type="text/javascript" src="../../viewers/map/mapping.js"></script>
 <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/search.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/blog.css">
+
+</head>
+<body>
+ <input id=yui-history-field type=hidden>
+
+<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/displayPreferences.php"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
+<script src="../../common/php/getMagicNumbers.php"></script>
+<script src="blog.js"></script>
 
 <script>
 
@@ -226,20 +240,15 @@ function reload() {
 
 </script>
 
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css">
-<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-<link rel="stylesheet" type="text/css" href="../../common/css/search.css">
-<link rel="stylesheet" type="text/css" href="../../common/css/blog.css">
-
-</head>
-<body>
- <input id=yui-history-field type=hidden>
 
  <script src=autocompleteBlogTags.js></script>
- <script src="../../common/php/loadCommonInfo.php"></script>
+
+ <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
  <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
-<!-- div class="tooltip" id="mapPopup"><p></p></div -->
+<!--
+
+div class="tooltip" id="mapPopup"><p></p></div -->
 
 <a id="home-link" href="#">
 <div title="Click the logo at top left of any Heurist page to return to your Favourites" id="logo"></div>

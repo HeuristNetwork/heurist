@@ -1,17 +1,25 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * showReps.php
+ *
+ *
+ * parameters
+ * 'template' or 'template_body' - template file name or template value as a text
+ * 'replevel'  - 1 notices, 2 all, 3 debug mode
+ *
+ * 'output' - full file path to be saved
+ * 'mode' - if publish>0: js or html (default)
+ * 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
+ *
+ * other parameters are hquery's
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
-?>
-
-<?php
 
 define('SEARCH_VERSION', 1);
 
@@ -23,6 +31,25 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once('libs.inc.php');
 
+	$outputfile = null;
+	$isJSwrap = false;
+	$publishmode = 0;
+
+	if(array_key_exists("q", $_REQUEST) &&
+			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
+	{
+			executeSmartyTemplate($_REQUEST);
+	}
+
+/**
+* Main function
+*
+* @param mixed $_REQUEST
+*/
+function executeSmartyTemplate($params){
+
+	global $smarty, $outputfile, $isJSwrap, $publishmode;
+
 	mysql_connection_db_select(DATABASE);
 
 	//load definitions (USE CACHE)
@@ -30,24 +57,26 @@ require_once('libs.inc.php');
 	$dtStructs = getAllDetailTypeStructures(true);
 	$dtTerms = getTerms(true);
 
-	$_REQUEST["f"] = 1; //always search
+	$params["f"] = 1; //always search (do not use cache)
 
-	$isJSwrap = (array_key_exists("mode", $_REQUEST) && $_REQUEST["mode"]=="js"); //use javascript wrap
+	$isJSwrap	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
+	$outputfile  = (array_key_exists("output", $params))? $params["output"] :null;
+	$publishmode = (array_key_exists("publish", $params))?intval($params['publish']):0;
 
-	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
+	if( !array_key_exists("limit", $params) ){ //not defined
 
 		$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
 		if (!$limit || $limit<1){
 			$limit = 1000; //default limit in dispPreferences
 		}
 
-		$_REQUEST["limit"] = $limit; //force limit
+		$params["limit"] = $limit; //force limit
 	}
 
-	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
+	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
-		if(array_key_exists("publish", $_REQUEST)){
+		if($publishmode>0){
 			$error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
 		}else{
 			$error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
@@ -61,11 +90,9 @@ require_once('libs.inc.php');
 	}
 
 	//get name of template file
-	$template_file = (array_key_exists('template',$_REQUEST)?$_REQUEST['template']:null);
+	$template_file = (array_key_exists('template',$params)?$params['template']:null);
 	//get template body from request (for execution from editor)
-	$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
-
-	$replevel = (array_key_exists('replevel',$_REQUEST) ?$_REQUEST['replevel']:0);
+	$template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);
 
 	//convert to array that will assigned to smarty variable
 	$records =  $qresult["records"];
@@ -87,6 +114,9 @@ require_once('libs.inc.php');
 //DEBUG
 //error_log(">>>".$template_body."<<<");
 //error_log(">>>>>>>".$replevel."<<<<<<");
+
+		//error report level: 1 notices, 2 all, 3 debug mode
+		$replevel = (array_key_exists('replevel',$params) ?$params['replevel']:0);
 
 		if($replevel=="1" || $replevel=="2"){
 			ini_set( 'display_errors' , 'true');// 'stdout' );
@@ -120,7 +150,9 @@ require_once('libs.inc.php');
 
 		$smarty->debugging = false;
 		$smarty->error_reporting = 0;
-		if($isJSwrap){
+		if($outputfile!=null){
+			$smarty->registerFilter('output','save_report_output');
+		}else if($isJSwrap){
 			$smarty->registerFilter('output','add_javascript_wrap5');
 		}
 		$smarty->display($template_file);
@@ -144,10 +176,68 @@ require_once('libs.inc.php');
 
 	//echo json_format( $results, true);
 	//END DEBUG stuff
+}
 
-exit();
+//
+// save report output as file (if there is parameter output)
+//
+function save_report_output($tpl_source, Smarty_Internal_Template $template)
+{
+	global $outputfile, $isJSwrap, $publishmode;
+
+	$errors = null;
+
+	try{
+
+		$path_parts = pathinfo($outputfile);
+		$dirname = (array_key_exists('dirname',$path_parts))?$path_parts['dirname']:"";
 
 
+		if(!file_exists($dirname)){
+			$errors = "Output folder $dirname does not exist";
+		}else{
+			if($isJSwrap){
+				$tpl_res = add_javascript_wrap4($tpl_source);
+				$ext =  ".js";
+			}else{
+				$tpl_res = $tpl_source;
+				$ext =  ".html";
+			}
+
+			$res_file = $dirname."/".$path_parts['filename'].$ext;
+			$file = fopen ($res_file, "w");
+			if(!$file){
+				$errors = "Can't write file $res_file. Check permission for directory";
+			}else{
+				fwrite($file, $tpl_source);
+				fclose ($file);
+			}
+
+		}
+
+	}catch(Exception $e)
+	{
+
+		$errors = $e->getMessage();
+	}
+
+
+	if($publishmode<2){
+
+		if($errors!=null){
+			$tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
+		}
+
+		if($isJSwrap){
+			header("Content-type: text/javascript");
+			$tpl_res = add_javascript_wrap4($tpl_source);
+		}else{
+			header("Content-type: text/html");
+			$tpl_res = $tpl_source;
+		}
+		echo $tpl_res;
+	}
+}
 //
 // wrap smarty output into javascript function
 //

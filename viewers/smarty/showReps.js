@@ -41,7 +41,8 @@ function ShowReps() {
 		_sQueryMode = "all",
 		mySimpleDialog,
 		needReload = true,
-		infoMessageBox;
+		infoMessageBox,
+		_db;
 
 	var handleYes = function() {
 					_operationEditor(2);
@@ -129,6 +130,8 @@ function ShowReps() {
 		document.getElementById('cbUseAllRecords2').value = _sQueryMode;
 		document.getElementById('cbUseAllRecords1').value = _sQueryMode;
 
+		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
 		/*var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
@@ -181,17 +184,13 @@ function ShowReps() {
 	function _reload_templates(){
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
 				var callback = _updateTemplatesList;
-				top.HEURIST.util.getJsonData(baseurl, callback, 'mode=list');
+				top.HEURIST.util.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
 	}
 
 	/**
-	* Executes the template with the given query
+	*
 	*/
-	function _reload(template_file) {
-
-				_showLimitWarning();
-
-				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
+	function _getQueryAndTemplate(template_file, isencode){
 
 				var squery = _getQuery();
 
@@ -202,14 +201,38 @@ function ShowReps() {
 						_updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
 					}
 
+					return null;
+
 				}else{
 
-				if(Hul.isnull(template_file)){
-					var sel = document.getElementById('selTemplates');
-					if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
-					template_file = sel.options[sel.selectedIndex].value; // by default first entry
+					if(Hul.isnull(template_file)){
+						var sel = document.getElementById('selTemplates');
+						if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+						template_file = sel.options[sel.selectedIndex].value; // by default first entry
+					}
+
+					if(isencode){
+						squery = 'hquery='+encodeURIComponent(squery);
+					}
+
+					squery = squery + '&template='+template_file;
 				}
-				squery = squery + '&template='+template_file;
+
+		return squery;
+	}
+
+	/**
+	* Executes the template with the given query
+	*/
+	function _reload(template_file) {
+
+				_showLimitWarning();
+
+				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
+				var squery = _getQueryAndTemplate(template_file, false);
+
+				if(squery!=null){
+
 
 					//infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
 					infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
@@ -301,7 +324,7 @@ function ShowReps() {
 				alert('Please select some records in search results');
 			}else{
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
-				top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);
+				top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
 			}
 	}
 
@@ -321,7 +344,7 @@ function ShowReps() {
 
 			_originalFileName = template_file;
 
-			var squery = 'mode=get&template='+template_file;
+			var squery = 'db='+_db+'&mode=get&template='+template_file;
 
 			top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = top.HEURIST.util.evalJson(xhr.responseText);
@@ -344,7 +367,7 @@ function ShowReps() {
 		if(mode>0){
 
 			var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php",
-				squery = 'mode=',
+				squery = 'db='+_db+'&mode=',
 				template_file = null;
 
 			if(mode<3)
@@ -1293,6 +1316,24 @@ function ShowReps() {
 			document.getElementById('recordCount').innerHTML = msg;
 	}
 
+	//
+	function _onPublish(template_file){
+
+		var q = _getQueryAndTemplate(template_file, true);
+
+		if(q==null) return;
+
+		var url = top.HEURIST.basePath + "admin/ugrps/manageReports.html?"+q;
+
+		top.HEURIST.util.popupURL(top, url,
+		{   "close-on-blur": false,
+			"no-resize": false,
+			height: 480,
+			width: 620,
+			callback: null
+		});
+	}
+
 	//public members
 	var that = {
 
@@ -1359,6 +1400,10 @@ function ShowReps() {
 
 			doExecuteFromEditor: function(){
 				_doExecuteFromEditor();
+			},
+
+			onPublish:function (template_file){
+				_onPublish(template_file);
 			},
 
 			//insert section type at the cursor position

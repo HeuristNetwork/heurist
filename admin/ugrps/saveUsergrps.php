@@ -99,7 +99,7 @@
 
 	case 'deleteUser':
 
-			$rv = array();
+		$rv = array();
 		if (!$recID) {
 			$rv['error'] = "invalid or not ID sent with deleteUser method call to saveUsergrps.php";
 		}else if( intval($recID)==2 ){
