@@ -1650,9 +1650,6 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .icons .recordDiv:hover .thumbnail, .icons .recordDiv:hover .recTypeThumb {
 	height:42px;
 }
-.icons .recordDiv .thumbnail {
-	display:none
-}
 .icons div.recordDiv:hover .thumbnail {
 	display:block !important
 }
@@ -1687,9 +1684,14 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .icons .recTypeThumb {
 	opacity:0.6;
 }
+/* Artem: WTF?!!!!
+.icons .recordDiv .thumbnail {
+	display:none
+}
 .recordDiv .thumbnail, .recordDiv .thumbnail {
 	display:none
 }
+*/
 .thumbnails .recordDiv, .thumbs .recordDiv {
 	-moz-border-radius:6px;
 	-moz-box-shadow:0 2px 4px #BBB;

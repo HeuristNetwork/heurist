@@ -1323,7 +1323,7 @@ function ShowReps() {
 
 		if(q==null) return;
 
-		var url = top.HEURIST.basePath + "admin/ugrps/manageReports.html?"+q;
+		var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q;
 
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,

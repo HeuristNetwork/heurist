@@ -1,4 +1,16 @@
-// ReportManager object
+/**
+* manageReports.js
+* ReportManager object for listing and searching of scheduled report
+*
+* @version 2012.0426
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 var reportManager;
 
 //aliases
@@ -13,7 +25,7 @@ var Dom = YAHOO.util.Dom,
 * @param _isWindowMode - true in window popup, false in div
 
 * @author Artem Osmakov <osmakov@gmail.com>
-* @version 2011.0509
+* @version 2012.0426
 */
 function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
@@ -52,7 +64,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				var sfilter = "";
 
-				var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadReports.php";
+				var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 				var params = "method=searchreports&db=" + _db + sfilter;
 				top.HEURIST.util.getJsonData(baseurl, __updateRecordsList, params);
 	};
@@ -145,7 +157,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 				_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 									responseSchema : {
-										fields: ["rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes", "selection"]
+										fields: ["rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes", "selection", "status"]
 									},
 									doBeforeCallback : function (req, raw, res, cb) {
 										// This is the filter function
@@ -183,6 +195,28 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 
+			{ key: "status", label: "Status", hidden:false, sortable:true,
+				formatter:  function(elLiner, oRecord, oColumn, oData) {
+					var status = Number(oRecord.getData('status'));
+					if(status>0){
+						var simg, shint;
+						if(status==1){
+							simg = 'url_error.png';
+							shint = 'template file does not exsist';
+						}else if(status==2){
+							simg = 'url_warning.png';
+							shint = 'output folder does not exsist';
+						}else if(status==3){
+							simg = 'url_warning.png';
+							shint = 'generated report is not created yet';
+						}
+						elLiner.innerHTML = '<img src="../../common/images/'+simg+'" width="16" height="16" border="0" title="'+shint+'">';
+					}else{
+						elLiner.innerHTML = "";
+					}
+
+			}},
+
 			{ key: "rps_ID", label: "#", sortable:true, className:'right',resizeable:false},
 
 			{ key: null, label: "Edit", sortable:false,  width:5,
@@ -192,9 +226,14 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 			{ key: null, label: "Execute", sortable:false,  width:5,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var status = Number(oRecord.getData('status'));
+					if(status==1){
+					elLiner.innerHTML = '';
+					}else{
 					var recID = oRecord.getData('rps_ID');
 					elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=1&id='+recID+'" target="_blank"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"><\/a>';
 //					elLiner.innerHTML = '<a href="#execute_report"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"><\/a>';
+					}
 			}},
 
 			{ key: "rps_Title", label: "Title", sortable:true, resizeable:true},
@@ -267,7 +306,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 								}*/
 							}
 
-							var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadReports.php";
+							var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deletereport&db=" + _db + "&recID=" + recID;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -399,7 +438,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	*/
 	function _onAddEditRecord(params){
 
-		var url = top.HEURIST.basePath + "admin/ugrps/editReportSchedule.html";
+		var url = top.HEURIST.basePath + "export/publish/editReportSchedule.html";
 		if(!Hul.isempty(params)){
 			url = url + params;
 		}
@@ -461,7 +500,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 					}
 				},
 
-				editReport: function(recID){ _onAddEditRecord( recID ); },
+				editReport: function(recID){ _onAddEditRecord("?db="+_db+"&recID="+recID ); },
 
 				getClass: function () {
 					return _className;

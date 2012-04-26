@@ -479,7 +479,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				'</div>'+
 '</div></div>';
 
-			var customIcon = "heuristicon.png"; //TODO!!!! - deault marker
+			var customIcon = basePath + "common/images/H3-favicon.png";// "heuristicon.png"; //TODO!!!! - deault marker
 
     		var customTheme = new TimeMapTheme({
         		"color": "#0000FF",

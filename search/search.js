@@ -2998,6 +2998,7 @@ top.HEURIST.search = {
 		top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/sendNotificationsPopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
+	// AO: NOT USED, TO REMOVE ???
 	emailToDatabasePopup: function() {
 		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 		if (recIDs_list.length == 0) {

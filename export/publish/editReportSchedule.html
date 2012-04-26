@@ -81,7 +81,7 @@
 
 			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 						(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var _url = top.HEURIST.basePath +'admin/ugrps/loadReports.php?method=getreport&db='+_db;
+			var _url = top.HEURIST.basePath +'export/publish/loadReports.php?method=getreport&db='+_db;
 
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			var _recID = top.HEURIST.parameters.recID;
@@ -123,7 +123,7 @@
 		<label class="dtyLabel" for="rps_FilePath">File path:</label>
 		<input id="rps_FilePath" style="width:400;" maxlength="128" />
 		<div class="help prompt help1">
-			<label>Path to which report is published</label>
+			<label id="lblFilePathHelp"></label>
 		</div>
 	</div>
 	<div class="dtyField">
@@ -181,6 +181,9 @@
 	//  starts initialization on load completion of this window
 	//
 	function loadHandler(){
+
+		Dom.get("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ _db+"/generated-reports)";
+
 		window.reportScheduleEditor = new ReportScheduleEditor();
 	}
 	YAHOO.util.Event.addListener(window, "load", loadHandler );

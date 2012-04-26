@@ -2205,7 +2205,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
 						windowRef,
-						"digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),
+						top.HEURIST.basePath+"/records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),
 						{ callback: function(type, value)
 								{
 									thisRef.setGeo(newDiv, value? (type+" "+value) : "");

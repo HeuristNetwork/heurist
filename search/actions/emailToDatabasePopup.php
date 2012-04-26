@@ -1,5 +1,9 @@
 <?php
 
+
+// AO: NOT USED, TO REMOVE ???
+
+
 /**
  * emailToDatabasePopup.php, Sends a set of records to an IMAP server for harvesting
  * by another Heurist database, copied from sendNotificationsPopup.php, Ian Johnson 1/8/11
@@ -12,7 +16,7 @@
 
 
  // TO DO: 1/8/11 MODIFY THIS CODE TO EMAIL IN SUITABLE FORMAT FOR HARVESTING BY TARGET DB
- 
+
  ?>
 
 

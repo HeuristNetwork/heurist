@@ -1,4 +1,16 @@
-// GroupManager object
+/**
+* manageGroups.js
+* GroupManager object for listing and searching of groups
+*
+* @version 2011.0509
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 var groupManager;
 
 //aliases

@@ -70,8 +70,8 @@
                 <div style="margin-left: 40px;">
                     <!-- user name used as prefix -->
                     <b><?= HEURIST_DB_PREFIX ?>
-                    <input type="text" maxlength="20" size="6" name="uname" 
-                    style="padding-left:3px; font-weight:bold;" value=<?=substr(get_user_username(),0,5)?> > 
+                    <input type="text" maxlength="20" size="6" name="uname"
+                    style="padding-left:3px; font-weight:bold;" value=<?=substr(get_user_username(),0,5)?> >
                     _  </b>
 					<input type="text" maxlength="64" size="25" name="dbname">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;" >
@@ -316,14 +316,25 @@
 				echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."html-output (used to write published records as generic html files)<br>");
 				echo($output2);
 				$warnings = 1;
+			}
+
+			//for generated reports
+			$folder = $uploadPath."/generated-reports";
+
+			if(!file_exists($folder)){
+				if (!mkdir($folder, 0777, true)) {
+					echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."generated-reports (used to write generated reports)<br>");
+					echo($output2);
+					$warnings = 1;
 				}
+			}
 
             // Prepare to write to the newly created database
 			mysql_connection_db_insert($newname);
 
             // Update file locations
-			$query='update sysIdentification 
-                set sys_hmlOutputDirectory = "$uploadPath/hml-output", 
+			$query='update sysIdentification
+                set sys_hmlOutputDirectory = "$uploadPath/hml-output",
                 sys_htmlOutputDirectory = "$uploadPath/html-output"';
   			mysql_query($query);
 			if ($warnings == 1) {

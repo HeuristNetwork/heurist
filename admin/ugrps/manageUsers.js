@@ -1,4 +1,16 @@
-// UserManager object
+/**
+* manageUsers.js
+* UserManager object for listing and searching of users
+*
+* @version 2011.0510
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 var userManager;
 
 //aliases

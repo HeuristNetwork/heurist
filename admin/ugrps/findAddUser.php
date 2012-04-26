@@ -1,5 +1,7 @@
 <?php
 
+// AO: NOT USED, TO REMOVE ???
+
 /*<!--
  * findAddUser.php, New user registration form (find function no longer relevant)
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.

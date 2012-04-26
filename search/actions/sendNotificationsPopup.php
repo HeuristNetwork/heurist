@@ -9,9 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -41,7 +38,7 @@ if (@$_REQUEST['send_notification']) {
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 
   <title>Share records</title>
   <script type="text/javascript">

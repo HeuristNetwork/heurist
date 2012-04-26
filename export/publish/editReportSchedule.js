@@ -248,7 +248,7 @@ function ReportScheduleEditor() {
 //DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadReports.php";
+			var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 			var callback = _updateResult;
 			var params = "method=savereport&db=" + _db + "&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);

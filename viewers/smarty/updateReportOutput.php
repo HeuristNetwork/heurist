@@ -8,12 +8,12 @@
  * An ID of 0 should trigger sequential refreshing of all the reports
  *
  * parameters
- * 'output' - full file path to be saved
+ * 'id' - key field value in usrReportSchedule
  * 'mode' - if publish>0: js or html (default)
  * 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
  * 				3 - redirect the existing report, if it does not exist publish=1
  *
- * If publish=2 then the script displays a web page with a report on the process
+ * If publish=1 then the script displays a web page with a report on the process
  * (success or errors as below). If not set, then the errors (file can't be written, can't find template,
  * can't find file path, empty query etc) are sent by email to the database owner.
  *
@@ -26,8 +26,6 @@
 
  require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
 
-
-$dir = HEURIST_SMARTY_TEMPLATES_DIR;
 
 $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
@@ -69,8 +67,17 @@ function doReport($row){
 
 	global $publish, $format;
 
-	$dir = ($row['rps_FilePath']!=null)?$row['rps_FilePath']:HEURIST_UPLOAD_DIR."generated-report/";
-	if(substr($dir,-1)!="/") $dir = $dir."/";
+	if($row['rps_FilePath']!=null){
+		$dir = $row['rps_FilePath'];
+		if(substr($dir,-1)!="/") $dir = $dir."/";
+	}else{
+		$dir = HEURIST_UPLOAD_DIR."generated-reports/";
+		if(!file_exists($dir)){
+			if (!mkdir($dir, 0777, true)) {
+    				die('Failed to create folder for generated reports');
+			}
+		}
+	}
 
 	$filename = ($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template'];
 
@@ -79,8 +86,8 @@ function doReport($row){
 	if($publish==3){
 
 		$path_parts = pathinfo($outputfile);
-		$ext = $path_parts['extension'];
-error_log("EXT=".$ext);
+		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
+//DEBUG error_log("EXT=".$ext);
 
 		if ($ext == null) {
 

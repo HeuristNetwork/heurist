@@ -53,7 +53,7 @@ if (! is_logged_in()) {
 
 		//loads list of all records
 
-		$query = "select rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 as selection from usrReportSchedule";
+		$query = "select rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 as selection, 0 as status from usrReportSchedule";
 
 		if($f_name && $f_name!=""){
 			$query = $query." where rps_Title like '%".$f_name."%'";
@@ -62,6 +62,9 @@ if (! is_logged_in()) {
 		$res = mysql_query($query);
 
 		while ($row = mysql_fetch_assoc($res)) {
+
+			$row['status'] = getStatus($row);
+
 			array_push($records, $row);
 		}
 
@@ -145,6 +148,42 @@ if (! is_logged_in()) {
 
 	}
 
+	/**
+	* @return 0 - ok,  1 - template file missed, 2 - output folder does not exist, 2 - file does not exist
+	*/
+	function getStatus($row){
+
+		if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$row['rps_Template'])){
+			return 1;
+		}
+
+		if($row['rps_FilePath']!=null){
+			$dir = $row['rps_FilePath'];
+			if(substr($dir,-1)!="/") $dir = $dir."/";
+		}else{
+			$dir = HEURIST_UPLOAD_DIR."generated-reports/";
+		}
+
+		if(!file_exists($dir)){
+			return 2;
+		}
+
+		$filename = ($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template'];
+
+		$outputfile = $dir.$filename;
+
+		$path_parts = pathinfo($outputfile);
+		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
+		if ($ext == null) {
+			$outputfile = $outputfile.".html";
+		}
+
+		if(!file_exists($outputfile)){
+			return 3;
+		}else{
+			return 0;
+		}
+	}
 
 	/**
 	* deleteReportSchedule - delete record from
