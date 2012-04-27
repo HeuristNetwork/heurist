@@ -878,7 +878,9 @@ function ShowReps() {
 		}else{
 			//lbl="'+nodedata.labelonly+'"
 			res = '{wrap var=$'+prefix+nodedata.this_id;
-			if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
+			if(nodedata.dtype === '' || nodedata.this_id === 'recURL'){
+				res = res + ' dt="url"';
+			}else if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
 				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
 				res = res + ' width="300" height="auto"';
 			}else{

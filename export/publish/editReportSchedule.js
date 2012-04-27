@@ -58,7 +58,7 @@ function ReportScheduleEditor() {
 				templatefile = top.HEURIST.parameters.template;
 				hquery = top.HEURIST.parameters.hquery;
 
-				if(_recID){
+				if(Number(_recID)>0){
 					_entity = top.HEURIST.reports.records[_recID];
 				}
 				if(Hul.isnull(typeID)){
@@ -72,8 +72,8 @@ function ReportScheduleEditor() {
 				}
 		}
 
-		if (_recID && Hul.isnull(_entity) ){
-			Dom.get("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  not be found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
+		if (Number(_recID>0) && Hul.isnull(_entity) ){
+			Dom.get("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_entity)){

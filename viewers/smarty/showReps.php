@@ -34,6 +34,9 @@ require_once('libs.inc.php');
 	$outputfile = null;
 	$isJSwrap = false;
 	$publishmode = 0;
+	$rtStructs = null;
+	$dtStructs = null;
+	$dtTerms = null;
 
 	if(array_key_exists("q", $_REQUEST) &&
 			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -48,7 +51,7 @@ require_once('libs.inc.php');
 */
 function executeSmartyTemplate($params){
 
-	global $smarty, $outputfile, $isJSwrap, $publishmode;
+	global $smarty, $outputfile, $isJSwrap, $publishmode, $rtStructs, $dtStructs, $dtTerms;
 
 	mysql_connection_db_select(DATABASE);
 
@@ -292,6 +295,9 @@ function getRecordForSmarty($rec, $recursion_depth){
 		$record = array();
 		$recTypeID = null;
 
+
+//DEBUG error_log("REC=".print_r($rec, true));
+
 		//loop for all record properties
 		foreach ($rec as $key => $value){
 			$pos = strpos($key,"rec_");
@@ -376,6 +382,14 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 	$rtNames = $rtStructs['names'];
 	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
 
+
+/* DEBUG
+	if($dtKey==9){
+error_log("KEY=".$dtKey."   NAME=".$dtNames[$dtKey]);
+error_log("dtValue=".print_r($dtValue, true));
+	}
+*/
+
 	if($dtKey<1 || $dtNames[$dtKey]){
 
 		if($dtKey<1){
@@ -442,8 +456,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 					if(strlen($res)>0) $res = $res.", ";
 					$res = $res.$value['file']['URL'];
 
+
 					//original value keeps the whole 'file' array
 					$dtname2 = $dtname."_originalvalue";
+
+//error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
+
 					$arres = array_merge($arres, array($dtname2=>$value['file']));
 				}
 				if(strlen($res)==0){
@@ -622,6 +640,7 @@ function smarty_function_wrap($params, &$smarty)
 
 	if($params['var']){
 
+//error_log(">>>>".print_r($params,true));
 
 		if(array_key_exists('dt',$params)){
 			$dt = $params['dt'];
@@ -658,9 +677,16 @@ function smarty_function_wrap($params, &$smarty)
 			}
 		}
 
-		if($dt=="file"){
+		if($dt=="url"){
+
+				return "<a href='".$params['var']."' target='_blank'>".$params['var']."</a>";
+
+		}else if($dt=="file"){
 			//insert image or link
 			$value = $params['var'];
+
+
+//!!!!! error_log("WARP VALUE>>>>".print_r($value,true));
 
 			if( strpos($value['type'],'image')==0 ){
 				return "<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>".$value['origName'];

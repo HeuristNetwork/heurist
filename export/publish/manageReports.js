@@ -236,8 +236,34 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 					}
 			}},
 
+			{ key: null, label: "html", sortable:false,  width:5,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var status = Number(oRecord.getData('status'));
+					if(status==1){
+						elLiner.innerHTML = '';
+					}else{
+						var recID = oRecord.getData('rps_ID');
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link"><\/a>';
+					}
+			}},
+			{ key: null, label: "JS", sortable:false,  width:5,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var status = Number(oRecord.getData('status'));
+					if(status==1){
+						elLiner.innerHTML = '';
+					}else{
+						var recID = oRecord.getData('rps_ID');
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&mode=js&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"><\/a>';
+					}
+			}},
+
+
 			{ key: "rps_Title", label: "Title", sortable:true, resizeable:true},
-			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true},
+			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+						var hquery = oRecord.getData('rps_HQuery');
+						elLiner.innerHTML = "<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
+			}},
 			{ key: "rps_IntervalMinutes", label: "Interval", sortable:true, resizeable:false},
 
 			{ key: null, label: "Del", className:'center', sortable:false,

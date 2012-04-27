@@ -113,7 +113,7 @@ function doReport($row){
 			return;
 		}
 		$publish = 1;
-	}
+	}//publish==3
 
 	$hquery = $row['rps_HQuery'];
 	if(strpos($hquery, "&q=")>0){
