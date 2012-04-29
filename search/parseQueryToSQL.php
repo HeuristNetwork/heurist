@@ -23,12 +23,13 @@ define('SORT_TITLE', 't');
 
 function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
-
 	// remove any  lone dashes outside matched quotes.
 	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
 	// divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
 	preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
 	$preProcessedQuery = "";
+	$prevQueryPart="";
+//error_log("parse query matches = ".print_r($matches,true));
 	foreach ($matches[0] as $queryPart) {
 		//if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
 		//necessary since we want to doble quotes to allow all characters
@@ -41,7 +42,11 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 		//reconstruct the string
 		$preProcessedQuery .= ($preProcessedQuery &&
 								strrpos($preProcessedQuery,":") != strlen($preProcessedQuery)-1 &&
+								(!strrpos($prevQueryPart,":") || strrpos($prevQueryPart,":") == strlen($prevQueryPart)-1) &&
 								strpos($queryPart,":") !== 0 ? " ":"").$queryPart;
+		$prevQueryPart = $queryPart;
+//error_log("query part = ".print_r($queryPart,true));
+//error_log("preprocessed query = ".print_r($preProcessedQuery,true));
 	}
 	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
@@ -712,6 +717,7 @@ class FieldPredicate extends Predicate {
 
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
+error_log("FieldPred MakeSql value = ".print_r($this->value,true));
 
 		$match_value = is_numeric($this->value)? floatval($this->value) : '"' . addslashes($this->value) . '"';
 
