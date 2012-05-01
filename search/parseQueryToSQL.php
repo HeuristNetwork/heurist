@@ -498,32 +498,43 @@ class SortPhrase {
 
 			if (preg_match('/^(?:f|field):(\\d+)(:m)?/i', $text, $matches)) {
 				@list($_, $field_id, $show_multiples) = $matches;
+				$res = mysql_query("select dty_Type from defDetailTypes where dty_ID = $field_id");
+				$baseType = mysql_fetch_row($res);  $baseType = @$baseType[0];
 
 				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
 					$bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
 					return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
-					             "left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and dtl_DetailTypeID=$field_id ");
+								"left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and dtl_DetailTypeID=$field_id ");
+				} else if ($baseType == "integer"){//sort field is an integer so need to cast in order to get numeric sorting
+					return array(" cast(dtl_Value as unsigned)","dtl_Value is integer",
+								"left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
 				} else {
 					// have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, if(dty_Type='integer',cast(dtl_Value as SIGNED), dtl_Value)) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
 							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			} else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
 				@list($_, $field_name, $show_multiples) = $matches;
+				$res = mysql_query("select dty_Type from defDetailTypes where dty_Name = '$field_name'");
+				$baseType = mysql_fetch_row($res);  $baseType = @$baseType[0];
 
 				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
 					$bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
 					return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
-					             "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".addslashes($field_name)."' "
-					            ."left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and $bd_name.dtl_DetailTypeID=bdt$bd_name.dty_ID ");
+								"left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".addslashes($field_name)."' "
+								."left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and $bd_name.dtl_DetailTypeID=bdt$bd_name.dty_ID ");
+				} else if ($baseType == "integer"){//sort field is an integer so need to cast in order to get numeric sorting
+					return array(" cast(dtl_Value as unsigned)","dtl_Value is integer",
+								"left join defDetailTypes bdtInt on bdtInt.dty_Name='".addslashes($field_name)."' "
+								."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
 				} else {
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, if(dty_Type='integer',cast(dtl_Value as SIGNED), dtl_Value)) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
 							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			}
 
-		    case 't': case 'title':
-			return array('rec_Title'.$scending, NULL);
+			case 't': case 'title':
+				return array('rec_Title'.$scending, NULL);
 		}
 	}
 }
@@ -717,7 +728,7 @@ class FieldPredicate extends Predicate {
 
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
-error_log("FieldPred MakeSql value = ".print_r($this->value,true));
+//error_log("FieldPred MakeSql value = ".print_r($this->value,true));
 
 		$match_value = is_numeric($this->value)? floatval($this->value) : '"' . addslashes($this->value) . '"';
 
@@ -1244,7 +1255,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-//	error_log("request to query returns ".print_r($query,true));
+	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 
