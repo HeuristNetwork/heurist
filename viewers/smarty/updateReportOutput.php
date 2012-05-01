@@ -132,6 +132,7 @@ function doReport($row){
 	$params["output"]	= $outputfile;
 	$params["mode"] 	= $format;
 	$params["publish"] 	= $publish;
+	$params["rps_id"] 	= $row['rps_ID'];
 
 	executeSmartyTemplate($params); //in showReps
 }

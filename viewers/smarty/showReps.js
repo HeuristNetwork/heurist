@@ -75,19 +75,9 @@ function ShowReps() {
 			for (i in context){
 			if(i!==undefined){
 
-				option = document.createElement("option");
-				option.text = context[i].name;
-				option.value = context[i].filename;
-
-				if(keepSelIndex<0 && _currentTemplate==option.value){
-					keepSelIndex = sel.length;
-				}
-
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (ex2){
-					sel.add(option,null);
+				Hul.addoption(sel, context[i].filename, context[i].name);
+				if(keepSelIndex<0 && _currentTemplate==context[i].filename){
+					keepSelIndex = sel.length-1;
 				}
 			}
 			} // for
@@ -1327,11 +1317,13 @@ function ShowReps() {
 
 		var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q;
 
+		var dim = top.HEURIST.util.innerDimensions(top);
+
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 480,
-			width: 620,
+			width: dim.w*0.9,
 			callback: null
 		});
 	}

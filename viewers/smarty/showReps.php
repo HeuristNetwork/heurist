@@ -28,6 +28,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once('libs.inc.php');
 
@@ -36,7 +37,8 @@ require_once('libs.inc.php');
 	$publishmode = 0;
 	$rtStructs = null;
 	$dtStructs = null;
-	$dtTerms = null;
+	$dtTerms3 = null;
+	$rps_recid = null;
 
 	if(array_key_exists("q", $_REQUEST) &&
 			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -51,7 +53,7 @@ require_once('libs.inc.php');
 */
 function executeSmartyTemplate($params){
 
-	global $smarty, $outputfile, $isJSwrap, $publishmode, $rtStructs, $dtStructs, $dtTerms;
+	global $smarty, $outputfile, $isJSwrap, $publishmode, $rtStructs, $dtStructs, $dtTerms, $rps_recid;
 
 	mysql_connection_db_select(DATABASE);
 
@@ -63,8 +65,9 @@ function executeSmartyTemplate($params){
 	$params["f"] = 1; //always search (do not use cache)
 
 	$isJSwrap	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
-	$outputfile  = (array_key_exists("output", $params))? $params["output"] :null;
-	$publishmode = (array_key_exists("publish", $params))?intval($params['publish']):0;
+	$outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
+	$publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
+	$rps_recid	 = (array_key_exists("rps_id", $params)) ? $params["rps_id"] :null;
 
 	if( !array_key_exists("limit", $params) ){ //not defined
 
@@ -186,9 +189,10 @@ function executeSmartyTemplate($params){
 //
 function save_report_output($tpl_source, Smarty_Internal_Template $template)
 {
-	global $outputfile, $isJSwrap, $publishmode;
+	global $outputfile, $isJSwrap, $publishmode, $rps_recid;
 
 	$errors = null;
+	$res_file = null;
 
 	try{
 
@@ -225,7 +229,7 @@ function save_report_output($tpl_source, Smarty_Internal_Template $template)
 	}
 
 
-	if($publishmode<2){
+	if($publishmode==0){
 
 		if($errors!=null){
 			$tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
@@ -239,6 +243,37 @@ function save_report_output($tpl_source, Smarty_Internal_Template $template)
 			$tpl_res = $tpl_source;
 		}
 		echo $tpl_res;
+
+	}else if ($publishmode==1){
+
+		header("Content-type: text/html");
+
+		if($errors!=null){
+			echo $errors;
+		}else{
+
+?>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+</head>
+<body style="margin: 25px;">
+<h2>
+	The following file has been updated:  <?=$res_file?><br>
+<?php
+
+			if($rps_recid){
+
+				$link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
+?>
+<p>You may view the content of report by click hyperlinks below:<br>
+HTML: <a href="<?=$link?>" target="_blank"><?=$link?></a><br>
+Javascript: <a href="<?=$link?>&mode=js" target="_blank"><?=$link?>&mode=js</a><br>
+<?php
+			}
+			echo "</h2></body></html>";
+
+		}
 	}
 }
 //
@@ -443,6 +478,20 @@ error_log("dtValue=".print_r($dtValue, true));
 				}*/
 
 			break;
+
+			case 'date':
+
+				$res = "";
+				foreach ($dtValue as $key => $value){
+					if(strlen($res)>0) $res = $res.", ";
+					$res = $res.temporalToHumanReadableString($value);
+				}
+				if(strlen($res)==0){ //no valid terms
+					$res = null;
+				}else{
+					$res = array( $dtname=>$res );
+				}
+				break;
 
 			case 'file':
 			   //get url for file download

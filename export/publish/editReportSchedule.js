@@ -82,9 +82,49 @@ function ReportScheduleEditor() {
 			_entity = [-1,typeID,'','','','',hquery,templatefile,0];
 		}
 
+		_reload_templates();
+
+	}
+
+	/**
+	*  show the list of available reports
+	*  #todo - filter based on record types in result set
+	*/
+	function _updateTemplatesList(context) {
+
+
+		var sel = document.getElementById('rps_Template'),
+			option,
+			keepSelIndex = sel.selectedIndex;
+
+		//celear selection list
+		while (sel.length>0){
+				sel.remove(0);
+		}
+
+		if(context && context.length>0){
+			for (i in context){
+				if(i!==undefined){
+					Hul.addoption(sel, context[i].filename, context[i].name);
+				}
+			} // for
+
+			sel.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
+		}
+
 		//fills input with values from _entity array
 		_fromArrayToUI();
 	}
+	/**
+	* loads list of templates
+	*/
+	function _reload_templates(){
+				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+				var callback = _updateTemplatesList;
+				top.HEURIST.util.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+	}
+
+
 
 	/**
 	* Fills inputs with values from _entity array

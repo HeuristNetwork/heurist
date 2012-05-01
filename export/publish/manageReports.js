@@ -37,7 +37,8 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 			_callback_func, //callback function for non-window mode
 			_db,
 			_isSingleSelection = false,
-			_records; //array of all reports from server
+			_records, //array of all reports from server
+			_keepParameters = null;
 		//
 		// filtering UI controls
 		//
@@ -105,6 +106,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 	{
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+		_keepParameters = null;
 
 				if (Hul.isnull(usrID) && location.search.length > 1) { //for selection mode
 					//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
@@ -118,7 +120,8 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 					if(!(Hul.isempty(top.HEURIST.parameters.hquery) || Hul.isempty(top.HEURIST.parameters.template)))
 					{
-						_onAddEditRecord(location.search);
+						_keepParameters = location.search;
+						//auto open _onAddEditRecord(_keepParameters);
 					}
 				}
 
@@ -126,6 +129,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				_initTable([]);
 	}
+
 
 	/**
 	* Creates and (re)fill datatable
@@ -195,7 +199,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 
-			{ key: "status", label: "Status", hidden:false, sortable:true,
+			{ key: "status", label: "<div style='font-size:10;'>Status</div>", hidden:false, sortable:true,
 				formatter:  function(elLiner, oRecord, oColumn, oData) {
 					var status = Number(oRecord.getData('status'));
 					if(status>0){
@@ -217,43 +221,43 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 			}},
 
-			{ key: "rps_ID", label: "#", sortable:true, className:'right',resizeable:false},
+			{ key: "rps_ID", label: "<div style='max-width:15px;'>#</div>", sortable:true, className:'right',resizeable:false},
 
-			{ key: null, label: "Edit", sortable:false,  width:5,
+			{ key: null, label: "<div style='font-size:10;'>Edit</div>", sortable:false,width:12,resizeable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_record"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';
+					elLiner.innerHTML = '<a href="#edit_record"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"></a>';
 			}},
 
-			{ key: null, label: "Execute", sortable:false,  width:5,
+			{ key: null, label: "<div style='font-size:10;'>Exec</div>", sortable:false,resizeable:false,width:12,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var status = Number(oRecord.getData('status'));
 					if(status==1){
 					elLiner.innerHTML = '';
 					}else{
 					var recID = oRecord.getData('rps_ID');
-					elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=1&id='+recID+'" target="_blank"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"><\/a>';
+					elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=1&id='+recID+'" target="_blank"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"></a>';
 //					elLiner.innerHTML = '<a href="#execute_report"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"><\/a>';
 					}
 			}},
 
-			{ key: null, label: "html", sortable:false,  width:5,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
+			{ key: null, label: "<div style='font-size:10;min-width:30px;'>HTML</div>", sortable:false,resizeable:false,width:18,
+					formatter: function(elLiner, oRecord, oColumn, oData) {
 					var status = Number(oRecord.getData('status'));
 					if(status==1){
 						elLiner.innerHTML = '';
 					}else{
 						var recID = oRecord.getData('rps_ID');
-						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link"><\/a>';
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link"></a>';
 					}
 			}},
-			{ key: null, label: "JS", sortable:false,  width:5,
+			{ key: null, label: "<div style='font-size:10;'>JS</div>", sortable:false,resizeable:false,width:7,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var status = Number(oRecord.getData('status'));
 					if(status==1){
 						elLiner.innerHTML = '';
 					}else{
 						var recID = oRecord.getData('rps_ID');
-						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&mode=js&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"><\/a>';
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&mode=js&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
 					}
 			}},
 
@@ -262,7 +266,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 						var hquery = oRecord.getData('rps_HQuery');
-						elLiner.innerHTML = "<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
+						elLiner.innerHTML = hquery;//"<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
 			}},
 			{ key: "rps_IntervalMinutes", label: "Interval", sortable:true, resizeable:false},
 
@@ -526,7 +530,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 					}
 				},
 
-				editReport: function(recID){ _onAddEditRecord("?db="+_db+"&recID="+recID ); },
+				editReport: function(recID){ _onAddEditRecord((recID<0 && _keepParameters)?_keepParameters:"?db="+_db+"&recID="+recID); },
 
 				getClass: function () {
 					return _className;

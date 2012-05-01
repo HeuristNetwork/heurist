@@ -314,6 +314,8 @@ function initmap(map_div_id, geovalue){
 
 	google.maps.event.addListener(map, 'click', addLatLng);
 	google.maps.event.addListener(map,'zoom_changed',mapzoom);
+	map.setOptions({ draggableCursor: 'crosshair' });
+
 	cursorposition(map);
 
     if(geovalue){
@@ -445,6 +447,7 @@ function addLatLng2(point){
 function setstartMarker(point){
 
 	    startMarker = new google.maps.Marker({
+			icon: imageNormal,
 		    position: point,
 		    map: (isReadOnly)?null:map
 	    });
@@ -453,6 +456,7 @@ function setstartMarker(point){
 function createrectangle(point) {
 	    // startMarker i southwest point. now set northeast
     nemarker = new google.maps.Marker({
+    		icon: imageNormal,
 		    position: point,
 		    draggable: true,
 		    raiseOnDrag: false,
@@ -516,17 +520,23 @@ function drawRectangle() {
 }
 function createcircle(point) {
 	// startMarker is center point. now set radius
+	if(nemarker) nemarker.setMap(null);
+
 	nemarker = new google.maps.Marker({
+		icon: imageNormal,
 		position: point,
 		draggable: true,
 		raiseOnDrag: false,
 		title: "Draggable",
-		map: map});
-	google.maps.event.addListener(startMarker, 'drag', drawCircle);
-	google.maps.event.addListener(nemarker, 'drag', drawCircle);
-	startMarker.setDraggable(true);
-	startMarker.setAnimation(null);
-	startMarker.setTitle("Draggable");
+	    map: (isReadOnly)?null:map});
+
+    if(!isReadOnly){
+		google.maps.event.addListener(startMarker, 'drag', drawCircle);
+		google.maps.event.addListener(nemarker, 'drag', drawCircle);
+		startMarker.setDraggable(true);
+		startMarker.setAnimation(null);
+		startMarker.setTitle("Draggable");
+	}
 	drawCircle();
 	polyShape.setMap(null); // remove the Polyline that has collected the points
 	polyPoints = [];
@@ -779,6 +789,7 @@ function setTool(newToolID){
 	if(el){
 		el.value = newToolID;
 		if(toolID == 1 || toolID == 2){
+			//map.setOptions({ draggableCursor: 'crosshair' });
 			showthis('btnDelLastPoint');
 			showthis('btnEditPoly');
 		}else{
