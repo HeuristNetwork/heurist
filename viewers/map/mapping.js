@@ -9,6 +9,7 @@ if (typeof mxn.LatLonPoint == "function") {
 
 		map: null,
 		tmap: null,
+		marker_1:null, marker_2:null, //for debug
 
 		defaultCenter: new mxn.LatLonPoint(-33.888, 151.19),
 		defaultZoom: 14,
@@ -632,23 +633,25 @@ if (typeof mxn.LatLonPoint == "function") {
 						if(layer.url.charAt(layer.url.length-1)!=="/"){
 							layer.url = layer.url + "/";
 						}
+						//internal function to obtain tile URL
 						tile_url =	function(tile,zoom) {
-			              if ((zoom < 1) || (zoom > 19) || (zoom < layer.min_zoom) || (zoom > layer.max_zoom)) {
-			                  return "http://www.maptiler.org/img/none.png";
-			              }
-			              var ymax = 1 << zoom;
-			              var y = ymax - tile.y -1;
+				              if ((zoom < 1) || (zoom > 19) || (zoom < layer.min_zoom) || (zoom > layer.max_zoom)) {
+				                  return "http://www.maptiler.org/img/none.png";
+				              }
+				              var ymax = 1 << zoom;
+				              var y = ymax - tile.y -1;
 
-			              var pnt = M.map.fromPixelToLatLng(tile.x, tile.y, zoom);
+				              var pnt  = M.map.fromPixelToLatLng(tile.x-64, tile.y-64, zoom);
+				              var pnt2 = M.map.fromPixelToLatLng(tile.x+64, tile.y+64, zoom);
+				              var tileBounds = new mxn.BoundingBox(pnt2.lat, pnt.lng, pnt.lat, pnt2.lng);
 
-
-			              if (layer.extent==null || layer.extent.contains(pnt)){ // true) { //(mapBounds.intersects(tileBounds)) {
-			              		var surl = layer.url+zoom+"/"+tile.x+"/"+y+".png";
-			                  	return surl;
-			              } else {
-			                  	return "http://www.maptiler.org/img/none.png";
-			              }
-			          };
+				              if (layer.extent==null || layer.extent.intersects(tileBounds)) {  // layer.extent.contains(pnt)){ // true) {
+			              			var surl = layer.url+zoom+"/"+tile.x+"/"+y+".png";
+			                  		return surl;
+				              } else {
+			                  		return "http://www.maptiler.org/img/none.png";
+				              }
+			          	  }; //end of internal function to obtain tile URL
 					} else {
 						errors = errors + "Map type is not defined properly for image layer. It should be virtual earth or maptiler. Rec#"+layer.rec_ID;//+"\n";
 					}
@@ -671,6 +674,22 @@ if (typeof mxn.LatLonPoint == "function") {
 						//layer.min_zoom, layer.max_zoom, true);
 
 						layer.extent = M.getImageLayerExtent(layer['extent']);
+/* DEBUG
+if(layer.extent){
+var gmap = M.map.maps.googlev3;
+if(M.marker_1) M.marker_1.setMap(null);
+if(M.marker_2) M.marker_2.setMap(null);
+
+var point = new google.maps.LatLng(layer.extent.sw.lat, layer.extent.sw.lng);
+M.marker_1 = new google.maps.Marker({
+position: point,
+map: gmap});
+point = new google.maps.LatLng(layer.extent.ne.lat, layer.extent.ne.lng);
+M.marker_2 = new google.maps.Marker({
+position: point,
+map: gmap});
+}
+*/
 						if(zoom_mode>0){
 							var layerbnd = layer.extent;
 							if(layerbnd){

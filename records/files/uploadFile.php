@@ -429,6 +429,10 @@ function register_external($filejson)
 			}
 		}
 	}
+	
+	if($filedata['ext']==null && $filedata['mediaType']=="xml"){
+		$filedata['ext'] = "xml";
+	}
 
 	$fileparameters = "mediatype=".$filedata['mediaType'];
 	if($filedata['remoteSource'] && $filedata['remoteSource']!='heurist'){ // && $filedata['remoteSource']!='generic'){

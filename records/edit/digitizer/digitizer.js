@@ -2240,19 +2240,23 @@ function _updateLayersList(context){
 	for (ind in systemAllLayers) {
 		if(!top.HEURIST.util.isnull(ind))
 		{
-			var sTitle = systemAllLayers[ind].title;
-			if(top.HEURIST.util.isempty(sTitle)){
-				sTitle = context.records[systemAllLayers[ind].rec_ID].title;
-			}
-			if(top.HEURIST.util.isempty(sTitle)){
-				sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
-			}
+			if(top.HEURIST.util.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
+			{
 
-			s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+				var sTitle = systemAllLayers[ind].title;
+				if(top.HEURIST.util.isempty(sTitle)){
+					sTitle = context.records[systemAllLayers[ind].rec_ID].title;
+				}
+				if(top.HEURIST.util.isempty(sTitle)){
+					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
+				}
 
-			if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
-			systemAllLayers[ind].rec_ID === currentBackgroundLayer){
-				selIndex = ind;
+				s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+
+				if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
+				systemAllLayers[ind].rec_ID === currentBackgroundLayer){
+					selIndex = ind;
+				}
 			}
 		}
 	}

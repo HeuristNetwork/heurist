@@ -29,7 +29,7 @@
 	header("Content-type: text/javascript");
 
 	$imagelayerRT = (defined('RT_IMAGE_LAYER')?RT_IMAGE_LAYER:0);
-	$KMLlayerRT = (defined('RT_IMAGE_LAYER')?RT_KML_LAYER:0);
+	$KMLlayerRT = (defined('RT_KML_LAYER')?RT_KML_LAYER:0);
 
 	mysql_connection_db_select(DATABASE);
 

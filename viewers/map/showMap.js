@@ -459,7 +459,7 @@ function ShowMap() {
 
 		systemAllLayers = context.layers;
 
-
+		//add kml as well
 		for (ind in context.geoObjects) {
 			if(!Hul.isnull(ind))
 			{
@@ -478,20 +478,25 @@ function ShowMap() {
 		for (ind in systemAllLayers) {
 			if(!Hul.isnull(ind)){
 
-				var sTitle = systemAllLayers[ind].title;
-				if(Hul.isempty(sTitle)){
-					sTitle = context.records[systemAllLayers[ind].rec_ID].title;
-				}
-				if(Hul.isempty(sTitle)){
-					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
-				}
+				if(Hul.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
+				{
 
-				var sSel = '';
-				if(keptLayer==systemAllLayers[ind].rec_ID){
-					sSel = ' selected="selected"';
-				}
+					var sTitle = systemAllLayers[ind].title;
+					if(Hul.isempty(sTitle)){
+						sTitle = context.records[systemAllLayers[ind].rec_ID].title;
+					}
+					if(Hul.isempty(sTitle)){
+						sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
+					}
 
-				s = s + "<option value='" + ind + "' "+sSel+">"+ sTitle +"</option>";
+					var sSel = '';
+					if(keptLayer==systemAllLayers[ind].rec_ID){
+						sSel = ' selected="selected"';
+					}
+
+					s = s + "<option value='" + ind + "' "+sSel+">"+ sTitle +"</option>";
+
+				}
 			}
 		}
 

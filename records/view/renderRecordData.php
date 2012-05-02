@@ -408,7 +408,7 @@ function print_private_details($bib) {
 
 			}else if ($bd['dty_Type'] == 'date') {
 
-				$bd['val'] = temporalToHumanReadableString($bd['val']);
+				$bd['val'] = temporalToHumanReadableString($bd['val'], true);
 				$bd['val'] = output_chunker($bd['val']);
 
 			}else if ($bd['dty_Type'] == 'resource') {

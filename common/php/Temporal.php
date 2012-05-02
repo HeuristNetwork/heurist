@@ -10,12 +10,12 @@
  * @todo
  */
 
-function temporalToHumanReadableString($value){
+function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 
 		if (strpos($value,"|")!==false) {// temporal encoded date
-			$value = $value;
+			$value2 = $value;
 			$tDate = array();
-			$props = explode("|",substr_replace($value,"",0,1)); // remove first verticle bar and create array
+			$props = explode("|",substr_replace($value2,"",0,1)); // remove first verticle bar and create array
 			foreach ($props as $prop) {//create an assoc array
 				list($tag, $val) = explode("=",$prop);
 				$tDate[$tag] = $val;
@@ -58,7 +58,9 @@ function temporalToHumanReadableString($value){
 					}
 					break;
 			}
-			$value .= " [$value]";
+			if($showoriginal_temporal){
+				$value .= " [ $value2 ]";
+			}
 		}
 
 		return $value;
