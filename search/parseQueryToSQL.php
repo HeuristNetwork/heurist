@@ -28,11 +28,11 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 	// divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
 	preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
 	$preProcessedQuery = "";
-	$prevQueryPart="";
+	$connectors=array(":",">","<","=",",");
 //error_log("parse query matches = ".print_r($matches,true));
 	foreach ($matches[0] as $queryPart) {
 		//if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
-		//necessary since we want to doble quotes to allow all characters
+		//necessary since we want double quotes to allow all characters
 		if (!preg_match('/^\s*-?".*"$/',$queryPart)) {
 		// clean up the query.
 		// liposuction out all the non-kocher characters
@@ -40,12 +40,9 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			$queryPart = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $queryPart);
 		}
 		//reconstruct the string
-		$preProcessedQuery .= ($preProcessedQuery &&
-								strrpos($preProcessedQuery,":") != strlen($preProcessedQuery)-1 &&
-								(!strrpos($prevQueryPart,":") || strrpos($prevQueryPart,":") == strlen($prevQueryPart)-1) &&
-								strpos($queryPart,":") !== 0 ? " ":"").$queryPart;
-		$prevQueryPart = $queryPart;
-//error_log("query part = ".print_r($queryPart,true));
+		$addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
+		$preProcessedQuery .= ($addSpace ? " ":"").$queryPart;
+//error_log("query part = ".print_r($queryPart[0],true));
 //error_log("preprocessed query = ".print_r($preProcessedQuery,true));
 	}
 	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
@@ -510,7 +507,7 @@ class SortPhrase {
 								"left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
 				} else {
 					// have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, if(dty_Type='integer',cast(dtl_Value as SIGNED), dtl_Value)) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
 							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			} else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
@@ -528,7 +525,7 @@ class SortPhrase {
 								"left join defDetailTypes bdtInt on bdtInt.dty_Name='".addslashes($field_name)."' "
 								."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
 				} else {
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, if(dty_Type='integer',cast(dtl_Value as SIGNED), dtl_Value)) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
 							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			}
@@ -764,10 +761,10 @@ class FieldPredicate extends Predicate {
 		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
 		                        . 'left join Records link on rd.dtl_Value=link.rec_ID '
 		                            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-		                            . '  and if(dty_Type = "resource", '
+		                            . '  and if(rdt.dty_Type = "resource", '
 		                                      .'link.rec_Title ' . $match_pred . ', '
-		                       . ($timestamp ? 'if(dty_Type = "date", '
-		                                         .'str_to_date(rd.dtl_Value, "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
+		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.dtl_Value ' . $match_pred . ')'
 		                                     : 'rd.dtl_Value ' . $match_pred ) . ')'
 		                              .' and ' . $rd_type_clause . ')';
@@ -1255,7 +1252,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-	error_log("request to query returns ".print_r($query,true));
+//	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

@@ -45,21 +45,21 @@ else 				// all records entries
 	$search_type = BOTH;
 
 
-$query = 'select SQL_CALC_FOUND_ROWS
-          bkm_ID,
-          bkm_UGrpID,
-          rec_ID,
-          rec_URL,
-          rec_RecTypeID,
-          rec_Title,
-          rec_OwnerUGrpID,
-          rec_NonOwnerVisibility,
-          rec_URLLastVerified,
-          rec_URLErrorMessage,
-          bkm_PwdReminder ';
+$query = 'select SQL_CALC_FOUND_ROWS '
+		.'bkm_ID,'
+		.'bkm_UGrpID,'
+		.'rec_ID,'
+		.'rec_URL,'
+		.'rec_RecTypeID,'
+		.'rec_Title,'
+		.'rec_OwnerUGrpID,'
+		.'rec_NonOwnerVisibility,'
+		.'rec_URLLastVerified,'
+		.'rec_URLErrorMessage,'
+		.'bkm_PwdReminder ';
 
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_db_overwrite(DATABASE);
 
 if (preg_match('/\\b_BROKEN_\\b/', $_REQUEST['q'])) {
 	$broken = 1;
@@ -92,7 +92,7 @@ if (@$collected) {
 
 list($usec, $sec) = explode(' ', microtime());
 $ptime = $sec + $usec;
-
+//error_log("query from asynch ".print_r($query,true));
 $res = mysql_query($query);
 if (mysql_error()) {
 	error_log("queryError in getResultsPageAsync -".mysql_error());

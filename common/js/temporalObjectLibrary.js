@@ -322,7 +322,7 @@ Temporal.parse = function () {
 Temporal.typeDict = {"s" :	"Simple Date",
 					"c"	:	"C14 Date",
 					"f"	:	"Aproximate Date",
-					"p"	:	"Date Range",
+					"p"	:	"Probability Date Range",
 					"d"	:	"Duration"
 };
 

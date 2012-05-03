@@ -139,6 +139,125 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
 
 DELIMITER ;
 
+-- ------------------------------------------------------------------------------
+
+DELIMITER $$
+
+DROP function IF EXISTS `getTemporalDateString`$$
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8
+	DETERMINISTIC
+	begin
+			declare temporalType char;
+			declare iBegin integer;
+			declare iEnd integer;
+			declare dateString varchar(4095);
+		-- find the temporal type might not be a temporal format, see else below
+		set @iBegin := LOCATE('TYP=',strDate);
+		if iBegin = 0 THEN
+			RETURN strDate;
+		else
+			set @iBegin := @iBegin + 4;
+		end if;
+		set @temporalType = SUBSTRING(strDate,@iBegin,1);
+		CASE @temporalType
+			WHEN 's' THEN -- Simple Date
+				begin
+					set @iBegin := INSTR(strDate,'DAT=');
+					if @iBegin = 0 THEN -- no Date field send empty string
+						RETURN '';
+					else
+						set @iBegin := @iBegin + 4;
+					end if;
+					set @iEnd := LOCATE('|', strDate, @iBegin);
+					if @iEnd = 0 THEN -- no other properties so goto end of string
+						begin
+							set @dateString =  substring(strDate,@iBegin);
+						end;
+					else	-- use iEnd to calc substring length
+						begin
+							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+						end;
+					end if;
+				end;
+			WHEN 'f' THEN -- Fuzzy Date
+				begin
+					set @iBegin := INSTR(strDate,'DAT=');
+					if @iBegin = 0 THEN -- no Date field send empty string
+						RETURN '';
+					else
+						set @iBegin := @iBegin + 4;
+					end if;
+					set @iEnd := LOCATE('|', strDate, @iBegin);
+					if @iEnd = 0 THEN -- no other properties so goto end of string
+						begin
+							set @dateString =  substring(strDate,@iBegin);
+						end;
+					else	-- use iEnd to calc substring length
+						begin
+							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+						end;
+					end if;
+				end;
+			WHEN 'c' THEN -- Carbon14 Date
+				begin
+					set @iBegin := INSTR(strDate,'BPD=');
+					if @iBegin = 0 THEN -- no Date field send empty string
+						set @iBegin := INSTR(strDate,'BCE=');
+					end if;
+					if @iBegin = 0 THEN -- no Date field send empty string
+						RETURN '';
+					else
+						set @iBegin := @iBegin + 4;
+					end if;
+					set @iEnd := LOCATE('|', strDate, @iBegin);
+					if @iEnd = 0 THEN -- no other properties so goto end of string
+						begin
+							set @dateString =  substring(strDate,@iBegin);
+						end;
+					else	-- use iEnd to calc substring length
+						begin
+							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+						end;
+					end if;
+				end;
+			WHEN 'p' THEN -- Probable Date
+				begin
+					set @iBegin := INSTR(strDate,'TPQ=');
+					if @iBegin = 0 THEN -- no TPQ field try PDB
+						set @iBegin := INSTR(strDate,'PDB=');
+					end if;
+					if @iBegin = 0 THEN -- no PDB field try PDE
+						set @iBegin := INSTR(strDate,'PDE=');
+					end if;
+					if @iBegin = 0 THEN -- no PDE field try TAQ
+						set @iBegin := INSTR(strDate,'TAQ=');
+					end if;
+					if @iBegin = 0 THEN -- no Date field send empty string
+						RETURN '';
+					else
+						set @iBegin := @iBegin + 4;
+					end if;
+					set @iEnd := LOCATE('|', strDate, @iBegin);
+					if @iEnd = 0 THEN -- no other properties so goto end of string
+						begin
+							set @dateString =  substring(strDate,@iBegin);
+						end;
+					else	-- use iEnd to calc substring length
+						begin
+							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+						end;
+					end if;
+				end;
+			ELSE
+				set @dateString = strDate;
+		END CASE;
+
+		return @dateString;
+	end$$
+
+DELIMITER ;
+
 --  **********************   Triggers   ***************************
 -- ------------------------------------------------------------------------------
 
@@ -269,7 +388,7 @@ DELIMITER $$
 --			from defRecTypes
 --			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 	-- need to change this to check the rectype's type = relationship
-    -- 1 = record relationship
+	-- 1 = record relationship
 	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 								values (@logged_in_user_id, NEW.rec_ID, now());
 	set @rec_id := last_insert_id(NEW.rec_ID);
@@ -345,11 +464,11 @@ DELIMITER $$
 --			select dtl_Value into srcRecID
 --				from recDetails
 --				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
-        -- record type 1 = relationship record
+		-- record type 1 = relationship record
 		if NEW.rec_RecTypeID = 1 AND NOT OLD.rec_RecTypeID = 1 then
 			select dtl_Value into srcRecID
-            	from recDetails
-                -- primary resource pointer
+				from recDetails
+				-- primary resource pointer
 				where dtl_DetailTypeID=7 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if srcRecID is null then
 				set srcRecID = NEW.rec_ID;
@@ -357,7 +476,7 @@ DELIMITER $$
 			select dtl_Value into trgRecID
 				from recDetails
 --				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
-                -- linked resource pointer
+				-- linked resource pointer
 				where dtl_DetailTypeID=4 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
@@ -662,14 +781,14 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-    DROP TRIGGER IF EXISTS defTerms_last_delete$$
+	DROP TRIGGER IF EXISTS defTerms_last_delete$$
 
-    CREATE
-    DEFINER=`root`@`localhost`
-    TRIGGER `defTerms_last_delete`
-    AFTER DELETE ON `defTerms`
-    FOR EACH ROW
-        update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defTerms_last_delete`
+	AFTER DELETE ON `defTerms`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
 
 DELIMITER ;
 
@@ -794,11 +913,11 @@ DELIMITER $$
 --  			delete
 	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
 
-        CREATE
-        DEFINER=`root`@`localhost`
+		CREATE
+		DEFINER=`root`@`localhost`
 	TRIGGER `defDetailTypeGroups_delete`
 	AFTER DELETE ON `defDetailTypeGroups`
-        FOR EACH ROW
+		FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
 
 DELIMITER ;

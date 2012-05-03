@@ -45,7 +45,7 @@ require_once(dirname(__FILE__)."../../records/files/uploadFile.php");
 
 $memcache = null;
 
-mysql_connection_select(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)  {
 	/*
@@ -78,7 +78,10 @@ function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)
 	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
 
 	$res = mysql_query($query);
-// error_log($query);
+//	error_log($query);
+	if (mysql_error()) {
+		error_log("queryError in getSearchResults -".mysql_error());
+	}
 	$fres = mysql_query('select found_rows()');
 	$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
 
@@ -216,8 +219,8 @@ function loadRecordDetails(&$record) {
 
 		switch ($rd["dty_Type"]) {
 			case "freetext": case "blocktext":
-            case "float": 
-			case "date": 
+            case "float":
+			case "date":
 			case "enum":
 			case "relationtype":
             case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility

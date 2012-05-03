@@ -830,7 +830,7 @@ function outputDateDetail($attrs, $value) {
 
 function outputTDateDetail($attrs, $value) {
 	makeTag('raw', null, $value);
-	if (preg_match('/^([^T\s]*)(?:[T\s+](\S*))?$/', $value, $matches)) { // valid ISO Duration split into date and time
+	if (preg_match('/^([^T\s]*)(?:[T\s+](\S*))?$/', $value, $matches)) { // valid ISO Date split into date and time
 		$date = @$matches[1];
 		$time = @$matches[2];
 		if (!$time && preg_match('/:\./',$date)) {
