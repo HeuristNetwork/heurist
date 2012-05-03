@@ -1935,15 +1935,169 @@ function loadParameters(val) {
 	}
 	var type = matches[1];
 	var value = matches[2];
-	var __point;
-
-	var bounds;
-	clearMap();
 
 	switch (type) {
 		case "p":
-		    var matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
-		    if (! matches) break;
+		    matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
+			break;
+		case "r":  //rectangle
+		    matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+			break;
+
+		case "c":  //circle
+		    matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+			break;
+
+		case "l":  ///polyline
+		    matches = value.match(/LINESTRING\((.+)\)/i);
+		    if (matches){
+		    	matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+			}
+			break;
+
+		case "pl": //polygon
+		    matches = value.match(/POLYGON\(\((.+)\)\)/i);
+		    if (matches) {
+	    		matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+			}
+			break;
+		default:
+			setTool(5);
+	}
+
+	loadCoordinates(type, matches);
+}
+
+Number.prototype.toRad = function() {
+   return this * Math.PI / 180;
+}
+Number.prototype.toDeg = function() {
+   return this * 180 / Math.PI;
+}
+function destinationPoint(lat1, lon1, brng, dist) {
+   dist = dist / 6371000;
+   brng = brng.toRad();
+
+   lat1 = lat1.toRad();
+   lon1 = lon1.toRad();
+
+   var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
+                        Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+
+   var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
+                                Math.cos(lat1),
+                                Math.cos(dist) - Math.sin(lat1) *
+                                Math.sin(lat2));
+
+   if (isNaN(lat2) || isNaN(lon2)) return null;
+
+   return [lat2.toDeg(), lon2.toDeg()];
+}
+
+// apply manually enetered coordinates
+function applyManualEntry(){
+	var s = gob("coords1").value;
+		s = s.replace(/[\b\t\n\v\f\r]/g, ' ');
+		s = s.replace("  "," ");
+
+	var arc = s.split(" ");
+	var k, type = 5, coords = [''];
+
+	switch (toolID) {
+		case 5: //"point":
+			type = "p";
+			break;
+		case 3: //"rectangle":
+			type = "r";
+			break;
+		case 4: //"circle":
+			type = "c";
+			break;
+		case 2: //"polygon":
+			type = "pl";
+			coords = [];
+			break;
+		case 1: //"path":
+			type = "l";
+			coords = [];
+	}
+
+	var islng = true;
+	for (k=0; k<arc.length; k++){
+		if(k==2 && type=="c" && arc[k].indexOf("r=")==0){
+			var d = Number(arc[k].substr(2));
+			if(isNaN(d)){
+				alert(arc[k]+" is wrong radius value");
+				return;
+			}
+
+			var resc = destinationPoint(coords[2], coords[1], 90, d);
+
+			coords.push(resc[1]); //lng
+			coords.push(resc[0]); //lat
+			break;
+		}
+		var crd = Number(arc[k]);
+		if(isNaN(crd)){
+			alert(arc[k]+" is not number value");
+			return;
+		}else if(islng && Math.abs(crd)>180){
+			alert(arc[k]+" is wrong longitude value");
+			return;
+		}else if(!islng && Math.abs(crd)>90){
+			alert(arc[k]+" is wrong latitude value");
+			return;
+		}
+
+		if(toolID<3){ //polygon or path
+			if(!islng){
+				coords.push(arc[k-1]+' '+arc[k]);
+			}
+		}else{
+			coords.push(crd);
+		}
+		islng = !islng;
+	}
+
+	var isok = false;
+
+	if (coords){
+		if(type=="r" && coords.length<5){
+			alert("Not enough coordinates for rectangle. Need at least 2 pairs");
+		}else if(type=="l" && coords.length<2){
+			alert("Not enough coordinates for path. Need at least 2 pairs");
+		}else if(type=="pl" && coords.length<3){
+			alert("Not enough coordinates for polygon. Need at least 3 pairs");
+		}else if(type=="p" && coords.length<2){
+			alert("Define at least one pair of coordinates for point/marker");
+		}else if(type=="c" && coords.length<5){
+			alert("For circle define at least one pair of coordinates and radious or 2 pairs of coordinates");
+		}else{
+			isok = true;
+		}
+	}
+	if(isok){
+		loadCoordinates(type, coords);
+	}
+}
+
+//
+//
+//
+function loadCoordinates(type, matches){
+
+	var bounds,
+		__point,
+		points = [];
+
+
+	clearMap();
+
+	if(matches && matches.length>2){
+
+	switch (type) {
+		case "p":
+
 		    var point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
 		    __point = point;
 
@@ -1957,13 +2111,13 @@ function loadParameters(val) {
 		break;
 
 		case "r":  //rectangle
-		    var matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
-		    if (! matches) break;
 
 		    setTool(3);
 
-		    //var point1 = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-		    //var point2 = new GLatLng(parseFloat(matches[6]), parseFloat(matches[5]));
+		    if(matches.length<6){
+		    	matches.push(matches[3]);
+		    	matches.push(matches[4]);
+			}
 
 		    southWest = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
 		    northEast = new google.maps.LatLng(parseFloat(matches[6]), parseFloat(matches[5]));
@@ -1975,8 +2129,7 @@ function loadParameters(val) {
 		break;
 
 		case "c":  //circle
-		    var matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
-		    if (! matches) break;
+
 		    var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
 		    var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
 		    //var radius = google.maps.geometry.spherical.computeDistanceBetween (centre, oncircle);  // (parseFloat(matches[3])-parseFloat(matches[1]));
@@ -1985,26 +2138,20 @@ function loadParameters(val) {
 		    setstartMarker(centre);
 		    createcircle(oncircle);
 
-		    /*
-		    southWest = new google.maps.LatLng(centre.lat() - radius, centre.lng() - radius);
-		    northEast = new google.maps.LatLng(centre.lat() + radius, centre.lng() + radius);
-		    bounds = new google.maps.LatLngBounds(southWest, northEast);*/
-
 		    bounds = circle.getBounds();
 
 		break;
 
 		case "l":  ///polyline
-		    var matches = value.match(/LINESTRING\((.+)\)/i);
-		    if (! matches) break;
 
-		    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
-		    var points = [];
+		    setTool(1);
+
 		    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-		    for (var j=0; j < matches.length-1; ++j) {
+		    for (var j=0; j < matches.length; ++j) {
 			    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
 			    var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
 			    points.push(point);
+				pointsArrayKml.push(matches[j].replace(",",""));
 
 			    if (point.lat() < minLat) minLat = point.lat();
 			    if (point.lat() > maxLat) maxLat = point.lat();
@@ -2012,7 +2159,6 @@ function loadParameters(val) {
 			    if (point.lng() > maxLng) maxLng = point.lng();
 		    }
 
-		    setTool(1);
 		    polyPoints = points;
 		    southWest = new google.maps.LatLng(minLat, minLng);
 		    northEast = new google.maps.LatLng(maxLat, maxLng);
@@ -2023,16 +2169,15 @@ function loadParameters(val) {
 		break;
 
 		case "pl": //polygon
-		    var matches = value.match(/POLYGON\(\((.+)\)\)/i);
-		    if (! matches) break;
 
-		    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
-		    var points = [];
+		    setTool(2);
+
 		    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 		    for (var j=0; j < matches.length-1; ++j) {
 			    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
 			    var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
 			    points.push(point);
+				pointsArrayKml.push(matches[j].replace(",",""));
 
 			    if (point.lat() < minLat) minLat = point.lat();
 			    if (point.lat() > maxLat) maxLat = point.lat();
@@ -2040,7 +2185,6 @@ function loadParameters(val) {
 			    if (point.lng() > maxLng) maxLng = point.lng();
 		    }
 
-		    setTool(2);
 		    polyPoints = points;
 		    southWest = new google.maps.LatLng(minLat, minLng);
 		    northEast = new google.maps.LatLng(maxLat, maxLng);
@@ -2051,6 +2195,8 @@ function loadParameters(val) {
 		break;
 		default:
 		setTool(5);
+	}
+
 	}
 
 	/* ARTEM todo
@@ -2068,6 +2214,8 @@ function loadParameters(val) {
 	}else{
 		zoomToBounds(bounds);
 	}
+
+	logCoords(null);
 }
 
 function zoomToBounds(bounds) {
@@ -2304,3 +2452,4 @@ function keepExtent() {
 	button.style.color = "red";
 	setTimeout(function() { button.value = "Remember this view"; button.style.color = ""; }, 2000);
 }
+

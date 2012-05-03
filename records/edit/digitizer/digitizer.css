@@ -3,7 +3,8 @@
     padding: 5px;
     font-weight: normal;
     width:130px;
-    height:320px;
+    height:290px;
+    font-size:0.8em;
 }
 #presenter {
     opacity:0.7;
