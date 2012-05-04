@@ -2461,12 +2461,20 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		tds[0].appendChild(this.document.createTextNode("Who"));
 
 		var userTextbox = this.userTextbox = tds[1].appendChild(this.document.createElement("input"));
+			this.userTextbox.id = "reminder-user";
 			this.userTextbox.name = "reminder-user";
 			this.userTextbox.className = "in";
 			this.userTextbox.setAttribute("prompt", "Type user name here");
 			new top.HEURIST.autocomplete.AutoComplete(userTextbox, top.HEURIST.util.userAutofill,
 			                { multiWord: false, prompt: this.userTextbox.getAttribute("prompt"),
-					  nonVocabularyCallback: function(value) { if (value) alert("Unknown user '"+value+"'"); return false; } });
+					  nonVocabularyCallback: function(value) {
+					  	  if (value) {
+					  	  	  alert("Unknown user '"+value+"'");
+					  	  	  this.textbox.currentWordValue = '';
+					  	  	  this.textbox.value = '';
+						  }
+					  	  return true;
+					  } });
 
 		tds[2].appendChild(this.document.createTextNode("or"));
 

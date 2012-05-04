@@ -104,6 +104,7 @@ top.HEURIST.search = {
 						top.HEURIST.search.clearRelatesRows();
 						top.HEURIST.search.renderNavigation();
 						top.HEURIST.search.updateRssFeedLink();
+						top.HEURIST.search.updateMapOrSmarty();
 			});
 		}
 //			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
