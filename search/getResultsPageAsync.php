@@ -26,8 +26,14 @@ require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
 
 
+mysql_connection_db_overwrite(DATABASE);
+
+//remove any tempory records more that a week old since
+//it's possible that someone leaves the edit page up for a while before saving.
+mysql_query("delete from Records where rec_FlagTemporary = 1 and rec_Modified < date_sub(now(), interval 1 week)");
+
 list($usec, $sec) = explode(' ', microtime());
-$stime = $sec + $usec;
+$stime = $sec + $usec;//start time
 
 // if the user isn't logged in, never do a usrBookmarks search
 if (! is_logged_in())
@@ -59,7 +65,6 @@ $query = 'select SQL_CALC_FOUND_ROWS '
 		.'bkm_PwdReminder ';
 
 
-mysql_connection_db_overwrite(DATABASE);
 
 if (preg_match('/\\b_BROKEN_\\b/', $_REQUEST['q'])) {
 	$broken = 1;
@@ -91,7 +96,7 @@ if (@$collected) {
 
 
 list($usec, $sec) = explode(' ', microtime());
-$ptime = $sec + $usec;
+$ptime = $sec + $usec;//parse time
 //error_log("query from asynch ".print_r($query,true));
 $res = mysql_query($query);
 if (mysql_error()) {
@@ -101,7 +106,7 @@ $fres = mysql_query('select found_rows()');
 $num_rows = mysql_fetch_row($fres); $num_rows = $num_rows[0];
 
 list($usec, $sec) = explode(' ', microtime());
-$etime = $sec + $usec;
+$etime = $sec + $usec;// execusion time
 
 if (mysql_error()) {
 	error_log(mysql_error());
