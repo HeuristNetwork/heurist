@@ -78,7 +78,8 @@ function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)
 	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
 
 	$res = mysql_query($query);
-//	error_log($query);
+//error_log($query);
+
 	if (mysql_error()) {
 		error_log("queryError in getSearchResults -".mysql_error());
 	}
@@ -95,6 +96,11 @@ function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)
 	}else{
 		$recs = array();
 		while ($row = mysql_fetch_assoc($res)) {
+
+			if (mysql_error()) {
+				error_log("2.queryError in getSearchResults -".mysql_error());
+			}
+
 			$record = loadRecord($row["rec_ID"], $fresh, $bare);
 			if (array_key_exists("error", $record)) {
 				return array("error" => $record["error"]);

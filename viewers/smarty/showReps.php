@@ -55,7 +55,7 @@ function executeSmartyTemplate($params){
 
 	global $smarty, $outputfile, $isJSwrap, $publishmode, $rtStructs, $dtStructs, $dtTerms, $rps_recid;
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_overwrite(DATABASE); //AO: mysql_connection_db_select - does not work since there is no access to stored procedures(getTemporalDateString) Steve uses in some query
 
 	//load definitions (USE CACHE)
 	$rtStructs = getAllRectypeStructures(true);
@@ -80,6 +80,7 @@ function executeSmartyTemplate($params){
 	}
 
 	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
+//error_log(print_r($qresult,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
