@@ -592,12 +592,14 @@ HAPI.WOOT.GUI = function() {
 		*/
 			this.chunkText = chunkText;
 
-			if (this.editButton) {
-				this.div.appendChild(this.editButton);
-			}
 			this.div.appendChild(chunkText);
 			if (ownerText)  { this.div.insertBefore(this.ownerText, this.div.firstChild); }
+
+
 			this.div.insertBefore(this.addButton, this.div.firstChild);
+			if (this.editButton) {
+				this.div.insertBefore(this.editButton, this.addButton);
+			}
 
 			this.div.appendChild(document.createElement("br")).style.clear = "both";	// prevent floating contents from protruding
 	}
@@ -648,11 +650,15 @@ HAPI.WOOT.GUI = function() {
 		}
 		this.chunkText.innerHTML = this.div.innerHTML; //re-render chunk text in a div to avoid onclick conflict
 		this.div.innerHTML  = "";
-		this.div.appendChild(this.editButton);
+		//this.div.appendChild(this.editButton);
 		this.div.appendChild(this.chunkText);
 
 		this.div.insertBefore(this.ownerText, this.div.firstChild);
 		this.div.insertBefore(this.addButton, this.div.firstChild);
+		if (this.editButton) {
+				this.div.insertBefore(this.editButton, this.addButton);
+		}
+
 
 //		this.div.appendChild(document.createElement("br")).style.clear = "both";	// prevent floating contents from protruding
 	};

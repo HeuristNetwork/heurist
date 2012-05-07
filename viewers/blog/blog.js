@@ -395,7 +395,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		if (Blog.canEdit()) {
 			var editLink = document.createElement("span")
 				editLink.className = "geo-edit";
-				editLink.innerHTML = (geovalue)?"Click to edit a location":"Click to add a location";
+				editLink.innerHTML = "Edit location"; //(geovalue)?"Click to edit a location":"Click to add a location";
 				editLink.onclick = function() {
 
 					var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;

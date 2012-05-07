@@ -429,12 +429,16 @@ error_log("dtValue=".print_r($dtValue, true));
 
 		if($dtKey<1){
 			$dt_label = "Relationship";
+//error_log("111>>>>>".print_r($dtValue, true));
+//error_log("222>>>>>".$recTypeID);
+
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
 			$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 			if(array_key_exists($dtKey,$rt_structure)){
 				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
 			}
+
 			$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
 		}
 

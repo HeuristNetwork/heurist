@@ -530,12 +530,14 @@ function ShowReps() {
 		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
 		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
+		var dim = Hul.innerDimensions(this);
+
 		var units;
 		if(isviewer && iseditor){
 				units = [
-				{ position: 'top', header: 'Editor', height: 200,
+				{ position: 'top', header: 'Editor', height: dim.h*0.7,
 					resize: true, body: 'editorcontainer', gutter:'5px', useShim: true, collapse: true},
-				{ position: 'center', body: 'viewercontainer'}
+				{ position: 'center', body: 'viewercontainer', height: dim.h*0.3}
 				];
 		}else if(isviewer){
 				units = [
@@ -725,11 +727,15 @@ function ShowReps() {
 					}else{
 						if(parent_id=="r" || parent_id.indexOf("r")==0){
 							term.label = term.label + label +
-'&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">insert</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
 						}else{
 							term.label = term.label + label +
-'&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">in</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">out</a>)</div>';
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
+'&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">in if</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">out if</a>)</div>';
+
 						}
 					}
 
@@ -825,7 +831,8 @@ function ShowReps() {
                     term.label = term.label + '</div>'
 			}else{
 					term.label = term.label + varid+ //to debug replace to term.id
-'&nbsp;<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
+'&nbsp;<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">insert</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF opeartor for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
 
 			}
 
@@ -850,6 +857,9 @@ function ShowReps() {
 		//first_node.toggle();
 	}
 
+	function _addIfOperator(nodedata, prefix){
+		return "{if ($"+prefix+nodedata.this_id+")}\n{else}\n{/if} {* "+prefix+nodedata.this_id+" *}";
+	}
 	//
 	//
 	//
@@ -857,11 +867,11 @@ function ShowReps() {
 		var res= "",
 			insertMode = Dom.get("selInsertMode").value;
 
-		if(insertMode==0){
+		if(insertMode==0){ //variable only
 
-			res = "{$"+prefix+nodedata.this_id+"}";
+			res = "{$"+prefix+nodedata.this_id+"} {*"+nodedata.labelonly+"*}";
 
-		}else if (insertMode==1){
+		}else if (insertMode==1){ //label+field
 
 			res = nodedata.labelonly+": {$"+prefix+nodedata.this_id+"}";
 
@@ -878,7 +888,7 @@ function ShowReps() {
 			res = res +'}';
 		}
 
-		return (res+'<br/>\n');
+		return (res+((insertMode==0)?' ':'<br/>\n'));
 	}
 
 	//
@@ -943,7 +953,7 @@ function ShowReps() {
 	//
 	// inserts selected variables
 	//
-	function _insertSelectedVars( varid, inloop ){
+	function _insertSelectedVars( varid, inloop, isif ){
 
 		var textedit = Dom.get("edTemplateBody"),
 			_text = "",
@@ -994,7 +1004,12 @@ function ShowReps() {
 							__loopNodes2(node.children);
 
 						}else {
-							_text = _text + _addVariable(node.data, _prefix);
+
+							if(isif){
+								_text = _text + _addIfOperator(node.data, _prefix);
+							}else{
+								_text = _text + _addVariable(node.data, _prefix);
+							}
 						}
 					}
 					index++;
@@ -1047,7 +1062,12 @@ function ShowReps() {
 						s = s.substring(0,s.length-_nodep.data.this_id.length);
 						_prefix = s;
 					}
-					_text = _text + _addVariable(_nodep.data, _prefix);
+
+					if(isif){
+						_text = _text + _addIfOperator(_nodep.data, _prefix);
+					}else{
+						_text = _text + _addVariable(_nodep.data, _prefix);
+					}
 				}
 			}
 		}
@@ -1411,8 +1431,8 @@ function ShowReps() {
 			},
 
 			//inserts selected variables
-			insertSelectedVars:function(varid, inloop){
-				_insertSelectedVars(varid, inloop);
+			insertSelectedVars:function(varid, inloop, isif){
+				_insertSelectedVars(varid, inloop, isif);
 			},
 
 			insertRectypeIf:function(rectypeName){
