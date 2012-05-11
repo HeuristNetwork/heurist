@@ -72,8 +72,8 @@ $dbDescription = $row[2];
 $ownerGrpID = $row[3];
 
 // Look up current user email from sysUGrps table in the current database (the one being registered)
-// Registering user must be a real user so that there is an email address and password to attach to the registration record. 
-// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better 
+// Registering user must be a real user so that there is an email address and password to attach to the registration record.
+// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better
 // to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
 $user_id=get_user_id();
 if ($user_id !=2) {
@@ -136,7 +136,7 @@ function registerDatabase() {
 	$usrLastName = rawurlencode($usrLastName);
 	$usrPassword = rawurlencode($usrPassword);
 	$dbDescriptionEncoded = rawurlencode($dbDescription);
-	$reg_url =  HEURIST_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
+	$reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
 				"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
 				"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 				"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
@@ -177,7 +177,7 @@ function registerDatabase() {
     			 <a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself) </div></div>";
             ?>
                 <script> // automatically call H3MasterIndix metadata edit form for this database
-                window.open("<?=$url?>",'_blank'); 
+                window.open("<?=$url?>",'_blank');
                 </script>
             <?
 		} else {
@@ -185,7 +185,7 @@ function registerDatabase() {
 			$msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";
             echo $msg;
 			return;
-		} // unable to write db identification record 
+		} // unable to write db identification record
    } // successful new DB ID
 } // registerDatabase()
 ?>
