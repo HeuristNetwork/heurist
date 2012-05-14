@@ -83,6 +83,10 @@ $sysAdminEmail = ""; // recommended
 // Leaving this blank will suppress info inquiry emails
 $infoEmail = ""; // recommended
 
+// email address to which bug reports will be sent.
+// Leaving this blank will send to heurist development
+$bugEmail = ""; // recommended
+
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
