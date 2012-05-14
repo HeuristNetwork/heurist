@@ -141,7 +141,7 @@ function registerDatabase() {
 				"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 				"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
     curl_setopt($ch, CURLOPT_URL,$reg_url);
-	error_log('cALLING CURL, CURLOPT_URL = '.$reg_url);
+	error_log('Calling, CURLOPT_URL = '.$reg_url);
     $data = curl_exec($ch);
     error_log('return data from getNextDBReg..ID = '.$data);
 	$error = curl_error($ch);
