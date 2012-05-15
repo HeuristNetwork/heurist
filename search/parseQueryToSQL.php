@@ -84,7 +84,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-//error_log("q after parse ".print_r($q,true));
+error_log("q after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -748,7 +748,7 @@ class FieldPredicate extends Predicate {
 			/* handle the easy case: user has specified a (single) specific numeric type */
 			$rd_type_clause = 'rd.dtl_DetailTypeID = ' . intval($this->field_type);
 		}
-		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+		else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {
 			/* user has specified a list of numeric types ... match any of them */
 			$rd_type_clause = 'rd.dtl_DetailTypeID in (' . $this->field_type . ')';
 		}
@@ -761,7 +761,7 @@ class FieldPredicate extends Predicate {
 		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
 		                        . 'left join Records link on rd.dtl_Value=link.rec_ID '
 		                            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-		                            . '  and if(rdt.dty_Type = "resource", '
+		                            . '  and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
 		                                      .'link.rec_Title ' . $match_pred . ', '
 		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
 		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
@@ -1252,7 +1252,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-//	error_log("request to query returns ".print_r($query,true));
+	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 
