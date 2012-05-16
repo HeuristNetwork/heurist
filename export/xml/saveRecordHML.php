@@ -44,7 +44,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 	return;
 }
-error_log(print_r($_SESSION,true));
+//error_log(print_r($_SESSION,true));
 
 // set parameter defaults
 $recID = (@$_REQUEST['recID'] ? $_REQUEST['recID'] : null);
@@ -56,7 +56,7 @@ if (!$q) {
 $depth = @$_REQUEST['depth'] ? $_REQUEST['depth'] : 1;
 $hinclude = (@$_REQUEST['hinclude'] ? $_REQUEST['hinclude'] : ($recID?0:-1)); //default to 0 will output xincludes all non record id related records, -1 puts out all xinclude
 
-error_log("recID = .$recID.  q = .$q.  outName = .$outName. depth = .$depth");
+//error_log("recID = .$recID.  q = .$q.  outName = .$outName. depth = .$depth");
 
 mysql_connection_db_select(DATABASE);
 
@@ -91,7 +91,7 @@ saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&depth=$dept
 //  ---------Helper Functions
 function saveRecordHML($filename){
 global $recID, $outName;
-error_log(" file name = $filename");
+//error_log(" file name = $filename");
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return teh output as a string from curl_exec
@@ -107,7 +107,7 @@ error_log(" file name = $filename");
 	}
 	curl_setopt($ch, CURLOPT_URL, $filename);
 	$hml = curl_exec($ch);
-error_log(" output from flatHML ".print_r($hml,true));
+//error_log(" output from flatHML ".print_r($hml,true));
 	$xml = new DOMDocument;
 	$xml->loadXML($hml);
 	// convert to xml

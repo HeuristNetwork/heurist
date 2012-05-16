@@ -47,31 +47,35 @@ if (!is_logged_in()) {
 mysql_connection_db_select(DATABASE);
 
 // set parameter defaults
-$recID = @$_REQUEST['recID'] ? $_REQUEST['recID'] : null;
-	//if no style given then try default, if default doesn't exist we our put raw xml
+$inputFilename = (@$_REQUEST['inputFilename'] ? "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'] :
+					(@$_REQUEST['recID'] ? "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml":
+						null));	// outName returns the hml direct.
+//if no style given then try default, if default doesn't exist we our put raw xml
 $style = @$_REQUEST['style'] ? $_REQUEST['style'] : 'default';
-$inputFilename ="".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml";
-$outputFilename ="".HEURIST_HTML_PUBPATH.$style.HEURIST_DBID."-".$recID.".html";
+$outputFilename = (@$_REQUEST['outputFilename'] ? "".HEURIST_HTML_PUBPATH.$_REQUEST['outputFilename'] :
+					(@$_REQUEST['recID'] ? "".HEURIST_HTML_PUBPATH.$style."-".HEURIST_DBID."-".$recID.".html":
+						null));	// outName returns the hml direct.
 
 $pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
-if ($pos !== false){
+if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
 	$outputURI = 'http://'.HEURIST_HOST_NAME.
-						substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)).
-						$style.HEURIST_DBID."-".$recID.".html";
+						( $pos !== false ? substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)) : HEURIST_HTML_PUBPATH).
+						(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
+							(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
 }
-if ($inputFilename && !file_exists($inputFilename)) {
-		returnXMLErrorMsgPage("unable to load hml for $inputFilename");
+if (!$inputFilename || !file_exists($inputFilename)) {
+	returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 }
 //set the style filename and check that it exist
-$styleFilename = ($style ? "".HEURIST_HML_PUBPATH."xsl/".$style.".xsl":null);
-if ($styleFilename && !file_exists($styleFilename)) {
-	$styleFilename = null;
+$styleFilename = ($style ? "".HEURIST_XSL_TEMPLATES_DIR.$style.".xsl":null);
+if (!$styleFilename || !file_exists($styleFilename)) {
+	returnXMLErrorMsgPage("unable to find style file '$styleFilename'");
 }
 
 loadRecordHTML($inputFilename,$styleFilename);
 
 returnXMLSuccessMsgPage("Successfully wrote output file".
-							($outputURI?" <a href=\"$outputURI\" target=\"_blank\">$outputURI</a>":""));
+							($outputURI?" <a href=\"$outputURI\" target=\"_blank\">$outputURI</a>":"Unable to determine URI. Not in website path! $outputFilename"));
 
 
 function loadRecordHTML($recHMLFilename, $styleFilename){

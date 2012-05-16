@@ -334,8 +334,8 @@
 
             // Update file locations
 			$query='update sysIdentification
-                set sys_hmlOutputDirectory = "$uploadPath/hml-output",
-                sys_htmlOutputDirectory = "$uploadPath/html-output"';
+                set sys_hmlOutputDirectory = "'.$uploadPath.'/hml-output",
+                sys_htmlOutputDirectory = "'.$uploadPath.'/html-output"';
   			mysql_query($query);
 			if ($warnings == 1) {
 				echo "<h2>Please take note of warnings above</h2>";
