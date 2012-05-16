@@ -507,8 +507,12 @@ class SortPhrase {
 								"left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
 				} else {
 					// have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
-							"dtl_DetailTypeID=$field_id", NULL);
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
+													"if(dty_Type='date',getTemporalDateString(dtl_Value),dtl_Value)) ".
+											"from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID ".
+											"where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id ".
+											"order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
+									"dtl_DetailTypeID=$field_id", NULL);
 				}
 			} else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
 				@list($_, $field_name, $show_multiples) = $matches;
@@ -525,8 +529,12 @@ class SortPhrase {
 								"left join defDetailTypes bdtInt on bdtInt.dty_Name='".addslashes($field_name)."' "
 								."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
 				} else {
-					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
-							"dtl_DetailTypeID=$field_id", NULL);
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
+													"if(dty_Type='date',getTemporalDateString(dtl_Value),dtl_Value)) ".
+											"from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID ".
+											"where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID ".
+											"order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
+									"dtl_DetailTypeID=$field_id", NULL);
 				}
 			}
 
