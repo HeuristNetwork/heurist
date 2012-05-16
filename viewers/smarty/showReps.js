@@ -896,7 +896,7 @@ function ShowReps() {
 	//
 	function _insertRootForEach(){
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{foreach $results as $r}\n\t\n{/foreach}\n';  //{* INSERT YOUR CODE HERE *}
+		var _text = '{foreach $results as $r}\n\n{if ($r.recOrder==0)}\n\n{elseif ($r.recOrder==count($results)-1)}\n\n{else}\n\n{/if}\n{/foreach}\n';  //{* INSERT YOUR CODE HERE *}
 
 		insertAtCursor(textedit, _text, false, -12);
 	}

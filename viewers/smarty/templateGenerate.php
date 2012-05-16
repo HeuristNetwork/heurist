@@ -113,6 +113,16 @@ require_once('libs.inc.php');
                 '',
                 '{foreach $results as $r} {* Records loop, do not remove *}',
                 '',
+                '{if ($r.recOrder==0)}',
+                '',
+                '{elseif ($r.recOrder==count($results)-1)}',
+                '',
+                '{else}',
+                '',
+                '{/if}',
+                '',
+                '   <b>id=</b> <!-- use html tags as you wish -->',
+                '',
                 '   <b>id=</b> <!-- use html tags as you wish -->',
                 '',
                 '   <!-- Output some common fields -->'));
@@ -520,11 +530,12 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 
 				$recursion_depth++;
 
-				if($mode=='varsonly' || !array_key_exists($pointerRecTypeId, $rtNames)){
+				/*if($mode=='varsonly' || !array_key_exists($pointerRecTypeId, $rtNames)){
 					$recordTypeName = $dt_label;
 				}else{
 					$recordTypeName = $rtNames[$pointerRecTypeId];
-				}
+				}*/
+				$recordTypeName = $dt_label;
 				$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 
 				$_fe = array($dt_label,'{foreach $'.$parentName.'.'.$recordTypeName.'s as $'.$recordTypeName.'}');

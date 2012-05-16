@@ -104,9 +104,11 @@ function executeSmartyTemplate($params){
 	//convert to array that will assigned to smarty variable
 	$records =  $qresult["records"];
 	$results = array();
+	$k = 0;
 	foreach ($records as $rec){
 
-		$res1 = getRecordForSmarty($rec, 0);
+		$res1 = getRecordForSmarty($rec, 0, $k);
+		$k++;
 		array_push($results, $res1);
 	}
 	//activate default template - generic list of records
@@ -315,7 +317,7 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 // convert record array to arrray to be assigned to smarty variable
 //
 // @todo - implement as method
-function getRecordForSmarty($rec, $recursion_depth){
+function getRecordForSmarty($rec, $recursion_depth, $order){
 
 	global $rtStructs;
 
@@ -333,6 +335,7 @@ function getRecordForSmarty($rec, $recursion_depth){
 
 
 //DEBUG error_log("REC=".print_r($rec, true));
+		$record["recOrder"] = $order;
 
 		//loop for all record properties
 		foreach ($rec as $key => $value){
@@ -436,10 +439,10 @@ error_log("dtValue=".print_r($dtValue, true));
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
 			$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-			if(array_key_exists($dtKey,$rt_structure)){
+			if(array_key_exists($dtKey, $rt_structure)){
 				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
+				//$dtname = getVariableNameForSmarty($dt_label);
 			}
-
 			$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
 		}
 
@@ -571,6 +574,7 @@ error_log("dtValue=".print_r($dtValue, true));
 				$rectypeID = null;
 				$prevID = null;
 //error_log("dtValue>>>>>".print_r($dtValue,true));
+				$order = 0;
 
 				foreach ($dtValue as $key => $value){
 
@@ -585,7 +589,8 @@ error_log("dtValue=".print_r($dtValue, true));
 
 						$res0 = null;
 						if(true){  //64719  45171   48855    57247
-							$res0 = getRecordForSmarty($record, $recursion_depth+1); //@todo - need to
+							$res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
+							$order++;
 						}
 
 						if($res0){
@@ -601,11 +606,14 @@ error_log("dtValue=".print_r($dtValue, true));
 				if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
 				{
 					$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
-					if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
+
+					/*if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
 						$recordTypeName = $dt_label;
 					}else{
 						$recordTypeName = $rtNames[$rectypeID];
-					}
+					}*/
+					$recordTypeName = $dt_label;
+
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
 				}else{
