@@ -30,6 +30,8 @@ require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+include_once('../../external/geoPHP/geoPHP.inc');
+
 require_once('libs.inc.php');
 
 	$outputfile = null;
@@ -554,7 +556,28 @@ error_log("dtValue=".print_r($dtValue, true));
 */
 
 			case 'geo':
-			break;
+
+				$res = "";
+				foreach ($dtValue as $key => $value){
+//error_log("GEO=>>>>".print_r($value, true));
+
+						$geom = geoPHP::load($value['geo']['wkt'],'wkt');
+						if(!$geom->isEmpty()){
+							$point = $geom->centroid();
+							$res = "http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x();
+							break;
+//error_log("GEO=>>>>".$point->x()."  ".$point->y());
+						}
+				}
+
+				if(strlen($res)==0){
+					$res = null;
+				}else{
+					$res = array( $dtname=>$res );
+				}
+
+				break;
+
 			case 'separator':
 			break;
 			case 'calculated':
