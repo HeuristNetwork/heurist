@@ -518,10 +518,9 @@ error_log("dtValue=".print_r($dtValue, true));
 
 					//original value keeps the whole 'file' array
 					$dtname2 = $dtname."_originalvalue";
-
+					$arres = array_merge($arres, array($dtname2=>$value['file']));
 //error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
 
-					$arres = array_merge($arres, array($dtname2=>$value['file']));
 				}
 				if(strlen($res)==0){
 					$res = null;
@@ -558,22 +557,31 @@ error_log("dtValue=".print_r($dtValue, true));
 			case 'geo':
 
 				$res = "";
+				$arres = array();
 				foreach ($dtValue as $key => $value){
 //error_log("GEO=>>>>".print_r($value, true));
 
+						//original value keeps whole geo array
+						$dtname2 = $dtname."_originalvalue";
+						$arres = array_merge($arres, array($dtname2=>$value['geo']));
+
+						$res = $value['geo']['wkt'];
+						break; //only one geo location at the moment
+
+						/*
 						$geom = geoPHP::load($value['geo']['wkt'],'wkt');
 						if(!$geom->isEmpty()){
 							$point = $geom->centroid();
 							$res = "http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x();
 							break;
-//error_log("GEO=>>>>".$point->x()."  ".$point->y());
-						}
+						}*/
 				}
 
 				if(strlen($res)==0){
 					$res = null;
 				}else{
-					$res = array( $dtname=>$res );
+					$res = array_merge($arres, array($dtname=>$res));
+					//$res = array( $dtname=>$res );
 				}
 
 				break;
@@ -618,7 +626,7 @@ error_log("dtValue=".print_r($dtValue, true));
 
 						if($res0){
 							array_push($res, $res0);
-							if($rectypeID==null){
+							if($rectypeID==null && @$res0['recRecTypeID']){
 								$rectypeID = $res0['recRecTypeID'];
 							}
 						}
@@ -779,6 +787,19 @@ function smarty_function_wrap($params, &$smarty)
 				return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 			}
 
+		}else if($dt=='geo'){
+
+			$value = $params['var'];
+			$res = "";
+
+			if($value && $value['wkt']){
+				$geom = geoPHP::load($value['wkt'],'wkt');
+				if(!$geom->isEmpty()){
+					$point = $geom->centroid();
+					$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>Location on map</a>";
+				}
+			}
+			return $res;
 		}
 		/*
 
