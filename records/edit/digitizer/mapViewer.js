@@ -33,11 +33,30 @@ function MapViewer() {
 			initmap_viewer('map_viewer', geovalue); //from digitizer.js
 	}
 
+	function _showAtStatic(event, recid)
+	{
+			hintDiv.showAt(event);
+
+			//add image with url to static google map
+			var mapImg = this.document.getElementById('map_static_image');
+			if(!mapImg){
+				var map_viewer = this.document.getElementById('map_viewer');
+				mapImg = map_viewer.appendChild(this.document.createElement("img"));
+				mapImg.id = "map_static_image";
+			}
+			var d = new Date().getTime()
+			mapImg.src = top.HEURIST.basePath+"viewers/map/showMapUrl.php?width=300&height=300&q=ids:"+recid+"&db="+top.HEURIST.database.name+"&t="+d;
+	}
+
+
 	//public members
 	var that = {
 
 		showAt: function(event, geovalue){
 			_showAt(event, geovalue);
+		},
+		showAtStatic: function(event, recid){
+			_showAtStatic(event, recid);
 		},
 		hide: function(){
 			hintDiv.hide();

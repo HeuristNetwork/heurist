@@ -360,7 +360,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 
 				$details = array();
 				foreach ($value as $dtKey => $dtValue){
-					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID);
+					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $record['recID']);
 					if($dt){
 						$record = array_merge($record, $dt);
 					}
@@ -387,7 +387,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 				$k++;
 			}//while
 			if($k>1){
-				$dt = getDetailForSmarty(-1,$dtValue, $recursion_depth, $recTypeID);
+				$dt = getDetailForSmarty(-1,$dtValue, $recursion_depth, $recTypeID, $record["recID"]);
 				if($dt){
 					$record = array_merge($record, $dt);
 				}
@@ -416,7 +416,7 @@ function _add_term_val($res, $val){
 // $dtKey - detailtype ID, if <1 this dummy relationship detail
 //
 // @todo - implement as method
-function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
+function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $recID){
 
 	global $dtStructs, $dtTerms, $rtStructs;
 	$dtNames = $dtStructs['names'];
@@ -563,6 +563,7 @@ error_log("dtValue=".print_r($dtValue, true));
 
 						//original value keeps whole geo array
 						$dtname2 = $dtname."_originalvalue";
+						$value['geo']['recid'] = $recID;
 						$arres = array_merge($arres, array($dtname2=>$value['geo']));
 
 						$res = $value['geo']['wkt'];
@@ -733,7 +734,7 @@ function smarty_function_wrap($params, &$smarty)
 
 	if($params['var']){
 
-//error_log(">>>>".print_r($params,true));
+//error_log("WRAP>>>>".print_r($params,true));
 
 		if(array_key_exists('dt',$params)){
 			$dt = $params['dt'];
@@ -744,10 +745,13 @@ function smarty_function_wrap($params, &$smarty)
 			$label = $params['lbl'].": ";
 		}
 		$width = "";
+		$mapsize = "width=200";
+
 		if(array_key_exists('width',$params) && $params['width']!=""){
 			$width = $params['width'];
 			if(is_numeric($width)<0){
 				$width = $width."px";
+				$mapsize = "width=".$width;
 			}
 		}
 		$height = "";
@@ -755,12 +759,16 @@ function smarty_function_wrap($params, &$smarty)
 			$height = $params['height'];
 			if(is_numeric($height)<0){
 				$height = $height."px";
+				$mapsize = $mapsize."&height=".$height;
 			}
+		}
+		if(!(strpos($mapsize,"&")>0)){
+				$mapsize = $mapsize."&height=200";
 		}
 
 		$size = "";
 		if($width=="" && $height==""){
-			$size = "width='300px'";
+			$size = "width=".(($dt=='geo')?"200px":"'300px'");
 		}else {
 			if($width!=""){
 				$size = "width='".$width."'";
@@ -795,8 +803,15 @@ function smarty_function_wrap($params, &$smarty)
 			if($value && $value['wkt']){
 				$geom = geoPHP::load($value['wkt'],'wkt');
 				if(!$geom->isEmpty()){
-					$point = $geom->centroid();
-					$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>Location on map</a>";
+
+					if(array_key_exists('mode',$params) && $params['mode']=="link"){
+						$point = $geom->centroid();
+						$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>Location on map</a>";
+					}else{
+						$recid = $value['recid'];
+						$url = HEURIST_SITE_PATH."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
+						return "<img src='".$url."' ".$size."/>";
+					}
 				}
 			}
 			return $res;
