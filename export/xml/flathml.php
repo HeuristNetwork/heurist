@@ -78,6 +78,14 @@ require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
 
+$colRT = (defined('RT_COLLECTION')?RT_COLLECTION:0);
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$qStrDT = (defined('DT_QUERY_STRING')?DT_QUERY_STRING:0);
+$resrcDT = (defined('DT_RESOURCE')?DT_RESOURCE:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+
 //----------------------------------------------------------------------------//
 //  Tag construction helpers
 //----------------------------------------------------------------------------//
@@ -185,7 +193,6 @@ $GEO_TYPES = array(
 );
 
 // set parameter defaults
-$MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;	// default to only one level
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including reverse pointers
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
 $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ?  $_REQUEST['hinclude'] : 99;	//default to not output xinclude format for related records until beyound 99 degrees of separation
@@ -227,17 +234,29 @@ if (!isset($PTRTYPE_FILTERS)) {
 	die(" error decoding json pointer type filters string");
 }
 //error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
+//error_log("request depth".print_r($_REQUEST['depth'],true));
+$MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) :
+			(max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS)))?
+				max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS))):0));	// default to only one level
 // handle special case for collection where ids are stored in teh session.
-if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
-	if (!session_id()) session_start();
-	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
-	if (count($collection) > 0) {
-		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
-	} else {
-		$_REQUEST['q'] = '';
+if (array_key_exists('q',$_REQUEST)) {
+	if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
+		if (!session_id()) session_start();
+		$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
+		if (count($collection) > 0) {
+			$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
+		} else {
+			$_REQUEST['q'] = '';
+		}
 	}
+}else if(array_key_exists('recID',$_REQUEST)){ //record IDs to use as a query
+	//check for expansion of query records.
+	$recIDs = explode(",",$_REQUEST['recID']);
+	if (array_key_exists('expandColl',$_REQUEST)){
+		$recIDs = expandCollections($recIDs);
+	}
+	$_REQUEST['q'] = 'ids:' . join(',', $recIDs);
 }
-
 
 //----------------------------------------------------------------------------//
 //  Authentication
@@ -250,16 +269,12 @@ if (@$ARGV) {	// commandline actuation
 	function get_group_ids() { return array(0); }
 	function is_admin() { return false; }
 	function is_logged_in() { return false; }
-	$pub_id = 0;
+	$ss_id = 0;
 } else {	// loggin required entry
-	$pub_id = 0;
+	$ss_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 }
 
-$relRT = (defined('RT_RELATION')?RT_RELATION:0);
-$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
-$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 								'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
@@ -270,6 +285,43 @@ if (is_logged_in()){
 	}
 }
 
+function expandCollections( $recIDs){
+	global $colRT,$qStrDT,$resrcDT;
+	$expRecIDs = array();
+	foreach ( $recIDs as $recID ){
+error_log("recID ".print_r($recID,true));
+		$rectype = mysql__select_array("Records","rec_RecTypeID","rec_ID = $recID");
+error_log("rectype ($colRT) ".print_r($rectype,true));
+		$rectype = intval($rectype[0]);
+		if ($rectype == $colRT) { // collection rec so get query string and expand it and list all ptr recIDs
+			$qryStr = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $qStrDT and dtl_RecID = $recID");
+error_log("query String ".print_r($qryStr,true));
+			if (count($qryStr) > 0) {
+				// get recIDs only for query. and add them to expanded recs
+				$loadResult = loadSearch(array("q"=>$qryStr[0]),true,true);
+error_log("loadResult ".print_r($loadResult,true));
+				if (array_key_exists("recordCount",$loadResult) && $loadResult["recordCount"] > 0){
+					foreach (explode(",",$loadResult["recIDs"]) as $resRecID) {
+						if (!in_array($resRecID,$expRecIDs)){
+							array_push($expRecIDs,$resRecID);
+						}
+					}
+				}
+			}
+			//add any colected record pointers
+			$collRecIDs = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $resrcDT and dtl_RecID = $recID");
+error_log("recID list ".print_r($collRecIDs,true));
+			foreach ($collRecIDs as $collRecID) {
+				if (!in_array($collRecID,$expRecIDs)){
+					array_push($expRecIDs,$collRecID);
+				}
+			}
+		}else if (!in_array($recID,$expRecIDs)){
+			array_push($expRecIDs,$recID);
+		}
+	}
+	return $expRecIDs;
+}
 //----------------------------------------------------------------------------//
 // Traversal functions
 // The aim here is to bundle all the queries for each level of relationships
@@ -534,6 +586,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 **/
 function buildGraphStructure($rec_ids, &$recSet) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
+	error_log("max depth = ".print_r($MAX_DEPTH,true));
 	$depth = 0;
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ($rtfilter){
@@ -1186,10 +1239,11 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
-if ($pub_id) {
-	$query_attrs['pubID'] = $pub_id;
-}
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,
+													'sid'=>1,'label'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,
+													'expandColl'=>1,'recID'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,
+													'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
+
 makeTag('query', $query_attrs);
 
 makeTag('dateStamp', null, date('c'));

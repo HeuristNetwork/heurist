@@ -314,6 +314,7 @@
 	'RT_INTERPRETATION' => array(2,10),
 	'RT_FACTOID' => array(3,22),
 	'RT_ANNOTATION' => array(3,25),
+	'RT_COLLECTION' => array(2,6),
 	'RT_IMAGELAYER' => array(70,168)  //AO: What's this? We already have RT_IMAGE_LAYER?
 	);
 
@@ -327,10 +328,12 @@
 	'DT_ALTERNATE_NAME' => array(3,36),
 	'DT_CREATOR' => array(2,19),
 	'DT_EXTENDED_DESCRIPTION' => array(3,17),
+	'DT_QUERY_STRING' => array(2,6),
 	'DT_LINKED_RESOURCE' => array(2,4),
 	'DT_RELATION_TYPE' => array(2,5),
 	'DT_NOTES' => array(2,12),	//TODO: change dty to Short summary and remove from code
 	'DT_PRIMARY_RESOURCE' => array(2,7),
+	'DT_RESOURCE' => array(2,79),
 	'DT_FULL_IMAG_URL' => array(70,603),	//TODO: remove from code
 	'DT_THUMB_IMAGE_URL' => array(70,606),	//TODO: remove from code
 	'DT_ASSOCIATED_FILE' => array(2,8),		//TODO: Change this to file resource

@@ -19,7 +19,7 @@ if (! document.body) {
 if (! top.HEURIST) {
 	var installDir = top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	top.HEURIST = {
-	VERSION: "build 3.1.0.240112",
+	VERSION: "build 3.1.0.210512",
 
 		basePath: installDir,
 	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
@@ -239,7 +239,7 @@ if (! top.HEURIST) {
 
 	/**
 	* Returns value of given parametr ofor current query
-	*/ 
+	*/
 	getQueryVar: function(varName){
 		// Grab and unescape the query string - appending an '&' keeps the RegExp simple
 		// for the sake of this example.

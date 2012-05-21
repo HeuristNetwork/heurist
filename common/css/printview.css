@@ -154,6 +154,26 @@ div.show-related:hover {text-decoration: underline;}
 }
 .L0 {display:block !important}
 div.annotatedDocument {display:block !important}
+#errorMsg {
+	background-color: #FFFFFF;
+	height: 99%;
+	text-align: center;
+	vertical-align: middle;
+	width: 100%;
+}
+#errorMsg span, .errorMsg span, div#errorMsg span{
+	background-color: rgba(100, 100, 100, 0.6);
+	background:-moz-linear-gradient(center top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(rgba(100, 100, 100, 0.6)), to(rgba(100, 100, 100, 0.9)));
+	border: 1px solid #999;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	padding:3px;
+	font-size:14px;
+	color:#FFF;
+}
+
 
 /* annotationss */
 div.annotationList li {text-align:left; color:#666; padding:5px; list-style:none; display:inline-block; max-width:150px; vertical-align:top; border-right:1px solid #CCC;}

@@ -161,6 +161,11 @@
 					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
 					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
 				}
+				if(!selectedIds || selectedIds.length == 0){
+					clearAndDisplayNoRecordSelected();
+				}else{
+
+				}
 			}
 
 			var relatedRecListXSL;
@@ -382,13 +387,23 @@
 						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
 					}
 					newSelectionMap = objFromArr(newSelectionIds);
+
 					var limit = newSelectionIds.length;
 					if (!limit) {
-						// todo clear and display no records selected
+						clearAndDisplayNoRecordSelected();
 						return;
 					}
-						clearAndDisplayLoading();
-					var pageQuery = "?w=all&a=1&depth=1&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
+
+					clearAndDisplayLoading();
+
+					var rtFilter = top.HEURIST.search.getPushDownFilter("rectype");
+					var rleFilter = top.HEURIST.search.getPushDownFilter("reltype");
+					var ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
+					var filter = "" + (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
+									+ (rleFilter.length > 0 &&  rleFilter[1] != "" ? "&" + rleFilter[1] : "")
+									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "");
+					var pageQuery = "?w=all&a=1&depth="+ rtFilter[0] +"&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
+										(filter.length > 0 ? filter : "") +
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
 					curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 					var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
@@ -418,7 +433,7 @@
 				}
 			}
 
-			function updateSelection(){// saw TODO change this to update the selection for levels
+			function updateSelection(){//Mark any record divs id in selected as class selected (visible)
 				if(selectedIds && selectedIds.length>0) {
 					for (var i = 0; i < selectedIds.length; i++) {
 						$('div[class~=record]').filter('div[id='+ selectedIds[i] +']').addClass("selected");
@@ -432,6 +447,15 @@
 				var loadingDiv = document.createElement("div");
 					loadingDiv.id = "loading";
 				resultDiv.appendChild(loadingDiv);
+			}
+
+			function clearAndDisplayNoRecordSelected(){
+				var resultDiv =document.getElementById("displayResult");
+				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+				var noSelectedDiv = document.createElement("div");
+					noSelectedDiv.id = "errorMsg";
+					noSelectedDiv.innerHTML = "<div style='height:50%'></div><span>No Records Selected</span>";
+				resultDiv.appendChild(noSelectedDiv);
 			}
 
 			function displayResult(style){
@@ -572,12 +596,6 @@
 			</select>
 			<a href="javascript:window.print()"><div id="printingLink"></div></a>
 			<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
-
-			<input type="checkbox" style="display:inline-block;"
-				id="rbUseSelectedRecords" checked="checked"
-				 title="Display of all records not currently available in this view" disabled="disabled">
-			<label title="Display of all records not currently available in this view">Selected only</label>
-
 			<a href="javascript:window.backToTop()" style="float: right;">to top</a>
 		</div>
 		<div id="displayResult" ></div>
