@@ -2976,11 +2976,31 @@ top.HEURIST.search = {
 		return selectedRecIDs;
 	},
 
+	getLevelSelectedRecIDs: function(lvl) {
+		var recIDs = {};
+		var selectedRecIDs = $((lvl==0 ?"#results-level0 > .recordDiv.selected:not(.filtered),"+
+								" #results-level0 > .recordDiv.relateSelected:not(.filtered)" :
+								"#results-level"+lvl+" > .recordDiv.selected.lnk:not(.filtered),"+
+								" #results-level"+lvl+" > .recordDiv.relateSelected.lnk:not(.filtered)"),
+								$("#results")).map(function(i,recdiv){
+					var recID = $(recdiv).attr("recID");
+					if (recID && !recIDs[recID] && parseInt(recID)>=0) {
+						recIDs[recID] = true;
+						return recID;
+					}
+				});
+		return selectedRecIDs;
+	},
+
 	getSelectedBkmIDs: function() {
 		var bkmIDs = {};
-		var selectedBkmIDs = $(".recordDiv.selected:not(.filtered) ",$("#results")).map(function(i,recdiv){
+		var selectedBkmIDs =  $("#results-level0 > .recordDiv.selected:not(.filtered),"+
+								" #results-level0 > .recordDiv.relateSelected:not(.filtered),"+
+								" .recordDiv.selected.lnk:not(.filtered),"+
+								" .recordDiv.relateSelected.lnk:not(.filtered)",
+								$("#results")).map(function(i,recdiv){
 					var bkmID = $(recdiv).attr("bkmk_id");
-					if (!bkmIDs[bkmID] && parseInt(bkmID)>=0) {
+					if (bkmID && !bkmIDs[bkmID] && parseInt(bkmID)>=0) {
 						bkmIDs[bkmID] = true;
 						return bkmID;
 					}

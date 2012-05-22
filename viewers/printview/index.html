@@ -380,12 +380,12 @@
 				}else  if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
 																// if a level is not loaded then load synch
 					newSelectionIds = [];
-					if (top.HEURIST.search.getSelectedRecIDs().get().length > 0) {
-						newSelectionIds = top.HEURIST.search.getSelectedRecIDs().get();
-					}else if (argList && argList.match("selectedIds")) {
+					if (top.HEURIST.search.getLevelSelectedRecIDs("0").get().length > 0) {
+						newSelectionIds = top.HEURIST.search.getLevelSelectedRecIDs("0").get();
+					}/*else if (argList && argList.match("selectedIds")) {
 						var ids = argList.match("selectedIds=(\\d+(?:,\\d+)*)");
 						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
-					}
+					}*/
 					newSelectionMap = objFromArr(newSelectionIds);
 
 					var limit = newSelectionIds.length;
@@ -454,7 +454,7 @@
 				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
 				var noSelectedDiv = document.createElement("div");
 					noSelectedDiv.id = "errorMsg";
-					noSelectedDiv.innerHTML = "<div style='height:50%'></div><span>No Records Selected</span>";
+					noSelectedDiv.innerHTML = "<div style='height:50%'></div><span>No Records Selected from Search Results</span>";
 				resultDiv.appendChild(noSelectedDiv);
 			}
 
