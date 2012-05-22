@@ -314,8 +314,7 @@
 	'RT_INTERPRETATION' => array(2,10),
 	'RT_FACTOID' => array(3,22),
 	'RT_ANNOTATION' => array(3,25),
-	'RT_COLLECTION' => array(2,6),
-	'RT_IMAGELAYER' => array(70,168)  //AO: What's this? We already have RT_IMAGE_LAYER?
+	'RT_COLLECTION' => array(2,6)
 	);
 
 	foreach ($rtDefines as $str => $id) {

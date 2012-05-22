@@ -78,10 +78,7 @@ require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
 
-$colRT = (defined('RT_COLLECTION')?RT_COLLECTION:0);
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
-$qStrDT = (defined('DT_QUERY_STRING')?DT_QUERY_STRING:0);
-$resrcDT = (defined('DT_RESOURCE')?DT_RESOURCE:0);
 $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
 $relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
@@ -285,43 +282,6 @@ if (is_logged_in()){
 	}
 }
 
-function expandCollections( $recIDs){
-	global $colRT,$qStrDT,$resrcDT;
-	$expRecIDs = array();
-	foreach ( $recIDs as $recID ){
-error_log("recID ".print_r($recID,true));
-		$rectype = mysql__select_array("Records","rec_RecTypeID","rec_ID = $recID");
-error_log("rectype ($colRT) ".print_r($rectype,true));
-		$rectype = intval($rectype[0]);
-		if ($rectype == $colRT) { // collection rec so get query string and expand it and list all ptr recIDs
-			$qryStr = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $qStrDT and dtl_RecID = $recID");
-error_log("query String ".print_r($qryStr,true));
-			if (count($qryStr) > 0) {
-				// get recIDs only for query. and add them to expanded recs
-				$loadResult = loadSearch(array("q"=>$qryStr[0]),true,true);
-error_log("loadResult ".print_r($loadResult,true));
-				if (array_key_exists("recordCount",$loadResult) && $loadResult["recordCount"] > 0){
-					foreach (explode(",",$loadResult["recIDs"]) as $resRecID) {
-						if (!in_array($resRecID,$expRecIDs)){
-							array_push($expRecIDs,$resRecID);
-						}
-					}
-				}
-			}
-			//add any colected record pointers
-			$collRecIDs = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $resrcDT and dtl_RecID = $recID");
-error_log("recID list ".print_r($collRecIDs,true));
-			foreach ($collRecIDs as $collRecID) {
-				if (!in_array($collRecID,$expRecIDs)){
-					array_push($expRecIDs,$collRecID);
-				}
-			}
-		}else if (!in_array($recID,$expRecIDs)){
-			array_push($expRecIDs,$recID);
-		}
-	}
-	return $expRecIDs;
-}
 //----------------------------------------------------------------------------//
 // Traversal functions
 // The aim here is to bundle all the queries for each level of relationships

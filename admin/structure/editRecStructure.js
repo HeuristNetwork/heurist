@@ -213,7 +213,9 @@ function EditRecStructure() {
 				key:"rst_DefaultValue", label: "Default", sortable:false,className:"center",
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var reqtype = oRecord.getData('rst_DefaultValue');
-					elLiner.innerHTML = reqtype.substring(0,9);
+					if (reqtype && reqtype.length > 0){
+						elLiner.innerHTML = reqtype.substring(0,9);// Artem, why do we do this??
+					}
 				}
 			},
             {

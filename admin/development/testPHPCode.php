@@ -1,8 +1,10 @@
 <?php
 
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 
 // Deals with all the database connections stuff
 
@@ -43,8 +45,8 @@ var_dump($termIDs);
 echo preg_replace("/\"".$termIDs[0]."\"/","\"9999\"",$str);
 */
 //echo $temp2 . "<br />";
-
-echo json_format(getTerms(),true)."<br><br><br>";
+echo json_format(expandCollections(array("147960"),true),true)."<br><br><br>";
+//echo json_format(getTerms(),true)."<br><br><br>";
 //echo json_format(getTermOffspringList(1820),true)."<br><br><br>";
 //echo json_format(getAllRectypeConstraint(),true)."<br><br><br>";
 //echo json_format(getAllDetailTypeStructures(),true)."<br><br><br>";
