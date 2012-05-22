@@ -17,23 +17,47 @@
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
 
 	$mapobjects = getMapObjects($_REQUEST);
-
+	
 	if($mapobjects['cntWithGeo']>0){
 
 		if(@$_REQUEST['width'] && @$_REQUEST['height']){
 			$size = $_REQUEST['width']."x".$_REQUEST['height'];
 		}else{
-			$size = "170x170";
+			$size = "200x200";
 		}
 
 		$url = "http://maps.google.com/maps/api/staticmap";
-		$url = $url."?size=".$size."&sensor=false&maptype=terrain";
+		$url = $url."?size=".$size."&sensor=false";
+		
+		if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
+			$url = $url."&zoom=".$_REQUEST['zoom'];
+		}
+		if(@$_REQUEST['maptype']){
+			$url = $url."&maptype=".$_REQUEST['maptype'];
+		}else{
+			$url = $url."&maptype=terrain";
+		}
+		if(@$_REQUEST['m_style']){
+			$style_marker = $_REQUEST['m_style'];
+		}else{
+			$style_marker = "color:red";
+		}
+		if(@$_REQUEST['pl_style']){
+			$style_path = $_REQUEST['pl_style'];
+		}else{
+			$style_path = "weight:3|color:red";
+		}
+		if(@$_REQUEST['pg_style']){
+			$style_poly = $_REQUEST['pg_style'];
+		}else{
+			$style_poly = "weight:3|color:red|fillcolor:0x0000ff40";
+		}
+		
 		//$url = $url."&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w";
 
 		$markers = "";
 		$path_all = "";
 		$poly_all = "";
-
 
 		foreach ($mapobjects['geoObjects'] as $geoObject) {
 
@@ -47,7 +71,7 @@
 					$path = $path.$point['y'].",".$point['x'];
 				}
 				if($path!=""){
-					$path_all = $path_all."&path=weight:3|color:red|".$path;
+					$path_all = $path_all."&path=".$style_path."|".$path;
 				}
 
 			}else if($geoObject['type']=="polygon"){
@@ -61,13 +85,13 @@
 					$poly = $poly.$point['y'].",".$point['x']."|";
 				}
 				if($poly!=""){
-					$poly_all = $poly_all."&path=weight:3|color:red|fillcolor:0x0000ff40|".$poly.$firstpoint;
+					$poly_all = $poly_all."&path=".$style_poly."|".$poly.$firstpoint;
 				}
 
 			}else if($geoObject['type']=="rect"){
 
 				$crd = $geoObject['geo'];
-				$poly_all = $poly_all."&path=weight:3|color:red|fillcolor:0x0000ff40|";
+				$poly_all = $poly_all."&path=".$style_poly."|";
 				$poly_all = $poly_all.$crd['y0'].",".$crd['x0']."|";
 				$poly_all = $poly_all.$crd['y0'].",".$crd['x1']."|";
 				$poly_all = $poly_all.$crd['y1'].",".$crd['x1']."|";
@@ -81,7 +105,7 @@
 		}
 
 		if($markers!=""){
-			$markers = "&markers=".$markers;
+			$markers = "&markers=".$style_marker."|".$markers;
 			$url = $url.$markers;
 		}
 		if($path_all!=""){         //0xff00007f
@@ -91,11 +115,11 @@
 			$url = $url.$poly_all;
 		}
 
-error_log(">>>>>".$url);
+//error_log(">>>>>".$url);
 		header('Location: '.$url);
 		//return $url;
 	}else{
-		header('Location: '.$url);
-		//return ""; //@todo reference to empty image with warning message
+		header('Location: '.HEURIST_SITE_PATH.'common/images/notfound.png');
+		//print "noting found";
 	}
 ?>

@@ -806,7 +806,8 @@ function smarty_function_wrap($params, &$smarty)
 
 					if(array_key_exists('mode',$params) && $params['mode']=="link"){
 						$point = $geom->centroid();
-						$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>Location on map</a>";
+						if($label=="") $label = "on map";
+						$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>".$label."</a>";
 					}else{
 						$recid = $value['recid'];
 						$url = HEURIST_SITE_PATH."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
