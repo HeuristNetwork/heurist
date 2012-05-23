@@ -95,6 +95,10 @@ function executeSmartyTemplate($params){
 		}
 		echo $error;
 
+		if($publishmode>0 && $outputfile!=null){ //save empty outpurt inot file
+			save_report_output2("<div style=\"padding:20px;\">Currently there are no results</div>");
+		}
+
 		exit();
 	}
 
@@ -194,6 +198,11 @@ function executeSmartyTemplate($params){
 //
 function save_report_output($tpl_source, Smarty_Internal_Template $template)
 {
+	save_report_output2($tpl_source);
+}
+
+function save_report_output2($tpl_source){
+
 	global $outputfile, $isJSwrap, $publishmode, $rps_recid;
 
 	$errors = null;
@@ -232,7 +241,6 @@ function save_report_output($tpl_source, Smarty_Internal_Template $template)
 
 		$errors = $e->getMessage();
 	}
-
 
 	if($publishmode==0){
 
@@ -742,7 +750,7 @@ function smarty_function_wrap($params, &$smarty)
 
 		$label = "";
 		if(array_key_exists('lbl',$params) && $params['lbl']!=""){
-			$label = $params['lbl'].": ";
+			$label = $params['lbl'];
 		}
 		$width = "";
 		$mapsize = "width=200";
@@ -807,11 +815,11 @@ function smarty_function_wrap($params, &$smarty)
 					if(array_key_exists('mode',$params) && $params['mode']=="link"){
 						$point = $geom->centroid();
 						if($label=="") $label = "on map";
-						$res = "<a href='http://maps.google.com/maps?z=18&q=".$point->y().",".$point->x()."' target='_blank'>".$label."</a>";
+						$res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
 					}else{
 						$recid = $value['recid'];
 						$url = HEURIST_SITE_PATH."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
-						return "<img src='".$url."' ".$size."/>";
+						return "<img src=\"".$url."\" ".$size."/>";
 					}
 				}
 			}
@@ -870,6 +878,7 @@ function smarty_function_wrap($params, &$smarty)
 
 		}*/
 		else{
+			if($label!="") $label = $label.": ";
     		return $label.$params['var'].'<br/>';
 		}
 	}else{
