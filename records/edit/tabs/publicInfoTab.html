@@ -244,7 +244,7 @@ function renderInputs(bibID, rectype) {
 				top.HEURIST.magicNumbers['DT_END_WORD'] &&
 				rectype == top.HEURIST.magicNumbers['RT_ANNOTATION']) {
 				var addr = window.HEURIST.parameters["addr"];
-				addr = addr.split(",");
+				addr = addr.split(":");
 				if (addr.length == 4) {
 					defaultInputValues[top.HEURIST.magicNumbers['DT_START_ELEMENT']] = [ { "value" : addr[0] } ];
 					defaultInputValues[top.HEURIST.magicNumbers['DT_START_WORD']] = [ { "value" : addr[1] } ];

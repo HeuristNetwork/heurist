@@ -56,13 +56,16 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 	if (count($fuzzyFields) == 0  &&  count($strictFields) == 0) return;
 
 	$groups = get_group_ids();
-	if(is_logged_in()){
-		array_push($group,get_user_id());
-		array_push($group,0);
+	if (!is_array($groups)){
+		$groups = array();
 	}
-	$groups = join(",",$groups);
+	if(is_logged_in()){
+		array_push($groups,get_user_id());
+		array_push($groups,0);
+	}
+	$groupPred = count($groups) > 0 ? "rec_OwnerUGrpID in (".join(",",$groups).") or ":"";
 	$tables = "records";
-	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and (rec_OwnerUGrpID in ($groups) or not rec_NonOwnerVisibility='hidden')" . ($rec_id ? " and rec_ID != $rec_id" : "");
+	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and ($groupPred not rec_NonOwnerVisibility='hidden')" . ($rec_id ? " and rec_ID != $rec_id" : "");
 	$N = 0;
 	foreach ($fuzzyFields as $field) {
 		list($rdt_id, $val) = $field;

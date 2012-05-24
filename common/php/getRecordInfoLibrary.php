@@ -70,15 +70,19 @@ function getResolvedIDs($recID,$bmkID) {
 	if (intval(@$recID)) {
 		$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=$recID");
 		$recurseLimit = 10;
+		$resolvedRecID = 0;
 		while (mysql_num_rows($res) > 0) {
 			$row = mysql_fetch_row($res);
-			$recID = $row[0];
+			$resolvedRecID = $row[0];
 			$replaced = true;
-			$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=$recID");
+			$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=$resolvedRecID");
 			if ($recurseLimit-- === 0) { return array(); }
 		}
+		if ($resolvedRecID !== 0) {
+			 $recID = $resolvedRecID;
+		}
 	}
-
+//error_log("no forwarding".print_r($recID,true));
 	$rec_id = 0;
 	$bkm_ID = 0;
 	if (intval(@$recID)) {
@@ -86,9 +90,11 @@ function getResolvedIDs($recID,$bmkID) {
 		$res = mysql_query('select rec_ID, bkm_ID from Records
 		 left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
 		$row = mysql_fetch_assoc($res);
+//error_log("row ".print_r($row,true));
 		$rec_id = intval($row['rec_ID']);
 		$bkm_ID = intval($row['bkm_ID']);
 	}
+//error_log("after recID bmk lookup ".print_r($rec_id,true));
 
 	if (! $rec_id  &&  intval(@$bmkID)) {
 		$bkm_ID = intval($bmkID);

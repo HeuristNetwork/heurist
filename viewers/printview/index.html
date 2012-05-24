@@ -563,9 +563,9 @@
 							" Word:" + annoStruct.addr.endWord)+ " ?"; */
 				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 							top.HEURIST.magicNumbers['RT_ANNOTATION']+
-										'&addr='+annoStruct.addr.startElems.join(":") +","+
-												annoStruct.addr.startWord +","+
-												annoStruct.addr.endElems.join(":") +","+
+										'&addr='+annoStruct.addr.startElems.join(",") +":"+
+												annoStruct.addr.startWord +":"+
+												annoStruct.addr.endElems.join(",") +":"+
 												annoStruct.addr.endWord +
 										(recID ? '&trgRecID='+recID : "") +
 										(recTitle ? '&trgRecTitle='+recTitle : "") +
