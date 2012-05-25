@@ -299,22 +299,24 @@
 	define('DT_ALL_ASSOC_FILE','2-221');
 
 	$rtDefines = array(
-	'RT_INTERNET_BOOKMARK' => array(2,2),
+	'RT_INTERNET_BOOKMARK' => array(2,2),//TODO : change RT_WEB_PAGE with new update.
 	'RT_NOTE' => array(2,3),
 	'RT_JOURNAL_ARTICLE' => array(3,15),
 	'RT_BOOK' => array(3,13),
 	'RT_JOURNAL_VOLUME' => array(3,18),
 	'RT_RELATION' => array(2,1),
-	'RT_PERSON' => array(2,20),
+	'RT_PERSON' => array(2,20),//TODO : change 2-10 with new update.
 	'RT_MEDIA_RECORD' => array(2,5),
-	'RT_IMAGE_LAYER' => array(3,6),
+	'RT_IMAGE_LAYER' => array(3,6),//TODO : change 2-11 with new update.
 	'RT_KML_LAYER' => array(3,24),
 	'RT_AUTHOR_EDITOR' => array(3,23),
-	'RT_BLOG_ENTRY' => array(2,8),
-	'RT_INTERPRETATION' => array(2,10),
+	'RT_BLOG_ENTRY' => array(2,8),//TODO : change 2-7 with new update.
+	'RT_INTERPRETATION' => array(2,10),//TODO : change 2-8 with new update.
 	'RT_FACTOID' => array(3,22),
-	'RT_ANNOTATION' => array(3,25),
-	'RT_COLLECTION' => array(2,6)
+	'RT_ANNOTATION' => array(3,25),//TODO : change 2-8 with new update.
+	'RT_COLLECTION' => array(2,6),
+	'RT_FILTER' => array(2,12),
+	'RT_TRANSFORMATION' => array(2,14)
 	);
 
 	foreach ($rtDefines as $str => $id) {
@@ -322,55 +324,59 @@
 	}
 
 	$dtDefines = array(
-	'DT_TITLE' => array(2,1),
-	'DT_GIVEN_NAMES' => array(2,33),
-	'DT_ALTERNATE_NAME' => array(3,36),
-	'DT_CREATOR' => array(2,19),
-	'DT_EXTENDED_DESCRIPTION' => array(3,17),
-	'DT_QUERY_STRING' => array(2,6),
-	'DT_LINKED_RESOURCE' => array(2,4),
-	'DT_RELATION_TYPE' => array(2,5),
+	'DT_TITLE' => array(2,1),//TODO : change DT_NAME
+	'DT_GIVEN_NAMES' => array(2,33),//TODO : change 2-18 with new update.
+	'DT_ALTERNATE_NAME' => array(3,36),//TODO : change 2-2 with new update.
+	'DT_CREATOR' => array(2,19),//TODO : change 2-15 with new update.
+	'DT_EXTENDED_DESCRIPTION' => array(3,17),//TODO : change 2-4 with new update.
+	'DT_QUERY_STRING' => array(2,6),//TODO : change 2-12 with new update.
+	'DT_LINKED_RESOURCE' => array(2,4),//TODO : change 2-5  DT_TARGET_RESOURECE with new update.
+	'DT_RELATION_TYPE' => array(2,5),//TODO : change 2-6 with new update.
 	'DT_NOTES' => array(2,12),	//TODO: change dty to Short summary and remove from code
 	'DT_PRIMARY_RESOURCE' => array(2,7),
-	'DT_RESOURCE' => array(2,79),
+	'DT_RESOURCE' => array(2,79),//TODO : change 2-13 with new update.
 	'DT_FULL_IMAG_URL' => array(70,603),	//TODO: remove from code
 	'DT_THUMB_IMAGE_URL' => array(70,606),	//TODO: remove from code
-	'DT_ASSOCIATED_FILE' => array(2,8),		//TODO: Change this to file resource
-	'DT_GEO_OBJECT' => array(2,11),
+	'DT_ASSOCIATED_FILE' => array(2,8),		//TODO : change 2-38 DT_FILE_RESOURCE with new update.
+	'DT_FILE_TYPE'=>array(2,41),
+	'DT_GEO_OBJECT' => array(2,11),//TODO : change 2-28 with new update.
 	'DT_OTHER_FILE' => array(3,62),
 	'DT_LOGO_IMAGE' => array(3,222),
-	'DT_THUMBNAIL' => array(2,9),
+	'DT_THUMBNAIL' => array(2,9),//TODO : change 2-39 with new update.
 	'DT_IMAGES' => array(3,224),	//TODO: remove from code
-	'DT_DATE' => array(3,16),
-	'DT_START_DATE' => array(2,2),
-	'DT_END_DATE' => array(2,3),
-	'DT_INTERPRETATION_REFERENCE' => array(2,13),
-	'DT_ORIGINAL_RECORD_ID' => array(2,589), //for import
+	'DT_DATE' => array(3,16),//TODO : change 2-9 with new update.
+	'DT_START_DATE' => array(2,2),//TODO : change 2-10 with new update.
+	'DT_END_DATE' => array(2,3),//TODO : change 2-11 with new update.
+	'DT_INTERPRETATION_REFERENCE' => array(2,13),//TODO : change 2-8 with new update.
+	'DT_ORIGINAL_RECORD_ID' => array(2,589), //TODO : change 2-36 with new update.
 	'DT_DOI' => array(3,99),
 	'DT_WEBSITE_ICON' => array(3,347),
 	'DT_ISBN' => array(3,97),
 	'DT_ISSN' => array(3,108),
 	'DT_JOURNAL_REFERENCE' => array(3,111),
-	'DT_SHORT_SUMMARY' => array(2,12),
+	'DT_SHORT_SUMMARY' => array(2,12),//TODO : change 2-3 with new update.
 	'DT_MEDIA_REFERENCE' => array(3,508),
 	'DT_TEI_DOCUMENT_REFERENCE' => array(3,322),
 	'DT_START_ELEMENT' => array(3,539),
 	'DT_END_ELEMENT' => array(3,540),
 	'DT_START_WORD' => array(3,329),
 	'DT_END_WORD' => array(3,330),
-	'DT_MIME_TYPE' => array(3,48),
-	'DT_SERVICE_URL' => array(3,339),
-	'DT_MAP_IMAGE_LAYER_SCHEMA' => array(3,585),
+	'DT_MIME_TYPE' => array(3,48),//TODO : change 2-29 with new update.
+	'DT_SERVICE_URL' => array(3,339),//TODO : change 2-34 with new update.
+	'DT_MAP_IMAGE_LAYER_SCHEMA' => array(3,585),//TODO : change 2-31 with new update.
 	'DT_KML_FILE' => array(3,552),
 	'DT_TITLE_SHORT' => array(3,55),
 	'DT_KML' => array(3,138),
-	'DT_MINMUM_ZOOM_LEVEL' => array(3,586),
+	'DT_MINMUM_ZOOM_LEVEL' => array(3,586),//TODO : change 2-32 with new update.
 	'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3,92),
-	'DT_MAXIMUM_ZOOM_LEVEL' => array(3,587),
-	'DT_LOCATION' => array(3,181),
-	'DT_CONTACT_INFO' => array(70,309),
-	'DT_SHOW_IN_MAP_BG_LIST' => array(3,679)   //show image layer or kml in map background list
-	);
+	'DT_MAXIMUM_ZOOM_LEVEL' => array(3,587),//TODO : change 2-33 with new update.
+	'DT_LOCATION' => array(3,181),//TODO : change 2-27 DT_PLACE_NAME with new update.
+	'DT_CONTACT_INFO' => array(70,309),//TODO : change 2-17 with new update.
+	'DT_SHOW_IN_MAP_BG_LIST' => array(3,679),//show image layer or kml in map background list
+	'DT_ANNOTATION_RESOURCE'=>array(2,42),
+	'DT_ANNOTATION_RANGE'=>array(2,43),
+	'DT_FILTER_STRING'=>array(2,40)
+	);//TODOD: add email magic numbers
 
 	foreach ($dtDefines as $str => $id) {
 		defineDTLocalMagic($str,$id[1],$id[0]);

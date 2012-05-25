@@ -1687,7 +1687,10 @@ top.HEURIST.search = {
 		var fld = $("#field-select").val();
 		var ctn = $("#field-select").parent().hasClass('enum') ?$("#simple-search-enum-selector").val() :
 																$("#input-contains").val();
-		q = (q? (fld?q+" ": q ):"") + (fld?fld:" all:") + (ctn?'"'+ctn+'"':"");
+		var asc = ($("#sortAsc:checked").length > 0 ? "" : "-");
+		var srt = $("#sortby-select").val();
+		srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
+		q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?'"'+ctn+'"':"") + (srt? " " + srt : "");
 		if (q) {
 			$("#q").val(q);
 		}
@@ -1737,7 +1740,16 @@ top.HEURIST.search = {
 		var detailTypes = top.HEURIST.detailTypes;
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
+		var sortbyValSelect = document.getElementById("sortby-select");
+		sortbyValSelect.innerHTML = '<option value="t" selected>record title</option>'+
+									'<option value="u">record URL</option>'+
+									'<option value="m">date modified</option>'+
+									'<option value="a">date added</option>'+
+									'<option value="r">personal rating</option>'+
+									'<option value="p">popularity</option>';
+
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
+		sortbyValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
 
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var index in detailTypes.groups){
@@ -1748,17 +1760,21 @@ top.HEURIST.search = {
 			var firstInGroup = true,
 				i=0;
 			grp.label = detailTypes.groups[index].name;
+			var srtGrp = grp.cloneNode(false);
 			for (; i < detailTypes.groups[index].showTypes.length; i++) {
 				var detailTypeID = detailTypes.groups[index].showTypes[i];
 				if (detailTypeID && detailTypes.usageCount[detailTypeID]) {
 					if (firstInGroup){
 						fieldValSelect.appendChild(grp);
+						sortbyValSelect.appendChild(srtGrp);
 						firstInGroup = false;
 					}
 					var name = detailTypes.names[detailTypeID];
 //					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
+					var sortValue =  "" + (useIDs ? detailTypeID : '"'+name+'"');
 					fieldValSelect.appendChild(new Option(name,value));
+					sortbyValSelect.appendChild(new Option(name,sortValue));
 				}
 			}
 		}
@@ -1769,12 +1785,24 @@ top.HEURIST.search = {
 		var fields = top.HEURIST.rectypes.typedefs[rt].dtFields;
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
-		fieldValSelect.onchange = top.HEURIST.search.handleFieldSelectSimpleSearch;
+		var sortbyValSelect = document.getElementById("sortby-select");
+		sortbyValSelect.innerHTML = '<option value="t" selected>record title</option>'+
+									'<option value="u">record URL</option>'+
+									'<option value="m">date modified</option>'+
+									'<option value="a">date added</option>'+
+									'<option value="r">personal rating</option>'+
+									'<option value="p">popularity</option>'+
+									'<optgroup label="'+ top.HEURIST.rectypes.names[rt] +' fields"></optgroup>'
+
+		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
+		sortbyValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var dtID in fields){
 			var name = fields[dtID][0] +" (" + dtID + ")";
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
+			var sortValue =  "" + (useIDs ? dtID : '"'+name+'"');
 			fieldValSelect.appendChild(new Option(name,value));
+			sortbyValSelect.appendChild(new Option(name,sortValue));
 		}
 	},
 

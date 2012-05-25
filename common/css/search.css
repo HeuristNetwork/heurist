@@ -2100,6 +2100,11 @@ div.searchInput > .simplesearch.collapsed {
 	border-radius:3px;
 	width:100px;
 }
+#sortAsc {
+	display: inline;
+	vertical-align: bottom;
+	width: 20px;
+}
 .simple-search-row.enum input {
 	display:none;
 }

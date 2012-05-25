@@ -769,8 +769,8 @@ function getRectypeColNames(){
 					"rty_AlternativeRecEditor",
 					"rty_Type",
 					"rty_ShowURLOnEditForm",
-                    "rty_ShowDescriptionOnEditForm",
-                    "rty_Modified",
+					"rty_ShowDescriptionOnEditForm",
+					"rty_Modified",
 					"rty_LocallyModified",
 					"rty_ConceptID");
 }
@@ -1125,7 +1125,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 
 	while ($row = mysql_fetch_row($res)) {
 		array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'],$row[2]);
-		if ($row[16]) {
+		if ($row[17]) {
 			array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['showTypes'],$row[2]);
 		}
 		$dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row,2);
