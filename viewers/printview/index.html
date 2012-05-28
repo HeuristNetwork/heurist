@@ -57,12 +57,27 @@
 				var styleSelectElt = document.getElementById("style_select");
 				styleSelectElt.options[0] = new Option("Select a style...", "");
 				styleSelectElt.options[0].disabled = true;
-				var i = 1;
-				for (var style in styles) {
-					styleSelectElt.options[i++] = new Option(styles[style][0], style);
-					if (style == s) styleSelectElt.selectedIndex = i-1;
+				for (var grpIndex in top.HEURIST.transforms.groupOrder) {
+					var grpName = top.HEURIST.transforms.groupOrder[grpIndex];
+					var firstInGroup = true;
+					for (var index in top.HEURIST.transforms.groups[grpName]){
+						var transform = top.HEURIST.transforms.groups[grpName][index];
+						if (transform["type"].search(/XSLT/) !== -1) {
+							if (firstInGroup){
+								//create opt group
+								var grp = document.createElement("optgroup");
+								grp.label = grpName;
+								styleSelectElt.appendChild(grp);
+								firstInGroup = false;
+							}
+							styleSelectElt.appendChild( new Option(transform["label"],transform["uri"]));
+							if (transform["label"] == s) {
+								styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
+							}
+						}
+					}
 				}
-				styleSelectElt.options[i] = new Option("Generic XML", "genericXML");
+				styleSelectElt.appendChild(new Option("Generic XML", "genericXML"));
 			}
 
 			var xml;

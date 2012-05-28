@@ -784,16 +784,17 @@ function EditRecStructure() {
 
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_FilteredJsonTermIDTree');
 
-/* Ian's request - no more filtering
+
 					recreateTermsPreviewSelector(rst_type,
-					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),   //dty_JsonTermIDTree
-					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value)); //dty_TermIDTreeNonSelectableIDs
-*/
+					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),//dty_JsonTermIDTree
+					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value),//dty_TermIDTreeNonSelectableIDs
+					edt_def.value);
+/* Ian's request - no more filtering
 					recreateTermsPreviewSelector(rst_type,
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree],
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs],
 						edt_def.value); //default value
-
+*/
 					//editedTermTree, editedDisabledTerms);
 					Dom.setStyle(edt_def, "visibility", "hidden");
 

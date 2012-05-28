@@ -77,6 +77,9 @@ print "top.HEURIST.detailTypes = " . json_format(getAllDetailTypeStructures(true
 
 print "\ntop.HEURIST.terms = \n". json_format(getTerms(true),true) . ";\n";
 
+print "\ntop.HEURIST.transforms = \n". json_format(getTransformsByOwnerGroup(),true) . ";\n";
+
+
 /*print "\ntop.HEURIST.terms.termsByDomainLookup = \n" . json_format(getTerms(),true) . ";\n";
 
 print "\ntop.HEURIST.terms.treesByDomain = { 'relation' : " . json_format(getTermTree("reltype","prefix"),true).",\n

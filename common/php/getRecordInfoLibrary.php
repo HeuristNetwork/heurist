@@ -1033,6 +1033,59 @@ function getRecTypeUsageCount() {
 }
 
 
+function getTransformsByOwnerGroup() {
+	$transRT = (defined('RT_TRANSFORMATION')?RT_TRANSFORMATION:0);
+	$transNameDT = (defined('DT_TITLE')?DT_TITLE:0);
+	$transFileDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
+	$transTypeDT = (defined('DT_FILE_TYPE')?DT_FILE_TYPE:0);
+	$transDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
+	$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+									'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
+	if (is_logged_in()){
+		array_push($ACCESSABLE_OWNER_IDS,get_user_id());
+		if (!in_array(0,$ACCESSABLE_OWNER_IDS)){
+			array_push($ACCESSABLE_OWNER_IDS,0);
+		}
+	}
+
+	$transforms = array("groupOrder"=> array(),"groups" => array());
+	$query = 'select rec_ID, '.
+					'if(ugr_Type="workgroup", ugr_Name,if(ugr_id = '.get_user_id().
+															',"personal",concat(ugr_FirstName," ",ugr_LastName))) as grpName, '.
+					'if(ugr_id = '.get_user_id().',0, if(ugr_id = 0,1,2)) as dispOrder, '.
+					'dtname.dtl_Value as lbl, '.
+					'ulf_ExternalFileReference as uri, '.
+					'ulf_ObfuscatedFileID as fileID, '.
+					'trm_Label as typ, '.
+					'dttrans.dtl_Value as trans '.
+				'from Records '.
+					'left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID='.$transNameDT.' '.
+					'left join recDetails dtfile on rec_ID=dtfile.dtl_RecID and dtfile.dtl_DetailTypeID='.$transFileDT.' '.
+					'left join recUploadedFiles on dtfile.dtl_UploadedFileID = ulf_ID '.
+					'left join recDetails dttrantyp on rec_ID=dttrantyp.dtl_RecID and dttrantyp.dtl_DetailTypeID='.$transTypeDT.' '.
+					'left join defTerms on dttrantyp.dtl_Value = trm_ID '.
+					'left join recDetails dttrans on rec_ID=dttrans.dtl_RecID and dttrans.dtl_DetailTypeID='.$transDT.' '.
+					'left join sysUGrps on ugr_ID=rec_OwnerUGrpID '.
+				'where rec_RecTypeID='.$transRT.' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
+					'NOT rec_NonOwnerVisibility = "hidden") '.
+				'order by dispOrder, grpName, lbl';
+		$res = mysql_query($query);
+//error_log("query ".print_r($query,true));
+//error_log("error ".print_r(mysql_error(),true));
+	while ($row = mysql_fetch_assoc($res)) {
+		if (!@$transforms["groups"][$row['grpName']]){
+			$transforms["groups"][$row['grpName']] = array();
+			array_push($transforms["groupOrder"],$row['grpName']);
+		}
+//error_log("row ".print_r($row,true));
+		array_push($transforms["groups"][$row['grpName']], array("label" => $row['lbl'],
+														"uri" => (@$row['uri']? $row['uri'] : (@$row['fileID'] ? HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID'] : null)),
+														"type" => $row['typ'],
+														"trans" => (@$row['trans']?$row['trans']:null)));
+	}
+	return $transforms;
+}
+
 function getDetailTypeUsageCount() {
 	$recDetailsByDetailType = array();
 	$res = mysql_query("select dty_ID as dtID, count(dtl_ID) as usageCnt
@@ -1100,13 +1153,13 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						"relmarker" => "Relationship marker",
 						"separator" => "Separator (no data)",
 						"calculated" => "Calculated value (not yet impl.)",
-                        // Note=> the following types are no longer deinable but may be required for backward compatibility
+						// Note=> the following types are no longer deinable but may be required for backward compatibility
 						"relationtype" => "Relationship type (terms)",
 						//"fieldsetmarker" => "Field set marker",
-                        "integer" => "Numeric - integer",
-                        "year" => "Year (no mm-dd)",
-                        //"urlinclude" => "File/URL of include content",
-                        "boolean" => "Boolean (true/false)") );
+						"integer" => "Numeric - integer",
+						"year" => "Year (no mm-dd)",
+						//"urlinclude" => "File/URL of include content",
+						"boolean" => "Boolean (true/false)") );
 
 
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());

@@ -20,7 +20,15 @@
 	$style = @$_REQUEST['style'];
 
 	define("SAVE_URI", "disabled");
-	if (is_dir(HEURIST_UPLOAD_DIR)) {
+	if ( preg_match("/(http:\/\/|\/)/",$style)){
+//error_log("style is ".print_r($style,true));
+		$handle = fopen($style, "rb");
+		$contents = stream_get_contents($handle);
+		fclose($handle);
+		header('Content-type: text/xml; charset=utf-8');
+		echo $contents;
+		return;
+	}else if (is_dir(HEURIST_UPLOAD_DIR)) {
 		define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
 	}else if(is_dir('xsl-templates')) {
 		define('DIR', 'xsl-templates');

@@ -119,17 +119,17 @@ function expandCollections($recIDs, $publicOnly = false){
 	$resrcDT = (defined('DT_RESOURCE')?DT_RESOURCE:0);
 	$expRecIDs = array();
 	foreach ( $recIDs as $recID ){
-error_log("recID ".print_r($recID,true));
+//error_log("recID ".print_r($recID,true));
 		$rectype = mysql__select_array("Records","rec_RecTypeID","rec_ID = $recID");
-error_log("rectype ($colRT) ".print_r($rectype,true));
+//error_log("rectype ($colRT) ".print_r($rectype,true));
 		$rectype = intval($rectype[0]);
 		if ($rectype == $colRT) { // collection rec so get query string and expand it and list all ptr recIDs
 			$qryStr = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $qStrDT and dtl_RecID = $recID");
-error_log("query String ".print_r($qryStr,true));
+//error_log("query String ".print_r($qryStr,true));
 			if (count($qryStr) > 0) {
 				// get recIDs only for query. and add them to expanded recs
 				$loadResult = loadSearch(array("q"=>$qryStr[0]),true,true,$publicOnly);
-error_log("loadResult ".print_r($loadResult,true));
+//error_log("loadResult ".print_r($loadResult,true));
 				if (array_key_exists("recordCount",$loadResult) && $loadResult["recordCount"] > 0){
 					foreach (explode(",",$loadResult["recIDs"]) as $resRecID) {
 						if (!in_array($resRecID,$expRecIDs)){
@@ -140,7 +140,7 @@ error_log("loadResult ".print_r($loadResult,true));
 			}
 			//add any colected record pointers
 			$collRecIDs = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $resrcDT and dtl_RecID = $recID");
-error_log("recID list ".print_r($collRecIDs,true));
+//error_log("recID list ".print_r($collRecIDs,true));
 			foreach ($collRecIDs as $collRecID) {
 				if (!in_array($collRecID,$expRecIDs)){
 					array_push($expRecIDs,$collRecID);

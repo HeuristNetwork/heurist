@@ -337,7 +337,7 @@
 	'DT_RESOURCE' => array(2,79),//TODO : change 2-13 with new update.
 	'DT_FULL_IMAG_URL' => array(70,603),	//TODO: remove from code
 	'DT_THUMB_IMAGE_URL' => array(70,606),	//TODO: remove from code
-	'DT_ASSOCIATED_FILE' => array(2,8),		//TODO : change 2-38 DT_FILE_RESOURCE with new update.
+	'DT_ASSOCIATED_FILE' => array(2,38),		//TODO : change 2-38 DT_FILE_RESOURCE with new update.
 	'DT_FILE_TYPE'=>array(2,41),
 	'DT_GEO_OBJECT' => array(2,11),//TODO : change 2-28 with new update.
 	'DT_OTHER_FILE' => array(3,62),
