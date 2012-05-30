@@ -204,6 +204,7 @@ top.HEURIST.search = {
 			$("#searchButtons").toggleClass("collapsed");
 			$("div.searchButtonsTrigger").toggleClass("collapsed");
 		}
+		top.HEURIST.search.results = null;
 		top.HEURIST.search.loadSearch();
 	},
 
@@ -332,7 +333,7 @@ top.HEURIST.search = {
 													$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
 													$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
 												}else{// make sure collapsed class is on parent
-													if ($("#results-level"+i).hasClass('collapsed')){
+													if (!$("#results-level"+i).hasClass('collapsed')){
 														$("#results-level"+i).addClass('collapsed');
 													};
 													$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
@@ -1089,6 +1090,7 @@ top.HEURIST.search = {
 		if (top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") ==="false"){
 			$("#results-level0 div.filter").remove();
 		}
+		$("#results-level0 div.showrelated").html("<a>Search Results </a><span class=\"relatedCount\">0</span>");
 	},
 
 	clearRelatesRows: function() {
@@ -3377,17 +3379,20 @@ top.HEURIST.search = {
 		for (i=0; i<filterMenus.length; i++) {
 			var level = filterMenus[i].className.match(/level(\d+)/);
 			level = level[1];
-			maxLevel = parseInt(level) > maxLevel ?  parseInt(level): maxLevel;
 			if ($("li:not('[class*=checked],[class*=cmd]')",filterMenus[i]).length && level){//if not all checked then need to specify filtering
-				filter[level] = [];
 				$("li[class*=checked]:not([class*=disabled])",filterMenus[i]).each(function(){// find all enabled and checked menu items
+					if (!filter[level]) {
+						filter[level] = [];
+					}
 					filter[level].push( $(this).attr(type));
+					maxLevel = parseInt(level) > maxLevel ?  parseInt(level): maxLevel;
 				});
 			}
 		}
 		ret = YAHOO.lang.JSON.stringify(filter);
 		if (ret === "{}"){
 			ret = "";
+			maxLevel = -1;
 		}else{
 			ret = prefix+"filters="+ret;
 		}
@@ -3404,7 +3409,7 @@ top.HEURIST.search = {
 			maxLevel = 0;
 		for (i=0; i<=len; i++) {
 			var resultsDiv = $("#results-level" + i);
-			if (!resultsDiv || resultsDiv.length < 1) {
+			if (!resultsDiv || resultsDiv.length < 1 || i> 0 && $(".loaded",resultsDiv).length < 1) {
 				break;
 			}
 			maxLevel = i;
