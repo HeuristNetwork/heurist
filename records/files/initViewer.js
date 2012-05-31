@@ -12,6 +12,7 @@
  * this file requires
  * ../../common/js/utilsUI.js
  * ../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js
+ * ../../records/files/imageAnnotation.js
  */
 var viewerObject,
 	Hul = top.HEURIST.util;
@@ -141,7 +142,7 @@ function detectSourceAndType(link, extension){
 			//alternative extension = filename.split('.').pop();
 			//@TODO if extension is still undefined - try to load via server and detectg mimeType
 		}
-		if ( !Hul.isnull(extension ) ){ //
+		if ( !top.HEURIST.util.isnull(extension ) ){ //
 			extension = extension.toLowerCase();
 		}
 
@@ -197,7 +198,8 @@ function linkifyYouTubeURLs(text) {
         //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>');
 }
 
-
+//
+// remove all child elements for given container
 //
 function clearViewer(container){
 	if(container){
@@ -214,7 +216,7 @@ function clearViewer(container){
 }
 
 //
-function showViewer(container, url_and_cfg){
+function showViewer(container, url_and_cfg, _recordID){
 
 	   var acfg;
 
@@ -224,7 +226,7 @@ function showViewer(container, url_and_cfg){
 	   	   acfg = url_and_cfg;
 	   }
 
-	   if(Hul.isnull(acfg) || acfg.length<1){
+	   if(top.HEURIST.util.isnull(acfg) || acfg.length<1){
 				return;
 	   }
 
@@ -244,9 +246,22 @@ function showViewer(container, url_and_cfg){
 
  		if(sType === "image"){
 
+ 			container.style.bottom = 22;
+
  			viewerObject = null;
-			viewer.toolbarImages = top.HEURIST.baseURL+"images/toolbar";
+			viewer.toolbarImages = top.HEURIST.baseURL+"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
+			image_digitizer_container = document.getElementById('image_digitizer_container');
+			if(image_digitizer_container){
+				image_digitizer_container.style.display = 'block';
+			}
+			if(_recordID!=null){
+				viewer.onload2 = function(self){
+									var image_digitizer = ImageAnnotation(self, _recordID);
+									//image_digitizer.createAnnotations();
+									return image_digitizer;
+  								};
+			}
 
 			viewerObject = new viewer({
 					parent: container,

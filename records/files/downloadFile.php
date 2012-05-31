@@ -24,6 +24,7 @@ mysql_connection_db_select(DATABASE);
 
 if (! @$_REQUEST['ulf_ID']) return; // nothing returned if no ulf_ID parameter
 
+$recID = null; //need for image annotations
 $filedata = get_uploaded_file_info_internal($_REQUEST['ulf_ID'], false);
 if($filedata==null) return; // nothing returned if parameter does not match one and only one row
 
@@ -36,18 +37,39 @@ $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes'
 
 if($isplayer){
 
+	$size = '';
+	if (array_key_exists('width',$_REQUEST)){
+		$width =  $_REQUEST['width'];
+		$size = 'width="'.$width.'" ';
+	}else{
+		$width =  '100%';
+	}
+	if (array_key_exists('height',$_REQUEST)){
+		$height =  $_REQUEST['height'];
+		$size = $size.' height="'.$height.'"';
+	}else{
+		$height =  '100%';
+	}
+
 	if($type_source=='youtube')
 	{
-//error_log(">>>>>".linkifyYouTubeURLs($filedata['URL'], ''));
-		print linkifyYouTubeURLs($filedata['URL'], null); // $size
+		print linkifyYouTubeURLs($filedata['URL'], $size); //returns iframe
+	}
+	else if($type_media=='image')
+	{
+			$size = 'width="'.$width.'" height="'.$height.'"';
+
+			$text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
+
+			print $text;
 	}
 	else if($type_media=='video')
 	{
-		print createVideoTag($filedata['URL'], $filedata['mimeType'], ''); // $size
+		print createVideoTag($filedata['URL'], $filedata['mimeType'], $size);
 	}
 	else if($type_media=='audio')
 	{
-error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
+//error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
 
 		print createAudioTag($filedata['URL'], $filedata['mimeType']);
 	}
@@ -159,7 +181,7 @@ function createAudioTag($url, $mimeType) {
 */
 function linkifyYouTubeURLs($text, $size) {
 
-	if($size==null){
+	if($size==null || $size==''){
 		$size = 'width="420" height="345"';
 	}
 

@@ -39,6 +39,7 @@
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/js/utilsUI.js"></script>
 <script src="uploadFileOrDefineURL.js"></script>
+<script src="imageAnnotation.js"></script>
 <script src="initViewer.js"></script>
 <script>
 // width="640" height="480"
@@ -78,6 +79,8 @@ if (window == top) {
 </div>
 </div>
 <div id="preview" style="position:absolute;top:106px;bottom:0px;left:0px;right:0px;"><div class='wrap'><div id='errorMsg'><span>PREVIEW</span></div></div></div>
+
+<div id="image_digitizer_container" style="position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
 
   <script language="JavaScript">
   		top.HEURIST.registerEvent(window, "load", initPage);

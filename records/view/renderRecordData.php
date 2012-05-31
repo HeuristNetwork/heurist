@@ -29,14 +29,29 @@ require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 
 $terms = getTerms();
+
+// get a list of workgroups the user belongs to.
+$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
+array_push($wg_ids, 0);
+
+// if we get a record id tehn see if there is a personal bookmark for it.
+ if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
+	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
+	if (mysql_num_rows($res)>0) {
+		$row = mysql_fetch_assoc($res);
+		$_REQUEST['bkmk_id'] = $row['bkm_ID'];
+	}
+}
+$bkm_ID = intval(@$_REQUEST['bkmk_id']);
+$rec_id = intval(@$_REQUEST['recID']);
 ?>
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 	<script src="../../external/jquery/jquery-1.6.min.js"></script>
-	<script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
-	<script type="text/javascript" src="../../records/files/initViewer.js"></script>
-	<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+	<!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
+	<script type="text/javascript" src="../../records/files/initViewer.js"></script -->
+	<script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
 
 	<script type="text/javascript">
 
@@ -54,6 +69,8 @@ function zoomInOut(obj,thumb,url) {
 	}
 }
 
+//
+//
 function showPlayer(obj, id, url) {
 
 	var currentImg = obj;
@@ -62,7 +79,6 @@ function showPlayer(obj, id, url) {
 		currentImg.style.display = 'none';
 		currentImg.parentNode.className = "fullSize";
 		//add content to player div
-
 		top.HEURIST.util.sendRequest(url, function(xhr) {
 			var obj = xhr.responseText;
 //alert('!!!!'+obj);
@@ -130,31 +146,12 @@ function link_open(link) {
 	else return true;
 }
 
+//on document load
 function add_sid() {
 	if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.results.querySid) {
 		var e = document.getElementById("edit-link");
 		if (e) {
 			e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.results.querySid+"&");
-		}
-	}
-
-	fillPreviewes()
-}
-
-/**
-* create preview for urlinclude detail types
-*/
-function fillPreviewes(){
-//alert('ops!');
-	//get all divs of class urlinclude
-	var elements = document.getElementsByClassName('urlinclude'); //$('div.urlinclude').find('div');
-	if(!top.HEURIST.util.isnull(elements)){
-		var element, ind;
-		for (ind=0; ind<elements.length; ind++)
-		{
-			// alert(elements[ind].id);
-			// in initViewer.js
-			showViewer(elements[ind], elements[ind].childNodes[0].value);
 		}
 	}
 }
@@ -167,20 +164,6 @@ function fillPreviewes(){
 
 <?php
 
-// get a list of workgroups the user belongs to.
-$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
-array_push($wg_ids, 0);
-
-// if we get a record id tehn see if there is a personal bookmark for it.
- if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
-	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
-	if (mysql_num_rows($res)>0) {
-		$row = mysql_fetch_assoc($res);
-		$_REQUEST['bkmk_id'] = $row['bkm_ID'];
-	}
-}
-$bkm_ID = intval(@$_REQUEST['bkmk_id']);
-$rec_id = intval(@$_REQUEST['recID']);
 if ($bkm_ID) {
 	$res = mysql_query('select * from usrBookmarks left join Records on bkm_recID=rec_ID left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
@@ -393,11 +376,7 @@ function print_private_details($bib) {
 				));
 			}
 
-			if ($bd['dty_Type'] == 'urlinclude') { //to remove
-
-				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;"><input type="hidden" value="'.$bd['val'].'"></div>';
-
-			}else if ($bd['dty_Type'] == 'enum') {
+			if ($bd['dty_Type'] == 'enum') {
 
 				if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
 					$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
@@ -428,6 +407,7 @@ function print_private_details($bib) {
 				if($filedata){
 
 					$filedata = $filedata['file'];
+					$remoteSrc = $filedata['remoteSource'];
 
 					//add to thumbnail list
 					$isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
@@ -437,7 +417,7 @@ function print_private_details($bib) {
 							'id' => $filedata['id'],
 							'url' => $filedata['URL'],   //download
 							'thumb' => $filedata['thumbURL'],
-							'player' => $isplayer?$filedata['playerURL']:null  //link to generate player html
+							'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube')?"":"&height=60%"):null  //link to generate player html
 						));
 					}
 
@@ -520,7 +500,7 @@ function print_private_details($bib) {
 		if($thumb['player']){
 			print '<img id="img'.$thumb['id'].'" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player']) .'\')">';
 			print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
-		}else{
+		}else{  //for usual image
 			print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
 		}
 		print '<br/><div class="download_link">';

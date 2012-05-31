@@ -257,6 +257,23 @@ function renderInputs(bibID, rectype) {
 					defaultInputValues[top.HEURIST.magicNumbers['DT_TEI_DOCUMENT_REFERENCE']] = [ { "value" : trgRecID, "title" : trgRecTitle } ];
 				}
 			}
+
+			// image annontation
+			if (top.HEURIST.magicNumbers &&
+			top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE'] &&
+			top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE']) 
+				//&& (rectype == 36)) //todo - change to verification of existance of "image annotation area" field type  top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']) &&
+			{
+				var addr = window.HEURIST.parameters["addr"];
+				defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE']] = [ { "value" : "i:"+addr } ];   //top.HEURIST.magicNumbers['DT_END_WORD']
+
+				var trgRecID = window.HEURIST.parameters["trgRecID"];
+				var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
+				if (trgRecID && trgRecTitle) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE']] = [ { "value" : trgRecID,  "title" :trgRecTitle } ]
+				}
+			}
+
 		}
 		var inputs = top.HEURIST.edit.createInputsForRectype(null,rectype, defaultInputValues, allInputs);
 

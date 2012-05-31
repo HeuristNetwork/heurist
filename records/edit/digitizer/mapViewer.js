@@ -3,7 +3,9 @@
 * Creates popup div with Gmap to view given coordinates
 *
 * requires
-* common/js/hintDiv.js
+* common/js/hintDiv.js (popup div)
+*
+* for dynaminc map viewer it requires
 * records/edit/digitizer/digitizer.js
 * 		viewer/map/mapping.js
 * 		jquery

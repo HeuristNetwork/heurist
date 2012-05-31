@@ -30,6 +30,7 @@ require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
 require_once('libs.inc.php');
@@ -96,7 +97,7 @@ function executeSmartyTemplate($params){
 		echo $error;
 
 		if($publishmode>0 && $outputfile!=null){ //save empty outpurt inot file
-			save_report_output2("<div style=\"padding:20px;\">Currently there are no results</div>");
+			save_report_output2("<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
 		}
 
 		exit();
@@ -747,6 +748,11 @@ function smarty_function_wrap($params, &$smarty)
 		if(array_key_exists('dt',$params)){
 			$dt = $params['dt'];
 		}
+		if(array_key_exists('mode',$params)){
+			$mode = $params['mode'];
+		}else{
+			$mode = null;
+		}
 
 		$label = "";
 		if(array_key_exists('lbl',$params) && $params['lbl']!=""){
@@ -795,12 +801,24 @@ function smarty_function_wrap($params, &$smarty)
 			$value = $params['var'];
 
 
-//!!!!! error_log("WARP VALUE>>>>".print_r($value,true));
+//!!!!!
+error_log("WARP VALUE>>>>".print_r($value,true));
 
-			if( strpos($value['type'],'image')==0 ){
-				return "<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>".$value['origName'];
+			if($mode=="thumbnail"){
+
+			 	return "<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
+						"<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
+
 			}else{
-				return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+
+				if($value['mediaType'] == 'image'){
+					return "<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
+				}else if( $value['remoteSource']=='youtube' ){
+					return linkifyYouTubeURLs($value['URL'], $size);
+				}else{
+					return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+				}
+
 			}
 
 		}else if($dt=='geo'){

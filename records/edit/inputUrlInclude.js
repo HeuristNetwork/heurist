@@ -141,8 +141,12 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 	if (!editValue) {
 		editValue = element.hiddenElt.value; //json string with bdValue.file
 	}
+	var recID = "";
+	if(top.HEURIST.edit.record && top.HEURIST.edit.record.bibID){
+		recID = "&recid="+top.HEURIST.edit.record.bibID;
+	}
 
-	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+"&db="+_db;
+	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
 	/*if (element.input.constrainrectype){
 		url += "&t="+element.input.constrainrectype;
 	}*/

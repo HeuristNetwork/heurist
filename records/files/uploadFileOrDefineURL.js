@@ -4,10 +4,13 @@
  * Popup dialogue to define URLinclude field type in editRecord
  * URL is either to external resource or link file uploaded to heurist
  *
+ * requires initViewer
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
+ *
  *
  * @todo - implement basic preview
  */
@@ -17,7 +20,8 @@ var viewerObject,
 	curr_ext,
 	URLInput,
 	fileUploadInput,
-	_filedata = null;
+	_filedata = null,
+	_recordID = null;
 
  /**
  * User has uploaded the file - change the url to point to this file and change source and type
@@ -45,7 +49,7 @@ var viewerObject,
  		document.getElementById("cbType").value = oType.type;
  		curr_ext = oType.extension;
 
- 		showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type])
+ 		showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type], _recordID)
 	}
  }
 
@@ -91,8 +95,9 @@ function initPage() {
 		if(location.search.length > 1) {
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
+			_recordID = top.HEURIST.parameters['recid'];
 			_filedata = Hul.expandJsonStructure(top.HEURIST.parameters['value']);
-        
+
             if(_filedata.remoteURL){
                 sUrl    = _filedata.remoteURL;
             }else{
@@ -161,7 +166,7 @@ function initPage() {
  				curr_link = sUrl;
  				document.getElementById("cbSource").value = sSource;
  				document.getElementById("cbType").value = sType;
- 				showViewer(document.getElementById('preview'), [curr_link, sSource, sType]);
+ 				showViewer(document.getElementById('preview'), [curr_link, sSource, sType], _recordID);
 			}
 		}
 

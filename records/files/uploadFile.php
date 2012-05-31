@@ -429,7 +429,7 @@ function register_external($filejson)
 			}
 		}
 	}
-	
+
 	if($filedata['ext']==null && $filedata['mediaType']=="xml"){
 		$filedata['ext'] = "xml";
 	}
@@ -527,6 +527,59 @@ function get_uploaded_file_info($fileID, $needConnect)
 	return $res;
 }
 
+/**
+* find record id by file id
+*
+* @param mixed $fileID
+* @param mixed $needConnect
+*/
+function get_uploaded_file_recordid($fileID, $needConnect)
+{
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	$recID = null;
+
+	$res = mysql_query("select dtl_RecID from recDetails where dtl_UploadedFileID=".$fileID);
+	while ($row = mysql_fetch_array($res)) {
+		$recID = $row[0];
+		break;
+	}
+
+	return $recID;
+}
+
+/**
+* get file id by record id
+*
+* @param mixed $recID
+* @param mixed $needConnect
+*/
+function get_uploaded_fileid_by_recid($recID, $needConnect)
+{
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	$ulf_id = null;
+
+	$res = mysql_query("select dtl_UploadedFileID from recDetails where dtl_RecID=".$recID." and dtl_UploadedFileID is not null");
+	while ($row = mysql_fetch_array($res)) {
+		$ulf_id = $row[0];
+		break;
+	}
+
+	return $ulf_id;
+}
+
+/**
+* put your comment there...
+*
+* @param mixed $fileID
+* @param mixed $needConnect
+* @return bool
+*/
 function get_uploaded_file_info_internal($fileID, $needConnect)
 {
 
@@ -588,7 +641,7 @@ function get_uploaded_file_info_internal($fileID, $needConnect)
 			//@todo - add special parameters for specific sources and media types
 			// QUESTION - store it in database? Or create on-fly??
 			//
-			if($res["remoteSource"]=="youtube" || $res["mediaType"]=="video" || $res["mediaType"]=="audio"){
+			if($res["remoteSource"]=="youtube" || $res["mediaType"]=="image" || $res["mediaType"]=="video" || $res["mediaType"]=="audio"){
 				$res["playerURL"] =	$downloadURL."&player=yes";
 			}
 
