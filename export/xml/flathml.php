@@ -191,6 +191,8 @@ $GEO_TYPES = array(
 
 // set parameter defaults
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including reverse pointers
+$EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
+
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
 $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ?  $_REQUEST['hinclude'] : 99;	//default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ?  true : false;	//default to not output xinclude format for related records
