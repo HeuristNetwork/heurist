@@ -95,8 +95,8 @@ function import() {
 				makeLogEntry("Record type", $importRtyID, " exists in $targetDBName as ID = $localRtyID");
 			}else{
 			$localRtyID = importRectype($importRty);
+			}
 		}
-	}
 	}
 	// successful import
 	if(!$error) {

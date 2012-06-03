@@ -112,7 +112,14 @@ function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)
 	}
 }
 
-
+/*
+ *	This function takes a comma separated list of recIDS and for each clection record
+ *	finds the recIDs that statisfy the query string, adding any direct recIDs from the
+ *	repeatable pointer field and appends any non collection records in the list.
+ *
+ *
+ *
+ */
 function expandCollections($recIDs, $publicOnly = false){
 	$colRT = (defined('RT_COLLECTION')?RT_COLLECTION:0);
 	$qStrDT = (defined('DT_QUERY_STRING')?DT_QUERY_STRING:0);
