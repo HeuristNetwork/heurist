@@ -410,15 +410,15 @@
 					}
 
 					clearAndDisplayLoading();
-
 					var rtFilter = top.HEURIST.search.getPushDownFilter("rectype");
 					var rleFilter = top.HEURIST.search.getPushDownFilter("reltype");
 					var ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
 					var filter = "" + (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
 									+ (rleFilter.length > 0 &&  rleFilter[1] != "" ? "&" + rleFilter[1] : "")
 									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "");
-					var pageQuery = "?w=all&a=1&depth="+ rtFilter[0] +"&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
+					var pageQuery = "?w=all&a=1&depth="+ Math.max(rtFilter[0],0) +"&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
 										(filter.length > 0 ? filter : "") +
+										($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
 					curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 					var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
@@ -611,6 +611,8 @@
 			</select>
 			<a href="javascript:window.print()"><div id="printingLink"></div></a>
 			<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
+			<input type="checkbox" id="expandColl" />
+			<label for="expandColl">Expand Collections</label>
 			<a href="javascript:window.backToTop()" style="float: right;">to top</a>
 		</div>
 		<div id="displayResult" ></div>

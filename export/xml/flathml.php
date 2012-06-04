@@ -251,9 +251,6 @@ if (array_key_exists('q',$_REQUEST)) {
 }else if(array_key_exists('recID',$_REQUEST)){ //record IDs to use as a query
 	//check for expansion of query records.
 	$recIDs = explode(",",$_REQUEST['recID']);
-	if (array_key_exists('expandColl',$_REQUEST)){
-		$recIDs = expandCollections($recIDs);
-	}
 	$_REQUEST['q'] = 'ids:' . join(',', $recIDs);
 }
 
@@ -587,6 +584,11 @@ function outputRecords($result) {
 	$recSet = array('count'=> 0,
 					'relatedSet'=>array());
 	$rec_ids = explode(",",$result['recIDs']);
+
+	if (array_key_exists('expandColl',$_REQUEST)){
+		$rec_ids = expandCollections($rec_ids);
+	}
+
 	foreach ($rec_ids as $recID) {
 		$recSet['relatedSet'][$recID] = array('depth'=>0);
 	}
