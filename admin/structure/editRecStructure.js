@@ -544,6 +544,11 @@ function EditRecStructure() {
 
 	/**
 	* Opens popup with preview
+	* 
+	* Button is hident in UI
+	* Preview record structure - doesn’t always work reliably. It hasn't been fully debugged.
+	* Option:   use records/add/formAddRecordPopup.html
+	* 
 	*/
 	function _initPreview(){
 

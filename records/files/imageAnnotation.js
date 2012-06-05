@@ -73,7 +73,8 @@ function ImageAnnotation(self, _recID) {
 													(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
 															(top.HEURIST.database.name? top.HEURIST.database.name:'')));
 
-		_createAnnotations();
+		getAnnotationRectypes();
+		//_createAnnotations();
 
 	}
 
@@ -244,8 +245,6 @@ function ImageAnnotation(self, _recID) {
 			}
 		}
 
-		getAnnotationRectypes();
-
 		var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
 		var callback = _updateList;
 		var params = "recid="+_recordID+"&db="+_db;
@@ -276,6 +275,8 @@ function ImageAnnotation(self, _recID) {
 			}
 			if(_selRectypes.length<1){
 				_noEditAllowed();
+			}else{
+				_createAnnotations();
 			}
 		}
 

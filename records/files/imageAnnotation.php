@@ -49,14 +49,14 @@ function getAnnotationsRectype(){
 
 	$result = array();
 	if (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE')){
-	
+
 		//find record types that suits to annotation: image area + pointer
 		$query = "select distinct d1.rst_RecTypeID as id, d1.rst_DisplayName as name from defRecStructure d1, defRecStructure d2 where ".
 		"d1.rst_RecTypeID = d2.rst_RecTypeID ".
 		" and d1.rst_DetailTypeID=322 and ".DT_ANNOTATION_RANGE.
 		" and d2.rst_DetailTypeID=".DT_ANNOTATION_RESOURCE;
 		///"d2.rst_DetailTypeID in (select dty_ID from defDetailTypes where dty_Type=\"resource\")";
-		
+
 		$fres = mysql_query($query);
 
 
@@ -64,8 +64,8 @@ function getAnnotationsRectype(){
 			array_push($result, $row);
 		}
 
-		return $result;
 	}
+	return $result;
 }
 
 
@@ -75,14 +75,14 @@ function getAnnotationsRectype(){
 */
 function getAnnotationsById($recid){
 
-	$result = array();   
+	$result = array();
 	if (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE')){
-	
+
 		$params = array("q"=>"f:".DT_ANNOTATION_RESOURCE."=".$recid, "w"=>BOTH);
-		
+
 		$result = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
-		
-		if(!array_key_exists('records',$result) ||  $result['resultCount']==0 ){ 
+
+		if(!array_key_exists('records',$result) ||  $result['resultCount']==0 ){
 			//error_log("EMPTY");
 		}
 	}
@@ -116,7 +116,7 @@ function deleteAnnotationById($rec_id){
 			}else{
 				mysql_query("commit");
 			}
-			
+
 			return $res;
 }
 ?>

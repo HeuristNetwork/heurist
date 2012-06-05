@@ -9,6 +9,7 @@
 
 var lastElt = null;
 var selectedDay = null;
+var callback = null;
 
 
 function getDaysInMonth(month, year) {
@@ -164,15 +165,17 @@ function parseDate(date) {
 }
 
 
-function init(initDate) {
+function init_calendar(initDate, _callback) {
 	if (initDate.charAt(0) == '*') {	// month and year supplied
 		initCalendar(parseDate(initDate.substring(1)), true);
 	} else {				// specific date supplied
 		if (initDate) initCalendar(parseDate(initDate));
 		else initCalendar(null);
 	}
+	callback = _callback;
 }
 
+/* old way
 if (location.hash.length > 1) {
 	init(location.hash.substring(1));
 } else {
@@ -182,7 +185,7 @@ if (location.hash.length > 1) {
 	var day = now.getDate();			if (day < 10) day = "0" + day;
 	init("*" + year + "-" + month + "-" + day);
 }
-
+*/
 
 document.onclick = function(e) {
 	if (!e) e = event;
@@ -192,10 +195,17 @@ document.onclick = function(e) {
 		selectedDay = target;
 		target.className += ' cal_day_selected';
 
-		if(window.opener && window.opener.document && window.opener.document.getElementById(dateId))
-		  window.opener.document.getElementById(dateId).value=selectedDay.id;
+		if(callback){
+			callback.apply(this, [selectedDay.id]);
+		}
+/* old way
+		if(window.opener && window.opener.document && window.opener.document.getElementById(dateId)){
 
+		   window.opener.document.getElementById(dateId).value=selectedDay.id;
+		   window.opener.calendarRollOver.close();
+		}
 		window.close(selectedDay.id);
+*/
 	}
 }
 document.onmouseover = function(e) {

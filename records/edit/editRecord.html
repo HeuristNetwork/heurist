@@ -414,7 +414,7 @@
 				top.HEURIST.whenLoaded(recordEvent, function() {
 					document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 					var citeAs = document.getElementById("cite-as-url");
-					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
+					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
 					citeAs.appendChild(document.createTextNode(citeAs.href));
 				});
 			</script>

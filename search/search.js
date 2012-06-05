@@ -3892,7 +3892,7 @@ function removeCustomAlert() {
 		var tabBar = document.getElementById("tabbar");
 		var searchTable = document.getElementById("search");
 
-		var layout = new YAHOO.widget.Layout(mainbody,{
+		var layout = new YAHOO.widget.Layout('mainbody',{
 			units: [
 				//{ position: 'top', height: 95, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 20, resize: false, body: 'footer', gutter: '0', collapse: false },

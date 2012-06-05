@@ -39,7 +39,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			if(width>0 && height>0){
 				popup_div.css({
 					'width':width+'px',
-					'height':width+'px'});
+					'height':height+'px'});
 			}
 
 			popup_div.css({
@@ -129,9 +129,13 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _showAt(event)
 	{
-			_init();
-
 			var xy = _getMousePos(event);
+			_showAtXY(xy);
+	}
+			
+	function _showAtXY(xy){	
+	
+			_init();	
 			//xy = [posx = event.target.x,posy = event.target.y];
 
 			//var _map_popup = $("#mapPopup");
@@ -175,8 +179,15 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		showAt: function(event){
 			_showAt(event);
 		},
+		showAtXY: function(xy){
+			_showAtXY(xy);
+		},
 		hide: function(){
 			hideTimer = window.setTimeout(_hideToolTip, 1000);
+		},
+		close: function(){
+			needHideTip = true;
+			_hideToolTip();
 		},
 		getClass: function () {
 			return _className;
