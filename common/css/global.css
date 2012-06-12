@@ -946,3 +946,66 @@ body.is-not-logged-in div.not-logged-in-only {
 .externalLink:hover {
 	background-image: url("../images/jump_white.png");
 }
+.input-cell select > optgroup {
+	background-color: white;
+}
+.termTree, .selectedTerms {
+	border:none;
+	overflow: auto;
+	float:left;
+	width:30%;
+	height:360px;
+	background:#FFF;
+	box-shadow:inset 0px 1px 6px #6A7C99;
+}
+.selectedTerms {
+	margin:0 1%;
+}
+.termTreeText {
+	width: 30%;
+	padding-left:0;
+	float: left;
+	vertical-align: bottom;
+}
+.selectedTermsText {
+	width: 30%;
+	padding-left:0;
+	float: left;
+	margin: 0 1%;
+}
+.previewListText {
+	padding-left:0;
+	float: left;
+}
+.previewList {
+	width: 200px;
+	max-width: 200px;
+}
+.termHeader {
+	font-weight: bold;
+	color: black;
+}
+.depth0 {
+	margin-left: 0px;
+}
+.depth1 {
+	margin-left: 10px;
+}
+.depth2 {
+	margin-left: 20px;
+}
+.depth3 {
+	margin-left: 30px;
+}
+.depth4 {
+	margin-left: 40px;
+}
+.depth5 {
+	margin-left: 50px;
+}
+.depth6 {
+	margin-left: 60px;
+}
+.depth7 {
+	margin-left: 70px;
+}
