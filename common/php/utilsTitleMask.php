@@ -68,6 +68,8 @@ function check_title_mask2($mask, $rt, $checkempty) {
 
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $authRT = (defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:0);
+$authorDT = (defined('DT_CREATOR')?DT_CREATOR:0);
+$editorDT = (defined('DT_EDITOR')?DT_EDITOR:0);
 $titleDT = (defined('DT_TITLE')?DT_TITLE:0);
 $surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
 $enum_params = array('id','code','label','conceptid');
@@ -109,6 +111,7 @@ function fill_title_mask($mask, $rec_id, $rt)
 	}
 	$replacements['[['] = '[';
 	$replacements[']]'] = ']';
+//error_log("fill mask replacements = ".print_r($replacements,true));
 
 	$title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
 	if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {	// not a URI
@@ -268,7 +271,8 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 {
 	global $surnameDT, $authRT, $enum_params;
 
-//error_log("[$field_name]   [$rec_id]   [$rt]");
+//error_log("[$field_name]  rec [$rec_id]  rty [$rt]");
+//error_log(" rt info ".print_r($rt,true));
 
 	if (!$rec_id) { // return blank can't lookup values without a recID
 		return '';
@@ -304,8 +308,9 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 			if($rdts) $rdt_id = $rdts['dty_ID'];
 			$enum_param_name = $matches[2];
 		}
+//error_log("field mask matches = ".print_r($matches,true));
 		if($rdt_id>0 && in_array(strtolower($enum_param_name), $enum_params)){ //this is enum
-
+//error_log("expand enumeration".print_r($enum_param_name,true));
 			$val = _title_mask__get_enum_value($rec_id, $rdt_id, strtolower($enum_param_name));
 			if($val!=''){
 				return $val;
@@ -319,13 +324,25 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 		if (preg_match('/^(\\d+)/', $field_name, $matches)) {	// field is dtyID
 			$rdt_id = $matches[1];
 		} else {	// do a field name lookup
-
-			$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
-
+			if (!is_array($rt)) {
+				$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
+			}else{
+				foreach ( $rt as $rtID) {
+					if (array_key_exists(strtolower($field_name),@$rdr[$rtID])){
+						$rdt_id = @$rdr[$rtID][strtolower($field_name)]['dty_ID'];
+						break;
+					}
+				}
+//error_log("rdt ID ".print_r($rdt_id,true));
+				if (!@$rdt_id && strtolower($field_name) !== "rectitle") {
+//error_log(" rdr rt $field_name info ".print_r(@$rdr[$rtID][strtolower($field_name)],true));
+					return "'$field_name' field not defined for rectype ".join(",",$rt);
+				}
+			}
+//error_log(" rdr rt info ".print_r($rdr[$rt][strtolower($field_name)],true));
 			if (!@$rdt_id && strtolower($field_name) === "title") {
 				return '"title" field not defined for rectype '.$rt;
-			}
-			else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
+			}else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
 
 				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
 				if (mysql_error()) {
@@ -338,6 +355,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 				return $title;
 			}
 		}
+//error_log("$rt field $field_name 's dty ID ".print_r($rdt_id,true));
 
 		return _title_mask__get_rec_detail($rec_id, $rdt_id);
 	}
@@ -363,7 +381,8 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 	$value = '';
 
 	if ($rt_id != 0 &&  $inner_field_name) { //reference to another record
-
+	//TODO: error $rt_id could be array
+	//todo: need to adjust the following code to check if dty Typei is Author or Editor
 		if ($rt_id != $authRT) {	// not an AuthorEditor
 			while ($inner_rec_id = mysql_fetch_row($res)) {
 				$inner_rec_id = $inner_rec_id[0];
