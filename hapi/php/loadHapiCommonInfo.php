@@ -196,7 +196,7 @@ foreach ($rec_types as $rec_type) {
 			$rec_type,																							// 0-recTypeID
 			$dtyID,																								// 1-detailTypeID
 			$rstC2I['rst_RequirementType']?$rdr[$rstC2I['rst_RequirementType']]:null,							// 2-RequirementType
-			$rstC2I['rst_MaxValues']?intval($rdr[$rstC2I['rst_MaxValues']]):0,									// 3-MaxValue
+			$rstC2I['rst_MaxValues'] && $rdr[$rstC2I['rst_MaxValues']]?intval($rdr[$rstC2I['rst_MaxValues']]):null,									// 3-MaxValue
 			$rstC2I['rst_DisplayName']?$rdr[$rstC2I['rst_DisplayName']]:null,									// 4-Name
 			$rstC2I['rst_DisplayHelpText']?$rdr[$rstC2I['rst_DisplayHelpText']]:null,							// 5-HelpText
 			$rstC2I['rst_RecordMatchOrder']?intval($rdr[$rstC2I['rst_RecordMatchOrder']]):0,					// 6-Match Order
@@ -230,7 +230,6 @@ $commonData = array(
 	"detailTypes" => $detailTypes,
 	"detailRequirements" =>$detailRequirements
 );
-
 if (! @$_REQUEST["json"]) {
 	print "var HAPI_commonData = ";
 }

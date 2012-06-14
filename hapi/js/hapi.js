@@ -2474,7 +2474,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
-		return (details  && details[1] && details[1] != 1 )? true : false;
+		return (details  && (details[1] && details[1] != 1 || !detail[1]))? true : false;
 	};
 	this.getDetailMaxRepeat = function(recordType, detailType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
