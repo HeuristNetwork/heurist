@@ -298,7 +298,7 @@ DELIMITER $$
 --			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
 --			order by dty_ID desc limit 1;
 --		if NEW.dtl_DetailTypeID=relTrgDT then
-		if NEW.dtl_DetailTypeID=4 then -- linked resource pointer
+		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
 			update recRelationshipsCache
 			-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_TargetRecID = NEW.dtl_Value
@@ -353,7 +353,7 @@ DELIMITER $$
 --			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
 --			order by dty_ID desc limit 1;
 --		if NEW.dtl_DetailTypeID=relTrgDT then
-		if NEW.dtl_DetailTypeID=4 then -- linked resource pointer
+		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
 			update recRelationshipsCache
 			-- need to also save teh RecTypeID for the record
 				set rrc_TargetRecID = NEW.dtl_Value
@@ -477,7 +477,7 @@ DELIMITER $$
 				from recDetails
 --				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 				-- linked resource pointer
-				where dtl_DetailTypeID=4 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+				where dtl_DetailTypeID=5 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
 			end if;

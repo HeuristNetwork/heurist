@@ -146,7 +146,7 @@ foreach ($bibs as $rec_id => $bib) {
 print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.count($updates).')</script>'."\n";
 print '<hr>';
 
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 if (count($updates) > 0) {
 

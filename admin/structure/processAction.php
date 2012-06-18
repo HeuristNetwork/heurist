@@ -319,12 +319,14 @@ function importRectype($importRty) {
 		// get the rectypes structure
 		$resRecStruct = mysql_query("select * from ".$tempDBName.".defRecStructure where rst_RecTypeID = ".$importRtyID);
 		while($rtsFieldDef = mysql_fetch_assoc($resRecStruct)) {
-			$importDtyID = $rtsFieldDef['rst_DetailTypeID'];
-			$recStructuresByDtyID[$importDtyID] = $rtsFieldDef;
+			$importFieldDtyID = $rtsFieldDef['rst_DetailTypeID'];
+			$recStructuresByDtyID[$importFieldDtyID] = $rtsFieldDef;
+
 			// If this recstructure field has originating DBID 0 it's an original concept
 			// need to set the origin DBID to the DB it is being imported from
 			if($rtsFieldDef["rst_OriginatingDBID"] == 0 || $rtsFieldDef["rst_OriginatingDBID"] == "") {
 				$rtsFieldDef["rst_OriginatingDBID"] = $sourceDBID;
+
 				$rtsFieldDef["rst_IDInOriginatingDB"] = $rtsFieldDef["rst_ID"];
 			}
 			// check that field don't  already exist
@@ -332,7 +334,8 @@ function importRectype($importRty) {
 							"where rst_OriginatingDBID = ".$rtsFieldDef["rst_OriginatingDBID"].
 							" AND rst_IDInOriginatingDB = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
 			if ( mysql_num_rows($resRstExist)) {
-				makeLogEntry("Record structure", $importDtyID, "Error: found existing field structure while importing field \"".$rtsFieldDef["rst_DisplayName"]."\" defDetailType ID = $importDtyID rectype ID = $importRtyID");
+				makeLogEntry("Record structure", $rtsFieldDef["rst_ID"], "Error: found existing field structure while importing field \"".$rtsFieldDef["rst_DisplayName"]."\" defDetailType ID = $importFieldDtyID rectype ID = $importRtyID");
+				makeLogEntry("Record structure", $rtsFieldDef["rst_ID"], "Originating DBID = ".$rtsFieldDef["rst_OriginatingDBID"]." Field ID = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
 				$error = true;
 			}
 		}

@@ -26,7 +26,7 @@ blogEntryRecordType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_B
 websiteRecordType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK'] ?HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']):null),
 mediaRecordType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_MEDIA_RECORD'] ?HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers['RT_MEDIA_RECORD']):null),
 
-titleDetailType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TITLE'] ?HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_TITLE']):null),
+titleDetailType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME'] ?HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_NAME']):null),
 thumbnailDetailType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_THUMBNAIL'] ?HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_THUMBNAIL']):null),
 geoDetailType: (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_GEO_OBJECT'] ?HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_GEO_OBJECT']):null),
 

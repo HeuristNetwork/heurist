@@ -30,12 +30,12 @@
 	}
 
 
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 $geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
-$fileDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
+$fileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 $startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
 $enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
-$descriptionDT = (defined('DT_NOTES')?DT_NOTES:0);
+$descriptionDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
 
 $fieldhelper_to_heurist_map = array(
 	"heurist_id" => "recordId",

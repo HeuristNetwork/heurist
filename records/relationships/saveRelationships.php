@@ -80,7 +80,7 @@ if (count(@$deletions) > 0) {
 	$res = mysql_query("select rec_ID from Records, recDetails
 		where dtl_RecID=rec_ID and dtl_DetailTypeID in (".
 								(defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:"0").",".
-								(defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:"0").") and dtl_Value=$recID and rec_ID in (" . join(",", $deletions) . ")");
+								(defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:"0").") and dtl_Value=$recID and rec_ID in (" . join(",", $deletions) . ")");
 
 	$deletions = array();
 	while ($row = mysql_fetch_row($res)) array_push($deletions, $row[0]);
@@ -156,20 +156,20 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 
 	$relnRecID = mysql_insert_id();
 	$res = null;
-//error_log("defines title=".DT_TITLE.", prim = ".DT_PRIMARY_RESOURCE);
-	if ($relnRecID > 0 &&  defined('DT_TITLE') &&
+//error_log("defines title=".DT_NAME.", prim = ".DT_PRIMARY_RESOURCE);
+	if ($relnRecID > 0 &&  defined('DT_NAME') &&
 				defined('DT_RELATION_TYPE') &&
-				defined('DT_LINKED_RESOURCE') &&
+				defined('DT_TARGET_RESOURCE') &&
 				defined('DT_PRIMARY_RESOURCE')) {
 		$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
-		$query .=   "($relnRecID, ".DT_TITLE.", '" . addslashes($title) . "')";
+		$query .=   "($relnRecID, ".DT_NAME.", '" . addslashes($title) . "')";
 		$query .= ", ($relnRecID, ".DT_PRIMARY_RESOURCE.", $recID)";
-		$query .= ", ($relnRecID, ".DT_LINKED_RESOURCE.", $trgRecID)";
+		$query .= ", ($relnRecID, ".DT_TARGET_RESOURCE.", $trgRecID)";
 		$query .= ", ($relnRecID, ".DT_RELATION_TYPE.", $relTermID)";
 		if ($interpRecID && defined('DT_INTERPRETATION_REFERENCE'))
 			$query .= ", ($relnRecID, ".DT_INTERPRETATION_REFERENCE.", $interpRecID)";
-		if ($notes && defined('DT_NOTES'))
-			$query .= ", ($relnRecID, ".DT_NOTES.", '" . addslashes($notes) . "')";
+		if ($notes && defined('DT_SHORT_SUMMARY'))
+			$query .= ", ($relnRecID, ".DT_SHORT_SUMMARY.", '" . addslashes($notes) . "')";
 		if ($start_date && defined('DT_START_DATE'))
 			$query .= ", ($relnRecID, ".DT_START_DATE.", '" . addslashes($start_date) . "')";
 		if ($end_date && defined('DT_END_DATE'))

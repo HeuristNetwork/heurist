@@ -92,7 +92,7 @@ if (!top.Relationship) {
 			"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
 		{ callback: function(newRecTitle, newDetails) {
 				var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
-				var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']:'');
+				var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:'');
 				if (newDetails) {
 					if (dtRelType && newDetails[dtRelType] && newDetails[dtRelType][0]) {
 						thisRef.relSpan.innerHTML = (newDetails[dtRelType][0]['enumValue'] ?
@@ -233,8 +233,8 @@ if (!top.Relationship) {
 			//16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
 			//18,"dty_FieldSetRectypeID"
 
-		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']?
-																'' + top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']:''),
+		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']?
+																'' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:''),
 															"Related record",
 															"resource",
 															"",

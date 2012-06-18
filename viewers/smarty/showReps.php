@@ -339,7 +339,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 	{
 		$relRT = (defined('RT_RELATION')?RT_RELATION:0);
 		$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-		$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+		$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
 		$record = array();
 		$recTypeID = null;

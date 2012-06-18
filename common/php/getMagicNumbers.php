@@ -34,18 +34,18 @@ foreach ($dtDefines as $magicDTName) {
 }
 
 /*
-print " 'DT_TITLE' : ".(defined('DT_TITLE')?DT_TITLE:"''").",\n";
+print " 'DT_NAME' : ".(defined('DT_NAME')?DT_NAME:"''").",\n";
 print " 'DT_GIVEN_NAMES' : ".(defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:"''").",\n";
 print " 'DT_ALTERNATE_NAME' : ".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"''").",\n";
 print " 'DT_CREATOR' : ".(defined('DT_CREATOR')?DT_CREATOR:"''").",\n";
 print " 'DT_EXTENDED_DESCRIPTION' : ".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"''").",\n";
-print " 'DT_LINKED_RESOURCE' : ".(defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:"''").",\n";
+print " 'DT_TARGET_RESOURCE' : ".(defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:"''").",\n";
 print " 'DT_RELATION_TYPE' : ".(defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:"''").",\n";
-print " 'DT_NOTES' : ".(defined('DT_NOTES')?DT_NOTES:"''").",\n";
+print " 'DT_SHORT_SUMMARY' : ".(defined('DT_NOTES')?DT_NOTES:"''").",\n";
 print " 'DT_PRIMARY_RESOURCE' : ".(defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:"''").",\n";
 print " 'DT_FULL_IMAG_URL' : ".(defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:"''").",\n";
 print " 'DT_THUMB_IMAGE_URL' : ".(defined('DT_THUMB_IMAGE_URL')?DT_THUMB_IMAGE_URL:"''").",\n";
-print " 'DT_ASSOCIATED_FILE' : ".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"''").",\n";
+print " 'DT_FILE_RESOURCE' : ".(defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:"''").",\n";
 print " 'DT_GEO_OBJECT' : ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"''").",\n";
 print " 'DT_OTHER_FILE' : ".(defined('DT_OTHER_FILE')?DT_OTHER_FILE:"''").",\n";
 print " 'DT_LOGO_IMAGE' : ".(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"''").",\n";
@@ -70,7 +70,7 @@ print " 'DT_MIME_TYPE' : ".(defined('DT_MIME_TYPE')?DT_MIME_TYPE:"''").",\n";
 print " 'DT_SERVICE_URL' : ".(defined('DT_SERVICE_URL')?DT_SERVICE_URL:"''").",\n";
 print " 'DT_MAP_IMAGE_LAYER_SCHEMA' : ".(defined('DT_MAP_IMAGE_LAYER_SCHEMA')?DT_MAP_IMAGE_LAYER_SCHEMA:"''").",\n";
 print " 'DT_KML_FILE' : ".(defined('DT_KML_FILE')?DT_KML_FILE:"''").",\n";
-print " 'DT_TITLE_SHORT' : ".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"''").",\n";
+print " 'DT_SHORT_NAME' : ".(defined('DT_SHORT_NAME')?DT_SHORT_NAME:"''").",\n";
 print " 'DT_KML' : ".(defined('DT_KML')?DT_KML:"''").",\n";
 print " 'DT_MINMUM_ZOOM_LEVEL' : ".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"''").",\n";
 print " 'DT_MAP_IMAGE_LAYER_REFERENCE' : ".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"''").",\n";

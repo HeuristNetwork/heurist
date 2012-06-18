@@ -100,7 +100,7 @@
 		//0 DT_SHORT_SUMMARY
 		//1 DT_EXTENDED_DESCRIPTION
 		//2 - record URL
-		//3 DT_ASSOCIATED_FILE
+		//3 DT_FILE_RESOURCE
 		//REMOVED 4 DT_LOGO_IMAGE
 		//REMOVED 5 DT_THUMBNAIL
 		//REMOVED 6 DT_IMAGES
@@ -116,7 +116,7 @@
 		from Records
 		left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"0").
-		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0").
+		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:"0").
 //		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").
 //		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").
 //		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_IMAGES')?DT_IMAGES:"0").
@@ -147,7 +147,7 @@
 		if($row[4] && is_numeric($row[4]) && ! in_array($row[4],$imageLayers)){ //DT_MAP_IMAGE_LAYER_REFERENCE
 			array_push($imageLayers, $row[4]);
 		}
-		$kml_path =  getKmlFilePath($row[3]); //DT_ASSOCIATED_FILE
+		$kml_path =  getKmlFilePath($row[3]); //DT_FILE_RESOURCE
 //error_log(">>>>>>".$row[3]."=".$kml_path);
 // removed by SAW as DT_KML_FILE changed from a file base type to blocktext
 //		if($kml_path==null){
@@ -279,7 +279,7 @@ if(mysql_error()) {
 		" (select trm_Label from defTerms where trm_ID=d.dtl_Value) as mime_type,".
 		" e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright, j.dtl_Value as isbackground".
 		" from Records".
-		" left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"0").
+		" left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_NAME')?DT_SHORT_NAME:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_SCHEMA')?DT_MAP_IMAGE_LAYER_SCHEMA:"0").
 		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_SERVICE_URL')?DT_SERVICE_URL:"0").
 		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_MIME_TYPE')?DT_MIME_TYPE:"0").

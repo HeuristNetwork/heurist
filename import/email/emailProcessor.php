@@ -243,7 +243,7 @@
 		$_POST["rectype"]="183";  //EMAIL
 		*/
 
-			if(defined('DT_TITLE')) $_POST["type:".DT_TITLE] = array($email->getSubject()); //title
+			if(defined('DT_NAME')) $_POST["type:".DT_NAME] = array($email->getSubject()); //title
 		//$_POST["type:158"] = array("email harvesting"); //creator (recommended)
 			if(defined('DT_DATE')) $_POST["type:".DT_DATE] = array(date('Y-m-d H:i:s')); //specific date
 			if(defined('DT_SHORT_SUMMARY')) $_POST["type:".DT_SHORT_SUMMARY] = array($email->getFrom()." ".$description); //notes
@@ -257,7 +257,7 @@
 		if($arr==0){
 			return false;
 			}else if(count($arr)>0 ){
-				if (defined('DT_ASSOCIATED_FILE')) $_POST['type:'.DT_ASSOCIATED_FILE] = $arr;
+				if (defined('DT_FILE_RESOURCE')) $_POST['type:'.DT_FILE_RESOURCE] = $arr;
 			//array_push($_POST['type:221'], $arr);
 				//error_log(">>>>>>>>>ARRAY>>".print_r($arr, true));
 		}

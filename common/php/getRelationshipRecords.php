@@ -157,12 +157,12 @@
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 $intrpDT = (defined('DT_INTERPRETATION_REFERENCE')?DT_INTERPRETATION_REFERENCE:0);
-$notesDT = (defined('DT_NOTES')?DT_NOTES:0);
+$notesDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
 $startDT = (defined('DT_START_DATE')?DT_START_DATE:0);
 $endDT = (defined('DT_END_DATE')?DT_END_DATE:0);
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 
 	function fetch_relation_details($recID, $i_am_primary) {

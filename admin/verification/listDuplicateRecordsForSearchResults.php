@@ -109,7 +109,7 @@
 	$relRT = (defined('RT_RELATION')?RT_RELATION:0);
 	$perRT = (defined('RT_PERSON')?RT_PERSON:0);
 	$surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
-	$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+	$titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 	if (@$_REQUEST['crosstype']){
 		$crosstype = true;

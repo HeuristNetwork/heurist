@@ -65,7 +65,7 @@ foreach ($bibIDs as $bibID) {
 						  from Records
 					  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(DT_SHORT_SUMMARY?DT_SHORT_SUMMARY:"303").
 					" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(DT_EXTENDED_DESCRIPTION?DT_EXTENDED_DESCRIPTION:"191").
-					" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(DT_ASSOCIATED_FILE?DT_ASSOCIATED_FILE:"221").
+					" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(DT_FILE_RESOURCE?DT_FILE_RESOURCE:"221").
 					" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(DT_LOGO_IMAGE?DT_LOGO_IMAGE:"222").
 					" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(DT_THUMBNAIL?DT_THUMBNAIL:"223").
 					" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(DT_IMAGES?DT_IMAGES:"224").

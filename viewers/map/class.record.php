@@ -62,7 +62,7 @@ class Biblio {
 								   and dtl_DetailTypeID in(".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").",".
 															(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").",".
 															(defined('DT_IMAGES')?DT_IMAGES:"0").",".
-															(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0").",".
+															(defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:"0").",".
 															(defined('DT_OTHER_FILE')?DT_OTHER_FILE:"0").")".
 								  " and file_mimetype like 'image%'
 							  order by ".(defined('DT_THUMBNAIL')?"dtl_DetailTypeID = ".DT_THUMBNAIL." desc, ":"").

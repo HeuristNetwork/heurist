@@ -81,7 +81,7 @@ mysql_connection_db_select(DATABASE);
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
 //----------------------------------------------------------------------------//
 //  Tag construction helpers

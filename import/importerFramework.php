@@ -2021,7 +2021,7 @@ function process_author(&$field) {
 	// field corresponds to a person: make sure they're in the database, and set the field's value to that per_id.
 	// We will need to get fairly sophisticated about this eventually, but for now this quick hacque will do.
 
-	$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+	$titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 
 	$person_bib_ids = array();

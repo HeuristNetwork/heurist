@@ -50,9 +50,9 @@
 
     if(!isset($isNewDB)) { $isNewDB = false; }
     $isExistingDB = !$isNewDB; // for clarity
-    
+
 	// Requires admin user if updating current database, even though get_definitions is open
-    // If it's processing the SQL file for a new database it does not  
+    // If it's processing the SQL file for a new database it does not
 	if ((! is_admin()) && $isExistingDB) {
 		print "<html><head><link rel=stylesheet href='../../common/css/global.css'>
 		</head><body><div class=wrap><div id=errorMsg>
@@ -199,7 +199,8 @@
 	preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
 
 	preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
-
+//error_log("source ".print_r($sourceDBVersion,true));
+//error_log("this  ".print_r($thisDBVersion,true));
 	// we ignore following test if creating a new database, because the current database version is irrelevant, the definition files determine the version created
 	// Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database rather than the current open database
 	if ($isExistingDB && !($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {

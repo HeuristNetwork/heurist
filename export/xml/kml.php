@@ -36,7 +36,7 @@ if(!$islist){
 	if(array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")
 	{
 	//kml is stored in uploaded file
-	$res = mysql_query("select ulf_ID, ulf_FilePath, ulf_FileName from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = ".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0")." OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")");
+	$res = mysql_query("select ulf_ID, ulf_FilePath, ulf_FileName from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = ".(defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:"0")." OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")");
 
 	if (mysql_num_rows($res)) {
 			$file_data = mysql_fetch_array($res);
@@ -85,10 +85,10 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
 		//for kml
 		$squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
-		$ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").(defined('DT_ASSOCIATED_FILE')?" or (dtl_DetailTypeID = ".DT_ASSOCIATED_FILE." AND ulf_MimeExt='kml'))":")");
+		$ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").(defined('DT_FILE_RESOURCE')?" or (dtl_DetailTypeID = ".DT_FILE_RESOURCE." AND ulf_MimeExt='kml'))":")");
 		$detTable = "recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
-		$isSearchKml = defined('DT_KML_FILE') || defined('DT_ASSOCIATED_FILE');
+		$isSearchKml = defined('DT_KML_FILE') || defined('DT_FILE_RESOURCE');
 
 
 		if($islist){

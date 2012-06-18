@@ -1603,7 +1603,7 @@ var HRelationship = function(primaryRecord, relationshipType, secondaryRecord) {
 	if (! HRelationship.PrimaryRecordType) {
 		/* Keep a static storage of the types essential to a relationship record */
 		HRelationship.PrimaryRecordType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_PRIMARY_RESOURCE']);
-		HRelationship.SecondaryRecordType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']);
+		HRelationship.SecondaryRecordType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']);
 	}
 	if (! HRelationship.RelationshipTypeType) {
 		HRelationship.RelationshipTypeType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_RELATION_TYPE']);

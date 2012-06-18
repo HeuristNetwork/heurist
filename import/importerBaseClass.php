@@ -409,7 +409,7 @@ class HeuristNativeEntry {
 		// $field is a HeuristNativeField
 		$this->_fields[] = &$field;
 
-		$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+		$titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 		// these are important fields
 		if ($field->getType() == $titleDT) $this->_title_field = &$field;//MAGIC NUMBER

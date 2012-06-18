@@ -194,10 +194,10 @@ $doiDT = (defined('DT_DOI')?DT_DOI:0);
 $webIconDT = (defined('DT_WEBSITE_ICON')?DT_WEBSITE_ICON:0);
 $isbnDT = (defined('DT_ISBN')?DT_ISBN:0);
 $issnDT = (defined('DT_ISSN')?DT_ISSN:0);
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {

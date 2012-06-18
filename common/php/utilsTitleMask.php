@@ -70,7 +70,7 @@ $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $authRT = (defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:0);
 $authorDT = (defined('DT_CREATOR')?DT_CREATOR:0);
 $editorDT = (defined('DT_EDITOR')?DT_EDITOR:0);
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 $surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
 $enum_params = array('id','code','label','conceptid');
 
@@ -88,7 +88,7 @@ function fill_title_mask($mask, $rec_id, $rt)
 	global $titleDT;
 	/* Fill the title mask for the given records record */
 
-	///mask not defined - take value from fieldtype "dt_title"
+	///mask not defined - take value from fieldtype "DT_NAME"
 	if (! $mask) return trim(_title_mask__get_field_value($titleDT, $rec_id, $rt));
 
 	if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))

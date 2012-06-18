@@ -17,7 +17,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../importerBaseClass.php");
 
-$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
 $geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 $locationDT = (defined('DT_LOCATION')?DT_LOCATION:0);
 $contactDT = (defined('DT_CONTACT_INFO')?DT_CONTACT_INFO:0);

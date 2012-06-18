@@ -680,7 +680,7 @@ function parseParameters($params){
 */
 function getThumbnailURL($recordId){
 
-	$assocDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
+	$assocDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 	$logoDT = (defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:0);
 	$thumbDT = (defined('DT_THUMBNAIL')?DT_THUMBNAIL:0);
 	$imgDT = (defined('DT_IMAGES')?DT_IMAGES:0); //deprecated

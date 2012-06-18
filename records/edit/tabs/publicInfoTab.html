@@ -231,7 +231,7 @@ function renderInputs(bibID, rectype) {
 				// journal volume - put the title into the journal pointer field, not the journal volume title field
 				defaultInputValues[top.HEURIST.magicNumbers['DT_JOURNAL_REFERENCE']] = [ { "title" : window.HEURIST.parameters["title"] } ];
 			} else {
-				defaultInputValues[top.HEURIST.magicNumbers['DT_TITLE']] = [ { "value" : window.HEURIST.parameters["title"] } ];
+				defaultInputValues[top.HEURIST.magicNumbers['DT_NAME']] = [ { "value" : window.HEURIST.parameters["title"] } ];
 			}
 		}
 
