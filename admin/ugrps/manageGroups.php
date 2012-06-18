@@ -70,13 +70,12 @@ if (!is_admin()) {
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
 
 		<!-- access to functions about current user -->
 		<script src="loadUserInfoShort.php"></script>
 		<script type="text/javascript" src="manageGroups.js"></script>
-
-		<div class="tooltip" id="toolTip2" onMouseOut="groupManager.forcehideInfo()"><p></p></div>
 
 	<div id="page-inner">
 

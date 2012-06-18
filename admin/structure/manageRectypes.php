@@ -70,6 +70,7 @@ if (!is_admin()) {
 		<script src="../../common/php/displayPreferences.php"></script>
 		<script src="../../common/php/getMagicNumbers.php"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
+		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 		<script src="manageRectypes.js"></script>
 
 
@@ -77,7 +78,6 @@ if (!is_admin()) {
 <div>
 	<div class="banner"><h2>Record Types</h2></div>
 	<div id="page-inner">
-		<div class="tooltip" id="toolTip2" onMouseOut="rectypeManager.forcehideInfo()"><p></p></div>
 <!--
 		<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
 				style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>

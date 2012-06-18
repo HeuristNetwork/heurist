@@ -36,7 +36,7 @@ include_once('../../external/geoPHP/geoPHP.inc');
 require_once('libs.inc.php');
 
 	$outputfile = null;
-	$isJSwrap = false;
+	$isJSout = false;
 	$publishmode = 0;
 	$rtStructs = null;
 	$dtStructs = null;
@@ -56,7 +56,7 @@ require_once('libs.inc.php');
 */
 function executeSmartyTemplate($params){
 
-	global $smarty, $outputfile, $isJSwrap, $publishmode, $rtStructs, $dtStructs, $dtTerms, $rps_recid;
+	global $smarty, $outputfile, $isJSout, $publishmode, $rtStructs, $dtStructs, $dtTerms, $rps_recid;
 
 	mysql_connection_overwrite(DATABASE); //AO: mysql_connection_db_select - does not work since there is no access to stored procedures(getTemporalDateString) Steve uses in some query
 
@@ -67,7 +67,7 @@ function executeSmartyTemplate($params){
 
 	$params["f"] = 1; //always search (do not use cache)
 
-	$isJSwrap	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
+	$isJSout	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
 	$outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
 	$publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
 	$rps_recid	 = (array_key_exists("rps_id", $params)) ? $params["rps_id"] :null;
@@ -91,7 +91,7 @@ function executeSmartyTemplate($params){
 		}else{
 			$error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
 		}
-		if($isJSwrap){
+		if($isJSout){
 			$error = add_javascript_wrap4($error, null);
 		}
 		echo $error;
@@ -168,7 +168,7 @@ function executeSmartyTemplate($params){
 		$smarty->error_reporting = 0;
 		if($outputfile!=null){
 			$smarty->registerFilter('output','save_report_output');
-		}else if($isJSwrap){
+		}else if($isJSout){
 			$smarty->registerFilter('output','add_javascript_wrap5');
 		}
 		$smarty->display($template_file);
@@ -204,7 +204,7 @@ function save_report_output($tpl_source, Smarty_Internal_Template $template)
 
 function save_report_output2($tpl_source){
 
-	global $outputfile, $isJSwrap, $publishmode, $rps_recid;
+	global $outputfile, $isJSout, $publishmode, $rps_recid;
 
 	$errors = null;
 	$res_file = null;
@@ -218,7 +218,7 @@ function save_report_output2($tpl_source){
 		if(!file_exists($dirname)){
 			$errors = "Output folder $dirname does not exist";
 		}else{
-			if($isJSwrap){
+			if($isJSout){
 				$tpl_res = add_javascript_wrap4($tpl_source);
 				$ext =  ".js";
 			}else{
@@ -249,7 +249,7 @@ function save_report_output2($tpl_source){
 			$tpl_source = $tpl_source."<div style='color:#ff0000;font-weight:bold;'>$errors</div>";
 		}
 
-		if($isJSwrap){
+		if($isJSout){
 			header("Content-type: text/javascript");
 			$tpl_res = add_javascript_wrap4($tpl_source);
 		}else{
@@ -282,7 +282,7 @@ function save_report_output2($tpl_source){
 ?>
 <p>You may view the content of report by click hyperlinks below:<br>
 HTML: <a href="<?=$link?>" target="_blank"><?=$link?></a><br>
-Javascript: <a href="<?=$link?>&mode=js" target="_blank"><?=$link?>&mode=js</a><br>
+Javascript: <a href="<?=$link?>&mode=js" target="_blank"><?=$link?>&mode=js</a><br></p>
 <?php
 			}
 			echo "</h2></body></html>";
@@ -443,7 +443,7 @@ error_log("dtValue=".print_r($dtValue, true));
 	if($dtKey<1 || $dtNames[$dtKey]){
 
 		if($dtKey<1){
-			$dt_label = "Relationship";
+			$dt_label = "Relationship 123";
 //error_log("111>>>>>".print_r($dtValue, true));
 //error_log("222>>>>>".$recTypeID);
 
@@ -635,10 +635,20 @@ error_log("dtValue=".print_r($dtValue, true));
 						}
 
 						if($res0){
-							array_push($res, $res0);
+							
 							if($rectypeID==null && @$res0['recRecTypeID']){
 								$rectypeID = $res0['recRecTypeID'];
+								/* TEMP DEBUG
+								if(array_key_exists($rectypeID, $rtNames))
+								{
+									$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];		
+									$isunconstrained = ($pointerIDs=="");			
+if($isunconstrained){
+error_log($dt_label.">>>>>>>");
+}
+								}            */
 							}
+							array_push($res, $res0); 
 						}
 
 					}
@@ -802,7 +812,7 @@ function smarty_function_wrap($params, &$smarty)
 
 
 //!!!!!
-error_log("WARP VALUE>>>>".print_r($value,true));
+//error_log("WARP VALUE>>>>".print_r($value,true));
 
 			if($mode=="thumbnail"){
 

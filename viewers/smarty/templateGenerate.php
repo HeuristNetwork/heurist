@@ -538,6 +538,11 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 				}*/
 				$recordTypeName = $dt_label;
 				$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
+				
+				if($pointerRecTypeId==""){ //unconstrainded
+					$dt_label = $dt_label." ptr";
+					$vars = array_merge($vars, array($recordTypeName=>$dt_label));
+				}
 
 				$_fe = array($dt_label,'{foreach $'.$parentName.'.'.$recordTypeName.'s as $'.$recordTypeName.'}');
 

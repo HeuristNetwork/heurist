@@ -72,6 +72,7 @@ if (!is_admin()) {
 		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
+		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 		<script src="manageDetailTypes.js"></script>
 
 
@@ -79,7 +80,6 @@ if (!is_admin()) {
 	<div>
 	<div class="banner"><h2>Field Types</h2></div>
 	<div id="page-inner">
-		<div class="tooltip" id="toolTip2" onMouseOut="detailTypeManager.forcehideInfo()"><p>popup popup</p></div>
 
 <!--
 				<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"

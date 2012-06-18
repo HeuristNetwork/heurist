@@ -49,7 +49,7 @@ H2 span {
 	padding:5px;
 }
 #templateCode {
-	bottom: 45px;
+	bottom: 25px;
 	left: 5px;
 	position: absolute;
 	top: 0;
@@ -58,7 +58,7 @@ H2 span {
 	margin-right:2px;
 }
 #templateTree {
-	bottom: 45px;
+	bottom: 25px;
 	position: absolute;
 	right: 5px;
 	top: 30px;

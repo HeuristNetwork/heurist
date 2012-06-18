@@ -37,6 +37,10 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			_usrID,
 			_db,
 			_isSingleSelection = false,
+			_isadmin = false,
+			_currentuserid = 0,
+			_rolloverInfo,
+			currentTipId,
 			_workgroups; //array of all workgroups from server
 		//
 		// filtering UI controls
@@ -49,11 +53,6 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			lblSelect1,
 			lblSelect2,
 			filterByMembership;
-
-		//for tooltip
-		var currentTipId,
-			needHideTip = true,
-			hideTimer;
 
 	/**
 	* Result handler for search on server
@@ -94,7 +93,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 							var sfilter = "";
 							if(filterByMembership && !filterByMembership.checked){
 
-								sfilter = "&userID=" +  top.HEURIST.get_user_id() + "&grpRole=";
+								sfilter = "&userID=" +  _currentuserid + "&grpRole=";
 
 								if(Dom.get('inputFilterByMembership2').checked){
 									sfilter = sfilter + "any";
@@ -148,6 +147,9 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 	*/
 	function _init(usrID, _callback)
 	{
+		_isadmin = top.HEURIST.is_admin();
+		_currentuserid = top.HEURIST.get_user_id();
+
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -162,6 +164,9 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 									}
 
 				}
+
+		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
+
 
 //		Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
@@ -247,7 +252,7 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 			{ key: null, label: "Edit", sortable:false,  width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var recID = oRecord.getData('id');
-					if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) ){
+					if(_isadmin || _isGroupAdmin(_currentuserid, recID) ){
 elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';
 					}else{
 						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: Not Admin - Locked\">";
@@ -304,7 +309,7 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"System group - Locked\">";
 					//}else if(Number(oRecord.getData('members'))>1){
 //elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Impossible to delete group with members\">";
-					} else if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) )
+					} else if(_isadmin || _isGroupAdmin(_currentuserid, recID) )
 					{
 elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../../common/images/cross.png" border="0" title="Delete this Group"" /><\/a></div>';
 					}else{
@@ -438,39 +443,10 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 						return false;
 	}
 
-	//
-	//
-	function clearHideTimer(){
-		if (hideTimer) {
-			window.clearTimeout(hideTimer);
-			hideTimer = 0;
-		}
-	}
-	function _hideToolTip(){
-		if(needHideTip){
-			currentTipId = null;
-			clearHideTimer();
-			var my_tooltip = $("#toolTip2");
-			my_tooltip.css( {
-				visibility:"hidden",
-				opacity:"0"
-			});
-		}
-	}
 /**
 	* Show popup div with information about field types in use for given record type
 	*/
 	function _showInfoToolTip(recID, event) {
-
-				//tooltip div mouse out
-				function __hideToolTip2() {
-					needHideTip = true;
-				}
-				//tooltip div mouse over
-				function __clearHideTimer2() {
-					needHideTip = false;
-					clearHideTimer();
-				}
 
 				var textTip = null;
 				var forceHideTip = true;
@@ -482,7 +458,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 						if(grpname.length>40) { grpname = grpname.substring(0,40)+"&#8230"; }
 						//find all records that reference this type
 						var admins = _workgroups[recID].admins;
-						textTip = '<h3>'+grpname+'</h3>'+
+						textTip = '<h3>'+grpname+'</h3><br>'+
 						'<b>Administrators:</b><label style="color: #999;margin-left:5px">Click on admin to edit</label><ul>';
 						var index;
 						for(index in admins) {
@@ -498,26 +474,17 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 					}
 				}
 				if(!Hul.isnull(textTip)) {
-					clearHideTimer();
-					needHideTip = true;
-					var my_tooltip = $("#toolTip2");
 
-					my_tooltip.mouseover(__clearHideTimer2);
-					my_tooltip.mouseout(__hideToolTip2);
 
 					var xy = Hul.getMousePos(event);
-					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+					xy[0] = xy[0] - 10;
 
-					var border_top = $(window).scrollTop();
-					var border_right = $(window).width();
-					var border_height = $(window).height();
-					var offset =0;
+					_rolloverInfo.showInfoAt(xy,"inforollover2",textTip);
 
-					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
-					//hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
-					_hideToolTip();
+					currentTipId = '';
+					_rolloverInfo.close();
 				}
 
 	}
@@ -616,7 +583,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 				if(filterByMembership) { filterByMembership.onchange = _updateFilter; }
 				filterByMembership = Dom.get('inputFilterByMembership1');
 				if(filterByMembership){
-					if(top.HEURIST.is_admin()){
+					if(_isadmin){
 						Dom.get('lblForInputFilterByMembership1').style.display = "inline-block";
 						filterByMembership.style.display = "inline-block";;
 						filterByMembership.onchange = _updateFilter;
@@ -736,8 +703,8 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 				*/
 				editUser: function(user){ _editUser( user ); },
 				showInfo: function(recID, event){ _showInfoToolTip( recID, event ); },
-				hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
-				forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
+				hideInfo: function() { currentTipId = ''; _rolloverInfo.hide(); },
+				//forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
 
 				getClass: function () {
 					return _className;

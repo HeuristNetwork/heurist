@@ -414,7 +414,7 @@ overviews and step-by-step instructions for using Heurist.
 		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID limit 1";
 		$rows = execSQL($db, $query, null, true);
 
-		if ($rows==0 || is_string($rows) ) {
+		if (is_string($rows) ) {
 			$ret['error'] = "error finding Records for User $recID in deleteGroup - ".$rows;
 		}else if ($rows>0){
 			$ret['error'] = "Error. Deleting Group ($recID) with existing Records not allowed";
@@ -442,6 +442,7 @@ overviews and step-by-step instructions for using Heurist.
 					$ret['error'] = "db error deleting of Group $recID from sysUGrps - ".$rows;
 				} else {
 					$ret['result'] = $recID;
+					updateSessionInfo();
 				}
 			}
 		}
@@ -516,6 +517,10 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 		}else{
 			$arr = split(",", $recIds);
 		}
+
+		$is_myself_affected = false;
+		$current_user_id = get_user_id();
+
 		//remove from group
 		if($newRole=="delete"){
 
@@ -523,6 +528,9 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 			$ret['errors'] = array();
 
 			foreach ($arr as $userID) {
+
+				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
+
 				$error = checkLastAdmin($userID, $grpID);
 				if($error==null){
 
@@ -546,6 +554,9 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 			$ret['results'] = array();
 
 			foreach ($arr as $userID) {
+
+				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
+
 				$error = null;
 				if($oldRole=="admin" && $newRole=="member"){
 					$error = checkLastAdmin($userID, $grpID);
@@ -574,6 +585,9 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 			$resIDs = "";
 
 			foreach ($arr as $userID) {
+
+					$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
+
 					if($nofirst) {
 						$query	= $query.", ";
 						$resIDs = $resIDs.", ";
@@ -605,6 +619,9 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 
 		}
 
+		if($is_myself_affected){
+			updateSessionInfo();
+		}
 
 		return $ret;
 	}
@@ -736,5 +753,32 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 			return $refs;
         }
 		return $arr;
+	}
+
+	/**
+	*
+	*
+	*/
+	function updateSessionInfo(){
+
+		$query = 'select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
+							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
+							' and '.USER_GROUPS_USER_ID_FIELD.'="'.get_user_id().'"';
+
+		$groups = array();
+
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			if ($row[USER_GROUPS_ROLE_FIELD])
+				$groups[$row[GROUPS_ID_FIELD]] = $row[USER_GROUPS_ROLE_FIELD];
+			else
+				$groups[$row[GROUPS_ID_FIELD]] = 'member';
+		}
+		$groups[get_user_id()] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this
+
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
+
+error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
+
 	}
 ?>

@@ -33,8 +33,7 @@ function RectypeManager() {
 	arrDataSources = [];
 
 	var currentTipId,
-		needHideTip = true,
-		hideTimer;
+		_rolloverInfo;
 
 	var _groups = [],  //for dropdown list
 		_deleted = [], //keep removed types to exclude on filtering
@@ -77,6 +76,8 @@ function RectypeManager() {
 				ind++;
 			}
 		}//for groups
+		
+		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
@@ -166,9 +167,7 @@ function RectypeManager() {
 	//
 	function _handleTabChange (e) {
 
-		hideTimer = null;
-		needHideTip = true;
-		_hideToolTip();
+		_rolloverInfo.hide();
 
 		var option;
 
@@ -251,7 +250,7 @@ function RectypeManager() {
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
 					if (rectype && rectype[fi.rty_RecTypeGroupID] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
-						arr.push([rectypeID,
+						arr.push([Number(rectypeID),
 						(Number(rectype[fi.rty_ShowInLists])===1),
 						'', //icon
 						rectype[fi.rty_Name],
@@ -318,7 +317,12 @@ function RectypeManager() {
 			});
 
 			var myColumnDefs = [
-			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
+			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right',
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var rectypeID = oRecord.getData('id');
+	                elLiner.innerHTML = '<a href="#search">'+ rectypeID + '</a>'; 
+			},			
+			},
 			{ key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
 			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
 				var rectypeID = oRecord.getData('id');
@@ -411,8 +415,12 @@ function RectypeManager() {
 				var elLink = oArgs.target;
 				var oRecord = dt.getRecord(elLink);
 				var rectypeID = oRecord.getData("id");
-
-				if(elLink.hash === "#edit_rectype") {
+				var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+							(top.HEURIST.database.name?top.HEURIST.database.name:''));
+							
+				if(elLink.hash === "#search") {
+					window.open(top.HEURIST.baseURL+'search/search.html?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+				}else if(elLink.hash === "#edit_rectype") {
 					_onAddEditRecordType(rectypeID, 0);
 					// TO REMOVE editRectypeWindow(rectypeID);
 				} else if(elLink.hash === "#edit_sctructure") {
@@ -450,8 +458,7 @@ function RectypeManager() {
 								}
 							}
 
-							var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-							(top.HEURIST.database.name?top.HEURIST.database.name:''));
+
 							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteRT&db=" + db + "&rtyID=" + rectypeID;
@@ -611,17 +618,6 @@ function RectypeManager() {
 	*/
 	function _showInfoToolTip(rectypeID, event) {
 
-				//tooltip div mouse out
-				function __hideToolTip2() {
-					needHideTip = true;
-					//_hideToolTip();
-				}
-				//tooltip div mouse over
-				function __clearHideTimer2() {
-					needHideTip = false;
-					clearHideTimer();
-				}
-
 				var forceHideTip = true;
 				var textTip;
 
@@ -633,7 +629,7 @@ function RectypeManager() {
 						if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
 						//find all records that reference this type
 						var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
-						textTip = '<h3>'+recname+'</h3>'+
+						textTip = '<h3 style="padding-bottom: 5px;display:block">'+recname+'</h3>'+
 						'<b>Fields:</b><label style="color: #999;margin-left:5px">Click on field type to edit</label><ul>';
 
 						var detail;
@@ -646,30 +642,16 @@ function RectypeManager() {
 					}
 				}
 				if(!Hul.isnull(textTip)) {
-					clearHideTimer();
-					needHideTip = true;
-					var my_tooltip = $("#toolTip2");
-
-					my_tooltip.mouseover(__clearHideTimer2);
-					my_tooltip.mouseout(__hideToolTip2);
 
 					var xy = Hul.getMousePos(event);
-					//xy = [posx = event.target.x,posy = event.target.y];
+					xy[0] = xy[0] - 10;
 
-
-					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
-
-					var border_top = $(window).scrollTop();
-					var border_right = $(window).width();
-					var border_height = $(window).height();
-					var offset =0;
-
-					Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
-
-					//hideTimer = window.setTimeout(_hideToolTip, 2000);
+					_rolloverInfo.showInfoAt(xy,"inforollover2",textTip);
+					
 				}
 				else if(forceHideTip) {
-					_hideToolTip();
+					currentTipId = '';
+					_rolloverInfo.close();
 				}
 
 
@@ -822,26 +804,6 @@ function RectypeManager() {
 	}
 
 	//  SAVE BUNCH OF TYPES ======================================================== END
-
-	//
-	//
-	function clearHideTimer(){
-		if (hideTimer) {
-			window.clearTimeout(hideTimer);
-			hideTimer = 0;
-		}
-	}
-	function _hideToolTip(){
-		if(needHideTip){
-			currentTipId = null;
-			clearHideTimer();
-			var my_tooltip = $("#toolTip2");
-			my_tooltip.css( {
-				visibility:"hidden",
-				opacity:"0"
-			});
-		}
-	}
 
 	//
 	// filtering by name
@@ -1246,9 +1208,8 @@ function RectypeManager() {
 		doGroupCancel: function(){ _doGroupCancel(); },
 		hasChanges: function(){ return  (_updatesCnt>0); },
 		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
-		forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
-		//hideInfo: function() { _hideToolTip(); },
+		hideInfo: function() {  currentTipId = ''; _rolloverInfo.hide();},
+
 		getClass: function () {
 			return _className;
 		},

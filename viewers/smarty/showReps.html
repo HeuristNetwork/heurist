@@ -189,7 +189,9 @@
 		</div>
 	</div>
 	<div class="actionButtons">
-		<div>
+		<button onClick="doExecuteFromEditor()" title="Test your template">TEST</button>
+		&nbsp;
+		<div style="display:inline-block;">
 			<select id="cbErrorReportLevel">
 				<option value="0" selected="selected">Ignore errors</option>
 				<option value="1">Show warnings</option>
@@ -202,7 +204,6 @@
 				<option value="main">Query result</option>
 			</select>
 		</div>
-		<button onClick="doExecuteFromEditor()" title="Test your template">TEST</button>
 		<button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
 		<button onClick="doEditor(1)">Save As</button>
 		<!--		<button onClick="doEditor(3)">Delete</button>

@@ -30,7 +30,8 @@ function EditRecStructure() {
 	_isServerOperationInProgress = false, //prevents send request if there is not respoce from previous one
 	_isReserved = false,
 	_rty_Status,
-	myDTDrags = {};
+	myDTDrags = {},
+	_ft_separator_id = null;
 
 	/**
 	* Initialization of input form
@@ -58,6 +59,7 @@ function EditRecStructure() {
 		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
 		'<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
+		//'<input type="button" style="margin:0" value="Separator" onClick="onAddSeparator()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div>';
 
@@ -886,6 +888,31 @@ function EditRecStructure() {
 
 
 	/**
+	* adds separator field type
+	*/
+	function _onAddSeparator(){
+
+		//find seprator field type ID   
+		if(Hul.isnull(_ft_separator_id)){
+			var dtypes = top.HEURIST.detailTypes.typedefs;
+			var ind;                    
+			for (ind in dtypes){
+				if(!Hul.isnull(ind) && !isNaN(Number(ind)) ){
+					if(dtypes[ind].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type]==="separator"){
+						 _ft_separator_id = ind;
+						 break;
+					}
+				}
+			}
+		}
+
+		if(!Hul.isnull(_ft_separator_id)){
+			_doExpliciteCollapse(null, true);
+			_addDetails(_ft_separator_id);
+		}
+	}
+	
+	/**
 	* Adds the list of new detail types to this record structure
 	*
 	* After addition it saves all on server side
@@ -926,7 +953,7 @@ function EditRecStructure() {
 		var k;
 		for(k=0; k<arrDty_ID.length; k++){
 			var dty_ID = arrDty_ID[k];
-			if(Hul.isnull(recDetTypes[dty_ID])){
+			if(Hul.isnull(recDetTypes[dty_ID]) || dty_ID===_ft_separator_id){
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
@@ -1380,6 +1407,9 @@ function EditRecStructure() {
 		initPreview:function(){
 			return _initPreview();
 		},
+		onAddSeparator: function(){
+			_onAddSeparator();
+		},
 
 		getClass: function () {
 			return _className;
@@ -1434,6 +1464,13 @@ function onAddNewDetail(){
 		//alert("111");
 
 	}
+}
+
+/**
+* Adds separator field type
+*/
+function onAddSeparator(){
+  editStructure.onAddSeparator();
 }
 
 /**

@@ -9,9 +9,7 @@ var Dom = YAHOO.util.Dom,
 function DetailTypeManager() {
 
 	var _className = "DetailTypeManager",
-	_ver = g_version,				//version number for data representation
-	showTimer,
-	hideTimer;
+	_ver = g_version;				//version number for data representation
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 				(top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -19,8 +17,8 @@ function DetailTypeManager() {
 	var arrTables = [],
 	arrDataSources = [];
 
-	var currentTipId;
-	var needHideTip = true;
+	var currentTipId,
+		_rolloverInfo;
 
 	var _groups = [],  //for dropdown list
 	_deleted = [], //keep removed types to exclude on filtering
@@ -57,6 +55,8 @@ function DetailTypeManager() {
 				ind++;
 			}
 		} //for
+
+		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
@@ -150,9 +150,7 @@ function DetailTypeManager() {
 	//
 	function _handleTabChange (e) {
 
-		hideTimer = null;
-		needHideTip = true;
-		_hideToolTip();
+		_rolloverInfo.hide();
 
 		var option;
 		var id = e.newValue.get("id");
@@ -243,7 +241,7 @@ function DetailTypeManager() {
 						// add order in group, name, help, type and status,
 						// doc will be hidden (for pop-up)
 						// last 3 columns for actions
-						arr.push([dty_ID,
+						arr.push([Number(dty_ID),
 								(Number(deftype[fi.dty_ShowInLists])===1),
 								deftype[fi.dty_OrderInGroup],
 								deftype[fi.dty_Name],
@@ -493,20 +491,6 @@ function DetailTypeManager() {
 					//remove destination table
 					_removeTable(newValue, false);
 
-					/*
-					@ todo
-					// show flashed message
-					needHideTip = true;
-					var my_tooltip = $("#toolTip2");
-					my_tooltip.mouseover(null);
-					my_tooltip.mouseout(null);
-
-					var xy = [$(window).width()/2 - 100, $(window).height()/2 - 50 + $(window).scrollTop()];
-					_showToolTipAt(my_tooltip, xy);
-					my_tooltip.html("<b>AAAAAAAAA</b>");
-					hideTimer = null;
-					hideTimer = window.setTimeout(_hideToolTip, 4000);
-					*/
 
 					//remove from this table and refresh another one
 					window.setTimeout(function() {
@@ -637,16 +621,6 @@ function DetailTypeManager() {
 	*/
 	function _showInfoToolTip(dty_ID, event) {
 
-				//tooltip div mouse out
-				function __hideToolTip2() {
-					needHideTip = true;
-				}
-				//tooltip div mouse over
-				function __clearHideTimer2() {
-					needHideTip = false;
-					clearHideTimer();
-				}
-
 				var forceHideTip = true;
 				var textTip;
 
@@ -677,28 +651,14 @@ function DetailTypeManager() {
 					}
 				}
 				if(!Hul.isnull(textTip)) {
-					clearHideTimer();
-					needHideTip = true;
-					var my_tooltip = $("#toolTip2");
-
-					my_tooltip.html(textTip);
-
-					my_tooltip.mouseover(__clearHideTimer2);
-					my_tooltip.mouseout(__hideToolTip2);
-
 					var xy = Hul.getMousePos(event);
+					xy[0] = xy[0] - 10;
 
-					var border_top = $(window).scrollTop();
-					var border_right = $(window).width();
-					var border_height = $(window).height();
-					var offset =0;
-
-					Hul.showPopupDivAt(my_tooltip,xy,border_top ,border_right ,border_height, offset );
-
-					//hideTimer = window.setTimeout(_hideToolTip, 2000);
+					_rolloverInfo.showInfoAt(xy,"inforollover2",textTip);
 				}
 				else if(forceHideTip) {
-					_hideToolTip();
+					currentTipId = '';
+					_rolloverInfo.close();
 				}
 
 
@@ -861,26 +821,6 @@ function DetailTypeManager() {
 	}
 
 	//  SAVE BUNCH OF TYPES ======================================================== END
-
-	//
-	//
-	function clearHideTimer(){
-		if (hideTimer) {
-			window.clearTimeout(hideTimer);
-			hideTimer = 0;
-		}
-	}
-	function _hideToolTip(){
-		if(needHideTip){
-			currentTipId = null;
-			clearHideTimer();
-			var my_tooltip = $("#toolTip2");
-			my_tooltip.css( {
-				visibility:"hidden",
-				opacity:"0"
-			});;
-		}
-	}
 
 	//
 	// filtering by name
@@ -1157,8 +1097,7 @@ function DetailTypeManager() {
 		doGroupCancel: function(){ _doGroupCancel(); },
 		hasChanges: function(){ return  (_updatesCnt>0); },
 		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
-		forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
+		hideInfo: function() {  currentTipId = ''; _rolloverInfo.hide();},
 		getClass: function () {
 				return _className;
 		},

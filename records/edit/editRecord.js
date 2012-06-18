@@ -1109,11 +1109,26 @@ top.HEURIST.edit = {
 
 		var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
 		buttonElt.onclick = function() {
+
+
+				var callback =	function(date)
+				{
+					if (date) {
+						dateBox.value = date;
+						windowRef.changed();
+						calendarViewer.close();
+					}
+				}
+				var buttonPos = top.HEURIST.getPosition(buttonElt, true);
+				calendarViewer.showAt([buttonPos.x, buttonPos.y], "", callback);
+
+			/* old way
 			var buttonPos = top.HEURIST.getPosition(buttonElt, true);
 			popupOptions.x = buttonPos.x + 8 - 120;
 			popupOptions.y = buttonPos.y + 8 - 80;
 
 			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/html/calendarTemplate.html#"+dateBox.value, popupOptions);
+			*/
 		}
 
 		return buttonElt;
@@ -1131,20 +1146,25 @@ top.HEURIST.edit = {
 		function decodeValue (inputStr) {
 			var str = inputStr;
 			dateBox.disabled = false;
+			dateBox.disabledStrictly = false;
+
 			if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 				dateBox.strTemporal = str;
 				dateBox.disabled = true;
+				dateBox.disabledStrictly = true;
 				if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
 					str = str.match(/SRT=([^\|]+)/)[1];
 				}else if (str.search(/TYP=s/) != -1 ) {
 					if (str.match(/DAT=([^\|]+)/)) {
 						if (str.search(/COM=[^\|]+/) == -1) {
 							dateBox.disabled = false;
+							dateBox.disabledStrictly = false;
 						}
 						str = str.match(/DAT=([^\|]+)/)[1];
 					}else if (str.search(/COM=[^\|]+/) != -1) {
 						str = str.match(/COM=([^\|]+)/)[1];
 						dateBox.disabled = false;
+						dateBox.disabledStrictly = false;
 					}
 				}else if (str.search(/TYP=c/) != -1 ) { //c14 date
 					var bce = str.match(/BCE=([^\|]+)/);
@@ -1187,13 +1207,15 @@ top.HEURIST.edit = {
 		}
 		var popupOptions = {
 			callback: function(str) {
-				dateBox.strTemporal = str;
-				if( dateBox.strTemporal != dateBox.value) {
-					windowRef.changed();
-				}
-				dateBox.value = decodeValue(str);
-				if( dateBox.strTemporal != dateBox.value) {
-					buttonElt.title = "Edit temporal " + dateBox.strTemporal;
+				if(str!==undefined){
+					dateBox.strTemporal = str;
+					if( dateBox.strTemporal != dateBox.value) {
+						windowRef.changed();
+					}
+					dateBox.value = decodeValue(str);
+					if( dateBox.strTemporal != dateBox.value) {
+						buttonElt.title = "Edit temporal " + dateBox.strTemporal;
+					}
 				}
 			},
 			width: "700",
@@ -1311,10 +1333,12 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly = function(readonly
 		}
 	} else {
 		this.inputCell.className = this.inputCell.className.replace(/\s*\breadonly\b/, "");
-		inputElem = this.inputCell.getElementsByClassName("in");
+		var inputElem = this.inputCell.getElementsByClassName("in");
 		if (inputElem[0]){
 			inputElem = inputElem[0];
-			inputElem.removeAttribute("disabled");
+			if(!inputElem['disabledStrictly']){
+				inputElem.removeAttribute("disabled");
+			}
 		}
 	}
 	for (var i=0; i < this.inputs.length; ++i) {
@@ -1501,7 +1525,10 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput = function(bdV
 		textElt.title = "Enter date";  //sw
 		textElt.style.width = newDiv.style.width;
 		newDiv.style.width = "";
-		top.HEURIST.registerEvent(textElt, "change", function() { windowRef.changed(); });
+		top.HEURIST.registerEvent(textElt, "change", function() {
+				textElt.strTemporal = null;
+				windowRef.changed();
+		});
 //	var isTemporal = /^\|\S\S\S=/.test(textElt.value);		//sw check the beginning of the string for temporal format
 //	var isDate = ( !isTemporal && /\S/.test(textElt.value));	//sw not temporal and has non - white space must be a date
 //	if (!isTemporal) top.HEURIST.edit.makeDateButton(textElt, this.document); //sw
@@ -2512,7 +2539,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		gd.onchange = function() { ut.value = et.value = ""; }
 		et.onchange = function() { gd.selectedIndex = 0; ut.value = ""; }
 
-	var tr2 = tbody.appendChild(this.document.createElement("div"));
+		var tr2 = tbody.appendChild(this.document.createElement("div"));
 		var td = tr2.appendChild(this.document.createElement("span"));
 		//td.className = "col-1";
 		td.appendChild(this.document.createTextNode("When"));

@@ -80,6 +80,18 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	}
 
 	/**
+	* 
+	*/
+	function _setSize(wh){
+		if(popup_div!=null){
+		
+				popup_div.css({
+					'width':wh[0]+'px',
+					'height':wh[1]+'px'});
+		}
+	}
+		
+	/**
 	* Returns array that contain the mouse position relative to the document
 	*/
 	function _getMousePos(e){
@@ -182,6 +194,16 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		showAtXY: function(xy){
 			_showAtXY(xy);
 		},
+		showInfoAt: function(xy, divid, divcontent){
+					var my_tooltip = $("#"+divid);
+					my_tooltip.html(divcontent);
+					
+                    _setSize([260, my_tooltip.height()+25]);
+					_showAtXY(xy);
+		},
+		setSize: function(wh){
+			_setSize(wh);
+		},
 		hide: function(){
 			hideTimer = window.setTimeout(_hideToolTip, 1000);
 		},
@@ -199,5 +221,6 @@ function HintDiv(_id, _width, _height, _initcontent) {
 
 	}
 
+	_init();
 	return that;
 }

@@ -732,9 +732,9 @@ function ShowReps() {
 						}else{
 							term.label = term.label + label +
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
-'&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">in if</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">out if</a>)</div>';
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
+'&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</div>';
 
 						}
 					}
@@ -822,7 +822,14 @@ function ShowReps() {
 */
 					term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
 					if(varid!=="r"){
-						term.label = term.label + '<b>' + varid + '</b>' +
+						
+						if(varnames.vars[varid]){
+							lbl = varnames.vars[varid];
+						}else{
+							lbl = varid;
+						}
+						
+						term.label = term.label + '<b>' + lbl + '</b>' +
 '&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)';
 					}else{
 						term.label = term.label + varid;
