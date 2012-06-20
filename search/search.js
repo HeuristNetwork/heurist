@@ -3016,7 +3016,7 @@ top.HEURIST.search = {
 					var recID = $(recdiv).attr("recID");
 					if (recID && !recIDs[recID] && parseInt(recID)>=0) {
 						recIDs[recID] = true;
-						return recID;
+						return parseInt(recID);
 					}
 				});
 		return selectedRecIDs;
@@ -3432,6 +3432,49 @@ top.HEURIST.search = {
 		return [maxLevel,ret];
 	},
 
+	getSelectedString: function(){
+		var ret = "";
+		//for each level find its style and collapsed state
+		// then find id's of all check items
+		var i,
+			len = 3,
+			maxLevel = 0,
+			selFilter={};
+		for (i=0; i<=len; i++) {
+			var resultsDiv = $("#results-level" + i);
+			//if level not loaded nothing is selected so skip, if this marks end we could return
+			if (!resultsDiv || resultsDiv.length < 1 || i> 0 && $(".loaded",resultsDiv).length < 1) {
+				break;
+			}
+			var recIDs = {};
+			var selectedRecIDs = [];
+			$((i==0 ?"#results-level0 > .recordDiv.selected:not(.filtered),"+
+								" #results-level0 > .recordDiv.relateSelected:not(.filtered)" :
+								"#results-level"+i+" > .recordDiv.selected.lnk:not(.filtered),"+
+								" #results-level"+i+" > .recordDiv.relateSelected.lnk:not(.filtered)"),
+								$("#results")).each(function(i,recdiv){
+									var recID = $(recdiv).attr("recID");
+									if (recID && !recIDs[recID] && parseInt(recID)>=0) {
+										recIDs[recID] = true;
+										selectedRecIDs.push(parseInt(recID));
+									}
+								});
+
+			if (selectedRecIDs && selectedRecIDs.length > 0) {
+				selFilter[""+i] = selectedRecIDs;
+				maxLevel = i;
+			}
+		}
+		ret = YAHOO.lang.JSON.stringify(selFilter);
+		if (ret === "{}"){
+			ret = "";
+			maxLevel = -1;
+		}else{
+			ret = "selids="+ret;
+		}
+		return [maxLevel,ret];
+	},
+
 	exportHML: function(isAll,includeRelated){
 		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
@@ -3465,12 +3508,24 @@ top.HEURIST.search = {
 				depth = ptrFilter[0];
 			}
 			ptrFilter = ptrFilter[1];
+			var layoutString = top.HEURIST.search.getLayoutString();
+			if (layoutString[0] > depth){
+				depth = layoutString[0];
+			}
+			layoutString = layoutString[1];
+			var selFilter = top.HEURIST.search.getSelectedString();
+			if (selFilter[0] > depth){
+				depth = selFilter[0];
+			}
+			selFilter = selFilter[1];
 		}
 		var sURL = "../export/xml/flathml.php?"+
 						"w=all"+
 						"&a=1"+
 						"&depth="+depth +
 						"&q=" + q +
+						(layoutString ? "&" + layoutString : "") +
+						(selFilter ? "&" + selFilter : "") +
 						(rtFilter ? "&" + rtFilter : "") +
 						(relFilter ? "&" + relFilter : "") +
 						(ptrFilter ? "&" + ptrFilter : "") +

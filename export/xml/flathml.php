@@ -234,9 +234,26 @@ if (!isset($PTRTYPE_FILTERS)) {
 }
 //error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
 //error_log("request depth".print_r($_REQUEST['depth'],true));
+$filterString = (@$_REQUEST['selids'] ? $_REQUEST['selids'] : null);
+if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
+	die(" error invalid json rectype filters string");
+}
+$SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
+if (!isset($SELIDS_FILTERS)) {
+	die(" error decoding json rectype filters string");
+}else{
+	$selectedIDs = array();
+	foreach ($SELIDS_FILTERS as $ids) {
+		foreach($ids as $id) {
+			$selectedIDs[$id] = 1;
+		}
+	}
+	$selectedIDs = array_keys($selectedIDs);
+}
+
 $MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) :
-			(max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS)))?
-				max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS))):0));	// default to only one level
+			(max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS),array_keys($SELIDS_FILTERS)))?
+				max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS),array_keys($SELIDS_FILTERS))):0));	// default to only one level
 // handle special case for collection where ids are stored in teh session.
 if (array_key_exists('q',$_REQUEST)) {
 	if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
@@ -1203,13 +1220,16 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
+error_log("selids".print_r($_REQUEST['selids'],true));
 $query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,
 													'sid'=>1,'label'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,
 													'expandColl'=>1,'recID'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,
-													'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
+													'slb'=>1,'selids'=>1,'layout'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
 
 makeTag('query', $query_attrs);
-
+if (count($selectedIDs)>0){
+	makeTag('selectedIDs', null, join(",",$selectedIDs));
+}
 makeTag('dateStamp', null, date('c'));
 
 if (array_key_exists('error', $result)) {

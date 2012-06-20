@@ -401,7 +401,7 @@
 						var ids = argList.match("selectedIds=(\\d+(?:,\\d+)*)");
 						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
 					}*/
-					newSelectionMap = objFromArr(newSelectionIds);
+					newSelectionMap = top.HEURIST.search.getSelectedRecIDs();
 
 					var limit = newSelectionIds.length;
 					if (!limit) {
@@ -410,13 +410,21 @@
 					}
 
 					clearAndDisplayLoading();
+					var layoutString = top.HEURIST.search.getLayoutString();
+					var selFilter = top.HEURIST.search.getSelectedString();
 					var rtFilter = top.HEURIST.search.getPushDownFilter("rectype");
 					var rleFilter = top.HEURIST.search.getPushDownFilter("reltype");
 					var ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-					var filter = "" + (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
+					var filter = "" + (selFilter.length > 0 ? "&" + selFilter : "")
+									+ (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
 									+ (rleFilter.length > 0 &&  rleFilter[1] != "" ? "&" + rleFilter[1] : "")
-									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "");
-					var pageQuery = "?w=all&a=1&depth="+ Math.max(rtFilter[0],0) +"&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
+									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "")
+									+ (layoutString.length > 0 &&  layoutString[1] != "" ? "&" + layoutString[1] : "");
+					var pageQuery = "?w=all&a=1&depth="+ Math.max(layoutString[0],0) +
+										"&q=" +(top.HEURIST.parameters['q']&& top.HEURIST.parameters['q'].length >0 ? top.HEURIST.parameters['q'] :
+												(newSelectionIds.length>0? "ids:"+ newSelectionIds.join(","):""))+
+										"&limit=" + limit +
+										(filter.length > 0 ? filter : "") +
 										(filter.length > 0 ? filter : "") +
 										($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
