@@ -164,7 +164,7 @@
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 			$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 		}
-
+error_log("source url ".print_r($source_url,true));
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return curl_exec output as string

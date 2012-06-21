@@ -415,8 +415,9 @@
 			print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
 			'$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
 			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
-			'$row[rty_NonOwnerVisibility]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
-			'$rty_AlternativeRecEditor','$row[rty_Type]','$row[rty_LocallyModified]'),";
+			'$row[rty_NonOwnerVisibility]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_RecTypeModelIDs]',
+			'$row[rty_FlagAsFieldset]','$rty_ReferenceURL','$rty_AlternativeRecEditor','$row[rty_Type]',
+			'$row[rty_ShowURLOnEditForm]','$row[rty_ShowDescriptionOnEditForm]','$row[rty_LocallyModified]'),";
 			}
 			break;
 
@@ -426,11 +427,12 @@
 			$dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
 			$dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
 			$dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
+			$dty_EntryMask = mysql_real_escape_string($row['dty_EntryMask']);
 			$dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
 			$dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
 			$dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
 			print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
-			'$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
+			'$dty_ExtendedDescription','$dty_EntryMask','$row[dty_Status]','$row[dty_OriginatingDBID]',
 			'$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
 			'$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
 			'$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]','$row[dty_LocallyModified]'),";
