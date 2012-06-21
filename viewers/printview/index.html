@@ -415,7 +415,7 @@
 					var rtFilter = top.HEURIST.search.getPushDownFilter("rectype");
 					var rleFilter = top.HEURIST.search.getPushDownFilter("reltype");
 					var ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-					var filter = "" + (selFilter.length > 0 ? "&" + selFilter : "")
+					var filter = "" + (selFilter.length > 0 &&  selFilter[1] != "" ? "&" + selFilter[1] : "")
 									+ (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
 									+ (rleFilter.length > 0 &&  rleFilter[1] != "" ? "&" + rleFilter[1] : "")
 									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "")
