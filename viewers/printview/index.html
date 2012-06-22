@@ -62,7 +62,7 @@
 					var firstInGroup = true;
 					for (var index in top.HEURIST.transforms.groups[grpName]){
 						var transform = top.HEURIST.transforms.groups[grpName][index];
-						if (transform["type"].search(/XSLT/) !== -1) {
+						if (transform["type"] && transform["type"].search(/XSLT/) !== -1) {
 							if (firstInGroup){
 								//create opt group
 								var grp = document.createElement("optgroup");
@@ -403,12 +403,12 @@
 					}*/
 					newSelectionMap = top.HEURIST.search.getSelectedRecIDs();
 
-					var limit = newSelectionIds.length;
+					/*var limit = newSelectionIds.length;
 					if (!limit) {
 						clearAndDisplayNoRecordSelected();
 						return;
 					}
-
+*/
 					clearAndDisplayLoading();
 					var layoutString = top.HEURIST.search.getLayoutString();
 					var selFilter = top.HEURIST.search.getSelectedString();
@@ -423,7 +423,7 @@
 					var pageQuery = "?w=all&a=1&depth="+ Math.max(layoutString[0],0) +
 										"&q=" +(top.HEURIST.parameters['q']&& top.HEURIST.parameters['q'].length >0 ? top.HEURIST.parameters['q'] :
 												(newSelectionIds.length>0? "ids:"+ newSelectionIds.join(","):""))+
-										"&limit=" + limit +
+//										"&limit=" + limit +
 										(filter.length > 0 ? filter : "") +
 										(filter.length > 0 ? filter : "") +
 										($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +

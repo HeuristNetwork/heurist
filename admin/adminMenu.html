@@ -154,8 +154,16 @@
 				<h3><a href="#">UTILITIES: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#" onClick="loadContent('verification/recalcTitlesAllRecords.php?db=[dbname!]')" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
+						<li class="seperator"><a href="#"
+												onClick="loadContent('verification/recalcTitlesAllRecords.php?db=[dbname!]')"
+												title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
 						<!-- : Also have capabuility for specific records and rectypes</p> -->
+						<li><a href="#"
+							onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=[dbname!]')"
+							title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
+						<li><a href="#"
+							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=[dbname!]')"
+							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/listRecordPointerErrors.php?db=[dbname!]')"
 							title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointer check</a></li>
