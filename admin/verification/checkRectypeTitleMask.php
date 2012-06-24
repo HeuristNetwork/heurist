@@ -90,7 +90,7 @@ $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_I
 
 if (!$rectypeID){
 	foreach ($rtIDs as $rtID => $rtName) {
-		checkRectypeMask($rtID, $rtName, $mask, $coMask, null, $check);
+		checkRectypeMask($rtID, $rtName, null, null, null, $check);
 	}
 }else{
 	checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $check);
@@ -118,15 +118,17 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 		echo "<div class='resultsRow'><div class='statusCell ".($retMaskCheck == "" ? "valid'>":"invalid'>in")."valid</div>";
 		echo "<div class='maskCell'>mask = <i>$mask</i></div>";
 		if ($retMaskCheck != ""){
-			echo "<div class='errorCell>".$retMaskCheck."</div></div>";
+			echo "<div class='errorCell'>".$retMaskCheck."</div>";
 		}
+		echo "</div>";
 
 		$retCoMaskCheck = check_title_mask2($coMask, $rtID, true);
 		echo "<div class='resultsRow'><div class='statusCell ".($retCoMaskCheck == "" ? "valid'>":"invalid'>in")."valid</div>";
 		echo "<div class='maskCell'>canonical mask = <i>$coMask</i></div>";
 		if ($retCoMaskCheck != ""){
-			echo "<div class='errorCell>".$retCoMaskCheck."</div></div>";
+			echo "<div class='errorCell'>".$retCoMaskCheck."</div>";
 		}
+		echo "</div>";
 
 		if ($retCoMaskCheck !== "" && $retMaskCheck == "") {
 			$coMask = make_canonical_title_mask($mask, $rtID);
