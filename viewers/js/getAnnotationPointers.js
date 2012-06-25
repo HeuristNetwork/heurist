@@ -98,7 +98,7 @@ function findSelection (node, startNode, endNode) {
 	var children = [];
 	for (var i = 0; i < node.childNodes.length; ++i) {
 		var childNode = node.childNodes[i];
-		if (childNode.nodeType === Node.ELEMENT_NODE) {		// skip non-elements
+		if (childNode.nodeType === Node.ELEMENT_NODE && childNode.nodeName != "BR") {		// skip non-elements - SAW 25/06/12 need to skip br elements
 			if (! (childNode.nodeName === "A"  &&  childNode.className.match(/\bannotation\b/)) ) {	// skip annotation links
 				children.push(childNode);
 			}
@@ -176,7 +176,9 @@ function offsetCorrection(elem) {
 
 	while (e.previousSibling) {
 		e = e.previousSibling;
-
+		if(e.nodeName == "BR"){
+				continue;
+		}
 		if (! (e.nodeName === "A"  &&  e.className.match(/\bannotation\b/)  &&  e.className.match(/\bsuperscript\b/)) ) {
 			if (! e.textContent.match(/^\s+$/)) {
 				var text = e.textContent.replace(/^\s+/, "").replace(/\s+$/, "");

@@ -85,7 +85,7 @@ function traverse (elem, refs, address) {
 	var elemNumber = 0;
 	var wordOffset = 0;
 	for (var i = 0; i < children.length; ++i) {
-		if (children[i].nodeType === Node.ELEMENT_NODE) {
+		if (children[i].nodeType === Node.ELEMENT_NODE && children[i].nodeName != "BR") {//SAW 25/06/12 need to skip br elements
 			// may alter currentRefs!
 			wordOffset += traverse(children[i], refs, address.concat([++elemNumber]));
 		}
@@ -119,6 +119,7 @@ function transformTextNode (elem, refs, startingRefs, endingRefs, wordOffset) {
 //								+ " endingRefs: " + endingRefs.join(","));
 	var parentElem = elem.parentNode;
 	var text = elem.textContent;
+	text = text.replace(/\n/g,""); // replace returns in text node for count purpose
 	var matches = text.match(/^(\s*)(.*?)(\s*)$/); //check for empty lines
 	if(!matches){
 		return 0;
