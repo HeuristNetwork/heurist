@@ -1079,12 +1079,14 @@ function getTransformsByOwnerGroup() {
 		}
 //error_log("row ".print_r($row,true));
 		array_push($transforms["groups"][$row['grpName']], array("label" => $row['lbl'],
+														"recID" => $row['rec_ID'],
 														"uri" => (@$row['uri']? $row['uri'] : (@$row['fileID'] ? HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID'] : null)),
 														"type" => $row['typ'],
 														"trans" => (@$row['trans']?$row['trans']:null)));
 	}
 	return $transforms;
 }
+
 
 function getDetailTypeUsageCount() {
 	$recDetailsByDetailType = array();
@@ -1189,7 +1191,6 @@ function getAllDetailTypeStructures($useCachedData = false) {
 //error_log(print_r($dtStructs['typedefs'],true));
 	return $dtStructs;
 }
-
 function getDetailTypeDef($dtID) {
 	$dtDef = array();
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order

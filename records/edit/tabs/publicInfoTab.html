@@ -244,6 +244,9 @@ function renderInputs(bibID, rectype) {
 				top.HEURIST.magicNumbers['DT_END_WORD'] &&
 				rectype == top.HEURIST.magicNumbers['RT_ANNOTATION']) {
 				var addr = window.HEURIST.parameters["addr"];
+				if (top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE'] && addr) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE']] = [ { "value" : "stwo:"+addr } ]; // structure text word offset encode
+				}
 				addr = addr.split(":");
 				if (addr.length == 4) {
 					defaultInputValues[top.HEURIST.magicNumbers['DT_START_ELEMENT']] = [ { "value" : addr[0] } ];
@@ -254,14 +257,19 @@ function renderInputs(bibID, rectype) {
 				var trgRecID = window.HEURIST.parameters["trgRecID"];
 				var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
 				if (trgRecID && trgRecTitle) {
-					defaultInputValues[top.HEURIST.magicNumbers['DT_TEI_DOCUMENT_REFERENCE']] = [ { "value" : trgRecID, "title" : trgRecTitle } ];
+					if (top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE']){
+						defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE']] = [ { "value" : trgRecID,  "title" :trgRecTitle } ]
+					}else{
+						defaultInputValues[top.HEURIST.magicNumbers['DT_TEI_DOCUMENT_REFERENCE']] = [ { "value" : trgRecID, "title" : trgRecTitle } ];
+					}
 				}
-			}
-
-			// image annontation
-			if (top.HEURIST.magicNumbers &&
+				var annoType = window.HEURIST.parameters["type"];
+				if (annoType && top.HEURIST.magicNumbers['DT_ANNOTATION_TYPE']) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_TYPE']] = [ { "value" : annoType } ];;
+				}
+			} else if (top.HEURIST.magicNumbers &&// image annontation
 			top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE'] &&
-			top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE']) 
+			top.HEURIST.magicNumbers['DT_ANNOTATION_RESOURCE'])
 				//&& (rectype == 36)) //todo - change to verification of existance of "image annotation area" field type  top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']) &&
 			{
 				var addr = window.HEURIST.parameters["addr"];

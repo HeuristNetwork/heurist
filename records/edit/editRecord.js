@@ -1307,16 +1307,16 @@ top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldReq
 		this.promptDiv.innerHTML = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
 
 	this.inputs = [];
-	if (this.repeatable) {	//saw TODO adjust this code for Cardinality
+	if (this.repeatable === true) {	//saw TODO adjust this code for Cardinality , pass in max number and flag red after max
 		for (var i=0; i < fieldValues.length; ++i) {
-			this.addInput(fieldValues[i]);
+			typeof fieldValues == "string" ? this.addInput( fieldValues) : this.addInput( fieldValues[0]);
 		}
 		if (fieldValues.length == 0) {
 			this.addInput({"value" : recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]});	// add default value input make it look like bdvalue without id field
 		}
 	} else {
 		if (fieldValues.length > 0) {
-			this.addInput(fieldValues[0]);
+			typeof fieldValues == "string" ? this.addInput( fieldValues) : this.addInput( fieldValues[0]);
 		} else {
 			this.addInput({"value" : recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]});
 		}
@@ -1750,7 +1750,9 @@ top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput = function(bdVa
 };
 
 
-top.HEURIST.edit.inputs.BibDetailDropdownInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
+top.HEURIST.edit.inputs.BibDetailDropdownInput = function() {
+	top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments);
+};
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { return input? (input.selectedIndex !== -1 && input.options[input.selectedIndex].value) : ""; };
@@ -1794,11 +1796,12 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 														(bdValue && bdValue.value ? bdValue.value : null));
 
 	if(newInput.length>0){
+		var tempSelected = newInput.selectedIndex;
 		newInput.innerHTML = '<option disabled="disabled">Select '+ this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + '</option>'+newInput.innerHTML;
 		if(!(bdValue && bdValue.value)){
 			newInput.selectedIndex = 0;
 		}else{
-			newInput.value = bdValue.value
+			newInput.selectedIndex = tempSelected + 1;
 		}
 		/*
 		var option = document.createElement("option");

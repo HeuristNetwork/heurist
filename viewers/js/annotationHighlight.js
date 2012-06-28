@@ -19,6 +19,11 @@ function highLightAllAnnotated() {
 				});
 
 }
+var annoTypeSymbology;
+function setAnnoSymbology (annoSymbols) {
+	annoTypeSymbology = annoSymbols;
+}
+var defaultHighLightColor = "lightBlue";
 var annoListRefs;
 function highlight (docRoot, refs) {
 	// normalise addresses
@@ -165,8 +170,13 @@ function transformTextNode (elem, refs, startingRefs, endingRefs, wordOffset) {
 		a.title = ref.title;
 		a.name = "ref" + ref.recordID;
 		a.setAttribute("annotation-id", ref.recordID);
-		a.onclick = function() { showFootnote(this.getAttribute("annotation-id")); highlightAnnotation(this.getAttribute("annotation-id")); };
+//		a.onclick = function() { showFootnote(this.getAttribute("annotation-id")); highlightAnnotation(this.getAttribute("annotation-id")); };
 		a.innerHTML = elem.textContent;
+		if (ref.type && annoTypeSymbology && annoTypeSymbology[ref.type]){
+			a.style.backgroundColor = annoTypeSymbology[ref.type];
+		}/*else if (annoTypeSymbology && annoTypeSymbology["default"]){
+			a.style.backgroundColor = annoTypeSymbology["default"];
+		}*/
 		elem.parentNode.replaceChild(a, elem);
 
 	} else {
@@ -288,6 +298,11 @@ console.log("sections: " + sections.toSource());
 				a.setAttribute("annotation-id", ref.recordID);
 				a.onclick = function() { highlightAnnotation(this.getAttribute("annotation-id")); };
 				a.innerHTML = wordString;
+				if (ref.type && annoTypeSymbology && annoTypeSymbology[ref.type]){
+					a.style.backgroundColor = annoTypeSymbology[ref.type];
+				}/*else if (annoTypeSymbology && annoTypeSymbology["default"]){
+					a.style.backgroundColor = annoTypeSymbology["default"];
+				}*/
 				newElements.push(a);
 				if (!annoListRefs[ref.recordID]){
 					annoListRefs[ref.recordID] = 1; // mark this annotation is in the list
@@ -324,7 +339,7 @@ console.log("sections: " + sections.toSource());
 					a.href = "#ref" + ref.recordID;
 					a.title = ref.title;
 					a.setAttribute("annotation-id", ref.recordID);
-					a.onclick = function() { highlightAnnotation(this.getAttribute("annotation-id")); };
+//					a.onclick = function() { highlightAnnotation(this.getAttribute("annotation-id")); };
 					var s = a.appendChild(document.createElement("sup"));
 					s.innerHTML = "[" + (section.refNums[r] + 1) + "]";
 					//s.innerHTML = "";

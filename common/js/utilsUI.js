@@ -1446,7 +1446,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					opt.className = "depth" + depth;
 					opt.disabled = isDisabled;
 
-					if (termID == defaultTermID) {
+					if (termID == defaultTermID ||
+						termName == defaultTermID) {
 						opt.selected = true;
 					}
 

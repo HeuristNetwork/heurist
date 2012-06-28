@@ -171,6 +171,8 @@
 				}
 			//load xml
 				fillStyles(curStyle);
+
+			//set event handlers
 				if (top.HEURIST) {
 					top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
 					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
@@ -563,9 +565,18 @@
 				var resultDiv =document.getElementById("displayResult");
 				resultDiv.scrollTop = 0;
 			}
+			var annoSymbology = { "default" : "lightBlue",
+							"Comment" : "lightBlue",
+							"Addition" : "lightGreen",
+							"Delete" : "lightCoral"}; //default is to add "comment" annotations  with lightBlue highlight
+			setAnnoSymbology(annoSymbology);
 
+			// read transform structure for buttons bar commands
 			//
-			function addAnnotation(){
+			function addAnnotation(annoType){
+				if (!annoType) {
+					annoType = 'Comment'
+				}
 				var contentDivs = $(".annotatedDocument div.content").get();
 				if (!contentDivs[0]){
 					alert("No content container element was found. Please use format that allows annotation. Try TeiView. ");
@@ -590,8 +601,9 @@
 												annoStruct.addr.startWord +":"+
 												annoStruct.addr.endElems.join(",") +":"+
 												annoStruct.addr.endWord +
-										(recID ? '&trgRecID='+recID : "") +
+										(recID ? '&trgRecID='+recID : "") +	//TODO SAW : need to change this to conform to new annotation style
 										(recTitle ? '&trgRecTitle='+recTitle : "") +
+										(annoType ? '&type='+annoType : "") +
 										'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
 														(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
 															(top.HEURIST.database.name? top.HEURIST.database.name:''))),
@@ -618,7 +630,14 @@
 			<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 			</select>
 			<a href="javascript:window.print()"><div id="printingLink"></div></a>
-			<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
+			<div id="buttonBar">
+				<a href="javascript:window.addAnnotation('Comment')">
+					<div title="Comment" class="annotationLink" style='background-color: lightBlue;'></div></a>
+				<a href="javascript:window.addAnnotation('Addition')">
+					<div title="Addition" class="annotationLink"  style="background-color: lightGreen; background-image:url('http://heuristscholar.org/h3-sw/records/files/downloadFile.php?db=whiteDiariesTestImport2&amp;ulf_ID=39026339ab119bf9244c61963e90920603b46a83'); "></div></a>
+				<a href="javascript:window.addAnnotation('Delete')">
+					<div title="Deletion" class="annotationLink"  style="background-color: lightCoral; background-image:url('http://heuristscholar.org/h3-sw/records/files/downloadFile.php?db=whiteDiariesTestImport2&amp;ulf_ID=cfd7dd2f40b4c6cdd6d23354ff83edc393e33a9f'); "></div></a>
+			</div>
 			<input type="checkbox" id="expandColl" />
 			<label for="expandColl">Expand Collections</label>
 			<a href="javascript:window.backToTop()" style="float: right;">to top</a>

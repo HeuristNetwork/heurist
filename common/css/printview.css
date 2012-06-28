@@ -119,7 +119,7 @@ div.show-related:hover {text-decoration: underline;}
 .wait {background-image: url("../images/mini-loading.gif") !important;}
 .relatedHeader {border-top:1px solid #FFF; font-weight:bold; color:#6A7C99; text-transform:uppercase; margin: 5px 0 5px 0; font-size:10px; padding:5px 0 0 0;}
 #printingLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/tool_print.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
-#annotationLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/tool_annotation.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
+.annotationLink {display: inline;padding:0 3px;width:16px; height:16px; background-size: 16px 16px; background-position: center; background-image:url("../images/tool_annotation.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
 
 /*  thumbnail view */
 .result_thumb {-moz-border-radius:10px 10px 10px 10px;-moz-box-shadow:0 2px 4px #AAAAAA;border-radius:10px 10px 10px 10px;box-shadow:0 2px 4px #AAAAAA;-webkit-border-radius:10px 10px 10px 10px;-webkit-box-shadow:0 2px 4px #AAAAAA;background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;border:3px solid #FFFFFF;border-collapse:collapse;display:inline-block;height:140px;margin:7px;overflow:visible;padding:0;position:relative;width:140px;overflow:hidden;}
@@ -209,6 +209,10 @@ div.annotationList H2{padding:5px}
 	position: absolute;
 	top: 0;
 	z-index: 999;
+}
+#buttonBar{
+	display: inline;
+	padding-right: 10px;
 }
 /* TEI specific styles */
 lg {display:block;}

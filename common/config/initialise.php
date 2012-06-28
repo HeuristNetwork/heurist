@@ -357,6 +357,7 @@
 	'DT_FILE_TYPE'=>array(2,41),
 	'DT_ANNOTATION_RESOURCE'=>array(2,42),
 	'DT_ANNOTATION_RANGE'=>array(2,43),
+	'DT_ANNOTATION_TYPE'=>array(2,52),
 	'DT_START_WORD' => array(2,44),
 	'DT_END_WORD' => array(2,45),
 	'DT_START_ELEMENT' => array(2,46),

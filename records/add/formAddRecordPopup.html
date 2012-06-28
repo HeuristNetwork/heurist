@@ -83,6 +83,7 @@ var url = window.HEURIST.parameters["url"];
 var addr = window.HEURIST.parameters["addr"];
 var trgRecID = window.HEURIST.parameters["trgRecID"];
 var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
+var type = window.HEURIST.parameters["type"];
 
 if (! rectype) {
 	var setInitialrectype = function() {
@@ -138,6 +139,7 @@ if (! rectype) {
 	editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+
 					(title ? "&title="+encodeURIComponent(title):"") +
 					(addr ? "&addr="+addr : "") +
+					(type ? "&type="+type : "") +
 					(trgRecID ? "&trgRecID="+trgRecID : "") +
 					(trgRecTitle ? "&trgRecTitle="+trgRecTitle : "");
 	editFrame.style.display = "block";
