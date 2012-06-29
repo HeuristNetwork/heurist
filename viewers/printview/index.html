@@ -575,7 +575,7 @@
 			//
 			function addAnnotation(annoType){
 				if (!annoType) {
-					annoType = 'Comment'
+					annoType = 'Comment';
 				}
 				var contentDivs = $(".annotatedDocument div.content").get();
 				if (!contentDivs[0]){
@@ -602,6 +602,7 @@
 												annoStruct.addr.endElems.join(",") +":"+
 												annoStruct.addr.endWord +
 										(recID ? '&trgRecID='+recID : "") +	//TODO SAW : need to change this to conform to new annotation style
+										(annoStruct.addr.text != ""  ? '&text='+ annoStruct.addr.text : "") +
 										(recTitle ? '&trgRecTitle='+recTitle : "") +
 										(annoType ? '&type='+annoType : "") +
 										'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
@@ -609,6 +610,27 @@
 															(top.HEURIST.database.name? top.HEURIST.database.name:''))),
 									{ callback: function(title, bd, bibID) {
 													if (bibID) {
+														//save scroll location
+														//reload Document
+														xml = loadXMLDocFromFile(curQueryURL);
+														displayResultDoc(curStyle,xml);
+														//setScroll location
+													} else {
+														alert("annotation didn't save please try again");
+													}
+												}
+									});
+
+			}
+			function editAnnotation(annoID){
+				if (!annoID) {
+					return;
+				}
+				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/edit/formEditRecordPopup.html?recID='+annoID ,
+									{	width: 800,
+										height: 600,
+										callback: function(title, bd) {
+													if (bd) {
 														//save scroll location
 														//reload Document
 														xml = loadXMLDocFromFile(curQueryURL);

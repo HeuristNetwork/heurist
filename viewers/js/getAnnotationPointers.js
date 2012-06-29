@@ -60,7 +60,7 @@ function getSelectionAddress (root) {
 
 	var startNode = range.startContainer;
 	var endNode = range.endContainer;
-
+	var selectedText = range.cloneContents().textContent;
 	// startContainer and endContainer could be text nodes
 	if (startNode.nodeName == "#text")
 		startNode = startNode.parentNode;
@@ -88,7 +88,7 @@ function getSelectionAddress (root) {
 		endWord += offsetCorrection(range.endContainer);
 	}
 
-	var retStruct = { "startElems": startAddr, "endElems": endAddr, "startWord": startWord, "endWord": endWord };
+	var retStruct = { "startElems": startAddr, "endElems": endAddr, "startWord": startWord, "endWord": endWord, "text": selectedText};
 	if ($(root).attr("recID")){
 		retStruct["recID"] = $(root).attr("recID");
 	}

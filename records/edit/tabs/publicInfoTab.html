@@ -264,8 +264,12 @@ function renderInputs(bibID, rectype) {
 					}
 				}
 				var annoType = window.HEURIST.parameters["type"];
-				if (annoType && top.HEURIST.magicNumbers['DT_ANNOTATION_TYPE']) {
-					defaultInputValues[top.HEURIST.magicNumbers['DT_ANNOTATION_TYPE']] = [ { "value" : annoType } ];;
+				if (annoType && top.HEURIST.magicNumbers['DT_TOOL_TYPE']) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_TOOL_TYPE']] = [ { "value" : annoType } ];
+				}
+				var annoText = window.HEURIST.parameters["text"];
+				if (annoText && top.HEURIST.magicNumbers['DT_SHORT_SUMMARY']) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_SHORT_SUMMARY']] = [ { "value" : annoText } ];
 				}
 			} else if (top.HEURIST.magicNumbers &&// image annontation
 			top.HEURIST.magicNumbers['DT_ANNOTATION_RANGE'] &&
