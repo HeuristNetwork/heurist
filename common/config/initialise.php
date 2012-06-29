@@ -314,6 +314,7 @@
 	'RT_ANNOTATION' => array(2,15),
 	'RT_LAYOUT' => array(2,16),
 	'RT_PIPELINE' => array(2,17),
+	'RT_TOOL' => array(2,19),
 	'RT_JOURNAL_ARTICLE' => array(3,1012),
 	'RT_BOOK' => array(3,1002),
 	'RT_JOURNAL_VOLUME' => array(3,1013),
@@ -357,12 +358,12 @@
 	'DT_FILE_TYPE'=>array(2,41),
 	'DT_ANNOTATION_RESOURCE'=>array(2,42),
 	'DT_ANNOTATION_RANGE'=>array(2,43),
-	'DT_ANNOTATION_TYPE'=>array(2,52),
 	'DT_START_WORD' => array(2,44),
 	'DT_END_WORD' => array(2,45),
 	'DT_START_ELEMENT' => array(2,46),
 	'DT_END_ELEMENT' => array(2,47),
 	'DT_LAYOUT_STRING'=>array(2,48),
+	'DT_TOOL_TYPE'=>array(2,52),
 	'DT_EDITOR' => array(3,1013),
 	'DT_OTHER_FILE' => array(3,62),//TODO: remove from code
 	'DT_LOGO_IMAGE' => array(3,222),//TODO: remove from code
