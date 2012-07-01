@@ -31,14 +31,14 @@ function getCachedData($key) {
 	if (! $memcache) {
 		$memcache = new Memcache;
 		if (! $memcache->connect('localhost', MEMCACHED_PORT)) {	//saw Decision: error or just load raw???
-			return array("error" => "couldn't connect to memcached");
+			error_log("couldn't connect to memcached - running directly from DB");
 		}
 	}
 //	if (!$lastModified) {
 		setLastModified();
 //	}
 //error_log("key = $key lastMod = $lastModified and cached = ".$memcache->get('lastUpdate:'.$key));
-	if ($lastModified > $memcache->get('lastUpdate:'.$key)) {
+	if ( !$memcache || $lastModified > $memcache->get('lastUpdate:'.$key)) {
 		// check the cached lastupdate value and return false on not equal meaning recreate data
 //		error_log("returning null from cache for key = $key");
 		return null;
@@ -51,7 +51,7 @@ function setCachedData($key, $var) {
 	if (! $memcache) {
 		$memcache = new Memcache;
 		if (! $memcache->connect('localhost', MEMCACHED_PORT)) {	//saw Decision: error or just load raw???
-			return array("error" => "couldn't connect to memcached");
+			error_log("couldn't connect to memcached - not caching DB queries");
 		}
 	}
 //	if (!$lastModified) {
