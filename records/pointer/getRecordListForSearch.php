@@ -56,7 +56,7 @@ if (@$_REQUEST["searchID"]) $searchID = $_REQUEST["searchID"];
 
 $colNames = array("rec_ID", "rec_Title", "rec_URL", "rec_RecTypeID");
 $query = REQUEST_to_query("select " . join(", ", $colNames) . " ", BOTH);
-error_log("Rec List query = ".$query);
+//error_log("Rec List query = ".$query);
 if (@$_REQUEST["r"] == "recent") {
 	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " . get_user_id() . ")) and ", $query);
 	// saw CHECK ME: this code assumes order by is last clause of query

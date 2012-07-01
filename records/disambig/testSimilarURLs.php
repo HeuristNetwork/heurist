@@ -88,7 +88,7 @@ function site_urls($url) {
 
 	$sitename = preg_replace('!^http://(?:www[.])?([^/]+)(?:.*)!', '$1', $url);
 		// just the host name
-error_log($sitename);
+//error_log($sitename);
 
 	$res = mysql_query('select rec_URL, rec_ID, rec_Title from Records where
 	                           rec_URL like "http://'.addslashes($sitename).'/%"

@@ -69,7 +69,7 @@
 	top.HEURIST.user.topTags = [<?php
 		/* find the top five tags for this user */
 		$res = mysql_query("select tag_Text, count(rtl_ID) as c from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
-		where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
+			where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
 		$first = true;
 		while ($row = mysql_fetch_row($res)) {
 			if (! $first) print ",";  print " "; $first = false;
@@ -80,7 +80,7 @@
 	top.HEURIST.user.recentTags = [<?php
 		/* find the ten most recently used tags for this user */
 		$res = mysql_query("select distinct(tag_Text) from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
-		where tag_UGrpID=".get_user_id()." group by rtl_TagID order by max(rtl_ID) desc limit 10");
+			where tag_UGrpID=".get_user_id()." group by rtl_TagID order by max(rtl_ID) desc limit 10");
 		$first = true;
 		while ($row = mysql_fetch_row($res)) {
 			if (! $first) print ",";  print " "; $first = false;
@@ -92,7 +92,7 @@
 		if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
 			$query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
 
-error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
+			//error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
 			$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
 			print join(", ", $workgroups);
 		}
@@ -105,7 +105,7 @@ error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
 			while ($row = mysql_fetch_assoc($res)) {
 				$wg = $row['svs_UGrpID'];
 				if (! @$ws[$wg])
-				$ws[$wg] = array();
+					$ws[$wg] = array();
 				//this is for searches from  obsolete published-searches table. they start with "q";
 				if (preg_match('/^q/', $row['svs_Query'])) {
 					$row['svs_Query'] = "?".$row['svs_Query'];
@@ -130,8 +130,8 @@ error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
 
 
 	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
-	from ".USERS_DATABASE.".sysUGrps usr
-	where usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
+		from ".USERS_DATABASE.".sysUGrps usr
+		where usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
 	order by fullname");
 	print "    top.HEURIST.allUsers = {\n";
 	$first = true;
@@ -143,21 +143,21 @@ error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
 ?>
 
 
-	top.HEURIST.is_logged_in = function() { return <?= intval(is_logged_in()) ?> > 0; };
-	top.HEURIST.get_user_id = function() { return <?= intval(get_user_id()) ?>; };
-	top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };
-	top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
-	top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
-	top.HEURIST.is_wgAdmin = function(wgID) {
-		if (!top.HEURIST.workgroups || !top.HEURIST.workgroups[wgID]) return false;
-		var usrID = top.HEURIST.get_user_id(),
-			i,
-			wgAdmins = top.HEURIST.workgroups[wgID];
-		for (i=0; i < wgAdmins.length; i++) {
-			if ( wgAdmins[i].id == usrID) return true;
-		}
-		return false;
-	};
+top.HEURIST.is_logged_in = function() { return <?= intval(is_logged_in()) ?> > 0; };
+top.HEURIST.get_user_id = function() { return <?= intval(get_user_id()) ?>; };
+top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };
+top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
+top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
+top.HEURIST.is_wgAdmin = function(wgID) {
+if (!top.HEURIST.workgroups || !top.HEURIST.workgroups[wgID]) return false;
+var usrID = top.HEURIST.get_user_id(),
+i,
+wgAdmins = top.HEURIST.workgroups[wgID];
+for (i=0; i < wgAdmins.length; i++) {
+if ( wgAdmins[i].id == usrID) return true;
+}
+return false;
+};
 
 <?php if (! is_admin()) { ?>
 	top.document.body.className += " is-not-admin";

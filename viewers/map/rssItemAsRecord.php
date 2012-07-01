@@ -30,7 +30,7 @@ class PseudoRssBiblio {
 
 	function PseudoRssBiblio ($item,$id) {
 		$this->geometry  = array();
-error_log(" in pseudo with id=$id");
+//error_log(" in pseudo with id=$id");
 		$this->minX = null; $this->minY = null; $this->maxX = null; $this->maxY = null;
 
 		if ($item && $item instanceof SimpleXMLElement) {

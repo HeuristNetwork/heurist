@@ -778,7 +778,7 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
 
-error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
+//error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
 
 	}
 ?>

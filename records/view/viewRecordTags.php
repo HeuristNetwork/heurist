@@ -127,7 +127,7 @@ if ($tags) {
 } else {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
-error_log("kwdlist is ".print_r($kwd_list,true));
+//error_log("kwdlist is ".print_r($kwd_list,true));
 
 $body->global_vars['tag-list'] = $kwd_list;
 

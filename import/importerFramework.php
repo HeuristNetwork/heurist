@@ -1222,7 +1222,7 @@ function mode_entry_insertion() {
 	update_progress_bar(-1);
 list($usec, $sec) = explode(' ', microtime());
 $etime = $sec + $usec;
-error_log("total time: " . ($etime - $stime));
+//error_log("total time: " . ($etime - $stime));
 
 
 	if ($zoteroItems  &&  count($zoteroItems) > 0) {

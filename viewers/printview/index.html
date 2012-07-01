@@ -54,14 +54,15 @@
 			}
 
 			function fillStyles(s) {
-				var styleSelectElt = document.getElementById("style_select");
+				var styleSelectElt = document.getElementById("transform_select");
 				styleSelectElt.options[0] = new Option("Select a style...", "");
 				styleSelectElt.options[0].disabled = true;
 				for (var grpIndex in top.HEURIST.transforms.groupOrder) {
 					var grpName = top.HEURIST.transforms.groupOrder[grpIndex];
 					var firstInGroup = true;
 					for (var index in top.HEURIST.transforms.groups[grpName]){
-						var transform = top.HEURIST.transforms.groups[grpName][index];
+						var transformID = top.HEURIST.transforms.groups[grpName][index];
+						var transform = top.HEURIST.transforms.byID[transformID];
 						if (transform["type"] && transform["type"].search(/XSLT/) !== -1) {
 							if (firstInGroup){
 								//create opt group
@@ -70,14 +71,14 @@
 								styleSelectElt.appendChild(grp);
 								firstInGroup = false;
 							}
-							styleSelectElt.appendChild( new Option(transform["label"],transform["uri"]));
+							styleSelectElt.appendChild( new Option(transform["label"],transformID));
 							if (transform["label"] == s) {
 								styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
 							}
 						}
 					}
 				}
-				styleSelectElt.appendChild(new Option("Generic XML", "genericXML"));
+				styleSelectElt.appendChild(new Option("Generic XML", "0"));
 			}
 
 			var xml;
@@ -91,6 +92,9 @@
 			var loadCount;	// to restict the number of pages that are loaded. Some queries gives all records.
 			var maxLoadPages = 10;
 			var curStyle = top.HEURIST.util.getDisplayPreference("defaultPrintView"); //saved default stylesheet
+			if (!top.HEURIST.transforms.nameLookup[curStyle]){
+				curStyle = "default";
+			}
 			var curQueryURL;
 			var currentPage = 1;
 			var totalRecordCount = 0;
@@ -107,7 +111,7 @@
 				// style
 					if (location.search.match(/style=([^&=#]*)/)) {
 						var temp = location.search.match(/style=([^&=#]*)/)[1];
-						if (styles[temp]) { //check if there is a template for this style
+						if (top.HEURIST.transforms.nameLookup[temp] || temp == "Generic XML") { //check if there is a template for this style
 							curStyle = temp;
 							top.HEURIST.util.setDisplayPreference("defaultPrintView",temp);
 						}
@@ -483,10 +487,16 @@
 				resultDiv.appendChild(noSelectedDiv);
 			}
 
-			function displayResult(style){
-				curStyle = style;
-				top.HEURIST.util.setDisplayPreference("defaultPrintView",style);
-				displayResultDoc(style,xml);
+			function changeTransform(transformID){
+				if (transformID == 0) {
+					curStyle = "Generic XML";
+				}else if (top.HEURIST.transforms.byID[transformID]) {
+					curStyle = top.HEURIST.transforms.byID[transformID].label;
+				}else{
+					curStyle = "default";
+				}
+				top.HEURIST.util.setDisplayPreference("defaultPrintView",curStyle);
+				displayResultDoc(curStyle,xml);
 			}
 
 			function displayResultDoc(style,xmlDoc){
@@ -496,12 +506,18 @@
 					while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
 				}
 
-				if (style == "genericXML") {
+				if (style == "Generic XML") {
 					var genXML = $("<xml>").append(xmlDoc.documentElement).html();
 					xhtmlResultDoc = document.createTextNode(genXML);
 				}else{
 					if (!xsls[style]){
-						xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?style=" + style);
+						if (top.HEURIST.transforms.nameLookup[style]){
+							var transID = top.HEURIST.transforms.nameLookup[style];
+							var uri = top.HEURIST.transforms.byID[transID].uri;
+							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?style=" + uri);
+						}else{
+							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?style=" + style);
+						}
 					}
 					if (!xsls[style]) {
 						alert("Unable to read '"+ style +"' file, check to see if this style sheet is readable in your browser or another browser.");
@@ -521,6 +537,7 @@
 					}
 				}
 				clearResult(resultDiv);
+				createTools(style);
 				resultDiv.appendChild(xhtmlResultDoc);
 				updateSelection();
 			}
@@ -532,7 +549,7 @@
 					while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
 				}
 
-				if (style == "genericXML") {
+				if (style == "Generic XML") {
 					xhtmlResultDoc = pageXMLs[page].documentElement;
 				}else{
 					if (!xsls[style]){
@@ -565,11 +582,48 @@
 				var resultDiv =document.getElementById("displayResult");
 				resultDiv.scrollTop = 0;
 			}
-			var annoSymbology = { "default" : "lightBlue",
-							"Comment" : "lightBlue",
-							"Addition" : "lightGreen",
-							"Delete" : "lightCoral"}; //default is to add "comment" annotations  with lightBlue highlight
-			setAnnoSymbology(annoSymbology);
+
+			var annoSymbology = {}; //default is to add "comment" annotations  with lightBlue highlight
+
+			function createTools(style){
+				var buttonBar = $("#buttonBar");
+				// remove all buttons
+				buttonBar.html("");
+				annoSymbology = {};
+				//check if this style is a transform
+				if (top.HEURIST.transforms.nameLookup[style]) {
+					var transID = top.HEURIST.transforms.nameLookup[style];
+					//check if there are tools for this transform
+					if (top.HEURIST.tools.byTransform[transID]){
+						var toolIDs = top.HEURIST.tools.byTransform[transID];
+						//for each tool add button to bar and if annotation tool then add symbology
+						for (var i in toolIDs) {
+							var tool = top.HEURIST.tools.byId[toolIDs[i]];
+							// if tool is for annotations then capture the symbology
+							if (top.HEURIST.magicNumbers['RT_ANNOTATION'] &&
+								tool.rt == top.HEURIST.rectypes.typedefs[top.HEURIST.magicNumbers['RT_ANNOTATION']].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex['rty_ConceptID']]){
+								annoSymbology[tool.value] = tool.colour;
+								//todo : set icon or superscript or subscript
+							}
+							var a = document.createElement("a");
+							a.href = tool.command;
+							var divTool = document.createElement("div");
+							a.appendChild(divTool);
+							divTool.className = "annotationLink"; //inherit standard stuff
+							divTool.title = tool.name;
+							if (tool.colour) {
+								divTool.style.backgroundColor = tool.colour;
+							}
+							if (tool.img) {
+								divTool.style.backgroundImage = "url('" + tool.img + "')";
+							}
+							buttonBar.append(a);
+						}
+					}
+				}
+				//set annoSymbology
+				setAnnoSymbology(annoSymbology);
+			}
 
 			// read transform structure for buttons bar commands
 			//
@@ -649,16 +703,10 @@
 	<body onLoad="init()">
 
 		<div class="banner">
-			<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
+			<select id="transform_select" style="width: 180px;" onChange="changeTransform(this.options[this.selectedIndex].value);">
 			</select>
 			<a href="javascript:window.print()"><div id="printingLink"></div></a>
 			<div id="buttonBar">
-				<a href="javascript:window.addAnnotation('Comment')">
-					<div title="Comment" class="annotationLink" style='background-color: lightBlue;'></div></a>
-				<a href="javascript:window.addAnnotation('Addition')">
-					<div title="Addition" class="annotationLink"  style="background-color: lightGreen; background-image:url('http://heuristscholar.org/h3-sw/records/files/downloadFile.php?db=whiteDiariesTestImport2&amp;ulf_ID=39026339ab119bf9244c61963e90920603b46a83'); "></div></a>
-				<a href="javascript:window.addAnnotation('Delete')">
-					<div title="Deletion" class="annotationLink"  style="background-color: lightCoral; background-image:url('http://heuristscholar.org/h3-sw/records/files/downloadFile.php?db=whiteDiariesTestImport2&amp;ulf_ID=cfd7dd2f40b4c6cdd6d23354ff83edc393e33a9f'); "></div></a>
 			</div>
 			<input type="checkbox" id="expandColl" />
 			<label for="expandColl">Expand Collections</label>

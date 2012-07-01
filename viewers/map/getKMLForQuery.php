@@ -62,7 +62,7 @@ if (@$_REQUEST['multilevel'] == "false"){
 }
 
 $querry = REQUEST_to_query('select distinct rec_ID, rec_URL, rec_ScratchPad, rec_RecTypeID ', $search_type);
-error_log($querry);
+//error_log($querry);
 
 
 

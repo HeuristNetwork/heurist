@@ -562,7 +562,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 **/
 function buildGraphStructure($rec_ids, &$recSet) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
-	error_log("max depth = ".print_r($MAX_DEPTH,true));
+//	error_log("max depth = ".print_r($MAX_DEPTH,true));
 	$depth = 0;
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ($rtfilter){
@@ -703,12 +703,13 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 		foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
 			foreach($dtIDs as $dtID) {
 				$linkedRec = $recInfos[$rec_id]['record'];
-				makeTag('reversePointer',
-						array('id' => $dtID,
+				$attrs = array('id' => $dtID,
 								'conceptID'=>getDetailTypeConceptID($dtID),
-								'type' => $DTN[$dtID],
-								'name' => $RQS[$linkedRec['rec_RecTypeID']][$dtID]),
-						$rec_id);
+								'type' => $DTN[$dtID]);
+				if (array_key_exists($dtID,$RQS[$linkedRec['rec_RecTypeID']])) {
+					$attrs['name'] = $RQS[$linkedRec['rec_RecTypeID']][$dtID];
+				}
+				makeTag('reversePointer',$attrs,$rec_id);
 			}
 		}
 	}
@@ -1220,7 +1221,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-error_log("selids".print_r($_REQUEST['selids'],true));
+//error_log("selids".print_r($_REQUEST['selids'],true));
 $query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,
 													'sid'=>1,'label'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,
 													'expandColl'=>1,'recID'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,

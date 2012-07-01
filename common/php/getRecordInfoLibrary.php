@@ -1039,6 +1039,13 @@ function getTransformsByOwnerGroup() {
 	$transFileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 	$transTypeDT = (defined('DT_FILE_TYPE')?DT_FILE_TYPE:0);
 	$transDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
+	$toolRT = (defined('RT_TOOL')?RT_TOOL:0);
+	$transformDT = (defined('DT_TRANSFORM_RESOURCE')?DT_TRANSFORM_RESOURCE:0);
+	$colourDT = (defined('DT_COLOUR')?DT_COLOUR:0);
+	$toolTypeDT = (defined('DT_TOOL_TYPE')?DT_TOOL_TYPE:0);
+	$rectypeDT = (defined('DT_RECORD_TYPE')?DT_RECORD_TYPE:0);
+	$detailTypeDT = (defined('DT_DETAIL_TYPE')?DT_DETAIL_TYPE:0);
+	$commandDT = (defined('DT_COMMAND')?DT_COMMAND:0);
 	$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 									'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
 	if (is_logged_in()){
@@ -1048,7 +1055,7 @@ function getTransformsByOwnerGroup() {
 		}
 	}
 
-	$transforms = array("groupOrder"=> array(),"groups" => array());
+	$transforms = array("groupOrder"=> array(),"groups" => array(), "nameLookup" => array(), "byID" => array());
 	$query = 'select rec_ID, '.
 					'if(ugr_Type="workgroup", ugr_Name,if(ugr_id = '.get_user_id().
 															',"personal",concat(ugr_FirstName," ",ugr_LastName))) as grpName, '.
@@ -1073,18 +1080,93 @@ function getTransformsByOwnerGroup() {
 //error_log("query ".print_r($query,true));
 //error_log("error ".print_r(mysql_error(),true));
 	while ($row = mysql_fetch_assoc($res)) {
+		$recID = $row['rec_ID'];
+
 		if (!@$transforms["groups"][$row['grpName']]){
-			$transforms["groups"][$row['grpName']] = array();
+			$transforms["groups"][$row['grpName']] = array($recID);
 			array_push($transforms["groupOrder"],$row['grpName']);
+		}else{
+			array_push($transforms["groups"][$row['grpName']],$recID);
 		}
 //error_log("row ".print_r($row,true));
-		array_push($transforms["groups"][$row['grpName']], array("label" => $row['lbl'],
-														"recID" => $row['rec_ID'],
+
+		$transforms["nameLookup"][$row['lbl']] = $recID;
+		$transforms["byID"][$recID] = array("label" => $row['lbl'],
 														"uri" => (@$row['uri']? $row['uri'] : (@$row['fileID'] ? HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID'] : null)),
 														"type" => $row['typ'],
-														"trans" => (@$row['trans']?$row['trans']:null)));
+														"trans" => (@$row['trans']?$row['trans']:null));
 	}
 	return $transforms;
+}
+
+function getToolsByTransform() {
+	$toolRT = (defined('RT_TOOL')?RT_TOOL:0);
+	$toolNameDT = (defined('DT_NAME')?DT_NAME:0);
+	$toolIconDT = (defined('DT_THUMBNAIL')?DT_THUMBNAIL:0);
+	$colourDT = (defined('DT_COLOUR')?DT_COLOUR:0);
+	$toolTransDT = (defined('DT_TRANSFORM_RESOURCE')?DT_TRANSFORM_RESOURCE:0);
+	$rectypeDT = (defined('DT_RECORD_TYPE')?DT_RECORD_TYPE:0);
+	$detailTypeDT = (defined('DT_DETAIL_TYPE')?DT_DETAIL_TYPE:0);
+	$toolDtValueDT = (defined('DT_TOOL_TYPE')?DT_TOOL_TYPE:0);
+	$commandDT = (defined('DT_COMMAND')?DT_COMMAND:0);
+	$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+									'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
+	if (is_logged_in()){
+		array_push($ACCESSABLE_OWNER_IDS,get_user_id());
+		if (!in_array(0,$ACCESSABLE_OWNER_IDS)){
+			array_push($ACCESSABLE_OWNER_IDS,0);
+		}
+	}
+
+	$tools = array("byTransform"=> array(),"byId" => array());
+	$query = 'select rec_ID, '.
+					'dtname.dtl_Value as name, '.
+					'ulf_ExternalFileReference as uri, '.
+					'ulf_ObfuscatedFileID as fileID, '.
+					'clrTrm.trm_Label as colour, '.
+					'dttype.dtl_Value as dt, '.
+					'rttype.dtl_Value as rt, '.
+					'dtv.trm_Label as value, '.
+					'cmd.dtl_Value as command '.
+				'from Records '.
+					'left join recDetails dtname on rec_ID=dtname.dtl_RecID and dtname.dtl_DetailTypeID='.$toolNameDT.' '.
+					'left join recDetails dtIcon on rec_ID=dtIcon.dtl_RecID and dtIcon.dtl_DetailTypeID='.$toolIconDT.' '.
+					'left join recUploadedFiles on dtIcon.dtl_UploadedFileID = ulf_ID '.
+					'left join recDetails clr on rec_ID=clr.dtl_RecID and clr.dtl_DetailTypeID='.$colourDT.' '.
+					'left join defTerms clrTrm on clr.dtl_Value = clrTrm.trm_ID '.
+					'left join recDetails rttype on rec_ID=rttype.dtl_RecID and rttype.dtl_DetailTypeID='.$rectypeDT.' '.
+					'left join recDetails dttype on rec_ID=dttype.dtl_RecID and dttype.dtl_DetailTypeID='.$detailTypeDT.' '.
+					'left join recDetails dtValue on rec_ID=dtValue.dtl_RecID and dtValue.dtl_DetailTypeID='.$toolDtValueDT.' '.
+					'left join defTerms dtv on dtValue.dtl_Value = dtv.trm_ID '.
+					'left join recDetails cmd on rec_ID=cmd.dtl_RecID and cmd.dtl_DetailTypeID='.$commandDT.' '.
+				'where rec_RecTypeID='.$toolRT.' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
+					'NOT rec_NonOwnerVisibility = "hidden") '.
+				'order by name';
+		$res = mysql_query($query);
+//error_log("query ".print_r($query,true));
+//error_log("error ".print_r(mysql_error(),true));
+//		$tools["error"] = $toolIconDT;
+	while ($row = mysql_fetch_assoc($res)) {
+		$recID = $row['rec_ID'];
+		$tools["byId"][$recID] = array("name" => $row['name'],
+														"recID" => $row['rec_ID'],
+														"img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID']) : null)),
+														"colour" => $row['colour'],
+														"dt" => $row['dt'],
+														"rt" => $row['rt'],
+														"value" => $row['value'],
+														"command" => $row['command'],
+														"trans" => mysql__select_array("recDetails","dtl_Value",("dtl_RecID=".$row['rec_ID']." and dtl_DetailTypeID=".$toolTransDT)));
+
+		foreach($tools["byId"][$recID]["trans"] as $transRecID){
+			if (!array_key_exists($transRecID,$tools["byTransform"])){
+				$tools["byTransform"][$transRecID] = array($recID);
+			}else if (!in_array($recID,$tools["byTransform"][$transRecID])) {
+				array_push($tools["byTransform"][$transRecID],$recID);
+			}
+		}
+	}
+	return $tools;
 }
 
 
@@ -1361,11 +1443,11 @@ global $relRT,$relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$t
 
 //	error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
-	if (mysql_error($res)) {
-		return array("error"=>mysql_error($res));
-	}
-	if (!mysql_num_rows($res)) {
+	if (!mysql_num_rows(@$res)) {
 		return array();
+	}
+	if (@$res && mysql_error(@$res)) {
+		return array("error"=>mysql_error($res));
 	}
 	$relations = array('relationshipRecs' => array());
 	while ($row = mysql_fetch_assoc($res)) {

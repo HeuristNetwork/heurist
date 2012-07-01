@@ -84,7 +84,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-error_log("q after parse ".print_r($q,true));
+//error_log("q after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -1260,7 +1260,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-	error_log("request to query returns ".print_r($query,true));
+//	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

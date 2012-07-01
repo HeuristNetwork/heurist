@@ -195,7 +195,7 @@
 	//temporary - to remove
 		if(!file_exists(HEURIST_THUMB_DIR)){
 			if (!mkdir(HEURIST_THUMB_DIR, 0777, true)) {
-    			error_log('Failed to create folder for thumbnails');
+				error_log('Failed to create folder for thumbnails');
 			}
 		}
 	//end temporary - to remove
@@ -363,7 +363,13 @@
 	'DT_START_ELEMENT' => array(2,46),
 	'DT_END_ELEMENT' => array(2,47),
 	'DT_LAYOUT_STRING'=>array(2,48),
+	'DT_TRANSFORM_RESOURCE'=>array(2,50),
+	'DT_PROPERTY_VALUE'=>array(2,51),
 	'DT_TOOL_TYPE'=>array(2,52),
+	'DT_RECORD_TYPE'=>array(2,53),
+	'DT_DETAIL_TYPE'=>array(2,54),
+	'DT_COMMAND'=>array(2,55),
+	'DT_COLOUR'=>array(2,56),
 	'DT_EDITOR' => array(3,1013),
 	'DT_OTHER_FILE' => array(3,62),//TODO: remove from code
 	'DT_LOGO_IMAGE' => array(3,222),//TODO: remove from code

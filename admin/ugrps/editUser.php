@@ -41,13 +41,13 @@ $body->global_vars['dbname'] = HEURIST_DBNAME;
 if (@$_REQUEST['approve']  &&  is_admin())
 	$body->global_vars['approve'] = 1;
 
-error_log("in editUser before verify");
+//error_log("in editUser before verify");
 
 $body->verify();
 if (@$_REQUEST['_submit']) {
 	$usr_id = intval(@$_REQUEST['Id']);
 
-error_log("in editUser in Submit");
+//error_log("in editUser in Submit");
 	if (@$_REQUEST['user_update_ugr_Password']) {
 		if ($_REQUEST['user_update_ugr_Password'] != @$_REQUEST['password2']) {
 			$_REQUEST['user_update_ugr_Password'] = '';
@@ -92,7 +92,7 @@ also visiting the Help function, which provides comprehensive
 overviews and step-by-step instructions for using Heurist.
 
 ";
-			error_log("sending user confirmation mail: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].'['.$row['ugr_eMail'].']');
+//			error_log("sending user confirmation mail: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].'['.$row['ugr_eMail'].']');
 			$rv = mail($email, 'Heurist User Registration: '.$row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']', $email_text, "From: ".HEURIST_MAIL_TO_INFO."\r\nCc: ".HEURIST_MAIL_TO_INFO);
 			if (! $rv) error_log("mail send failed: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']');
 		}
