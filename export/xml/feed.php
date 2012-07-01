@@ -87,7 +87,7 @@ if($isAtom){
 
 		$squery = prepareQuery($squery, $search_type, $joinTable, "", $limit);
 
-//error_log("1.>>>>".$squery);
+/*****DEBUG****///error_log("1.>>>>".$squery);
 
 		$res = mysql_query($squery);
 		$reccount = mysql_num_rows($res);
@@ -123,7 +123,7 @@ if($isAtom){
 <?php
 }
 
-	//error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
+	/*****DEBUG****///error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
 
 					if($row[6]){
 						$wkt = $row[6];

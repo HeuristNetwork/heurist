@@ -37,10 +37,10 @@ function getCachedData($key) {
 //	if (!$lastModified) {
 		setLastModified();
 //	}
-//error_log("key = $key lastMod = $lastModified and cached = ".$memcache->get('lastUpdate:'.$key));
+/*****DEBUG****///error_log("key = $key lastMod = $lastModified and cached = ".$memcache->get('lastUpdate:'.$key));
 	if ( !$memcache || $lastModified > $memcache->get('lastUpdate:'.$key)) {
 		// check the cached lastupdate value and return false on not equal meaning recreate data
-//		error_log("returning null from cache for key = $key");
+		error_log("returning null from cache for key = $key");
 		return null;
 	}
 	return $memcache->get($key);
@@ -82,7 +82,7 @@ function getResolvedIDs($recID,$bmkID) {
 			 $recID = $resolvedRecID;
 		}
 	}
-//error_log("no forwarding".print_r($recID,true));
+/*****DEBUG****///error_log("no forwarding".print_r($recID,true));
 	$rec_id = 0;
 	$bkm_ID = 0;
 	if (intval(@$recID)) {
@@ -90,11 +90,11 @@ function getResolvedIDs($recID,$bmkID) {
 		$res = mysql_query('select rec_ID, bkm_ID from Records
 		 left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
 		$row = mysql_fetch_assoc($res);
-//error_log("row ".print_r($row,true));
+/*****DEBUG****///error_log("row ".print_r($row,true));
 		$rec_id = intval($row['rec_ID']);
 		$bkm_ID = intval($row['bkm_ID']);
 	}
-//error_log("after recID bmk lookup ".print_r($rec_id,true));
+/*****DEBUG****///error_log("after recID bmk lookup ".print_r($rec_id,true));
 
 	if (! $rec_id  &&  intval(@$bmkID)) {
 		$bkm_ID = intval($bmkID);
@@ -227,7 +227,7 @@ function getAllRecordDetails($rec_id) {
 		}
 		else if ($row["envelope"]  &&  preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $row["envelope"], $poly)) {
 			list($match, $minX, $minY, $maxX, $maxY) = $poly;
-//error_log($match);
+/*****DEBUG****///error_log($match);
 			$x = 0.5 * ($minX + $maxX);
 			$y = 0.5 * ($minY + $maxY);
 
@@ -334,22 +334,22 @@ function attachChild($contIndex, $index, $terms) {
 		if (!@count($terms[$index]) || $contIndex == $index) {
 			return $terms;
 		}
-//error_log(" enter attach $contIndex, $index, ".print_r($terms,true));
+/*****DEBUG****///error_log(" enter attach $contIndex, $index, ".print_r($terms,true));
 		if (array_key_exists($index,$terms)) {
 			if (count($terms[$index])) {
 				foreach($terms[$index] as $cID => $n) {
 					if ($cID != null) {
 						$terms = attachChild($index,$cID, $terms);
-// error_log(" after recurse $index, $cID, ".print_r($terms,true));
+/*****DEBUG****/// error_log(" after recurse $index, $cID, ".print_r($terms,true));
 					}
 				}
 			}
-//error_log(" attaching ".print_r($terms[$index],true));
-//error_log(" to ".print_r($terms[$contIndex],true));
+/*****DEBUG****///error_log(" attaching ".print_r($terms[$index],true));
+/*****DEBUG****///error_log(" to ".print_r($terms[$contIndex],true));
 			$terms[$contIndex][$index] = $terms[$index];
 			unset($terms[$index]);
 		}
-// error_log(" exit attach $contIndex, $index, ".print_r($terms,true));
+/*****DEBUG****/// error_log(" exit attach $contIndex, $index, ".print_r($terms,true));
 		return $terms;
 	}
 
@@ -419,19 +419,19 @@ function updateTermData() {
 	}
 
 	function setChildDepth($parentID, $parentDepth){
-//error_log(" parentID = $parentID and parentDepth = $parentDepth");
+/*****DEBUG****///error_log(" parentID = $parentID and parentDepth = $parentDepth");
 		$children = getChildTerms($parentID);
-//error_log(" $parentID - children = ". print_r($children,true));
+/*****DEBUG****///error_log(" $parentID - children = ". print_r($children,true));
 		if (!$children) {
 			return;
 		}
 		$childIDList = join(",",array_keys($children));
-//error_log(" childID list = $childIDList");
+/*****DEBUG****///error_log(" childID list = $childIDList");
 		$depth = $parentDepth + 1;
 		// set every childs depth
 		$query = "update defTerms set trm_Depth = ".$depth." where trm_ID in(".$childIDList.")";
 		mysql_query($query);
-//error_log("query = $query and errors ".mysql_error());
+/*****DEBUG****///error_log("query = $query and errors ".mysql_error());
 		foreach ($children as $childID => $childCount){
 			if ($childCount) {
 				setChildDepth($childID,$depth);
@@ -532,11 +532,11 @@ function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'en
 */
 function getConceptID($lclID,$tableName,$fieldNamePrefix){
 	$query = "select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where ".$fieldNamePrefix."ID = $lclID";
-//error_log("SQL=".$query);
+/*****DEBUG****///error_log("SQL=".$query);
 	$res = mysql_query($query);
 	$ids = mysql_fetch_array($res);
-//error_log(print_r($ids, true));
-//error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
+/*****DEBUG****///error_log(print_r($ids, true));
+/*****DEBUG****///error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
 //return "".$ids[0]."-".$ids[1];
 	if ($ids && count($ids) == 4 && is_numeric($ids[0]) && is_numeric($ids[1])) {
 		return "".$ids[0]."-".$ids[1];
@@ -696,7 +696,7 @@ function getAllRectypeConstraint() {
 			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['limit'] = $max;
 		}
 		$offspring = $trmID && $trmID !== "any" && $hasChildren ? getTermOffspringList($trmID):null;
-//error_log("offspring for $trmID = ".print_r($offspring,true));
+/*****DEBUG****///error_log("offspring for $trmID = ".print_r($offspring,true));
 		if ($offspring) {
 			$cnstrnts[$srcID]['byTerm'][$trmID]['offspring'] = $offspring;
 			foreach ($offspring as $childTermID) { // point all offspring to inherit from term
@@ -1077,8 +1077,8 @@ function getTransformsByOwnerGroup() {
 					'NOT rec_NonOwnerVisibility = "hidden") '.
 				'order by dispOrder, grpName, lbl';
 		$res = mysql_query($query);
-//error_log("query ".print_r($query,true));
-//error_log("error ".print_r(mysql_error(),true));
+/*****DEBUG****///error_log("query ".print_r($query,true));
+/*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
 	while ($row = mysql_fetch_assoc($res)) {
 		$recID = $row['rec_ID'];
 
@@ -1088,7 +1088,7 @@ function getTransformsByOwnerGroup() {
 		}else{
 			array_push($transforms["groups"][$row['grpName']],$recID);
 		}
-//error_log("row ".print_r($row,true));
+/*****DEBUG****///error_log("row ".print_r($row,true));
 
 		$transforms["nameLookup"][$row['lbl']] = $recID;
 		$transforms["byID"][$recID] = array("label" => $row['lbl'],
@@ -1143,8 +1143,8 @@ function getToolsByTransform() {
 					'NOT rec_NonOwnerVisibility = "hidden") '.
 				'order by name';
 		$res = mysql_query($query);
-//error_log("query ".print_r($query,true));
-//error_log("error ".print_r(mysql_error(),true));
+/*****DEBUG****///error_log("query ".print_r($query,true));
+/*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
 //		$tools["error"] = $toolIconDT;
 	while ($row = mysql_fetch_assoc($res)) {
 		$recID = $row['rec_ID'];
@@ -1217,7 +1217,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 		}
 	}
 	$dtG = getDetailTypeGroups();
-//error_log(print_r($dtG,true));
+/*****DEBUG****///error_log(print_r($dtG,true));
 
 	$dtStructs = array('groups' => $dtG,
 						'names' => array(),
@@ -1270,7 +1270,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 	}
 
 	setCachedData($cacheKey,$dtStructs);
-//error_log(print_r($dtStructs['typedefs'],true));
+/*****DEBUG****///error_log(print_r($dtStructs['typedefs'],true));
 	return $dtStructs;
 }
 function getDetailTypeDef($dtID) {
@@ -1441,7 +1441,7 @@ global $relRT,$relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$t
 	if ($relnRecID) $query .= " and rels.relnID = $relnRecID";
 
 
-//	error_log($query);
+/*****DEBUG****///	error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
 	if (!mysql_num_rows(@$res)) {
 		return array();

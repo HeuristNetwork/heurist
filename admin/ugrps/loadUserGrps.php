@@ -27,9 +27,9 @@ mysql_connection_db_select(DATABASE);
 
 if (is_logged_in()) {
 
-/*error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
-error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
-error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));
 	$metod = @$_REQUEST['method'];
 
 	if($metod=="searchuser"){
@@ -40,7 +40,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 		$f_name  = urldecode(@$_REQUEST['name']);
 		$f_disab = @$_REQUEST['disabled'];
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
 
 		$query = "select 0 as selection, usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname, usr.ugr_eMail, usr.ugr_Enabled, usr.ugr_Organisation,";
 
@@ -73,7 +73,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 		$userGrp = array();
 		$userGrp['userslist'] = array();
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_row($res)) {
@@ -109,7 +109,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 			}
 		}
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$f_group."        ".$f_role);
 
 		$workgroups = array();
 		$workgroupIDs = array();
@@ -125,7 +125,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 						   and b.ugr_Enabled  = 'y' $filter2
 					  group by grp.ugr_ID order by grp.ugr_Name";
 
-//error_log(">>>>>>>>>>>>>>>>>>".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>".$query);
 
 		$res = mysql_query($query);
 
@@ -200,7 +200,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 			$query = null;
 		}
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {
@@ -248,7 +248,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 			$query = null;
 		}
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {

@@ -100,7 +100,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		$RQS[$row['rty_ID']][$rst_DetailTypeID] = @$rdr[0];
 	}
 }
-//error_log(print_r($RQS,true));
+/*****DEBUG****///error_log(print_r($RQS,true));
 // base names, varieties for detail types
 $query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes';
 $res = mysql_query($query);
@@ -151,7 +151,7 @@ $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RECTYPE_FILTERS)) {
 	die(" error decoding json rectype filters string");
 }
-//error_log("rt filters".print_r($RECTYPE_FILTERS,true));
+/*****DEBUG****///error_log("rt filters".print_r($RECTYPE_FILTERS,true));
 
 $filterString = (@$_REQUEST['relfilters'] ? $_REQUEST['relfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
@@ -161,7 +161,7 @@ $RELTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RELTYPE_FILTERS)) {
 	die(" error decoding json relation type filters string");
 }
-//error_log("rel filters".print_r($RELTYPE_FILTERS,true));
+/*****DEBUG****///error_log("rel filters".print_r($RELTYPE_FILTERS,true));
 
 $filterString = (@$_REQUEST['ptrfilters'] ? $_REQUEST['ptrfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
@@ -171,7 +171,7 @@ $PTRTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($PTRTYPE_FILTERS)) {
 	die(" error decoding json pointer type filters string");
 }
-//error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
+/*****DEBUG****///error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 	if (!session_id()) session_start();
 	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
@@ -205,7 +205,7 @@ if (is_logged_in()){
 
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 global $ACCESSABLE_OWNER_IDS;
-//error_log("in findPointers");
+/*****DEBUG****///error_log("in findPointers");
 	$nlrIDs = array(); // new linked record IDs
 	$query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType,'.
 					'dtl_Value as trgRecID, trg.rec_RecTypeID as trgType,'.
@@ -225,13 +225,13 @@ global $ACCESSABLE_OWNER_IDS;
 					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
 									'OR trg.rec_NonOwnerVisibility = "public")');
 
-//error_log("find d $depth pointer q = $query");
-//echo "\n $query\n";
+/*****DEBUG****///error_log("find d $depth pointer q = $query");
+/*****DEBUG****///echo "\n $query\n";
 	$res = mysql_query($query);
-//error_log("mysql error = ".mysql_error($res));
+/*****DEBUG****///error_log("mysql error = ".mysql_error($res));
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result
-//echo "\n".print_r($row);
+/*****DEBUG****///echo "\n".print_r($row);
 		$nlrIDs[$row['trgRecID']] = 1;	//save it for next level query
 		if (!@$recSet['infoByDepth'][$depth]['ptrtypes']) {
 			$recSet['infoByDepth'][$depth]['ptrtypes'] = array();
@@ -313,7 +313,7 @@ $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 //if (!$REVERSE) return array();
-//error_log("in findReversePointers");
+/*****DEBUG****///error_log("in findReversePointers");
 	$nlrIDs = array(); // new linked record IDs
 	$query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, '.
 					'dtl_RecID as trgRecID, trg.rec_RecTypeID as trgType, dty_ID as ptrDetailTypeID '.
@@ -334,7 +334,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 				(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
 								'OR trg.rec_NonOwnerVisibility = "public")');
 
-//error_log("find  d $depth rev pointer q = $query");
+/*****DEBUG****///error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result
@@ -412,7 +412,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 
 function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 	global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relSrcDT, $relTrgDT, $relTypDT;
-//error_log("in findRelatedRecords");
+//*****DEBUG****//error_log("in findRelatedRecords");
 	$nlrIDs = array();
 	$query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, '.// from detail
 				'IF( f.dtl_Value IN ('. join(',', $qrec_ids) . '),1,0) as srcIsFrom, '.
@@ -441,7 +441,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
 									'OR trg.rec_NonOwnerVisibility = "public")').
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
-//error_log("find  d $depth related q = $query");
+/*****DEBUG****///error_log("find  d $depth related q = $query");
 //echo $query;
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
@@ -651,10 +651,10 @@ function createQueryRecSet() {
 function getRelationStructure() {
 	global $stime, $QSID, $MAX_DEPTH;
 	//check if there is a cached set
-//	error_log("sid = ".$QSID." session prefix = ".HEURIST_SESSION_DB_PREFIX);
+/*****DEBUG****///	error_log("sid = ".$QSID." session prefix = ".HEURIST_SESSION_DB_PREFIX);
 	if($QSID && @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID]) {
 		$recSet = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID];
-//error_log("recset = ". print_r($recSet,true));
+/*****DEBUG****///error_log("recset = ". print_r($recSet,true));
 		if ( $MAX_DEPTH > 0 && @$recSet["infoByDepth"][$MAX_DEPTH] ){//all requested info in session so return everything.
 			list($usec, $sec) = explode(' ', microtime());
 			$etime = $sec + $usec;
@@ -725,11 +725,11 @@ function getRelationStructure() {
 	list($usec, $sec) = explode(' ', microtime());
 	$etime = $sec + $usec;
 	$recSet["eslapsedTime"] = ''.(($etime - $stime)*1000)."ms";
-//error_log("made it to the end and sid = $QSID");
+/*****DEBUG****///error_log("made it to the end and sid = $QSID");
 	// cache the relation set in
 	if ($QSID && @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID]) {
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID] = $recSet;
-//error_log("made it to store recSet");
+/*****DEBUG****///error_log("made it to store recSet");
 	}
 	return $recSet;
 }

@@ -39,11 +39,11 @@
 	$res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
 	$lastModified = mysql_fetch_row($res);
 	$lastModified = strtotime($lastModified[0]);
-	//error_log("lastmod = $lastModified with current time = ".@$_SERVER["REQUEST_TIME"]);
+	/*****DEBUG****///error_log("lastmod = $lastModified with current time = ".@$_SERVER["REQUEST_TIME"]);
 	// not changed since last requested so return
 	if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 		header('HTTP/1.1 304 Not Modified');
-		//error_log(" exiting loadCommonInfo with 'Not Modified' $lastModified");
+		/*****DEBUG****///error_log(" exiting loadCommonInfo with 'Not Modified' $lastModified");
 		exit();
 	}
 
@@ -145,7 +145,7 @@ top.HEURIST.ratings = {"0": "not rated",
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";
 	print "top.HEURIST.workgroupIDs = " . json_format($workgroupIDs) . ";\n";
 	print "\n";
-	//error_log("made to line ".__LINE__." in file ".__FILE__);
+	/*****DEBUG****///error_log("made to line ".__LINE__." in file ".__FILE__);
 
 ?>
 

@@ -55,7 +55,7 @@ function get_blog_entries($uid, $date) {
 	             AND rec_RecTypeID = ".(defined('RT_BLOG_ENTRY')?RT_BLOG_ENTRY:0).
 	 ($date ? " AND rec_Added >= '".addslashes($date)."'" : "") . "
 	         ORDER BY rec_Added DESC";
-	error_log($query);
+/*****DEBUG****///error_log($query);
 	$res = mysql_query($query);
 	$rv = array();
 	while ($row = mysql_fetch_assoc($res)) {

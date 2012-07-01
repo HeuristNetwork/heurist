@@ -18,7 +18,7 @@
 
 	$mimeExt = $_REQUEST['ext'];
 
-	//error_log("filename = $filename and mime = $mimeExt");
+	/*****DEBUG****///error_log("filename = $filename and mime = $mimeExt");
 
 	switch($mimeExt) {
 		case 'image/jpeg':

@@ -70,13 +70,13 @@ $key = @$_REQUEST["key"];
 require_once(dirname(__FILE__)."/../../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../../common/php/dbMySqlWrappers.php");
 
-// error_log(print_r($auth, 1));
+/*****DEBUG****/// error_log(print_r($auth, 1));
 $baseURL = HEURIST_URL_BASE;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);
 
-// error_log(" woot xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
+/*****DEBUG****/// error_log(" woot xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {

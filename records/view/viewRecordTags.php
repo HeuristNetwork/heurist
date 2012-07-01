@@ -21,7 +21,7 @@ if (!is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
-//error_log(print_r($LOOKUPS, 1));
+/*****DEBUG****///error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_db_overwrite(DATABASE);
 $template = file_get_contents('viewRecordTags.html');
@@ -45,8 +45,8 @@ if (@$_REQUEST['bkmk_id']) {
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
-//error_log("bookmark is ".print_r($bkmk,true));
-//error_log("record is ".print_r($bib,true));
+/*****DEBUG****///error_log("bookmark is ".print_r($bkmk,true));
+/*****DEBUG****///error_log("record is ".print_r($bib,true));
 
 $_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
@@ -87,8 +87,8 @@ while ($row = mysql_fetch_assoc($res)) {
 		$user_tags[$bkmk_user] = array($kwd_name);
 }
 */
-//error_log("tags are ".print_r($tags,true));
-//error_log("kwds are ".print_r($my_kwds,true));
+/*****DEBUG****///error_log("tags are ".print_r($tags,true));
+/*****DEBUG****///error_log("kwds are ".print_r($my_kwds,true));
 
 if ($tags) {
 	$kwd_list = '';
@@ -127,7 +127,7 @@ if ($tags) {
 } else {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
-//error_log("kwdlist is ".print_r($kwd_list,true));
+/*****DEBUG****///error_log("kwdlist is ".print_r($kwd_list,true));
 
 $body->global_vars['tag-list'] = $kwd_list;
 

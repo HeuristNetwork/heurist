@@ -29,7 +29,7 @@ $recaptcha_private_key = "6LdOkgQAAAAAALRx8NbUn9HL50ykaTjf1dv5G3oq";
 mysql_connection_overwrite(DATABASE);
 
 $query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
-//error_log("--- ".mysql_error());
+/*****DEBUG****///error_log("--- ".mysql_error());
 $details = mysql_fetch_row($query);
 $fullName = $details[0] . " " . $details[1];
 $eMail = $details[2];

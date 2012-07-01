@@ -95,7 +95,7 @@
 				$usrFirstName = $row[3];
 				$usrLastName = $row[4];
 
-				//error_log('registerDB.php: current dbid = '.$dbID.'   user ID = '.$user_id.' user email = '.$usrEmail);
+				/*****DEBUG****///error_log('registerDB.php: current dbid = '.$dbID.'   user ID = '.$user_id.' user email = '.$usrEmail);
 
 				// Check if database has already been registered
 
@@ -141,19 +141,19 @@
 					"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 					"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 					curl_setopt($ch, CURLOPT_URL,$reg_url);
-					//	error_log('Calling, CURLOPT_URL = '.$reg_url);
+					/*****DEBUG****///	error_log('Calling, CURLOPT_URL = '.$reg_url);
 					$data = curl_exec($ch);
-					//    error_log('return data from getNextDBReg..ID = '.$data);
+					/*****DEBUG****///    error_log('return data from getNextDBReg..ID = '.$data);
 					$error = curl_error($ch);
 					if ($error) {
 						$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 						echo $error . " (" . $code . ")";
-						//       error_log('CURL error code = '.$code.'  error = '.$error);
+						/*****DEBUG****///       error_log('CURL error code = '.$code.'  error = '.$error);
 					} else {
 						$dbID = intval($data);
 					}
 
-					//    error_log('CURL returned registered dbid = '.$dbID.'   '.$usrEmail);
+					/*****DEBUG****///    error_log('CURL returned registered dbid = '.$dbID.'   '.$usrEmail);
 
 
 					if ($dbID == 0) { // Unable to allocate a new database identifier

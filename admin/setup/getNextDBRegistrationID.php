@@ -66,16 +66,16 @@
 	$usrEmail = strtolower(trim($usrEmail));
 	$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_eMail)='".$usrEmail."'");
 	$indexdb_user_id = null;
-	//error_log('trying for email address');
+	/*****DEBUG****///error_log('trying for email address');
 
 	// Check if the email address is recognised as a user name
 	// Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
 	if(($res) && (mysql_num_rows($res) == 0)) { // no user found on email, try querying on user name
-//		error_log('trying for user name');
+/*****DEBUG****///error_log('trying for user name');
 		$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_Name)='".$usrEmail."'");
 	}
 	if($res) { // query OK, now see if we have found the user
-//		error_log('Query OK, got '.mysql_num_rows($res).' rows returned');
+/*****DEBUG****///error_log('Query OK, got '.mysql_num_rows($res).' rows returned');
 		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
 			//error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
 			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
@@ -94,7 +94,7 @@
 		} else { // existing user
 			$row = mysql_fetch_row($res);
 			$indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
-//			error_log('Existing user ID is '.$indexdb_user_id);
+/*****DEBUG****///error_log('Existing user ID is '.$indexdb_user_id);
 		}
 
 	} else {// error trying to find usergroup in UGrps table

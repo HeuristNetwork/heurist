@@ -644,7 +644,7 @@
 							$details["t:".$key] = $values;
 						}
 
-						//error_log("DETAILS:>>>>".print_r($details,true));
+						/*****DEBUG****///error_log("DETAILS:>>>>".print_r($details,true));
 						$ref = null;
 
 						//add-update Heurist record
@@ -703,7 +703,7 @@
 
 				} // end of loop for record types
 
-				//error_log("DEBUG: UNRESOLVED POINTERS>>>>>".print_r($unresolved_pointers, true));
+				/*****DEBUG****///error_log("DEBUG: UNRESOLVED POINTERS>>>>>".print_r($unresolved_pointers, true));
 
 				if(count($missed_terms)>0){
 					print "<br><br>*********************************************************";
@@ -763,7 +763,7 @@
 
 					if (count($inserts)>0) {//insert all new details
 						$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
-						//error_log(">>>>>>>>>>>>>>>".$query1);
+						/*****DEBUG****///error_log(">>>>>>>>>>>>>>>".$query1);
 						mysql_query($query1);
 						print "<br><br>Total count of resolved pointers:".count($inserts);
 					}

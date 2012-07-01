@@ -83,7 +83,7 @@
 		$tempDBName = "temp_".$dbname;
 	} // existing database
 
-	//error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
+	/*****DEBUG****///error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
 	// * IMPORTANT *
 	//   If database format is changed, update version info, include files, sql fiels for new dbs etc.
 	// see comprehensive lsit in admin/structure/getDBStrucutre.php
@@ -164,7 +164,7 @@
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 			$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 		}
-//error_log("source url ".print_r($source_url,true));
+/*****DEBUG****///error_log("source url ".print_r($source_url,true));
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return curl_exec output as string
@@ -199,8 +199,8 @@
 	preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
 
 	preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
-//error_log("source ".print_r($sourceDBVersion,true));
-//error_log("this  ".print_r($thisDBVersion,true));
+/*****DEBUG****///error_log("source ".print_r($sourceDBVersion,true));
+/*****DEBUG****///error_log("this  ".print_r($thisDBVersion,true));
 	// we ignore following test if creating a new database, because the current database version is irrelevant, the definition files determine the version created
 	// Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database rather than the current open database
 	if ($isExistingDB && !($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {

@@ -89,8 +89,8 @@ $rectype_to_bdt_id_map = array(
 mysql_connection_db_overwrite(DATABASE);
 mysql_query('set @logged_in_user_id = ' . get_user_id());
 
-// error_log("made it to importerFramework.php");
-//error_log('session ZoteroItems: ' . print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['ZoteroItems'], 1));
+/*****DEBUG****/// error_log("made it to importerFramework.php");
+/*****DEBUG****///error_log('session ZoteroItems: ' . print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['ZoteroItems'], 1));
 
 jump_sessions();
 setup_session_vars();
@@ -227,7 +227,7 @@ function clear_session() {
 
 function mode_file_selection() {
 	global $session_data;
-// error_log("mode_file_selection");
+/*****DEBUG****/// error_log("mode_file_selection");
 
 ?>
    <h1>File selection</h1>
@@ -276,7 +276,7 @@ function mode_file_selection() {
 
 function postmode_file_selection() {
 	global $session_data;
-// error_log("postmode_file_selection");
+/*****DEBUG****/// error_log("postmode_file_selection");
 
 	// there are two ways into the file selection mode;
 	// either the user has just arrived at the import page,
@@ -328,7 +328,7 @@ function postmode_file_selection() {
 
 function mode_file_parsing() {
 	global $session_data;
-// error_log("mode_file_parsing");
+/*****DEBUG****/// error_log("mode_file_parsing");
 
 ?>
 <?php
@@ -441,7 +441,7 @@ function mode_file_parsing() {
 
 function postmode_file_parsing() {
 	global $session_data;
-// error_log("postmode_file_parsing");
+/*****DEBUG****/// error_log("postmode_file_parsing");
 
 	// Might skip over rectype selection if there are no unknown rectypes
 	$known_rectype_count = 0;
@@ -526,7 +526,7 @@ function mode_zotero_request_parsing() {
 
 function mode_print_rectype_selection() {
 	global $session_data, $import_id;
-// error_log("mode_print_rectype_selection");
+/*****DEBUG****/// error_log("mode_print_rectype_selection");
 
 ?>
    <h1>Specify record types</h1>
@@ -621,7 +621,7 @@ function heuristic_enabler() { }
 
 function postmode_print_rectype_selection() {
 	global $session_data;
-// error_log("postmode_print_rectype_selection");
+/*****DEBUG****/// error_log("postmode_print_rectype_selection");
 	if (@$_REQUEST['set-rectype']  &&  in_array($_REQUEST['set-rectype'], $session_data['parser']->getReferenceTypes())) {
 		// set the record type for all un-typed (and therefore still un-imported) entries
 		foreach (array_keys($session_data['in_entries']) as $i)
@@ -1136,7 +1136,7 @@ function mode_entry_insertion() {
 
 		if ($entry->getBiblioID()  &&  $entry->_permanent) {  //set in find_exact_entry
 			// already in the database
-	// error_log("found exact match id = ". $entry->getBiblioID());
+	/*****DEBUG****/// error_log("found exact match id = ". $entry->getBiblioID());
 
 			// copy across any new data
 // FIXME			merge_biblio($entry->getBiblioID(), $temp_bib_id);
@@ -1158,7 +1158,7 @@ function mode_entry_insertion() {
 
 		} else if ($entry->getPotentialMatches()) {
 			// present disambiguation options
-	// error_log("found potential matches id = ". $entry->getPotentialMatches());
+	/*****DEBUG****/// error_log("found potential matches id = ". $entry->getPotentialMatches());
 			if (! $entry->getBiblioID()) insert_biblio($entry);
 
 			if (! @$session_data['disambig-biblios']) $session_data['disambig-biblios'] = array();
@@ -1168,7 +1168,7 @@ function mode_entry_insertion() {
 			@++$ambig_count;
 		} else if ($entry->getAncestor()  &&  $entry->_ancestor->getPotentialMatches()) {
 			// present disambiguation options
-	// error_log("found ancestor with potential matches id = ". $entry->_ancestor->getPotentialMatches());
+	/*****DEBUG****/// error_log("found ancestor with potential matches id = ". $entry->_ancestor->getPotentialMatches());
 			if (! $entry->getBiblioID()) insert_biblio($entry);
 			if (! @$session_data['disambig-ancestor-biblios']) $session_data['disambig-ancestor-biblios'] = array();
 			array_push($session_data['disambig-ancestor-biblios'], $entry->getBiblioID());
@@ -1177,7 +1177,7 @@ function mode_entry_insertion() {
 			@++$ambig_count;
 		} else if (! $entry->getAncestor()  ||  $entry->_ancestor->_permanent) {
 			// The entry (and possibly several container entries) needs to be inserted into records
-	// error_log("no matches found, possibly insert all inculding the containers");
+	/*****DEBUG****/// error_log("no matches found, possibly insert all inculding the containers");
 			$_entry = $entry;
 			do {
 				if (! $_entry->getBiblioID()) insert_biblio($_entry);
@@ -1222,7 +1222,7 @@ function mode_entry_insertion() {
 	update_progress_bar(-1);
 list($usec, $sec) = explode(' ', microtime());
 $etime = $sec + $usec;
-//error_log("total time: " . ($etime - $stime));
+/*****DEBUG****///error_log("total time: " . ($etime - $stime));
 
 
 	if ($zoteroItems  &&  count($zoteroItems) > 0) {
@@ -1478,7 +1478,7 @@ function find_exact_entry(&$entry) {
 		return true;
 	}
 
-	// error_log("select rec_ID from records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
+	/*****DEBUG****/// error_log("select rec_ID from records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
 	$res = mysql_query("select rec_ID from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
 
 	if (mysql_num_rows($res) < 1) return false;
@@ -1486,7 +1486,7 @@ function find_exact_entry(&$entry) {
 	$someMatch = mysql_fetch_row($res);
 	$someMatch = $someMatch[0];
 	if ($someMatch) {
-	// error_log(" matching recID = ". $someMatch);
+	/*****DEBUG****/// error_log(" matching recID = ". $someMatch);
 		setPermanentBiblioID($entry, $someMatch);
 		return true;
 	}
@@ -1515,7 +1515,7 @@ function find_similar_entries(&$entry) {
 	else {
 		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev is not null order by lev";
 	}
-	// error_log($similar_query);
+	/*****DEBUG****/// error_log($similar_query);
 
 	$res = mysql_query($similar_query);
 
@@ -1523,7 +1523,7 @@ function find_similar_entries(&$entry) {
 	while ($row = mysql_fetch_assoc($res)) {
 		array_push($near_misses, $row["matching_bib_id"]);
 	}
-	// error_log("near misses = ".join(',',$near_misses));
+	/*****DEBUG****/// error_log("near misses = ".join(',',$near_misses));
 
 	if (count($near_misses) > 0) {
 		foreach ($near_misses as $near_miss)
@@ -1659,7 +1659,7 @@ function insert_biblio(&$entry) {
 		unset($field);
 		$field = &$bib_details[$i];
 
-//error_log(">>>>>> dtType=".$field->getType());
+/*****DEBUG****///error_log(">>>>>> dtType=".$field->getType());
 
 		if ($field->getType() == $creatorDT) {//MAGIC NUMBER - Author/Creator
 			foreach ($field->getValue() as $person_bib_id) {
@@ -1689,7 +1689,7 @@ function insert_biblio(&$entry) {
 		$bib_detail_insert = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values '
 		                                             . $bib_detail_insert;
 
-//error_log(">>>>>>".$bib_detail_insert);
+/*****DEBUG****///error_log(">>>>>>".$bib_detail_insert);
 		mysql_query($bib_detail_insert);
 	}
 
@@ -1794,7 +1794,7 @@ left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
 
 
 function merge_new_biblio_data($master_biblio_id, &$entry) {
-// error_log("oh hey look merge_new_biblio_data");
+/*****DEBUG****/// error_log("oh hey look merge_new_biblio_data");
 	global $session_data;
 
 	$master_biblio_id = intval($master_biblio_id);
@@ -1814,7 +1814,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 			}
 		}
 	}
-// error_log(print_r($existingFields, 1));
+/*****DEBUG****/// error_log(print_r($existingFields, 1));
 	$res = mysql_query("select rec_ScratchPad from Records where rec_ID = " . $master_biblio_id);
 	$notesString = mysql_fetch_row($res);  $notesString = $notesString[0];
 	$notes = array();
@@ -2065,7 +2065,7 @@ function process_author(&$field) {
 	}
 
 	$field->_value = $person_bib_ids;
-// error_log('field value: ' . print_r($field, 1));
+/*****DEBUG****/// error_log('field value: ' . print_r($field, 1));
 }
 
 

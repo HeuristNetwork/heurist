@@ -45,11 +45,11 @@ function outputAsRedirect($text) {
 
 		session_start();
 		$_SESSION[$token] = $text;
-//		error_log("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
+/*****DEBUG****///		error_log("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 		header("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 	}
 	else {
-//		error_log("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
+/*****DEBUG****///		error_log("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 		header("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 	}
 
@@ -85,7 +85,7 @@ if ($callback  &&  preg_match('/^cb[0-9]+$/', $callback)) {
 $method = @$_REQUEST['method'];
 if (!@$_REQUEST['method']) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
 //$key = @$_REQUEST["key"];
-//error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
+/*****DEBUG****///error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
@@ -96,13 +96,13 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 	return;
 }
 */
-//error_log(print_r($auth, 1));
+/*****DEBUG****///error_log(print_r($auth, 1));
 $baseURL = HEURIST_URL_BASE;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);
 
-//error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
+/*****DEBUG****///error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";

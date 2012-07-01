@@ -33,7 +33,7 @@ $type_media = $filedata['mediaType'];
 
 $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
 
-//error_log(">>>>>".$type_media."   ".$isplayer);
+/*****DEBUG****///error_log(">>>>>".$type_media."   ".$isplayer);
 
 if($isplayer){
 
@@ -69,7 +69,7 @@ if($isplayer){
 	}
 	else if($type_media=='audio')
 	{
-//error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
+/*****DEBUG****///error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
 
 		print createAudioTag($filedata['URL'], $filedata['mimeType']);
 	}
@@ -89,7 +89,7 @@ if ($type_source==null || $type_source=='heurist')  //Local/Uploaded resources
 
 	$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
 	$filename = str_replace('//', '/', $filename);
-//DEBUG error_log("filename = ".$filename);
+/*****DEBUG****///error_log("filename = ".$filename);
 }
 
 if(isset($filename) && file_exists($filename)){ //local resources
@@ -133,7 +133,7 @@ if(isset($filename) && file_exists($filename)){ //local resources
 	*/
 	}else{
 
-//error_log(">>>>mineTYPE=".$filedata['mimeType']);
+/*****DEBUG****///error_log(">>>>mineTYPE=".$filedata['mimeType']);
 
 		// set the mime type, set to binary if mime type unknown
 		if ($filedata['mimeType']) {
@@ -211,7 +211,7 @@ function linkifyYouTubeURLs($text, $size) {
 
         //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
         //'<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-//error_log(">>>".$text."<<<<");
+/*****DEBUG****///error_log(">>>".$text."<<<<");
     return $text;
 }
 

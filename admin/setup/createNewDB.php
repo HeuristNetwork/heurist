@@ -93,7 +93,7 @@
 	global $done; // Prevents the makeDatabase() script from running twice
 	$done = false; // redundant
 
-	//error_log(" post dbname: $_POST['dbname'] ");  //debug
+	/*****DEBUG****///error_log(" post dbname: $_POST['dbname'] ");  //debug
 
 	if(isset($_POST['dbname'])) {
 		makeDatabase(); // this does all the work

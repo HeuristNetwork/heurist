@@ -25,7 +25,7 @@ session_cache_limiter('none');
 session_start();
 
 if (_is_logged_in()) {
-//error_log("in applyCred with valid login");
+/*****DEBUG****///error_log("in applyCred with valid login");
 	if ((! defined('SAVE_URI'))  ||  strtoupper(SAVE_URI) != 'DISABLED') {
 		if (defined('HEURIST_SESSION_DB_PREFIX')) {
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'] = $_SERVER['REQUEST_URI'];
@@ -58,8 +58,8 @@ function get_roles() {
 }
 
 function _is_logged_in() {
-//	error_log("in _is_logged_in instance prefix = ".HEURIST_SESSION_DB_PREFIX);
-//	error_log("in _is_logged_in restrict = ".defined('HEURIST_RESTRICT_GROUP_ID'));
+/*****DEBUG****///	error_log("in _is_logged_in instance prefix = ".HEURIST_SESSION_DB_PREFIX);
+/*****DEBUG****///	error_log("in _is_logged_in restrict = ".defined('HEURIST_RESTRICT_GROUP_ID'));
 	return (!!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']  &&
 			(!defined('HEURIST_RESTRICT_GROUP_ID')  ||
 				(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||
@@ -94,8 +94,8 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 				break;
 			case 'database':
 			default:
-//error_log("in is_admin username = ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
-//error_log(">>>>is_admin=".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID]);
+/*****DEBUG****///error_log("in is_admin username = ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
+/*****DEBUG****///error_log(">>>>is_admin=".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID]);
 				return  (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID]=="admin"); // ||
 	//					@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] == 'stevewh';
 		}

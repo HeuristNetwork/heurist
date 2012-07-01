@@ -87,7 +87,7 @@ function doReport($row){
 
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
-//DEBUG error_log("EXT=".$ext);
+/*****DEBUG****///error_log("EXT=".$ext);
 
 		if ($ext == null) {
 

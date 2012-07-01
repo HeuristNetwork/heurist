@@ -103,7 +103,7 @@
 
 	if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 		$targetdbname = $_REQUEST['targetdbname'];
-		//error_log("Target database is $dbPrefix$targetdbname");
+		/*****DEBUG****///error_log("Target database is $dbPrefix$targetdbname");
 
 		// Avoid illegal chars in db name
 		$hasInvalid = isInValid($targetdbname);

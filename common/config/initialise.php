@@ -77,7 +77,7 @@
 	define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/");	// Heurist Installation which contains reference structure definitions (registered DB # 3)
 	define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/");	// Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 	define('HEURIST_SYS_GROUP_ID', 1);	// ID of Heurist System User Group which has special privileges - deprecated, although more generally group 1 on every database is the database owners group
-	//error_log("in initialise dbHost = $dbHost");
+	/*****DEBUG****///error_log("in initialise dbHost = $dbHost");
 	//test db connect valid db
 	$db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword) or
 	returnErrorMsgPage('1',"Unable to connect to db server with admin account, set login in configIni.php. MySQL error: ".mysql_error());
@@ -92,7 +92,7 @@
 		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
 	}
 
-	// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
+	/*****DEBUG****/// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 
 	if (@$_REQUEST["db"]) {
 		$dbName = $_REQUEST["db"];
@@ -425,7 +425,7 @@
 			if (!$res) returnErrorMsgPage('0',"Unable to build internal record type lookup table, MySQL error: ".mysql_error());
 			$RTIDs = array();
 			while ( $row = mysql_fetch_assoc($res)){
-				//		error_log("rt ". print_r($row,true));
+				/*****DEBUG****///		error_log("rt ". print_r($row,true));
 				if (!@$RTIDs[$row['dbID']]){
 					$RTIDs[$row['dbID']] = array();
 				}

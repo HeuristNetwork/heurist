@@ -40,7 +40,7 @@ if (array_key_exists("rec_OwnerUGrpID",$bib) &&
 		$bib["rec_OwnerUGrpID"] != $usrID &&
 		$bib["rec_OwnerUGrpID"] != 0 &&
 		$bib["rec_NonOwnerVisibility"] == "hidden") {
-//	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
+/*****DEBUG****///	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks ".
 						"where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	if (! mysql_num_rows($res)) {

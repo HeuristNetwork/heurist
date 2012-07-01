@@ -29,7 +29,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 	preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
 	$preProcessedQuery = "";
 	$connectors=array(":",">","<","=",",");
-//error_log("parse query matches = ".print_r($matches,true));
+/*****DEBUG****///error_log("parse query matches = ".print_r($matches,true));
 	foreach ($matches[0] as $queryPart) {
 		//if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
 		//necessary since we want double quotes to allow all characters
@@ -42,8 +42,8 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 		//reconstruct the string
 		$addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
 		$preProcessedQuery .= ($addSpace ? " ":"").$queryPart;
-//error_log("query part = ".print_r($queryPart[0],true));
-//error_log("preprocessed query = ".print_r($preProcessedQuery,true));
+/*****DEBUG****///error_log("query part = ".print_r($queryPart[0],true));
+/*****DEBUG****///error_log("preprocessed query = ".print_r($preProcessedQuery,true));
 	}
 	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
@@ -84,7 +84,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-//error_log("q after parse ".print_r($q,true));
+/*****DEBUG****///error_log("q after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -110,15 +110,15 @@ class Query {
 		// Find any 'sortby:' phrases in the query, and pull them out.
 		// "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
 		while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
-//error_log("Create query obj ".print_r($matches, 1));
+/*****DEBUG****///error_log("Create query obj ".print_r($matches, 1));
 			$this->addSortPhrase($matches[2]);
 			$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
 		}
-//error_log("Create query obj text after processing sortby ".print_r($text, 1));
+/*****DEBUG****///error_log("Create query obj text after processing sortby ".print_r($text, 1));
 
 		// According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
 		$or_texts = preg_split('/\\b *OR *\\b/i', $text);
-//error_log("Create query obj text after processing or's ".print_r($or_texts, 1));
+/*****DEBUG****///error_log("Create query obj text after processing or's ".print_r($or_texts, 1));
 		for ($i=0; $i < count($or_texts); ++$i)
 			if ($or_texts[$i]) $this->addOrLimb($or_texts[$i]);	// NO LONGER collapse uppercase -> lowercase ... let's wait till PHP understands UTF-8 (mysql match ignores case anyway)
 	}
@@ -180,7 +180,7 @@ class Query {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
-//error_log("query obj  - ".print_r($this,true));
+/*****DEBUG****///error_log("query obj  - ".print_r($this,true));
 		$where_clause = '('.((is_logged_in() && !$this->isPublicOnly) ?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
 							((is_logged_in() && !$this->isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
 							((!empty($this->workgroups) && !$this->isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
@@ -733,7 +733,7 @@ class FieldPredicate extends Predicate {
 
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
-//error_log("FieldPred MakeSql value = ".print_r($this->value,true));
+/*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
 
 		$match_value = is_numeric($this->value)? floatval($this->value) : '"' . addslashes($this->value) . '"';
 
@@ -1234,7 +1234,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 	}
 
 	if(array_key_exists("l",$parms) || array_key_exists("limit",$parms)){
-//error_log("params".print_r($parms,true));
+/*****DEBUG****///error_log("params".print_r($parms,true));
 		if (array_key_exists("l", $parms)) {
 			$limit = intval(@$parms["l"]);
 			unset($parms["l"]);
@@ -1260,7 +1260,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-//	error_log("request to query returns ".print_r($query,true));
+/*****DEBUG****///	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

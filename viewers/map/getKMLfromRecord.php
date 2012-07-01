@@ -21,7 +21,7 @@ if (! @$_REQUEST['recID'] && !defined('DT_KML')) return;
 
 $query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=".DT_KML." and dtl_RecID=".$_REQUEST['recID'];
 
-error_log(">>>>>>>>>>>".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>".$query);
 
 $res = mysql_query($query);
 //"'.addslashes($_REQUEST['recID']).'"');
@@ -39,7 +39,7 @@ if (@$mimeType['fxm_MimeType']) {
 
 $row = mysql_fetch_row($res);
 
-//error_log(">>>>>>>>>>>".$row[0]);
+/*****DEBUG****///error_log(">>>>>>>>>>>".$row[0]);
 
 print $row[0];
 ?>

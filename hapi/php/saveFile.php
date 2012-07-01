@@ -17,7 +17,7 @@
 	require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
-	//error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
+	/*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
 	if (! defined("USING-XSS")) {
 		function outputAsRedirect($text) {
 			$val = base64_encode($text);
@@ -43,7 +43,7 @@
 
 
 	$upload = $_FILES["file"];
-	//error_log("upload file info - ". print_r($_FILES["file"],true));
+	/*****DEBUG****///error_log("upload file info - ". print_r($_FILES["file"],true));
 	//$upload["type"]
 	$fileID = upload_file($upload["name"], null, $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"], false);
 

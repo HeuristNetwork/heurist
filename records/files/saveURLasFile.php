@@ -20,7 +20,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
-//error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
+/*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
 /*
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
@@ -58,11 +58,11 @@ function generate_thumbnail($sURL, $needConnect){
 	$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
 	$heurist_path = tempnam(HEURIST_UPLOAD_DIR, "_temp_"); // . $file_id;
 
-	//error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
+	/*****DEBUG****///error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
 
 	$filesize = save_image($remote_path, $heurist_path);
 
-	//error_log(">>>>>SAVED SIZE=".$filesize);
+	/*****DEBUG****///error_log(">>>>>SAVED SIZE=".$filesize);
 
 	if($filesize>0){
 
@@ -86,7 +86,7 @@ function generate_thumbnail($sURL, $needConnect){
 			$res = getError("File upload was interrupted. ".$fileID);
 		}
 
-	//error_log("22222 FILE ID=".$fileID);
+	/*****DEBUG****///error_log("22222 FILE ID=".$fileID);
 	}else{
 		$res = getError("Can't download image");
 	}

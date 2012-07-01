@@ -12,7 +12,7 @@ define('SMARTY_DIR', dirname(__FILE__).'/../../external/Smarty-3.0.7/libs/');
 require_once(SMARTY_DIR.'Smarty.class.php');
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
-//error_log(">>>>".HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/');
+/*****DEBUG****///error_log(">>>>".HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/');
 
 $smarty = new Smarty();
 
@@ -52,7 +52,7 @@ $smarty->config_dir   = HEURIST_SMARTY_TEMPLATES_DIR."configs/";
 $smarty->compile_dir  = HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/';
 $smarty->cache_dir    = HEURIST_SMARTY_TEMPLATES_DIR.'cache/';
 
-//error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
+/*****DEBUG****///error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
 
 $smarty->registerResource("string", array("str_get_template",
                                        "str_get_timestamp",

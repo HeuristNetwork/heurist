@@ -46,7 +46,7 @@ $recs = array();
 while ($row = mysql_fetch_assoc($res)) {
 	$recs[$row['rec_ID']] = $row;
 }
-error_log(print_r($recs,true));
+/*****DEBUG****///error_log(print_r($recs,true));
 $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
 $updates = array();
 $blank_count = 0;
@@ -68,7 +68,7 @@ $processed_count = 0;
    records for which the new title would be blank (an error condition).
 </p>
 <p>This will take some time for large databases.</p>
- <p>The scanning step does not write to the database 
+ <p>The scanning step does not write to the database
 and can be cancelled safely at any time</p>
 
 <script type="text/javascript">
@@ -108,7 +108,7 @@ foreach ($recs as $rec_id => $rec) {
 	}
 
 	$mask = $masks[$rec['rec_RecTypeID']];
-//error_log("mask = $mask");
+/*****DEBUG****///error_log("mask = $mask");
 	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
 	++$processed_count;
 	$rec_title = trim($rec['rec_Title']);

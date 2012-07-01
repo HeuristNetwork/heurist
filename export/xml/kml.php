@@ -114,7 +114,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 			$squery2 = $squery2." from Records,".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere2;
 		}
 
-//error_log("1.>>>>".$squery);
+/*****DEBUG****///error_log("1.>>>>".$squery);
 
 		$res = mysql_query($squery);
 		$wkt_reccount = mysql_num_rows($res);
@@ -136,7 +136,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 				while ($row = mysql_fetch_row($res)) {
 					$kml = null;
 					$dt = $row[3];
-	//error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
+	/*****DEBUG****///error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
 					if($row[5]){
 						$wkt = $row[5];
 						$geom = geoPHP::load($wkt,'wkt');
@@ -152,12 +152,12 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 					}else{
 						/* @todo - tomorrow
 						$kml = $row[1];
-	//error_log($kml);
-						if(strpos($kml, "<?xml")>=0){
+	/*****DEBUG****///error_log($kml);
+/*						if(strpos($kml, "<?xml")>=0){
 							$start = strpos($kml, "<Placemark>");
 							$len = strpos($kml, strrchr($kml, "</Placemark>"))+strlen("</Placemark>")-$start;
-	error_log("START ".$start.",  len=".$len);
-							$kml = substr($kml, $start, $len);
+/*****DEBUG****///error_log("START ".$start.",  len=".$len);
+/*							$kml = substr($kml, $start, $len);
 						}
 						print $kml;
 						*/

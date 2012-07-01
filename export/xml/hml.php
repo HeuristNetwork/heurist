@@ -102,7 +102,7 @@ function makeTag($name, $attributes=null, $textContent=null, $close=true,$encode
 		$tag .= "</$name>";
 	}
 	echo $tag . "\n";
-//	error_log("in makeTag tag = $tag");
+/*****DEBUG****///	error_log("in makeTag tag = $tag");
 }
 
 function openTag($name, $attributes=null) {
@@ -111,7 +111,7 @@ function openTag($name, $attributes=null) {
 
 function closeTag($name) {
 	echo "</$name>\n";
-//	error_log("in closeTag name = $name");
+/*****DEBUG****///	error_log("in closeTag name = $name");
 }
 
 function openCDATA() {
@@ -166,7 +166,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		$RQS[$row['rty_ID']][$rst_DetailTypeID] = @$rdr[0];
 	}
 }
-//error_log(print_r($RQS,true));
+/*****DEBUG****///error_log(print_r($RQS,true));
 // base names, varieties for detail types
 $query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes';
 $res = mysql_query($query);
@@ -442,8 +442,8 @@ function outputRecords($result) {
 
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false, $parentID = null) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relSrcDT;
-//error_log("rec = ".$record['rec_ID']);
-//error_log(" in outputRecord record = \n".print_r($record,true));
+/*****DEBUG****///error_log("rec = ".$record['rec_ID']);
+/*****DEBUG****///error_log(" in outputRecord record = \n".print_r($record,true));
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
 		if ($record['rec_RecTypeID'] != $relRT) {
@@ -487,9 +487,9 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	}
 
 	if ($WOOT > $depth) {
-//error_log(" in outputRecord WOOT = \n".print_r($WOOT,true));
+/*****DEBUG****///error_log(" in outputRecord WOOT = \n".print_r($WOOT,true));
 		$result = loadWoot(array('title' => 'record:'.$record['rec_ID']));
-//error_log(" in outputRecord-WOOT result = \n".print_r($result,true));
+/*****DEBUG****///error_log(" in outputRecord-WOOT result = \n".print_r($result,true));
 		if ($result['success']) {
 			openTag('woot', array('title' => 'record:'.$record['rec_ID']));
 //			openCDATA();
@@ -518,7 +518,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 			openTag('relationships');
 			foreach ($relationships[$record['rec_ID']] as $rel_id) {
 				$rel = loadRecord($rel_id);
-//error_log(" relRec = ".print_r($rel,true));
+/*****DEBUG****///error_log(" relRec = ".print_r($rel,true));
 				foreach ( $rel['details'][$relSrcDT] as $dtID => $from){
 					$fromType = $from['type'];
 				}
@@ -537,7 +537,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 
 function outputRecordStub($recordStub) {
 	global $RTN;
-//error_log( "ouput recordStub ".print_r($recordStub,true));
+/*****DEBUG****///error_log( "ouput recordStub ".print_r($recordStub,true));
 
 	openTag('record',array('isStub'=> 1));
 	makeTag('id', null, array_key_exists('id',$recordStub)?$recordStub['id']:$recordStub['rec_ID']);
@@ -553,12 +553,12 @@ function makeFileContentNode($file){
 	$filename = $file['URL'];
 	if ($file['type'] ==="application/xml"){// && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
-//error_log(" xml = ". print_r($xml,true));
+/*****DEBUG****///error_log(" xml = ". print_r($xml,true));
 		// convert to xml
 		$xml = $xml->asXML();
 		// remove the name space
 		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
-//error_log(" xml = ". print_r($xml,true));
+/*****DEBUG****///error_log(" xml = ". print_r($xml,true));
 		$xml = simplexml_load_string($xml);
 		if (!$xml){
 			$attrs = array("type" => "unknown", "error" => "invalid xml content");
@@ -575,7 +575,7 @@ function makeFileContentNode($file){
 				$content = $xml->xpath('//TEI.2/text');
 			}
 			$content = $teiHeader[0]->asXML().$content[0]->asXML();
-//error_log(" content = ". print_r($content,true));
+/*****DEBUG****///error_log(" content = ". print_r($content,true));
 			makeTag('content',$attrs,$content,true,false);
 		}
 	}
@@ -583,7 +583,7 @@ function makeFileContentNode($file){
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub, $parentID) {
 	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT, $relTrgDT, $relSrcDT;
-//error_log("in outputDetail dt = $dt value = ". print_r($value,true));
+/*****DEBUG****///error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
 	$attrs = array('id' => $dt, 'conceptID'=>getDetailTypeConceptID($dt));
 	if (array_key_exists($dt, $DTN)) {
@@ -638,7 +638,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 			}
 		} else if (array_key_exists('file', $value)) {
 			$file = $value['file'];
-//error_log(" in outputDetail file = \n".print_r($file,true));
+/*****DEBUG****///error_log(" in outputDetail file = \n".print_r($file,true));
 			openTag('detail', $attrs);
 				openTag('file');
 					makeTag('id', null, $file['id']);
@@ -680,7 +680,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		if (@$TL[$value]['trm_ParentTermID']) {
 			$attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
 		}
-//		error_log("value = ".$value." label = ".$TL[$value]['trm_Label']);
+/*****DEBUG****///error_log("value = ".$value." label = ".$TL[$value]['trm_Label']);
 		makeTag('detail', $attrs, $TL[$value]['trm_Label']);
 	} else {
 		makeTag('detail', $attrs, replaceIllegalChars($value));

@@ -69,11 +69,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$base_url_root = preg_replace('!([^:/])/.*!', '$1', $base_url);
 		$base_url_base = preg_replace('!([^:/]/.*/)[^/]*$!', '$1', $base_url);
 		if (substr($base_url_base, -1, 1) != '/') $base_url_base = $base_url_base . '/';
-/*
-error_log($base_url);
-error_log($base_url_root);
-error_log($base_url_base);
-*/
+/*****DEBUG****///error_log($base_url);
+/*****DEBUG****///error_log($base_url_root);
+/*****DEBUG****///error_log($base_url_base);
 
 		// clean up the page a little
 		$src = preg_replace('/<!-.*?->/s', '', $src);
@@ -126,7 +124,7 @@ error_log($base_url_base);
 				//while (preg_match('!/\\.\\.(?:/|$)!', $matches[2][$i]))	/* remove ..s */
 					//$matches[2][$i] = preg_replace('!(http://.+)(?:/[^/]*)/\\.\\.(/|$)!', '\\1\\2', $matches[2][$i]);
 
-		//		error_log($matches[1][$i]);
+		/*****DEBUG****///		error_log($matches[1][$i]);
 			}
 
 			$matches[3][$i] = trim(preg_replace('/\s+/', ' ', str_replace('&nbsp;', ' ', strip_tags($matches[3][$i]))));

@@ -67,7 +67,7 @@ function getList(){
 
 		$path_parts = pathinfo($filename);
 		$ext = strtolower($path_parts['extension']);
-//error_log(">>>>".$path_parts['filename']."    ".$filename.indexOf("_")."<<<<");
+/*****DEBUG****///error_log(">>>>".$path_parts['filename']."    ".$filename.indexOf("_")."<<<<");
 		$ind = strpos($filename,"importcsv_");
         $isok = (is_numeric($ind) && $ind==0);
 
@@ -78,7 +78,7 @@ function getList(){
 	}
 	header("Content-type: text/javascript");
 	//header('Content-type: text/html; charset=utf-8');
-	//DEBUG error_log(">>>>>>>>>>>>>".print_r($results, true));
+	/*****DEBUG****////*****DEBUG****/error_log(">>>>>>>>>>>>>".print_r($results, true));
 
 	//comma separated list of filenames
 	print implode("|", $results);

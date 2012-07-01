@@ -679,9 +679,9 @@ class HeuristNativeEntry {
 					$inner_bdt_id = $matches[1];
 				else
 					$inner_bdt_id = $bib_requirement_names[55][strtolower($inner_field_name)];//MAGIC NUMBER
-//error_log($inner_bdt_id);
-//error_log($inner_field_name);
-//error_log(print_r($bib_requirement_names[55], 1));
+/*****DEBUG****///error_log($inner_bdt_id);
+/*****DEBUG****///error_log($inner_field_name);
+/*****DEBUG****///error_log(print_r($bib_requirement_names[55], 1));
 
 
 				if ($this->_authors[0] == 'anonymous') {

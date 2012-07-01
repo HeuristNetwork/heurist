@@ -242,7 +242,7 @@ global $relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT,
 
 	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
 
-		//error_log($query);
+		/*****DEBUG****///error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
 
 		if (!mysql_num_rows($res)) {

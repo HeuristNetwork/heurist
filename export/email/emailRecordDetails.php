@@ -106,13 +106,13 @@
 
 		$query = "select ulf_ID, ulf_OrigFileName, ulf_Added, ulf_MimeExt, ulf_FileSizeKB, ulf_FilePath, ulf_FileName from recUploadedFiles where ulf_ID in ".$ids.")";
 
-		//DEBUG error_log(">>>> ".$query);
+		/*****DEBUG****///DEBUG error_log(">>>> ".$query);
 
 		$files_arr = array();
 
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_row($res)) { //mysql_fetch_assoc
-			//DEBUG error_log(">>>> ".HEURIST_UPLOAD_DIR."/".$row[0]);
+			/*****DEBUG****///DEBUG error_log(">>>> ".HEURIST_UPLOAD_DIR."/".$row[0]);
 
 			if ($row[6]) {
 				$filename = $row[5].$row[6]; // post 18/11/11 proper file path and name
@@ -140,9 +140,9 @@
 	foreach ($upload["size"] as $eltID => $size) {
 	if ($size <= 0) continue;
 
-	error_log(">>>>>>".$tmp_name);
+	/*****DEBUG****///error_log(">>>>>>".$tmp_name);
 
-	$geekMail->attach($tmp_name);
+/*	$geekMail->attach($tmp_name);
 
 	if (!$_POST[$eltName]) $_POST[$eltName] = $upload;
 	}
@@ -176,7 +176,7 @@
 		foreach ($_POST as $key => $value)
 		{
 			$pos = strpos($key, "type:");
-			//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+			/*****DEBUG****///error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
 			if (is_numeric($pos) && $pos == 0)
 			{
@@ -196,8 +196,8 @@
 			}
 		}//for
 
-		//DEBUG error_log(">>>> rectype=".$_POST["rectype"]);
-		//DEBUG error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
+		/*****DEBUG****///DEBUG error_log(">>>> rectype=".$_POST["rectype"]);
+		/*****DEBUG****///DEBUG error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
 
 		$newrectype = getRecTypeConceptID($_POST["rectype"]);
 		if($newrectype){
@@ -213,7 +213,7 @@
 	//$message = json_format($_POST);
 	$message =  json_encode($arr);
 
-	// DEBUG error_log(">>>> ".$message);
+	/*****DEBUG****/// DEBUG error_log(">>>> ".$message);
 	/**/
 	$geekMail->message($message);
 

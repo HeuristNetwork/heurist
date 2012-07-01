@@ -148,7 +148,7 @@ function convert_to_png($img, $dim, $filename){
 				$new_y = $dim;
 			}
 
-//error_log(">>>>>".$new_x.",".$new_y);
+/*****DEBUG****///error_log(">>>>>".$new_x.",".$new_y);
 
 		}else{
 			$new_x = $orig_x;
@@ -165,7 +165,7 @@ function convert_to_png($img, $dim, $filename){
 	$left = ceil(($dim-$new_x)/2) ;
 	$top = ceil(($dim-$new_y)/2) ;
 
-//error_log("LT>>>>>".$left.",".$top);
+/*****DEBUG****///error_log("LT>>>>>".$left.",".$top);
 
 	if(!imagecopyresampled($img_resized, $img, $left, $top, 0, 0, $new_x, $new_y, $orig_x, $orig_y)){
 		$error = 'An error occurred while uploading the file - can\'t resize the image';

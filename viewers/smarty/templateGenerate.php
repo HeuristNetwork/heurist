@@ -538,7 +538,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 				}*/
 				$recordTypeName = $dt_label;
 				$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-				
+
 				if($pointerRecTypeId==""){ //unconstrainded
 					$dt_label = $dt_label." ptr";
 					$vars = array_merge($vars, array($recordTypeName=>$dt_label));
@@ -598,10 +598,10 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 					///no need $text = $text.'</td></tr>\n';
 					/*
 					if($recursion_depth>1){
-	error_log(">>>>            ");
-	error_log(">>>>            ".print_r($res2['tree'], true));
-						$tree = array_merge($tree, $res2['tree']);
-					}*/
+/*****DEBUG****///error_log(">>>>            ");
+///*****DEBUG****/error_log(">>>>            ".print_r($res2['tree'], true));
+//						$tree = array_merge($tree, $res2['tree']);
+//					}*/
 
 				}//array_key_exists($pointerRecTypeId, $rtNames))
 
@@ -620,8 +620,8 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 				$rectypeID = null;
 
 				foreach ($dtValue as $key => $value){
-//error_log(">>>>>>>>>>".array_key_exists('id',$value));
-					if (array_key_exists('id',$value))
+/*****DEBUG****///error_log(">>>>>>>>>>".array_key_exists('id',$value));
+/*					if (array_key_exists('id',$value))
 					{
 						//this is record ID
 						$recordID = $value['id'];
@@ -642,8 +642,8 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 				{
 					$recordTypeName = $rtNames[$rectypeID];
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-//error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName);
-					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
+/*****DEBUG****///error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName);
+/*					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
 				}else{
 					$res = null;
 				}

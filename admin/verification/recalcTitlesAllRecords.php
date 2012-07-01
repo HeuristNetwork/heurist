@@ -85,7 +85,7 @@ function update_counts2(processed, total) {
    new title would be blank (an error condition).
 </p>
 <p>This will take some time for large databases.</p>
- <p>The scanning step does not write to the database 
+ <p>The scanning step does not write to the database
 and can be cancelled safely at any time</p>
 
 <div><span id=total_count><?=count($recs)?></span> records in total</div>
@@ -110,7 +110,7 @@ $blanks = array();
 $reparables = array();
 foreach ($recs as $rec_id => $rec) {
 	if ($rec_id % 10 == 0) {
-//error_log(">>>>".$processed_count.','.$blank_count.','.$repair_count.','.count($updates));
+/*****DEBUG****///error_log(">>>>".$processed_count.','.$blank_count.','.$repair_count.','.count($updates));
 
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();

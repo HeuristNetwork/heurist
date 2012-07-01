@@ -92,7 +92,7 @@
 		if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
 			$query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
 
-			//error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
+			/*****DEBUG****///error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
 			$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
 			print join(", ", $workgroups);
 		}

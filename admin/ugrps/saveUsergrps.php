@@ -1,18 +1,18 @@
 <?php
 
-/*<!--
- saveUsergrps.php
-* This file accepts request to update sysUGrps and sys sysUsrGrpLinks tables
-*
-* @version 2011.0510
-* @autor: Artem Osmakov
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
- -->*/
+	/*<!--
+	saveUsergrps.php
+	* This file accepts request to update sysUGrps and sys sysUsrGrpLinks tables
+	*
+	* @version 2011.0510
+	* @autor: Artem Osmakov
+	*
+	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+	* @link: http://HeuristScholar.org
+	* @license http://www.gnu.org/licenses/gpl-3.0.txt
+	* @package Heurist academic knowledge management system
+	* @todo
+	-->*/
 
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -21,7 +21,7 @@
 
 
 	if (! is_logged_in()) {
-	//ARTEM
+		//ARTEM
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
@@ -29,38 +29,38 @@
 	header('Content-type: text/javascript');
 
 	$legalMethods = array(
-	"saveUser",
-	"saveGroup",
-	"deleteUser",
-	"deleteGroup",
-	"changeRole");
+		"saveUser",
+		"saveGroup",
+		"deleteUser",
+		"deleteGroup",
+		"changeRole");
 
 	$sysUGrps_ColumnNames = array(
-	"ugr_ID"=>"i",
-	"ugr_Type"=>"s",
-	"ugr_Name"=>"s",
-	"ugr_LongName"=>"s",
-	"ugr_Description"=>"s",
-	"ugr_Password"=>"s",
-	"ugr_eMail"=>"s",
-	"ugr_FirstName"=>"s",
-	"ugr_LastName"=>"s",
-	"ugr_Department"=>"s",
-	"ugr_Organisation"=>"s",
-	"ugr_City"=>"s",
-	"ugr_State"=>"s",
-	"ugr_Postcode"=>"s",
-	"ugr_Interests"=>"s",
-	"ugr_Enabled"=>"s",
-	"ugr_URLs"=>"s",
-	"ugr_IncomingEmailAddresses"=>"s"
+		"ugr_ID"=>"i",
+		"ugr_Type"=>"s",
+		"ugr_Name"=>"s",
+		"ugr_LongName"=>"s",
+		"ugr_Description"=>"s",
+		"ugr_Password"=>"s",
+		"ugr_eMail"=>"s",
+		"ugr_FirstName"=>"s",
+		"ugr_LastName"=>"s",
+		"ugr_Department"=>"s",
+		"ugr_Organisation"=>"s",
+		"ugr_City"=>"s",
+		"ugr_State"=>"s",
+		"ugr_Postcode"=>"s",
+		"ugr_Interests"=>"s",
+		"ugr_Enabled"=>"s",
+		"ugr_URLs"=>"s",
+		"ugr_IncomingEmailAddresses"=>"s"
 	);
 
 	$sysUsrGrpLinks_ColumnNames = array(
-	"ugl_ID"=>"i",
-	"ugl_UserID"=>"i",
-	"ugl_GroupID"=>"i",
-	"ugl_Role"=>"s"
+		"ugl_ID"=>"i",
+		"ugl_UserID"=>"i",
+		"ugl_GroupID"=>"i",
+		"ugl_Role"=>"s"
 	);
 
 	if (!@$_REQUEST['method']) {
@@ -77,86 +77,86 @@
 
 	switch (@$_REQUEST['method']) {
 
-	case 'saveUser':
-		if (!array_key_exists('user',$data) ||
-		!array_key_exists('colNames',$data['user']) ||
-		!array_key_exists('defs',$data['user'])) {
-			die("invalid data structure sent with saveUser method call to saveUsergrps.php");
-		}
-
-		$groupID = @$_REQUEST['groupID'];
-
-		$colNames = $data['user']['colNames'];
-
-		$rv = array();
-		$rv['result'] = array(); //result
-
-		foreach ($data['user']['defs'] as $recID => $rt) {
-			array_push($rv['result'], updateUserGroup('user', $colNames, $recID, $groupID, $rt));
-		}
-
-		break;
-
-	case 'deleteUser':
-
-		$rv = array();
-		if (!$recID) {
-			$rv['error'] = "invalid or not ID sent with deleteUser method call to saveUsergrps.php";
-		}else if( intval($recID)==2 ){
-			$rv['error'] = "Can't delete system user dbAdmin";
-		}else{
-			$rv = deleteUser($recID);
-			if (!array_key_exists('error',$rv)) {
-				//$rv['rectypes'] = getAllRectypeStructures();
+		case 'saveUser':
+			if (!array_key_exists('user',$data) ||
+				!array_key_exists('colNames',$data['user']) ||
+				!array_key_exists('defs',$data['user'])) {
+				die("invalid data structure sent with saveUser method call to saveUsergrps.php");
 			}
-		}
-		break;
 
-	case 'saveGroup':
-		if (!array_key_exists('group',$data) ||
-		!array_key_exists('colNames',$data['group']) ||
-		!array_key_exists('defs',$data['group'])) {
-			die("invalid data structure sent with saveGroup method call to saveUsergrps.php");
-		}
-		$colNames = $data['group']['colNames'];
+			$groupID = @$_REQUEST['groupID'];
 
-		$rv = array();
-		$rv['result'] = array(); //result
-
-		foreach ($data['group']['defs'] as $recID => $rt) {
-			array_push($rv['result'], updateUserGroup('group', $colNames, $recID, null, $rt));
-		}
-
-		break;
-
-	case 'deleteGroup':
+			$colNames = $data['user']['colNames'];
 
 			$rv = array();
-		if (!$recID) {
-			$rv['error'] = "invalid or not ID sent with deleteGroup method call to saveUsergrps.php";
-		}else if( intval($recID)==2 ){
-			$rv['error'] = "Can't delete system group 'Database Owners'";
-		}else{
-			$rv = deleteGroup($recID);
-		}
-		break;
+			$rv['result'] = array(); //result
 
-	case 'changeRole':
-
-		$recIds	= @$_REQUEST['recIDs'];
-		$newRole = @$_REQUEST['role'];
-		$oldRole = @$_REQUEST['oldrole'];
-
-		if (!$recID || !$recIds || !$newRole) {
-			$rv = array();
-			$rv['error'] = "invalid or not IDs sent with changeRole method call to saveUsergrps.php";
-		}else{
-			$rv = changeRole($recID, $recIds, $newRole, $oldRole, true);
-			if (!array_key_exists('error',$rv)) {
-				//$rv['rectypes'] = getAllRectypeStructures();
+			foreach ($data['user']['defs'] as $recID => $rt) {
+				array_push($rv['result'], updateUserGroup('user', $colNames, $recID, $groupID, $rt));
 			}
-		}
-		break;
+
+			break;
+
+		case 'deleteUser':
+
+			$rv = array();
+			if (!$recID) {
+				$rv['error'] = "invalid or not ID sent with deleteUser method call to saveUsergrps.php";
+			}else if( intval($recID)==2 ){
+				$rv['error'] = "Can't delete system user dbAdmin";
+			}else{
+				$rv = deleteUser($recID);
+				if (!array_key_exists('error',$rv)) {
+					//$rv['rectypes'] = getAllRectypeStructures();
+				}
+			}
+			break;
+
+		case 'saveGroup':
+			if (!array_key_exists('group',$data) ||
+				!array_key_exists('colNames',$data['group']) ||
+				!array_key_exists('defs',$data['group'])) {
+				die("invalid data structure sent with saveGroup method call to saveUsergrps.php");
+			}
+			$colNames = $data['group']['colNames'];
+
+			$rv = array();
+			$rv['result'] = array(); //result
+
+			foreach ($data['group']['defs'] as $recID => $rt) {
+				array_push($rv['result'], updateUserGroup('group', $colNames, $recID, null, $rt));
+			}
+
+			break;
+
+		case 'deleteGroup':
+
+			$rv = array();
+			if (!$recID) {
+				$rv['error'] = "invalid or not ID sent with deleteGroup method call to saveUsergrps.php";
+			}else if( intval($recID)==2 ){
+				$rv['error'] = "Can't delete system group 'Database Owners'";
+			}else{
+				$rv = deleteGroup($recID);
+			}
+			break;
+
+		case 'changeRole':
+
+			$recIds	= @$_REQUEST['recIDs'];
+			$newRole = @$_REQUEST['role'];
+			$oldRole = @$_REQUEST['oldrole'];
+
+			if (!$recID || !$recIds || !$newRole) {
+				$rv = array();
+				$rv['error'] = "invalid or not IDs sent with changeRole method call to saveUsergrps.php";
+			}else{
+				$rv = changeRole($recID, $recIds, $newRole, $oldRole, true);
+				if (!array_key_exists('error',$rv)) {
+					//$rv['rectypes'] = getAllRectypeStructures();
+				}
+			}
+			break;
 
 	}//end of switch
 	$db->close();
@@ -181,26 +181,26 @@
 
 		$ret = null;
 
-			if(	!is_admin() ){
-				if($type=='user'){
-					if ( $recID != get_user_id() ){
-						$ret = "You are not admin and can't edit another user";
-					}
-				}else if($type=='group'){
-					//find admin
-					$query = "select ugl_UserID from sysUsrGrpLinks where ugl_Role = 'admin' and ugl_GroupID=$recID
-							and ugl_UserID=".get_user_id();
-					$rows = execSQL($db, $query, null, true);
+		if(	!is_admin() ){
+			if($type=='user'){
+				if ( $recID != get_user_id() ){
+					$ret = "You are not admin and can't edit another user";
+				}
+			}else if($type=='group'){
+				//find admin
+				$query = "select ugl_UserID from sysUsrGrpLinks where ugl_Role = 'admin' and ugl_GroupID=$recID
+				and ugl_UserID=".get_user_id();
+				$rows = execSQL($db, $query, null, true);
 
-					if ($rows==0 || is_string($rows) ) {
-						$ret = "Error checking rights Group $recID in updateUserGroup - ".$rows;
-					}else if ($rows==0){
-						$ret = "You are not admin for Group# $recID. Edit is not allowed";
-					}
+				if ($rows==0 || is_string($rows) ) {
+					$ret = "Error checking rights Group $recID in updateUserGroup - ".$rows;
+				}else if ($rows==0){
+					$ret = "You are not admin for Group# $recID. Edit is not allowed";
 				}
 			}
+		}
 
-			return $ret;
+		return $ret;
 	}
 
 	/**
@@ -257,15 +257,15 @@
 
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
-						if($query!="") $query = $query.",";
+					if($query!="") $query = $query.",";
 
-						if($isInsert){
-							$query = $query."?";
-							//if($fieldNames!="") $fieldNames=$fieldNames.",";
-							//$fieldNames = $fieldNames.$colName;
-						}else{
-							$query = $query."$colName = ?";
-						}
+					if($isInsert){
+						$query = $query."?";
+						//if($fieldNames!="") $fieldNames=$fieldNames.",";
+						//$fieldNames = $fieldNames.$colName;
+					}else{
+						$query = $query."$colName = ?";
+					}
 
 					$parameters[0] = $parameters[0].$sysUGrps_ColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
@@ -291,30 +291,30 @@
 
 						if($type=='user'){
 							$email_text =
-"Your Heurist account registration has been approved.
+							"Your Heurist account registration has been approved.
 
-Heurist database: ".HEURIST_DBNAME."
+							Heurist database: ".HEURIST_DBNAME."
 
-Login at:
+							Login at:
 
-".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
+							".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
 
-with the username: " . $ugr_Name . ".
+							with the username: " . $ugr_Name . ".
 
-We recommend visiting the 'Take the Tour' section and
-also visiting the Help function, which provides comprehensive
-overviews and step-by-step instructions for using Heurist.
+							We recommend visiting the 'Take the Tour' section and
+							also visiting the Help function, which provides comprehensive
+							overviews and step-by-step instructions for using Heurist.
 
-";
+							";
 							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FirstName.' '.
 								$ugr_LastName.' ['.$ugr_eMail.']', $email_text,
 								"From: ".HEURIST_MAIL_TO_INFO."\r\nCc: ".HEURIST_MAIL_TO_INFO);
-							if (! $rv) {
+							if (! $rv) {//TODO  SAW this should not fail silently
 								error_log("mail send failed: " . $ugr_eMail);
 							}
 							if($groupID){
-									//add new user to specified group
-									changeRole($groupID, $recID, "member", null, false);
+								//add new user to specified group
+								changeRole($groupID, $recID, "member", null, false);
 							}
 
 
@@ -378,7 +378,7 @@ overviews and step-by-step instructions for using Heurist.
 			$query = "delete from sysUsrGrpLinks where ugl_UserID=$recID";
 			$rows = execSQL($db, $query, null, true);
 			if (is_string($rows) ) {
-					$ret['error'] = "db error deleting relations for User $recID from sysUsrGrpLinks - ".$rows;
+				$ret['error'] = "db error deleting relations for User $recID from sysUsrGrpLinks - ".$rows;
 			}else{
 
 				$query = "delete from sysUGrps where ugr_ID=$recID";
@@ -424,16 +424,16 @@ overviews and step-by-step instructions for using Heurist.
 			$query = "select ugl_UserID from sysUsrGrpLinks where ugl_GroupID=$recID limit 1";
 			$rows = execSQL($db, $query, null, true);
 			if (!is_numeric($rows)) {
-				$ret['error'] = "error finding Users for Group $recID in deleteGroup - ".$rows;
+			$ret['error'] = "error finding Users for Group $recID in deleteGroup - ".$rows;
 			}else if ($rows>0){
-				$ret['error'] = "Error. Deleting Group ($recID) with existing Users not allowed";
+			$ret['error'] = "Error. Deleting Group ($recID) with existing Users not allowed";
 			}else{
 			}*/
 
 			$query = "delete from sysUsrGrpLinks where ugl_GroupID=$recID";
 			$rows = execSQL($db, $query, null, true);
 			if ($rows==0 || is_string($rows) ) {
-					$ret['error'] = "db error deleting relations for Group $recID from sysUsrGrpLinks - ".$rows;
+				$ret['error'] = "db error deleting relations for Group $recID from sysUsrGrpLinks - ".$rows;
 			}else{
 				$query = "delete from sysUGrps where ugr_ID=$recID";
 				$rows = execSQL($db, $query, null, true);
@@ -456,36 +456,36 @@ overviews and step-by-step instructions for using Heurist.
 	* @param mixed $recID - user ID
 	*/
 	function checkLastAdmin($recID, $groupID){
-			global $db;
-			$query =
-"select g1.ugl_GroupID,
-(select count(*) from sysUsrGrpLinks as g2 where g1.ugl_GroupID=g2.ugl_GroupID and g2.ugl_Role='admin') as adm
-from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
+		global $db;
+		$query =
+		"select g1.ugl_GroupID,
+		(select count(*) from sysUsrGrpLinks as g2 where g1.ugl_GroupID=g2.ugl_GroupID and g2.ugl_Role='admin') as adm
+		from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 
-//, (select count(*) from sysUsrGrpLinks as g3 where g1.ugl_GroupID=g3.ugl_GroupID and g3.ugl_Role='member') as mem
+		//, (select count(*) from sysUsrGrpLinks as g3 where g1.ugl_GroupID=g3.ugl_GroupID and g3.ugl_Role='member') as mem
 
-			if($groupID){
-				$query = $query." and g1.ugl_GroupID=$groupID";
+		if($groupID){
+			$query = $query." and g1.ugl_GroupID=$groupID";
+		}
+
+		/*****DEBUG****///error_log("CHECK LAST ADMIN >>>>>>>>>>>>>>>>>>>>	".$query);
+
+		$rows = execSQL($db, $query, null, false);
+
+		if ( (is_numeric($rows) && $rows==0) || is_string($rows) ) {
+			$ret = "DB error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$rows;
+			return $ret;
+		}
+
+		while ($row = mysqli_fetch_row($rows)) {
+			/*****DEBUG****///error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
+
+			if($row[1]<2){ // && $row[2]>0){
+				return "Error change role/deleteing for User #$recID since it is the only admin for Group #$row[0]";
 			}
+		}
 
-//DEBUG error_log("CHECK LAST ADMIN >>>>>>>>>>>>>>>>>>>>	".$query);
-
-			$rows = execSQL($db, $query, null, false);
-
-			if ( (is_numeric($rows) && $rows==0) || is_string($rows) ) {
-				$ret = "DB error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$rows;
-				return $ret;
-			}
-
-			while ($row = mysqli_fetch_row($rows)) {
-//DEBUG error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
-
-					if($row[1]<2){ // && $row[2]>0){
-						return "Error change role/deleteing for User #$recID since it is the only admin for Group #$row[0]";
-					}
-			}
-
-			return null;
+		return null;
 	}
 
 	/**
@@ -500,7 +500,7 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 
 		$ret = array();
 
-//error_log(">>>>> grpId=".$grpID.", recIds=".$recIds.", newrole=".$newRole.", oldrole=".$oldRole);
+		/*****DEBUG****///error_log(">>>>> grpId=".$grpID.", recIds=".$recIds.", newrole=".$newRole.", oldrole=".$oldRole);
 
 
 		if($needCheck){
@@ -534,7 +534,7 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 				$error = checkLastAdmin($userID, $grpID);
 				if($error==null){
 
-//DEBUG error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
+					/*****DEBUG****///error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
 					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID and ugl_GroupID=$grpID";
 					$rows = execSQL($db, $query, null, true);
 					if ($rows==0 || is_string($rows) ) {
@@ -544,7 +544,7 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 						array_push($ret['results'], $userID);
 					}
 				}else{
-						array_push($ret['errors'], $error);
+					array_push($ret['errors'], $error);
 				}
 			}
 
@@ -565,14 +565,14 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 					}
 				}
 				if($error==null){
-						$query = "UPDATE sysUsrGrpLinks set ugl_Role='$newRole' where ugl_GroupID=$grpID and ugl_UserID=$userID";
-						$rows = execSQL($db, $query, null, true);
+					$query = "UPDATE sysUsrGrpLinks set ugl_Role='$newRole' where ugl_GroupID=$grpID and ugl_UserID=$userID";
+					$rows = execSQL($db, $query, null, true);
 
-						if ($rows==0 || is_string($rows) ) {
-							array_push($ret['errors'], "DB error changing roles in sysUsrGrpLinks for group $grpID, user $userID - ".$rows);
-						} else {
-							array_push($ret['results'], $userID);
-						}
+					if ($rows==0 || is_string($rows) ) {
+						array_push($ret['errors'], "DB error changing roles in sysUsrGrpLinks for group $grpID, user $userID - ".$rows);
+					} else {
+						array_push($ret['results'], $userID);
+					}
 				}
 			}//for
 
@@ -586,24 +586,24 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 
 			foreach ($arr as $userID) {
 
-					$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
+				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
 
-					if($nofirst) {
-						$query	= $query.", ";
-						$resIDs = $resIDs.", ";
-					}
-					$query	= $query."($grpID, $userID, '$newRole')";
-					$resIDs = $resIDs."$userID";
-					$nofirst = true;
+				if($nofirst) {
+					$query	= $query.", ";
+					$resIDs = $resIDs.", ";
+				}
+				$query	= $query."($grpID, $userID, '$newRole')";
+				$resIDs = $resIDs."$userID";
+				$nofirst = true;
 			}
 
-/* DEBUG
+			/* DEBUG
 			if($nofirst){
-error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $newRole");
-				//$nofirst = false;
-				//$ret['result'] = $resIDs;
+/*****DEBUG****///error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $newRole");
+/*			//$nofirst = false;
+			//$ret['result'] = $resIDs;
 			}
-*/
+			*/
 			if($nofirst){
 
 				$query	= $query." ON DUPLICATE KEY UPDATE ugl_Role='$newRole'";
@@ -645,7 +645,7 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 			}else{
 				$result = $mysqli->error;
 				if($result == ""){
-		   			$result = $mysqli->affected_rows;
+					$result = $mysqli->affected_rows;
 				}else{
 					error_log(">>>Error=".$mysqli->error);
 				}
@@ -653,60 +653,7 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 
 		}else{ //prepared query
 
-		   $stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
-		   call_user_func_array(array($stmt, 'bind_param'), refValues($params));
-
-		   $stmt->execute();
-
-		   if($close){
-			$result = $mysqli->error;
-			if($result == ""){
-		   		$result = $mysqli->affected_rows;
-			}else{
-				error_log(">>>Error=".$mysqli->error);
-			}
-		   } else {
-		   		$meta = $stmt->result_metadata();
-
-				while ( $field = $meta->fetch_field() ) {
-					$parameters[] = &$row[$field->name];
-				}
-
-				call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
-
-			   	while ( $stmt->fetch() ) {
-					$x = array();
-					foreach( $row as $key => $val ) {
-							$x[$key] = $val;
-						}
-					$results[] = $x;
-				}
-
-				$result = $results;
-			}
-
-		   	$stmt->close();
-		}
-		   	return  $result;
-
-/*		 OLD WAY
-		$result = "unknown error";
-
-		if($params==null || count($params)<1){
-
-			if($result = $mysqli->query($sql)){
-				if($close){
-					$result = $mysqli->affected_rows;
-				}
-			}else{
-				$result = $mysqli->error;
-			}
-
-		}else{ //prepared query
-
-			$stmt = $mysqli->stmt_init();
 			$stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
-
 			call_user_func_array(array($stmt, 'bind_param'), refValues($params));
 
 			$stmt->execute();
@@ -715,9 +662,10 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 				$result = $mysqli->error;
 				if($result == ""){
 					$result = $mysqli->affected_rows;
+				}else{
+					error_log(">>>Error=".$mysqli->error);
 				}
 			} else {
-
 				$meta = $stmt->result_metadata();
 
 				while ( $field = $meta->fetch_field() ) {
@@ -729,8 +677,8 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 				while ( $stmt->fetch() ) {
 					$x = array();
 					foreach( $row as $key => $val ) {
-							$x[$key] = $val;
-						}
+						$x[$key] = $val;
+					}
 					$results[] = $x;
 				}
 
@@ -739,9 +687,61 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 
 			$stmt->close();
 		}
+		return  $result;
+
+		/*		 OLD WAY
+		$result = "unknown error";
+
+		if($params==null || count($params)<1){
+
+		if($result = $mysqli->query($sql)){
+		if($close){
+		$result = $mysqli->affected_rows;
+		}
+		}else{
+		$result = $mysqli->error;
+		}
+
+		}else{ //prepared query
+
+		$stmt = $mysqli->stmt_init();
+		$stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
+
+		call_user_func_array(array($stmt, 'bind_param'), refValues($params));
+
+		$stmt->execute();
+
+		if($close){
+		$result = $mysqli->error;
+		if($result == ""){
+		$result = $mysqli->affected_rows;
+		}
+		} else {
+
+		$meta = $stmt->result_metadata();
+
+		while ( $field = $meta->fetch_field() ) {
+		$parameters[] = &$row[$field->name];
+		}
+
+		call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
+
+		while ( $stmt->fetch() ) {
+		$x = array();
+		foreach( $row as $key => $val ) {
+		$x[$key] = $val;
+		}
+		$results[] = $x;
+		}
+
+		$result = $results;
+		}
+
+		$stmt->close();
+		}
 
 		return  $result;
-*/
+		*/
 	}
 
 	function refValues($arr){
@@ -749,9 +749,9 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 		{
 			$refs = array();
 			foreach($arr as $key => $value)
-					$refs[$key] = &$arr[$key];
+				$refs[$key] = &$arr[$key];
 			return $refs;
-        }
+		}
 		return $arr;
 	}
 
@@ -762,8 +762,8 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 	function updateSessionInfo(){
 
 		$query = 'select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
-							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
-							' and '.USER_GROUPS_USER_ID_FIELD.'="'.get_user_id().'"';
+		' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
+		' and '.USER_GROUPS_USER_ID_FIELD.'="'.get_user_id().'"';
 
 		$groups = array();
 
@@ -778,7 +778,7 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
 
-//error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
+		/*****DEBUG****///error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
 
 	}
 ?>

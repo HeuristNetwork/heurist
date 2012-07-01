@@ -93,7 +93,7 @@ function fill_title_mask($mask, $rec_id, $rt)
 
 	if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
 		return $mask;	// nothing to do -- no substitutions
-//error_log("fill mask matches = ".print_r($matches,true));
+/*****DEBUG****///error_log("fill mask matches = ".print_r($matches,true));
 	$replacements = array();
 	for ($i=0; $i < count($matches[1]); ++$i) {
 		/*
@@ -111,7 +111,7 @@ function fill_title_mask($mask, $rec_id, $rt)
 	}
 	$replacements['[['] = '[';
 	$replacements[']]'] = ']';
-//error_log("fill mask replacements = ".print_r($replacements,true));
+/*****DEBUG****///error_log("fill mask replacements = ".print_r($replacements,true));
 
 	$title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
 	if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {	// not a URI
@@ -148,7 +148,7 @@ function _title_mask__check_field_name($field_name, $rt)
 		return "Record type is not defined";
 	}
 	$rct = _title_mask__get_rec_types(null);//get all rec types.  AO: it stores in static array - will it be updated if strcture is changed ???
-//error_log("fieldname = $field_name and rt = $rt   ".array_key_exists($rt, $rct));
+/*****DEBUG****///error_log("fieldname = $field_name and rt = $rt   ".array_key_exists($rt, $rct));
 	if (! array_key_exists($rt, $rct) ){
 		return "Title mask cannot be tested with the existing record type. Record type $rt not found";
 	}
@@ -217,7 +217,7 @@ function _title_mask__check_field_name($field_name, $rt)
 		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_field_name = $matches[2];
 	}
-//error_log("inner rec type = ".print_r($inner_rec_type,true));
+/*****DEBUG****///error_log("inner rec type = ".print_r($inner_rec_type,true));
 
 	if (!$inner_rec_type && $inner_field_name) {
 		// an unconstrained pointer: we can't say what fields might be available.
@@ -271,8 +271,8 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 {
 	global $surnameDT, $authRT, $enum_params;
 
-//error_log("[$field_name]  rec [$rec_id]  rty [$rt]");
-//error_log(" rt info ".print_r($rt,true));
+/*****DEBUG****///error_log("[$field_name]  rec [$rec_id]  rty [$rt]");
+/*****DEBUG****///error_log(" rt info ".print_r($rt,true));
 
 	if (!$rec_id) { // return blank can't lookup values without a recID
 		return '';
@@ -308,9 +308,9 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 			if($rdts) $rdt_id = $rdts['dty_ID'];
 			$enum_param_name = $matches[2];
 		}
-//error_log("field mask matches = ".print_r($matches,true));
+/*****DEBUG****///error_log("field mask matches = ".print_r($matches,true));
 		if($rdt_id>0 && in_array(strtolower($enum_param_name), $enum_params)){ //this is enum
-//error_log("expand enumeration".print_r($enum_param_name,true));
+/*****DEBUG****///error_log("expand enumeration".print_r($enum_param_name,true));
 			$val = _title_mask__get_enum_value($rec_id, $rdt_id, strtolower($enum_param_name));
 			if($val!=''){
 				return $val;
@@ -333,13 +333,13 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 						break;
 					}
 				}
-//error_log("rdt ID ".print_r($rdt_id,true));
+/*****DEBUG****///error_log("rdt ID ".print_r($rdt_id,true));
 				if (!@$rdt_id && strtolower($field_name) !== "rectitle") {
-//error_log(" rdr rt $field_name info ".print_r(@$rdr[$rtID][strtolower($field_name)],true));
+/*****DEBUG****///error_log(" rdr rt $field_name info ".print_r(@$rdr[$rtID][strtolower($field_name)],true));
 					return "'$field_name' field not defined for rectype ".join(",",$rt);
 				}
 			}
-//error_log(" rdr rt info ".print_r($rdr[$rt][strtolower($field_name)],true));
+/*****DEBUG****///error_log(" rdr rt info ".print_r($rdr[$rt][strtolower($field_name)],true));
 			if (!@$rdt_id && strtolower($field_name) === "title") {
 				return '"title" field not defined for rectype '.$rt;
 			}else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
@@ -355,7 +355,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 				return $title;
 			}
 		}
-//error_log("$rt field $field_name 's dty ID ".print_r($rdt_id,true));
+/*****DEBUG****///error_log("$rt field $field_name 's dty ID ".print_r($rdt_id,true));
 
 		return _title_mask__get_rec_detail($rec_id, $rdt_id);
 	}
@@ -597,7 +597,7 @@ function _title_mask__get_rec_types($rt) {
 		$cond = ($rt) ?'rty_ID='.$rt :'1';
 
 		$rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', $cond);
-//error_log("rt ".print_r($rct,true));
+/*****DEBUG****///error_log("rt ".print_r($rct,true));
 	}
 	return $rct;
 }
@@ -630,7 +630,7 @@ function _title_mask__get_rec_detail_requirements() {
 				$rdr[$row['rst_RecTypeID']][$row['rst_DisplayName']] = $row;
 			}
 		}
-//error_log("rf ".print_r($rdr,true));
+/*****DEBUG****///error_log("rf ".print_r($rdr,true));
 	}
 	return $rdr;
 }
@@ -649,7 +649,7 @@ function _title_mask__get_rec_detail_types() {
 			$rdt[$row['dty_ID']] = $row;
 			$rdt[strtolower($row['dty_Name'])] = $row;
 		}
-//error_log("dt ".print_r($rdt,true));
+/*****DEBUG****///error_log("dt ".print_r($rdt,true));
 	}
 
 	return $rdt;
@@ -691,7 +691,7 @@ function _title_mask__get_field_number($field_name, $rt) {
 	if (is_array($rt)){
 		return "$field_name was tested with Array of rectypes - bad parameter";
 	}
-//error_log("fieldname = $field_name and rt = $rt");
+/*****DEBUG****///error_log("fieldname = $field_name and rt = $rt");
 	if(strtolower($field_name) == 'rectitle') {
 		return $field_name;
 	}
@@ -721,8 +721,8 @@ function _title_mask__get_field_number($field_name, $rt) {
 				!array_key_exists($rdt_id,$rdt) ||
 				!array_key_exists($rdt_id,$rdr[$rt]) ||
 				$rdt[$rdt_id]['dty_Type'] !== 'resource') {
-//error_log("dt = ".print_r($rdt[$rdt_id],true));
-//error_log("fld = ".print_r($rdr[$rt][$rdt_id],true));
+/*****DEBUG****///error_log("dt = ".print_r($rdt[$rdt_id],true));
+/*****DEBUG****///error_log("fld = ".print_r($rdr[$rt][$rdt_id],true));
 			return "invalid field $matches[1] of type ".$rdt[$rdt_id]['dty_Type'];
 		}
 		$inner_field_name = $matches[2];
@@ -768,7 +768,7 @@ function array_str_replace($search, $replace, $subject) {
 		$match_idx = -1;
 		$match_offset = -1;
 		for ($i=0; $i < count($search); ++$i) {
-//error_log(">>>>".$subject." IN ".$search[$i]);
+/*****DEBUG****///error_log(">>>>".$subject." IN ".$search[$i]);
 			if($search[$i]==null || $search[$i]=='') continue;
 			$offset = strpos($subject, $search[$i]);
 			if ($offset === FALSE) continue;

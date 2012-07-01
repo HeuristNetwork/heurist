@@ -85,7 +85,7 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 
 	$matches = array();
 	$res = mysql_query("select rec_ID as id, rec_Title as title, rec_Hash as hhash from $tables where $predicates order by rec_Title limit 100");
-	error_log("approx-matching: select rec_ID as id, rec_Title as title, rec_Hash as hhash from $tables where $predicates order by rec_Title limit 100");
+/*****DEBUG****///error_log("approx-matching: select rec_ID as id, rec_Title as title, rec_Hash as hhash from $tables where $predicates order by rec_Title limit 100");
 	while ($bib = mysql_fetch_assoc($res)) {
 		array_push($matches, $bib);
 	}

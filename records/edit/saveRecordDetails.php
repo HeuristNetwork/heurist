@@ -523,7 +523,7 @@
 			}
 		}
 		function inputOK($postVal) {
-			//error_log("FILE:>>>>>>>>>>>".$postVal);
+			/*****DEBUG****///error_log("FILE:>>>>>>>>>>>".$postVal);
 			return (is_numeric($postVal) || preg_match("/\\S/", $postVal));
 		}
 	}

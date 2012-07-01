@@ -23,7 +23,7 @@ if (! is_logged_in()) {
 	return;
 }
 
-//DEBUG error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
+/*****DEBUG****///error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
 
 //require_once('libs.inc.php');
 //$dir = 'c:/xampp/htdocs/h3-ao/viewers/smarty/templates/';  //$smarty->template_dir
@@ -35,7 +35,7 @@ if($mode){ //opeartion with template files
 
 	//get name of tempalte file
 	$template_file = (array_key_exists('template',$_REQUEST)?  urldecode($_REQUEST['template'])  :null);
-//error_log(">>>>>>>>>>".$template_file);
+/*****DEBUG****///error_log(">>>>>>>>>>".$template_file);
 	try{
 
 	switch ($mode) {
@@ -113,7 +113,7 @@ function getList(){
 		if(array_key_exists('extension', $path_parts))
 		{
 			$ext = strtolower($path_parts['extension']);
-//error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
+/*****DEBUG****///error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
 
 			$ind = strpos($filename,"_");
 	        $isnot_temp = (!(is_numeric($ind) && $ind==0));
@@ -128,7 +128,7 @@ function getList(){
 	}
 	header("Content-type: text/javascript");
 	//header('Content-type: text/html; charset=utf-8');
-//DEBUG error_log(">>>>>>>>>>>>>".print_r($results, true));
+/*****DEBUG****/// error_log(">>>>>>>>>>>>>".print_r($results, true));
 
 	print json_format( $results, true );
 }

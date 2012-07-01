@@ -109,7 +109,7 @@
 		mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
 			'", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
-		//error_log(">>>>".$tmp_name."  >>>> ".$filename);
+		/*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
 		$pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);
 		if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename) )
 		{
@@ -201,7 +201,7 @@
 				'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
 
 
-			//error_log(">>>>>".print_r($toins,true));
+			/*****DEBUG****///error_log(">>>>>".print_r($toins,true));
 
 			$res = mysql__insert('recUploadedFiles', $toins);
 
@@ -404,8 +404,8 @@
 		$filedata = json_decode($filejson, true);
 
 		//DEBUG
-		//error_log("1.>>>>>".$filedata);
-		//error_log("2.>>>>>".print_r($filedata, true));
+		/*****DEBUG****///error_log("1.>>>>>".$filedata);
+		/*****DEBUG****///error_log("2.>>>>>".print_r($filedata, true));
 
 		if(!is_array($filedata)){ //can't parse - assume this is URL - old way
 
@@ -433,7 +433,7 @@
 		if(@$filedata['ext']==null && $filedata['mediaType']=="xml"){
 			$filedata['ext'] = "xml";
 		}
-// error_log("reg remote file data ".print_r($filedata,true));
+//*****DEBUG****/// error_log("reg remote file data ".print_r($filedata,true));
 		$fileparameters = @$filedata['params'] ? $filedata['params'] : "mediatype=".$filedata['mediaType'];
 		if(@$filedata['remoteSource'] && $filedata['remoteSource']!='heurist'){ // && $filedata['remoteSource']!='generic'){
 			$fileparameters	= $fileparameters."|source=".$filedata['remoteSource'];
@@ -709,7 +709,7 @@
 			($imgDT?		" dtl_DetailTypeID = $imgDT desc,"		:"").
 			" dtl_DetailTypeID".	// no preference on associated or other files just select the first
 			" limit 1";
-			//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
+			/*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
 			$res = mysql_query($squery);
 
 			if ($res && mysql_num_rows($res) == 1) {
@@ -735,7 +735,7 @@
 			" dtl_DetailTypeID".	// anythingelse is last
 			" limit 1";
 
-			//error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
+			/*****DEBUG****///error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
 			$res = mysql_query($squery);
 
 			if ($res && mysql_num_rows($res) == 1) {

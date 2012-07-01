@@ -94,7 +94,7 @@ if (! is_logged_in()) {
 			$query = null;
 		}
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {

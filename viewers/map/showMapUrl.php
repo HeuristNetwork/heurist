@@ -17,7 +17,7 @@
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
 
 	$mapobjects = getMapObjects($_REQUEST);
-	
+
 	if($mapobjects['cntWithGeo']>0){
 
 		if(@$_REQUEST['width'] && @$_REQUEST['height']){
@@ -28,7 +28,7 @@
 
 		$url = "http://maps.google.com/maps/api/staticmap";
 		$url = $url."?size=".$size."&sensor=false";
-		
+
 		if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
 			$url = $url."&zoom=".$_REQUEST['zoom'];
 		}
@@ -52,7 +52,7 @@
 		}else{
 			$style_poly = "weight:3|color:red|fillcolor:0x0000ff40";
 		}
-		
+
 		//$url = $url."&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w";
 
 		$markers = "";
@@ -115,7 +115,7 @@
 			$url = $url.$poly_all;
 		}
 
-//error_log(">>>>>".$url);
+/*****DEBUG****///error_log(">>>>>".$url);
 		header('Location: '.$url);
 		//return $url;
 	}else{

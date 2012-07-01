@@ -64,10 +64,10 @@ $isPopup = false;
 if ($refer == "formEditRecordPopup") {
 	$isPopup = true;
 }
-//error_log(print_r($_SERVER,true));
+/*****DEBUG****///error_log(print_r($_SERVER,true));
 mysql_connection_db_select(DATABASE);
 list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
-//error_log("rec_id ".print_r($rec_id,true));
+/*****DEBUG****///error_log("rec_id ".print_r($rec_id,true));
 
 if (! $rec_id) {
 	// record does not exist
@@ -78,7 +78,7 @@ if (! $rec_id) {
 	$record["replacedBy"] = $rec_id;
 } else {
 	$record = getBaseProperties($rec_id, $bkm_ID);
-//error_log("base Properties".print_r($record,true));
+/*****DEBUG****///error_log("base Properties".print_r($record,true));
 	if (@$record["workgroupID"] && $record["workgroupID"] != get_user_id() &&
 			$record[@"visibility"] == "hidden"  &&
 			! $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {

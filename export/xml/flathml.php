@@ -65,7 +65,7 @@ if (@$argv) {
 	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
 
 }
-//error_log("flathml session".print_r(@$_SESSION,true));
+/*****DEBUG****///error_log("flathml session".print_r(@$_SESSION,true));
 /*header("Content-type: text/javascript");
 */header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -108,7 +108,7 @@ function makeTag($name, $attributes=null, $textContent=null, $close=true,$encode
 		$tag .= "</$name>";
 	}
 	echo $tag . "\n";
-//	error_log("in makeTag tag = $tag");
+/*****DEBUG****///	error_log("in makeTag tag = $tag");
 }
 
 function openTag($name, $attributes=null) {
@@ -117,7 +117,7 @@ function openTag($name, $attributes=null) {
 
 function closeTag($name) {
 	echo "</$name>\n";
-//	error_log("in closeTag name = $name");
+/*****DEBUG****///	error_log("in closeTag name = $name");
 }
 
 function openCDATA() {
@@ -152,7 +152,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		$RQS[$row['rty_ID']][$rst_DetailTypeID] = @$rdr[0];
 	}
 }
-//error_log(print_r($RQS,true));
+/*****DEBUG****///error_log(print_r($RQS,true));
 // base names, varieties for detail types
 $query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes';
 $res = mysql_query($query);
@@ -212,7 +212,7 @@ $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RECTYPE_FILTERS)) {
 	die(" error decoding json rectype filters string");
 }
-//error_log("rt filters".print_r($RECTYPE_FILTERS,true));
+/*****DEBUG****///error_log("rt filters".print_r($RECTYPE_FILTERS,true));
 
 $filterString = (@$_REQUEST['relfilters'] ? $_REQUEST['relfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
@@ -222,7 +222,7 @@ $RELTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RELTYPE_FILTERS)) {
 	die(" error decoding json relation type filters string");
 }
-//error_log("rel filters".print_r($RELTYPE_FILTERS,true));
+/*****DEBUG****///error_log("rel filters".print_r($RELTYPE_FILTERS,true));
 
 $filterString = (@$_REQUEST['ptrfilters'] ? $_REQUEST['ptrfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
@@ -232,8 +232,8 @@ $PTRTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($PTRTYPE_FILTERS)) {
 	die(" error decoding json pointer type filters string");
 }
-//error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
-//error_log("request depth".print_r($_REQUEST['depth'],true));
+/*****DEBUG****///error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
+/*****DEBUG****///error_log("request depth".print_r($_REQUEST['depth'],true));
 $filterString = (@$_REQUEST['selids'] ? $_REQUEST['selids'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
 	die(" error invalid json rectype filters string");
@@ -315,7 +315,7 @@ if (is_logged_in()){
 
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 global $ACCESSABLE_OWNER_IDS, $PUBONLY;
-//error_log("in findPointers");
+/*****DEBUG****///error_log("in findPointers");
 	//saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
 	// find all detail values for resource type details which exist for any record with an id in $rec_ids
 	// and also is of a type in rtyIDs if rtyIDs is set to non null
@@ -336,13 +336,13 @@ global $ACCESSABLE_OWNER_IDS, $PUBONLY;
 					((is_logged_in() && !$PUBONLY) ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
 									'trg.rec_NonOwnerVisibility = "public")');
 
-//error_log("find d $depth pointer q = $query");
+/*****DEBUG****///error_log("find d $depth pointer q = $query");
 //echo "\n $query\n";
 	$res = mysql_query($query);
-//error_log("mysql error = ".mysql_error($res));
+/*****DEBUG****///error_log("mysql error = ".mysql_error($res));
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result
-//echo "\n".print_r($row);
+/*****DEBUG****///echo "\n".print_r($row);
 		if ( !array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
 			$recSet['relatedSet'][$row['trgRecID']]=array('depth'=>$depth);
 			$nlrIDs[$row['trgRecID']] = 1;	//save it for next level query
@@ -395,7 +395,7 @@ global $ACCESSABLE_OWNER_IDS, $PUBONLY;
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT,$PUBONLY;
 //if (!$REVERSE) return array();
-//error_log("in findReversePointers");
+/*****DEBUG****///error_log("in findReversePointers");
 	$nlrIDs = array(); // new linked record IDs
 	$query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, '.
 					'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID '.
@@ -414,7 +414,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT,$PUBONLY;
 				(is_logged_in() && ! $PUBONLY ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
 								'trg.rec_NonOwnerVisibility = "public")');
 
-//error_log("find  d $depth rev pointer q = $query");
+/*****DEBUG****///error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result
@@ -469,7 +469,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT,$PUBONLY;
 
 function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 	global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $PUBONLY;
-//error_log("in findRelatedRecords");
+/*****DEBUG****///error_log("in findRelatedRecords");
 	$nlrIDs = array();
 	$query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, '.// from detail
 				'IF( f.dtl_Value IN ('. join(',', $qrec_ids) . '),1,0) as srcIsFrom, '.
@@ -494,7 +494,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 					(is_logged_in() && !$PUBONLY ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
 									'trg.rec_NonOwnerVisibility = "public")').
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
-//error_log("find  d $depth related q = $query");
+/*****DEBUG****///error_log("find  d $depth related q = $query");
 //echo $query;
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
@@ -562,7 +562,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 **/
 function buildGraphStructure($rec_ids, &$recSet) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
-//	error_log("max depth = ".print_r($MAX_DEPTH,true));
+/*****DEBUG****///	error_log("max depth = ".print_r($MAX_DEPTH,true));
 	$depth = 0;
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ($rtfilter){
@@ -650,7 +650,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 			return;
 		}
 	}
-//if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
+/*****DEBUG****///if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
 	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable')));
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
@@ -1207,7 +1207,7 @@ ob_implicit_flush(1);
 
 //echo "request = ".print_r($_REQUEST,true)."\n";
 $result = loadSearch($_REQUEST,false,true, $PUBONLY);
-//error_log("$result = ".print_r($result,true)."\n");
+/*****DEBUG****///error_log("$result = ".print_r($result,true)."\n");
 
 openTag('hml',
 			($USEXINCLUDE ? array(
@@ -1221,7 +1221,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-//error_log("selids".print_r($_REQUEST['selids'],true));
+/*****DEBUG****///error_log("selids".print_r($_REQUEST['selids'],true));
 $query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,
 													'sid'=>1,'label'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,
 													'expandColl'=>1,'recID'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,

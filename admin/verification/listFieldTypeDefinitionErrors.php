@@ -94,14 +94,14 @@
 				}
 
 				if (strpos($formattedStringOfTermIDs,"{")!== false) {
-					//error_log( "term tree string = ". $formattedStringOfTermIDs);
+					/*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
 					$temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
 					if (strrpos($temp,":") == strlen($temp)-1) {
 						$temp = substr($temp,0, strlen($temp)-1);
 					}
 					$termIDs = explode(":",$temp);
 				} else {
-					//error_log( "term array string = ". $formattedStringOfTermIDs);
+					/*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
 					$temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
 					$termIDs = explode(",",$temp);
 				}
@@ -154,7 +154,7 @@
 						$dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
 					}
 				}
-				//error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
+				/*****DEBUG****///error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
 				if ($dty['dty_PtrTargetRectypeIDs']){
 					$invalidRectypes = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
 					if (count($invalidRectypes)){

@@ -21,7 +21,7 @@
 
 	define("SAVE_URI", "disabled");
 	if ( preg_match("/(http:\/\/|\/)/",$style)){
-//error_log("style is ".print_r($style,true));
+/*****DEBUG****///error_log("style is ".print_r($style,true));
 		$handle = fopen($style, "rb");
 		$contents = stream_get_contents($handle);
 		fclose($handle);

@@ -83,7 +83,7 @@ function executeSmartyTemplate($params){
 	}
 
 	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
-//error_log(print_r($qresult,true));
+/*****DEBUG****///error_log(print_r($qresult,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
@@ -127,9 +127,8 @@ function executeSmartyTemplate($params){
 
 	if($template_body)
 	{	//execute template from string - modified temoplate in editor
-//DEBUG
-//error_log(">>>".$template_body."<<<");
-//error_log(">>>>>>>".$replevel."<<<<<<");
+/*****DEBUG****///error_log(">>>".$template_body."<<<");
+/*****DEBUG****///error_log(">>>>>>>".$replevel."<<<<<<");
 
 		//error report level: 1 notices, 2 all, 3 debug mode
 		$replevel = (array_key_exists('replevel',$params) ?$params['replevel']:0);
@@ -345,7 +344,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 		$recTypeID = null;
 
 
-//DEBUG error_log("REC=".print_r($rec, true));
+/*****DEBUG****///error_log("REC=".print_r($rec, true));
 		$record["recOrder"] = $order;
 
 		//loop for all record properties
@@ -433,19 +432,18 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
 
 
-/* DEBUG
-	if($dtKey==9){
-error_log("KEY=".$dtKey."   NAME=".$dtNames[$dtKey]);
-error_log("dtValue=".print_r($dtValue, true));
-	}
-*/
+/*****DEBUG****///	if($dtKey==9){
+/*****DEBUG****///error_log("KEY=".$dtKey."   NAME=".$dtNames[$dtKey]);
+/*****DEBUG****///error_log("dtValue=".print_r($dtValue, true));
+/*****DEBUG****///	}
+
 
 	if($dtKey<1 || $dtNames[$dtKey]){
 
 		if($dtKey<1){
 			$dt_label = "Relationship 123";
-//error_log("111>>>>>".print_r($dtValue, true));
-//error_log("222>>>>>".$recTypeID);
+/*****DEBUG****///error_log("111>>>>>".print_r($dtValue, true));
+/*****DEBUG****///error_log("222>>>>>".$recTypeID);
 
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
@@ -528,7 +526,7 @@ error_log("dtValue=".print_r($dtValue, true));
 					//original value keeps the whole 'file' array
 					$dtname2 = $dtname."_originalvalue";
 					$arres = array_merge($arres, array($dtname2=>$value['file']));
-//error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
+/*****DEBUG****///error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
 
 				}
 				if(strlen($res)==0){
@@ -568,7 +566,7 @@ error_log("dtValue=".print_r($dtValue, true));
 				$res = "";
 				$arres = array();
 				foreach ($dtValue as $key => $value){
-//error_log("GEO=>>>>".print_r($value, true));
+/*****DEBUG****///error_log("GEO=>>>>".print_r($value, true));
 
 						//original value keeps whole geo array
 						$dtname2 = $dtname."_originalvalue";
@@ -614,7 +612,7 @@ error_log("dtValue=".print_r($dtValue, true));
 				$res = array();
 				$rectypeID = null;
 				$prevID = null;
-//error_log("dtValue>>>>>".print_r($dtValue,true));
+/*****DEBUG****///error_log("dtValue>>>>>".print_r($dtValue,true));
 				$order = 0;
 
 				foreach ($dtValue as $key => $value){
@@ -635,20 +633,20 @@ error_log("dtValue=".print_r($dtValue, true));
 						}
 
 						if($res0){
-							
+
 							if($rectypeID==null && @$res0['recRecTypeID']){
 								$rectypeID = $res0['recRecTypeID'];
 								/* TEMP DEBUG
 								if(array_key_exists($rectypeID, $rtNames))
 								{
-									$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];		
-									$isunconstrained = ($pointerIDs=="");			
+									$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
+									$isunconstrained = ($pointerIDs=="");
 if($isunconstrained){
 error_log($dt_label.">>>>>>>");
 }
 								}            */
 							}
-							array_push($res, $res0); 
+							array_push($res, $res0);
 						}
 
 					}
@@ -753,7 +751,7 @@ function smarty_function_wrap($params, &$smarty)
 
 	if($params['var']){
 
-//error_log("WRAP>>>>".print_r($params,true));
+/*****DEBUG****///error_log("WRAP>>>>".print_r($params,true));
 
 		if(array_key_exists('dt',$params)){
 			$dt = $params['dt'];
@@ -812,7 +810,7 @@ function smarty_function_wrap($params, &$smarty)
 
 
 //!!!!!
-//error_log("WARP VALUE>>>>".print_r($value,true));
+/*****DEBUG****///error_log("WARP VALUE>>>>".print_r($value,true));
 
 			if($mode=="thumbnail"){
 

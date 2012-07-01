@@ -61,7 +61,7 @@ array_push($ACCESSABLE_OWNER_IDS,get_user_id());
 array_push($ACCESSABLE_OWNER_IDS,0);	// 0 = belong to everyone
 
 $rec_owner_id = mysql__select_array("Records","rec_OwnerUGrpID","rec_ID=$recID");
-//error_log(" rec owner = $rec_owner_id[0]  ".count($rec_owner_id)." vis = ".$row['rec_NonOwnerVisibility']." ".print_r($ACCESSABLE_OWNER_IDS,true));
+/*****DEBUG****///error_log(" rec owner = $rec_owner_id[0]  ".count($rec_owner_id)." vis = ".$row['rec_NonOwnerVisibility']." ".print_r($ACCESSABLE_OWNER_IDS,true));
 
 if ( $row['rec_NonOwnerVisibility'] == 'hidden' && (count($rec_owner_id) < 1 || !in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS))){
 	returnXMLErrorMsgPage(" no access to record id $recID ");

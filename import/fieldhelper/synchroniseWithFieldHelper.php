@@ -30,26 +30,26 @@
 	}
 
 
-$titleDT = (defined('DT_NAME')?DT_NAME:0);
-$geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
-$fileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
-$startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
-$enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
-$descriptionDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
+	$titleDT = (defined('DT_NAME')?DT_NAME:0);
+	$geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
+	$fileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
+	$startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
+	$enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
+	$descriptionDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
 
-$fieldhelper_to_heurist_map = array(
-	"heurist_id" => "recordId",
-	"Name0" => $titleDT,
-	"Annotation" => $descriptionDT,
-	"DateTimeOriginal" => $startdateDT,
-	"filename" => "file",
-	"latitude" => "lat",
-	"longitude" => "lon"
-);
+	$fieldhelper_to_heurist_map = array(
+		"heurist_id" => "recordId",
+		"Name0" => $titleDT,
+		"Annotation" => $descriptionDT,
+		"DateTimeOriginal" => $startdateDT,
+		"filename" => "file",
+		"latitude" => "lat",
+		"longitude" => "lon"
+	);
 
-$rep_counter = null;
-$rep_issues = null;
-$currfile = null;
+	$rep_counter = null;
+	$rep_issues = null;
+	$currfile = null;
 
 ?>
 <html>
@@ -122,17 +122,17 @@ $currfile = null;
 		/*
 		if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 
-			$mediaFolders = $_REQUEST['media'];
+		$mediaFolders = $_REQUEST['media'];
 
-			print "<form name='mappings' action='synchroniseWithFieldHelper.php' method='post'>";
-			print "<input name='mode' value='3' type='hidden'>"; // calls the transfer function
-			print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-			print "<input name='media' value='$mediaFolders' type='hidden'>";
+		print "<form name='mappings' action='synchroniseWithFieldHelper.php' method='post'>";
+		print "<input name='mode' value='3' type='hidden'>"; // calls the transfer function
+		print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
+		print "<input name='media' value='$mediaFolders' type='hidden'>";
 
-			print "Ready to process media folders: <b>$mediaFolders</b><p>";
+		print "Ready to process media folders: <b>$mediaFolders</b><p>";
 
-			print "<input type='submit' value='Import data'><p><hr>\n";
-			exit;
+		print "<input type='submit' value='Import data'><p><hr>\n";
+		exit;
 		}
 
 		*/
@@ -153,311 +153,311 @@ $currfile = null;
 			print "<div>Syncronization completed</div>";
 			print "<div style=\"color:green\">Total records created: $rep_counter </div>";
 			/*if($rep_issues!=""){
-			    print "<div>Problems: $rep_issues </div>";
+			print "<div>Problems: $rep_issues </div>";
 			}*/
 		}
 
-    // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
+		// ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
 
-    function harvest($dirs) {
+		function harvest($dirs) {
 
-    	global $rep_counter, $rep_issues;
+			global $rep_counter, $rep_issues;
 
-		foreach ($dirs as $dir){
-			if(file_exists($dir) && is_dir($dir))
-			{
-				$files = scandir($dir);
-				if($files && count($files)>0)
+			foreach ($dirs as $dir){
+				if(file_exists($dir) && is_dir($dir))
 				{
-					$subdirs = array();
+					$files = scandir($dir);
+					if($files && count($files)>0)
+					{
+						$subdirs = array();
 
-					$isfirst = true;
+						$isfirst = true;
 
-					foreach ($files as $filename){
+						foreach ($files as $filename){
 
-//error_log("1>>>>".is_dir($filename)."  ".$filename);
+							/*****DEBUG****///error_log("1>>>>".is_dir($filename)."  ".$filename);
 
-						if(!($filename=="." || $filename=="..")){
-							if(is_dir($dir.$filename)){
-								array_push($subdirs, $dir.$filename."/");
-							}else if($isfirst){ //if($filename == "fieldhelper.xml"){
-								$isfirst = false;
-								$rep_counter = $rep_counter + harvest_in_dir($dir);
+							if(!($filename=="." || $filename=="..")){
+								if(is_dir($dir.$filename)){
+									array_push($subdirs, $dir.$filename."/");
+								}else if($isfirst){ //if($filename == "fieldhelper.xml"){
+									$isfirst = false;
+									$rep_counter = $rep_counter + harvest_in_dir($dir);
+								}
 							}
 						}
-					}
 
-					if(count($subdirs)>0){
-						harvest($subdirs);
-						flush();
-					}
-				}
-			}else{
-				print "<div style=\"color:red\">Folder is not found: $dir</div>";
-				//$rep_issues = $rep_issues."<br/>Directory $dir not found.";
-			}
-	    }
-    }
-
-    /**
-    * callback from saveRecord
-    *
-    * @param mixed $message
-    */
-    function jsonError($message) {
-		global $rep_issues, $currfile;
-
-	//mysql_query("rollback");
-error_log("ERROR :".$message);
-
-		$rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
-
-		//print "{\"error\":\"" . addslashes($message) . "\"}";
-		//exit(0);
-    }
-
-    /**
-     *
-     * @global type $rep_counter
-     * @global string $rep_issues
-     * @global array $fieldhelper_to_heurist_map
-     * @param type $dir
-     */
-    function harvest_in_dir($dir) {
-
-	    global $rep_issues, $fieldhelper_to_heurist_map,
-		    $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
-
-		$rep_processed = 0;
-		$rep_processed_dir = 0;
-	    $rep_ignored = 0;
-		$f_items = null; //reference to items element
-
-		print "<div><b>$dir</b></div>";
-
-		if(!is_writable($dir)){
-   			//$rep_issues = "Folder ".$dir." is not writable. Check permissions";
-			print "<div style=\"color:red\">Folder is not writable. Check permissions</div>";
-   			return 0;
-		}
-
-	    $manifest_file = $dir."fieldhelper.xml";
-
-		$all_files = scandir($dir);
-
-//error_log(">>>>>>in dir: ".$manifest_file);
-		if(file_exists($manifest_file)){
-
-	    	//read fieldhelpe.xml
-	    	if(is_readable($manifest_file)){
-
-    			//check write permission
-    			if(!is_writable($manifest_file)){
-					print "<div style=\"color:red\">Manifest is not writable. Check permissions</div>";
-	    			//$rep_issues = $rep_issues."<br/> Manifest is not writable in ".$dir;
-	    			return 0;
-				}
-			}else{
-				print "<div style=\"color:red\">Manifest is not readable. Check permissions</div>";
-	    		//$rep_issues = $rep_issues."<br> manifest is not readable in ".$dir;
-	    		return 0;
-			}
-
-		$fh_data = simplexml_load_file($manifest_file);
-
-		if($fh_data==null || is_string($fh_data)){
-			print "<div style=\"color:red\">Manifest is corrupted</div>";
-		    //$rep_issues = "Manifest file is corrupted";
-		    return 0;
-		}
-
-		//MAIN 	LOOP in manifest
-		    $not_found = true;
-
-		foreach ($fh_data->children() as $f_gen){
-			if($f_gen->getName()=="items"){
-
-				$f_items = $f_gen;
-			    $not_found = false;
-
-			    foreach ($f_gen->children() as $f_item){
-
-					$recordId	 = null;
-					$recordType  = RT_MEDIA_RECORD; //media by default
-					$recordURL   = null;
-					$recordNotes = null;
-					$el_heuristid = null;
-					$lat = null;
-					$lon = null;
-					$filename = null;
-					$filename_base = null;
-					$details = array();
-					$file_id = null;
-					$old_md5 = null;
-
-				foreach ($f_item->children() as $el){  //$key=>$value
-
-					$content = "$el";
-					$key = $el->getName();
-					$value = $content;
-					/*foreach ($el as $key=>$value2){
-					$value = $value2;
-					break;
-					}*/
-					if($key == "md5"){
-
-						$old_md5 = $value;
-
-					}else if(array_key_exists($key,
-						$fieldhelper_to_heurist_map)){
-
-						$key = $fieldhelper_to_heurist_map[$key];
-
-						if($key=="file"){
-							$filename = $dir.$value;
-							$filename_base = $value;
-
-						}else if($key=="lat"){
-
-							$lat = floatval($value);
-
-						}else if($key=="lon"){
-
-							$lon = floatval($value);
-
-						}else if($key=="recordId"){
-							$recordId = $value;
-							$el_heuristid = $el;
-						}else if(intval($key)>0) {
-							//add to details
-							$details["t:".$key] = array("1"=>$value);
-						}
-
-					}
-				}//for item keys
-
-
-				if($filename){
-							//exclude from the list of all files in this folder
-							if(in_array($filename_base, $all_files)){
-								$ind = array_search($filename_base,$all_files,true);
-								unset($all_files[$ind]);
-							}
-				}
-
-			    if($recordId==null){ //import only new
-
-					if($filename){
-
-						if(file_exists($filename)){
-
-							$currfile = $filename; //assign to global
-
-						    //add-update the uploaded file
-						    $file_id = register_file($filename, null, false);
-						    if(is_numeric($file_id)){
-								$details["t:".$fileDT] = array("1"=>$file_id);
-						    }else{
-								print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
-								//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
-								$file_id = null;
-							}
-
-						}else{
-							print "<div style=\"color:#ff8844\">warning $filename_base file not found, no record created</div>";
+						if(count($subdirs)>0){
+							harvest($subdirs);
+							flush();
 						}
 					}
-
-					if(!$file_id){
-					    continue; //add with valid file only
-					}
-
-					if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
-					    $details["t:".$geoDT] = array("1"=>"p POINT($lon $lat)");
-					}
-
-					//set title by default
-					if (!array_key_exists("t:".$titleDT, $details)){
-						$details["t:".$titleDT] = "title for ".$filename;
-						print "<div style=\"color:#ff8844\">warning $filename_base no title</div>";
-					}
-
-//error_log(">>>>>>details: ".print_r($details, true));
-
-					//add-update Heurist record
-					$out = saveRecord($recordId, $recordType,
-						$recordURL,
-						$recordNotes,
-						null, //???get_group_ids(), //group
-						null, //viewable
-						null, //bookmark
-						null, //pnotes
-						null, //rating
-						null, //tags
-						null, //wgtags
-						$details,
-						null, //-notify
-						null, //+notify
-						null, //-comment
-						null, //comment
-						null //+comment
-						);
-
-//error_log(">>>>>>".print_r($out, true));
-
-
-					if (@$out['error']) {
-						print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";
-					}else{
-
-						//update xml
-						if($recordId==null){
-
-							$new_md5 = md5_file($filename);
-							if($old_md5!=$new_md5){
-								print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
-							}
-							$f_item->addChild("heurist_id", $out["bibID"]);
-							$f_item->addChild("md5", $new_md5);
-						}else{
-							$el_heuristid["heurist_id"] = $out["bibID"];
-						}
-
-						if (@$out['warning']) {
-								print "<div style=\"color:#ff8844\">$filename_base Warning: ".implode("; ",$out["warning"])."</div>";
-						}
-
-						$rep_processed++;
-					}
-
 				}else{
-					$rep_ignored++;
-				}
-
-				}//for items
-			}//if has items
-			}//for all children in manifest
-
-
-			if($not_found){
-				print "<div style=\"color:red\">Manifest is either corrupted or empty</div>";
-				//$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
-			}else{
-				if($rep_processed>0){
-					print "<div>$rep_processed records created</div>";
-				}
-				if($rep_ignored>0){
-					print "<div>$rep_ignored entries in manifest ignored</div>";
-			    	//$rep_issues=$rep_issues."<br> $rep_ignored entries in manifest are ignored for ".$dir;
+					print "<div style=\"color:red\">Folder is not found: $dir</div>";
+					//$rep_issues = $rep_issues."<br/>Directory $dir not found.";
 				}
 			}
+		}
+
+		/**
+		* callback from saveRecord
+		*
+		* @param mixed $message
+		*/
+		function jsonError($message) {
+			global $rep_issues, $currfile;
+
+			//mysql_query("rollback");
+			error_log("ERROR :".$message);
+
+			$rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
+
+			//print "{\"error\":\"" . addslashes($message) . "\"}";
+			//exit(0);
+		}
+
+		/**
+		*
+		* @global type $rep_counter
+		* @global string $rep_issues
+		* @global array $fieldhelper_to_heurist_map
+		* @param type $dir
+		*/
+		function harvest_in_dir($dir) {
+
+			global $rep_issues, $fieldhelper_to_heurist_map,
+			$geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
+
+			$rep_processed = 0;
+			$rep_processed_dir = 0;
+			$rep_ignored = 0;
+			$f_items = null; //reference to items element
+
+			print "<div><b>$dir</b></div>";
+
+			if(!is_writable($dir)){
+				//$rep_issues = "Folder ".$dir." is not writable. Check permissions";
+				print "<div style=\"color:red\">Folder is not writable. Check permissions</div>";
+				return 0;
+			}
+
+			$manifest_file = $dir."fieldhelper.xml";
+
+			$all_files = scandir($dir);
+
+			/*****DEBUG****///error_log(">>>>>>in dir: ".$manifest_file);
+			if(file_exists($manifest_file)){
+
+				//read fieldhelpe.xml
+				if(is_readable($manifest_file)){
+
+					//check write permission
+					if(!is_writable($manifest_file)){
+						print "<div style=\"color:red\">Manifest is not writable. Check permissions</div>";
+						//$rep_issues = $rep_issues."<br/> Manifest is not writable in ".$dir;
+						return 0;
+					}
+				}else{
+					print "<div style=\"color:red\">Manifest is not readable. Check permissions</div>";
+					//$rep_issues = $rep_issues."<br> manifest is not readable in ".$dir;
+					return 0;
+				}
+
+				$fh_data = simplexml_load_file($manifest_file);
+
+				if($fh_data==null || is_string($fh_data)){
+					print "<div style=\"color:red\">Manifest is corrupted</div>";
+					//$rep_issues = "Manifest file is corrupted";
+					return 0;
+				}
+
+				//MAIN 	LOOP in manifest
+				$not_found = true;
+
+				foreach ($fh_data->children() as $f_gen){
+					if($f_gen->getName()=="items"){
+
+						$f_items = $f_gen;
+						$not_found = false;
+
+						foreach ($f_gen->children() as $f_item){
+
+							$recordId	 = null;
+							$recordType  = RT_MEDIA_RECORD; //media by default
+							$recordURL   = null;
+							$recordNotes = null;
+							$el_heuristid = null;
+							$lat = null;
+							$lon = null;
+							$filename = null;
+							$filename_base = null;
+							$details = array();
+							$file_id = null;
+							$old_md5 = null;
+
+							foreach ($f_item->children() as $el){  //$key=>$value
+
+								$content = "$el";
+								$key = $el->getName();
+								$value = $content;
+								/*foreach ($el as $key=>$value2){
+								$value = $value2;
+								break;
+								}*/
+								if($key == "md5"){
+
+									$old_md5 = $value;
+
+								}else if(array_key_exists($key,
+											$fieldhelper_to_heurist_map)){
+
+										$key = $fieldhelper_to_heurist_map[$key];
+
+										if($key=="file"){
+											$filename = $dir.$value;
+											$filename_base = $value;
+
+										}else if($key=="lat"){
+
+											$lat = floatval($value);
+
+										}else if($key=="lon"){
+
+											$lon = floatval($value);
+
+										}else if($key=="recordId"){
+											$recordId = $value;
+											$el_heuristid = $el;
+										}else if(intval($key)>0) {
+											//add to details
+											$details["t:".$key] = array("1"=>$value);
+										}
+
+								}
+							}//for item keys
 
 
-		}//manifest does not exists
-		else{
+							if($filename){
+								//exclude from the list of all files in this folder
+								if(in_array($filename_base, $all_files)){
+									$ind = array_search($filename_base,$all_files,true);
+									unset($all_files[$ind]);
+								}
+							}
 
-			//create empty manifest XML  - TODO!!!!
-$s_manifest = <<<XML
+							if($recordId==null){ //import only new
+
+								if($filename){
+
+									if(file_exists($filename)){
+
+										$currfile = $filename; //assign to global
+
+										//add-update the uploaded file
+										$file_id = register_file($filename, null, false);
+										if(is_numeric($file_id)){
+											$details["t:".$fileDT] = array("1"=>$file_id);
+										}else{
+											print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
+											//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+											$file_id = null;
+										}
+
+									}else{
+										print "<div style=\"color:#ff8844\">warning $filename_base file not found, no record created</div>";
+									}
+								}
+
+								if(!$file_id){
+									continue; //add with valid file only
+								}
+
+								if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
+									$details["t:".$geoDT] = array("1"=>"p POINT($lon $lat)");
+								}
+
+								//set title by default
+								if (!array_key_exists("t:".$titleDT, $details)){
+									$details["t:".$titleDT] = "title for ".$filename;
+									print "<div style=\"color:#ff8844\">warning $filename_base no title</div>";
+								}
+
+								/*****DEBUG****///error_log(">>>>>>details: ".print_r($details, true));
+
+								//add-update Heurist record
+								$out = saveRecord($recordId, $recordType,
+									$recordURL,
+									$recordNotes,
+									null, //???get_group_ids(), //group
+									null, //viewable
+									null, //bookmark
+									null, //pnotes
+									null, //rating
+									null, //tags
+									null, //wgtags
+									$details,
+									null, //-notify
+									null, //+notify
+									null, //-comment
+									null, //comment
+									null //+comment
+								);
+
+								/*****DEBUG****///error_log(">>>>>>".print_r($out, true));
+
+
+								if (@$out['error']) {
+									print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";
+								}else{
+
+									//update xml
+									if($recordId==null){
+
+										$new_md5 = md5_file($filename);
+										if($old_md5!=$new_md5){
+											print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
+										}
+										$f_item->addChild("heurist_id", $out["bibID"]);
+										$f_item->addChild("md5", $new_md5);
+									}else{
+										$el_heuristid["heurist_id"] = $out["bibID"];
+									}
+
+									if (@$out['warning']) {
+										print "<div style=\"color:#ff8844\">$filename_base Warning: ".implode("; ",$out["warning"])."</div>";
+									}
+
+									$rep_processed++;
+								}
+
+							}else{
+								$rep_ignored++;
+							}
+
+						}//for items
+					}//if has items
+				}//for all children in manifest
+
+
+				if($not_found){
+					print "<div style=\"color:red\">Manifest is either corrupted or empty</div>";
+					//$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
+				}else{
+					if($rep_processed>0){
+						print "<div>$rep_processed records created</div>";
+					}
+					if($rep_ignored>0){
+						print "<div>$rep_ignored entries in manifest ignored</div>";
+						//$rep_issues=$rep_issues."<br> $rep_ignored entries in manifest are ignored for ".$dir;
+					}
+				}
+
+
+			}//manifest does not exists
+			else{
+
+				//create empty manifest XML  - TODO!!!!
+				$s_manifest = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <fieldhelper version="1">
   <info>
@@ -469,106 +469,106 @@ $s_manifest = <<<XML
 <formatOutput>1</formatOutput></fieldhelper>
 XML;
 
-			$fh_data = simplexml_load_string($s_manifest);
-		}
+				$fh_data = simplexml_load_string($s_manifest);
+			}
 
-		// add new empty items element
-		if($f_items==null){
-			$f_items = $fh_data->addChild("items");
-		}
+			// add new empty items element
+			if($f_items==null){
+				$f_items = $fh_data->addChild("items");
+			}
 
-		$allowed_exts = array("jpg", "jpeg", "png", "gif");
+			$allowed_exts = array("jpg", "jpeg", "png", "gif");
 
-		//for files in folder that are not specified in the directory
-		foreach ($all_files as $filename){
+			//for files in folder that are not specified in the directory
+			foreach ($all_files as $filename){
 				if(!($filename=="." || $filename==".." || is_dir($dir.$filename))){
 
-//error_log("2>>>>".is_dir($dir.$filename)."  ".$filename);
+					/*****DEBUG****///error_log("2>>>>".is_dir($dir.$filename)."  ".$filename);
 
-						$filename_base = $filename;
-						$filename = $dir.$filename;
-						$currfile = $filename;
-						$flleinfo = pathinfo($filename);
+					$filename_base = $filename;
+					$filename = $dir.$filename;
+					$currfile = $filename;
+					$flleinfo = pathinfo($filename);
 
-						//checks for allowed extensions
-						if(in_array(strtolower($flleinfo['extension']),$allowed_exts))
-						{
+					//checks for allowed extensions
+					if(in_array(strtolower($flleinfo['extension']),$allowed_exts))
+					{
 
-							$details = array();
+						$details = array();
 
-						    $file_id = register_file($filename, null, false);
-						    if(is_numeric($file_id)){
-								$details["t:".$fileDT] = array("1"=>$file_id);
-						    }else{
-								print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
-								//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
-								$file_id = null;
-								continue;
-							}
+						$file_id = register_file($filename, null, false);
+						if(is_numeric($file_id)){
+							$details["t:".$fileDT] = array("1"=>$file_id);
+						}else{
+							print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
+							//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+							$file_id = null;
+							continue;
+						}
 
-							$details["t:".$titleDT] = array("1"=>"title for ".$flleinfo['basename']);
-							/* TODO - extract these data from exif
-							$details["t:".$descriptionDT] = array("1"=>$file_id);
-							$details["t:".$startdateDT] = array("1"=>$file_id);
-							$details["t:".$enddateDT] = array("1"=>$file_id);
-							$details["t:".$geoDT] = array("1"=>$file_id);
-							*/
+						$details["t:".$titleDT] = array("1"=>"title for ".$flleinfo['basename']);
+						/* TODO - extract these data from exif
+						$details["t:".$descriptionDT] = array("1"=>$file_id);
+						$details["t:".$startdateDT] = array("1"=>$file_id);
+						$details["t:".$enddateDT] = array("1"=>$file_id);
+						$details["t:".$geoDT] = array("1"=>$file_id);
+						*/
 
-							//add-update Heurist record
-							$out = saveRecord(null, //record ID
-								RT_MEDIA_RECORD, //record type
-								null,  //record URL
-								null,  //Notes
-								null, //???get_group_ids(), //group
-								null, //viewable
-								null, //bookmark
-								null, //pnotes
-								null, //rating
-								null, //tags
-								null, //wgtags
-								$details,
-								null, //-notify
-								null, //+notify
-								null, //-comment
-								null, //comment
-								null //+comment
-								);
+						//add-update Heurist record
+						$out = saveRecord(null, //record ID
+							RT_MEDIA_RECORD, //record type
+							null,  //record URL
+							null,  //Notes
+							null, //???get_group_ids(), //group
+							null, //viewable
+							null, //bookmark
+							null, //pnotes
+							null, //rating
+							null, //tags
+							null, //wgtags
+							$details,
+							null, //-notify
+							null, //+notify
+							null, //-comment
+							null, //comment
+							null //+comment
+						);
 
 
-							$f_item = $f_items->addChild("item");
-							$f_item->addChild("filename", $flleinfo['basename']);
-							$f_item->addChild("nativePath", $filename);
-							$f_item->addChild("folder", $flleinfo['dirname']);
-							$f_item->addChild("extension", $flleinfo['extension']);
-							//$f_item->addChild("DateTime", );
-							//$f_item->addChild("DateTimeOriginal", );
-							$f_item->addChild("filedate", date("Y/m/d H:i:s.", filectime($filename)));
-							$f_item->addChild("typeContent", "image");
-							$f_item->addChild("device", "image");
-							$f_item->addChild("duration", "2000");
-							$f_item->addChild("original_metadata", "chk");
-							$f_item->addChild("Name0", "title for ".$flleinfo['basename']);
-							$f_item->addChild("heurist_id", $out["bibID"]);
-							$f_item->addChild("md5", md5_file($filename));
+						$f_item = $f_items->addChild("item");
+						$f_item->addChild("filename", $flleinfo['basename']);
+						$f_item->addChild("nativePath", $filename);
+						$f_item->addChild("folder", $flleinfo['dirname']);
+						$f_item->addChild("extension", $flleinfo['extension']);
+						//$f_item->addChild("DateTime", );
+						//$f_item->addChild("DateTimeOriginal", );
+						$f_item->addChild("filedate", date("Y/m/d H:i:s.", filectime($filename)));
+						$f_item->addChild("typeContent", "image");
+						$f_item->addChild("device", "image");
+						$f_item->addChild("duration", "2000");
+						$f_item->addChild("original_metadata", "chk");
+						$f_item->addChild("Name0", "title for ".$flleinfo['basename']);
+						$f_item->addChild("heurist_id", $out["bibID"]);
+						$f_item->addChild("md5", md5_file($filename));
 
-							$rep_processed_dir++;
-						}//check ext
+						$rep_processed_dir++;
+					}//check ext
 				}
-		}//for files in folder that are not specified in the directory
+			}//for files in folder that are not specified in the directory
 
 
-		if($rep_processed_dir>0){
+			if($rep_processed_dir>0){
 				print "<div>$rep_processed_dir records created (new entries added to manifest)</div>";
-		}
+			}
 
-		if($rep_processed+$rep_processed_dir>0){
-			//save modified xml (with updated heurist_id tags
-			$fh_data->formatOutput = true;
-			$fh_data->saveXML($manifest_file);
-		}
+			if($rep_processed+$rep_processed_dir>0){
+				//save modified xml (with updated heurist_id tags
+				$fh_data->formatOutput = true;
+				$fh_data->saveXML($manifest_file);
+			}
 
-		return $rep_processed+$rep_processed_dir;
-    }
-?>
+			return $rep_processed+$rep_processed_dir;
+		}
+	?>
 	</body>
 </html>

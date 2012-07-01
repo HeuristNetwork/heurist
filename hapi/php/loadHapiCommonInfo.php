@@ -187,7 +187,7 @@ $rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rt
 		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
 		// rst_TermIDTreeNonSelectableIDs, rst_CalcFunctionID, rst_Status, rst_OrderForThumbnailGeneration,
 		// dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, rst_NonOwnerVisibility] ...]
-//error_log(print_r($rec_types,true));
+/*****DEBUG****///error_log(print_r($rec_types,true));
 $rstC2I = getColumnNameToIndex(getRectypeStructureFieldColNames());
 foreach ($rec_types as $rec_type) {
 	foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {

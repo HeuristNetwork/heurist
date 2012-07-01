@@ -112,7 +112,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 		array_push($out["record"],$savedRecord);
 	}
 }
-//error_log("updating titlemasks ");
+/*****DEBUG****///error_log("updating titlemasks ");
 if (count($retitleRecs) > 0) {
 	foreach ( $retitleRecs as $id  ) {
 		// calculate title, do an update
@@ -127,7 +127,7 @@ if (count($retitleRecs) > 0) {
 		}
 	}
 }
-//error_log("committing changes");
+/*****DEBUG****///error_log("committing changes");
 
 
 print json_format($out);

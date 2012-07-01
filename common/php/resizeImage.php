@@ -66,7 +66,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		echo $file['ulf_Thumbnail'];
 		return;
 	}
-//error_log(">>>>>>>>>".$file['ulf_Parameters']);
+/*****DEBUG****///error_log(">>>>>>>>>".$file['ulf_Parameters']);
 	$fileparams = parseParameters($file['ulf_Parameters']);
 	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
 	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
@@ -97,7 +97,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 			$mimeExt = $matches[1];
 		}
 
-	//DEBUG	error_log("filename = $filename and mime = $mimeExt");
+	/*****DEBUG****///error_log("filename = $filename and mime = $mimeExt");
 
 		switch($mimeExt) {
 		case 'image/jpeg':
@@ -151,7 +151,7 @@ if (!$img) {
 $orig_x = imagesx($img);
 $orig_y = imagesy($img);
 
-//DEBUG error_log(" image orig size x= $orig_x  y=$orig_y");
+/*****DEBUG****///error_log(" image orig size x= $orig_x  y=$orig_y");
 $rx = $x / $orig_x;
 $ry = $y / $orig_y;
 
@@ -163,7 +163,7 @@ if ($no_enlarge  &&  $scale > 1) {
 
 $new_x = ceil($orig_x * $scale);
 $new_y = ceil($orig_y * $scale);
-//DEBUG error_log(" image new size x= $new_x  y=$new_y");
+/*****DEBUG****///DEBUG error_log(" image new size x= $new_x  y=$new_y");
 
 $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
 imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
