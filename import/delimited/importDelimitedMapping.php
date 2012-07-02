@@ -78,7 +78,7 @@ function getList(){
 	}
 	header("Content-type: text/javascript");
 	//header('Content-type: text/html; charset=utf-8');
-	/*****DEBUG****////*****DEBUG****/error_log(">>>>>>>>>>>>>".print_r($results, true));
+	/*****DEBUG****///error_log(">>>>>>>>>>>>>".print_r($results, true));
 
 	//comma separated list of filenames
 	print implode("|", $results);

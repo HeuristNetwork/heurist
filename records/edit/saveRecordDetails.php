@@ -149,7 +149,7 @@
 
 				$val = @$_POST[$eltName][$eltID];
 				if (! $bdInputHandler->inputOK($val)) {
-/*****DEBUG****/error_log(" in saveRecord details value check error  $eltName,  $eltID, ".print_r($val,true));
+/*****DEBUG****///error_log(" in saveRecord details value check error  $eltName,  $eltID, ".print_r($val,true));
 					continue;	// faulty input ... ignore
 				}
 
@@ -167,8 +167,8 @@
 				unset($bibDetails[$eltName][$eltID]);	// remove data from local reflection of the database
 			}
 		}
-/*****DEBUG****/error_log("save record dtls POST after updates removed ".print_r($_POST,true));
-/*****DEBUG****/error_log("save record dtls after updates removed ".print_r($bibDetails,true));
+/*****DEBUG****///error_log("save record dtls POST after updates removed ".print_r($_POST,true));
+/*****DEBUG****///error_log("save record dtls after updates removed ".print_r($bibDetails,true));
 
 		// Anything left in bibDetails now represents recDetails rows that need to be deleted because they were removed before submission
 

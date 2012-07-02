@@ -291,8 +291,16 @@ console.log("sections: " + sections.toSource());
 				a.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
 				//a.href = "#ref" + ref.recordID;
 				//a.href = top.HEURIST.basePath+"search/search.html?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
-				a.href = "javascript:window.editAnnotation("+ref.recordID+")";
-				//a.target = "_blank";
+				if (ref.linkhref && ref.linkhref != "") {
+					if ( ref.popup && ref.popup != "") {
+						a.href = "javascript:top.HEURIST.util.popupURL(window,\""+top.HEURIST.baseURL+ref.linkhref+"\","+ref.popup+")";
+					}else{
+						a.href = top.HEURIST.basePath+ref.linkhref;
+						a.target = "_blank";
+					}
+				}else{
+					a.href = "javascript:window.editAnnotation("+ref.recordID+")";
+				}
 				//a.title = ref.title;
 				a.name = "ref" + ref.recordID;
 				a.id = "ref" + ref.recordID;
@@ -301,9 +309,7 @@ console.log("sections: " + sections.toSource());
 				a.innerHTML = wordString;
 				if (ref.type && annoTypeSymbology && annoTypeSymbology[ref.type]){
 					a.style.backgroundColor = annoTypeSymbology[ref.type];
-				}/*else if (annoTypeSymbology && annoTypeSymbology["default"]){
-					a.style.backgroundColor = annoTypeSymbology["default"];
-				}*/
+				}
 				newElements.push(a);
 				if (!annoListRefs[ref.recordID]){
 					annoListRefs[ref.recordID] = 1; // mark this annotation is in the list
@@ -312,28 +318,35 @@ console.log("sections: " + sections.toSource());
 				refItem.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
 				refItem.title = ref.title;
 				refItem.href = "#" + a.id;
-					refItem.appendChild(document.createTextNode(ref.title && ref.title != ""?ref.title:"["+(section.refId + 1)+"]"));
+				refItem.appendChild(document.createTextNode(ref.title && ref.title != ""?ref.title:"["+(section.refId + 1)+"]"));
 				list.appendChild(refItem);
-				if (ref.summary !=="") {
+				}
+				if ( ref.rollover !== "" || ref.summary !=="") {
 	//					previews = document.getElementById("content");
-						previews = curDoc;
+					previews = curDoc;
 					preview = previews.appendChild(document.createElement("div"));
-					previewHTML = "<div><b>"+ref.title+"</b></div><div>"+ref.summary+"</div>";
 					preview.title = ref.title;
 					preview.className = "preview";
-						preview.id = "preview-" + a.id;// this is unique since each annotation is a separate record
-					preview.innerHTML=previewHTML;
+					preview.id = "preview-" + a.id;// this is unique since each annotation is a separate record
+					if ( ref.rollover !== ""){
+						preview.innerHTML=ref.rollover;
+					}else{
+						previewHTML = "<div><b>"+ref.title+" :</b></div><div>"+ref.summary+"</div>";
+						preview.innerHTML=previewHTML;
+					}
 					//preview.appendChild(document.createTextNode(ref.summary));
 					previews.appendChild(preview);
 				}
-				}
-				if ($("#preview-"+a.id).get(0)) {// if we have a preview then attach teh appropriate event handlers
+				if ($("#preview-"+a.id).get(0)) {// if we have a preview then attach the appropriate event handlers
 					a.setAttribute("onmouseover", "showPreview(this, event)");
 					a.setAttribute("onmouseout", "hidePreview(this)");
 				}
 
 				for (var r = 0; r < section.refNums.length; ++r) {
 					var ref = refs[section.refNums[r]];
+					if (!ref.superscript){// reference marked as don't show superscript
+						continue;
+					}
 					var a = document.createElement("a");
 					a.className = "annotation superscript";
 //					a.href = "#ref" + (section.refNums[r] + 1);

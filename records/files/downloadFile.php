@@ -147,7 +147,7 @@ if(isset($filename) && file_exists($filename)){ //local resources
 
 }else if ($filedata['URL']!=null){  //Remote resources - just redirect
 
-/*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
+/*****DEBUG****/error_log("REDIRECT>>>>>".$filedata['URL']);
 		/* Redirect browser */
 		//header('HTTP/1.1 201 Created', true, 201);
 		//if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
