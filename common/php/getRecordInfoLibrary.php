@@ -1542,8 +1542,8 @@ function getAllRelatedRecords2($recID, $relnRecID=0) {
 
 	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
 
-	//error_log($query);
-	$res = mysql_query($query);	// primary resources first, then non-primary, then authors
+	/*****DEBUG****///error_log($query);
+/*	$res = mysql_query($query);	// primary resources first, then non-primary, then authors
 
 	if (!mysql_num_rows($res)) {
 		return array();

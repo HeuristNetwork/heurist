@@ -119,8 +119,8 @@ if(isset($filename) && file_exists($filename)){ //local resources
 	       $zz=zip_entry_read($zip_entry, $zip_fs);
 
 	       $zname = HEURIST_UPLOAD_DIR."/".$zname;
-	error_log(">>>>>>>>>>".$zname);
-	       $z=fopen($zname,"w");
+/*****DEBUG****///error_log(">>>>>>>>>>".$zname);
+/*	       $z=fopen($zname,"w");
 	       fwrite($z,$zz);
 	       fclose($z);
 	       zip_entry_close($zip_entry);
@@ -147,7 +147,7 @@ if(isset($filename) && file_exists($filename)){ //local resources
 
 }else if ($filedata['URL']!=null){  //Remote resources - just redirect
 
-error_log("REDIRECT>>>>>".$filedata['URL']);
+/*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
 		/* Redirect browser */
 		//header('HTTP/1.1 201 Created', true, 201);
 		//if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");

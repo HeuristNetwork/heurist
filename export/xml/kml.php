@@ -119,9 +119,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 		$res = mysql_query($squery);
 		$wkt_reccount = mysql_num_rows($res);
 
-//error_log("2.>>>>".$wkt_reccount);
+/*****DEBUG****///error_log("2.>>>>".$wkt_reccount);
 
-//error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
+/*****DEBUG****///error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
 		if($isSearchKml){
 			$res2 = mysql_query($squery2);
 			$kml_reccount = mysql_num_rows($res2);

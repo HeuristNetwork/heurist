@@ -1198,7 +1198,7 @@ function mode_entry_insertion() {
 			// This goes against the definition of an ancestor, so we shouldn't be here.
 			// This means an internal error, but we may Recover Gracefully.
 			// Insert the entry and all containers.
-			// error_log("mode: entry insertion - ancestor with no potential matches");
+			/*****DEBUG****/// error_log("mode: entry insertion - ancestor with no potential matches");
 			$entry->setAncestor(NULL);
 			perm_biblio($entry);
 

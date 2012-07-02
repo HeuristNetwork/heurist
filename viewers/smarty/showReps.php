@@ -642,8 +642,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 									$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
 									$isunconstrained = ($pointerIDs=="");
 if($isunconstrained){
-error_log($dt_label.">>>>>>>");
-}
+/*****DEBUG****///error_log($dt_label.">>>>>>>");
+/*}
 								}            */
 							}
 							array_push($res, $res0);
@@ -873,8 +873,8 @@ function smarty_function_wrap($params, &$smarty)
 	   			$url_type = $acfg[2];
 	   		}
 
-//error_log(">>>>>>>>".$value."  type=".$url_type."  source=".$url_source);
-
+/*****DEBUG****///error_log(">>>>>>>>".$value."  type=".$url_type."  source=".$url_source);
+/*
 			if($url_type == "Image"){
 
 				return "<img src='".$url."' width='300px'/>";

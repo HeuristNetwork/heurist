@@ -421,9 +421,9 @@ function importRectype($importRty) {
 				}
 
 				if(!$error && @$rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] && $rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] != '') {
-//error_log("import rty $importRtyID 7  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]);
+/*****DEBUG****///error_log("import rty $importRtyID 7  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]);
 					// term non selectable list exist so need to translate to new ids
-//error_log("non selectable = ". print_r($rtsFieldDef['rst_TermIDTreeNonSelectableIDs'],true));
+/*****DEBUG****///error_log("non selectable = ". print_r($rtsFieldDef['rst_TermIDTreeNonSelectableIDs'],true));
 					$rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] = translateTermIDs($rtsFieldDef['rst_TermIDTreeNonSelectableIDs'],"non-selectable"," field '".$rtsFieldDef['rst_DisplayName']."' detailTypeID = $dtyID in rectype '".$importRty["rty_Name"]."'");
 				}
 
@@ -478,14 +478,14 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 	makeLogEntry("Term Translation", -1, "Translating $contextString terms $formattedStringOfTermIDs for $forEntryString");
 	$retJSonTermIDs = $formattedStringOfTermIDs;
 	if (strpos($retJSonTermIDs,"{")!== false) {
-//error_log( "term tree string = ". $formattedStringOfTermIDs);
+/*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
 		$temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
 		if (strrpos($temp,":") == strlen($temp)-1) {
 			$temp = substr($temp,0, strlen($temp)-1);
 		}
 		$termIDs = explode(":",$temp);
 	} else {
-//error_log( "term array string = ". $formattedStringOfTermIDs);
+/*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
 		$temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
 		$termIDs = explode(",",$temp);
 	}
@@ -509,7 +509,7 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 
 function importTermID($importTermID) {
 	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
-//error_log( "import termID = ". $importTermID);
+/*****DEBUG****///error_log( "import termID = ". $importTermID);
 	if (!$importTermID){
 		return "";
 	}
@@ -536,7 +536,7 @@ function importTermID($importTermID) {
 		// Term is in target DB so return translated term ID
 		if(mysql_num_rows($resExistingTrm) > 0) {
 			$existingTermID = mysql_fetch_array($resExistingTrm);
-//error_log( " existing term  = ". print_r($existingTermID,true));
+/*****DEBUG****///error_log( " existing term  = ". print_r($existingTermID,true));
 			return $existingTermID[0];
 		} else {
 			// If parent term exist import  it first and use the save the parentID

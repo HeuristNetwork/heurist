@@ -132,7 +132,7 @@
 		$arr = json_decode($description, true);
 
 
-		//DEBUG error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
+		/*****DEBUG****///error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 
 		// assume all id (rtID, dtID, trmID and ontID) are all concept ids (dbID - ID)
 		// get rectype concept id and  convert to local id or notes

@@ -77,7 +77,7 @@
 	if($res) { // query OK, now see if we have found the user
 /*****DEBUG****///error_log('Query OK, got '.mysql_num_rows($res).' rows returned');
 		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
-			//error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
+			/*****DEBUG****///error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
 			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
 				VALUES  ('$usrEmail','$usrPassword','$usrEmail','y','$usrFirstName','$usrLastName')");
 			// Note: we use $usrEmail as user name because the person's name may be repeated across many different users of

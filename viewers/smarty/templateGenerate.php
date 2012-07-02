@@ -599,7 +599,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 					/*
 					if($recursion_depth>1){
 /*****DEBUG****///error_log(">>>>            ");
-///*****DEBUG****/error_log(">>>>            ".print_r($res2['tree'], true));
+/*****DEBUG****///error_log(">>>>            ".print_r($res2['tree'], true));
 //						$tree = array_merge($tree, $res2['tree']);
 //					}*/
 
