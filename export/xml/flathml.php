@@ -1208,12 +1208,20 @@ ob_implicit_flush(1);
 //echo "request = ".print_r($_REQUEST,true)."\n";
 $result = loadSearch($_REQUEST,false,true, $PUBONLY);
 /*****DEBUG****///error_log("$result = ".print_r($result,true)."\n");
+$hmlAttrs = array();
+if($USEXINCLUDE) {
+	$hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
+}
 
-openTag('hml',
-			($USEXINCLUDE ? array(
-									'xmlns:xi' => 'http://www.w3.org/2001/XInclude')
-							:null)
-);
+if(@$_REQUEST['filename']) {
+	$hmlAttrs['filename'] = $_REQUEST['filename'];
+}
+
+if(@$_REQUEST['pathfilename']) {
+	$hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
+}
+
+openTag('hml',$hmlAttrs);
 /*
 openTag('hml', array(
 	'xmlns' => 'http://heuristscholar.org/heurist/hml',
@@ -1227,6 +1235,7 @@ $query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'
 													'expandColl'=>1,'recID'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,
 													'slb'=>1,'selids'=>1,'layout'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
 
+makeTag('database',array('id' => HEURIST_DBID),HEURIST_DBNAME);
 makeTag('query', $query_attrs);
 if (count($selectedIDs)>0){
 	makeTag('selectedIDs', null, join(",",$selectedIDs));

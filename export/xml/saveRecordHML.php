@@ -49,10 +49,20 @@ if (!is_logged_in()) { // check if the record being retrieved is a single non-pr
 // set parameter defaults
 $recID = (@$_REQUEST['recID'] ? $_REQUEST['recID'] : null);
 $q = (@$_REQUEST['q'] ? $_REQUEST['q'] : ($recID ? "ids:$recID" : null));
-$outName = @$_REQUEST['outName'] ? $_REQUEST['outName'] : null;	// outName returns the hml direct.
 if (!$q) {
 	returnXMLErrorMsgPage(" You must specify a record id (recID=#) or a heurist query (q=valid heurst search string)");
 }
+
+$outFullName = @$_REQUEST['outputFullname'] ? $_REQUEST['outputFullname'] : null;	// outName returns the hml direct.
+if (!$outFullName){
+	$outFullName = @$_REQUEST['outputFilename'] ? "".HEURIST_HML_PUBPATH.$_REQUEST['outputFilename'] :
+						($recID ? "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml" : null);
+}
+if (!$outFullName) {
+	returnXMLErrorMsgPage(" Unable to determine output name either supply record id (recID=#) or outFilename=filenameOnlyHere ");
+}
+
+
 $depth = @$_REQUEST['depth'] ? $_REQUEST['depth'] : 1;
 $hinclude = (@$_REQUEST['hinclude'] ? $_REQUEST['hinclude'] : ($recID?0:-1)); //default to 0 will output xincludes all non record id related records, -1 puts out all xinclude
 
@@ -80,17 +90,17 @@ if ($recID ){ // check access first
 			(is_logged_in() &&  $row['rec_NonOwnerVisibility'] == 'hidden'))){
 		returnXMLErrorMsgPage(" no access to record id $recID ");
 	}
-	if (!$outName){
-		$outName ="".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml";
-	}
 }
 
-saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&depth=$depth&hinclude=$hinclude&w=all&q=$q&db=".HEURIST_DBNAME);
+saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&".
+								"depth=$depth&hinclude=$hinclude&w=all&q=$q&db=".HEURIST_DBNAME.
+								(@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
+								($outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :""));
 
 
 //  ---------Helper Functions
 function saveRecordHML($filename){
-global $recID, $outName;
+global $recID, $outFullName;
 /*****DEBUG****///error_log(" file name = $filename");
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
@@ -113,16 +123,16 @@ global $recID, $outName;
 	// convert to xml
 	if (!$xml){
 		returnXMLErrorMsgPage("unable to generate valid hml for $filename");
-	}else if($outName){
+	}else if($outFullName){
 		$text = $xml->saveXML();
-		$ret = file_put_contents( $outName,$text);
-/*****DEBUG****///error_log(" output ".($ret?"2":"1")." complete $outputFilename");
+		$ret = file_put_contents( $outFullName,$text);
+/*****DEBUG****/error_log(" output ".($ret?"2":"1")." complete $outFullName");
 		if (!$ret){
-			returnXMLErrorMsgPage("output of $outName failed to write");
+			returnXMLErrorMsgPage("output of $outFullName failed to write");
 		}else if ($ret < strlen($text)){
-			returnXMLErrorMsgPage("output of $outName wrote $ret bytes of ".strlen($text));
+			returnXMLErrorMsgPage("output of $outFullName wrote $ret bytes of ".strlen($text));
 		}else{ // success output the contents of the saved file file
-			$text = file_get_contents($outName);
+			$text = file_get_contents($outFullName);
 		}
 		echo $text;
 	}else{

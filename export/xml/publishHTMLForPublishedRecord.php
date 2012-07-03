@@ -93,6 +93,7 @@ global $recID, $outputFilename;
 //	$xslProc->setParameter('','hbaseURL',HEURIST_URL_BASE);
 //	$xslProc->setParameter('','dbName',HEURIST_DBNAME);
 //	$xslProc->setParameter('','dbID',HEURIST_DBID);
+	$xslProc->setParameter('','standalone','1');
 	$xslProc->transformToURI($recHmlDoc,$outputFilename);
 }
 
