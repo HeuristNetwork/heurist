@@ -56,15 +56,8 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 //		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
 /*****DEBUG****///error_log("in login  after crypt check");
 
-		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
-							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
-							' and '.USER_GROUPS_USER_ID_FIELD.'="'.$user[USERS_ID_FIELD].'"');
-		while ($row = mysql_fetch_assoc($res)) {
-			if ($row[USER_GROUPS_ROLE_FIELD])
-				$groups[$row[GROUPS_ID_FIELD]] = $row[USER_GROUPS_ROLE_FIELD];
-			else
-				$groups[$row[GROUPS_ID_FIELD]] = 'member';
-		}
+		$groups = reloadUserGroups($user[USERS_ID_FIELD]);
+
 		$groups[$user[USERS_ID_FIELD]] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this group
 
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
@@ -117,7 +110,6 @@ if (@$_REQUEST['logout']) {
 
 	return;
 }
-
 
 ?>
 <html>

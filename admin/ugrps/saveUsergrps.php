@@ -760,7 +760,7 @@
 	*
 	*/
 	function updateSessionInfo(){
-
+/*
 		$query = 'select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
 		' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
 		' and '.USER_GROUPS_USER_ID_FIELD.'="'.get_user_id().'"';
@@ -775,10 +775,12 @@
 				$groups[$row[GROUPS_ID_FIELD]] = 'member';
 		}
 		$groups[get_user_id()] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this
-
+*/
+		$groups = reloadUserGroups(get_user_id());
+		session_start();
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
 
-		/*****DEBUG****///error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($groups, true));
+		/*****DEBUG****///error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'], true));
 
 	}
 ?>

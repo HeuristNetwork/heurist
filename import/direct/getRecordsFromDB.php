@@ -104,7 +104,7 @@
 				print "<input type='submit' value='Switch to H".($is_h2?"3":"2")." databases' /><br/>";
 				print "</form>";
 
-				print "<form name='selectdb' action='getRecordsFromDB.php' method='get'>";
+				print "<form name='selectdb' action='getRecordsFromDB.php' method='post'>";
 				//  We have to use 'get', 'post' fails to transfer target database to step 2
 				print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
@@ -121,7 +121,19 @@
 					}
 				}
 				print "</select>";
-				print "<input type='submit' value='Continue' />";
+
+				print "<div style=\"padding:5px;\">";
+				print "Username:&nbsp;<input type='text' name='username' id='username' size='20' class='in'>&nbsp;&nbsp;";
+				print "Password:&nbsp;<input type='password' name='password' size='20' class='in'>&nbsp;&nbsp;";
+				print "Use the same as current:&nbsp;<input type='checkbox' checked='checked' name='samelogin' value='1'/>";
+
+				if(array_key_exists('loginerror', $_REQUEST) && $_REQUEST['loginerror']=='1'){
+					print '<br/><font color="#ff0000">Incorrect Username / Password for source database</font>';
+				}
+
+				print "</div>";
+
+				print "<input type='submit' value='Continue'/>";
 				print "</form>";
 				exit;
 			}
@@ -129,6 +141,44 @@
 			// ----FORM 2 - MAPPINGS FORM ----------------------------------------------------------------------------------------
 
 			$sourcedbname = $_REQUEST['sourcedbname'];
+
+			//verify user+password for source database
+			$usecurrentlogin = array_key_exists('samelogin', $_REQUEST) && $_REQUEST['samelogin']=='1';
+			if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
+				$username = get_user_username();
+				//take from database
+				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+				$user = mysql_fetch_assoc($res);
+				if ($user){
+					$password = $user[USERS_PASSWORD_FIELD];
+				}else{
+					$password = "";
+				}
+				$needcrypt = false;
+
+			} else {
+				$username = $_REQUEST['username'];
+				$password = $_REQUEST['password'];
+				$needcrypt = true;
+			}
+
+			mysql_connection_db_select($db_prefix.$sourcedbname);
+
+			$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+    		if ( ($user = mysql_fetch_assoc($res))  &&
+		 		$user[USERS_ACTIVE_FIELD] == 'y'  &&
+		 		(($needcrypt && crypt($password, $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]) ||
+		 		 (!$needcrypt && $password == $user[USERS_PASSWORD_FIELD]))
+		 		)
+		    {
+
+			}else{
+				header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
+				exit;
+			}
+
+
+			mysql_connection_db_overwrite(DATABASE);
 
 			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 

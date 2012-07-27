@@ -104,8 +104,8 @@
 				document.body.className += "w-" + (top.HEURIST.parameters["w"] ? top.HEURIST.parameters["w"] : "all");
 			}
 			// start loading this early
-			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
-			(database ? "?db=" + database : ""));
+			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +
+			(database ? "?db=" + database : "")); // user-specific HEURIST data
 
 			top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDBName);
 			top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDocumentTitle);

@@ -172,4 +172,25 @@ function jump_sessions() {
 	foreach ($copy_vars as $varname) $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$varname] = $tmp[$varname];
 }
 
+/**
+* @param mixed $user_id
+*/
+function reloadUserGroups($user_id){
+
+		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
+							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
+							' and '.USER_GROUPS_USER_ID_FIELD.'="'.$user_id.'"');
+		while ($row = mysql_fetch_assoc($res)) {
+			if ($row[USER_GROUPS_ROLE_FIELD])
+				$groups[$row[GROUPS_ID_FIELD]] = $row[USER_GROUPS_ROLE_FIELD];
+			else
+				$groups[$row[GROUPS_ID_FIELD]] = 'member';
+		}
+		$groups[$user_id] = 'member';
+
+		return $groups;
+}
+
+
+
 ?>

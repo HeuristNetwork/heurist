@@ -271,10 +271,10 @@ FlexImport = (function () {
 		$("#records-div").empty();
 		$("#records-div-info").empty();
 
-/* Ian 14/3/12: 
-    I can't work out what this section does - it does not seem to set anything in the record created, 
+/* Ian 14/3/12:
+    I can't work out what this section does - it does not seem to set anything in the record created,
     even less give you a lsit of tags for the workgroup selected. It's not particualrly necessary, so easier to omit than fix.
-   
+
 		var p = e.appendChild(document.createElement("p"));
 		p.appendChild(document.createTextNode("Apply workgroup tags for workgroup: "));
 		FlexImport.workgroupSelect = p.appendChild(document.createElement("select"));
@@ -336,8 +336,8 @@ FlexImport = (function () {
 		p = e.appendChild(document.createElement("p"));
 		var hh = p.appendChild(document.createElement("label"));
 		hh.innerHTML = "bold in pulldown list = required";
-		
-		
+
+
 		var i, l = FlexImport.columnCount;
 		var table = document.createElement("table");
 		table.id = "col-select-table";
@@ -440,6 +440,9 @@ FlexImport = (function () {
 			alist.push({id:'url', name:'URL', selected:(columnName == 'url'), req:false});
 			alist.push({id:'notes', name:'Notes', selected:(columnName == 'notes'), req:false});
 
+			var recStructure = top.HEURIST.rectypes.typedefs[FlexImport.recType.getID()].dtFields;
+			var dtyName_ind = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+
 			for (d = 0; d < dl; ++d) {
 				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
 				var det_id = detailTypes[d].getID();
@@ -451,6 +454,9 @@ FlexImport = (function () {
 						break;
 					}
 				}
+
+				//since HAPI returns generic field names rather than record specific - take the correct name from top.HEURIST
+				rdName = recStructure[det_id][dtyName_ind];
 
 				alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
 			}
@@ -1169,7 +1175,7 @@ FlexImport = (function () {
 		}
 		$textarea.append(line.join(", ") + "\n");
 
-		$("#result-message").html('IMPORT SUCCESSFUL' + 
+		$("#result-message").html('IMPORT SUCCESSFUL' +
         '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
 		'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
         '<p/>WARNING: you will lose the record IDs as soon as you click START OVER, so save the data below to a file first<br/>&nbsp;<br/>');
