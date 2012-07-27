@@ -490,6 +490,7 @@
 			);
 
 			if (!$res) {
+/*****DEBUG****///error_log("ERROR Insert record: ".mysql_error());
 				return null; //"Error registration remote source  $url into database";
 			}
 

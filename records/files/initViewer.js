@@ -139,13 +139,15 @@ function detectSourceAndType(link, extension){
 			if(extension){
 				extension = extension[0];
 			}
-			//alternative extension = filename.split('.').pop();
-			//@TODO if extension is still undefined - try to load via server and detectg mimeType
 		}
+
+		var isloop = false;
+
+		do{
+
 		if ( !top.HEURIST.util.isnull(extension ) ){ //
 			extension = extension.toLowerCase();
 		}
-
 
 		if(extension==="jpg" || extension==="jpeg" || extension==="png" || extension==="gif"){
 			type = 'image';
@@ -159,7 +161,19 @@ function detectSourceAndType(link, extension){
 			type = 'document';
 		}else if(extension==="swf"){
 			type = 'flash';
+		}else{ //undefined extension
+
+			//extension is not recognized
+			if(!isloop){
+				extension = link.split('.').pop();
+				isloop = true;
+			}else{
+				extension = null;
+				isloop = false;
+			}
 		}
+
+		}while (isloop && type==='unknown');
 	}
 	}
 	return {source:source, type:type, extension:extension};

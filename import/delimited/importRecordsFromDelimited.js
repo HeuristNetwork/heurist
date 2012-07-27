@@ -333,6 +333,11 @@ FlexImport = (function () {
 		a.innerHTML = "Show field list for <b>" + FlexImport.recType.getName() + "</b>";
 
 
+		p = e.appendChild(document.createElement("p"));
+		var hh = p.appendChild(document.createElement("label"));
+		hh.innerHTML = "bold in pulldown list = required";
+		
+		
 		var i, l = FlexImport.columnCount;
 		var table = document.createElement("table");
 		table.id = "col-select-table";
@@ -357,6 +362,10 @@ FlexImport = (function () {
 		var tr = tbody.appendChild(document.createElement("tr"));
 		tr.id = "col-select-row";
 		var td, sel, opt;
+
+		tr = tbody.appendChild(document.createElement("tr"));
+		tr.id = "col-select-row";
+
 		td = tr.appendChild(document.createElement("td"));
 		td.innerHTML = "row number";
 		for (i = 0; i < l; ++i) {

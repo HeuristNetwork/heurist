@@ -114,7 +114,7 @@ function EditRecStructure() {
 
 			//only for this group and visible in UI
 			if(!Hul.isnull(_dts)){
-				var rst_ID;
+				var rst_ID;  //field type ID
 				for (rst_ID in _dts) {
 					var statusLock;
 					var aval = _dts[rst_ID];
@@ -546,11 +546,11 @@ function EditRecStructure() {
 
 	/**
 	* Opens popup with preview
-	* 
+	*
 	* Button is hident in UI
-	* Preview record structure - doesn’t always work reliably. It hasn't been fully debugged.
+	* Preview record structure - doesn't always work reliably. It hasn't been fully debugged.
 	* Option:   use records/add/formAddRecordPopup.html
-	* 
+	*
 	*/
 	function _initPreview(){
 
@@ -892,10 +892,10 @@ function EditRecStructure() {
 	*/
 	function _onAddSeparator(){
 
-		//find seprator field type ID   
+		//find seprator field type ID
 		if(Hul.isnull(_ft_separator_id)){
 			var dtypes = top.HEURIST.detailTypes.typedefs;
-			var ind;                    
+			var ind;
 			for (ind in dtypes){
 				if(!Hul.isnull(ind) && !isNaN(Number(ind)) ){
 					if(dtypes[ind].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type]==="separator"){
@@ -911,7 +911,7 @@ function EditRecStructure() {
 			_addDetails(_ft_separator_id);
 		}
 	}
-	
+
 	/**
 	* Adds the list of new detail types to this record structure
 	*

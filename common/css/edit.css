@@ -1068,6 +1068,6 @@ hr {
 }
 .resource-div.empty {
 	background-image: url("../images/blue-down-triangle.png");
-	background-position: 3px center;
+	background-position: 90% center;
 	background-repeat: no-repeat;
 }
