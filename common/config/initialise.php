@@ -31,7 +31,8 @@
 
 	//set up system path defines
 
-	define('HEURIST_VERSION',"3.1.0");// need to change this in common/js/utilLoad.js
+	define('HEURIST_VERSION',"3.1.0.030712");// need to change this in common/js/utilLoad.js
+
 	define('HEURIST_MIN_DBVERSION',"1.0.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");
@@ -272,6 +273,8 @@
 
 	if ($infoEmail) {
 		define('HEURIST_MAIL_TO_INFO', $infoEmail);	//mailto string for heurist installation issues
+	}else{
+		define('HEURIST_MAIL_TO_INFO', 'prime.heurist@gmail.com');	//mailto string for heurist installation issues
 	}
 
 	if ($sysAdminEmail) {
@@ -289,14 +292,15 @@
 
 	// MAGIC CONSTANTS for limited set of common rectypes and their detail types
 	// they refer to global definition DB and IDs of rectypes/detailtypes there
-	define('RT_BUG_REPORT',"2-216");
-	define('DT_BUG_REPORT_NAME',"2-179");
-	define('DT_BUG_REPORT_FILE',"2-221");
-	define('DT_BUG_REPORT_DESCRIPTION',"2-303");
-	define('DT_BUG_REPORT_ABSTRACT',"2-560");
-	define('DT_BUG_REPORT_STATUS',"2-725");
+	define('RT_BUG_REPORT',"2-253");
+	define('DT_BUG_REPORT_NAME',"2-1");
+	define('DT_BUG_REPORT_FILE',"2-38");
+	define('DT_BUG_REPORT_DESCRIPTION',"2-3");
+	define('DT_BUG_REPORT_STEPS',"2-4");
+	define('DT_BUG_REPORT_EXTRA_INFO',"2-51");
+	define('DT_BUG_REPORT_STATUS',"2-810");
 
-	define('DT_ALL_ASSOC_FILE','2-221');
+	define('DT_ALL_ASSOC_FILE','2-38');
 
 	$rtDefines = array(
 	'RT_RELATION' => array(2,1),

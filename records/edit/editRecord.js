@@ -1309,7 +1309,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldReq
 	this.inputs = [];
 	if (this.repeatable === true) {	//saw TODO adjust this code for Cardinality , pass in max number and flag red after max
 		for (var i=0; i < fieldValues.length; ++i) {
-			typeof fieldValues == "string" ? this.addInput( fieldValues) : this.addInput( fieldValues[0]);
+			typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
 		}
 		if (fieldValues.length == 0) {
 			this.addInput({"value" : recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]});	// add default value input make it look like bdvalue without id field

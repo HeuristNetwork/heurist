@@ -105,6 +105,7 @@
 	$emails_failed=0;
 	$emails_processed_ids="";
 
+	$oldFileArray = false;
 	/**
 	* call back function of classEmailProcessor
 	*
@@ -113,7 +114,7 @@
 	*/
 	function add_email_as_record($email){
 
-		global $emails_processed, $emails_failed, $attachment_size_max, $sys_sender, $ownership;
+		global $emails_processed, $emails_failed, $attachment_size_max, $sys_sender, $ownership,$oldFileArray;
 		$emails_processed++;
 
 		$description=$email->getBody();
@@ -159,6 +160,30 @@
 					//@todo we have to convert the content of fields as well -
 					// since it may contain terms and references to other rectypes !!!1
 					$typeid = substr($key, 5);
+					// temporay code to translate existing reports
+					switch ($typeid){
+						case "2-221":
+						case "68-221":
+							$typeid = DT_BUG_REPORT_FILE;
+							$oldFileArray = true;
+							break;
+						case "2-179":
+						case "68-179":
+							$typeid = DT_BUG_REPORT_NAME;
+							break;
+						case "2-303":
+						case "68-303":
+							$typeid = DT_BUG_REPORT_DESCRIPTION;
+							break;
+						case "2-560":
+						case "68-560":
+							$typeid = DT_BUG_REPORT_STEPS;
+							break;
+						case "2-725":
+						case "68-725":
+							$typeid = DT_BUG_REPORT_STATUS;
+							break;
+					}
 
 					$newkey = getDetailTypeLocalID($typeid);
 
@@ -166,8 +191,7 @@
 
 					if($newkey){
 						$arrnew["type:".$newkey] = $value;
-
-						if($typeid == DT_ALL_ASSOC_FILE){
+						if($newkey == DT_FILE_RESOURCE){
 							$key_file = "type:".$newkey;
 						}
 					}else{
@@ -179,11 +203,18 @@
 					$arrnew[$key] = $value;
 				}
 			}//for
-
-			$newrectype = getRecTypeLocalID($arr["rectype"]);
-			if($newrectype)
-			{
+			$rectype = $arr["rectype"];
+			switch ($rectype){
+				case "2-216":
+				case "68-216":
+					$rectype = RT_BUG_REPORT;
+			}
+			$newrectype = getRecTypeLocalID($rectype);
+			if($newrectype){
 				$arrnew["rectype"] = $newrectype;
+				if ($rectype == RT_BUG_REPORT){
+
+				}
 			}else{
 				$email->setErrorMessage("Can't find the local id for rectype #".$_POST["rectype"]);
 				$key_file = null; //avoid processing attachments
@@ -212,7 +243,11 @@
 			/*****DEBUG****///error_log(">>>>ARRAY=".print_r($arrnew, true));
 
 			$_POST = $arrnew;
-
+			$statusKey = getDetailTypeLocalID(DT_BUG_REPORT_STATUS);
+/*****DEBUG****///error_log("status key ".print_r($statusKey,true));
+			if ($statusKey){
+				$_POST["type:".$statusKey] = array("Received");
+			}
 		}else if(defined('RT_NOTE')){
 			// this is from usual email - we will add email rectype
 
@@ -309,7 +344,7 @@
 	//
 	function saveAttachments($files_arr, $email){
 
-		global $attachment_size_max;
+		global $attachment_size_max,$oldFileArray;
 
 		$arr_res = array();
 
@@ -318,32 +353,37 @@
 		$attachments=$email->getAttachments();
 		foreach($attachments as $attachment){
 			$body=$attachment->getBody();
-
+/*****DEBUG****/ //error_log("attachment >>>> ".print_r($attachment,true));
 
 			$file_size = strlen($body);
 
-			/*****DEBUG****/// error_log("SIZE ".$file_size.">>>>>".$attachment_size_max);
+			/*****DEBUG****/ //error_log("SIZE ".$file_size.">>>>>".$attachment_size_max);
 
 			if($file_size>$attachment_size_max){
 				continue;
 			}
 
 			$filename=$attachment->getFilename();
+				/*****DEBUG****/ error_log("AA11>>>".$filename);
 			if(!$filename){
 				$filename=$attachment->getName();
 			}
 			if($filename){
 
-				/*****DEBUG****/// error_log("AAAA>>>".$filename."     ".$attachment->getName());
+				/*****DEBUG****/ error_log("AAAA>>>".$filename."     ".$attachment->getName());
 
-				//find file name and related info if $files_arr
+/*****DEBUG****/ //error_log("file arr >>>>>>".print_r($files_arr,true));				//find file name and related info if $files_arr
 				if($files_arr){
 					$file_data = null;
 
 					foreach ($files_arr as $temp_arr) {
-						if($temp_arr[0]==$filename){
+						if($oldFileArray){
+							$temp_arr = array($temp_arr[1], $temp_arr[3]);
+						}
+						/*****DEBUG****/ //error_log("test $filename is eq to filearray name ".print_r($temp_arr[0],true));
+						if(preg_match("/".$temp_arr[0]."/",$filename)){
 							$file_data = $temp_arr;
-							/*****DEBUG****/// error_log("BBBB>>>print_r=".print_r($file_data, true));
+							/*****DEBUG****/ //error_log("BBBB>>>print_r=".print_r($file_data, true));
 							break;
 						}
 					}
@@ -363,7 +403,7 @@
 					$date_uploaded = date('Y-m-d H:i:s');
 					$mimetypeExt = strtolower(substr($filename,-3,3));
 					if($mimetypeExt=="peg") $mimetypeExt = "jpg";
-					/*****DEBUG****/// error_log("SAVING>>>>>>>>>>>>>>>>>>>>>".$mimetypeExt."   ".strrpos($filename,".")."    ".substr($fielname,strrpos($filename,".")+1));
+					/*****DEBUG****/ //error_log("SAVING>>>>>>>>>>>>>>>>>>>>>".$mimetypeExt."   ".strrpos($filename,".")."    ".substr($filename,strrpos($filename,".")+1));
 				}
 
 				//save into database
@@ -373,7 +413,7 @@
 
 					$full_name = HEURIST_UPLOAD_DIR."/ulf_".$file_id."_".$name;
 
-					/*****DEBUG****/// error_log("CCCCC>>>".$full_name);
+					/*****DEBUG****/ //error_log("CCCCC>>>".$full_name);
 
 					/*if(!is_file($full_name))
 					{
@@ -403,7 +443,7 @@
 					return 0;
 				}
 
-				/*****DEBUG****/// error_log("DDDDDDDD>> SAVED");
+				/*****DEBUG****/ //error_log("DDDDDDDD>> SAVED");
 
 				array_push($arr_res, $file_id);
 			}

@@ -94,22 +94,22 @@
 	/**
 	* Main method that parses POST and update details for given record ID
 	*
-	* @param int $bibID
+	* @param int $recID
 	*/
-	function updateRecord($bibID) {
+	function updateRecord($recID) {
 		// Update the given record.
 		// This is non-trivial: so that the versioning stuff (achive_*) works properly
 		// we need to separate this into updates, inserts and deletes.
 
-		$bibID = intval($bibID);
+		$recID = intval($recID);
 
 		// Check that the user has permissions to edit it.
 		$res = mysql_query("select * from Records
 			left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID
 			left join defRecTypes on rty_ID=rec_RecTypeID
-			where rec_ID=$bibID and (! rec_OwnerUGrpID or rec_OwnerUGrpID=".get_user_id()." or ugl_UserID=".get_user_id().")");
+			where rec_ID=$recID and (! rec_OwnerUGrpID or rec_OwnerUGrpID=".get_user_id()." or ugl_UserID=".get_user_id().")");
 		if (mysql_num_rows($res) == 0) {
-			$res = mysql_query("select grp.ugr_Name from Records, ".USERS_DATABASE.".sysUGrps grp where rec_ID=$bibID and grp.ugr_ID=rec_OwnerUGrpID");
+			$res = mysql_query("select grp.ugr_Name from Records, ".USERS_DATABASE.".sysUGrps grp where rec_ID=$recID and grp.ugr_ID=rec_OwnerUGrpID");
 			$grpName = mysql_fetch_row($res);  $grpName = $grpName[0];
 
 			print '({ error: "\nSorry - you can\'t edit this record.\nYou aren\'t in the ' . slash($grpName) . ' workgroup" })';
@@ -121,7 +121,7 @@
 		uploadFiles();  //Artem: it does not work here - since we uploaded files at once
 
 		// Get the existing records details and compare them to the incoming data
-		$bibDetails = getBiblioDetails($bibID);
+		$bibDetails = getBiblioDetails($recID);
 		$bibDetailUpdates = array();
 /*****DEBUG****///error_log("save record dtls ".print_r($bibDetails,true));
 		foreach ($bibDetails as $eltName => $bds) {
@@ -184,7 +184,7 @@
 		// Try to insert anything left in POST as new recDetails rows
 		$bibDetailInserts = array();
 
-/*****DEBUG****///error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
+/*****DEBUG****/ error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
 		foreach ($_POST as $eltName => $bds) {
 			// if not properly formatted or empty or an empty array then skip it
 			if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
@@ -196,8 +196,8 @@
 
 				$newBibDetail = $bdInputHandler->convertPostToMysql($val);
 				$newBibDetail["dtl_DetailTypeID"] = $bdType;
-				$newBibDetail["dtl_RecID"] = $bibID;
-
+				$newBibDetail["dtl_RecID"] = $recID;
+/*****DEBUG****/error_log("new detail ".print_r($newBibDetail,true));
 				array_push($bibDetailInserts, $newBibDetail);
 
 				unset($_POST[$eltName][$eltID]);	// remove data from post submission
@@ -234,7 +234,7 @@
 			}
 		}
 /*****DEBUG****///error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));
-		mysql__update("Records", "rec_ID=$bibID", $bibUpdates);
+		mysql__update("Records", "rec_ID=$recID", $bibUpdates);
 		$biblioUpdated = (mysql_affected_rows() > 0)? true : false;
 		if (mysql_error()) error_log("error rec update".mysql_error());
 		$updatedRowCount = 0;
@@ -242,7 +242,7 @@
 
 /*****DEBUG****///error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 
-			mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$bibID", $vals);
+			mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$recID", $vals);
 			if (mysql_affected_rows() > 0) {
 				++$updatedRowCount;
 			}
@@ -262,7 +262,7 @@
 		$deletedRowCount = 0;
 		if ($bibDetailDeletes) {
 /*****DEBUG****///error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
-			mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$bibID");
+			mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$recID");
 			if (mysql_affected_rows() > 0) {
 				$deletedRowCount = mysql_affected_rows();
 			}
@@ -285,12 +285,12 @@
 			/* something changed: update the records title and commit all changes */
 			mysql_query("update Records
 				set rec_Title = '" . addslashes(fill_title_mask($bib["rty_TitleMask"], $bib["rec_ID"], $bib["rec_RecTypeID"])) . "'
-				where rec_ID = $bibID");
+				where rec_ID = $recID");
 
 			mysql_query("commit");
 
 			// Update memcached's copy of record (if it is cached)
-			updateCachedRecord($bibID);
+			updateCachedRecord($recID);
 
 			return true;
 		} else {
@@ -313,9 +313,9 @@
 				"rec_NonOwnerVisibility" => @$_POST["visibility"]?$_POST["visibility"]:(HEURIST_NEWREC_ACCESS ? HEURIST_NEWREC_ACCESS:'viewable'),
 				"rec_URL" => @$_POST["rec_url"]? $_POST["rec_url"] : ""));
 
-		$_REQUEST["recID"] = $bibID = mysql_insert_id();
-		if($bibID){
-			updateRecord($bibID);
+		$_REQUEST["recID"] = $recID = mysql_insert_id();
+		if($recID){
+			updateRecord($recID);
 			return true;
 		}else{
 			return false;
@@ -323,11 +323,11 @@
 	}
 
 
-	function getBiblioDetails($bibID) {
-		$bibID = intval($bibID);
+	function getBiblioDetails($recID) {
+		$recID = intval($recID);
 		$bd = array();
 
-		$res = mysql_query("select * from recDetails where dtl_RecID = " . $bibID);
+		$res = mysql_query("select * from recDetails where dtl_RecID = " . $recID);
 		while ($val = mysql_fetch_assoc($res)) {
 			$elt_name = "type:".$val["dtl_DetailTypeID"];
 

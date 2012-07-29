@@ -26,6 +26,9 @@
 	if ( !(isset($toEmailAddress) && $toEmailAddress) && defined('HEURIST_MAIL_TO_ADMIN')){
 		$toEmailAddress = HEURIST_MAIL_TO_ADMIN;
 	}
+	if (($_POST["rectype"] == RT_BUG_REPORT) && defined('HEURIST_MAIL_TO_BUG')){
+			$toEmailAddress = HEURIST_MAIL_TO_BUG;
+	}
 	if(!(isset($toEmailAddress) && $toEmailAddress)){
 		print '({"error":"The owner of this instance of Heurist has not defined either the info nor system emails"})';
 		exit();
@@ -34,6 +37,7 @@
 	//send an email
 	$geekMail = new geekMail();
 	$geekMail->setMailType('html');
+	$geekMail->to($toEmailAddress);
 
 	// This is set up to send email to a Heurist instance via an email account (from which the records are harvested)
 	// TODO: replace hard-cioded email address with address passed to request
@@ -42,7 +46,6 @@
 	// $geekMail->to('prime.heurist@gmail.com');
 	// but during development it's best just to send it to the team so we actually SEE them ...
 
-	$geekMail->to($toEmailAddress);
 
 
 	$ids = "";
@@ -58,31 +61,35 @@
 		$geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
 		$geekMail->subject('Bug report or feature request: '.$bug_title[0]);
 
-		$key_abs = "type:".DT_BUG_REPORT_ABSTRACT;
-		$ext_desc = $_POST[$key_abs];
-		if(!is_array($ext_desc)) {
-			$ext_desc = array();
-			if($_POST[$key_abs]!="" && $_POST[$key_abs]!=null){
-				array_push($ext_desc, $_POST[$key_abs]);
+		$key_steps = "type:".DT_BUG_REPORT_STEPS;
+		$repro_steps = $_POST[$key_steps];
+		/*****DEBUG****///error_log("steps  >>>>  ".print_r($repro_steps,true));
+		if(!is_array($repro_steps)) {
+			$repro_steps = array();
+			if($_POST[$key_steps]!="" && $_POST[$key_steps]!=null){
+				array_push($repro_steps, $_POST[$key_steps]);
 			}
+		}else if (count($repro_steps) ===1){
+			$repro_steps = explode("\n",$repro_steps[0]);  //split on line break
 		}
+		$_POST[$key_steps] = $repro_steps;
 		//add current system information into message
-		array_push($ext_desc, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
+		$key_extra = "type:".DT_BUG_REPORT_EXTRA_INFO;
+		$ext_info = array();
+		array_push($ext_info, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
 		//add current heurist information into message
 		//add current heurist information into message
-		array_push($ext_desc, "   Heurist codebase: ".HEURIST_BASE_URL);
-		array_push($ext_desc, "   Heurist version: ".HEURIST_DBVERSION);
-		array_push($ext_desc, "   Heurist database: ". DATABASE);
-		array_push($ext_desc, "   Heurist user: ".get_user_name());
-
-		$_POST[$key_abs] = $ext_desc;
-
+		array_push($ext_info, "   Heurist codebase: ".HEURIST_BASE_URL);
+		array_push($ext_info, "   Heurist version: ".HEURIST_VERSION);
+		array_push($ext_info, "   Heurist dbversion: ".HEURIST_DBVERSION);
+		array_push($ext_info, "   Heurist database: ". DATABASE);
+		array_push($ext_info, "   Heurist user: ".get_user_name());
+		$_POST[$key_extra] = $ext_info;
 	}else{
-
 		$geekMail->from("bugs@heuristscholar.org", "Record sender"); //'noreply@heuristscholar.org', 'Bug Report');
 		$geekMail->subject('Record from '.DATABASE);
-
 	}
+
 
 	// ATTACHMENTS - find file fieldtype in POST
 	$key_file = "type:".DT_BUG_REPORT_FILE;
@@ -101,6 +108,7 @@
 			}
 		}
 	}
+
 	if($ids!=""){
 		mysql_connection_db_overwrite(DATABASE);
 
