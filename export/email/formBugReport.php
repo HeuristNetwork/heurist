@@ -184,7 +184,6 @@
 				</div>
 				<div class="input-row">
 					<div class="input-header-cell">Screenshot
-						<img alt="Add another Screenshot field" title="Add another Screenshot field" class="duplicator" src="/h3-ao/common/images/duplicate.gif">
 					</div>
 					<div class="input-cell">
 						<div id="fileUploadDiv" class="file-div empty"
