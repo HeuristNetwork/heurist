@@ -108,7 +108,7 @@ function detectSourceAndType(link, extension){
 	if(link){
 
 	//1. detect source
-	if(link.indexOf('http://heuristscholar.org')==0){
+	if(link.indexOf(location.protocol+'//'+location.hostname)==0){
 		source = 'heurist';
 	}else if(link.indexOf('http://www.flickr.com')==0){
 		source = 'flickr';

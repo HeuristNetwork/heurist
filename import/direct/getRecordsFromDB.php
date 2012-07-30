@@ -86,6 +86,8 @@
 
 
 			$sourcedbname = NULL;
+			$password = NULL;
+			$username = NULL;
 
 			$is_h2 = array_key_exists('h2', $_REQUEST) && ($_REQUEST['h2']==1);
 
@@ -121,7 +123,7 @@
 					}
 				}
 				print "</select>";
-
+				if(!$is_h2){
 				print "<div style=\"padding:5px;\">";
 				print "Username:&nbsp;<input type='text' name='username' id='username' size='20' class='in'>&nbsp;&nbsp;";
 				print "Password:&nbsp;<input type='password' name='password' size='20' class='in'>&nbsp;&nbsp;";
@@ -132,7 +134,7 @@
 				}
 
 				print "</div>";
-
+				}
 				print "<input type='submit' value='Continue'/>";
 				print "</form>";
 				exit;
@@ -142,43 +144,44 @@
 
 			$sourcedbname = $_REQUEST['sourcedbname'];
 
-			//verify user+password for source database
-			$usecurrentlogin = array_key_exists('samelogin', $_REQUEST) && $_REQUEST['samelogin']=='1';
-			if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
-				$username = get_user_username();
-				//take from database
-				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
-				$user = mysql_fetch_assoc($res);
-				if ($user){
-					$password = $user[USERS_PASSWORD_FIELD];
-				}else{
-					$password = "";
+			if(!$is_h2){
+				//verify user+password for source database
+				$usecurrentlogin = array_key_exists('samelogin', $_REQUEST) && $_REQUEST['samelogin']=='1';
+				if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
+					$username = get_user_username();
+					//take from database
+					$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+					$user = mysql_fetch_assoc($res);
+					if ($user){
+						$password = $user[USERS_PASSWORD_FIELD];
+					}else{
+						$password = "";
+					}
+					$needcrypt = false;
+
+				} else {
+					$username = $_REQUEST['username'];
+					$password = $_REQUEST['password'];
+					$needcrypt = true;
 				}
-				$needcrypt = false;
 
-			} else {
-				$username = $_REQUEST['username'];
-				$password = $_REQUEST['password'];
-				$needcrypt = true;
+				mysql_connection_db_select($db_prefix.$sourcedbname);
+
+				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+    			if ( ($user = mysql_fetch_assoc($res))  &&
+		 			$user[USERS_ACTIVE_FIELD] == 'y'  &&
+		 			(($needcrypt && crypt($password, $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]) ||
+		 			 (!$needcrypt && $password == $user[USERS_PASSWORD_FIELD]))
+		 			)
+			    {
+
+				}else{
+					header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
+					exit;
+				}
+				mysql_connection_db_overwrite(DATABASE);
 			}
 
-			mysql_connection_db_select($db_prefix.$sourcedbname);
-
-			$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
-    		if ( ($user = mysql_fetch_assoc($res))  &&
-		 		$user[USERS_ACTIVE_FIELD] == 'y'  &&
-		 		(($needcrypt && crypt($password, $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]) ||
-		 		 (!$needcrypt && $password == $user[USERS_PASSWORD_FIELD]))
-		 		)
-		    {
-
-			}else{
-				header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
-				exit;
-			}
-
-
-			mysql_connection_db_overwrite(DATABASE);
 
 			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 
@@ -217,7 +220,7 @@
 
 			function createMappingForm($config){
 
-				global $sourcedbname, $db_prefix, $dbPrefix, $is_h2;
+				global $sourcedbname, $db_prefix, $dbPrefix, $is_h2, $password, $username;
 
 				$sourcedb = $db_prefix.$sourcedbname;
 
@@ -239,6 +242,10 @@
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 				print "<input name='h2' value='".($is_h2?1:0)."' type='hidden'>";
 				print "<input name='sourcedbname' value='$sourcedbname' type='hidden'>";
+				if(!$is_h2){
+					print "<input name='username' value='$username' type='hidden'>";
+					print "<input name='password' value='$password' type='hidden'>";
+				}
 				print "<input name='reportlevel' value='1' type='checkbox' checked='checked'>Report level: show errors only<br>";
 				print "Check the code mappings below, then click  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
 				// alert(document.getElementById(\"mode\").value);

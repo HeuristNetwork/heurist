@@ -297,7 +297,7 @@
 		$type = 'unknown';
 
 		//1. detect source
-		if(strpos($url,'http://heuristscholar.org')==0){
+		if(strpos($url, 'http://'.HEURIST_HOST_NAME) ==0){
 			$source = 'heurist';
 		}else if(strpos($url,'http://www.flickr.com')==0){
 			$source = 'flickr';
