@@ -88,6 +88,8 @@
 			$sourcedbname = NULL;
 			$password = NULL;
 			$username = NULL;
+			$user_id_insource = NULL;
+			$user_workgroups = array();
 
 			$is_h2 = array_key_exists('h2', $_REQUEST) && ($_REQUEST['h2']==1);
 
@@ -162,7 +164,7 @@
 				} else {
 					$username = $_REQUEST['username'];
 					$password = $_REQUEST['password'];
-					$needcrypt = true;
+					$needcrypt = (array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2');
 				}
 
 				mysql_connection_db_select($db_prefix.$sourcedbname);
@@ -174,6 +176,11 @@
 		 			 (!$needcrypt && $password == $user[USERS_PASSWORD_FIELD]))
 		 			)
 			    {
+					$user_id_insource  = $user[USERS_ID_FIELD];
+
+					$user_workgroups = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+		                              'ugl_UserID='.$user_id_insource.' and grp.ugr_Type != "User" order by ugl_GroupID');
+
 
 				}else{
 					header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
@@ -494,7 +501,7 @@
 
 			function doTransfer()
 			{
-				global $sourcedbname, $dbPrefix, $db_prefix, $is_h2;
+				global $sourcedbname, $dbPrefix, $db_prefix, $is_h2, $user_id_insource, $user_workgroups;
 
 				$sourcedb = $db_prefix.$sourcedbname;
 
@@ -517,6 +524,16 @@
 					$query1 = "SELECT DISTINCT (`rec_type`) FROM `$sourcedb`.`records`";
 				}else{
 					$query1 = "SELECT DISTINCT (`rec_RecTypeID`) FROM $sourcedb.Records";
+
+					$user_rights = ' (not rec_FlagTemporary and (rec_OwnerUGrpID='.$user_id_insource.' or (not rec_NonOwnerVisibility="hidden")';
+					// rec_NonOwnerVisibility="public")
+					if (!empty($user_workgroups)) {
+							$user_rights = $user_rights.' or rec_OwnerUGrpID in (' . join(',', $user_workgroups) . ')))';
+					}else{
+							$user_rights = $user_rights.'))';
+					}
+
+					$query1 = $query1.' where '.$user_rights;
 				}
 				$res1 = mysql_query($query1);
 				if(!$res1) {
@@ -566,6 +583,8 @@
 						$query2 = "select `rec_id`,`rec_url` from `$sourcedb`.`records` Where `$sourcedb`.`records`.`rec_type`=$rt";
 					}else{
 						$query2 = "select `rec_ID`,`rec_URL` from $sourcedb.Records Where $sourcedb.Records.rec_RecTypeID=$rt";
+
+						$query2 = $query2.' and '.$user_rights;
 					}
 					$res2 = mysql_query($query2);
 					if(!$res2) {

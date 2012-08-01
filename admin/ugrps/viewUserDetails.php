@@ -75,7 +75,7 @@ $tags .= "</span>\n";
 
   <link rel="icon" href="../../favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" type="text/css" href= "../../common/css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 </head>
 <body>
 

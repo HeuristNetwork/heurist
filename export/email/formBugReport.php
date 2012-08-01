@@ -184,6 +184,10 @@
 				</div>
 				<div class="input-row">
 					<div class="input-header-cell">Screenshot
+<<<<<<< Updated upstream:export/email/formBugReport.php
+=======
+						<img alt="Add another Screenshot field" title="Add another Screenshot field" class="duplicator" src="../../common/images/duplicate.gif">
+>>>>>>> Stashed changes:export/email/formBugReport.php
 					</div>
 					<div class="input-cell">
 						<div id="fileUploadDiv" class="file-div empty"

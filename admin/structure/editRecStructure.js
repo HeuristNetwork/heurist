@@ -30,8 +30,7 @@ function EditRecStructure() {
 	_isServerOperationInProgress = false, //prevents send request if there is not respoce from previous one
 	_isReserved = false,
 	_rty_Status,
-	myDTDrags = {},
-	_ft_separator_id = null;
+	myDTDrags = {};
 
 	/**
 	* Initialization of input form
@@ -59,7 +58,7 @@ function EditRecStructure() {
 		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
 		'<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
-		//'<input type="button" style="margin:0" value="Separator" onClick="onAddSeparator()" class="add"/>'+
+		'<input type="button" style="margin:0" value="Separator" onClick="onAddSeparator()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div>';
 
@@ -892,23 +891,105 @@ function EditRecStructure() {
 	*/
 	function _onAddSeparator(){
 
-		//find seprator field type ID
-		if(Hul.isnull(_ft_separator_id)){
-			var dtypes = top.HEURIST.detailTypes.typedefs;
-			var ind;
-			for (ind in dtypes){
+		//find seprator field type ID that is not yet added to this record strucuture
+		var ft_separator_id =  null;
+		var ft_separator_group =  top.HEURIST.detailTypes.groups[0].id;
+		var dtypes = top.HEURIST.detailTypes.typedefs;
+		var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+		var fnames = top.HEURIST.detailTypes.typedefs.commonFieldNames;
+		var recDetTypes = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+
+		var ind, k = 1;
+		for (ind in dtypes){
 				if(!Hul.isnull(ind) && !isNaN(Number(ind)) ){
-					if(dtypes[ind].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type]==="separator"){
-						 _ft_separator_id = ind;
-						 break;
+					if(dtypes[ind].commonFields[fi.dty_Type]==="separator"){
+						k++;
+						ft_separator_group = dtypes[ind].commonFields[fi.dty_DetailTypeGroupID];
+						if(Hul.isnull(recDetTypes[ind])){
+						 	ft_separator_id = ind;
+						 	break;
+						}
+					}
+				}
+		}
+
+		if(!Hul.isnull(ft_separator_id)){
+			_doExpliciteCollapse(null, true);
+			_addDetails(ft_separator_id);
+		}else{ //"not used" separator field type not found - create new one
+
+			var _detailType = new Array();
+
+			_detailType[fnames[fi.dty_Name]] = 'separator#'+k;
+			_detailType[fnames[fi.dty_ExtendedDescription]] = '';
+			_detailType[fnames[fi.dty_Type]] = 'separator';
+			_detailType[fnames[fi.dty_OrderInGroup]] = 0;
+			_detailType[fnames[fi.dty_HelpText]] = 'Another separator field';
+			_detailType[fnames[fi.dty_ShowInLists]] = 1;
+			_detailType[fnames[fi.dty_Status]] = 'open';
+			_detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;
+			_detailType[fnames[fi.dty_FieldSetRectypeID]] = null;
+			_detailType[fnames[fi.dty_JsonTermIDTree]] = null;
+			_detailType[fnames[fi.dty_TermIDTreeNonSelectableIDs]] = null;
+			_detailType[fnames[fi.dty_PtrTargetRectypeIDs]] = null;
+			_detailType[fnames[fi.dty_NonOwnerVisibility]] = 'viewable';
+
+
+			var oDetailType = {detailtype:{
+				colNames:{common:[]},
+				defs: {}
+			}};
+
+			oDetailType.detailtype.defs[-1] = {};
+			oDetailType.detailtype.defs[-1].common = [];
+
+			var fname;
+			for (fname in _detailType){
+				if(!Hul.isnull(fname)){
+					oDetailType.detailtype.colNames.common.push(fname);
+					oDetailType.detailtype.defs[-1].common.push(_detailType[fname]);
+				}
+			}
+
+			var str = YAHOO.lang.JSON.stringify(oDetailType);
+
+
+			function _addNewSeparator(context) {
+				if(!context) {
+					alert("An error occurred trying to contact the database");
+				}else{
+					var error = false,
+						report = "",
+						ind;
+
+					for(ind in context.result){
+						if( !Hul.isnull(ind) ){
+							var item = context.result[ind];
+							if(isNaN(item)){
+								alert("An error occurred: " + item);
+								error = true;
+							}else{
+								ft_separator_id = ""+Math.abs(Number(item));
+
+								//refresh the local heurist
+								top.HEURIST.detailTypes = context.detailTypes;
+
+								_doExpliciteCollapse(null, true);
+								_addDetails(ft_separator_id);
+							}
+						}
 					}
 				}
 			}
-		}
 
-		if(!Hul.isnull(_ft_separator_id)){
-			_doExpliciteCollapse(null, true);
-			_addDetails(_ft_separator_id);
+			//
+			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+								(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = _addNewSeparator;
+			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
+			Hul.getJsonData(baseurl, callback, params);
+
 		}
 	}
 
@@ -953,7 +1034,7 @@ function EditRecStructure() {
 		var k;
 		for(k=0; k<arrDty_ID.length; k++){
 			var dty_ID = arrDty_ID[k];
-			if(Hul.isnull(recDetTypes[dty_ID]) || dty_ID===_ft_separator_id){
+			if(Hul.isnull(recDetTypes[dty_ID])){
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility

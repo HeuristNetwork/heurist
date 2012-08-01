@@ -9,21 +9,20 @@
  * @todo
  **/
 
-?>
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
+?>
 <html>
  <head>
   <title>Heurist Password Reset</title>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
  </head>
  <body>
  <div style="padding: 10px;">
  <h3>Reset lost/forgotten password</h3>
 <?php
-
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 function generate_passwd ($length = 8) {
 	$passwd = '';
