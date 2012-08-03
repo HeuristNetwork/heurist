@@ -755,6 +755,7 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 
 	var confirmImg = this.confirmImg = this.document.createElement("div");
 		confirmImg.className = "confirmImg";
+		confirmImg.style.z-index = 999;
 	var confirmOption = confirmImg.appendChild(this.document.createElement("div"));
 		confirmOption.className = "option";
 		confirmOption.style.top = "2px";

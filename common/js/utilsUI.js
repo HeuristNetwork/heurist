@@ -1612,7 +1612,58 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	*/
 	loadScript2: function(doc, url){
 		doc.write("<script src=\"" + url + "\"></script>");
+	},
+
+	autoSize: function(textElt, o){
+
+ 		o = $.extend({
+        maxWidth: 1000,
+        minWidth: 200,
+        comfortZone: 10
+    	}, o);
+
+		var input = $(textElt);
+
+		//var d = this.document.getElementById("testerwidth");
+		if($("#testerwidth").length == 0){
+			$('<div id="testerwidth"></div>').appendTo('body')
+		}
+
+		var testSubject = $('#testerwidth').css({
+						position: 'absolute',
+						top: -9999,
+						left: -9999,
+						width: 'auto',
+						fontSize: input.css('fontSize'),
+						fontFamily: input.css('fontFamily'),
+						fontWeight: input.css('fontWeight'),
+						letterSpacing: input.css('letterSpacing'),
+						whiteSpace: 'nowrap'
+					});
+
+		// Enter new content into testSubject
+		var escaped = textElt.value.replace(/&/g, '&amp;').replace(/\s/g,'&nbsp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		testSubject.html(escaped);
+
+		// Calculate new width + whether to change
+		var testerWidth = testSubject.width(),
+		newWidth = (testerWidth + o.comfortZone) >= o.minWidth ? testerWidth + o.comfortZone : o.minWidth;
+		if(newWidth > o.maxWidth){
+			newWidth = o.maxWidth;
+		}
+		input.width(newWidth);
+		/*currentWidth = input.width(),
+		isValidWidthChange = (newWidth < currentWidth && newWidth >= o.minWidth)
+												|| (newWidth > o.minWidth && newWidth < o.maxWidth);
+
+		// Animate width
+		if (isValidWidthChange) {
+				input.width(newWidth);
+		}
+		*/
 	}
+
+
 
 };
 
@@ -1652,4 +1703,3 @@ if (!Array.prototype.indexOf)
     return -1;
   };
 }
-

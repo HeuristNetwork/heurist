@@ -1601,6 +1601,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 			}
 			else return true;	// allow tab or control/alt etc to do their normal thing (cycle through controls)
 		};
+
+		top.HEURIST.util.autoSize(textElt, {});
+
 		top.HEURIST.registerEvent(textElt, "click", function() { if (! newDiv.readOnly) thisRef.chooseResource(newDiv); });
 		top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
 		top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
@@ -1672,10 +1675,11 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.setResource = function(
 	element.textElt.title = element.textElt.value = element.textElt.defaultValue = bibTitle? bibTitle : "";
 	element.hiddenElt.value = element.hiddenElt.defaultValue = bibID? bibID : "0";
 	if (bibID) {
-		element.className = element.className.replace(/(^|\s+)empty(\s+|$)/g, " ");
+		element.className = element.className.replace(/(^|\s+)empty(\s+|$)/g, "");
 	} else if (! element.className.match(/(^|\s+)empty(\s+|$)/)) {
 		element.className += " empty";
 	}
+	top.HEURIST.util.autoSize(element.textElt, {});
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();
 };

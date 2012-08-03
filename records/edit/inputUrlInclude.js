@@ -17,15 +17,61 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.focus = function() { 
 //top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.regex = new RegExp("^[1-9]\\d*$");
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.typeDescription = "a url to be included";
 
+/*
+top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.autoSize = function(textElt){
+
+		var o = {
+		maxWidth: 1000,
+		minWidth: 200,
+		comfortZone: 10};
+
+		var input = $(textElt);
+
+		//var d = this.document.getElementById("testerwidth");
+		if($("#testerwidth").length == 0){
+			$('<div id="testerwidth"></div>').appendTo('body')
+		}
+
+		var testSubject = $('#testerwidth').css({
+						position: 'absolute',
+						top: -9999,
+						left: -9999,
+						width: 'auto',
+						fontSize: input.css('fontSize'),
+						fontFamily: input.css('fontFamily'),
+						fontWeight: input.css('fontWeight'),
+						letterSpacing: input.css('letterSpacing'),
+						whiteSpace: 'nowrap'
+					});
+
+		// Enter new content into testSubject
+		var escaped = textElt.value.replace(/&/g, '&amp;').replace(/\s/g,'&nbsp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		testSubject.html(escaped);
+
+		// Calculate new width + whether to change
+		var testerWidth = testSubject.width(),
+		newWidth = (testerWidth + o.comfortZone) >= o.minWidth ? testerWidth + o.comfortZone : o.minWidth,
+		currentWidth = input.width(),
+		isValidWidthChange = (newWidth < currentWidth && newWidth >= o.minWidth)
+												|| (newWidth > o.minWidth && newWidth < o.maxWidth);
+
+		// Animate width
+		if (isValidWidthChange) {
+				input.width(newWidth);
+		}
+};
+*/
+
 /**
 * creates visible input to display file name or URL
 * and invisible to keep real value - either file ID (for uploaded) or URL|source|type for remote resources
 */
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(bdValue) {
+
+
 	var thisRef = this;	// provide input reference for closures
 
 	var newDiv = this.document.createElement("div");
-		newDiv.className = "resource-div"; //bdValue? "resource-div" : "resource-div empty";
 		newDiv.expando = true;
 		newDiv.bdValue = null;
 	this.addInputHelper.call(this, bdValue, newDiv);
@@ -60,6 +106,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		}
 	}
 
+	newDiv.className = top.HEURIST.util.isempty(valueVisible)? "resource-div empty" : "resource-div";
 
 
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
@@ -70,11 +117,11 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
-		textElt.value = textElt.defaultValue = valueVisible;
 		textElt.title = "Click here to upload file or define the URL";
 		textElt.setAttribute("autocomplete", "off");
-		textElt.className = "in"; //"resource-title";
-		textElt.style.width = 500;
+		textElt.className = "resource-title";
+		//textElt.className = "in"; //"resource-title";
+		//textElt.style.width = 500;
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
 			if (! e) e = window.event;
@@ -86,6 +133,18 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 			}
 			else return true;	// allow tab or control/alt etc to do their normal thing (cycle through controls)
 		};
+
+		textElt.value = textElt.defaultValue = valueVisible;
+
+		top.HEURIST.util.autoSize(textElt, {});
+
+		/*$('input#'+textElt.id).autoGrowInput({
+    		comfortZone: 50,
+    		minWidth: 20,
+    		maxWidth: '90%',
+    		id:'#'+textElt.id
+		});*/
+
 
 	top.HEURIST.registerEvent(textElt, "click", function() { thisRef.defineURL(newDiv); });
 	top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
@@ -189,6 +248,14 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(e
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, visibleValue, hiddenValue) {
 
 	element.textElt.value = element.textElt.defaultValue = HEURIST.util.isempty(visibleValue)? "" :visibleValue;
+
+	if (HEURIST.util.isempty(visibleValue)) {
+		element.className += " empty";
+	} else if (! element.className.match(/(^|\s+)empty(\s+|$)/)) {
+		element.className = element.className.replace(/(^|\s+)empty(\s+|$)/g, "");
+	}
+
+	top.HEURIST.util.autoSize(element.textElt, {});
 
 	element.hiddenElt.value = element.hiddenElt.defaultValue = HEURIST.util.isempty(hiddenValue)? "" :hiddenValue;
 

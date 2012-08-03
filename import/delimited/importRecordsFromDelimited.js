@@ -390,6 +390,7 @@ FlexImport = (function () {
 				// for types that have subtypes show select for subtypes
 				if (this.value != "url"  &&  this.value != "notes"  &&
 					this.value != "tags"  &&  this.value != "wgTags"  &&
+					HDetailManager.getDetailTypeById(this.value) &&
 					HDetailManager.getDetailTypeById(this.value).getVariety() == HVariety.GEOGRAPHIC) {
 					this.subTypeSelect = this.parentNode.appendChild(document.createElement("select"));
 					var vals = [
@@ -442,23 +443,31 @@ FlexImport = (function () {
 
 			var recStructure = top.HEURIST.rectypes.typedefs[FlexImport.recType.getID()].dtFields;
 			var dtyName_ind = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+			var fieldTypes = top.HEURIST.detailTypes.typedefs;
+			var dtyType_ind = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
 
 			for (d = 0; d < dl; ++d) {
-				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
+
 				var det_id = detailTypes[d].getID();
-				var isrequired = false;
 
-				for (k = 0; k < rdl; ++k) {
-					if(det_id == reqDetailTypes[k].getID()){
-						isrequired = true;
-						break;
+				if("separator" != fieldTypes[det_id].commonFields[dtyType_ind])
+				{
+
+					var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
+					var isrequired = false;
+
+					for (k = 0; k < rdl; ++k) {
+						if(det_id == reqDetailTypes[k].getID()){
+							isrequired = true;
+							break;
+						}
 					}
+
+					//since HAPI returns generic field names rather than record specific - take the correct name from top.HEURIST
+					rdName = recStructure[det_id][dtyName_ind];
+
+					alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
 				}
-
-				//since HAPI returns generic field names rather than record specific - take the correct name from top.HEURIST
-				rdName = recStructure[det_id][dtyName_ind];
-
-				alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
 			}
 
 			//sort by name
@@ -565,6 +574,9 @@ FlexImport = (function () {
 
 		if(eS){
 
+			var fieldTypes = top.HEURIST.detailTypes.typedefs;
+			var dtyType_ind = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
+
 			var e = $("#col-select-div")[0];
 
 			var table = document.createElement("table");
@@ -636,34 +648,46 @@ FlexImport = (function () {
 					td = tr.appendChild(document.createElement("td"));
 					if(FlexImport.colSelectors[j].selectedIndex>0){
 
-						var a = td.appendChild(document.createElement("a"));
-						a.href = "#";
-						a.innerHTML = "Edit field definition";
-						a.id2 = FlexImport.colSelectors[j].value;
-						var _onEditClick = function (e){
+						//for enum and relmarker only only
+						var dt_id = FlexImport.colSelectors[j].value;
 
-							var dtid = e.target.id2;
-							var url = HeuristBaseURL+
-								"admin/structure/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
+						if("relmarker" == fieldTypes[dt_id].commonFields[dtyType_ind] ||
+							"enum" == fieldTypes[dt_id].commonFields[dtyType_ind])
+						{
 
-							top.HEURIST.util.popupURL(top, url,
-							{	"close-on-blur": false,
-								"no-resize": false,
-								height: 680,
-								width: 660,
-								callback: function(context) {
-								}
-							});
+							var a = td.appendChild(document.createElement("a"));
+							a.href = "#";
+							a.innerHTML = "Edit field definition";
+							a.id2 = FlexImport.colSelectors[j].value;
+							var _onEditClick = function (e){
 
-						};
-						a.onclick = _onEditClick;
+								var dtid = e.target.id2;
+								var url = HeuristBaseURL+
+									"admin/structure/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
+
+								top.HEURIST.util.popupURL(top, url,
+								{	"close-on-blur": false,
+									"no-resize": false,
+									height: 680,
+									width: 660,
+									callback: function(context) {
+									}
+								});
+
+							};
+							a.onclick = _onEditClick;
+
+						}
 					}
 					haserr = true;
 				}
 			}
 			if(haserr){
 				e.insertBefore(table, before);
-				e.insertBefore(document.createTextNode("Unrecognised values in imported data. Edit values below and click Modify Data to change the values, then click Prepare Records again. <br>Alternatively, edit the field definitions with the <u>edit definitions</u>link(s) to the right.)"), table);
+				var dvm = document.createElement("div");
+				dvm.innerHTML = "Unrecognised values in imported data. Edit values below and click Modify Data to change the values, then click Prepare Records again.<br/>"+
+								"Alternatively, edit the field definitions with the <u>Edit field definition</u> link(s) to the right.<br/>";
+				e.insertBefore(dvm, table);
 			}
 
 		}
@@ -997,9 +1021,15 @@ FlexImport = (function () {
 		}else if ( FlexImport.num_invalid_records > 0){
 			e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
 		}else{
-			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
+			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.startSaveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
 		}
+	},
+
+	startSaveRecords:function(){
+		var e = $("#records-div-info")[0];
+		e.innerHTML = "";
+		FlexImport.Saver.saveRecords();
 	},
 
 
@@ -1178,7 +1208,7 @@ FlexImport = (function () {
 		$("#result-message").html('IMPORT SUCCESSFUL' +
         '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
 		'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
-        '<p/>WARNING: you will lose the record IDs as soon as you click START OVER, so save the data below to a file first<br/>&nbsp;<br/>');
+        '<p style="color:#ff0000;">WARNING: you will lose the record IDs as soon as you click START OVER, so save the data below to a file first<br/>&nbsp;</p>');
 
 		l = FlexImport.fields.length;
 		for (i = FlexImport.hasHeaderRow ? 1:0; i < l; ++i) {

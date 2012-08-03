@@ -1061,13 +1061,13 @@ hr {
 	width:100px;
 }
 */
-/***** other ******/
+/***** other 80% center;  ******/
 .file-size {
 	margin:0 6px;
 	color:#666666;
 }
 .resource-div.empty {
 	background-image: url("../images/blue-down-triangle.png");
-	background-position: 90% center;
+	background-position: 5 center;
 	background-repeat: no-repeat;
 }
