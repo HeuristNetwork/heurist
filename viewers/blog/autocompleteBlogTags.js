@@ -448,14 +448,14 @@ top.HEURIST.autocomplete.AutoComplete.prototype.expand = function() {
 		this.completions.style.display = "block";
 		var rightmostPosition = textboxPosition.x + this.textbox.offsetWidth - this.completions.offsetWidth;
 
-		this.completions.style.left = this.completionsIframe.style.left = Math.max(textboxPosition.x, Math.min(calculatedPosition, rightmostPosition)) + "px";
+		this.completions.style.left = this.completionsIframe.style.left = (Math.max(textboxPosition.x, Math.min(calculatedPosition, rightmostPosition))-160) + "px";
 	}
 	else {
 		this.completionsIframe.style.display = "block";
 		this.completions.style.display = "block";
 		this.completions.style.left = this.completionsIframe.style.left = textboxPosition.x + "px";
 	}
-	this.completions.style.top = this.completionsIframe.style.top = textboxPosition.y + (this.textbox.offsetHeight + 2) + "px";
+	this.completions.style.top = this.completionsIframe.style.top = textboxPosition.y + (this.textbox.offsetHeight - 90) + "px";
 	this.completionsIframe.style.width = this.completions.offsetWidth + "px";
 	this.completionsIframe.style.height = this.completions.offsetHeight + "px";
 
@@ -755,14 +755,17 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 
 	var confirmImg = this.confirmImg = this.document.createElement("div");
 		confirmImg.className = "confirmImg";
-		confirmImg.style.z-index = 999;
 	var confirmOption = confirmImg.appendChild(this.document.createElement("div"));
-		confirmOption.className = "option";
 		confirmOption.style.top = "2px";
+		confirmOption.style.color = "#fff";
+		confirmOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/tick-grey.gif'></div>Confirm New Tag";
+		confirmOption.className = "option";
 		confirmOption.onmousedown = function() { top.HEURIST.autocompleteConfirm.call(that); return false; };
 	var changeOption = confirmImg.appendChild(this.document.createElement("div"));
-		changeOption.className = "option";
 		changeOption.style.top = "14px";
+		changeOption.style.color = "#fff";
+		changeOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/cross.png'></div>Change Tag";
+		changeOption.className = "option";
 		changeOption.onmousedown = function() { top.HEURIST.autocompleteChange.call(that); return false; };
 
 
@@ -779,10 +782,13 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 	else if (approxLeft < 20) approxLeft = 20;
 
 	var tagsPosition = top.HEURIST.getPosition(this.textbox);
-	confirmImg.style.left = (tagsPosition.x + approxLeft - 20) + "px";
-	confirmImg.style.top = (tagsPosition.y - 30) + "px";
+	confirmImg.style.left = (tagsPosition.x + approxLeft - 150) + "px";
+	confirmImg.style.top = (tagsPosition.y - 80) + "px";
+	confirmImg.style.height = "30px";
 
-	this.document.body.appendChild(confirmImg);
+	//this.document.body.appendChild(confirmImg);
+	this.textbox.parentNode.appendChild(confirmImg);
+
 	this.setTextboxRange(start, end);
 	this.freeze();
 	if (top.HEURIST.edit) top.HEURIST.edit.preventTabSwitch = true;

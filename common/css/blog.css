@@ -67,7 +67,7 @@ a.highlight {
 	margin-right: 220px;
 }
 .empty-message {
-	margin-top: 40px;
+	margin-top: 0px;
 	padding: 10px;
 }
 .entry-left {
@@ -228,7 +228,8 @@ h4.archive-month-title {
 	background-color:#FFF;
 	padding:2px
 }
-.woot-title, .woot-editor .add-button, .woot-editor .save-button, .woot-editor .owner-text, .woot-editor .empty-message, .woot-editor .woot-chunk.empty {
+/*ART:  .woot-editor .empty-message,  .woot-editor .woot-chunk.empty*/
+.woot-title, .woot-editor .add-button, .woot-editor .save-button, .woot-editor .owner-text {
 	display: none;
 }
 #yui-history-iframe {

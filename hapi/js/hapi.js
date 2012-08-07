@@ -413,9 +413,11 @@ var HWorkgroupTag = function(id, name, workgroup) {
 	var _name = name;
 	var _workgroup = workgroup;
 
+	/*ARTEM
 	if (HAPI.WorkgroupTagManager) {
 		throw "Cannot construct new HWorkgroupTag objects";
 	}
+	*/
 
 	this.getID = function() { return _id; };
 	this.getName = function() { return _name; };
@@ -2276,31 +2278,39 @@ HWorkgroupManager.prototype = new HObject();
 HAPI.WorkgroupManager = HWorkgroupManager;
 
 
-var HWorkgroupTagManager = new function(wgTags) {
+var HWorkgroupTagManager = new function(__wgTags) {
 	/* wgTags is an array, each entry is a triplet of [id, name, workgroupID] */
 	var _wgTags = [];
 	var _wgTagsById = {};
 	var _wgTagsByName = {};
 	var _wgTagsByGroup = {};
 
-	/* wgTags are constructed by the tag manager */
-	var i, workgroup, newWgTag;
-	for (i=0; i < wgTags.length; ++i) {
-		workgroup = HWorkgroupManager.getWorkgroupById(wgTags[i][2]);
-		if (! workgroup) { continue; }
+	this.loadTags = function(wgTags){
 
-		newWgTag = new HWorkgroupTag(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
+		_wgTags = [];
+		_wgTagsById = {};
+		_wgTagsByName = {};
+		_wgTagsByGroup = {};
 
-		_wgTags.push(newWgTag);
-		_wgTagsById[wgTags[i][0]] = newWgTag;
-		_wgTagsByName[wgTags[i][1].toLowerCase()] = newWgTag;
-		if (_wgTagsByGroup[wgTags[i][2]]) {
-			_wgTagsByGroup[wgTags[i][2]].push(newWgTag);
+		/* wgTags are constructed by the tag manager */
+		var i, workgroup, newWgTag;
+		for (i=0; i < wgTags.length; ++i) {
+			workgroup = HWorkgroupManager.getWorkgroupById(wgTags[i][2]);
+			if (! workgroup) { continue; }
+
+			newWgTag = new HWorkgroupTag(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
+
+			_wgTags.push(newWgTag);
+			_wgTagsById[wgTags[i][0]] = newWgTag;
+			_wgTagsByName[wgTags[i][1].toLowerCase()] = newWgTag;
+			if (_wgTagsByGroup[wgTags[i][2]]) {
+				_wgTagsByGroup[wgTags[i][2]].push(newWgTag);
+			}
+			else {
+				_wgTagsByGroup[wgTags[i][2]] = [ newWgTag ];
+			}
 		}
-		else {
-			_wgTagsByGroup[wgTags[i][2]] = [ newWgTag ];
-		}
-	}
+	};
 
 	this.getWgTagById = function(id) {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
@@ -2321,6 +2331,8 @@ var HWorkgroupTagManager = new function(wgTags) {
 		}
 		return (_wgTagsByGroup[workgroup.getID()] || []).slice(0);
 	};
+
+	this.loadTags(__wgTags);
 }(HAPI_userData.workgroupTags || []);
 HWorkgroupTagManager.prototype = new HObject();
 HAPI.WorkgroupTagManager = HWorkgroupTagManager;

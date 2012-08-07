@@ -388,7 +388,7 @@ FlexImport = (function () {
 					}
 				}
 				// for types that have subtypes show select for subtypes
-				if (this.value != "url"  &&  this.value != "notes"  &&
+				if (this.value != "url"  &&  this.value != "scratchpad"  &&
 					this.value != "tags"  &&  this.value != "wgTags"  &&
 					HDetailManager.getDetailTypeById(this.value) &&
 					HDetailManager.getDetailTypeById(this.value).getVariety() == HVariety.GEOGRAPHIC) {
@@ -439,7 +439,7 @@ FlexImport = (function () {
 			var alist = [];
 
 			alist.push({id:'url', name:'URL', selected:(columnName == 'url'), req:false});
-			alist.push({id:'notes', name:'Notes', selected:(columnName == 'notes'), req:false});
+			alist.push({id:"scratchpad", name:'Scratchpad', selected:(columnName == "scratchpad"), req:false});
 
 			var recStructure = top.HEURIST.rectypes.typedefs[FlexImport.recType.getID()].dtFields;
 			var dtyName_ind = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
@@ -710,7 +710,7 @@ FlexImport = (function () {
 				FlexImport.cols[i] = undefined;
 			}
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
-			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "notes") {
+			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "scratchpad") {
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[i]);
 				//mark which columns have the REFERENCE identifying data
 				if (detailType.getVariety() == HVariety.REFERENCE) {
@@ -868,8 +868,8 @@ FlexImport = (function () {
 			td = tr.appendChild(document.createElement("td"));
 			if (FlexImport.cols[j] == "url") {
 				td.innerHTML = "URL";
-			} else if (FlexImport.cols[j] == "notes") {
-				td.innerHTML = "Notes";
+			} else if (FlexImport.cols[j] == "scratchpad") {
+				td.innerHTML = "Scratchpad";
 			} else if (FlexImport.cols[j] == "tags") {
 				if (! tags) {
 					tags = true;
@@ -968,7 +968,7 @@ FlexImport = (function () {
 				td = tr.appendChild(document.createElement("td"));
 				if (FlexImport.cols[j] == "url") {
 					td.innerHTML = "<p>" + record.getURL() + "</p>";
-				} else if (FlexImport.cols[j] == "notes") {
+				} else if (FlexImport.cols[j] == "scratchpad") {
 					td.innerHTML = "<p>" + record.getNotes() + "</p>";
 				} else if (FlexImport.cols[j] == "tags") {
 					if (! tags) {
@@ -1082,7 +1082,7 @@ FlexImport = (function () {
 				// set records detail value
 				if (FlexImport.cols[j] == "url") {
 					hRec.setURL(val);
-				} else if (FlexImport.cols[j] == "notes") {
+				} else if (FlexImport.cols[j] == "scratchpad") {
 					hRec.setNotes(val);
 				} else if (FlexImport.cols[j] == "tags") {
 					var vals = val.split(",");

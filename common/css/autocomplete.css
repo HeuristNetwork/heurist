@@ -91,6 +91,7 @@ div.confirmImg {
 	background-color: RGBA(0,0,0,0.7);
 	padding: 1px;
 	cursor: default;
+	z-index: 999;
 	border-radius: 5px;
 	box-shadow:0px 1px 3px RGBA(0,0,0,0.5);
 /*	background-image: url(../images/confirm-change.png);

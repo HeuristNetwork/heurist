@@ -1,15 +1,15 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * editGroupTags.php
+ * workgroup tags addition/deletion/statistics
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
- // TODO: Needs styling with title bar same as other pages in the admin menu - Irek
 ?>
 
 <?php
@@ -34,7 +34,6 @@ mysql_connection_db_select(DATABASE);
 <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
 <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
  <style type="text/css">
-body { overflow: auto; }
 .tbox { border: 1px solid black; margin: 1px; }
 .gr_div { padding: 4px 0px; }
 ul { margin: 2px; }
@@ -51,24 +50,17 @@ function delete_tag(tag_ID) {
 
 </head>
 
-<body class="popup">
+<body class="popup" width="840" height="550" style="margin: 5px; padding: 0; overflow:hidden;">
 
-<?php // fiel does not exist echo file_get_contents('menu.html');
-?>
-
-<div class="banner">
-<h2>Manage workgroup tags</h2>
-</div>
 <div id="page-inner">
-Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user, 
+Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
 workgroup tags are a controlled list of shared tags established by a workgroup administrator.
 <br>The list below only shows workgroups of which you are an administrator. <br>
 
 <?php
-	// TODO: these are giving undefined index errors for 'deleting' and 'adding' in the log  7/11/11
-	if ($_REQUEST['deleting']) {
+	if (array_key_exists('deleting', $_REQUEST) && $_REQUEST['deleting']) {
 		delete_tag();
-	} else if ($_REQUEST['adding']) {
+	} else if (array_key_exists('adding', $_REQUEST) && $_REQUEST['adding']) {
 		add_tags();
 	}
 ?>
@@ -80,6 +72,7 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 
 
 <input type="submit" value="Add workgroup tag(s)">
+<input type="button" value="Close Form" onclick="{window.close('lala');}">
 <input type="hidden" name="adding" value="1">
 <input type="hidden" name="deleting" value="0" id="kwd_delete">
 
@@ -114,14 +107,13 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 <?php
 		}
 		// TODO: this is giving undefined index error for 'new' in the log  7/11/11
-		print ' <li>add: <input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]) . '"></li>';
+		print ' <li>add: <input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . (  array_key_exists('new', $_REQUEST)?htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]):'') . '"></li>';
 		print '</ul>';
 		print '</div>';
 	}
 ?>
 
 </form>
-</div>
 </div>
 </body>
 </html>

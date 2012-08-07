@@ -168,6 +168,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 	$tbody.append("<tr><td class='entry-edit-link-cell'></td><td class='entry-fields'/></tr>");
 
+	// renderer VIEW mode
 	this.renderFields = function() {
 		var content = "<table><tbody>" +
 			"<tr><td><h2 class='entry-title'>" + this.record.getDetail(Blog.titleDetailType) + "</h2></td></tr>";
@@ -178,6 +179,8 @@ BlogEntry: function(record, parentElement, isNew) {
 		content += "<tr class='entry-tags-row'><td>"+ (Blog.group ? "Personal tags" : "Tags") + ": <span class='entry-tags-span'/></td></tr>";
 
 		$(".entry-fields", $tbody).empty().append(content);
+
+		//Personal tags
 
 		var $span = $(".entry-tags-span", this.$table);
 		var tags = [];
@@ -203,6 +206,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				$("<a href='#'>please add</a>")
 					.click(function() {
 						that.edit();
+						//ART Blog.showEditTagDialog();
 						return false;
 					})
 					.appendTo($span);
@@ -210,6 +214,8 @@ BlogEntry: function(record, parentElement, isNew) {
 				$(".entry-tags-row", this.$table).remove();
 			}
 		}
+
+		//Workgroup tags
 
 		$span = $(".entry-wg-tags-span", this.$table);
 		tags = this.record.getWgTags();
@@ -621,11 +627,12 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()) {
+
 			this.wootEditor = new HAPI.WOOT.GUI.WootEditor({ woot: this.woot, element: $(".entry-content", this.$div)[0] });
 
-		if (text.length > 1000) {
-			$(".woot-editor", this.$div).addClass("abbreviated");
-		}
+			if (text.length > 1000) {
+				$(".woot-editor", this.$div).addClass("abbreviated");
+			}
 
 			// dodgy hack time - replace the onsubmit and oncancel handlers that the WootEditor puts on the editor form
 			this.wootEditor.form.onsubmit = function() {
@@ -641,6 +648,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					$(".save-cancel-button-row", that.$table).remove();
 					$(".entry-thumb-input-row", that.$table).remove();
 					$(".entry-geo-input-row", that.$table).remove();
+					$(".entry-fields", $tbody).empty();
 					that.renderFields();
 				}, 0);
 				return false;
@@ -734,6 +742,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			this.wootEditor.appendNewChunk(null);
 		}
 
+		//change "view" components to "edit" inputs
 
 		var content = "<table><tbody>" +
 			"<tr>" +
@@ -755,32 +764,26 @@ BlogEntry: function(record, parentElement, isNew) {
 				"<td><input class='entry-edit-tags-input'></td>" +
 			"</tr>";
 
+			// readonly='readonly' onclick='{Blog.showEditTagDialog();}'  &nbsp;<a href='#' onclick='{Blog.showEditTagDialog();}'>Add/edit tags</a>
+
 		$(".entry-fields", this.$table).empty().append(content);
 
 		if (Blog.group) {
 			var $taginput = $(".entry-edit-wg-tags-input", this.table);
-			var $select = $("<select><option value=''>Select a tag...</option></select>");
-			var wgTags = HWorkgroupTagManager.getWorkgroupTags(Blog.group);
-			var l = wgTags.length;
-			for (var i = 0; i < l; ++i) {
-				(function (kwd) {
-					$("<option>" + kwd + "</option>")
-					.click(function () {
-						var re = new RegExp('(^|,)' + kwd + '(,|$)');
-						if (! re.test($taginput.val())) {
-							if ($taginput.val().length > 0) {
-								$taginput.val($taginput.val() + ",");
-							}
-							$taginput.val($taginput.val() + kwd);
-						}
-						$select.val("");
-					})
-					.appendTo($select);
-				})(wgTags[i].getName());
-			}
+			var $select = $("<select class='select-wg-tags'></select>");
+
+			Blog.fillWgTags($select);
+
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../../admin/ugrps/editGroupTags.php"+(database ? "&db="+database : "")+"'>admin</a>");
+
+					var $la = $("<a href='#'>Edit list</a>", this.table)
+					.click(function() {
+						Blog.showEditWgTagsDialog();
+						return false;
+					});
+
+					$select.after("&nbsp;&nbsp", $la);
 			}
 		}
 
@@ -801,12 +804,14 @@ BlogEntry: function(record, parentElement, isNew) {
 
 		$input = $(".entry-edit-tags-input", this.$table);
 		if (this.record.isPersonalised()) {
-			$input.val(this.record.getTags())
+			$input.val(this.record.getTags());  //assign list of tags to input
 		};
+		/* OUTDATED!!!! - it does not work properly at all */
 		new top.HEURIST.autocomplete.AutoComplete(
 			$input[0],
 			top.HEURIST.tagAutofill, { nonVocabularyCallback: top.HEURIST.showConfirmNewTag }
 		);
+
 
 		// thumbnail
 		var $td = $("<td>Image:</td><td><input type='file' class='entry-thumb-input'/></td>");
@@ -848,7 +853,7 @@ BlogEntry: function(record, parentElement, isNew) {
 	};
 
 	/**
-	* AO: Delete does not worj in HAPI!!!
+	* AO: Delete does not work in HAPI!!!
 	*/
 	this.deleteButtonClick = function() {
 
@@ -908,6 +913,16 @@ BlogEntry: function(record, parentElement, isNew) {
 			if (! this.record.isPersonalised()) {
 				this.record.addToPersonalised();
 			}
+			//add new tags to manager
+			for (var i = 0; i < tags.length; ++i) {
+				if (tags[i]){
+					var verifiedTag = HTagManager.getTag(tags[i]);
+					if (verifiedTag === null) {
+						HTagManager.addTag(tags[i]);
+					}
+				}
+			}
+
 			for (var i = 0; i < tags.length; ++i) {
 				if (tags[i]){
 					this.record.addTag(tags[i]);
@@ -988,9 +1003,79 @@ BlogEntry: function(record, parentElement, isNew) {
 	};
 },
 
+showEditWgTagsDialog: function(){
 
+	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
 
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php"+(database ? "?db="+database : ""), { callback: function(tags) {
+		if (tags){
 
+			var _updateHAPI = function(context){
+
+					if(!context) {
+						alert("An error occurred trying to contact the database");
+					} else {
+						HAPI_userData = context;
+						HWorkgroupTagManager.loadTags(HAPI_userData.workgroupTags || []); //refresh hapi object
+						$select = $(".select-wg-tags", this.$table);
+						Blog.fillWgTags($select);
+					}
+			}
+
+			var baseurl = top.HEURIST.basePath + "hapi/php/loadHapiUserInfo.php";
+			var callback = _updateHAPI;
+			var params = "db="+database+'&raw=1';
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+
+		}
+
+	} });
+
+	return false;
+},
+
+fillWgTags: function($select){
+
+			$select.empty();
+			$("<option value=''>Select a tag...</option>").appendTo($select);
+
+			var wgTags = HWorkgroupTagManager.getWorkgroupTags(Blog.group);
+			var l = wgTags.length;
+			for (var i = 0; i < l; ++i) {
+				(function (kwd) {
+					$("<option>" + kwd + "</option>")
+					.click(function () {
+						var re = new RegExp('(^|,)' + kwd + '(,|$)');
+						if (! re.test($taginput.val())) {
+							if ($taginput.val().length > 0) {
+								$taginput.val($taginput.val() + ",");
+							}
+							$taginput.val($taginput.val() + kwd);
+						}
+						$select.val("");
+					})
+					.appendTo($select);
+				})(wgTags[i].getName());
+			}
+
+			//return $select;
+},
+
+/* ART
+showEditTagDialog: function(){
+
+	top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
+		if (tags)
+			$input = $(".entry-edit-tags-input", this.$table); {
+			$input.val(tags);
+			//personalWindow.document.getElementById("tags").value = tags;
+		}
+
+	} });
+
+	return false;
+},
+*/
 
 loadTags: function() {
 	HAPI.XHR.sendRequest("../../viewers/blog/getTags.php?u=" + Blog.user.getID() + (database ? "&db="+database : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
@@ -1291,7 +1376,7 @@ search: function(opts) {
 	}
 
 	for (var i = 0; i < matches.length; ++i) {
-		this.entries.push(new Blog.BlogEntry(matches[i], mainElem));
+		this.entries.push(new Blog.BlogEntry(matches[i], mainElem, false));
 	}
 
 	// hide the current month archive if we're displaying the current month

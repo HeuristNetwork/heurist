@@ -45,13 +45,46 @@
        <div class="help"><span class=prompt>Double-click on a tag to remove it from this record</span></div>
       </div>
 	  </div>
-      <div id="admin-wgTags"><br><a href="../../../admin/ugrps/editGroupTags.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
+      <div id="admin-wgTags"><br><a href="#" onclick="{showEditWgTagsDialog(); return false;}"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
 
 <script>
 	document.write('<form id=wgtag-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php" action="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php"></form>');
 </script>
 <script src="../../tags/usergroupTagEditorLibrary.js"></script>
 <script>
+
+function showEditWgTagsDialog(){
+
+	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+
+	var database = (top.HEURIST.database.name || top.HEURIST.parameters.db);
+
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php"+(database ? "?db="+database : ""), { callback: function(tags) {
+		if (tags){
+
+			var _updateTags = function(context){
+
+					if(!context) {
+						alert("An error occurred trying to contact the database");
+					} else {
+						top.HEURIST.user.workgroupTags = context['workgroupTags'];
+						top.HEURIST.user.workgroupTagOrder = context['workgroupTagOrder'];
+
+						//recreate table 
+
+					}
+			}
+
+			var baseurl = top.HEURIST.basePath + "records/tags/reloadUsergroupTags.php";
+			var callback = _updateTags;
+			var params = "db="+database;
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		}
+
+	} });
+
+	return false;
+}
 
 var removeButton = document.getElementById("remove-button");
 var addButton = document.getElementById("add-button");

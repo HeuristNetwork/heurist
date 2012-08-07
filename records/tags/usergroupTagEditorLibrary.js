@@ -15,6 +15,8 @@
 
 if (! window.HEURIST) window.HEURIST = {};
 window.HEURIST.wgTagEditor = {
+
+	// add tag to selected list
 	addWgTag: function(row) {
 		var newInput = document.createElement("input");
 			newInput.type = "hidden";
@@ -37,6 +39,7 @@ window.HEURIST.wgTagEditor = {
 		if (top.HEURIST.edit) top.HEURIST.edit.changed("workgroups");
 	},
 
+	// remove tag from selected list
 	removeWgTag: function(row) {
 		var newInput = document.createElement("input");
 			newInput.type = "hidden";
@@ -60,6 +63,7 @@ window.HEURIST.wgTagEditor = {
 	},
 
 	tabIndex: 100,
+	// add tag to selected list that are already in record
 	addWgTagToList: function(list, kwdID, groupID, kwdName) {
 		if (! top.HEURIST.workgroups[groupID]) {
 			alert(groupID);
@@ -82,16 +86,15 @@ window.HEURIST.wgTagEditor = {
 		return list.appendChild(kwdRow);
 	},
 
-	WgTagEditor: function(currWgTagsElt, allWgTagsElt, addButton, removeButton) {
+	reloadTags: function(currWgTagsElt, allWgTagsElt) {
 		var kwdDetailsById = top.HEURIST.user.workgroupTags;
 		var kwdOrder = top.HEURIST.user.workgroupTagOrder;
 		var wKwdIds = parent.HEURIST.record? parent.HEURIST.record.workgroupTags : [];
 
-		HEURIST.wgTagEditor.addButton = addButton;
-		HEURIST.wgTagEditor.removeButton = removeButton;
-
 		var wgs = top.HEURIST.workgroups;
 		var usedKwdIds = {};
+
+		//fill current list
 		for (var i=0; i < wKwdIds.length; ++i) {
 			var kwdDetails = kwdDetailsById[ wKwdIds[i] ];
 			if (! kwdDetails) continue;	// workgroup-tag for a workgroup this user isn't in
@@ -107,6 +110,7 @@ window.HEURIST.wgTagEditor = {
 			usedKwdIds[ wKwdIds[i] ] = true;
 		}
 
+		//fill list of all tags
 		for (var i = 0; i < kwdOrder.length; ++i) {
 			wKwdId = kwdOrder[i];
 			if (usedKwdIds[wKwdId]) continue;
@@ -121,6 +125,13 @@ window.HEURIST.wgTagEditor = {
 				newRow.onfocus = function() { window.selectedRow = this; addButton.disabled = false; };
 				newRow.onblur = function() { window.selectedRow = null; addButton.disabled = true; };
 		}
+	},
+
+	WgTagEditor: function(currWgTagsElt, allWgTagsElt, addButton, removeButton) {
+		HEURIST.wgTagEditor.addButton = addButton;
+		HEURIST.wgTagEditor.removeButton = removeButton;
+
+		HEURIST.wgTagEditor.reloadTags(currWgTagsElt, allWgTagsElt);
 	}
 };
 

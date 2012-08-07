@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 header("Content-Type: text/javascript");
 define('SAVE_URI', 'disabled');
 
@@ -34,8 +30,14 @@ define_constants($loc["hl_instance"]);
 */
 mysql_connection_db_select(DATABASE);
 
+$is_raw = (array_key_exists('raw', $_REQUEST));
+
 if (! is_logged_in()) {
-	print "var HAPI_userData = {};\n";
+	if($is_raw){
+		print json_format(array(), true);
+	}else{
+		print "var HAPI_userData = {};\n";
+	}
 	return;
 }
 
@@ -54,9 +56,11 @@ $userData = array(
 	"workgroupTags" => $workgroupTags,
 	"currentUser" => $currentUser
 );
-
-print "var HAPI_userData = ";
-print json_encode($userData);
-print ";\n";
-
+if($is_raw){
+	print json_format($userData, true);
+}else{
+	print "var HAPI_userData = ";
+	print json_encode($userData);
+	print ";\n";
+}
 ?>
