@@ -34,6 +34,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 			_myDataSource,
 			_arr_selection = [],
 			_callback_func, //callback function for non-window mode
+			_initRecID, //to open edit user at once
 			_grpID, //if group is defined as parameter - filter by this group
 			_db,
 			_isSingleSelection = false,
@@ -152,6 +153,16 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 									//_myDataTable.getColumn("kickoff").hidden = ishidden;
 									//_myDataTable.getColumn("kickoff").width = ishidden?0:20;
 							}
+
+
+							//do it only once - on load
+							if(!Hul.isnull(_initRecID)){
+								_editUser(_initRecID);
+								_initRecID = null
+
+							}
+
+
 	};
 
 	function _isNotAdmin(__grpID){
@@ -222,6 +233,10 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 					text: "some text"
 				} );
 		infoMessageBox.render(document.body);
+
+		if(top.HEURIST.parameters){ //to open edit user at once
+			_initRecID = top.HEURIST.parameters.recID;
+		}
 
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters && top.HEURIST.parameters.db?

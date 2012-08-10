@@ -924,7 +924,7 @@ top.HEURIST.search = {
 		var rectypeThumb = "style='background-image:url("+ top.HEURIST.iconBaseURL + "thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
 		var rectypeTitle = "Click to see details";
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
-			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
+			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])]  + " ["+res[4]+"] - click to select, shift/ctrl for multiple select";
 		var html =
 		"<div class='recordDiv' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' recID="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
@@ -1070,7 +1070,7 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <br><br>New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=" +top.HEURIST.basePath+ "admin/ugrps/findAddUser.php?register=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+" target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
+				" <div id=register-button><a href=\"#\" onclick=\"{_registerUser();}\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -4121,3 +4121,28 @@ function removeCustomAlert() {
 	*/
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
+
+
+	/**
+	* call new popup - to register new User
+	*/
+	function _registerUser() {
+
+		var _db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
+				top.HEURIST.parameters.db :
+				(top.HEURIST.database && top.HEURIST.database.name?
+					top.HEURIST.database.name:''));
+
+		var URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db;
+
+		top.HEURIST.util.popupURL(top, URL, {
+			"close-on-blur": false,
+			"no-resize": false,
+			height: 640,
+			width: 740,
+			callback: function(context) {
+			}
+		});
+
+		return false;
+	}

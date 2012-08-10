@@ -212,7 +212,12 @@ function print_header_line($bib) {
 
 <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>"><h2 style="text-transform:none; line-height:16px"><?= $bib['rec_Title'] ?></h2>
 	<div id=footer>
-        <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
+
+        <h3>
+        	<div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL_BASE.$bib['rty_ID'].".png)'"?> >
+        		<?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."]" ?>
+        	</div>
+        </h3>
         <br>
         <?php if (@$url) { ?>
         <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
@@ -476,7 +481,7 @@ function print_private_details($bib) {
 						$bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
                                                  " Y ".round($minY,7).", ".round($maxY,7);
 
-                    $geoimage = "<img class='geo-image' src='".HEURIST_SITE_PATH."common/images/geo.gif' onmouseout='{mapViewer.hide();}' onmouseover='{mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}'>&nbsp;";
+                     $geoimage = "<img class='geo-image' src='".HEURIST_SITE_PATH."common/images/geo.gif' onmouseout='{mapViewer.hide();}' onmouseover='{mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}'>&nbsp;";
 
                      $bd['val'] = $geoimage.$bd['val'];
 

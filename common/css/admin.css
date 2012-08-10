@@ -302,6 +302,26 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 	border-color:#EFF2F6;
 	padding:6px 0
 }
+.hidden {
+	visibility:hidden;
+	height: 0px;
+	padding:0px;
+}
+.togglepnl {
+	background-image: url("../images/tright.gif");
+	background-repeat: no-repeat;
+	padding-left:20px;
+	background-color: #ECF1FB;
+}
+.togglepnl a{
+	cursor: pointer;
+	font-size: 1.1em;
+}
+.show {
+	background-image: url("../images/tdown.gif");
+	background-repeat: no-repeat;
+}
+
 #rectypeIcon img {
 	padding: 5px;
 	border-radius: 3px;

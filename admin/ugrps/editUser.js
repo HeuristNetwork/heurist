@@ -37,7 +37,8 @@ function UserEditor() {
 			_updatedFields = [], //field names which values were changed to be sent to server
 			_updatedDetails = [], //field values
 			_db,
-			_isAdmin = true;
+			_isAdmin = true,
+			_isRegistration = false;
 
 	/**
 	* Initialization of input form
@@ -68,6 +69,20 @@ function UserEditor() {
 		if(Hul.isnull(_entity)){
 			_recID =  -1;
 			_entity = [-1,'user','','','','','','','','','','','','','y',''];
+
+			_isRegistration  = !top.HEURIST.is_logged_in();
+			if(_isRegistration){
+				$('#condition').removeClass('hidden');
+				$('#div-inpit-ugr_ID').addClass('hidden');
+				$('#div-inpit-ugr_Enabled').addClass('hidden');
+				$('#div-inpit-ugr_IsModelUser').addClass('hidden');
+				$('#editButtons').addClass('hidden');
+				$('#regButtons').removeClass('hidden');
+				$('#regInfo').removeClass('hidden');
+				$('#contactDetails').html("Email "+top.HEURIST.userGrp['adminName']+": <a href=\"mailto:'"+top.HEURIST.userGrp['adminMail']+"'\">"+
+								top.HEURIST.userGrp['adminMail']+"</a>");
+			}
+
 		}else{ //reset password
 			//permisssions
 			_isAdmin = (top.HEURIST.is_admin() || _recID === top.HEURIST.get_user_id());
@@ -81,6 +96,9 @@ function UserEditor() {
 
 		if(!_isAdmin){
 			//hide and rename buttons
+			$('#div-inpit-ugr_Enabled').addClass('hidden');
+			$('#div-inpit-ugr_IsModelUser').addClass('hidden');
+
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "inline-block";
 		}
@@ -145,7 +163,7 @@ function UserEditor() {
 		el = Dom.get("ugr_ID");
 		if (_recID<0){
 				el.innerHTML = 'to be generated';
-				document.title = "Create New User";
+				document.title = (_isRegistration)?"Registration":"Create New User";
 		}else{
 				el.innerHTML =  _recID;
 				//document.title = "User #: " + _recID+" '"+_entity[6]+" "+_entity[7]+"'";
@@ -266,8 +284,13 @@ function UserEditor() {
 			if(!error){
 				var ss = (_recID < 0)?"added":"updated";
 
-				// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
-				window.close(context); //send back new HEURIST strcuture
+				if(_isRegistration){
+					//reload page with reg success message
+					window.location.replace(top.HEURIST.baseURL + "admin/ugrps/msgRegistrationSuccess.html")
+				}else{
+					// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
+					window.close(context); //send back new HEURIST strcuture
+				}
 			}
 		}
 	}

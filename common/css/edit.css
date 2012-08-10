@@ -498,7 +498,7 @@ div#notes {
 }
 .resource .input-cell {width:80%}
 .relation.editable.reminder {margin:10px 0 0 0;}
-.relation.editable.reminder .resource-div.empty input{width:100% !important}
+.relation.editable.reminder .resource-div.empty .file-resource-div.empty input{width:100% !important}
 .resource.optional {
 	background-color: rgba(255, 255, 255, 0.2);
 }
@@ -527,7 +527,7 @@ div.input-row div.input-cell div#relations-tbody div {
 div.input-row div.input-cell div#relations-tbody div.relation div {
 	display:inline-block
 }
-div.input-row div.input-cell div#relations-tbody div div div.relation div.resource div.resource div.input-row div.input-cell div.resource-div {
+div.input-row div.input-cell div#relations-tbody div div div.relation div.resource div.resource div.input-row div.input-cell div.resource-div div.file-resource-div{
 	width:auto !important
 }
 /***** date and temporal buttons *****/
@@ -662,32 +662,32 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 .input-cell .date-div .in {
 	display: inline;
 }
-.input-cell .resource-div {
+.input-cell .resource-div .file-resource-div {
 	position: relative;
 	white-space: nowrap;
 	padding: 0;
 	display:block
 }
-.input-row .resource-div * {
+.input-row .resource-div .file-resource-div * {
 	vertical-align: middle;
 }
 .input-row .temporal-div {
 	display: block;
 	padding: 0;
 }
-.input-cell .resource-div .edit-resource {
+.input-cell .resource-div .file-resource-div .edit-resource {
 	cursor: pointer;
 	position: relative;/* left: 383px; */
 }
-.input-cell .resource-div .delete-resource {
+.input-cell .resource-div .file-resource-div .delete-resource {
 	cursor: pointer;
 	margin-left: 5px;
 	background-image: url('../images/cross.png');
 }
-.input-cell .resource-div.empty img.edit-resource {
+.input-cell .resource-div.empty .file-resource-div.empty img.edit-resource {
 	visibility: hidden;
 }
-.input-cell .resource-div.empty img.delete-resource {
+.input-cell .resource-div.empty .file-resource-div.empty img.delete-resource {
 	cursor: default;
 	margin-left: 5px;
 	background-image: url('../images/cross-grey.png');
@@ -715,7 +715,7 @@ td.input-cell.readonly img.edit-resource {
 	vertical-align: middle;
 	margin-left: 1ex;
 }
-.input-cell .file-div {
+.input-cell .file-resource-div {
 	white-space: nowrap;
 	padding: 0;
 }
@@ -1071,3 +1071,30 @@ hr {
 	background-position: 5 center;
 	background-repeat: no-repeat;
 }
+.file-resource-div.empty {
+	background-image: url("../images/icon_picture.png");
+	background-position: 5 center;
+	background-repeat: no-repeat;
+}
+
+.thumbPopup {
+	background-color: rgba(255, 255, 255, 0.75);
+	border: 1px solid #FFFFFF;
+	border-radius: 5px 5px 5px 5px;
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+	color: #EDEDED;
+	padding: 5px;
+	z-index: 999;
+	background-repeat:no-repeat;
+   	background-size: 100% auto;
+    background-position: 0 center;
+    height: 100px;
+    width: 100px;
+	margin:-107px 25px;
+	display:none;
+	position:absolute
+}
+/*
+.resource-title:hover div.thumbPopup {
+	display:block;
+}*/

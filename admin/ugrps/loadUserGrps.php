@@ -25,12 +25,14 @@ header('Content-type: text/javascript');
 
 mysql_connection_db_select(DATABASE);
 
-if (is_logged_in()) {
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));
 	$metod = @$_REQUEST['method'];
+
+if (is_logged_in() || $metod=="getuser") {
+
 
 	if($metod=="searchuser"){
 		//search the list of users by specified parameters
@@ -242,7 +244,7 @@ if (is_logged_in()) {
 		/*if($userEmail){
 			$query = $query."ugr_eMail='".$userEmail."'";
 		} else*/
-		if($userID!="0"){
+		if($userID!="0" && is_logged_in()){
 			$query = $query."ugr_ID=".$userID;
 		}else{
 			$query = null;
@@ -254,6 +256,15 @@ if (is_logged_in()) {
 			while ($row = mysql_fetch_row($res)) {
 				$userGrp['users'][$row[0]] = $row;
 			}
+		}
+
+		if(!is_logged_in()){
+			$query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
+			$details = mysql_fetch_row($query);
+			$fullName = $details[0] . " " . $details[1];
+			$eMail = $details[2];
+			$userGrp['adminName'] = $fullName;
+			$userGrp['adminMail'] = $eMail;
 		}
 
 // using ob_gzhandler makes this stuff up on IE6-

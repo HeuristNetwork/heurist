@@ -393,9 +393,10 @@ BlogEntry: function(record, parentElement, isNew) {
 				geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
 				geoImg.className = "geo-image";
 				if(geovalue){
-					geoImg.onmouseover= function(e) { mapViewer.showAt(e, geovalue); };
-					geoImg.onmouseout = function(e) { mapViewer.hide(); };
+					geoImg.onmouseover= function(event) { mapViewer.showAtStatic(event, that.record.getID()); };  //{ mapViewer.showAt(e, geovalue); };
+					geoImg.onmouseout = function(event) { mapViewer.hide(); };
 				}
+
 				newDiv.appendChild(geoImg);
 
 		if (Blog.canEdit()) {

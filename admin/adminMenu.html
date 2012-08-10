@@ -207,5 +207,22 @@
 				</div>
 			</div>
 		</div>
+
+<script type="text/javascript">
+	top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+	var mode = top.HEURIST.parameters.mode;
+ 	if(mode=="users"){
+		var _recID = top.HEURIST.parameters.recID;
+		var sUrl = 'ugrps/manageUsers.php?db=[dbname!]';
+		if(_recID){
+			sUrl = sUrl+'&'+_recID;
+		}
+		loadContent(sUrl);
+		top.HEURIST.parameters.mode = null;
+
+		//window.history.pushState("object or string", "Title", location.pathname+'?db=[dbname!]');
+ 		//location.search = "?db=[dbname!]";
+	}
+</script>
 	</body>
 </html>

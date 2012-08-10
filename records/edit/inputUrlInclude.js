@@ -78,6 +78,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 	var valueVisible = "";
 	var valueHidden = "";
+	var thumbUrl = top.HEURIST.basePath+"common/images/icon_file.jpg";
 
 	if(bdValue){
 		if(bdValue.file){
@@ -94,6 +95,10 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 				//newDiv.bdValue =  valueHidden + '|'+ bdValue.file.URL+'|heurist|'+(bdValue.file.mediaType?bdValue.file.mediaType:'')+'|'+bdValue.file.ext;
 			}
 
+			if(bdValue.file.thumbURL){
+				thumbUrl = bdValue.file.thumbURL;
+			}
+
 		}else{
 			/* old way for real urlinclude - @todo remove
 			valueVisible = bdValue.value;
@@ -106,8 +111,14 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		}
 	}
 
-	newDiv.className = top.HEURIST.util.isempty(valueVisible)? "resource-div empty" : "resource-div";
+	newDiv.className = top.HEURIST.util.isempty(valueVisible)? "file-resource-div empty" : "file-resource-div";
 
+
+	var thumbDiv = this.document.createElement("div");
+		thumbDiv.className = "thumbPopup";
+		thumbDiv.style.backgroundImage = "url("+thumbUrl+")";
+		thumbDiv.style.display = "none";
+		newDiv.appendChild(thumbDiv);
 
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
 		hiddenElt.name = newDiv.name;
@@ -122,6 +133,15 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		textElt.className = "resource-title";
 		//textElt.className = "in"; //"resource-title";
 		//textElt.style.width = 500;
+		textElt.onmouseover = function(e){
+			if(!top.HEURIST.util.isempty(textElt.value)){
+				thumbDiv.style.display = "block";
+			}
+		}
+		textElt.onmouseout = function(e){
+			thumbDiv.style.display = "none";
+		}
+
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
 			if (! e) e = window.event;
@@ -259,7 +279,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(ele
 
 	element.hiddenElt.value = element.hiddenElt.defaultValue = HEURIST.util.isempty(hiddenValue)? "" :hiddenValue;
 
-	element.className = HEURIST.util.isempty(hiddenValue)?"resource-div empty":"resource-div";
+	element.className = HEURIST.util.isempty(hiddenValue)?"file-resource-div empty":"file-resource-div";
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();

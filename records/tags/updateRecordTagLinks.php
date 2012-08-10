@@ -1,7 +1,10 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * updateRecordTagLinks.php
+ *
+ * used in usergroupsTab.html (editRecord) to add/delete workgroup tags for record
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -9,9 +12,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 define("SAVE_URI", "disabled");
 
@@ -21,17 +22,18 @@ if (! is_logged_in()) return;
 
 mysql_connection_overwrite(DATABASE);
 
-
 header("Content-type: text/javascript");
 
 $rec_id = intval(@$_POST["recID"]);
 $actions = $_POST["action"];
+
 if ($rec_id  &&  $actions) {
 	$deletions = array();
 	$additions = array();
 
 	foreach ($actions as $action) {
 		$kwd_id = intval(substr($action, 4));
+
 		if( ! $kwd_id) continue;
 
 		if (substr($action, 0, 3) == "del") {
@@ -44,10 +46,13 @@ if ($rec_id  &&  $actions) {
 		}
 	}
 
-	if (count($deletions) > 0)
+	if (count($deletions) > 0){
 		mysql_query("delete from usrRecTagLinks where rtl_RecID=$rec_id and rtl_TagID in (" . join($deletions,",") . ")");
-	if (count($additions) > 0)
-		mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) values (" . join(",$rec_id), (", $additions) . ",$rec_id)");
+	}
+	if (count($additions) > 0){
+		$query = "insert into usrRecTagLinks (rtl_TagID, rtl_RecID) values (" . join(",$rec_id), (", $additions) . ",$rec_id)";
+		mysql_query($query);
+	}
 
 
 	$res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where rtl_TagID=tag_ID and rtl_RecID=$rec_id");

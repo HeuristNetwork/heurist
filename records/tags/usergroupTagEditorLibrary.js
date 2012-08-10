@@ -18,6 +18,7 @@ window.HEURIST.wgTagEditor = {
 
 	// add tag to selected list
 	addWgTag: function(row) {
+
 		var newInput = document.createElement("input");
 			newInput.type = "hidden";
 			newInput.name = "action[]";
@@ -26,7 +27,7 @@ window.HEURIST.wgTagEditor = {
 
 		var kwdDetails = top.HEURIST.user.workgroupTags[row.id];
 		row.className = "";	// address bug with csshover2
-		document.getElementById("current-workgroup-tags").appendChild(row);
+		HEURIST.wgTagEditor.currWgTagsElt.appendChild(row);
 		row.ondblclick = function() { HEURIST.wgTagEditor.removeWgTag(row); };
 		row.onkeypress = function(e) {
 			if (! e) e = window.event;
@@ -35,6 +36,9 @@ window.HEURIST.wgTagEditor = {
 		row.onfocus = function() { window.selectedRow = this; removeButton.disabled = false; }
 		row.onblur = function() { window.selectedRow = null; removeButton.disabled = true; };
 		HEURIST.wgTagEditor.addButton.disabled = true;
+
+
+		HEURIST.wgTagEditor.selectedTags.push(row.id);
 
 		if (top.HEURIST.edit) top.HEURIST.edit.changed("workgroups");
 	},
@@ -49,7 +53,7 @@ window.HEURIST.wgTagEditor = {
 
 		var kwdDetails = top.HEURIST.user.workgroupTags[row.id];
 		row.className = "";
-		document.getElementById("all-workgroup-tags").appendChild(row);
+		HEURIST.wgTagEditor.allWgTagsElt.appendChild(row);
 		row.ondblclick = function() { HEURIST.wgTagEditor.addWgTag(row); };
 		row.onkeypress = function(e) {
 			if (! e) e = window.event;
@@ -59,11 +63,17 @@ window.HEURIST.wgTagEditor = {
 		row.onblur = function() { window.selectedRow = null; HEURIST.wgTagEditor.addButton.disabled = true; };
 		HEURIST.wgTagEditor.removeButton.disabled = true;
 
+
+		var k = HEURIST.wgTagEditor.selectedTags.indexOf(row.id);
+		if(k>=0){
+			HEURIST.wgTagEditor.selectedTags.splice(k,1);
+		}
+
 		if (top.HEURIST.edit) top.HEURIST.edit.changed("workgroups");
 	},
 
 	tabIndex: 100,
-	// add tag to selected list that are already in record
+	// create row and append it to table
 	addWgTagToList: function(list, kwdID, groupID, kwdName) {
 		if (! top.HEURIST.workgroups[groupID]) {
 			alert(groupID);
@@ -86,20 +96,36 @@ window.HEURIST.wgTagEditor = {
 		return list.appendChild(kwdRow);
 	},
 
-	reloadTags: function(currWgTagsElt, allWgTagsElt) {
+	clearList: function(list) {
+		while( list.hasChildNodes && list.lastChild )
+		{
+			list.removeChild(list.lastChild);
+		}
+	},
+
+	//filld table with rows
+	reloadTags: function() {
+
+		HEURIST.wgTagEditor.clearList(HEURIST.wgTagEditor.currWgTagsElt);
+		HEURIST.wgTagEditor.clearList(HEURIST.wgTagEditor.allWgTagsElt);
+
+
 		var kwdDetailsById = top.HEURIST.user.workgroupTags;
 		var kwdOrder = top.HEURIST.user.workgroupTagOrder;
-		var wKwdIds = parent.HEURIST.record? parent.HEURIST.record.workgroupTags : [];
+		if(!HEURIST.wgTagEditor.selectedTags) {
+			HEURIST.wgTagEditor.selectedTags = parent.HEURIST.edit.record? parent.HEURIST.edit.record.workgroupTags : [];
+		}
+		var wKwdIds = HEURIST.wgTagEditor.selectedTags;
 
 		var wgs = top.HEURIST.workgroups;
-		var usedKwdIds = {};
+		var usedKwdIds = {}; //already selected
 
 		//fill current list
 		for (var i=0; i < wKwdIds.length; ++i) {
 			var kwdDetails = kwdDetailsById[ wKwdIds[i] ];
 			if (! kwdDetails) continue;	// workgroup-tag for a workgroup this user isn't in
 
-			var newRow = HEURIST.wgTagEditor.addWgTagToList(currWgTagsElt, wKwdIds[i], kwdDetails[0], kwdDetails[1]);
+			var newRow = HEURIST.wgTagEditor.addWgTagToList(HEURIST.wgTagEditor.currWgTagsElt, wKwdIds[i], kwdDetails[0], kwdDetails[1]);
 				newRow.ondblclick = function(row) { return function() { HEURIST.wgTagEditor.removeWgTag(row); }; }(newRow);
 				newRow.onkeypress = function(row) { return function(e) {
 					if (! e) e = window.event;
@@ -110,13 +136,13 @@ window.HEURIST.wgTagEditor = {
 			usedKwdIds[ wKwdIds[i] ] = true;
 		}
 
-		//fill list of all tags
+		//fill list of all tags except selected
 		for (var i = 0; i < kwdOrder.length; ++i) {
 			wKwdId = kwdOrder[i];
-			if (usedKwdIds[wKwdId]) continue;
+			if (usedKwdIds[wKwdId]) continue; //already selected
 
 			var kwdDetails = kwdDetailsById[ wKwdId ];
-			var newRow = HEURIST.wgTagEditor.addWgTagToList(allWgTagsElt, wKwdId, kwdDetails[0], kwdDetails[1]);
+			var newRow = HEURIST.wgTagEditor.addWgTagToList(HEURIST.wgTagEditor.allWgTagsElt, wKwdId, kwdDetails[0], kwdDetails[1]);
 				newRow.ondblclick = function(row) { return function() { HEURIST.wgTagEditor.addWgTag(row); }; }(newRow);
 				newRow.onkeypress = function(row) { return function(e) {
 					if (! e) e = window.event;
@@ -127,11 +153,16 @@ window.HEURIST.wgTagEditor = {
 		}
 	},
 
-	WgTagEditor: function(currWgTagsElt, allWgTagsElt, addButton, removeButton) {
+	WgTagEditor: function(currWgTagsElt, allWgTagsElt, addButton, removeButton)
+	{
 		HEURIST.wgTagEditor.addButton = addButton;
 		HEURIST.wgTagEditor.removeButton = removeButton;
+		HEURIST.wgTagEditor.currWgTagsElt = currWgTagsElt;
+		HEURIST.wgTagEditor.allWgTagsElt = allWgTagsElt;
 
-		HEURIST.wgTagEditor.reloadTags(currWgTagsElt, allWgTagsElt);
+		HEURIST.wgTagEditor.selectedTags =  parent.HEURIST.edit.record? parent.HEURIST.edit.record.workgroupTags : [];
+
+		HEURIST.wgTagEditor.reloadTags();
 	}
 };
 

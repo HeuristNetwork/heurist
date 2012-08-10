@@ -2267,8 +2267,8 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 		input.value = bdValue.geo.value;
 
 		geoImg.onmouseover= function(e) {
-				mapViewer.showAt(e, bdValue.geo.value); //dynamic google map (use digitizer.js)
-				//mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID); //static google map (use showMapUrl.php)
+				//mapViewer.showAt(e, bdValue.geo.value); //dynamic google map (use digitizer.js)
+				mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID); //static google map (use showMapUrl.php) see mapViewer.js
 		};
 
 		var description = this.geoValueToDescription(bdValue.geo);
@@ -2295,8 +2295,8 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(ele
 	element.descriptionSpan.appendChild(this.document.createElement("b")).appendChild(this.document.createTextNode(" " + description.type));
 	element.descriptionSpan.appendChild(this.document.createTextNode(" " + description.summary + " "));
 	element.geoImg.onmouseover= function(e) {
-		mapViewer.showAt(e, value);  //dynamic
-		//mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID); //static google map (use showMapUrl.php)
+		//mapViewer.showAt(e, value);  //dynamic
+		mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID); //static google map (use showMapUrl.php) see mapViewer.js
 	};
 
 	element.editLink.innerHTML = "edit";

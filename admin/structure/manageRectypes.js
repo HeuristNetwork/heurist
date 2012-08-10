@@ -76,7 +76,7 @@ function RectypeManager() {
 				ind++;
 			}
 		}//for groups
-		
+
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		tabView.addTab(new YAHOO.widget.Tab({
@@ -320,8 +320,8 @@ function RectypeManager() {
 			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var rectypeID = oRecord.getData('id');
-	                elLiner.innerHTML = '<a href="#search">'+ rectypeID + '</a>'; 
-			},			
+	                elLiner.innerHTML = '<a href="#search">'+ rectypeID + '</a>';
+			},
 			},
 			{ key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
 			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -337,7 +337,14 @@ function RectypeManager() {
 
 					var str1 = top.HEURIST.iconBaseURL + id + ".png?" + curtimestamp;
 					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
-					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var icon ="<div class=\"rectypeImages\">"+
+									"<a href=\"#edit_icon\">"+
+										"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
+									"</a>"+
+									"<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
+										"<a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
+									"</div>"+
+									"</div>";
 					elLiner.innerHTML = icon;
 			}},
 			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
@@ -417,7 +424,7 @@ function RectypeManager() {
 				var rectypeID = oRecord.getData("id");
 				var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
-							
+
 				if(elLink.hash === "#search") {
 					window.open(top.HEURIST.baseURL+'search/search.html?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
 				}else if(elLink.hash === "#edit_rectype") {
@@ -647,7 +654,7 @@ function RectypeManager() {
 					xy[0] = xy[0] - 10;
 
 					_rolloverInfo.showInfoAt(xy,"inforollover2",textTip);
-					
+
 				}
 				else if(forceHideTip) {
 					currentTipId = '';
@@ -1065,7 +1072,7 @@ function RectypeManager() {
 				if(grpID<0){
 
 					_refreshAllTables();
-					
+
 					grpID = context['0'].result;
 					ind = _groups.length;
 					_addNewTab(ind, grpID, name, description);
@@ -1097,12 +1104,12 @@ function RectypeManager() {
 
 
 	}
-    
+
     //
     //
     //
     function _refreshAllTables(){
-        
+
         var ind;
         for(ind in arrTables){
              if(!(Hul.isnull(ind) || Hul.isnull(arrTables[ind]))){
@@ -1110,7 +1117,7 @@ function RectypeManager() {
                            //arrTables[ind].render();
               }
         }
-    }	
+    }
     //
 	//
 	//
@@ -1144,7 +1151,7 @@ function RectypeManager() {
 						tabView.set("activeIndex", 0);
 						top.HEURIST.rectypes = context.rectypes;
 						_cloneHEU = null;
-						
+
 						_refreshAllTables();
 					}
 				}

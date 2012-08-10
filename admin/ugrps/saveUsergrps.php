@@ -20,13 +20,6 @@
 	//require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 
-	if (! is_logged_in()) {
-		//ARTEM
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-		return;
-	}
-
-	header('Content-type: text/javascript');
 
 	$legalMethods = array(
 		"saveUser",
@@ -63,11 +56,20 @@
 		"ugl_Role"=>"s"
 	);
 
+
 	if (!@$_REQUEST['method']) {
 		die("invalid call to saveUsergrps, method parameter is required");
 	}else if(!in_array($_REQUEST['method'], $legalMethods)) {
 		die("unsupported method call to saveUsergrps");
 	}
+
+
+	if (!is_logged_in() && @$_REQUEST['method'] != "saveUser") {
+		//ARTEM
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		return;
+	}
+	header('Content-type: text/javascript');
 
 	$db = mysqli_connection_overwrite(DATABASE); //artem's
 
@@ -84,9 +86,17 @@
 				die("invalid data structure sent with saveUser method call to saveUsergrps.php");
 			}
 
-			$groupID = @$_REQUEST['groupID'];
-
 			$colNames = $data['user']['colNames'];
+
+
+			if(!is_logged_in()){
+				//$groupID = 3; //WARNING! This is hardcode reference to "Other users" workgroup
+				$groupID = null; //new user is not assigned to any group
+			}else{
+				$groupID = @$_REQUEST['groupID'];
+				$key = -1;
+			}
+
 
 			$rv = array();
 			$rv['result'] = array(); //result
@@ -204,6 +214,26 @@
 	}
 
 	/**
+	*  if user is not enabled and login count=0 - this is approvement operation
+	*/
+	function isApprovement( $type, $recID ) {
+
+		$ret = false;
+
+		if(is_admin() && $type=='user'){
+				mysql_connection_overwrite(DATABASE);
+				$query = "select ugr_Enabled, ugr_LoginCount from ".DATABASE.".sysUGrps where ugr_ID=$recID";
+				$res = mysql_query($query);
+				while ($row = mysql_fetch_array($res)) {
+					$ret = ($row[0]=="n" && $row[1]==0);
+				}
+		}
+
+		return $ret;
+	}
+
+
+	/**
 	* put your comment there...
 	*
 	*
@@ -244,16 +274,12 @@
 						$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
 						$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
 						$val = crypt($val, $salt);
-					}else if($colName == "ugr_Name"){
-						$ugr_Name = $val;
-					}else if($colName == "ugr_FirstName"){
-						$ugr_FirstName = $val;
-					}else if($colName == "ugr_LastName"){
-						$ugr_LastName = $val;
-					}else if($colName == "ugr_eMail"){
-						$ugr_eMail = $val;
+					}else if($colName == "ugr_Enabled"){
+						if (!is_logged_in()){  //it is not possible to enable user - if not admin
+							$val = "n";
+						}
+						$ugr_Enabled = $val;
 					}
-
 
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
@@ -273,6 +299,12 @@
 				}
 			}//for columns
 
+			$isApprovement = false;
+			if(!$isInsert && isset($ugr_Enabled) && $ugr_Enabled=="y"){
+				$isApprovement = isApprovement($type, $recID);
+			}
+
+
 			if($query!=""){
 				if($isInsert){
 					$query = "insert into sysUGrps (".$fieldNames.") values (".$query.")";
@@ -284,34 +316,24 @@
 
 				if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper $type# $recID in updateUserGroup - ".$rows; //$msqli->error;
+
+					if(strpos(" ".$rows, "Duplicate entry")>0){
+						$ret = "Error $oper $type. Either 'Login name' or 'Email' already exists in database.";
+					}else{
+						$ret = "error $oper $type# $recID in updateUserGroup - ".$rows; //$msqli->error;
+					}
 				} else {
 					if($isInsert){
 						$recID = $db->insert_id;
 
 						if($type=='user'){
-							$email_text =
-							"Your Heurist account registration has been approved.
 
-							Heurist database: ".HEURIST_DBNAME."
-
-							Login at:
-
-							".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
-
-							with the username: " . $ugr_Name . ".
-
-							We recommend visiting the 'Take the Tour' section and
-							also visiting the Help function, which provides comprehensive
-							overviews and step-by-step instructions for using Heurist.
-
-							";
-							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FirstName.' '.
-								$ugr_LastName.' ['.$ugr_eMail.']', $email_text,
-								"From: ".HEURIST_MAIL_TO_INFO."\r\nCc: ".HEURIST_MAIL_TO_INFO);
-							if (! $rv) {//TODO  SAW this should not fail silently
-								error_log("mail send failed: " . $ugr_eMail);
+							if(!is_logged_in()){
+							 	sendNewUserInfoEmail($recID);
+							} else if (isset($ugr_Enabled) && $ugr_Enabled=="y") {
+								sendApprovalEmail($recID);
 							}
+
 							if($groupID){
 								//add new user to specified group
 								changeRole($groupID, $recID, "member", null, false);
@@ -328,6 +350,11 @@
 
 					}//if $isInsert
 					else{
+
+						if($isApprovement){
+							sendApprovalEmail($recID);
+						}
+
 						$ret = $recID;
 					}
 				}
@@ -339,6 +366,92 @@
 		}
 
 		return $ret;
+	}
+
+	/**
+	* Send email to admin about new user
+	*
+	*/
+	function sendNewUserInfoEmail($recID){
+
+		global $db;
+
+				//mysql_connection_overwrite(DATABASE);
+				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
+				$res = mysql_query($query);
+				while ($row = mysql_fetch_assoc($res)) {
+
+					$ugr_Name = $row['ugr_Name'];
+					$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
+					$ugr_Organisation = $row['ugr_Organisation'];
+					$ugr_eMail = $row['ugr_eMail'];
+
+					//create email text for admin
+					$email_text =
+"There is a Heurist user registration awaiting approval.
+
+The user details submitted are:
+
+Database name: ".DATABASE."
+Full name:    ".$ugr_FullName."
+Email address: ".$ugr_eMail."
+Organisation:  ".$ugr_Organisation."
+
+Go to the address below to review further details and approve the registration:
+
+".HEURIST_URL_BASE."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users
+
+";
+
+				$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
+								"From: root");
+				if (! $rv) {//TODO  SAW this should not fail silently
+								error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
+				}
+
+				}
+	}
+
+	/**
+	*   Send approval message to user
+	*/
+	function sendApprovalEmail($recID){
+
+		global $db;
+
+				//mysql_connection_overwrite(DATABASE);
+				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
+				$res = mysql_query($query);
+				while ($row = mysql_fetch_assoc($res)) {
+
+					$ugr_Name = $row['ugr_Name'];
+					$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
+					$ugr_Organisation = $row['ugr_Organisation'];
+					$ugr_eMail = $row['ugr_eMail'];
+
+							$email_text =
+							"Your Heurist account registration has been approved.
+
+							Heurist database: ".HEURIST_DBNAME."
+
+							Login at:
+
+							".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
+
+							with the username: " . $ugr_Name . ".
+
+							We recommend visiting the 'Take the Tour' section and
+							also visiting the Help function, which provides comprehensive
+							overviews and step-by-step instructions for using Heurist.
+
+							";
+
+							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
+								"From: ".HEURIST_MAIL_TO_ADMIN."\r\nCc: ".HEURIST_MAIL_TO_ADMIN);
+							if (! $rv) {//TODO  SAW this should not fail silently
+								error_log("mail send failed: " . $ugr_eMail);
+							}
+				}
 	}
 
 	/**
