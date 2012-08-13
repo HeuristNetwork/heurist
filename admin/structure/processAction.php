@@ -329,14 +329,14 @@ function importRectype($importRty) {
 
 				$rtsFieldDef["rst_IDInOriginatingDB"] = $rtsFieldDef["rst_ID"];
 			}
-			// check that field don't  already exist
+			// check that field doesn't already exist
 			$resRstExist = mysql_query("select rst_ID from ".$targetDBName.".defRecStructure ".
 							"where rst_OriginatingDBID = ".$rtsFieldDef["rst_OriginatingDBID"].
 							" AND rst_IDInOriginatingDB = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
 			if ( mysql_num_rows($resRstExist)) {
 				makeLogEntry("Record structure", $rtsFieldDef["rst_ID"], "Error: found existing field structure while importing field \"".$rtsFieldDef["rst_DisplayName"]."\" defDetailType ID = $importFieldDtyID rectype ID = $importRtyID");
 				makeLogEntry("Record structure", $rtsFieldDef["rst_ID"], "Originating DBID = ".$rtsFieldDef["rst_OriginatingDBID"]." Field ID = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
-				$error = true;
+//				$error = true;
 			}
 		}
 
