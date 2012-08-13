@@ -24,13 +24,6 @@
 		<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
 		<script src="../common/js/utilsLoad.js"></script><!-- core HEURIST functions -->
 		<script src="../common/js/utilsUI.js"></script><!-- core HEURIST functions -->
-
-
-
-		<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
-		<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
-		<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
-		<script src="../common/js/utilsUI.js"></script> <!-- core HEURIST functions -->
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 		<script>
 			$(function() {
@@ -51,7 +44,9 @@
 			function loadContent(url){
 				var recordFrame = document.getElementById("adminFrame");
 				recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
-				setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"admin/"+url;},500);
+				setTimeout(function(){
+						recordFrame.src = top.HEURIST.basePath+"admin/"+url;
+						},500);
 				return false;
 			};
 		</script>
@@ -89,10 +84,10 @@
 							type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=[dbname!]')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
-                        <li><a href="setup/deleteCurrentDB.php?db=[dbname!]"
-                            title="Delete a database completely">Delete entire database</a></li>
-                        <li><a href="setup/clearCurrentDB.php?db=[dbname!]"
-                            title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
+						<li><a href="setup/deleteCurrentDB.php?db=[dbname!]"
+							title="Delete a database completely">Delete entire database</a></li>
+						<li><a href="setup/clearCurrentDB.php?db=[dbname!]"
+							title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
 
 						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
@@ -210,12 +205,13 @@
 		</div>
 
 <script type="text/javascript">
+$(document).ready(function() {
 	if(!top.HEURIST.parameters){
 		top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 	}
 	var mode = top.HEURIST.parameters.mode;
 
- 	if(mode=="users"){
+	if(mode=="users"){
 		var _recID = top.HEURIST.parameters.recID;
 		var sUrl = 'ugrps/manageUsers.php?db=[dbname!]';
 		if(_recID){
@@ -226,8 +222,9 @@
 		//top.HEURIST.parameters.recID = null;
 
 		window.history.pushState("object or string", "Title", location.pathname+'?db=[dbname!]');
- 		//location.search = "?db=[dbname!]";
+		//location.search = "?db=[dbname!]";
 	}
+});
 </script>
 	</body>
 </html>

@@ -131,8 +131,6 @@ if ($prefs) {
 		$replaceClassNames .= "\\b" . $property . "-\\S+\\b";
 	}
 	print "\n};\n";
-	print "window.document.body.className = window.document.body.className.replace(/$replaceClassNames/g, '" . $classNames . "');\n";
-	print "window.document.body.className += '" . $classNames . "';\n";
 
 } else {
 	print "top.HEURIST.displayPreferences = {};\n";
