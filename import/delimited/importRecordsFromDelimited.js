@@ -44,6 +44,7 @@ FlexImport = (function () {
 	recStart: 0,
 	recEnd: 5,
 	SavRecordChunk: [],
+	currentStep: 1,
 
 	clearRecords: function () {
 		FlexImport.recStart = 0;
@@ -67,6 +68,49 @@ FlexImport = (function () {
 		FlexImport.records = [];
 	},
 
+	showProgress: function(){
+		$("#div-progress").removeClass("hidden");
+		$("#div-steps").addClass("hidden");
+	},
+
+	gotoStep: function(step_no){
+
+		if($("#div-steps").hasClass("hidden")){
+			$("#div-progress").addClass("hidden");
+			$("#div-steps").removeClass("hidden");
+		}
+
+		$("#astep"+FlexImport.currentStep).toggleClass("hidden");
+		$("#mstep"+FlexImport.currentStep).toggleClass("current");
+		if(step_no == 1){
+			$("#mstep1").removeClass("link");
+			$('#mstep1').unbind('click');
+		}
+		if(step_no != 3){
+			$("#mstep2").removeClass("link");
+			$('#mstep2').unbind('click');
+		}
+
+		FlexImport.currentStep = step_no;
+		$("#astep"+FlexImport.currentStep).toggleClass("hidden");
+		$("#mstep"+FlexImport.currentStep).toggleClass("current");
+
+		if(FlexImport.currentStep>1 && !$("#mstep1").hasClass("link")){
+			$("#mstep1").addClass("link");
+			$("#mstep1").click(function(){
+				location.reload();
+			});
+		}
+		if(FlexImport.currentStep==3 && !$("#mstep2").hasClass("link")){
+			$("#mstep2").addClass("link");
+			$("#mstep2").click(function(){
+				FlexImport.createColumnSelectors();
+				FlexImport.gotoStep(2);
+			});
+		}
+
+	},
+
 	analyseCSV: function () {
 
 		var txt = $("#csv-textarea").val();
@@ -85,6 +129,9 @@ FlexImport = (function () {
 		if (terminator == "\\n") terminator = "\n";
 
 		var switches = (terminator == "\n") ? "m" : "";
+
+		FlexImport.showProgress();
+		setTimeout(function() {
 
 		if (this.quote == "'") {
 			lineRegex = new RegExp(terminator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
@@ -111,13 +158,16 @@ FlexImport = (function () {
 
 		$("#info-p").html(
 			"Found <b>" + (this.hasHeaderRow ? FlexImport.fields.length - 1:FlexImport.fields.length) + "</b> rows of data," +
-			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
-			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over / import more</b></a>"
+			" in <b>" + FlexImport.fields[0].length + "</b> columns."
 		);
+//"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over / import more</b></a>"
 
 		FlexImport.createRecTypeOptions();
 
 		FlexImport.loadSavedMappings();
+
+		FlexImport.gotoStep(2);
+		},200);
 	},
 
 	//load mapping from file
@@ -173,7 +223,7 @@ FlexImport = (function () {
 				var savedMapping = context.response.split("|");
 
 				var e = $("#rec-type-select-div")[0];
-				e.appendChild(document.createTextNode("  or select saved mapping for record type: "));
+				e.appendChild(document.createTextNode("    or Saved mappings: "));
 				FlexImport.recTypeSelectSavedMapping = e.appendChild(document.createElement("select"));
 				FlexImport.recTypeSelectSavedMapping.onchange = function() {
 						FlexImport.reapplyMapping();
@@ -243,11 +293,11 @@ FlexImport = (function () {
 
 	createRecTypeOptions: function () {
 		var e = $("#rec-type-select-div")[0];
-		e.appendChild(document.createTextNode("Step 2: Select record type: "));
+		e.appendChild(document.createTextNode("Record types: "));
 		FlexImport.recTypeSelect = e.appendChild(document.createElement("select"));
 		FlexImport.recTypeSelect.onchange = function() { FlexImport.createColumnSelectors() };
 		var opt = document.createElement("option");
-		opt.innerHTML = "record type...";
+		opt.innerHTML = "to select...";
 		opt.disabled = true;
 		opt.selected = true;
 		FlexImport.recTypeSelect.appendChild(opt);
@@ -303,28 +353,6 @@ FlexImport = (function () {
 			a.innerHTML = "Create new tags";
 		p.appendChild(document.createTextNode(" then start over"));
 */
-
-		p = e.appendChild(document.createElement("p"));
-        p.appendChild(document.createTextNode(
-            "Note: In order to normalise the data, eg. to extract a list of persons (entities) as records and then " +
-            "point to these person records rather than including names repetitively in the main data records, " +
-            "start by importing only those fields relating to the entities to be normalised. After import, the data " +
-            "will be redisplayed with the ID numbers for the extracted records, which can be used as a pointer field " +
-            "in the subsequent import of the remaining columns of data."));
-
-        p = e.appendChild(document.createElement("p"));
-        p.appendChild(document.createTextNode("Select column assignments, then "));
-            var button = p.appendChild(document.createElement("input"));
-			button.type = "button";
-			button.value = " Save field mapping ";
-			button.onclick = function() { FlexImport.saveMappings(); };
-		p.appendChild(document.createTextNode(" then "));
-
-		var button = p.appendChild(document.createElement("input"));
-			button.type = "button";
-			button.value = " Prepare records ";
-			button.onclick = function() { FlexImport.loadReferencedRecords(); };
-		p.appendChild(document.createTextNode(" - SAFE - doesn't write to the database"));
 
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
@@ -684,9 +712,15 @@ FlexImport = (function () {
 			}
 			if(haserr){
 				e.insertBefore(table, before);
+
+				$("#btn_correct").hide();
+				$("#btn_save").hide();
+				$("#btn_prepare").show();
+				$("#step3-info").html("Unrecognised values in imported data. After correction of values below click 'Prepare Records' again");
+
 				var dvm = document.createElement("div");
-				dvm.innerHTML = "Unrecognised values in imported data. Edit values below and click Modify Data to change the values, then click Prepare Records again.<br/>"+
-								"Alternatively, edit the field definitions with the <u>Edit field definition</u> link(s) to the right.<br/>";
+				dvm.innerHTML = "<p>Edit values below and click Modify Data to change the values.<br/>"+
+								"Alternatively, edit the field definitions with the <u>Edit field definition</u> link(s) to the right.</p>";
 				e.insertBefore(dvm, table);
 			}
 
@@ -701,6 +735,11 @@ FlexImport = (function () {
 		var recIDs = [];
 		var recID = "";
 		var valCheck = {};
+
+		//get list of required field types
+		var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
+		var k;
+
 		//detect what fields to be imported
 		var i, l = FlexImport.colSelectors.length;
 		for (i = 0; i < l; ++i) {
@@ -712,6 +751,15 @@ FlexImport = (function () {
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
 			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "scratchpad") {
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[i]);
+
+					for (k = 0; k < reqDetailTypes.length; ++k) {
+						if(detailType.getID() == reqDetailTypes[k].getID()){
+							reqDetailTypes.splice(k,1);
+							break;
+						}
+					}
+
+
 				//mark which columns have the REFERENCE identifying data
 				if (detailType.getVariety() == HVariety.REFERENCE) {
 					if (HDetailManager.getDetailRepeatable(FlexImport.recType, detailType)) {
@@ -722,6 +770,19 @@ FlexImport = (function () {
 				}
 			}
 		}
+
+		if(reqDetailTypes.length>0){
+			var s = '';
+			var recStructure = top.HEURIST.rectypes.typedefs[FlexImport.recType.getID()].dtFields;
+			var dtyName_ind = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+
+			for (k = 0; k < reqDetailTypes.length; ++k) {
+					s = s + recStructure[reqDetailTypes[k].getID()][dtyName_ind]+'\n';
+			}
+			alert("The following required field types are not mapped:\n"+s);
+			return;
+		}
+
 		// build string for the query of referenced heurist records to load into cache
 		// FIXME  add code to handle record type field value queries for lookup type queries
 		// Example- type:Person field:"Given names":Bruce
@@ -845,6 +906,9 @@ FlexImport = (function () {
 		var error;
 		var val;
 
+		FlexImport.showProgress();
+		setTimeout(function() {
+
 		FlexImport.clearRecords();
 		FlexImport.colSelectors = [];
 		$("#col-select-div").empty();
@@ -913,6 +977,8 @@ FlexImport = (function () {
 		FlexImport.num_err_values = 0;
 		FlexImport.num_invalid_records = 0;
 
+		var dup_rec_mode = $('input[name=rg_duprec]:checked').val();
+
 		// create records
 		l = FlexImport.fields.length;
 		var istart = (FlexImport.hasHeaderRow)?1:0,
@@ -924,8 +990,9 @@ FlexImport = (function () {
 			if (FlexImport.lineHashes[lineHash] != undefined) {
 				// we've already created a record for an identical input lineHash
 				//ask user if this is a Duplicate or a different and unique record
-				if (confirm("Line " + i + " may be duplicate of line " + FlexImport.lineHashes[lineHash] +
-					"(selected fields have identical values)<p>OK = store as one record, Cancel = create two records ")) {
+				if ((dup_rec_mode==="0") || (dup_rec_mode==="2"  && confirm("Line " + i + " may be duplicate of line " + FlexImport.lineHashes[lineHash] +
+					" (selected fields have identical values)\n\nOK = store as one record,\n\nCancel = create two records ")))
+				{
 					record = FlexImport.lineRecordMap[FlexImport.lineHashes[lineHash]];
 					error = {"duplicateRecord":"duplicate of record on line " + FlexImport.lineHashes[lineHash]};
 				}
@@ -1011,25 +1078,43 @@ FlexImport = (function () {
 			} // for j in FlexImport.fields loop
 		} // for i = 0 loop
 
+		FlexImport.gotoStep(3);
+
 		// show command button for saving records
 		var e = $("#records-div-info")[0];
 
+		$("#btn_correct").show();
+		$("#btn_save").hide();
+		$("#btn_prepare").hide();
+		$("#step3-info").html("Unrecognised values in imported data. Click 'Correct the Data' to change the values");
+		$("#prepare-info-div").html("");
+
 		if(FlexImport.num_err_values>0){
-			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
-							FlexImport.num_err_columns+" columns. "+
-							"<input type=button value=\"Correct the data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+			$("#prepare-info-div").html("<div class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
+							FlexImport.num_err_columns+" columns. </div>");
+			//e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
+			//				FlexImport.num_err_columns+" columns. "+
+			//				"<input type=button value=\"Correct the data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
 		}else if ( FlexImport.num_invalid_records > 0){
-			e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
+//			e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
 		}else{
-			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.startSaveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
+			$("#step3-info").html("Records appear OK. Click 'Save records' to update database");
+			$("#btn_correct").hide();
+			$("#btn_save").show();
 		}
+		},200);
 	},
 
 	startSaveRecords:function(){
+
 		var e = $("#records-div-info")[0];
 		e.innerHTML = "";
-		FlexImport.Saver.saveRecords();
+		FlexImport.showProgress();
+
+		setTimeout(function() {
+			FlexImport.Saver.saveRecords();
+		},200);
 	},
 
 
@@ -1205,10 +1290,12 @@ FlexImport = (function () {
 		}
 		$textarea.append(line.join(", ") + "\n");
 
+		FlexImport.gotoStep(4);
+
 		$("#result-message").html('IMPORT SUCCESSFUL' +
         '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
 		'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
-        '<p style="color:#ff0000;">WARNING: you will lose the record IDs as soon as you click START OVER, so save the data below to a file first<br/>&nbsp;</p>');
+        '<p style="color:#ff0000;">WARNING: you will lose the record IDs as soon as you click STEP1 (START OVER), so save the data below to a file first<br/>&nbsp;</p>');
 
 		l = FlexImport.fields.length;
 		for (i = FlexImport.hasHeaderRow ? 1:0; i < l; ++i) {
@@ -1307,12 +1394,14 @@ FlexImport.Saver = (function () {
 
 			var saver = new HSaver(
 			function(r) {
-				$("#rec-type-select-div").empty();
-				$("#rec-type-select-div").empty();
+				//$("#rec-type-select-div").empty();
+				//$("#rec-type-select-div").empty();
 				$("#records-div").html("Saved <b>" + FlexImport.recEnd+ "</b> records");
 				// r.length gives the number of records in the chunk being saved
 				FlexImport.recStart = FlexImport.recEnd;
-				_getChunk();
+				setTimeout(function() {
+					_getChunk();
+				},0);
 			},
 			function(r,e) {
 				alert("record save failed: " + e);
@@ -1324,7 +1413,7 @@ FlexImport.Saver = (function () {
 	return {
 		saveRecords: function () {
 			if (! confirm("This will attempt to save all the displayed records to " +
-					(HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ". Are you sure you want to continue?")) return;
+					(HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ".\nAre you sure you want to continue?")) return;
 
 			_getChunk();
 		}

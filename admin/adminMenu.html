@@ -52,6 +52,7 @@
 				var recordFrame = document.getElementById("adminFrame");
 				recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
 				setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"admin/"+url;},500);
+				return false;
 			};
 		</script>
 		<script>
@@ -138,7 +139,7 @@
 						<li class="seperator"><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=[dbname!]')"
 							title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
 						<li><a href="#"
-							onClick="loadContent('ugrps/manageGroups.php?db=[dbname!]')"
+							onClick="{loadContent('ugrps/manageGroups.php?db=[dbname!]');return false;}"
 							title="Assign users to usergroups and set their roles">Manage groups</a></li>
 						<li><a href="#"
 							onClick="loadContent('setup/getUserFromDB.php?db=[dbname!]')"
@@ -209,18 +210,22 @@
 		</div>
 
 <script type="text/javascript">
-	top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+	if(!top.HEURIST.parameters){
+		top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+	}
 	var mode = top.HEURIST.parameters.mode;
+
  	if(mode=="users"){
 		var _recID = top.HEURIST.parameters.recID;
 		var sUrl = 'ugrps/manageUsers.php?db=[dbname!]';
 		if(_recID){
-			sUrl = sUrl+'&'+_recID;
+			sUrl = sUrl+'&recID='+_recID;
 		}
 		loadContent(sUrl);
-		top.HEURIST.parameters.mode = null;
+		//top.HEURIST.parameters.mode = null;
+		//top.HEURIST.parameters.recID = null;
 
-		//window.history.pushState("object or string", "Title", location.pathname+'?db=[dbname!]');
+		window.history.pushState("object or string", "Title", location.pathname+'?db=[dbname!]');
  		//location.search = "?db=[dbname!]";
 	}
 </script>

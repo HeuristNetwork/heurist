@@ -234,6 +234,8 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 				} );
 		infoMessageBox.render(document.body);
 
+		top.HEURIST.parameters = top.HEURIST.parseParams(this.location.search);
+		
 		if(top.HEURIST.parameters){ //to open edit user at once
 			_initRecID = top.HEURIST.parameters.recID;
 		}
@@ -246,7 +248,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				if (Hul.isnull(grpID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+									
 
 									grpID = top.HEURIST.parameters.grpID;
 

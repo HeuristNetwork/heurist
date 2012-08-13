@@ -261,6 +261,7 @@
 			$fieldNames = "";
 			$parameters = array("");
 			$fieldNames = join(",",$colNames);
+			$tmp_password = "";
 
 			foreach ($colNames as $colName) {
 
@@ -271,6 +272,7 @@
 
 
 					if($colName == "ugr_Password"){
+						$tmp_password = $val;
 						$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
 						$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
 						$val = crypt($val, $salt);
@@ -331,7 +333,7 @@
 							if(!is_logged_in()){
 							 	sendNewUserInfoEmail($recID);
 							} else if (isset($ugr_Enabled) && $ugr_Enabled=="y") {
-								sendApprovalEmail($recID);
+								sendApprovalEmail($recID, $tmp_password);
 							}
 
 							if($groupID){
@@ -352,7 +354,7 @@
 					else{
 
 						if($isApprovement){
-							sendApprovalEmail($recID);
+							sendApprovalEmail($recID, null);
 						}
 
 						$ret = $recID;
@@ -373,8 +375,6 @@
 	*
 	*/
 	function sendNewUserInfoEmail($recID){
-
-		global $db;
 
 				//mysql_connection_overwrite(DATABASE);
 				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
@@ -415,9 +415,7 @@ Go to the address below to review further details and approve the registration:
 	/**
 	*   Send approval message to user
 	*/
-	function sendApprovalEmail($recID){
-
-		global $db;
+	function sendApprovalEmail($recID, $tmp_password){
 
 				//mysql_connection_overwrite(DATABASE);
 				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
@@ -429,22 +427,29 @@ Go to the address below to review further details and approve the registration:
 					$ugr_Organisation = $row['ugr_Organisation'];
 					$ugr_eMail = $row['ugr_eMail'];
 
-							$email_text =
-							"Your Heurist account registration has been approved.
+					if($tmp_password!=null){
+						$email_text = "New Heurist account is registered for you. You are invited to Heurist world.";
+					}else{
+						$email_text = "Your Heurist account registration has been approved.";						
+					}
 
-							Heurist database: ".HEURIST_DBNAME."
+$email_text = $email_text."
 
-							Login at:
+Heurist database: ".HEURIST_DBNAME."
 
-							".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
+Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
 
-							with the username: " . $ugr_Name . ".
+with the username: " . $ugr_Name;
 
-							We recommend visiting the 'Take the Tour' section and
-							also visiting the Help function, which provides comprehensive
-							overviews and step-by-step instructions for using Heurist.
+					if($tmp_password!=null){
+ $email_text = $email_text." and temporal password: ".$tmp_password;
+					}
 
-							";
+ $email_text = $email_text."
+ 
+We recommend visiting the 'Take the Tour' section and
+also visiting the Help function, which provides comprehensive
+overviews and step-by-step instructions for using Heurist.";
 
 							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
 								"From: ".HEURIST_MAIL_TO_ADMIN."\r\nCc: ".HEURIST_MAIL_TO_ADMIN);

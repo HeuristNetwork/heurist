@@ -524,7 +524,7 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 	-moz-border-radius:3px !important;
 	-webkit-border-radius:3px !important ;
 	border-radius:3px !important;
-	padding:0 3px !important ;
+	padding:0 3px;
 	height:20px !important ;
 	line-height:19px !important;
 	font: 10px arial,helvetica,clean,sans-serif;
