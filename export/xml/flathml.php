@@ -843,7 +843,10 @@ function makeFileContentNode($file){
 		$xml = simplexml_load_file($filename);
 		// convert to xml
 		if (!$xml) {
-			return;
+			$xml = loadRemoteURLContent($filename);
+			if (!$xml) {
+				return;
+			}
 		}else{
 			$xml = $xml->asXML();
 		}
@@ -872,11 +875,44 @@ function makeFileContentNode($file){
 				$content = $xml->xpath('//rss');
 				$content = ($content && $content[0]? $content[0]->asXML():"");
 				$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
+			}else {
+				error_log(" made it here ");
+				$content = $xml->asXML();
+				$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
+				// $content = preg_replace("/\s*xmlns(?:\:\S+)?=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/"," ",$content);
 			}
 			if ($content) {
-			makeTag('content',$attrs,$content,true,false);
+				makeTag('content',$attrs,$content,true,false);
 			}
 		}
+	}
+}
+
+function loadRemoteURLContent($url) {
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
+	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
+	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
+	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
+	if (defined("HEURIST_HTTP_PROXY")) {
+		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+	}
+
+	curl_setopt($ch, CURLOPT_URL, $url);
+	$data = curl_exec($ch);
+
+	$error = curl_error($ch);
+	if ($error) {
+		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+		echo "$error ($code)" . " url = ". $remote_url;
+		return false;
+	} else {
+		return $data;
 	}
 }
 

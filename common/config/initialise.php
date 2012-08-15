@@ -31,9 +31,9 @@
 
 	//set up system path defines
 
-	define('HEURIST_VERSION',"3.1.0.030712");// need to change this in common/js/utilLoad.js
+	define('HEURIST_VERSION',"3.1.0.150812");// need to change this in common/js/utilLoad.js
 
-	define('HEURIST_MIN_DBVERSION',"1.0.0");
+	define('HEURIST_MIN_DBVERSION',"1.1.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");
 	// a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
