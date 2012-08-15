@@ -22,7 +22,6 @@
 		The tool reads the record types from Heurist and checks for existance and type
 		against the reords in Heurist. Before updating the detail the value is checked
 		for validity.
-
 		-->
 
 
@@ -39,7 +38,7 @@
 		<script src="../../external/jquery/jquery-1.6.min.js"></script>
 
 		<script>
-			const recChunkSize = 1000; // increased from 1000 by ian 24/10/11
+			const recChunkSize = 100; //1000; // increased from 1000 by ian 24/10/11
 			// TODO: Why are we using literals in the code rather than using the constant?
 			var fields = [];
 			var recTypeSelect;
@@ -68,10 +67,23 @@
 				return words;
 			}
 
+			/**
+			*
+			*/
+			function startSaveRecords(){
+				//hide update butttom
+				var e = document.getElementById("process-div");
+				e.style.display = "none";
+
+				setTimeout(function() {
+					loadPointers();
+				},100);
+			}
+
 			function loadPointers( ) {
 				var i;
 				if (recStart >= fields.length){
-					showProcessSummary();//we are done show the user what happened
+					showProcessSummary();//FINISH. We are done show the user what happened
 					return;
 				}
 				if (recStart > 0) {
@@ -125,7 +137,7 @@
 				var loader = new HLoader(
 				function(s,r) {
 					recRecords = r;
-					document.getElementById("info-p").innerHTML = "Processing input rows " + (recStart+1) + " to " + recEnd;
+					document.getElementById("info-p").innerHTML = "Processing input rows " + (recStart+1) + " to " + recEnd+" of "+fields.length;
 					updateDetails();
 				},
 				function(s,e) {
@@ -149,8 +161,11 @@
 				var saver = new HSaver(
 				function(r) {
 //					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
+					//document.getElementById("info-p").innerHTML = "Processing input rows " + (recStart+1) + " to " + recEnd;// + " of "  + recIDs.length;
 					recStart = recEnd;
-					setTimeout(function(){loadPointers();},100);
+					setTimeout(function(){
+							loadPointers();},
+					100);
 				},
 				function(r,e) {
 					alert("record save failed: " + e);     //FIXME write code to put error message in fields array.
@@ -404,8 +419,7 @@
 			}
 
 			function showProcessSummary() {
-				var e = document.getElementById("process-div");
-				e.style.display = "none";
+
 				var p = document.getElementById("records-p");
 				p.innerHTML = "";
 				var table = document.createElement("table");
@@ -539,9 +553,9 @@
 		<div id="theList" class="tooltip"><div class="close-button fieldsToggle" style="right:3px; top:3px"></div><ul id="fieldList"><h3>Field Types</h3></ul></div>
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
-			<p>The details shown below will be used to update records in the database. 
+			<p>The details shown below will be used to update records in the database.
             <br>Please review before proceeding. Note that erroneous input rows will be skipped.</p>
-			<input  type=button value="Update database" onClick="loadPointers();" >
+			<input  type=button value="Update database" onClick="startSaveRecords();" >
 			<p id=records-p></p>
 		</div>
 		<div id=csv-entry-div>

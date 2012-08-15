@@ -545,7 +545,9 @@ $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
 
 function print_relation_details($bib) {
-global $relRT,$relSrcDT,$relTrgDT;
+
+	global $relRT,$relSrcDT,$relTrgDT;
+
 	$from_res = mysql_query('select recDetails.*
 	                           from recDetails
 	                      left join Records on rec_ID = dtl_RecID
@@ -569,7 +571,9 @@ global $relRT,$relSrcDT,$relTrgDT;
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
+		if(array_key_exists('RelTerm',$bd)){
+			print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
+		}
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
 			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
@@ -577,8 +581,8 @@ global $relRT,$relSrcDT,$relTrgDT;
 			print htmlspecialchars($bd['Title']);
 		}
 		print '&nbsp;&nbsp;';
-		if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-		if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+		if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
+		if (@$bd['EndDate']) print ' until ' . htmlspecialchars(temporalToHumanReadableString($bd['EndDate']));
 		print '</div></div>';
 	}
 	while ($reln = mysql_fetch_assoc($to_res)) {
@@ -586,7 +590,9 @@ global $relRT,$relSrcDT,$relTrgDT;
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+		if(array_key_exists('RelTerm',$bd)){
+			print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+		}
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
 			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';

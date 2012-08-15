@@ -528,6 +528,7 @@ function ShowReps() {
 		_iseditor=iseditor;
 
 		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
+		Dom.get("rep_container").style.top = (iseditor) ?"0px" :"65px";
 		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
 		var dim = Hul.innerDimensions(this);
@@ -822,13 +823,13 @@ function ShowReps() {
 */
 					term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
 					if(varid!=="r"){
-						
+
 						if(varnames.vars[varid]){
 							lbl = varnames.vars[varid];
 						}else{
 							lbl = varid;
 						}
-						
+
 						term.label = term.label + '<b>' + lbl + '</b>' +
 '&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)';
 					}else{
@@ -888,7 +889,7 @@ function ShowReps() {
 			if(nodedata.dtype === '' || nodedata.this_id === 'recURL'){
 				res = res + ' dt="url"';
 			}else if(nodedata.dtype === 'geo'){
-				
+
 				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
 
 			}else if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){

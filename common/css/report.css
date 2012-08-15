@@ -92,7 +92,8 @@ H2 span {
 	padding:5px
 }
 #rep_container {
-	position:relative;
+	position:absolute;
+	top:0;
 	bottom:0;
 	left:0;
 	right:0;
@@ -100,9 +101,6 @@ H2 span {
 	padding:10px;
 	border-top:1px solid #CCC;
 	overflow-x:hidden;
-}
-#rep_container {
-	height:95%;
 	background-color:#FFF;
 }
 .yui-skin-sam .yui-layout .yui-layout-unit div.yui-layout-bd {

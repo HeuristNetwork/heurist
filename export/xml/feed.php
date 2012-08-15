@@ -27,7 +27,7 @@ header("Content-Type: application/".($isAtom?"atom":"rss")."+xml");
 
 $explanation="This feed returns the results of a HEURIST search. The search URL specifies the search parameters and the search results are built live from the HEURIST database. If you are not logged in you may see fewer records than you expect, as only records marked as 'Publicly Visible' will be rendered in the feed";
 
-print "<?xml version='1.0' encoding='UTF-8'?>\n";
+print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 if($isAtom){
 ?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss">
@@ -71,8 +71,8 @@ if($isAtom){
 <?php
 }
 
-								//   0       1         2		3				4				5			6
-		$squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo ";
+								//   0       1         2		3				4				5			6														7
+		$squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo, rec_Added ";
 		$joinTable = " left join recDetails  on (dtl_RecID=rec_ID and dtl_Geo is not null) ";
 
 		if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
@@ -91,23 +91,32 @@ if($isAtom){
 
 		$res = mysql_query($squery);
 		$reccount = mysql_num_rows($res);
+		$uniq_id = 1;
 
 		if ($reccount>0)
 		{
-//strtotime(//date("r", $row[5])
 
 				while ($row = mysql_fetch_row($res)) {
 
 	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	$uid = HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
+	$uid = HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+	//HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
+	//$uid = $uniq_id;
+	$uniq_id++;
+
+error_log(">>>>>> added=".$row[7]."    edt=".$row[5]);
+
+	$date_published = date("r", strtotime(($row[5]==null)? $row[7] : $row[5]));
+
+	$row[3] = ($row[3])? "<![CDATA[".$row[3]."]]>":"";
 
 if($isAtom){
 ?>
 <entry>
 	<title><?=htmlspecialchars($row[2])?></title>
-	<summary><![CDATA[<?=$row[3]?>]]></summary>
+	<summary><?=$row[3]?></summary>
 	<category>type/<?=$row[4]?></category>
-	<published><?=$row[5]?></published>
+	<published><?=$date_published?></published>
 	<id><?=$uid?></id>
 	<link href="<?=$url?>"/>
 <?php
@@ -115,21 +124,21 @@ if($isAtom){
 ?>
 <item>
 	<title><?=htmlspecialchars($row[2])?></title>
-	<description><![CDATA[<?=$row[3]?>]]></description>
+	<description><?=$row[3]?></description>
 	<category>type/<?=$row[4]?></category>
-	<pubDate><?=$row[5]?></pubDate>
+	<pubDate><?=$date_published?></pubDate>
 	<guid isPermaLink="false"><?=$uid?></guid>
 	<link><?=$url?></link>
 <?php
 }
-
-	/*****DEBUG****///error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
 
 					if($row[6]){
 						$wkt = $row[6];
 						$geom = geoPHP::load($wkt,'wkt');
 						$gml = $geom->out('georss');
 						if($gml){
+							$gml = "<georss:".substr($gml,1);
+							$gml = str_replace("</","</georss:",$gml);
 							print $gml;
 						}
 					}

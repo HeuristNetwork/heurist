@@ -324,7 +324,8 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 }
 
 //
-// convert record array to arrray to be assigned to smarty variable
+// convert record array to array to be assigned to smarty variable
+//
 //
 // @todo - implement as method
 function getRecordForSmarty($rec, $recursion_depth, $order){
@@ -339,6 +340,8 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 		$relRT = (defined('RT_RELATION')?RT_RELATION:0);
 		$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
 		$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+
+/*****DEBUG****///error_log("RElation constants=".$relRT."  ".$relSrcDT."    ".$relTrgDT);
 
 		$record = array();
 		$recTypeID = null;
@@ -378,28 +381,79 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 			}
 		}
 
-		if($relRT>0 && $relTrgDT>0){
-			/* find related records */
-			$to_res = mysql_query('select recDetails.dtl_RecID as id
+		/* find related records */
+		if($relRT>0 && $relSrcDT>0 && $relTrgDT>0){
+
+			$dtValue = array();
+
+			$from_res = mysql_query('select recDetails.*
+	                           from recDetails
+	                      left join Records on rec_ID = dtl_RecID
+	                          where dtl_DetailTypeID = '.$relSrcDT.
+	                           ' and rec_RecTypeID = '.$relRT.
+	                           ' and dtl_Value = ' . $record["recID"]);        //primary resource
+			$to_res = mysql_query('select recDetails.*
 	                         from recDetails
 	                    left join Records on rec_ID = dtl_RecID
 	                        where dtl_DetailTypeID = '.$relTrgDT.
 	                         ' and rec_RecTypeID = '.$relRT.
 	                         ' and dtl_Value = ' . $record["recID"]);          //linked resource
 
+			if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
 
-			$dtValue = array();
-			$k=1;
-			while ($reln = mysql_fetch_assoc($to_res)) {
-				array_push($dtValue, $reln);
-				$k++;
-			}//while
-			if($k>1){
-				$dt = getDetailForSmarty(-1,$dtValue, $recursion_depth, $recTypeID, $record["recID"]);
-				if($dt){
-					$record = array_merge($record, $dt);
-				}
+					while ($reln = mysql_fetch_assoc($from_res)) {
+						$bd = fetch_relation_details($reln['dtl_RecID'], true);
+						array_push($dtValue, $bd);
+					}
+					while ($reln = mysql_fetch_assoc($to_res)) {
+						$bd = fetch_relation_details($reln['dtl_RecID'], false);
+						array_push($dtValue, $bd);
+					}
+
+
+					$dt = getDetailForSmarty(-1, $dtValue, $recursion_depth, $recTypeID, $record["recID"]);
+					if($dt){
+						$record = array_merge($record, $dt);
+					}
 			}
+
+			/* OLD WAY
+			if($relSrcDT>0){
+
+				//current record is source
+				$rel_query = "select r2.dtl_Value as id from recDetails r1 left join recDetails r2 on r1.dtl_RecID = r2.dtl_RecID and r2.dtl_DetailTypeID = $relTrgDT
+where r1.dtl_DetailTypeID = $relSrcDT and r1.dtl_Value = ".$record["recID"];
+
+				$to_res = mysql_query($rel_query);
+
+				while ($reln = mysql_fetch_assoc($to_res)) {
+					array_push($dtValue, $reln);
+					$k++;
+				}//while
+
+			}
+
+			if($relTrgDT>0){
+				//current record is target
+				$rel_query = "select r2.dtl_Value as id from recDetails r1 left join recDetails r2 on r1.dtl_RecID = r2.dtl_RecID and r2.dtl_DetailTypeID = $relSrcDT
+where r1.dtl_DetailTypeID = $relTrgDT and r1.dtl_Value = ".$record["recID"];
+
+				$to_res = mysql_query($rel_query);
+
+				while ($reln = mysql_fetch_assoc($to_res)) {
+					array_push($dtValue, $reln);
+					$k++;
+				}//while
+			}
+
+			if($k>1){
+					$dt = getDetailForSmarty(-1,$dtValue, $recursion_depth, $recTypeID, $record["recID"]);
+					if($dt){
+						$record = array_merge($record, $dt);
+					}
+			}
+			*/
+
 		}
 
 		return $record;
@@ -441,7 +495,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 	if($dtKey<1 || $dtNames[$dtKey]){
 
 		if($dtKey<1){
-			$dt_label = "Relationship 123";
+			$dt_label = "Relationship";
 /*****DEBUG****///error_log("111>>>>>".print_r($dtValue, true));
 /*****DEBUG****///error_log("222>>>>>".$recTypeID);
 
@@ -499,14 +553,16 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 			case 'date':
 
 				$res = "";
+				$origvalues = array();
 				foreach ($dtValue as $key => $value){
 					if(strlen($res)>0) $res = $res.", ";
 					$res = $res.temporalToHumanReadableString($value);
+					array_push($origvalues, temporalToHumanReadableString($value));
 				}
 				if(strlen($res)==0){ //no valid terms
 					$res = null;
 				}else{
-					$res = array( $dtname=>$res );
+					$res = array( $dtname=>$res, $dtname."_originalvalue"=>$origvalues);
 				}
 				break;
 
@@ -516,7 +572,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 			   //if image - special case
 
 				$res = "";
-				$arres = array();
+				$origvalues = array();
 
 				foreach ($dtValue as $key => $value){
 					if(strlen($res)>0) $res = $res.", ";
@@ -524,15 +580,19 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 
 					//original value keeps the whole 'file' array
-					$dtname2 = $dtname."_originalvalue";
-					$arres = array_merge($arres, array($dtname2=>$value['file']));
+					array_push($origvalues, $value['file']);
+
+					//$dtname2 = $dtname."_originalvalue";
+					//$arres = array_merge($arres, array($dtname2=>$value['file']));
 /*****DEBUG****///error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
 
 				}
+
 				if(strlen($res)==0){
 					$res = null;
 				}else{
-					$res = array_merge($arres, array($dtname=>$res));
+					$res = array($dtname=>$res, $dtname."_originalvalue"=>$origvalues);
+					//array_merge($arres, array($dtname=>$res));
 				}
 
 			break;
@@ -617,18 +677,23 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 				foreach ($dtValue as $key => $value){
 
-					if($recursion_depth<2 && array_key_exists('id',$value))
+					if($recursion_depth<2 && (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
 					{
 
 						//this is record ID
-						$recordID = $value['id'];
+						if(array_key_exists('RelatedRecID',$value)){
+							$recordID = $value['RelatedRecID']['rec_ID'];
+/*****DEBUG****///error_log(">>>>value=".print_r($value, true));
+						}else{
+							$recordID = $value['id'];
+						}
 
 						//get full record info
 						$record = loadRecord($recordID); //from search/getSearchResults.php
 
 						$res0 = null;
 						if(true){  //64719  45171   48855    57247
-							$res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
+							$res0 = getRecordForSmarty($record, $recursion_depth+2, $order); //@todo - need to
 							$order++;
 						}
 
@@ -646,6 +711,27 @@ if($isunconstrained){
 /*}
 								}            */
 							}
+
+							//add relationship specific variables
+							if(array_key_exists('RelatedRecID',$value)){
+									$res0["recRelationType"] = $value['RelTerm'];
+									/*if(array_key_exists('interpRecID', $value)){
+										$record = loadRecord($value['interpRecID']);
+										$res0["recRelationInterpretation"] = getRecordForSmarty($record, $recursion_depth+2, $order);
+									}*/
+									if(array_key_exists('Notes', $value)){
+										$res0["recRelationNotes"] = $value['Notes'];
+									}
+									if(array_key_exists('StartDate', $value)){
+										$res0["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
+									}
+									if(array_key_exists('EndDate', $value)){
+										$res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
+									}
+
+/*****DEBUG****///error_log(">>>>RECID=".$recordID." >>>>>".print_r($res0, true));
+							}
+
 							array_push($res, $res0);
 						}
 
@@ -673,15 +759,19 @@ if($isunconstrained){
 			default:
 				// repeated basic detail types
 				$res = "";
+				$origvalues = array();
 				foreach ($dtValue as $key => $value){
 					if(strlen($res)>0) $res = $res.", ";
 					$res = $res.$value;
+					array_push($origvalues, $value);
 				}
 				if(strlen($res)==0){ //no valid terms
 					$res = null;
 				}else{
-					$res = array( $dtname=>$res );
+					$res = array( $dtname=>$res, $dtname."_originalvalue"=>$origvalues);
 				}
+
+
 			}
 			//it depends on detail type - need specific behaviour for each type
 			//foreach ($value as $dtKey => $dtValue){}
@@ -806,28 +896,37 @@ function smarty_function_wrap($params, &$smarty)
 
 		}else if($dt=="file"){
 			//insert image or link
-			$value = $params['var'];
+			$values = $params['var'];
 
 
 //!!!!!
-/*****DEBUG****///error_log("WARP VALUE>>>>".print_r($value,true));
+/*****DEBUG****///
+error_log("WARP VALUE>>>>".print_r($values,true));
+
+			$sres = "";
+
+			foreach ($values as $value){
 
 			if($mode=="thumbnail"){
 
-			 	return "<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
+			 	$sres = $sres."<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
 						"<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
 
 			}else{
 
 				if($value['mediaType'] == 'image'){
-					return "<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
+					$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
 				}else if( $value['remoteSource']=='youtube' ){
-					return linkifyYouTubeURLs($value['URL'], $size);
+					$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
 				}else{
-					return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+					$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 				}
 
 			}
+
+			}
+
+			return $sres;
 
 		}else if($dt=='geo'){
 

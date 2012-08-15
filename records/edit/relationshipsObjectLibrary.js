@@ -90,7 +90,9 @@ if (!top.Relationship) {
 		var thisRef = this;
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
 			"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
-		{ callback: function(newRecTitle, newDetails) {
+		{	width: 940,
+		 	height: 640,
+			callback: function(newRecTitle, newDetails) {
 				var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
 				var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:'');
 				if (newDetails) {

@@ -539,6 +539,15 @@ var HGeographicValue = function(type, wkt) {
 	var _type = HGeographicType.typeForAbbreviation(type);
 	var _wkt = wkt;
 
+	if(_wkt){
+		_wkt = _wkt.trim().toUpperCase();
+	}
+	if(_type==undefined || _type==null){
+		_type = HGeographicType.getTypeFromValue(_wkt);
+		type = HGeographicType.abbreviationForType(_type);
+	}
+
+
 	this.getType = function() { return _type; };
 	this.getWKT = function() { return _wkt; };
 	this.toString = function() { return "geographic value"; };
@@ -546,11 +555,11 @@ var HGeographicValue = function(type, wkt) {
 	// We use the generic HGeographicValue constructor as a factory for specific Geographic values if GOI is loaded
 	if (HAPI.GOI && type) {
 		switch (type) {
-			case "p": HAPI.GOI.PointValue.call(this, wkt); break;
-			case "r": HAPI.GOI.BoundsValue.call(this, wkt); break;
-			case "c": HAPI.GOI.CircleValue.call(this, wkt); break;
-			case "pl": HAPI.GOI.PolygonValue.call(this, wkt); break;
-			case "l": HAPI.GOI.PathValue.call(this, wkt); break;
+			case "p": HAPI.GOI.PointValue.call(this, _wkt); break;
+			case "r": HAPI.GOI.BoundsValue.call(this, _wkt); break;
+			case "c": HAPI.GOI.CircleValue.call(this, _wkt); break;
+			case "pl": HAPI.GOI.PolygonValue.call(this, _wkt); break;
+			case "l": HAPI.GOI.PathValue.call(this, _wkt); break;
 			default:
 			throw new HAPI.GOI.InvalidGeographicValueException("unknown geographic type");
 		}
@@ -573,6 +582,20 @@ var HGeographicType = {
 	},
 	abbreviationForType: function(type) {
 		return { "bounds": "r", "circle": "c", "polygon": "pl", "path": "l", "point": "p" }[type];
+	},
+
+	getTypeFromValue: function(wkt){
+		if (wkt){
+			wkt = wkt.trim().toUpperCase();
+		  if (wkt.match(/POINT[(]([^ ]+) ([^ ]+)[)]/)) {
+		  		return HGeographicType.POINT;
+		  }else if (wkt.match(/POLYGON[(][(]([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^)]+)[)][)]/)) {
+		  		return HGeographicType.POLYGON;
+		  }else  if (wkt.match(/LINESTRING[(]([^ ]+) ([^,]+),([^ ]+) /)) {
+		  		return HGeographicType.PATH;
+		  }
+		}
+		return undefined;
 	},
 
 	getClass: function() { return "HGeographicType"; }
