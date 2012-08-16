@@ -150,8 +150,10 @@ if (@$_REQUEST['recID'] == -1) { // signalled to create a new record
 	$force_new = 0;
 }
 
+$wg = "";
+
 // check workgroup permissions
-if (@$_REQUEST['rec_owner'] && $_REQUEST['rec_owner'] != $userID) {
+if (@$_REQUEST['rec_owner'] && $_REQUEST['rec_owner'] != $usrID) {
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=".intval($_REQUEST['rec_owner'])." and ugl_UserID=$usrID");
 	if (mysql_num_rows($res) == 0) { // user not a member so add wg to parameters for editRecord
 		$wg = '&wg=' . intval($_REQUEST['rec_owner']);

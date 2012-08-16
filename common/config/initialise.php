@@ -255,6 +255,7 @@
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
 	define ('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);
 	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
+
 	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
 		returnErrorMsgPage('0',"Heurist Code Version ".HEURIST_VERSION." requires database schema version # ".HEURIST_MIN_DBVERSION." or higher. ".
 		HEURIST_DBNAME." has version # ". HEURIST_DBVERSION." - please update the schema of the database.");
@@ -459,7 +460,7 @@
 		global $dbPrefix;
 
 		if ($critical==1) { // bad connection to MySQL etc.
-			echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
+			echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
 			exit ();
 		}
 
@@ -472,7 +473,10 @@
 			$test=strpos($row[0],$dbPrefix);
 			if (is_numeric($test) && ($test==0) ) { // there are databases
 				// echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
-				$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
+				$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+
+
+				$msg2 = rawurlencode($msg2);
 
 				if(defined('INITROOT')){
 					header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");

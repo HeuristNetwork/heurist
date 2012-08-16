@@ -27,7 +27,7 @@
 <h2>Generic Error</h2>
 <h1>
 <script>
-	var msg = decodeURI(location.search);
+	var msg = decodeURIComponent(location.search);
 	msg = msg.match(/msg=(.*)$/);
 	document.write(msg[1]);
 </script>

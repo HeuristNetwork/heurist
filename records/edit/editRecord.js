@@ -350,7 +350,7 @@ top.HEURIST.edit = {
 			personalWindow.tagCheckDone = true;
 
 			if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
-				top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
+				top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
 					if (tags) {
 						personalWindow.document.getElementById("tags").value = tags;
 						top.HEURIST.edit.changed("personal");
