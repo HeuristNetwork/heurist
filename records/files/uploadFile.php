@@ -330,10 +330,22 @@
 					$extension = pathinfo($path, PATHINFO_EXTENSION);
 				}
 			}
-
-			$mimeType = null;
-			if($extension){
-				$extension = strtolower($extension);
+			$mimeType = findMimeType($extension);
+			
+			//from query
+			if($mimeType==''){
+				
+				if( array_key_exists('query', $ap) ){
+					$path = $ap['query'];
+					if($path){
+						$extension = pathinfo($path, PATHINFO_EXTENSION);
+					}
+				}
+				$mimeType = findMimeType($extension);
+			}
+			//from
+			if($mimeType==''){
+				$extension = pathinfo($url, PATHINFO_EXTENSION);
 				$mimeType = findMimeType($extension);
 			}
 
@@ -380,14 +392,21 @@
 	*/
 	function findMimeType($mimetypeExt)
 	{
-		$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
-		if (mysql_num_rows($fres) == 1) {
-			$res = mysql_fetch_assoc($fres);
-			$mimeType = $res['fxm_Mimetype'];
-			if($mimeType==null){
-				$mimeType=='';
+		
+		$mimeType = '';
+		if($mimetypeExt){
+			$mimetypeExt = strtolower($mimetypeExt);
+			
+			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
+			if (mysql_num_rows($fres) == 1) {
+				$res = mysql_fetch_assoc($fres);
+				$mimeType = $res['fxm_Mimetype'];
+				if($mimeType==null){
+					$mimeType=='';
+				}
 			}
-		}
+
+		}		
 
 		return $mimeType;
 	}
@@ -406,6 +425,7 @@
 		//DEBUG
 		/*****DEBUG****///error_log("1.>>>>>".$filedata);
 		/*****DEBUG****///error_log("2.>>>>>".print_r($filedata, true));
+
 
 		if(!is_array($filedata)){ //can't parse - assume this is URL - old way
 

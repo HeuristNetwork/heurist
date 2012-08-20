@@ -2627,6 +2627,8 @@ top.HEURIST.search = {
 					 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 			query_string = query_string+"&db="+db;
 
+			query_string = query_string + (p["label"]?"&label="+p["label"]:'');
+
 			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
 
 			top.HEURIST.currentQuery_main = query_string_main;

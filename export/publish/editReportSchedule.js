@@ -44,6 +44,7 @@ function ReportScheduleEditor() {
 
 		var typeID = "smarty",
 			templatefile = '',
+			qlabel = '',
 			hquery = '';
 
 
@@ -66,6 +67,11 @@ function ReportScheduleEditor() {
 				}
 				if(Hul.isnull(hquery)){
 					hquery = '';
+				}else{
+					var hparams = top.HEURIST.parameters = top.HEURIST.parseParams(hquery);
+					if(!Hul.isnull(hparams.label)){
+						qlabel = hparams.label;
+					}
 				}
 				if(Hul.isnull(templatefile)){
 					templatefile = '';
@@ -79,7 +85,7 @@ function ReportScheduleEditor() {
 		if(Hul.isnull(_entity)){
 			_recID =  -1;
 			//"rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes"
-			_entity = [-1,typeID,'','','','',hquery,templatefile,0];
+			_entity = [-1,typeID,qlabel,'','','',hquery,templatefile,0];
 		}
 
 		_reload_templates();

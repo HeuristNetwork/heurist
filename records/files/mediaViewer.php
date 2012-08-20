@@ -26,7 +26,9 @@ if (@$_REQUEST['ulf_ID']){
 	if($filedata==null) return; // nothing returned if parameter does not match one and only one row
 
 	$url = $filedata['URL'];
+	$url = str_replace("\\","\\\\",$url);
 	$recID = get_uploaded_file_recordid($filedata['id'], false);
+
 }else{
 	$recID = $_REQUEST['rec_ID'];
 	$ulf_id = get_uploaded_fileid_by_recid($recID);

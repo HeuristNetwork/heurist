@@ -1347,7 +1347,7 @@ function ShowReps() {
 
 		if(q==null) return;
 
-		var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q;
+		var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q+"&db="+_db;
 
 		var dim = top.HEURIST.util.innerDimensions(top);
 

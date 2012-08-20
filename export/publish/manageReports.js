@@ -530,7 +530,9 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 					}
 				},
 
-				editReport: function(recID){ _onAddEditRecord((recID<0 && _keepParameters)?_keepParameters:"?db="+_db+"&recID="+recID); },
+				editReport: function(recID){
+					_onAddEditRecord((recID<0 && _keepParameters)?_keepParameters:"?db="+_db+"&recID="+recID);
+				},
 
 				getClass: function () {
 					return _className;
