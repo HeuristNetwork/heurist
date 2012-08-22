@@ -240,7 +240,7 @@ if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)
 }
 $SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($SELIDS_FILTERS)) {
-	die(" error decoding json rectype filters string");
+	die(" error decoding json selected ids string");
 }else{
 	$selectedIDs = array();
 	foreach ($SELIDS_FILTERS as $ids) {
@@ -252,7 +252,7 @@ if (!isset($SELIDS_FILTERS)) {
 }
 
 $MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) :
-			(max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS),array_keys($SELIDS_FILTERS)))?
+			(count(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS),array_keys($SELIDS_FILTERS)))>0?
 				max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS),array_keys($SELIDS_FILTERS))):0));	// default to only one level
 // handle special case for collection where ids are stored in teh session.
 if (array_key_exists('q',$_REQUEST)) {
@@ -840,19 +840,27 @@ function outputRecordStub($recordStub) {
 function makeFileContentNode($file){
 	$filename = $file['URL'];
 	if ($file['mimeType'] ==="application/xml"){// && file_exists($filename)) {
-		$xml = simplexml_load_file($filename);
-		// convert to xml
-		if (!$xml) {
+		if ($file['origName'] !== "_remote") {
+			$xml = simplexml_load_file($filename);
+			$xml = $xml->asXML();
+		}else{
 			$xml = loadRemoteURLContent($filename);
 			if (!$xml) {
 				return;
 			}
-		}else{
-			$xml = $xml->asXML();
 		}
+		//embedding so remove any xml element
+		$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$xml);
+		//embedding so remove any DOCTYPE  TODO saw need to validate first then this is fine. also perhaps attribute with type and ID
+		$content = preg_replace("/\<\!DOCTYPE[^\[]+\s*\[\s*(?:(?:\<--)?\s*\<[^\>]+\>\s*(?:--\>)?)*\s*\]\>/","",$content,1);
+		if ($content) {
+			makeTag('content',array("type" => "xml"),$content,true,false);
+		}
+		return;
 		// remove the name space
-		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
-		$xml = simplexml_load_string($xml);
+
+//		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
+/*		$xml = simplexml_load_string($xml);
 		if (!$xml){
 			$attrs = array("type" => "unknown", "error" => "invalid xml content");
 			$content = "Unable to read ". $file['origName']. " as xml file";
@@ -876,15 +884,13 @@ function makeFileContentNode($file){
 				$content = ($content && $content[0]? $content[0]->asXML():"");
 				$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
 			}else {
-				error_log(" made it here ");
 				$content = $xml->asXML();
 				$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
-				// $content = preg_replace("/\s*xmlns(?:\:\S+)?=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/"," ",$content);
 			}
 			if ($content) {
 				makeTag('content',$attrs,$content,true,false);
 			}
-		}
+		}*/
 	}
 }
 
@@ -909,7 +915,7 @@ function loadRemoteURLContent($url) {
 	$error = curl_error($ch);
 	if ($error) {
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		echo "$error ($code)" . " url = ". $remote_url;
+		echo "$error ($code)" . " url = ". $url;
 		return false;
 	} else {
 		return $data;

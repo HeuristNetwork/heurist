@@ -395,49 +395,50 @@
 				}
 			}
 
+			var FlatHMLQuery = {'filter':"",'query':"",'maxDepth':0,'selectIDs':""};
 			function onSelectionChange(eventType, argList) {
-				if (parent.document.getElementById("p").className == "yui-hidden") { //ARTEM
+				if (parent.document.getElementById("p").className == "yui-hidden") { //if tab not current ignore event
 					return false;
-				}else  if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
+				}else if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
 																// if a level is not loaded then load synch
-					newSelectionIds = [];
-					if (top.HEURIST.search.getLevelSelectedRecIDs("0").get().length > 0) {
-						newSelectionIds = top.HEURIST.search.getLevelSelectedRecIDs("0").get();
-					}/*else if (argList && argList.match("selectedIds")) {
-						var ids = argList.match("selectedIds=(\\d+(?:,\\d+)*)");
-						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
-					}*/
-					newSelectionMap = top.HEURIST.search.getSelectedRecIDs();
-
-					/*var limit = newSelectionIds.length;
-					if (!limit) {
-						clearAndDisplayNoRecordSelected();
-						return;
-					}
-*/
-					clearAndDisplayLoading();
 					var layoutString = top.HEURIST.search.getLayoutString();
 					var selFilter = top.HEURIST.search.getSelectedString();
 					var rtFilter = top.HEURIST.search.getPushDownFilter("rectype");
 					var rleFilter = top.HEURIST.search.getPushDownFilter("reltype");
 					var ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-					var filter = "" + (selFilter.length > 0 &&  selFilter[1] != "" ? "&" + selFilter[1] : "")
-									+ (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
+					var filter = "" + (rtFilter.length > 0 &&  rtFilter[1] != "" ? "&" + rtFilter[1] : "")
 									+ (rleFilter.length > 0 &&  rleFilter[1] != "" ? "&" + rleFilter[1] : "")
-									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "")
-									+ (layoutString.length > 0 &&  layoutString[1] != "" ? "&" + layoutString[1] : "");
-					var pageQuery = "?w=all&a=1&depth="+ Math.max(layoutString[0],0) +
-										"&q=" +(top.HEURIST.parameters['q']&& top.HEURIST.parameters['q'].length >0 ? top.HEURIST.parameters['q'] :
-												(newSelectionIds.length>0? "ids:"+ newSelectionIds.join(","):""))+
-//										"&limit=" + limit +
-										(filter.length > 0 ? filter : "") +
-										(filter.length > 0 ? filter : "") +
-										($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +
-										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
-					curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
-					var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
-					xml = loadXMLDocFromFile(curQueryURL);
-					selectedIds = newSelectionIds;
+									+ (ptrFilter.length > 0 &&  ptrFilter[1] != "" ? "&" + ptrFilter[1] : "");
+/*					newSelectionIds = [];
+					if (top.HEURIST.search.getLevelSelectedRecIDs("0").get().length > 0) {
+						newSelectionIds = top.HEURIST.search.getLevelSelectedRecIDs("0").get();
+					}else if (argList && argList.match("selectedIds")) {
+						var ids = argList.match("selectedIds=(\\d+(?:,\\d+)*)");
+						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
+					}*/
+					var maxDepth = Math.max(layoutString[0],0);
+					var newSelectionIDs = top.HEURIST.search.getSelectedRecIDs();
+					newSelectionIDs = newSelectionIDs.toArray().join();
+					if (FlatHMLQuery.filter != filter || FlatHMLQuery.maxDepth < maxDepth ||FlatHMLQuery.query != top.HEURIST.parameters['q']) {
+						var pageQuery = "?w=all&a=1&depth="+ maxDepth +
+											"&q=" +(top.HEURIST.parameters['q']&& top.HEURIST.parameters['q'].length >0 ? top.HEURIST.parameters['q'] :"")+
+											(filter.length > 0 ? filter : "") +
+											(layoutString.length > 0 &&  layoutString[1] != "" ? "&" + layoutString[1] : "") +
+											(selFilter.length > 0 &&  selFilter[1] != "" ? "&" + selFilter[1] : "") +
+											($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +
+											(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
+						curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+						var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
+						clearAndDisplayLoading();
+						xml = loadXMLDocFromFile(curQueryURL);
+						FlatHMLQuery.filter = filter;
+						FlatHMLQuery.query = top.HEURIST.parameters['q'];
+					}else if(FlatHMLQuery.selectIDs != newSelectionIDs){
+						//replace xml selids node with new ids.
+						xml.getElementsByTagName("selectedIDs").item(0).firstChild.nodeValue = newSelectionIDs;
+					}
+					FlatHMLQuery.selectIDs = newSelectionIDs;
+					selectedIds = newSelectionIDs;
 					displayResultDoc(curStyle,xml);
 /*
 					var selDivs = $('div[class~=selected]');
