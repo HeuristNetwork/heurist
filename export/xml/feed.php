@@ -52,7 +52,7 @@ if($isAtom){
 <?php
 }else{
 //
-//	<atom:link href="=urlencode(curPageURL())" rel="self" type="application/rss+xml"/>
+//	<atom:link href="=urlencode(HEURIST_CURRENT_URL)" rel="self" type="application/rss+xml"/>
 ?>
 <rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
@@ -64,7 +64,7 @@ if($isAtom){
 	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
 	<generator>HEURIST search</generator>
 	<managingEditor>info@heuristscholar.org (Information at Heurist)</managingEditor>
-	<atom:link href="<?=htmlspecialchars(curPageURL())?>" rel="self" type="application/rss+xml"/>
+	<atom:link href="<?=htmlspecialchars(HEURIST_CURRENT_URL)?>" rel="self" type="application/rss+xml"/>
 <item>
 	<title>HEURIST home</title>
 	<description>HEURIST home page (search)</description>
@@ -218,17 +218,5 @@ function prepareQuery($squery, $search_type, $joinTable, $where, $limit)
 			$squery = $squery.$where." limit ".$limit;
 
 			return $squery;
-}
-
-function curPageURL() {
- $pageURL = 'http';
- if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
- $pageURL .= "://";
- if ($_SERVER["SERVER_PORT"] != "80") {
-  $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
- } else {
-  $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
- }
- return $pageURL;
 }
 ?>

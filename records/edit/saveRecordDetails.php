@@ -160,6 +160,11 @@
 				$bibDetailUpdates[$bdID] = $toadd;
 				$bibDetailUpdates[$bdID]["dtl_DetailTypeID"] = $bdType;
 
+/*
+ @TODO Since this function is utilized in (email)import we need to add verification of values according to detail type
+ at the first for terms (enumeration field type)
+*/
+
 				unset($_POST[$eltName][$eltID]);	// remove data from post submission
 				if (count($_POST[$eltName]) == 0){
 					unset($_POST[$eltName]);
@@ -407,7 +412,7 @@
 			$speciesToInput = array(
 				"freetext" => new BibDetailFreetextInput(),
 				"blocktext" => new BibDetailBlocktextInput(),
-				"date" => new BibDetailDateInput(),
+				"date" => new BibDetailTemporalInput(),
 				"resource" => new BibDetailResourceInput(),
 				"float" => new BibDetailFloatInput(),
 				"enum" => new BibDetailDropdownInput(),
@@ -477,7 +482,7 @@
 			return preg_match("/^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$/i", $postVal);
 		}
 	}
-	class BibDetailDateInput extends BibDetailFreetextInput {
+	class BibDetailTemporalInput extends BibDetailFreetextInput {
 		function inputOK($postVal) {
 			return preg_match("/\\S/", $postVal);
 		}

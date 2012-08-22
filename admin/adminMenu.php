@@ -14,7 +14,8 @@ require_once(dirname(__FILE__).'/../common/t1000/t1000.php');
 
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME."&last_uri=".HEURIST_URL_BASE.'admin/adminMenu.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME."&last_uri=".urlencode(HEURIST_CURRENT_URL));
+//HEURIST_URL_BASE.'admin/adminMenu.php?db='.HEURIST_DBNAME);
 	return;
 }
 

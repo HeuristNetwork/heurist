@@ -59,7 +59,7 @@ function showEditWgTagsDialog(){
 
 	var database = (top.HEURIST.database.name || top.HEURIST.parameters.db);
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php"+(database ? "?db="+database : ""), { callback: function(tags) {
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
 		if (tags){
 
 			var _updateTags = function(context){

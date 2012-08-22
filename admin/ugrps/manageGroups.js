@@ -38,6 +38,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			_db,
 			_isSingleSelection = false,
 			_isadmin = false,
+			_ispopup = false,
 			_currentuserid = 0,
 			_rolloverInfo,
 			currentTipId,
@@ -167,7 +168,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
-
+		_ispopup = (Dom.get('titleBanner')==null);
 //		Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				_usrID = usrID;
@@ -262,8 +263,8 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pe
 			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<div align="center">'+
-		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-		_db + "&grpID="+oRecord.getData("id")+
+		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.php?db=" +
+		_db + "&grpID="+oRecord.getData("id")+(_ispopup?"&popup=yes":"")+
 		'" title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';
 
 //IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
@@ -436,7 +437,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 						var admins = _workgroups[recID].admins;
 						var index;
 						for(index in admins) {
-							if(!Hul.isnull(index) && userID === admins[index].id){
+							if(!Hul.isnull(index) && Number(userID) === Number(admins[index].id)){
 								return true;
 							}
 						}

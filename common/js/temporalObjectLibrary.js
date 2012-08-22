@@ -997,6 +997,14 @@ TDate.parse = function () {
 			return tDate;
 		}
 
+		//2 special cases
+		if("today"===str.toLowerCase()){
+			str = (new Date()).toDateString();
+		}else if("now"===str.toLowerCase()){
+ 			str = (new Date()).toString();
+		}
+
+
 		var temp = str.replace(/(GMT|UTC)/,"");   //remove  GMT or UTC marker
 		temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
 		temp = temp.replace(/\s*\([^\)]+\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)

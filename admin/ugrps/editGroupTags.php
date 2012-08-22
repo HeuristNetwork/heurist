@@ -72,7 +72,9 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 
 
 <input type="submit" value="Add workgroup tag(s)">
-<input type="button" value="Close Form" onclick="{window.close('lala');}">
+<?php if(array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes") { ?>
+<input type="button" value="Close Form" onclick="{window.close('bla');}">
+<?php } ?>
 <input type="hidden" name="adding" value="1">
 <input type="hidden" name="deleting" value="0" id="kwd_delete">
 

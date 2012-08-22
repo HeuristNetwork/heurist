@@ -244,9 +244,14 @@ if (is_logged_in() || $metod=="getuser") {
 		/*if($userEmail){
 			$query = $query."ugr_eMail='".$userEmail."'";
 		} else*/
-		if($userID!="0" && is_logged_in()){
+
+		if(intval($userID)==0 && is_logged_in()){
+			$userID = get_user_id();
+		}
+
+		if(intval($userID)!=0 && is_logged_in()){
 			$query = $query."ugr_ID=".$userID;
-		}else{
+		}else {
 			$query = null;
 		}
 

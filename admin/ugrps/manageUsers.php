@@ -2,7 +2,7 @@
 
 /**
 * manageUsers.php
-* workgroup listing
+* users listing
 *
 * @version 2011.0510
 * @autor: Artem Osmakov
@@ -15,10 +15,12 @@
 **/
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-if (!is_admin()) {
+if (!(is_admin() || array_key_exists('grpID', $_REQUEST))) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to add or change users</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
     return;
 }
+
+$isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 
 ?>
 
@@ -27,13 +29,13 @@ if (!is_admin()) {
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Users</title>
+		<title>Manage Users</title>
 
 		<link rel=stylesheet href="../../common/css/global.css">
 
-		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
 
+		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -97,7 +99,7 @@ if (!is_admin()) {
 				text-align: right;
 			}
 			.yui-dt table {
-    				width: 800;
+    			width: 800;
 			}
 			.listing{
 			}
@@ -109,14 +111,18 @@ if (!is_admin()) {
 			.deactivated{
 				display:none;
 			}
+<?php if($isPopup){ ?>
+			#page-inner {top:5 !important}
+<?php } ?>
 		</style>
 
 	</head>
 
 	<body class="popup yui-skin-sam" style="overflow:auto;">
     <div>
-    	<div class="banner"><h2>Manage Users</h2></div>
-
+<?php if(!$isPopup){ ?>
+    	<div class="banner" id="titleBanner"><h2>Manage Users</h2></div>
+<?php } ?>
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
@@ -131,7 +137,7 @@ if (!is_admin()) {
 
 			<div id="currUserInfo"></div>
 
-			<h2 id="lblGroupTitleSelection" class="selection"></h2>
+			<!-- <h2 id="lblGroupTitleSelection" class="selection"></h2> -->
 
 			<div>
 				<div id="pnlFilterByGroup">
@@ -145,13 +151,15 @@ if (!is_admin()) {
                         -->
 				</div>
 
+				<!--
 				<div id="pnlGroupTitle" style="display:none;">
 					<h2 id="lblGroupTitle"></h2>
 				</div>
+				-->
 
-                <div  id="pnlFilterByRole" style="display:none;">
+                <div id="pnlFilterByRole" style="display:none;">
 					<br>
-                    <label style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
+                    <label for="inputFilterByRole" style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
 					<select id="inputFilterByRole" name="inputFilterByRole" size="1" style="width:75px">
 						<option value="all">all roles</option>
 						<option value="admin">admin</option>
@@ -163,7 +171,7 @@ if (!is_admin()) {
 
 			</div>
 
-            <p>
+            <p></p>
 
 			<div id="toolbar2">
 
@@ -199,10 +207,15 @@ if (!is_admin()) {
 					<input type="button" tabindex="11" id="btnApply1" value="Add Users to Group" onClick="userManager.returnSelection();" />
 				</div>
 				<!-- edit contols -->
-				<div id="pnlCtrlEdit1"  class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" />
-					<div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
-						title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
+					<?php if(array_key_exists('grpID', $_REQUEST)){?>
+						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
+					<?php } ?>
+					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px">
+						<input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" />
+						<div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
+							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+					</div>
 				</div>
 			</div>
 
@@ -230,12 +243,16 @@ if (!is_admin()) {
 					<input type="button" tabindex="11" id="btnApply2" value="Add Users to Group" onClick="userManager.returnSelection();" />
 				</div>
 				<!-- edit contols -->
-				<div id="pnlCtrlEdit2"  class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" />
-					<div id="btnSelectAdd2"><input type="button" tabindex="11" value="Find and Add User"
-						title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
+					<?php if(array_key_exists('grpID', $_REQUEST)){?>
+						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
+					<?php } ?>
+					<div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">
+						<input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" />
+						<div id="btnSelectAdd2"><input type="button" tabindex="11" value="Find and Add User"
+							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+					</div>
 				</div>
-
 			</div>
 	</div></div>
 

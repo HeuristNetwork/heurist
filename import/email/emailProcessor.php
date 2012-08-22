@@ -317,7 +317,7 @@
 			$_POST["visibility"] = 'hidden';
 			/*****DEBUG****///error_log(">>>>before insert POST=".print_r($_POST, true));
 
-			$updated = insertRecord();
+			$updated = insertRecord(); //from saveRecordDetails.php
 			if ($updated) {
 				$rec_id = $_REQUEST["recID"];
 				$email->setRecId($rec_id);

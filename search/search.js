@@ -1070,7 +1070,7 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <br><br>New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=\"#\" onclick=\"{_registerUser();}\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
+				" <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -4123,28 +4123,3 @@ function removeCustomAlert() {
 	*/
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
-
-
-	/**
-	* call new popup - to register new User
-	*/
-	function _registerUser() {
-
-		var _db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
-				top.HEURIST.parameters.db :
-				(top.HEURIST.database && top.HEURIST.database.name?
-					top.HEURIST.database.name:''));
-
-		var URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db;
-
-		top.HEURIST.util.popupURL(top, URL, {
-			"close-on-blur": false,
-			"no-resize": false,
-			height: 640,
-			width: 740,
-			callback: function(context) {
-			}
-		});
-
-		return false;
-	}

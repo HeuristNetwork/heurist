@@ -1,3 +1,16 @@
+/**
+* manageDetailTypes.js
+* DetailTypeManager object for listing and searching of detail types
+*
+* @version 2011.0510
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 var g_version = "1";
 
 var detailTypeManager;
@@ -227,7 +240,7 @@ function DetailTypeManager() {
 				dty_ID,
 				fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
-			//create datatable and fill it valurs of particular group
+			//create datatable and fill it values of particular group
 			for (dty_ID in top.HEURIST.detailTypes.typedefs) {
 
 				if(!isNaN(Number(dty_ID)))
@@ -956,9 +969,9 @@ function DetailTypeManager() {
 				_cloneHEU = null;
 
 				if(Number(grpID)<0){
-					
+
 					_refreshAllTables();
-					
+
 					grpID = context['0'].result;
 					ind = _groups.length;
 					_addNewTab(ind, grpID, name, description);
@@ -996,7 +1009,7 @@ function DetailTypeManager() {
     //
     //
     function _refreshAllTables(){
-        
+
         var ind;
         for(ind in arrTables){
              if(!(Hul.isnull(ind) || Hul.isnull(arrTables[ind]))){

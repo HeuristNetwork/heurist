@@ -57,6 +57,10 @@ function UserEditor() {
 				_recID = top.HEURIST.parameters.recID;
 				_groupID = top.HEURIST.parameters.groupID;
 
+				if(Hul.isempty(_groupID) && Hul.isempty(_recID)){
+					_recID = top.HEURIST.get_user_id();
+				}
+
 				if(_recID){
 					_entity = top.HEURIST.userGrp.users[_recID];
 				}
@@ -94,11 +98,12 @@ function UserEditor() {
 		_fromArrayToUI();
 
 
-		if(!_isAdmin){
+		if(!top.HEURIST.is_admin()){
 			//hide and rename buttons
 			$('#div-inpit-ugr_Enabled').addClass('hidden');
 			$('#div-inpit-ugr_IsModelUser').addClass('hidden');
-
+		}
+		if(!_isAdmin){
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "inline-block";
 		}

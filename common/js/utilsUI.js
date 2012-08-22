@@ -188,6 +188,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 		if (options["title"]) {
 			titleSpan = top.document.createElement("span");
+			titleSpan.id = "titleSpan";
 			titleSpan.innerHTML = (options["title"]);
 			titleSpan.title = (options["title"]);
 			titleDiv.appendChild(titleSpan);
@@ -291,6 +292,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					// Multi-shot onload -- when(ever) document loads, set the title bar
 					try {
 						titleSpan = top.document.createElement("span");
+						titleSpan.id = "titleSpan";
 						titleSpan.innerHTML = newIframe.contentWindow.document.title;
 						titleSpan.title = newIframe.contentWindow.document.title;
 						titleDiv.replaceChild(titleSpan, titleDiv.lastChild);

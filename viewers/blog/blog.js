@@ -1008,7 +1008,7 @@ showEditWgTagsDialog: function(){
 
 	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php"+(database ? "?db="+database : ""), { callback: function(tags) {
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
 		if (tags){
 
 			var _updateHAPI = function(context){

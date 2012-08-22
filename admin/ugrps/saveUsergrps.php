@@ -428,9 +428,9 @@ Go to the address below to review further details and approve the registration:
 					$ugr_eMail = $row['ugr_eMail'];
 
 					if($tmp_password!=null){
-						$email_text = "New Heurist account is registered for you. You are invited to Heurist world.";
+						$email_text = "A new Heurist account has been created for you.";
 					}else{
-						$email_text = "Your Heurist account registration has been approved.";						
+						$email_text = "Your Heurist account registration has been approved.";
 					}
 
 $email_text = $email_text."
@@ -442,11 +442,13 @@ Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
 with the username: " . $ugr_Name;
 
 					if($tmp_password!=null){
- $email_text = $email_text." and temporal password: ".$tmp_password;
+ $email_text = $email_text." and password: ".$tmp_password."
+
+ To change your password go to My Profile -> My User Info in the top right menu";
 					}
 
  $email_text = $email_text."
- 
+
 We recommend visiting the 'Take the Tour' section and
 also visiting the Help function, which provides comprehensive
 overviews and step-by-step instructions for using Heurist.";

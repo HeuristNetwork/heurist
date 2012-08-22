@@ -1,7 +1,7 @@
 <?php
 
 /**
-* manageGroups.html
+* manageGroups.php
 * workgroup listing
 *
 * @version 2011.0509
@@ -14,6 +14,7 @@
 * @todo
 **/
 
+/*
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
@@ -22,7 +23,8 @@ if (!is_admin()) {
     " target='_top'>Log out</a></p></div></div></body></html>";
     return;
 }
-
+*/
+$isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 ?>
 
 <html>
@@ -30,7 +32,7 @@ if (!is_admin()) {
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Groups</title>
+		<title>Manage Groups</title>
 
 		<link rel=stylesheet href="../../common/css/global.css">
 
@@ -60,14 +62,20 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-
+		<style>
+<?php if ($isPopup) { ?>
+			#page-inner {top:0 !important}
+<?php } ?>
+			div.yui-dt-liner span.count {padding:0 3px; line-height:16px}
+		</style>
 	</head>
 
 
 	<body width="650" height="450" class="popup yui-skin-sam" style="overflow:auto;">
     <div>
-    	<div class="banner"><h2>Manage Groups</h2></div>
-
+<?php if (!$isPopup) { ?>
+    	<div id="titleBanner" class="banner"><h2>Manage Groups</h2></div>
+<?php } ?>
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
@@ -79,7 +87,7 @@ if (!is_admin()) {
 
 	<div id="page-inner">
 
-<p>To view users in a group or assign users to a group, click on the member count.</p>
+	<p>To view users in a group or assign users to a group, click on the member count.</p>
 
     <div id="currUserInfo"></div>
 	<div id="toolbar" style="height:22px;">

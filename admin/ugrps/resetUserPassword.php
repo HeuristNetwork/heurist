@@ -1,7 +1,10 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * resetUserPassword.php
+ * is called from login to reset forgotten password.
+ * Generates new password and send it to user email
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -42,18 +45,17 @@ function hash_it ($passwd) {
 
 function email_user ($user_id, $firstname, $email, $passwd, $username) {
 	$msg =
-'Dear '.$firstname.',
+"Dear ".$firstname.",
 
 Your Heurist password has been reset.
 
-Your username is: '.$username.'
-Your new password is: '.$passwd.'
+Your username is: ".$username."
+Your new password is: ".$passwd."
 
-To change your password, go to:
-'.HEURIST_URL_BASE.'admin/ugrps/editUser.php?db='.HEURIST_DBNAME.'&Id='.$user_id.'
+To change your password go to My Profile -> My User Info in the top right menu
 
 You will first be asked to log in with the new password above.
-';
+";
 	mail($email, 'Heurist password reset', $msg, 'From: '.HEURIST_MAIL_TO_INFO);
 }
 
@@ -89,6 +91,7 @@ if (!$_REQUEST['username']  ||  $error) {
 <p>Enter your username OR email address below and a new password will be emailed to you.</p>
 <?= $error ?>
 <form method="get">
+ <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
  Enter username / email:
  <input type="text" name="username" size="20"> &nbsp;&nbsp;
  <input type="submit" value="reset password">

@@ -41,6 +41,8 @@
 	define('HEURIST_HOST_NAME', @$_SERVER["HTTP_HOST"]);	    // eg. heuristscholar.org
 	define('HEURIST_DOCUMENT_ROOT',@$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/htdocs
 
+	define('HEURIST_CURRENT_URL',curPageURL());
+
 	// calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
 	$installDir = preg_replace("/\/(".HEURIST_TOP_DIRS.")\/.*/","",@$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
 
@@ -496,5 +498,22 @@
 			}
 		}
 		exit(); // it will drop through to here without an error message if the system has not been set up yet
-		}
+	}
+
+	/**
+	* returns full url for current page
+	*/
+	function curPageURL() {
+ 		$pageURL = 'http';
+		if (array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+
+		$pageURL .= "://";
+		if ($_SERVER["SERVER_PORT"] != "80") {
+			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		} else {
+  			$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+  		}
+ 		return $pageURL;
+	}
+
 ?>

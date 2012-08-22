@@ -235,7 +235,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		infoMessageBox.render(document.body);
 
 		top.HEURIST.parameters = top.HEURIST.parseParams(this.location.search);
-		
+
 		if(top.HEURIST.parameters){ //to open edit user at once
 			_initRecID = top.HEURIST.parameters.recID;
 		}
@@ -248,7 +248,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				if (Hul.isnull(grpID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									
+
 
 									grpID = top.HEURIST.parameters.grpID;
 
@@ -780,16 +780,31 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			//if group id is defined as parameter - hide filter by group div
 				var divfil = Dom.get("pnlFilterByGroup");
 				divfil.style.display = "none";
-				Dom.get("pnlGroupTitle").style.display = "block";
-				Dom.get("lblGroupTitle").innerHTML = "Members of <span class='recTypeName'>"+_workgroups[_grpID].name+"</span>";
+				/*Dom.get("pnlGroupTitle").style.display = "block";
+				Dom.get("lblGroupTitle").innerHTML = "Members of <span class='recTypeName'>"+_workgroups[_grpID].name+"</span>";*/
+				document.title = "Members of "+_workgroups[_grpID].name;
+				/*if(parent){
+					var dp = parent.document.getElementById("titleSpan")
+					if(dp){
+						dp.innerHTML = document.title;
+					}
+				}*/
+				if(Dom.get("titleBanner")){
+					Dom.get("titleBanner").innerHTML = "<h2>"+document.title+"</h2>";
+				}
+
 				return;
 			}
 		}
 
-		Dom.get("pnlGroupTitle").style.display = "none";
+		//Dom.get("pnlGroupTitle").style.display = "none";
 
 		if( _isSelection && !Hul.isnull(_grpID) && _grpID!=="all"){
-			Dom.get("lblGroupTitleSelection").innerHTML = "Select and add users for group '"+_workgroups[_grpID].name+"'";
+			//Dom.get("lblGroupTitleSelection").innerHTML =
+			document.title = "Select and add users for group '"+_workgroups[_grpID].name+"'";
+			if(Dom.get("titleBanner")){
+					Dom.get("titleBanner").innerHTML = "<h2>"+document.title+"</h2>";
+			}
 		}
 
 		var sfilter;
@@ -930,8 +945,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 		var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 
-		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-										_db + "&selection=1&grpID="+groupToBeUpdated;
+		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.php?db=" +
+										_db + "&selection=1&popup=yes&grpID="+groupToBeUpdated;
 
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
@@ -939,7 +954,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			height: 600,
 			width: 820,
 			callback: function(usersSelected) {
-				if(!Hul.isnull(usersSelected)){
+				if(!Hul.isempty(usersSelected)){
 //DEBUG alert(usersSelected);
 
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
@@ -956,7 +971,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 	/**
 	* show either selection or listing controls
-	*/
+	*/2
 	function _setMode(className, val)
 	{
 		$("."+className).toggleClass(val?"activated":"deactivated", true);

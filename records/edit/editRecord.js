@@ -929,6 +929,10 @@ top.HEURIST.edit = {
 		return inputs;
 	},
 
+	/**
+	* Validates that all required fields have values.
+	* Invoked onsubmit form in publicInfoTab
+	*/
 	requiredInputsOK: function(inputs, windowRef) {
 		// Return true if and only if all required fields have been filled in.
 		// Otherwise, display a terse message describing missing fields.
@@ -956,9 +960,11 @@ top.HEURIST.edit = {
 			return false;
 		}
 
-		if (missingFields.length == 0) return true;
+		if (missingFields.length == 0) {
 
-		if (missingFields.length == 1) {
+			return top.HEURIST.edit.datetimeInputsOK(inputs, windowRef)
+
+		}else if (missingFields.length == 1) {
 			alert("There was a problem with one of your inputs:\n" + missingFields[0]);
 		} else {	// many errors
 			alert("There were problems with your inputs:\n - " + missingFields.join("\n - "));
@@ -966,6 +972,38 @@ top.HEURIST.edit = {
 
 		firstInput.focus();
 		return false;
+	},
+
+	/**
+	* verifies all date fields for valid input
+	* Non-temoporal values will be converted to YYYY-MM-DD format
+	*
+	* invoked from requiredInputsOK
+	*/
+	datetimeInputsOK: function(inputs, windowRef) {
+
+
+		var missingFields = [];
+		var firstInput = null;
+		var fi_type = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
+
+		for (var i=0; i < inputs.length; ++i) {
+			if (inputs[i].detailType && inputs[i].detailType[fi_type] === "date"){
+				if (! inputs[i].verifyTemporal(inputs[i])) {
+
+					missingFields.push("\"" + inputs[i].shortName + "\""); // wrong date format");
+					if (! firstInput) firstInput = inputs[i];
+				}
+			}
+		}
+
+		if (missingFields.length == 0) {
+			return true;
+		}else{
+			alert("There are problems with your datetime inputs (wrong format):\n - " + missingFields.join("\n"));
+			firstInput.focus();
+			return false;
+		}
 	},
 
 	createDraggableTextarea: function(name, value, parentElement, options) {
@@ -1448,6 +1486,9 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.getValues = function() {
 	return values;
 };
 
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailFreetextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
@@ -1462,24 +1503,36 @@ top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.addInput = function(bdV
 		this.addInputHelper.call(this, bdValue, newInput);
 };
 
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailIntegerInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.typeDescription = "an integer value";
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.regex = new RegExp("^\\s*-?\\d+\\s*$");	// obvious integer regex
 
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailFloatInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.typeDescription = "a numeric value";
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex = new RegExp("^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+))\\s*$");	// extended float regex
 
+/*
+not used anymore
+*/
 top.HEURIST.edit.inputs.BibDetailYearInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype.typeDescription = "a year, or \"in press\"";
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype.regex = new RegExp("^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$", "i");
 
+/*
+not used anymore (see BibDetailTemporalInput instead)
+*/
 top.HEURIST.edit.inputs.BibDetailDateInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
@@ -1506,6 +1559,9 @@ top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype.typeDescription = "a date value";
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype.regex = new RegExp("\\S");
 
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailTemporalInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
@@ -1543,8 +1599,33 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(inp
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a temporal value";
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S");
+top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.verifyTemporal = function(){
 
+	for (var i=0; i < this.inputs.length; ++i) {
+		var input = this.inputs[i];
 
+		if(input && input.textElt)
+		{
+			if(input.textElt.strTemporal){
+				continue; //it is assumed that temporal valus if it is set is validated
+			}else if(input.textElt.value){
+				//validate manually enterted date
+				try{
+					var tDate = TDate.parse(input.textElt.value);
+					input.textElt.value = tDate.toString();
+				}catch(e) {
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+};
+
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailBlocktextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
@@ -1558,6 +1639,9 @@ top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.addInput = function(bd
 	this.addInputHelper.call(this, bdValue, newInput);
 };
 
+/*
+
+*/
 top.HEURIST.edit.inputs.BibDetailResourceInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
