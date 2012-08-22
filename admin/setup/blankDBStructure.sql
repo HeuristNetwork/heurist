@@ -38,10 +38,13 @@
 -- 
 -- Host: localhost
 -- Generation Time: Mar 04, 2012 at 11:04 PM
+-- Note: This is not the actual time of generation (at this date it was version 1.0.0)
+--       The SQL below has been updated separately using H3CORECLONE some time in July 2012 (version 1.1.0)
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
 -- Database: 'hdb_H3CoreDefinitions'
+-- Updated July 2012 using H3CORECLONE
 -- 
 
 -- --------------------------------------------------------
@@ -902,7 +905,9 @@ CREATE TABLE woots (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,1,0,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  -- Note: database sub version updated manually to '1' at 6pm 22/8/12
+  --       This reflects the actual state of the database structure in H3CORECLONE which was pasted in here
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these
