@@ -257,7 +257,7 @@
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
 	define ('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);
 	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
-
+/*****DEBUG****///error_log("initialise DBNAME ".HEURIST_DBNAME." ver ".HEURIST_DBVERSION." with code base from ".HEURIST_BASE_URL);
 	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
 		returnErrorMsgPage('0',"Heurist Code Version ".HEURIST_VERSION." requires database schema version # ".HEURIST_MIN_DBVERSION." or higher. ".
 		HEURIST_DBNAME." has version # ". HEURIST_DBVERSION." - please update the schema of the database.");

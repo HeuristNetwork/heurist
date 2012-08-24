@@ -8,20 +8,22 @@
 	* @package Heurist academic knowledge management system
 	* @todo
 	**/
-
+	if (!@$_REQUEST['db']){// be sure to override default this should only be called on the Master Index server.
+		$_REQUEST['db'] = "H3MasterIndex";
+	}
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    mysql_connection_db_select("hdb_H3MasterIndex"); 
+	mysql_connection_db_select("hdb_H3MasterIndex");
 
-    // Return all registered databases as a json string
-    $res = mysql_query("select rec_ID, rec_URL, rec_Title, rec_Popularity from Records where `rec_RecTypeID`='22'");
-    $registeredDBs = Array();
-    while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
+	// Return all registered databases as a json string
+	$res = mysql_query("select rec_ID, rec_URL, rec_Title, rec_Popularity from Records where `rec_RecTypeID`='22'");
+	$registeredDBs = Array();
+	while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
 		array_push($registeredDBs, $registeredDB);
-    }
-    $jsonRegisteredDBs = json_encode($registeredDBs);
-    echo $jsonRegisteredDBs;
-    
-    //BEWARE: If there si some sort of error, nothjign gets returned and this should be trapped at ht otehr end (selectDBForImport.php)
-    
+	}
+	$jsonRegisteredDBs = json_encode($registeredDBs);
+	echo $jsonRegisteredDBs;
+
+	//BEWARE: If there si some sort of error, nothjign gets returned and this should be trapped at ht otehr end (selectDBForImport.php)
+
 ?>
