@@ -63,7 +63,6 @@ function DetailTypeEditor() {
 			_keepStatus,// Keeps current status for rollback if user decided to keep it
 			_keepType;	// Keeps current datatype for rollback
 
-
 	/**
 	* Initialization of input form
 	*
@@ -357,7 +356,7 @@ function DetailTypeEditor() {
 			height: 480,
 			width: 440,
 			callback: function(recordTypesSelected) {
-				if(!Hul.isnull(recordTypesSelected)) { 
+				if(!Hul.isnull(recordTypesSelected)) {
 					if(type === "fieldsetmarker") { // Change comma seperated list to right format
 						Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
 					} else {

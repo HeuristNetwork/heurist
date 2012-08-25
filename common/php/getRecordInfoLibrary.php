@@ -653,6 +653,7 @@ function getAllRectypeConstraint() {
 					rcs_TermID as trmID,
 					rcs_TargetRectypeID as trgID,
 					rcs_TermLimit as max,
+					rcs_Description as notes,
 					trm_Depth as level,
 					if(trm_ChildCount > 0, true, false) as hasChildren
 				from defRelationshipConstraints
@@ -675,6 +676,7 @@ function getAllRectypeConstraint() {
 		$trmID = (@$row['trmID'] === null ? "any" : $row['trmID']);
 		$trgID = (@$row['trgID'] === null ? "any" : $row['trgID']);
 		$max = (@$row['max'] === null ? 'unlimited' : $row['max']);
+		$notes = $row['notes'];
 		$hasChildren = $row['hasChildren'];
 		if (!@$cnstrnts[$srcID]) {
 			$cnstrnts[$srcID] = array('byTerm'=>array(),'byTarget'=>array());
@@ -682,13 +684,18 @@ function getAllRectypeConstraint() {
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
 			$cnstrnts[$srcID]['byTerm'][$trmID]= array($trgID=>array('limit'=>$max));
 		}
+		
 		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
-			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>array('limit'=>$max));
+			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>array('limit'=>$max, "notes"=>$notes));
+		}else if (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
+			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max, "notes"=>$notes);
 		}
+		
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {
 			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = array('limit'=>$max);
-			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max);
+			//$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max, "notes"=>$notes);
 		}
+		
 		if (@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['addsTo']) {
 			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['limit'] = $max;
 		}

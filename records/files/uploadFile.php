@@ -179,7 +179,7 @@
 			$file_size = round($size / 1024);
 		}
 
-		//check if sudh file is already registered
+		//check if such file is already registered
 		$res = mysql_query('select ulf_ID from recUploadedFiles '.
 			'where ulf_FilePath = "'.addslashes($dirname).
 			'" and ulf_FileName = "'.addslashes($filename).'"');
@@ -327,25 +327,25 @@
 			if( array_key_exists('path', $ap) ){
 				$path = $ap['path'];
 				if($path){
-					$extension = pathinfo($path, PATHINFO_EXTENSION);
+					$extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 				}
 			}
 			$mimeType = findMimeType($extension);
-			
+
 			//from query
 			if($mimeType==''){
-				
+
 				if( array_key_exists('query', $ap) ){
 					$path = $ap['query'];
 					if($path){
-						$extension = pathinfo($path, PATHINFO_EXTENSION);
+						$extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 					}
 				}
 				$mimeType = findMimeType($extension);
 			}
 			//from
 			if($mimeType==''){
-				$extension = pathinfo($url, PATHINFO_EXTENSION);
+				$extension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
 				$mimeType = findMimeType($extension);
 			}
 
@@ -392,11 +392,11 @@
 	*/
 	function findMimeType($mimetypeExt)
 	{
-		
+
 		$mimeType = '';
 		if($mimetypeExt){
 			$mimetypeExt = strtolower($mimetypeExt);
-			
+
 			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
 			if (mysql_num_rows($fres) == 1) {
 				$res = mysql_fetch_assoc($fres);
@@ -406,7 +406,7 @@
 				}
 			}
 
-		}		
+		}
 
 		return $mimeType;
 	}

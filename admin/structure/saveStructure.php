@@ -35,6 +35,8 @@
 		"saveRT",
 		"saveRTS",
 		"deleteRTS",
+		"saveRTC",
+		"deleteRTC",
 		"saveRTG",
 		"saveDetailType",
 		"saveDT",
@@ -100,6 +102,17 @@
 		"rst_TermIDTreeNonSelectableIDs"=>"s",
 		"rst_Modified"=>"i",
 		"rst_LocallyModified"=>"i"
+	);
+
+	$rcsColumnNames = array(
+		"rcs_ID"=>"i",
+		"rcs_SourceRectypeID"=>"i",
+		"rcs_TargetRectypeID"=>"i",
+		"rcs_Description"=>"s",
+		"rcs_TermID"=>"i",
+		"rcs_TermLimit"=>"i",
+		"rcs_Modified"=>"i",
+		"rcs_LocallyModified"=>"i"
 	);
 
 	$dtyColumnNames = array(
@@ -259,6 +272,46 @@
 					$rv = deleteRecStructure($rtyID, $dtyID);
 					if (!array_key_exists('error', $rv)) {
 						$rv['rectypes'] = getAllRectypeStructures();
+					}
+				}
+				break;
+
+			case 'saveRTC': //Constraints
+
+				$srcID = @$_REQUEST['srcID'];
+				$trgID = @$_REQUEST['trgID'];
+				$rv = array();
+
+				if (!$srcID && !$trgID) {
+
+					$rv['error'] = "Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php";
+
+				}else{
+					//$colNames = $data['colNames'];  //['defs']
+					$rv['result'] = array(); //result
+
+					for ($ind=0; $ind<count($data); $ind++) {
+						array_push($rv['result'], updateRelConstraint($srcID, $trgID, $data[$ind]  ));
+					}
+					$rv['constraints'] = getAllRectypeConstraint();//getAllRectypeStructures();
+
+				}
+				break;
+
+
+			case 'deleteRTC': //Constraints
+
+				$srcID = @$_REQUEST['srcID'];
+				$trgID = @$_REQUEST['trgID'];
+				$trmID = @$_REQUEST['trmID'];
+
+				if (!$srcID && !$trgID) {
+					$rv = array();
+					$rv['error'] = "Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php";
+				}else{
+					$rv = deleteRelConstraint($srcID, $trgID, $trmID);
+					if (!array_key_exists('error', $rv)) {
+						$rv['constraints'] = getAllRectypeConstraint();//getAllRectypeStructures();
 					}
 				}
 				break;
@@ -1454,6 +1507,100 @@
 			*/
 		}
 
+		return $ret;
+	}
+
+	/**
+	* put your comment there...
+	*
+	* @param mixed $rcons - array that contains data for on record in defRelationshipConstraints
+	*/
+	function updateRelConstraint($srcID, $trgID, $terms){
+
+		global $db, $rcsColumnNames;
+
+		$ret = null;
+
+		if($terms==null){
+			$terms = array("null", '', "null", '');
+		}
+		if($terms[0]==null || $terms[0]==""){
+			$terms[0]=="null";
+		}
+		if($terms[2]==null || $terms[2]=="" || $terms[2]=="0"){
+			$terms[2]=="null";
+		}
+
+		$where = " where ";
+ 		
+ 		if($srcID==null || $srcID=="0"){
+			$srcID = "null";
+			$where = $where." rcs_SourceRectypeID is null";
+ 		}else{
+			$where = $where." rcs_SourceRectypeID=".$srcID;
+ 		}
+ 		if($trgID==null || $trgID=="0"){
+			$trgID = "null";
+			$where = $where." and rcs_TargetRectypeID is null";
+ 		}else{
+			$where = $where." and rcs_TargetRectypeID=".$trgID;
+ 		}
+ 
+ 
+ 		if($terms[0]!="null"){
+			$where = $where." and rcs_TermID=".$terms[0];;
+		}else{
+			$where = $where." and rcs_TermID is null";
+		}
+
+		$query = "select rcs_ID from defRelationshipConstraints ".$where;
+		
+		$res = $db->query($query);
+
+		$parameters = array("s",$terms[3]); //notes will be parameter
+		$query = "";
+
+		if ($res==null || $res->num_rows<1){ //$db->affected_rows<1){
+			//insert
+			$query = "insert into defRelationshipConstraints(rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_TermID, rcs_TermLimit) values (".
+						$srcID.",".$trgID.",?,".$terms[0].",".$terms[2].")";
+
+		}else{
+			//update
+			$query = "update defRelationshipConstraints set rcs_Description=?, rcs_TermID=".$terms[0].", rcs_TermLimit=".$terms[2].$where;
+		}
+	
+		$rows = execSQL($db, $query, $parameters, true);
+		if ($rows==0 || is_string($rows) ) {
+				$ret = "SQL error in updateRelConstraint: ".$query; //$db->error;
+		} else {
+				$ret = array($srcID, $trgID, $terms);
+		}
+
+		return $ret;
+	}
+
+	/**
+	* Delete constraints
+	*/
+	function deleteRelConstraint($srcID, $trgID, $trmID){
+
+		$ret = array();
+		$query = "delete from defRelationshipConstraints where rcs_SourceRectypeID = $srcID and ".
+			"rcs_TargetRectypeID = $trgID ";
+			
+		if($trmID && $trmID!="null"){
+			$query = $query."and rcs_TermID=$trmID";
+		}else{
+			$query = $query."and rcs_TermID is null";
+		}
+			
+		$res = mysql_query($query);
+		if (mysql_error()) {
+			$ret['error'] = "SQL error deleting constraint ($srcID, $trgID, $trmID) from defRelationshipConstraints table: ".mysql_error();
+		} else {
+			$ret['result'] = "ok";
+		}
 		return $ret;
 	}
 

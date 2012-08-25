@@ -75,6 +75,9 @@ if (!is_admin()) {
 				/*background-color: #EEE;*/
 				color:#999 !important;
 			}
+			.yui-dt1-col-limit .yui-dt1-th-limit{
+				width:20px;
+			}
 
 			.labeldiv{
 				display: inline-block;
@@ -107,41 +110,70 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
+		<script src="../../common/php/loadCommonInfo.php"></script>
 
 		<script type="text/javascript" src="editRectypeConstraints.js"></script>
 
 	<div id="page-inner">
 
-			<div id="tb_top" style="height:30">
+		<div style="width:45%;display:inline-block;vertical-align: top;">
+
+			<div style="height:30">
 
 				<!-- new constrain form -->
-				<div id="pnlAddConstraint" style="float:right; text-align:right;padding-top:5px;">
-					<label>Select record types</label>
-					<input type="button" tabindex="12" value="Cancel" onClick="userManager.cancel();" />
-					<input type="button" tabindex="11" value="Save" onClick="constraintManager.addConstraint();" />
+				<div id="pnlSelectPair" style="padding-top:5px;display:none;">
+					<div style="display:inline-block;">
+						<label>Source: </label>
+						<select id="selSrcRectypes"></select>
+						<label>Target: </label>
+						<select id="selTrgRectypes"></select>
+					</div>
+					<div style="float:right; text-align:right;">
+						<input type="button" tabindex="12" value="Cancel" onClick="constraintManager.toggleEdit(false);" />
+						<input type="button" tabindex="11" value="Save" onClick="constraintManager.addConstraint();" />
+					</div>
 				</div>
 				<!-- add button -->
-				<div style="float:right; text-align:right;padding-top:5px;">
-						<input type="button" tabindex="12" value="Add Constraint" onClick="" />
+				<div id="pnlAddConstraint" style="float:right; text-align:right;padding-top:5px;">
+						<input type="button" tabindex="12" value="Add Constraint" onClick="constraintManager.toggleEdit(true);" />
 				</div>
 			</div>
 
 			<div id="tabContainer">
+			</div>
+		</div>
+		<div id="termsList" style="width:50%;display:none;vertical-align: top;">
 
-				<script  type="text/javascript">
 
-				//  starts initialization on load completion of this window
-				function createManagerObj(){
-					constraintManager = new  ConstraintManager();
-				}
-				YAHOO.util.Event.addListener(window, "load", createManagerObj);
+			<div style="height:30">
 
-				</script>
+				<h3 id="currPairTitle" style="padding:0px;display:inline-block;">
+				</h3>
+				<!-- add button -->
+				<div id="pnlAddTerm" style="float:right; text-align:right;padding-top:5px;">
+					<input type="button" tabindex="12" value="Add 'Any'" onClick="constraintManager.addAny();" 
+							id="btnAddAny" style="visibility:hidden;" />
+					<input type="button" tabindex="11" value="Add Terms" onClick="constraintManager.addTerms();" />
+					<input type="button" tabindex="10" value="Save" onClick="constraintManager.saveTerms();" />
+				</div>
 			</div>
 
+			<div id="tabContainer2">
+			</div>
 
+		</div>
 	</div>
 	</div>
+
+	<script  type="text/javascript">
+
+		//  starts initialization on load completion of this window
+		function createManagerObj(){
+			constraintManager = new  ConstraintManager();
+		}
+		YAHOO.util.Event.addListener(window, "load", createManagerObj);
+
+	</script>
 
 	</body>
 </html>

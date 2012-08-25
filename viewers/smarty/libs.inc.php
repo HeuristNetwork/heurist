@@ -16,15 +16,6 @@ require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 $smarty = new Smarty();
 
-/*
-$smarty->template_dir = '/var/www/htdocs/h3-ao/viewers/smarty/templates/';
-$smarty->compile_dir  = '/var/www/htdocs/smarty/sandpit5/templates_c/';
-$smarty->config_dir   = '/var/www/htdocs/h3-ao/viewers/smarty/configs/';
-$smarty->cache_dir    = '/var/www/htdocs/smarty/sandpit5/cache/';
-*/
-//$smarty->template_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';
-//$smarty->config_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/configs/';
-
 //check folder existance and create new folders if they missed
 if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR)){
 	if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR, 0777, true)) {
