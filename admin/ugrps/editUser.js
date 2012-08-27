@@ -61,7 +61,7 @@ function UserEditor() {
 					_recID = top.HEURIST.get_user_id();
 				}
 
-				if(_recID){
+				if(Number(_recID)>0){
 					_entity = top.HEURIST.userGrp.users[_recID];
 				}
 		}

@@ -914,7 +914,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			if(!Hul.isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {
 				groupToBeUpdated = "&groupID="+groupToBeUpdated;
 			}else{
-				groupToBeUpdated = "";
+				groupToBeUpdated = "&recID=-1";
 			}
 
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + groupToBeUpdated;

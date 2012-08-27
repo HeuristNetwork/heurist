@@ -63,6 +63,12 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 						Dom.get("dtyName").innerHTML = _getTitle(_dt_id);
 					}
 				}
+
+				if(top.HEURIST.parameters.selonly == "1"){
+					Dom.get("headerDiv").style.display = "none";
+					Dom.get("selectedTermsTree").className = "selectedTerms";
+				}
+
 		}
 
 

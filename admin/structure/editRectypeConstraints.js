@@ -61,23 +61,23 @@ function ConstraintManager() {
 						{
 							var terms = [],
 								hasAny = false;
-							
+
 							for (term_ID in top.HEURIST.rectypes.constraints[rec_ID].byTarget[target_rec_ID] ) {
 								if(Hul.isnull(term_ID)) continue;
-								
+
 								var notes = top.HEURIST.rectypes.constraints[rec_ID].byTarget[target_rec_ID][term_ID].notes;
 								var limit = top.HEURIST.rectypes.constraints[rec_ID].byTarget[target_rec_ID][term_ID].limit;
 								if(limit=='unlimited') limit=0;
-								
+
 								if(term_ID=='any'){
-									
+
 									hasAny = true;
 									terms.push(['null',
 												'any',
 												limit,
 												notes,
 												false]);
-									
+
 								}else if(!isNaN(Number(term_ID))){
 									terms.push([term_ID,
 												top.HEURIST.terms.termsByDomainLookup.relation[term_ID][fi_trm_label],
@@ -140,15 +140,11 @@ function ConstraintManager() {
 								});
 
 								var myColumnDefs = [
-			{ key: "src_id", label: "From", sortable:true, className:'right',resizeable:false, width:5},
-			{ key: "src_name", label: " ", sortable:true},
-			{ key: "trg_id", label: "To", sortable:true, className:'right',resizeable:false, width:5},
-			{ key: "trg_name", label: " ", sortable:true},
-			{ key: "count", label: "Count", sortable:true, className:'right',resizeable:false, width:5},
-			{ key: null, label: "Edit", sortable:false, width:5,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#edit_item"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';}
-			}
+			{ key: "src_id", label: "", sortable:true, className:'right',resizeable:false, width:5},
+			{ key: "src_name", label: "From", sortable:true},
+			{ key: "trg_id", label: "", sortable:true, className:'right',resizeable:false, width:5},
+			{ key: "trg_name", label: "To", sortable:true},
+			{ key: "count", label: "Cnt", sortable:true, className:'center',resizeable:false, width:10}
 								];
 
 
@@ -158,42 +154,15 @@ elLiner.innerHTML = '<a href="#edit_item"><img src="../../common/images/edit-pen
 
 
 		//click on action images
-		_myDataTable.subscribe('linkClickEvent', function(oArgs){
+		_myDataTable.subscribe('rowClickEvent', function(oArgs){
 
 
 				var dt = this;
 				var elLink = oArgs.target;
 				var oRecord = dt.getRecord(elLink);
 
-				if(elLink.hash === "#edit_item") {
-					YAHOO.util.Event.stopEvent(oArgs.event);
-					_editConstraint(oRecord);
-
-				}/*else if(elLink.hash === "#delete_item"){
-
-					YAHOO.util.Event.stopEvent(oArgs.event);
-
-						var value = confirm("Do you really want to delete this pair?"); // '"+oRecord.getData('fullname')+"'?");
-						if(value) {
-
-							function _updateAfterDelete(context) {
-
-								if(Hul.isnull(context) || !context){
-									alert("Unknown error on server side");
-								}else if(Hul.isnull(context.error)){
-									dt.deleteRow(oRecord.getId(), -1);
-									top.HEURIST.rectypes = context.rectypes;
-									alert("Constraint pair was deleted");
-								}
-							}
-
-							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-							var callback = _updateAfterDelete;
-							var params = "method=deleteRTC&db="+db+"&srcID=" + oRecord.getData("src_id") + "&trgID=" + oRecord.getData("trg_id");
-							top.HEURIST.util.getJsonData(baseurl, callback, params);
-
-						}
-				}*/
+				//YAHOO.util.Event.stopEvent(oArgs.event);
+				_editConstraint(oRecord);
 
 		});
 
@@ -241,17 +210,24 @@ elLiner.innerHTML = '<a href="#edit_item"><img src="../../common/images/edit-pen
 								});
 
 								var myColumnDefs = [
-			{ key: "trm_label", label: "Term", sortable:true, resizeable:true},
-			{ key: "limit", label: "Limit", sortable:true, className:'right', width:20,
-				resizeable:true, formatter:'number',
-				editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true}), 
+			{ key: "trm_label", label: "Term", sortable:true, resizeable:true, width:100},
+			{ key: "limit", label: "Limit", sortable:true, className:'center',
+				resizeable:false, formatter:'number',
+				editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true}),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var val = oRecord.getData('limit');
-					elLiner.innerHTML = ((Number(val)<1)?'unlimited':val);
+					elLiner.innerHTML = "<span title='Click to edit'>"+((Number(val)<1)?'&nbsp;&nbsp;&nbsp;':val)+"</span>";
 			}
 			},
-			{ key: "notes", label: "Notes", resizeable:true, sortable:false, editor: new YAHOO.widget.TextareaCellEditor()},
-			{ key: null, label: "Delete", sortable:false, width:10, 
+			{ key: "notes", label: "Notes", resizeable:true, sortable:false, width:200, editor: new YAHOO.widget.TextareaCellEditor(),
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var val = oRecord.getData('notes');
+					if(Hul.isempty(val)){
+						val = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+					}
+					elLiner.innerHTML = "<span title='Click to edit'>"+val+"</span>";
+			}},
+			{ key: "changed", label: "Del", sortable:false,  resizeable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.png" title="Delete this Term" /><\/a>';
 						}
@@ -264,6 +240,13 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 		_myTermTable = new YAHOO.widget.DataTable('tabContainer2', myColumnDefs, _myTermSource, myConfigs);
 
 		_myTermTable.subscribe("cellClickEvent", _myTermTable.onEventShowCellEditor);
+
+		_myTermTable.subscribe("editorSaveEvent", function( oArgs) {
+				var oRecord = oArgs.editor.getRecord();
+				oRecord.setData("changed", true);
+				_saveConstraint(null, null, false, null);
+		});
+
 		//click on action images
 		_myTermTable.subscribe('linkClickEvent', function(oArgs){
 
@@ -272,16 +255,16 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 				var elLink = oArgs.target;
 				var oRecord = dt.getRecord(elLink);
 
-				if(elLink.hash === "#delete_term"){ 
+				if(elLink.hash === "#delete_term"){
 
 					YAHOO.util.Event.stopEvent(oArgs.event);
-						
-						var cnt = _currentPairRecord.getData('count');
+
+						var cnt = _currentPairRecord.getData("count");
 						var swarn = (cnt==1)
-									? "Do you really want to delete constraint pair at all?"
-									: "Do you really want to delete term?"
-					
-						var value = confirm(swarn); // '"+oRecord.getData('fullname')+"'?");
+									? "'"+oRecord.getData("trm_label")+"' is the only term for current enity. Do you really want to delete entity pair at all?"
+									: "Do you really want to delete term '"+oRecord.getData("trm_label")+"'?";
+
+						var value = confirm(swarn);
 						if(value) {
 
 							function _updateAfterDelete(context) {
@@ -289,20 +272,22 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 								if(Hul.isnull(context) || !context){
 									alert("Unknown error on server side");
 								}else if(Hul.isnull(context.error)){
-									
+
 									if(cnt==1){
-										_myDataTable.deleteRow(_currentPairRecord.getId(),-1);
-										_currentPairRecord = null;
-										_currentPair = null;
-										Dom.get('termsList').style.display = 'none';
+										_deleteAtAll(true);
 									}else{
-										
+
 										if(oRecord.getData("trm_label")=="any"){
 											Dom.get('btnAddAny').style.visibility = "visible";
 											_currentPairRecord.setData('hasAny', false);
 										}
 
-										_currentPairRecord.setData('count',cnt--);
+										var idx = _findTermIndex(oRecord.getData("trm_id"));
+										if(idx>=0){
+											var curterms= _currentPairRecord.getData("terms");
+											curterms.splice(idx,1);
+											_updateTerms(curterms);
+										}
 										dt.deleteRow(oRecord.getId(), -1);
 									}
 									top.HEURIST.rectypes.constraints = context.constraints;
@@ -329,6 +314,28 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 	}//end of initialization =====================
 
+	/**
+	* update UI if all terms are deleted
+	*/
+	function _deleteAtAll(todelete){
+		if(todelete){
+			_myDataTable.deleteRow(_currentPairRecord.getId(),-1);
+		}
+		_currentPairRecord = null;
+		_currentPair = null;
+		Dom.get('termsList').style.display = 'none';
+	}
+
+	/**
+	*
+	*/
+	function _updateTerms(curterms){
+				_currentPairRecord.setData("terms",curterms);
+				_currentPairRecord.setData("count",curterms.length);
+				_myDataTable.updateCell ( _currentPairRecord , "count" , curterms.length , false );
+				//_myDataTable.updateRow(_currentPairRecord.getId(), _currentPairRecord.getData()); //it works only once
+	}
+
 
 	/**
 	* Show table with list of relation types
@@ -345,7 +352,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 		var hasAny = oRecord.getData("hasAny");
 		Dom.get('btnAddAny').style.visibility = hasAny?"hidden":"visible";
-		
+
 		//init terms table
 		_initTermTable(_currentTerms);
 	}
@@ -353,10 +360,10 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 	/**
 	*
 	*/
-	function _saveConstraint(src_id, trg_id){
+	function _saveConstraint(src_id, trg_id, update_all, terms_to_delete){
 
-		var isFirst = (src_id!=null || trg_id!=null); 
-		
+		var isFirst = (src_id!=null || trg_id!=null);
+
 							function _updateAfterSave(context) {
 
 								if(Hul.isnull(context) || !context){
@@ -365,7 +372,10 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 									if(isFirst)
 									{
-										
+
+									//reset
+									_deleteAtAll(false);
+
 									var i;
 									for( i=0; i<context.result.length; i++){
 										var res = context.result[i];
@@ -375,21 +385,15 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 										    tname = 'any',
 										    target_rec_ID = 0;
 
-										if(isNaN(Number(res[0]))){
-											rec_ID = 0;
-											sname = 'any';
-										}else{
+										if(!isNaN(Number(res[0]))){
 											rec_ID = Number(res[0]);
 											sname = top.HEURIST.rectypes.names[rec_ID];
 										}
-										if(isNaN(Number(res[1]))){
-											target_rec_ID = 0;
-											tname = 'any';
-										}else{
+										if(!isNaN(Number(res[1]))){
 											target_rec_ID = Number(res[1]);
 											tname = top.HEURIST.rectypes.names[target_rec_ID];
 										}
-										
+
 										res =  {src_id:Number(rec_ID),
 												src_name:sname,
 												trg_id:Number(target_rec_ID),
@@ -414,30 +418,49 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 			var values = [],
 				currPair;
 			if(!isFirst){
-				
+
 				currPair = _currentPair;
-				
-				var i;
-				var records = _myTermTable.getRecordSet();  
-				var len = records._records.length-1;  
-				for(i=0;i<=len;i++){  
+
+				var i,
+					records = _myTermTable.getRecordSet(),
+					len = records._records.length-1,
+					currterms = [];
+
+				for(i=0;i<=len;i++){
 					var rec = records._records[i];
-					values.push([rec.getData("trm_id"),
-					rec.getData("trm_label"),
-					rec.getData("limit"),
-					rec.getData("notes"), false]);
+					currterms.push([rec.getData("trm_id"),
+									rec.getData("trm_label"),
+									rec.getData("limit"),
+									rec.getData("notes"),
+									false]);
+					if(update_all || rec.getData("changed")){
+						values.push(currterms[currterms.length-1]);
+					}
+					rec.setData("changed", false);
 				}
-				
-				_currentPairRecord.setData("terms", values);
+
+				_currentPairRecord.setData("terms", currterms);
+
+				if(!Hul.isempty(terms_to_delete)){
+					currPair = currPair + "&del=" + terms_to_delete;
+				}
+
  			}else{
+
+				if(Hul.isempty(src_id) && Hul.isempty(trg_id)){
+					alert("Define rectype for source or target");
+					return;
+				}
+
+
  				//check that this pair is unique
  				var srcrec = top.HEURIST.rectypes.constraints[(src_id==''?'any':src_id)];
  				if(Hul.isnull(srcrec) || Hul.isnull(srcrec.byTarget[(trg_id==''?'any':trg_id)])){
-					
+
  					currPair = "&srcID=" + src_id +	"&trgID=" + trg_id;
 					values.push(['null','null','null','']);
  				}else{
-					alert('There is such pair already');
+					alert('This pair of entities is already listed');
 					return;
  				}
 			}
@@ -492,7 +515,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 			for( idx in curterms){
 				if(!Hul.isnull(idx)){
 					if(termID == curterms[idx][0]){
-						return idx;
+						return Number(idx);
 					}
 				}
 			}
@@ -501,7 +524,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 	}
 
 	/**
-	* 
+	*
 	*/
 	function _addAny(){
 		var curterms = _currentPairRecord.getData("terms");
@@ -509,15 +532,18 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 						'any',
 						0,
 						'',
-						false]);
+						true]);
 		//update table
-		_currentPairRecord.setData("terms", curterms);
 		_currentPairRecord.setData("hasAny", true);
+		_updateTerms(curterms);
+
 		Dom.get('btnAddAny').style.visibility = "hidden";
-		
-		_initTermTable(curterms);		
+
+		_initTermTable(curterms);
+
+		_saveConstraint(null, null, false, null); //update on server side
 	}
-	
+
 	/**
 	* onSelectTerms
 	*
@@ -542,35 +568,37 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 		}
 
 		Hul.popupURL(top, top.HEURIST.basePath +
-			"admin/structure/selectTerms.html?datatype=relationtype&all="+allTerms+"&db="+db,
+			"admin/structure/selectTerms.html?datatype=relationtype&all="+allTerms+"&selonly=1&db="+db,
 			{
 			"close-on-blur": false,
 			"no-resize": true,
-			height: 500,
+			height: 450,
 			width: 750,
 			callback: function(editedTermTree, editedDisabledTerms) {
 				if(editedTermTree || editedDisabledTerms) {
 
 					var existingTree = Hul.expandJsonStructure(editedTermTree);
-					var disabledTerms = Hul.expandJsonStructure(editedDisabledTerms);
+					//var disabledTerms = Hul.expandJsonStructure(editedDisabledTerms);
 					var selterms = [];
 
 					function __getFlatArray(termSubTree){
 						//get flat list
 						for( termID in termSubTree){
 							if(!Hul.isnull(termID)){
-								if(disabledTerms.indexOf(termID)<0){
+								//if(disabledTerms.indexOf(termID)<0){
 									selterms.push(termID);
 									if(typeof termSubTree[termID] === "object") {
 										__getFlatArray(termSubTree[termID]);
 									}
-								}
+								//}
 							}
 						}
 					}
 
 					__getFlatArray(existingTree);
 
+					var affected = 0,
+						terms_to_delete = "";
 					//update terms in current pair record and reload table
 					idx = 0;
 					while( idx<curterms.length){
@@ -579,12 +607,18 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 								termID = curterms[idx][0];
 								if(selterms.indexOf(termID)<0){
 									//remove
+									terms_to_delete = terms_to_delete+termID+",";
 									curterms.splice(idx,1);
+									affected++;
 									continue;
 								}
 							}
 							idx++;
 					}
+					if(terms_to_delete.length>0){
+						terms_to_delete = terms_to_delete.substr(0,terms_to_delete.length-1);
+					}
+
 					var fi_trm_label = top.HEURIST.terms.fieldNamesToIndex.trm_Label;
 					for( idx in selterms){
 						if(!Hul.isnull(idx)){
@@ -595,15 +629,24 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 												top.HEURIST.terms.termsByDomainLookup.relation[termID][fi_trm_label],
 												0,
 												'',
-												false]);
+												true]);
 
+								affected++;
 							}
 						}
 					}
 
-					//update table
-					_currentPairRecord.setData("terms", curterms);
-					_initTermTable(curterms);
+					if(affected>0){ //autosave
+						//update table
+						if(curterms.length>0){
+							_updateTerms(curterms);
+							_initTermTable(curterms);
+						}else{
+							_deleteAtAll(true);
+						}
+
+						_saveConstraint(null, null, false, terms_to_delete); //all
+					}
 
 
 				}
@@ -622,19 +665,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 				* @param user - userID or email
 				*/
 				addConstraint: function(user){
-					_saveConstraint(Dom.get('selSrcRectypes').value, Dom.get('selTrgRectypes').value);
-				},
-
-				toggleEdit:function(isactive){
-					Dom.get('pnlSelectPair').style.display = (isactive)?'block':'none';
-					Dom.get('pnlAddConstraint').style.display = (!isactive)?'block':'none';
-
-				},
-
-				toggleEdit2:function(isactive){
-					Dom.get('pnlSelectTerm').style.display = (isactive)?'block':'none';
-					Dom.get('pnlAddTerm').style.display = (!isactive)?'block':'none';
-
+						_saveConstraint(Dom.get('selSrcRectypes').value, Dom.get('selTrgRectypes').value, false, null);
 				},
 
 				addTerms:function(){
@@ -644,11 +675,13 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 				addAny:function(){
 					_addAny();
 				},
-				
+
+				/* now there is "auto-save"
 				saveTerms:function(){
-					_saveConstraint(null,null);
+					_saveConstraint(null,null, false);
 					Dom.get('termsList').style.display = 'none';
 				},
+				*/
 
 				getClass: function () {
 					return _className;

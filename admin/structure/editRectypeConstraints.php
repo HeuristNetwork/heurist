@@ -75,9 +75,16 @@ if (!is_admin()) {
 				/*background-color: #EEE;*/
 				color:#999 !important;
 			}
-			.yui-dt1-col-limit .yui-dt1-th-limit{
-				width:20px;
+			#yui-dt0-th-count,#yui-dt1-th-changed,#yui-dt1-th-limit{
+				width:10px;
 			}
+			/*
+			#yui-dt1-th-changed{
+				width:10px;
+			}
+			#yui-dt1-th-limit{
+				width:10px;
+			}*/
 
 			.labeldiv{
 				display: inline-block;
@@ -120,8 +127,13 @@ if (!is_admin()) {
 
 			<div style="height:30">
 
+				<div style="padding:4px;">Constraints determine the type and number of relationships which can be created for each pair of entity types</div>
+
+				<div id="tabContainer">
+				</div>
+
 				<!-- new constrain form -->
-				<div id="pnlSelectPair" style="padding-top:5px;display:none;">
+				<div id="pnlSelectPair" style="padding-top:5px;display:block;">
 					<div style="display:inline-block;">
 						<label>Source: </label>
 						<select id="selSrcRectypes"></select>
@@ -129,39 +141,59 @@ if (!is_admin()) {
 						<select id="selTrgRectypes"></select>
 					</div>
 					<div style="float:right; text-align:right;">
-						<input type="button" tabindex="12" value="Cancel" onClick="constraintManager.toggleEdit(false);" />
-						<input type="button" tabindex="11" value="Save" onClick="constraintManager.addConstraint();" />
+						<input type="button" tabindex="11" value="Add pair" title="Add entity pair"
+								onClick="constraintManager.addConstraint();" />
 					</div>
-				</div>
-				<!-- add button -->
-				<div id="pnlAddConstraint" style="float:right; text-align:right;padding-top:5px;">
-						<input type="button" tabindex="12" value="Add Constraint" onClick="constraintManager.toggleEdit(true);" />
 				</div>
 			</div>
 
-			<div id="tabContainer">
-			</div>
 		</div>
 		<div id="termsList" style="width:50%;display:none;vertical-align: top;">
 
 
 			<div style="height:30">
 
-				<h3 id="currPairTitle" style="padding:0px;display:inline-block;">
-				</h3>
+				<h3 id="currPairTitle" style="padding:4px;"></h3>
+				<div id="tabContainer2"></div>
 				<!-- add button -->
-				<div id="pnlAddTerm" style="float:right; text-align:right;padding-top:5px;">
-					<input type="button" tabindex="12" value="Add 'Any'" onClick="constraintManager.addAny();" 
+				<div id="pnlAddTerm" style="text-align:left;padding-top:5px;">
+					<input type="button" tabindex="11" value="Choose Terms" onClick="constraintManager.addTerms();" />
+					<input type="button" tabindex="12" value="Add 'Any'" onClick="constraintManager.addAny();"
 							id="btnAddAny" style="visibility:hidden;" />
-					<input type="button" tabindex="11" value="Add Terms" onClick="constraintManager.addTerms();" />
-					<input type="button" tabindex="10" value="Save" onClick="constraintManager.saveTerms();" />
 				</div>
 			</div>
 
-			<div id="tabContainer2">
-			</div>
+
 
 		</div>
+
+		<div class="help prompt">
+		<hr/>
+			<ul>
+			<li>
+				General Notes:
+				<div style="padding-left: 25px;">
+Constraints are applied from most specific to least specific<br/>
+Only one constraint is allowed per source - target - term combination<br/>
+Specify constraints in the most specific direction<br/>
+for example:  Person-Person-IsParentOf (max 2 relationships)<br/>
+rather than:   Person-Person-IsOffspringOf (unlimited relationships)<br/>
+				</div>
+			</li>
+			<li>Fields:
+				<ul>
+<li>Source: The record type from which relationships will be established</li>
+<li>Target: The record type to which relationships will point</li>
+<li>Term: The term to be constrained (constraint is applied to the term and its children)</li>
+<li>Limit: The maximum number of relationships which can be established using this combination (blank = unlimited)</li>
+<li>Notes: Notes about the nature of the constraint</li>
+				</ul>
+			</li>
+
+
+		</div>
+
+
 	</div>
 	</div>
 

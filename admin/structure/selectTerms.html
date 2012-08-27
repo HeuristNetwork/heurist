@@ -58,25 +58,23 @@
 <iframe id="structure" src="../../common/php/loadCommonInfo.php" width="10px" height="10px"></iframe>
 -->
 
-<div>
-<div id="dtyName" style="width:49%;display:inline-block;"></div>
-<div style="width:49%;display:inline-block;padding-top:2px;text-align:left;">
-    <h3 style="margin:0px;padding-left:5px;display:inline-block;">Preview the result</h3>
-    <div style="display:inline-block;padding-top:0px;padding-right:10px;padding-left: 5px;">
-    	<select id="previewList" class="previewList"></select>
-    </div>
-</div>
-</div>
+<div id="headerDiv" style="display:block;">
+	<div id="dtyName" style="width:49%;display:inline-block;"></div>
+	<div style="width:49%;display:inline-block;padding-top:2px;text-align:left;">
+    	<h3 style="margin:0px;padding-left:5px;display:inline-block;">Preview the result</h3>
+    	<div style="display:inline-block;padding-top:0px;padding-right:10px;padding-left: 5px;">
+		    	<select id="previewList" class="previewList"></select>
+    	</div>
+	</div>
 
-<div>
-<div id="termTreeText" class="termTreeText" style="display:inline-block;">
-	<h3>Select the terms you want</h3>
-	<div style="float:right;padding-top:8px;padding-right:10px;visibility: hidden;"><button title="Clear selection" onClick="selectTerms.clearSelection()">Clear</button></div>
-</div>
-<div id="termTreeText" class="selectedTermsText" style="display:inline-block;">
-	<h3>Preview tree</h3><span style="padding-left:10px;">checked = selectable</span>
-	<div style="float:right;padding-top:8px;padding-right:20px;visibility: hidden;"><button title="Clear disbales" onClick="selectTerms.clearDisables()">Enable All</button></div>
-</div>
+	<div id="termTreeText" class="termTreeText" style="display:inline-block;">
+		<h3 style="padding: 0px;">Select the terms you want</h3>
+		<div style="float:right;padding-top:8px;padding-right:10px;visibility: hidden;"><button title="Clear selection" onClick="selectTerms.clearSelection()">Clear</button></div>
+	</div>
+	<div id="termTreeText" class="selectedTermsText" style="display:inline-block;">
+		<h3 style="padding: 0px;">Preview tree</h3><span style="padding-left:10px;">checked = selectable</span>
+		<div style="float:right;padding-top:8px;padding-right:20px;visibility: hidden;"><button title="Clear disbales" onClick="selectTerms.clearDisables()">Enable All</button></div>
+	</div>
 </div>
 
 <div id="termTree" class="termTree ygtv-checkbox"></div>

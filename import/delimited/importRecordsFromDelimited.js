@@ -104,8 +104,8 @@ FlexImport = (function () {
 		if(FlexImport.currentStep==3 && !$("#mstep2").hasClass("link")){
 			$("#mstep2").addClass("link");
 			$("#mstep2").click(function(){
-				FlexImport.createColumnSelectors();
-				FlexImport.gotoStep(2);
+				FlexImport.createColumnSelectors(null);
+				//FlexImport.gotoStep(2);
 			});
 		}
 
@@ -143,14 +143,15 @@ FlexImport = (function () {
 		doubleQuoteRegex = new RegExp(this.quote + this.quote, "g");
 
 		var lines = txt.split(lineRegex);
-		var i, l = lines.length;
+		var i, l = lines.length, k = 0;
 		for (i = 0; i < l; ++i) {
 			if (lines[i].length > 0) {
-				FlexImport.fields[i] = lines[i].split(fieldRegex);
-				for (var j = 0; j < FlexImport.fields[i].length; ++j) {
-					FlexImport.fields[i][j] = FlexImport.fields[i][j].replace(doubleQuoteRegex, this.quote);
+				FlexImport.fields[k] = lines[i].split(fieldRegex);
+				for (var j = 0; j < FlexImport.fields[k].length; ++j) {
+					FlexImport.fields[k][j] = FlexImport.fields[k][j].replace(doubleQuoteRegex, this.quote);
 					FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
 				}
+				k++;
 			}
 		}
 		//we have parsed the input so remove the textarea
@@ -189,23 +190,29 @@ FlexImport = (function () {
 
 				var recTypeID = Number(FlexImport.recTypeSelect.value);
 
-				if(recTypeID!==Number(savedMapping[0])){
-					FlexImport.recTypeSelect.value = savedMapping[0];
-					FlexImport.createColumnSelectors();
-				}
+				var applyMapping = function(){
+					var i, j=1,
+						m = savedMapping.length,
+						l = FlexImport.colSelectors.length;
 
-				var i, j=1,
-					m = savedMapping.length,
-					l = FlexImport.colSelectors.length;
-
-				for (i = 0; i < l; ++i) {
-					if(j<m){
-						FlexImport.colSelectors[i].value = savedMapping[j];
-						j++;
-					}else{
-						FlexImport.colSelectors[i].selectedIndex = 0;
+					for (i = 0; i < l; ++i) {
+						if(j<m){
+							FlexImport.colSelectors[i].value = savedMapping[j];
+							j++;
+						}else{
+							FlexImport.colSelectors[i].selectedIndex = 0;
+						}
 					}
 				}
+
+
+				if(recTypeID!==Number(savedMapping[0])){
+					FlexImport.recTypeSelect.value = savedMapping[0];
+					FlexImport.createColumnSelectors(applyMapping);
+				}else{
+					applyMapping.call(FlexImport);
+				}
+
 			}
 
 			var baseurl = HeuristBaseURL+"import/delimited/importDelimitedMapping.php";
@@ -295,7 +302,7 @@ FlexImport = (function () {
 		var e = $("#rec-type-select-div")[0];
 		e.appendChild(document.createTextNode("Record types: "));
 		FlexImport.recTypeSelect = e.appendChild(document.createElement("select"));
-		FlexImport.recTypeSelect.onchange = function() { FlexImport.createColumnSelectors() };
+		FlexImport.recTypeSelect.onchange = function() { FlexImport.createColumnSelectors(null) };
 		var opt = document.createElement("option");
 		opt.innerHTML = "to select...";
 		opt.disabled = true;
@@ -311,7 +318,11 @@ FlexImport = (function () {
 		}
 	},
 
-	createColumnSelectors: function () {
+	createColumnSelectors: function (applyMapping) {
+
+		FlexImport.showProgress();
+		setTimeout(function() {
+
 		var e = $("#col-select-div")[0];
 
 		FlexImport.recType = HRecordTypeManager.getRecordTypeById(FlexImport.recTypeSelect.value);
@@ -548,6 +559,9 @@ FlexImport = (function () {
 		// create rest of table filling it with the csv analysed data
 		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
+			if(top.HEURIST.util.isnull(inputRow)) {
+				inputRow = "";
+			}
 			tr = tbody.appendChild(document.createElement("tr"));
 			if (FlexImport.lineErrorMap[i]) {
 				if(FlexImport.lineErrorMap[i].invalidRecord){
@@ -591,7 +605,11 @@ FlexImport = (function () {
 
 		FlexImport.showErrorSummary(table);
 
-	},
+		FlexImport.gotoStep(2);
+		if(applyMapping) { applyMapping.call(FlexImport); }
+
+		},200);
+	}, //end createColumnSelectors
 
 	//
 	// creates the table with list of wrong and unrecognized values
