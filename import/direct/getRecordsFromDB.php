@@ -274,7 +274,7 @@
 				$seloptions = createOptions("or", $entnames);
 
 				if($is_h2){
-					$query1 = "SELECT DISTINCT `rec_type`,`rt_name` FROM `$sourcedb`.`records`,`$sourcedb`.`rec_types` where `rec_type`=`rt_id`";
+					$query1 = "SELECT DISTINCT `rec_type`,`rt_name`, '0' as cnt FROM `$sourcedb`.`records`,`$sourcedb`.`rec_types` where `rec_type`=`rt_id`";
 				}else{
 					$query1 = "SELECT rty_ID, rty_Name, count(rec_ID) as cnt ".
 					"from `$sourcedb`.`Records` ".
@@ -291,8 +291,9 @@
 					$rt=$row1[0]; //0=rec_RecTypeID
 					$cnt=$row1[2];
 					$selopts = $seloptions;
-					$selectedId = getPresetId($config,"cbr".$rt);
-					if(!$selectedId){	//find the closest name
+					if($config){
+						$selectedId = getPresetId($config,"cbr".$rt);
+					}else{ //					if(!$selectedId){	//find the closest name
 						$selectedId = findClosestName($row1[1], $entnames);  //1=rty_Name
 					}
 					if($selectedId){
@@ -300,7 +301,7 @@
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr><td>[ $rt ] ".$row1[1]."($cnt) </td>".
+					print "<tr><td>[ $rt ] ".$row1[1].(($is_h2)?"":"($cnt) ")."</td>".
 					"<td>==> <select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
 				} // loop through record types
 				print "</table>";
@@ -328,8 +329,9 @@
 
 					$selopts = $seloptions;
 					//find the closest name
-					$selectedId = getPresetId($config,"cbd".$ft);
-					if(!$selectedId){	//find the closest name
+					if($config){
+						$selectedId = getPresetId($config,"cbd".$ft);
+					}else{///	if(!$selectedId){	//find the closest name
 						$selectedId = findClosestName($row1[1], $entnames); //dty_Name
 					}
 					if($selectedId){
@@ -386,9 +388,9 @@
 					$tt=$row1[0]; //0=trm_ID
 
 					$selopts = $seloptions;
-					//find the closest name
-					$selectedId = getPresetId($config,"cbt".$tt);
-					if(!$selectedId){	//find the closest name
+					if($config){
+						$selectedId = getPresetId($config,"cbt".$tt);
+					}else{//	if(!$selectedId){	//find the closest name
 						$selectedId = findClosestName($row1[2], $entnames); //trm_Label
 					}
 					if($selectedId){

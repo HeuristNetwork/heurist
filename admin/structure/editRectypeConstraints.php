@@ -169,28 +169,14 @@ if (!is_admin()) {
 
 		<div class="help prompt">
 		<hr/>
-			<ul>
-			<li>
-				General Notes:
-				<div style="padding-left: 25px;">
+				<b>General Notes:</b>
+				<div>
 Constraints are applied from most specific to least specific<br/>
 Only one constraint is allowed per source - target - term combination<br/>
 Specify constraints in the most specific direction<br/>
 for example:  Person-Person-IsParentOf (max 2 relationships)<br/>
 rather than:   Person-Person-IsOffspringOf (unlimited relationships)<br/>
 				</div>
-			</li>
-			<li>Fields:
-				<ul>
-<li>Source: The record type from which relationships will be established</li>
-<li>Target: The record type to which relationships will point</li>
-<li>Term: The term to be constrained (constraint is applied to the term and its children)</li>
-<li>Limit: The maximum number of relationships which can be established using this combination (blank = unlimited)</li>
-<li>Notes: Notes about the nature of the constraint</li>
-				</ul>
-			</li>
-
-
 		</div>
 
 

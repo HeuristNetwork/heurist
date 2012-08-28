@@ -27,6 +27,8 @@ function ConstraintManager() {
 		_myDataSource,
 		_myTermTable,
 		_myTermSource,
+		_myToolTip,
+		showTimer, hideTimer,
 		_currentPair,
 		_currentPairRecord;
 
@@ -48,6 +50,8 @@ function ConstraintManager() {
 
 			createRectypeSelector("selSrcRectypes", true);
 			createRectypeSelector("selTrgRectypes", true);
+
+			_myToolTip = new YAHOO.widget.Tooltip("myTooltip");
 
 			//fi = top.HEURIST.rectypes.names;
 
@@ -170,9 +174,59 @@ function ConstraintManager() {
 		_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
 		_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
 
+		_myDataTable.on('theadCellMouseoverEvent', _showToolTip);
+		_myDataTable.on('theadCellMouseoutEvent', _hideToolTip);
+
 		_initTable(arr);
 
 	}//end of initialization =====================
+
+	function _showToolTip(oArgs){
+
+				if (showTimer) {
+					window.clearTimeout(showTimer);
+					showTimer = 0;
+				}
+
+				var target = oArgs.target;
+				var column = this.getColumn(target);
+				var description = null;
+				if (column.key == 'src_name') {
+					description = "Source: The record type from which relationships will be established";
+				}else if (column.key == 'trg_name') {
+					description = "Target: The record type to which relationships will point";
+				}else if (column.key == 'trm_label') {
+					description = "Term: The term to be constrained (constraint is applied to the term and its children)";
+				}else if (column.key == 'limit') {
+					description = "Limit: The maximum number of relationships which can be established using this combination (blank = unlimited)";
+				}else if (column.key == 'notes') {
+					description = "Notes: Notes about the nature of the constraint";
+				}
+				if(description){
+					var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
+
+					showTimer = window.setTimeout(function() {
+						_myToolTip.setBody(description);
+						_myToolTip.cfg.setProperty('xy',xy);
+						_myToolTip.show();
+						hideTimer = window.setTimeout(function() {
+							tt.hide();
+						},5000);
+					},500);
+				}
+
+	}
+	function _hideToolTip(oArgs){
+				if (showTimer) {
+					window.clearTimeout(showTimer);
+					showTimer = 0;
+				}
+				if (hideTimer) {
+					window.clearTimeout(hideTimer);
+					hideTimer = 0;
+				}
+				_myToolTip.hide();
+	}
 
 
 	/**
@@ -213,7 +267,7 @@ function ConstraintManager() {
 			{ key: "trm_label", label: "Term", sortable:true, resizeable:true, width:100},
 			{ key: "limit", label: "Limit", sortable:true, className:'center',
 				resizeable:false, formatter:'number',
-				editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true}),
+				editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true, maxlength:4, size:4}),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var val = oRecord.getData('limit');
 					elLiner.innerHTML = "<span title='Click to edit'>"+((Number(val)<1)?'&nbsp;&nbsp;&nbsp;':val)+"</span>";
@@ -240,6 +294,32 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 		_myTermTable = new YAHOO.widget.DataTable('tabContainer2', myColumnDefs, _myTermSource, myConfigs);
 
 		_myTermTable.subscribe("cellClickEvent", _myTermTable.onEventShowCellEditor);
+
+		_myTermTable.subscribe("editorKeydownEvent", function( oArgs ){
+			/* bug in YUI - it does not return CellEditor
+			var clm = oArgs.editor.getColumn();
+			if(clm.field == "limit")
+			{
+				if(oArgs.editor.getInputValue().length>2){
+					YAHOO.util.Event.stopEvent(oArgs.event);
+				}
+			}
+			*/
+			var keyCode = oArgs.event.keyCode;
+			if(oArgs.event.target.type=="text" && keyCode>46)
+			{
+
+ 				var isNumeric = (keyCode >= 48 /* KeyboardEvent.DOM_VK_0 */ && keyCode <= 57 /* KeyboardEvent.DOM_VK_9 */) ||
+                        	(keyCode >= 96 /* KeyboardEvent.DOM_VK_NUMPAD0 */ && keyCode <= 105 /* KeyboardEvent.DOM_VK_NUMPAD9 */);
+				//if(/^[a-z]+$/i.test(field.value)) return true;
+				//var s = String.fromCharCode(keyCode);
+
+				if (!isNumeric || oArgs.event.target.value && oArgs.event.target.value.length>2)
+				{
+					YAHOO.util.Event.stopEvent(oArgs.event);
+				}
+			}
+		});
 
 		_myTermTable.subscribe("editorSaveEvent", function( oArgs) {
 				var oRecord = oArgs.editor.getRecord();
@@ -309,6 +389,8 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 		// Subscribe to events for row selection
 		_myTermTable.subscribe("rowMouseoverEvent", _myTermTable.onEventHighlightRow);
 		_myTermTable.subscribe("rowMouseoutEvent", _myTermTable.onEventUnhighlightRow);
+		_myTermTable.on('theadCellMouseoverEvent', _showToolTip);
+		_myTermTable.on('theadCellMouseoutEvent', _hideToolTip);
 
 		_initTermTable(arr);
 
