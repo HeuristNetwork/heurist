@@ -35,9 +35,9 @@ if (_is_logged_in()) {
 	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive']) {
 		$rv = setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HOST_BASE);
 	}
-	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
-		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
-	}
+//	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
+//		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
+//	}
 
 }
 session_write_close();

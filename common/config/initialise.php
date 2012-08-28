@@ -89,7 +89,7 @@
 
 	if (@$defaultDBname != '') {
 		define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is ambiguous about the db
-		}
+	}
 
 	if (@$httpProxy != '') {
 		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
@@ -97,26 +97,23 @@
 
 	/*****DEBUG****/// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 
-	if (@$_REQUEST["db"]) {
+	if (@$_REQUEST["db"]) {//if uri has DB then use it
 		$dbName = $_REQUEST["db"];
-	}else if (@$_REQUEST["instance"]) { // saw TODO: temporary until change instance to db
-		$dbName = $_REQUEST["instance"];
-		// let's try the refer in case we are being called from an HTML page.
-		}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_db)) {
+	}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_db)) {//else check refer
 		$dbName = $refer_db[1];
-		// saw TODO: temporary until change instance to db
-		}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
-		$dbName = $refer_instance[1];
 	}
+
 	if (!@$dbName) {
-		if (@$_SESSION["heurist_last_used_dbname"]) {
-			$dbName = $_SESSION["heurist_last_used_dbname"];
-		}else if (defined("HEURIST_DEFAULT_DBNAME")) {
+//		if (@$_SESSION["heurist_last_used_dbname"]) {//if no DB known check session
+//			$dbName = $_SESSION["heurist_last_used_dbname"];
+//		}else
+		if (defined("HEURIST_DEFAULT_DBNAME") && defined("ROOTINIT")) {//if enter at site root  index.php and default is set use it
 			$dbName = HEURIST_DEFAULT_DBNAME;
 		} else {
-			returnErrorMsgPage('1',"Ambiguous database name, or no database name supplied. Please supply as '?db=' parameter or ask sysadmin to set in configIni.php");
+			returnErrorMsgPage(0,"Ambiguous database name, or no database name supplied. Please supply as '?db=' parameter or ask sysadmin to set in configIni.php");
 		}
 	}
+
 	define('HEURIST_DBNAME', $dbName);
 	$dbFullName = HEURIST_DB_PREFIX.HEURIST_DBNAME;
 	if ($dbFullName == "") {
@@ -480,7 +477,7 @@
 
 				$msg2 = rawurlencode($msg2);
 
-				if(defined('INITROOT')){
+				if(defined('ROOTINIT')){
 					header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
 				}else{
 					echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
@@ -491,9 +488,6 @@
 
 
 */
-
-
-
 				exit ();
 			}
 		}
