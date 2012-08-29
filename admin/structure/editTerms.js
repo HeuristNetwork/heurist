@@ -782,7 +782,7 @@ function EditTerms() {
 	}
 
 	/**
-	* invokes popup to import list of terms
+	* invokes popup to import list of terms from file
 	*/
 	function _import(isRoot) {
 

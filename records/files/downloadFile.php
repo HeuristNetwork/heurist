@@ -145,7 +145,7 @@ if(isset($filename) && file_exists($filename)){ //local resources
 		readfile($filename);
 	}
 
-}else if ($filedata['URL']!=null){  //Remote resources - just redirect
+}else if ($filedata['URL']!=null && (strpos($filedata['URL'],'downloadFile.php')<1)  ){  //Remote resources - just redirect
 
 /*****DEBUG****/error_log("REDIRECT>>>>>".$filedata['URL']);
 		/* Redirect browser */

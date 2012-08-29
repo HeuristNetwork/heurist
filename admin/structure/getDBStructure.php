@@ -2,6 +2,7 @@
 
 /* getDBStructure.php - returns database definitions (rectypes, details etc.)
  *						as SQL statements ready for INSERT processing
+ * 
  * Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org

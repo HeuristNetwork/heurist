@@ -1,6 +1,7 @@
 <?php
 	/**
 	* File: processAction.php Import a record type, with all its Record Structure, Field types, and terms, or crosswalk it with an existing record type
+	*
 	* Juan Adriaanse 13 Apr 2011
 	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org

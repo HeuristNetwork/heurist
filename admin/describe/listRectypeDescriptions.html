@@ -19,6 +19,10 @@
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
   <style type="text/css">
+  	body {
+  		background-color: #FFFFFF;
+  	    overflow:auto;
+	}
 	a img {
 		border: 0;
 	}
@@ -44,11 +48,7 @@
 
  <body>
 
-  {PageHeader}
-
   <div style="padding: 10px;">
-
-
 
 <div class="headline">Record types for database: [dbname!] </div>
 <p/>
@@ -69,16 +69,19 @@ Requirements: req. = Required, rec. = Recommended, xcl. = Forbidden, otherwise O
   <td>
    <table border="0">
     <tr><td>Notes:</td><td>[rty_Description]</td></tr>
-    <tr><td>Title Mask:</td><td>[rty_TitleMask]</td>
+    <tr><td>Title Mask:</td><td>[rty_TitleMask]</td></tr>
     <tr><td>Status:</td><td>[rty_Status]</td></tr>
-    <tr><td>Origin code/name:<td>[rty_OriginatingDBID]-[rty_IDInOriginatingDB] [rty_NameInOriginatingDB]</td></tr>
+    <tr><td>Origin code/name:</td><td>[rty_OriginatingDBID]-[rty_IDInOriginatingDB] [rty_NameInOriginatingDB]</td></tr>
     <tr><td>Locally modified:</td><td>[rty_LocallyModified]</td></tr>
     <tr><td>Non owner visibility:</td><td>[rty_NonOwnerVisibility]</td></tr>
     <tr><td>Show in lists:</td><td>[rty_ShowInLists]</td></tr>
     <tr><td>Flag as fieldset:</td><td>[rty_FlagAsFieldset]</td></tr>
-    </tr>
    </table>
-  &nbsp;
+   </td>
+ </tr>
+ <tr>
+  <td></td>
+  <td>
    <table width = 1500 border="0">
     <thead>
 	 <tr><th>Code</th><th>Prompt</th><th>Type</th><th>Req.</th><th>Min</th><th>Max</th><th>Match</th><th>Seen-by</th><th>Origin code</th><th>LocMod</th><th>Status</th>
@@ -121,14 +124,14 @@ Requirements: req. = Required, rec. = Recommended, xcl. = Forbidden, otherwise O
 	  <td>[rst_DisplayHelpText]</td>
 	 </tr>
 	 <tr>
-	 <td width="30">
-	 <td width="150">
+	 <td width="30"></td>
+	 <td width="150"></td>
 
 	 <!-- This is quick-and-dirty, lists numeric values for record pointers and terms,
 	      first the detail type list then the override list if present
 	      Really needs proper formatting and explanation in the output -->
 
-	 <td colspan="12" rowspan="1" nowrap="nowrap" width="100" style="text-align:left; overflow:hidden">
+	 <td colspan="13" rowspan="1" nowrap="nowrap" width="100" style="text-align:left; overflow:hidden">
 		 [select BIB_DETAIL_TYPE bdt]
 	 		<script type="text/javascript">
 	 			document.write('[dty_PtrTargetRectypeIDs]'==''?'':'Targets: [dty_PtrTargetRectypeIDs]');
@@ -153,8 +156,8 @@ Requirements: req. = Required, rec. = Recommended, xcl. = Forbidden, otherwise O
 	 [not-found][end-not-found]
 	</tbody>
    </table>
-   <hr>
-  </td>
+   <hr/>
+   </td>
  </tr>
  [end-foreach]
  [not-found][end-not-found]

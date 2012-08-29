@@ -1,7 +1,9 @@
 <?php
 
 	/**
-	* uploadRectypeIcon.php, uploads icons and thumbnails for record types
+	* uploadRectypeIcon.php
+	* uploads icons and thumbnails for record types
+	*
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org
 	* @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -9,9 +11,7 @@
 	* @todo
 	**/
 
-?>
 
-<?php
 	define('SAVE_URI', 'disabled');
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

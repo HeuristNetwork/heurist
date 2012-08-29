@@ -244,6 +244,8 @@
 			return null;
 		}
 	}
+
+
 	/**
 	*
 	*/
@@ -468,9 +470,9 @@
 
 				mysql__update('recUploadedFiles','ulf_ID='.$file_id,
 					array(
-						'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'_remote'),
-						'ulf_UploaderUGrpID' => get_user_id(),
-						'ulf_Added' => date('Y-m-d H:i:s'),
+						//'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'_remote'),
+						//'ulf_UploaderUGrpID' => get_user_id(),
+						'ulf_Modified' => date('Y-m-d H:i:s'),
 						'ulf_MimeExt ' => $filedata['ext'],
 						//'ulf_FileSizeKB' => $file['fileSize'],
 						//'ulf_Description' => $file['fileSize'],
@@ -657,6 +659,14 @@
 			$params = parseParameters($res["parameters"]);
 			$res["mediaType"] =	(array_key_exists('mediatype', $params))?$params['mediatype']:null;
 			$res["remoteSource"] = (array_key_exists('source', $params))?$params['source']:null;
+
+
+			$type_source = $res['remoteSource'];
+			if (!($type_source==null || $type_source=='heurist')){ //verify that this is actually remote resource
+				if( $res['fullpath'] && file_exists($res['fullpath']) ){
+					$res['remoteSource'] = 'heurist';
+				}
+			}
 
 			//
 			//@todo - add special parameters for specific sources and media types

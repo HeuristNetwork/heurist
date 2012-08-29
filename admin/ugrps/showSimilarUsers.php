@@ -9,8 +9,15 @@
  * @todo
  **/
 
-?>
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
+if (! is_logged_in()) {
+    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    return;
+}
+
+?>
 <html>
 
 <head>
@@ -28,21 +35,12 @@
 
 <?php
 
-require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-if (! is_logged_in()) {
-    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-    return;
-}
-
-if (!$_REQUEST['user']) $_REQUEST['user'] = get_user_id();
+if (!array_key_exists('user',$_REQUEST) || !$_REQUEST['user'] ) $_REQUEST['user'] = get_user_id();
 
 mysql_connection_db_select(DATABASE);
 
 if ($_REQUEST['user']) {
-	if ($_REQUEST['kwd']) {
+	if (array_key_exists('kwd',$_REQUEST) && $_REQUEST['kwd']) {
 		$res = mysql_query('
    select B.bkm_UGrpID,
           concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name,

@@ -24,7 +24,7 @@ if (! is_logged_in()) {
 mysql_connection_db_select(DATABASE);
 
 $template = file_get_contents('listRectypeDescriptions.html');
-$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
+//$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
