@@ -1885,7 +1885,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 
 	if(newInput.length>0){
 		var tempSelected = newInput.selectedIndex;
-		newInput.innerHTML = '<option disabled="disabled">Select '+ this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + '</option>'+newInput.innerHTML;
+		newInput.innerHTML = '<option disabled="disabled" value="">Select '+ this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + '</option>'+newInput.innerHTML;
 		if(!(bdValue && bdValue.value)){
 			newInput.selectedIndex = 0;
 		}else{
