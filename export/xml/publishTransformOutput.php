@@ -52,6 +52,10 @@ $transformID = @$_REQUEST['transID'] ? $_REQUEST['transID'] : null;
 if ($transformID) {
 	//read Record information to find transform and outputname
 		returnXMLErrorMsgPage("Transform ids not working at this time id='$transformID'");
+	// check record(transformID) is RT_TRANSFORM type
+	// check for fileresources / template files load template(s) (local or remote)
+	// and/or check for local transform then check transform type and dispatch to appropriate transform service
+
 }else {
 	//check transform style exist in standard directory
 	$style = @$_REQUEST['style'] ? $_REQUEST['style'] : 'default';
@@ -66,7 +70,7 @@ if ($transformID) {
 	}
 }
 
-
+//error_log("styleFilename - ".print_r($styleFilename,true));
 if (@$_REQUEST['inputFilename']){
 	if (preg_match("/http/",$_REQUEST['inputFilename'])) {
 		returnXMLErrorMsgPage("Remote inputs are not supported at this time '".$_REQUEST['inputFilename']."'");
@@ -156,8 +160,17 @@ global $outputURI;
 		}else{
 			returnXMLErrorMsgPage("Unable to output untransformed file $recHMLFilename to $outputFilename");
 		}
+	}else{
+		$xslDoc = new DOMDocument();
+		if (preg_match("/http/",$styleFilename)) {
+			$suc = $xslDoc ->loadXML( loadRemoteFile($styleFilename));
+		}else{
+			$suc = $xslDoc ->load($styleFilename);
+		}
+		if (!$suc){
+				returnXMLErrorMsgPage("Unable to load file $styleFilename");
+		}
 	}
-	$xslDoc = DOMDocument::load($styleFilename);
 	$xslProc = new XSLTProcessor();
 	$xslProc->importStylesheet($xslDoc);
 // set up common parameters for stylesheets.

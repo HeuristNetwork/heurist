@@ -2180,6 +2180,9 @@ div.list > div.recordDiv.lnk {
 #results-level0.list > div.recordDiv  {
 	display:block !important;
 }
+#results-level0.list > div.recordDiv.filtered  {
+	display:none !important;
+}
 div.list > div.recordDiv {
 	display:block !important;
 }

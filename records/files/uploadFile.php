@@ -470,8 +470,6 @@
 
 				mysql__update('recUploadedFiles','ulf_ID='.$file_id,
 					array(
-						//'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'_remote'),
-						//'ulf_UploaderUGrpID' => get_user_id(),
 						'ulf_Modified' => date('Y-m-d H:i:s'),
 						'ulf_MimeExt ' => $filedata['ext'],
 						//'ulf_FileSizeKB' => $file['fileSize'],
@@ -495,6 +493,14 @@
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
 					$file_id = $row['ulf_ID'];
+					mysql__update('recUploadedFiles','ulf_ID='.$file_id,
+						array(
+							'ulf_Modified' => date('Y-m-d H:i:s'),
+							'ulf_MimeExt ' => $filedata['ext'],
+							//'ulf_FileSizeKB' => $file['fileSize'],
+							//'ulf_Description' => $file['fileSize'],
+							'ulf_Parameters' => $fileparameters)
+					);
 					return $file_id;
 				}
 			}

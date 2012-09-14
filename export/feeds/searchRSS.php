@@ -62,7 +62,7 @@ $query = str_replace("select distinct bkm_ID from", "select distinct rec_ID from
 $SEARCHES['rss_search'] = $query;
 /*****DEBUG****///error_log("query = ".$query);
 
-$template = file_get_contents('search_rss.xml');
+$template = file_get_contents('searchRSSTemplate.xml');
 
 
 
