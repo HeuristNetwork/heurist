@@ -79,6 +79,7 @@ $prefs = array(
 	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
 	"autoSelectRelated" => "false", // autoSelect related records
 	"autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
+	"relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
 	"tagging-popup" => "true",
 	"mapbackground" => "",
 	"report-output-limit" => "1000"   //report output limit for smarty and map

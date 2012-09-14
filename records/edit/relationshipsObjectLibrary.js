@@ -151,6 +151,7 @@ if (!top.Relationship) {
 				endDate: null
 			};
 		}
+
 		this.div = parentElement.appendChild(this.document.createElement("fieldset"));
 		this.div.className = "relation editable reminder";
 
@@ -185,18 +186,29 @@ if (!top.Relationship) {
 	*/
 		tr = tbody.appendChild(this.document.createElement("div"));
 		tr.className = "input-row";
-		td = tr.appendChild(this.document.createElement("div"));
-		td.className = "input-header-cell";
-		td.appendChild(this.document.createTextNode("This record"));
 
 		td = tr.appendChild(this.document.createElement("div"));
-		this.relTypeSelect = td.appendChild(
-								top.HEURIST.util.createTermSelect(this.manager.relTerms,
-																	(this.termHeadersList || ""),
+		td.style.display = "inline-block";
+
+		td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input2-header-cell";
+		td.style.paddingLeft = '10px';
+		td.appendChild(this.document.createTextNode("This record"));
+
+
+		//var rfr = top.HEURIST.rectypes.typedefs[top.HEURIST.magicNumbers['RT_RELATION']]['dtFields'][top.HEURIST.magicNumbers['DT_RELATION_TYPE']];
+
+		//td = tr.appendChild(this.document.createElement("div"));
+		//td.style.display = "inline-block";
+		this.relTypeSelect = top.HEURIST.util.createTermSelect(this.manager.relTerms,
+																	(this.manager.termHeadersList || ""),
 																	top.HEURIST.terms.termsByDomainLookup.relation,
-																	null));
+																	this.relationshipRec.relTermID);
+		this.relTypeSelect.style.marginLeft = '5px';
+		this.relTypeSelect.style.padding = '3px';
 		this.relTypeSelect.id = "relationship-type";
 		this.relTypeSelect.name = "relationship-type";
+		td.appendChild(this.relTypeSelect);
 	/*	var firstOption = this.relTypeSelect.options[0] = new Option("(select relationship type)", "");
 		firstOption.disabled = true;
 		firstOption.selected = true;
@@ -234,6 +246,24 @@ if (!top.Relationship) {
 			//13,"rst_TermIDTreeNonSelectableIDs" 14,"rst_CalcFunctionID" 15,"rst_Status"
 			//16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
 			//18,"dty_FieldSetRectypeID"
+/*
+		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']?
+																'' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:''),
+															"This record",
+															"relationtype",
+															"",
+															null, //dtyTermIDs
+															"[]", //dtyTermNonSelectableIDs
+															0);
+		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+
+		//fakeBDR[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
+
+		this.relationType = new top.HEURIST.edit.inputs.BibDetailDropdownInput(this.manager.recID, fakeBDT, fakeBDR, [this.relationshipRec.relTermID], tr, "input2");
+		this.relTypeSelect = this.relationType.inputs[0];
+		this.relTypeSelect.id = "relationship-type";
+		this.relTypeSelect.name = "relationship-type";
+*/
 
 		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']?
 																'' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:''),
@@ -245,22 +275,23 @@ if (!top.Relationship) {
 
 		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
 
-		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], tbody);
+		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], tr, "input2"); //was tbody);
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
 
 
-		tr = tbody.appendChild(this.document.createElement("div"));
-		tr.className = "input-row";
+		//tr = tbody.appendChild(this.document.createElement("div"));
+		//ART tr.className = "input-row";
+		//ART td = tr.appendChild(this.document.createElement("div"));
+		//ART td.className = "input-header-cell";
 		td = tr.appendChild(this.document.createElement("div"));
-			td.className = "input-header-cell";
-		td = tr.appendChild(this.document.createElement("div"));
-			td.className = "input-cell";
+		td.className = "input2-header-cell";
+		td.style.padding = "0px 10px 0px 10px ";
 
 		var saveButton = this.document.createElement("input");
 		saveButton.type = "button";
 		saveButton.style.fontWeight = "bold";
 		saveButton.style.marginRight = "10px";
-		saveButton.value = "Add relationship";
+		saveButton.value = "Add";// relationship";
 		saveButton.onclick = function() { thisRef.save(); };
 
 		td.appendChild(saveButton);
@@ -279,9 +310,35 @@ if (!top.Relationship) {
 
 		tr = opt.appendChild(this.document.createElement("div"));
 		tr.className = "input-row optional";
+
 		td = tr.appendChild(this.document.createElement("div"));
 		td.className = "section-header-cell optional";
-		td.appendChild(this.document.createTextNode("Optional Fields"));
+
+		// show hide optional fields
+		var a = td.appendChild(document.createElement("a"));
+		a.href = "#";
+		a.innerHTML = "Optional Fields";
+
+		opt = opt.appendChild(this.document.createElement("div"));
+		var isvisible = top.HEURIST.util.getDisplayPreference("relationship-optional-fields");
+		if (typeof isvisible == "string"){
+			isvisible = (isvisible=="true");
+		}
+		opt.style.display = (isvisible)?"block":"none";
+
+		a.onclick = function(opt)
+					{ return function() {
+							if(opt.style.display == "block"){
+								opt.style.display = "none";
+							}else{
+								opt.style.display = "block";
+							}
+							top.HEURIST.util.setDisplayPreference("relationship-optional-fields", (opt.style.display == "block"));
+
+							return false;
+						}
+					}(opt);
+		//td.appendChild(this.document.createTextNode("Optional Fields"));
 
 		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE'] &&
 										top.HEURIST.magicNumbers['RT_INTERPRETATION']) {
@@ -377,17 +434,20 @@ if (!top.Relationship) {
 				parent.HEURIST.edit.record.relatedRecords = vals.relationship;
 
 				var myTR = thisRef.div.parentNode.parentNode;
-				var newRels = window.frames[4].document.getElementById("newly-added-rels");
-				if (!newRels) {
-					newRels = document.createElement("div");
-					newRels.id = "newly-added-rels";
-					newRels.style.marginTop ="20px";
-					newRelsHeading = newRels.appendChild(this.document.createElement("div"));
-					newRelsHeading.innerHTML = "New Relationships";
-					newRelsHeading.className = "relation-title";
-					myTR.appendChild(newRels);
-				};
 
+				/* ARTEM it is hardcoded for particular frame */
+				if (!thisRef.manager.supressHeaders) {
+					var newRels = window.frames[4].document.getElementById("newly-added-rels");
+					if (!newRels) {
+						newRels = document.createElement("div");
+						newRels.id = "newly-added-rels";
+						newRels.style.marginTop ="20px";
+						newRelsHeading = newRels.appendChild(this.document.createElement("div"));
+						newRelsHeading.innerHTML = "New Relationships";
+						newRelsHeading.className = "relation-title";
+						myTR.appendChild(newRels);
+					}
+				}
 
 
 				var newReln = new top.Relationship(myTR.parentNode, vals.relationship.relationshipRecs[vals.relnRecID],thisRef.manager);
@@ -396,9 +456,9 @@ if (!top.Relationship) {
 				thisRef.clear();
 				thisRef.remove();//removes form after saving
 
+				/*ARTEM - something weired */
 				var prevRelnDiv = window.frames[4].document.getElementById("newly-added");
 				if (prevRelnDiv) prevRelnDiv.id = "";
-
 				newReln.tr.id = "newly-added";
 
 				thisRef.manager.remove(thisRef);
@@ -449,6 +509,8 @@ if (!top.Relationship) {
 	*/
 	top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders) {
 		if (!parentElement || !record || isNaN(record.recID)) return null;
+
+		this.supressHeaders = supressHeaders;
 		var thisRef = this;
 		this.parentElement = parentElement; // the containing element for display of relationships
 		this.rectypeID = parseInt(record.rectypeID);
@@ -456,6 +518,8 @@ if (!top.Relationship) {
 		if (dtIDRelmarker) {	// relmarker detail type which means we possibly have range constraints for tragets and relation terms
 			this.dtID = dtIDRelmarker;
 		}
+
+		 var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
 		// save change notification callback in case we change something this should trigger a screen refresh
 		if (changeNotification) {
@@ -465,9 +529,11 @@ if (!top.Relationship) {
 		//get all constraints for src rectype or global constraints
 		this.constraints = (top.HEURIST.rectypes.constraints[this.rectypeID] || top.HEURIST.rectypes.constraints['any']);
 
-		if (dtIDRelmarker) { // we are dealing with a relmark so get definitions and process them for UI
+		if (dtIDRelmarker>0) { // we are dealing with a relmark so get definitions and process them for UI
+
+			var rfr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker];
 			// get any trgPointer restrictions
-			var trgRectypeList = temp = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
+			var trgRectypeList = temp = rfr[rstFieldNamesToRdrIndexMap['rst_PtrFilteredIDs']];
 			var targetRectypes = {};
 			if (temp) {
 				temp = temp.split(",");
@@ -478,7 +544,7 @@ if (!top.Relationship) {
 			}
 
 			// get HeaderTerms list - the values from the structure can be null
-			var rfrHdr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs']];
+			var rfrHdr = rfr[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']];
 			var headerList = {};
 			if (rfrHdr) {
 				rfrHdr = rfrHdr.split(",");
@@ -489,11 +555,32 @@ if (!top.Relationship) {
 			}
 
 			// get relationship terms from relmarker definition
-			this.relTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']]]);
+			this.relTerms = top.HEURIST.util.expandJsonStructure(rfr[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']]);
 		}
 		if (!this.relTerms) { // if no terms were setup in a relmarker then default to all relationships = unconstrained
-			this.relTerms = top.HEURIST.terms.treesByDomain.relation;
+			//if not defined - take list of terms from
+			if(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_RELATION'] && top.HEURIST.magicNumbers['DT_RELATION_TYPE']){
+				var rfr = top.HEURIST.rectypes.typedefs[top.HEURIST.magicNumbers['RT_RELATION']]['dtFields'][top.HEURIST.magicNumbers['DT_RELATION_TYPE']];
+
+				var sAllTerms = rfr[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
+				var sDisTerms = rfr[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
+
+				this.relTerms = top.HEURIST.util.expandJsonStructure(sAllTerms);
+				this.termHeadersList = top.HEURIST.util.expandJsonStructure(sDisTerms);
+
+			}else{
+
+				this.relTerms = top.HEURIST.terms.treesByDomain.relation;
+
+				if(!this.termHeadersList){
+					this.termHeadersList = "";
+					for(termID in this.relTerms) { // For every header term
+						this.termHeadersList = this.termHeadersList + termID + ",";
+					}
+				}
+			}
 		}
+
 		var flatTermIDLookup = null;
 		if (this.relTerms && typeof this.relTerms === "object" && dtIDRelmarker) {
 			flatTermIDLookup = YAHOO.lang.JSON.stringify(this.relTerms);
@@ -606,6 +693,8 @@ if (!top.Relationship) {
 				a.onclick = function(tRow, rtype, dtID) { return function() {
 						var newRow = document.createElement("div");
 						var newCell = newRow.appendChild(document.createElement("div"));
+						newRow.style.width = "100%";
+
 						thisRef.parentElement.insertBefore(newRow, tRow.nextSibling);
 						var rel = new top.EditableRelationship(newCell, null, rtype || 0,dtID,thisRef);
 						rel.nonce = thisRef.getNonce();
@@ -633,6 +722,8 @@ if (!top.Relationship) {
 		addOtherTd.id = "addRelationshipLink";
 		var a = addOtherTd.appendChild(document.createElement("a"));
 		a.href = "#";
+		a.style.padding = "3px 6px 3px 0px";
+
 		var addImg = a.appendChild(document.createElement("img"));
 		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
 		addImg.className = "add_records_img";
@@ -646,14 +737,21 @@ if (!top.Relationship) {
 		a.style.textDecoration = "none";
 		a.onclick = function(rtypes,dtID) { return function() {
 			var newRow = document.createElement("div");
+			newRow.style.width = "100%";
+			newRow.className = "relation";
+
 			var newCell = newRow.appendChild(document.createElement("div"));
+
 			//newCell.colSpan = 7;
-			thisRef.parentElement.insertBefore(newRow,thisRef.parentElement.lastChild);
+			thisRef.parentElement.insertBefore(newRow, thisRef.parentElement.lastChild);
+
 			var rel = new top.EditableRelationship(newCell,null,rtypes,dtID,thisRef);
 			rel.nonce = thisRef.getNonce();
 			thisRef.openRelationships[rel.nonce] = rel;
 			rel.relTypeSelect.focus();
+
 			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
+
 		this.parentElement.appendChild(addOtherTd);
 
 

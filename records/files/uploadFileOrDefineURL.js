@@ -21,7 +21,8 @@ var viewerObject,
 	URLInput,
 	fileUploadInput,
 	_filedata = null,
-	_recordID = null;
+	_recordID = null,
+	_fileuploaded = false;
 
  /**
  * User has uploaded the file - change the url to point to this file and change source and type
@@ -30,6 +31,7 @@ var viewerObject,
  {
 		var rec_url = URLInput.inputs[0]; //document.getElementById("rec_url");
  		rec_url.value = input.link;
+ 		_fileuploaded = true;
  		onChangeURL(null, input.fileType);
  }
 
@@ -195,16 +197,21 @@ function onApply(){
 		_filedata.id = fileId;
 	}
 */
-	_filedata = fileUploadInput.getFileData();
+	if(_fileuploaded){
+		_filedata = fileUploadInput.getFileData();
+	}
+
+	var src = document.getElementById("cbSource").value;
 
 	if(Hul.isempty(_filedata)){ //new
-		_filedata = {id:0, remoteURL:curr_link,
+		_filedata = {id:0,
+					remoteURL: (src=='heurist')?null:curr_link,
 					ext:curr_ext,
-					remoteSource:document.getElementById("cbSource").value,
+					remoteSource: src,
 					mediaType:document.getElementById("cbType").value };
 	}else{
-		_filedata.remoteURL = curr_link;
-		_filedata.remoteSource = document.getElementById("cbSource").value;
+		_filedata.remoteURL = (src=='heurist')?null:curr_link;
+		_filedata.remoteSource = src;
 		_filedata.mediaType = document.getElementById("cbType").value;
 		if(curr_ext) _filedata.ext = curr_ext;
 	}

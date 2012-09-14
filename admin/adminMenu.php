@@ -35,7 +35,14 @@ if(array_key_exists('mode',$_REQUEST)){
 		}
 		//clear
 		//window.history.pushState("object or string", "Title", location.pathname+'?db=
+	}else if($mode=="rectype"){
+		$url = "structure/manageRectypes.php?db=".HEURIST_DBNAME;
+		if(array_key_exists('rtID',$_REQUEST)){
+			$rtID = $_REQUEST['rtID'];
+			$url = $url."&rtID=".$rtID;
+		}
 	}
+
 }
 ?>
 <html>

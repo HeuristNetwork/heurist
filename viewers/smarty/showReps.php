@@ -154,8 +154,7 @@ function executeSmartyTemplate($params){
 			fwrite($file, $template_body);
 			fclose ($file);
 
-		$smarty->display($template_file);
-		//$smarty->display('string:'.$template_body);
+	//$smarty->display('string:'.$template_body);
 	}
 	else
 	{	// usual way - from file
@@ -170,10 +169,14 @@ function executeSmartyTemplate($params){
 		}else if($isJSout){
 			$smarty->registerFilter('output','add_javascript_wrap5');
 		}
-		$smarty->display($template_file);
 
 		//$smarty->unregisterFilter('post','add_javascript_wrap');
+	}
 
+	try{
+			$smarty->display($template_file);
+	} catch (Exception $e) {
+    		echo 'Exception on execution: ',  $e->getMessage(), "\n";
 	}
 
 	//$tpl_vars = $smarty->get_template_vars();
@@ -900,29 +903,44 @@ function smarty_function_wrap($params, &$smarty)
 
 
 //!!!!!
-/*****DEBUG****///
-error_log("WARP VALUE>>>>".print_r($values,true));
+/*****DEBUG****///error_log("WARP VALUE>>>>".print_r($values,true));
 
 			$sres = "";
 
 			foreach ($values as $value){
 
-			if($mode=="thumbnail"){
+				$type_media = $value['mediaType'];
 
-			 	$sres = $sres."<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
-						"<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
+				if($mode=="thumbnail"){
 
-			}else{
+			 		$sres = $sres."<a href='".($value['playerURL']?$value['playerURL']:$value['URL'])."' target='_blank'>".
+							"<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
 
-				if($value['mediaType'] == 'image'){
-					$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
-				}else if( $value['remoteSource']=='youtube' ){
-					$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+				}else if($mode=="player"){
+
+					if($type_media == 'image'){
+						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
+					}else if($value['remoteSource']=='youtube' ){
+						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+					}else if($type_media=='video'){
+						$sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
+					}else if($type_media=='audio'){
+						$sres = $sres.createAudioTag($value['URL'], $value['mimeType']);
+					}else{
+						$sres = $sres."Unsupported media type ".$type_media;
+					}
+
 				}else{
-					$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
-				}
 
-			}
+					if($type_media == 'image'){
+						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
+					}else if( $value['remoteSource']=='youtube' ){
+						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+					}else{
+						$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+					}
+
+				}
 
 			}
 

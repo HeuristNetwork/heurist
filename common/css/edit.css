@@ -42,10 +42,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	width: 130px;
 	overflow:hidden;
 }
+#rectype-edit {
+	border-right:1px solid #D6D6D6;
+	bottom:0;
+	overflow:hidden;
+	padding:10px 0;
+	position:absolute;
+	left:0px;
+	text-align:center;
+	top:0;
+	width:230px;
+	text-align:left;
+}
+#rectype-select{
+	display:none;
+	width:200px
+}
+#rectype-name{
+	width:200px;
+	color:#6A7C99;
+	font-weight: bold;
+}
 #record-title {
 	bottom:0;
 	display:table;
-	left:10px;
+	left:230px;
 	position:absolute;
 	margin: 5px 480px 5px 5px;
 	top:0;
@@ -108,20 +129,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #workgroup-access {
 	padding-left: 20px;
 	background: transparent url(../images/public_icon-small.gif) scroll top left no-repeat;
-}
-#rectype-edit {
-	border-left:1px solid #D6D6D6;
-	bottom:0;
-	overflow:hidden;
-	padding:10px 0;
-	position:absolute;
-	right:260px;
-	text-align:center;
-	top:0;
-	width:210px;
-}
-#rectype-select {
-	width:200px
 }
 #workgroup-editor {
 	width:320px !important;
@@ -230,7 +237,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	padding: 0 5px 0 0;
 	color:#363636;
 }
-#footer #rty_description span.recID{
+#footer #rty_description #rectype-name{
 	color:#6A7C99;
 	font-weight: bold;
 }
@@ -482,7 +489,8 @@ div#notes {
 	display: table-cell;
 	vertical-align: middle;
 }
-.relation div div {display:inline-block}
+/*ARTEM  .relation div div {display:inline-block} */
+
 .relation div.rel {
 	color: #6A7C99;
 	text-align: right;
@@ -521,12 +529,10 @@ div.input-row div.input-cell div#relations-tbody {
 div.input-row div.input-cell div#relations-tbody div.relation {
 	display:block;
 }
-div.input-row div.input-cell div#relations-tbody div {
+div#relations-tbody {
 	display: inline-block;
 }
-div.input-row div.input-cell div#relations-tbody div.relation div {
-	display:inline-block
-}
+
 div.input-row div.input-cell div#relations-tbody div div div.relation div.resource div.resource div.input-row div.input-cell div.resource-div div.file-resource-div{
 	width:auto !important
 }
@@ -624,13 +630,20 @@ div.temporal-div input.temporal-button:hover {
 	color: #6A7C99;
 	font-weight: normal;
 }
+
+.input2-header-cell, .input2-row, .input2-cell{
+	display:inline-block !important;
+	vertical-align: middle !important;
+	padding-left:2px;
+}
+
 .prompt {
 	font-size: 10px;
 	color:#999;
 	font-weight: normal;
 	max-width:450px;
 }
-input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]) {
+input#tags, .input-cell .in, .resource-title, .in, .input-row input:not([type="submit"]) {
 	font-size:2ex;
 	background:none repeat scroll 0 0 #FFF;
 	border:1px solid rgba(0, 0, 0, 0.2);

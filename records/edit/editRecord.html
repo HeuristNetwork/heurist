@@ -31,7 +31,7 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	-->
 	<head>
-		<title>Heurist Reference Database - Edit - &copy; 2007 University of Sydney</title>
+		<title>Heurist Reference Database - &copy; 2012 University of Sydney</title>
 		<link rel=stylesheet href="../../common/css/global.css">
 		<link rel=stylesheet href="../../common/css/edit.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/calendar.css" />
@@ -154,6 +154,11 @@
 
 			function createRectypeChanger() {
 				var rectypeEdit = document.getElementById("rectype-edit");
+
+				//<span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] + ": </span>"
+				var rectypeName = document.getElementById("rectype-name");
+				rectypeName.innerHTML = top.HEURIST.edit.record.rectype;
+
 				var rectypeValSelect = document.createElement("select");
 				rectypeValSelect.id = "rectype-select";
 				rectypeValSelect.onchange = changeRectype;
@@ -176,6 +181,19 @@
 						}
 					}
 				}
+
+				if(top.HEURIST.is_admin()){
+					var edt = document.getElementById("admin_editrectype");
+					edt.innerHTML = "<a href='../../admin/adminMenu.php?db="+
+							top.HEURIST.database.name+"&mode=rectype&rtID="+top.HEURIST.edit.record.rectypeID+"' target='_blank'>Edit record type<img src='../../common/images/edit-pencil.png'></a>";
+				}
+				if(top.HEURIST.edit.record && top.HEURIST.edit.record.isTemporary){
+					top.document.title = "Add ["+top.HEURIST.edit.record.rectype + ", "+ top.HEURIST.edit.record.rectypeID + "] "+top.document.title;
+				}else{
+					top.document.title = top.HEURIST.edit.record.title + " [" + top.HEURIST.edit.record.rectype + ", "+ top.HEURIST.edit.record.rectypeID +"] ID:"+top.HEURIST.edit.record.recID +
+											".  "+top.document.title;
+				}
+
 			}
 
 			function changeRectype() {
@@ -283,11 +301,15 @@
 		<!-- search -->
 		<div id=search  class="roundedBoth outline bannerBG">
 	<!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
+
+	<div id=rectype-edit class=edit >
+		<div style="display:inline-block;padding-right:2px;"><img id=rectype-img src="../../common/images/16x16.gif"></div>
+		<div style="display:inline-block;"><label id="rectype-name"></label><img src="../../common/images/edit-pencil.png"
+			onclick="{event.target.parentNode.style.display='none';document.getElementById('rectype-select').style.display='inline-block';}"></div>
+	</div>
 	<div id=record-title>
-		<img id=rectype-img src="../../common/images/16x16.gif">
 		<div id=title-val></div>
 	</div>
-	<div id=rectype-edit class=edit ></div>
 	<div id=workgroup-div>
 		<div id=workgroup-val-div title="Restrict access by workgroup">
 			<nobr>
@@ -339,12 +361,14 @@
 	<div class="sidebar-nav" style="text-align:right">
 		<div style="padding: 3px 0;">
 			<label for=act-stay >stay on page</label>
-			<input type=radio name=act id=act-stay value=stay
+			<input type=radio name=act id=act-stay value="stay"
+				title="Saves the record but keeps this form open for further editing"
 				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
 		</div>
 		<div style="padding: 3px 0;" id="close-window-option">
 			<label for=act-close>close window</label>
-			<input type=radio name=act id=act-close value=close
+			<input type=radio name=act id=act-close value="close"
+				title="Saves the record and closes the tab or window containing this data entry form"
 				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
 		</div>
 		<div id="public-link" style="padding: 3px 0;">
@@ -362,7 +386,7 @@
 			<!-- banner -->
 			<div class="banner">
 				<a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
-				<div class=public-visible style="margin:3px 10px">
+				<div class=public-visible style="display:inline-block;margin:3px 10px">
 					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
 					<label for=input-visibility>show optional fields</label>
 					<script>
@@ -371,6 +395,7 @@
 						});
 					</script>
 				</div>
+				<div id="admin_editrectype" style="float:right;width:200px;text-align:right;"></div>
 			</div>
 			<!-- main panel -->
 			<div id="page-inner" class="panel-main-div">

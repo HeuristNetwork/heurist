@@ -368,7 +368,7 @@
 
 		if($extension=="jpg" || $extension=="jpeg" || $extension=="png" || $extension=="gif"){
 			$type = 'image';
-		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi"){
+		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi" || $extension=="flv"){
 			$type = 'video';
 		}else if($extension=="mp3" || $extension=="wav"){
 			$type = 'audio';

@@ -16,6 +16,11 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
+if (@$_REQUEST['mobcfg']){
+	downloadFile("text/xml", HEURIST_UPLOAD_DIR."settings/mobile-config.xml");
+	return;
+}
+
 mysql_connection_db_select(DATABASE);
 
 
@@ -136,18 +141,13 @@ if(isset($filename) && file_exists($filename)){ //local resources
 /*****DEBUG****///error_log(">>>>mineTYPE=".$filedata['mimeType']);
 
 		// set the mime type, set to binary if mime type unknown
-		if ($filedata['mimeType']) {
-			header('Content-type: ' .$filedata['mimeType']);
-		}else{
-			header('Content-type: binary/download');
-		}
+		downloadFile($filedata['mimeType'], $filename);
 
-		readfile($filename);
 	}
 
 }else if ($filedata['URL']!=null && (strpos($filedata['URL'],'downloadFile.php')<1)  ){  //Remote resources - just redirect
 
-/*****DEBUG****/error_log("REDIRECT>>>>>".$filedata['URL']);
+/*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
 		/* Redirect browser */
 		//header('HTTP/1.1 201 Created', true, 201);
 		//if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
@@ -215,4 +215,30 @@ function linkifyYouTubeURLs($text, $size) {
     return $text;
 }
 
+/**
+* direct file download
+*
+* @param mixed $mimeType
+* @param mixed $filename
+*/
+function downloadFile($mimeType, $filename){
+		if ($mimeType) {
+			header('Content-type: ' .$mimeType);
+		}else{
+			header('Content-type: binary/download');
+		}
+
+		header('access-control-allow-origin: *');
+		header('access-control-allow-credentials: true');
+
+		readfile($filename);
+}
+
+/*
+$file = file_get_contents('some.zip');
+header('Content-Type: application/zip');
+header('Content-Disposition: attachment; filename="some.zip"');
+header('Content-Length: ' . strlen($file));
+echo $file;
+*/
 ?>

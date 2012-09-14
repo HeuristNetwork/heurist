@@ -156,7 +156,12 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 		textElt.value = textElt.defaultValue = valueVisible;
 
-		top.HEURIST.util.autoSize(textElt, {});
+		var maxWidth = this.parentElement.width;
+		if(!maxWidth || maxWidth>500){
+				maxWidth = 500;
+		}
+
+		top.HEURIST.util.autoSize(textElt, {maxWidth:maxWidth});
 
 		/*$('input#'+textElt.id).autoGrowInput({
     		comfortZone: 50,

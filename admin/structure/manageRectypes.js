@@ -52,7 +52,8 @@ function RectypeManager() {
 	var _updatesCnt = 0, //number of affected rec types (visibility, group belong)
 		_filterForAll = true,
 		_filterText = "",
-		_filterVisible = 0;
+		_filterVisible = 0,
+		_initRecID;
 
 	var tabView = new YAHOO.widget.TabView();
 
@@ -76,6 +77,12 @@ function RectypeManager() {
 				ind++;
 			}
 		}//for groups
+
+		top.HEURIST.parameters = top.HEURIST.parseParams(this.location.search);
+
+		if(top.HEURIST.parameters){ //to open edit recordtyep structure at once
+			_initRecID = top.HEURIST.parameters.rtID;
+		}
 
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
@@ -617,6 +624,13 @@ function RectypeManager() {
 		else if (needFilterUpdate){
 			updateFilter();
 		}
+
+		//do it only once - on load
+		if(!Hul.isnull(_initRecID)){
+			_editRecStructure(_initRecID);
+			_initRecID = null
+		}
+
 	}//initTabContent =============================================== END DATATABLE INIT
 
 

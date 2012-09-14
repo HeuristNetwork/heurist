@@ -84,8 +84,8 @@ function DetailTypeEditor() {
 						_detailType = dt.commonFields;
 					}
 				}
-				if(Hul.isnull(dtgID)){
-					dtgID = 0;
+				if(Hul.isnull(dtgID) && top.HEURIST.detailTypes.groups){
+					dtgID = top.HEURIST.detailTypes.groups[0].id;
 				}
 		}
 

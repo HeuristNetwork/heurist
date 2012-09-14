@@ -1380,7 +1380,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
 * @author Stephen White
 * @param termIDTree an array tree of term ids
-* @param headerTermIDsList a comma separated list of term ids to be markered as headers, can be empty
+* @param disabledTermIDsList a comma separated list of term ids to be markered as headers, can be empty
 * @param termLookup a lookup array of term names
 * @param defaultTermID id of term to show as selected, can be null
 * @return selObj an HTML select object node
@@ -1390,10 +1390,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 	createTermSelectExt: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID, isAddFirstEmpty) { // Creates the preview
 		var selObj = document.createElement("select");
-		var temp = ( disabledTermIDsList instanceof(Array) ?
-						disabledTermIDsList : (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
-						disabledTermIDsList.split(","):
-						[]));
+		var temp = ( disabledTermIDsList instanceof(Array)
+						? disabledTermIDsList
+						: (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
+							disabledTermIDsList.split(","):
+							[]));
 		var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
 		var disabledTerms = {};

@@ -578,7 +578,7 @@ top.HEURIST.edit = {
 		return fdt;
 	},
 
-	createInput: function(recID, detailTypeID, rectypeID, fieldValues, container) {
+	createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
 		// Get Detail Type info
 		//0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
 		//6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
@@ -605,14 +605,14 @@ top.HEURIST.edit = {
 				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(recID, dt, rfr, fieldValues, container);
 				break;
 			case "resource":
-				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(recID, dt, rfr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(recID, dt, rfr, fieldValues, container, stylename_prefix);
 				break;
 			case "float":
 				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(recID, dt, rfr, fieldValues, container);
 				break;
 			case "relationtype":
 			case "enum":
-				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(recID, dt, rfr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(recID, dt, rfr, fieldValues, container, stylename_prefix);
 				break;
 			case "file":
 				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
@@ -880,8 +880,8 @@ top.HEURIST.edit = {
 			var e = document.getElementById("rty_description");
 			if(e){
 				var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
-				e.innerHTML = "<span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] +
-								": </span><span>" +
+				//removed 2012-09-12 <span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] + ": </span>"
+				e.innerHTML = "<span>" +
 								top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Description] +"</span>";
 			}
         }
@@ -1282,9 +1282,10 @@ top.HEURIST.edit = {
 
 top.HEURIST.edit.inputs = { };
 
-top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldRequirements, fieldValues, parentElement) {
+top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldRequirements, fieldValues, parentElement, stylename_prefix) {
 
 	if (arguments.length == 0) return;	// for prototyping
+	if((typeof stylename_prefix==="undefined") || (stylename_prefix===null)) { stylename_prefix = "input"; }
 
 // detailType
 //0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
@@ -1319,13 +1320,17 @@ top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldReq
 
 	this.repeatable = (recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']] != 1)? true : false; //saw TODO this really needs to check many exist
 
-	this.row = parentElement.appendChild(this.document.createElement("div"));
-		this.row.className = "input-row " + required;
+	this.row = this.document.createElement("div");
+	parentElement.appendChild(this.row);
+		this.row.className = stylename_prefix+"-row " + required;
 		if (this.detailType[3] == "separator") this.row.className = "input-row separator";
 
-	this.headerCell = this.row.appendChild(this.document.createElement("div"));
-		this.headerCell.className = "input-header-cell";
-		this.headerCell.appendChild(this.document.createTextNode(recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]));	// rfr_name
+
+	var lbl = this.document.createTextNode(recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]);
+		this.headerCell = this.row.appendChild(this.document.createElement("div"));
+		this.headerCell.className = stylename_prefix+"-header-cell";
+		this.headerCell.appendChild(lbl);	// rfr_name
+
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
 			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
@@ -1335,11 +1340,12 @@ top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldReq
 	}
 
 	this.inputCell = this.row.appendChild(this.document.createElement("div"));
-		this.inputCell.className = "input-cell";
+		this.inputCell.className = stylename_prefix+"-cell";
 
 	this.linkSpan = null;
 
 	// make sure that the promptDiv is the last item in the input cell
+	var helpText = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
 		this.promptDiv.innerHTML = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
@@ -1388,8 +1394,10 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { t
 // 2. put element into inputs array
 // 3.
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
+
 	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
 	this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
 		element.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
@@ -1411,7 +1419,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 		else	this.constrainrectype = 0;
 	}
 	if (parseFloat(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayWidth']]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayWidth']]) + "ex";
+		element.style.width = Math.round(2 + Number(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayWidth']])) + "ex"; //was *4/3
 	}
 
 	element.expando = true;
@@ -1666,6 +1674,12 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.className = bdValue && bdValue.value? "resource-div" : "resource-div empty";
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
+		newDiv.style.width = "";
+
+	if(this.promptDiv.innerHTML){
+		var br = this.document.createElement("br");
+		newDiv.parentNode.insertBefore(br, this.promptDiv);
+	}
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
@@ -1715,8 +1729,10 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
+			if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
 				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value +
 									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
+			}
 //				top.HEURIST.util.popupURL(window,
 //							top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
 //									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
@@ -1763,7 +1779,11 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.setResource = function(
 	} else if (! element.className.match(/(^|\s+)empty(\s+|$)/)) {
 		element.className += " empty";
 	}
-	top.HEURIST.util.autoSize(element.textElt, {});
+	var maxWidth = this.parentElement.width;
+	if(!maxWidth || maxWidth>500){
+		maxWidth = 500;
+	}
+	top.HEURIST.util.autoSize(element.textElt, {maxWidth: maxWidth});
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();
 };
@@ -1837,7 +1857,9 @@ top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput = function(bdVa
 	newInput.style.width = "4em";	// Firefox for Mac workaround -- otherwise dropdown is too narrow (has to be done after inserting into page)
 };
 
-
+//
+//
+//
 top.HEURIST.edit.inputs.BibDetailDropdownInput = function() {
 	top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments);
 };
@@ -1858,8 +1880,6 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.setReadonly = function(
 };
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
-	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
-	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	if(needClear){
 		//find and remove previous selector
@@ -1871,17 +1891,25 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		 this.inputs = [];
 	}
 
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
 	var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
 	var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
 
-	var	allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) :[];
+	var	allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
+	if(allTerms==null){
+			allTerms = (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
+						?top.HEURIST.terms.treesByDomain['enum']
+						:top.HEURIST.terms.treesByDomain.relation;
+	}
 	var	disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
-	var newInput = top.HEURIST.util.createTermSelect(allTerms, disabledTerms,
-														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum" ?
-															top.HEURIST.terms.termsByDomainLookup['enum'] :
-															top.HEURIST.terms.termsByDomainLookup.relation,
-														(bdValue && bdValue.value ? bdValue.value : null));
+	var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
+														(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
+															?top.HEURIST.terms.termsByDomainLookup['enum']
+															:top.HEURIST.terms.termsByDomainLookup.relation,
+														(bdValue && bdValue.value ? bdValue.value : null), (this.required!=="required"));
 
 	if(newInput.length>0){
 		var tempSelected = newInput.selectedIndex;
@@ -1891,18 +1919,6 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		}else{
 			newInput.selectedIndex = tempSelected + 1;
 		}
-		/*
-		var option = document.createElement("option");
-		option.text = "";
-		option.value = ""
-		var sel = newInput.options[0];
-		try
-		{
-			newInput.add(option,sel);
-		}catch(ex){
-			// for IE earlier than version 8
-			newInput.add(option, 0);
-		}*/
 	}
 
 	this.addInputHelper.call(this, bdValue, newInput);
@@ -2440,7 +2456,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype = new top.HEURIST.edit
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.typeDescription = "record relationship marker";
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
 	if (cmd == "delete") {
-		var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php?db="+top.HEURIST.databse.name,
+		var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
 						elements: [ { name: "delete[]", value: relID },
 									{ name: "recID", value: this.recID } ] };
 		var thisRef = this;

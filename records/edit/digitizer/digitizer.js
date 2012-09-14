@@ -347,7 +347,10 @@ function initmap(map_div_id, geovalue){
 		}
 	}
 	else {
-		map.setCenter(new google.maps.LatLng(0, 0), 3); //-33.887967, 151.190034
+		var pos = new google.maps.LatLng(-33.88889, 151.18956);
+		map.setZoom(16);
+		map.setCenter(pos);
+        if(toolID == 5 && markerShape==null) drawPointMarker(pos);
 	}
 
 
