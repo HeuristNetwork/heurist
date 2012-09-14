@@ -76,8 +76,8 @@
 				var editFrame = document.getElementById("edit-frame");
 
 				var parameters = window.HEURIST.parameters;
-				if (parameters  &&  parameters.recID) {
-					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID;
+				if (parameters  &&  parameters.recID && parameters.db) {
+					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID + "&db=" + parameters.db;
 					editFrame.style.display = "block";
 				}
 
