@@ -44,8 +44,8 @@
 						<td style="padding: 2px 5px 5px 5px;">
 							<div style="width: 98%;" class="searchInput">
 								<div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', this.value);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
-								<div id="help-div" class="help prompt"   
-                                    style="width: 250px;">Enter search (partial match), hit [enter] or click 
+								<div id="help-div" class="help prompt"
+                                    style="width: 250px;">Enter search (partial match), hit [enter] or click
                                     <img src="../../common/images/magglass_12x11.gif"
                                     onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
 							</div>
@@ -60,7 +60,7 @@
 							-->
 						</td>
 						<td style="width: 120px;" title="Restrict search to this record type">
-							in <select id=t name=t style="width: 90%;" onChange="document.forms[0].submit('record-search-type')"></select>
+							in <select id="t" name="t" style="width: 90%;" onChange="document.forms[0].submit('record-search-type')"></select>
 						</td>
 						<td style="width: 80px; padding: 0 5px;">
 							<div class=radio><nobr><label for=r-all><input type=radio name=r id=r-all value=all onChange="document.forms[0].submit('r-all')"> all records</label></nobr></div>
@@ -272,7 +272,7 @@
 				window.setTimeout(function() { document.forms[0].elements["q"].focus(); },100);
 
                 document.body.className = document.body.className + ' help-'+top.HEURIST.util.getDisplayPreference('help')+' ';
-                
+
 				//get last selected rectype
 				var initialType = top.HEURIST.util.getDisplayPreference("record-search-type");
 				if (rectypes && !rectypes[initialType]) {//if preferred is not in constrained list choose first rectype
@@ -307,13 +307,20 @@
 						delete tElt.rectypes;
 					}
 				}else{ // pointer constrained to rectypes - ignore showTypes
+					var isNotFound = true;
 					for (var rectypeID in rectypes) {
 						var name = top.HEURIST.rectypes.names[rectypeID];
 						tElt.appendChild( new Option(name, rectypeID));
 						if (rectypeID == initialType) {// select inital type
 							tElt.selectedIndex = tElt.options.length-1;
 						}
+						if(rectypeID == lastSearchType){
+							isNotFound = false;
+						}
 						rectypeIDList.push(rectypeID);
+					}
+					if(isNotFound){
+						lastSearchType = null;
 					}
 					tElt.rectypes = rectypeIDList.join();
 				}
@@ -324,7 +331,9 @@
 					document.forms[0].elements["q"].value = qVal;
 					document.getElementById("r-all").checked = true;
 				}else{//new record
-					document.getElementById("t").value = lastSearchType;
+					if(lastSearchType){
+						document.getElementById("t").value = lastSearchType;
+					}
 					document.getElementById(searchScope).checked = true;
 				}
 				document.forms[0].submit();

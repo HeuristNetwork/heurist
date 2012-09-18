@@ -76,6 +76,12 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		newDiv.bdValue = null;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
+	if(this.promptDiv.innerHTML){
+		var br = this.document.createElement("br");
+		br.style.lineHeight = "2px";
+		newDiv.parentNode.insertBefore(br, this.promptDiv);
+	}
+
 	var valueVisible = "";
 	var valueHidden = "";
 	var thumbUrl = top.HEURIST.basePath+"common/images/icon_file.jpg";

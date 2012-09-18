@@ -61,7 +61,8 @@ function DetailTypeEditor() {
 			_updatedFields = [], //field names which values were changed to be sent to server
 			_updatedDetails = [], //field values
 			_keepStatus,// Keeps current status for rollback if user decided to keep it
-			_keepType;	// Keeps current datatype for rollback
+			_keepType,	// Keeps current datatype for rollback
+			_db;
 
 	/**
 	* Initialization of input form
@@ -88,6 +89,9 @@ function DetailTypeEditor() {
 					dtgID = top.HEURIST.detailTypes.groups[0].id;
 				}
 		}
+
+		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
 
 		if (_dtyID && Hul.isnull(_detailType) ){
 			Dom.get("msg").style.visibility = "visible";
@@ -298,27 +302,26 @@ function DetailTypeEditor() {
 	*/
 	function _onSelectTerms(){
 
-	var type = Dom.get("dty_Type").value;
-	var allTerms = Dom.get("dty_JsonTermIDTree").value;
-	var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
-	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+		var type = Dom.get("dty_Type").value;
+		var allTerms = Dom.get("dty_JsonTermIDTree").value;
+		var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 
-	Hul.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
-		{
-		"close-on-blur": false,
-		"no-resize": true,
-		height: 500,
-		width: 750,
-		callback: function(editedTermTree, editedDisabledTerms) {
-			if(editedTermTree || editedDisabledTerms) {
-				//update hidden fields
-				Dom.get("dty_JsonTermIDTree").value = editedTermTree;
-				Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
-					_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
+		Hul.popupURL(top, top.HEURIST.basePath +
+			"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
+			{
+			"close-on-blur": false,
+			"no-resize": true,
+			height: 500,
+			width: 750,
+			callback: function(editedTermTree, editedDisabledTerms) {
+				if(editedTermTree || editedDisabledTerms) {
+					//update hidden fields
+					Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+					Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+						_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
+				}
 			}
-		}
-	});
+		});
 
 	}
 
@@ -328,46 +331,50 @@ function DetailTypeEditor() {
 	* listener of "Select Record Type" buttons
 	* Shows a popup window where you can select record types
 	*/
-	function _onSelectRectype() {
-	var type = Dom.get("dty_Type").value;
-	var args,URL;
-	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-	if(type === "fieldsetmarker") {
-		if(Dom.get("dty_FieldSetRecTypeID")) {
-			args = Dom.get("dty_FieldSetRecTypeID").value;
-		}
-	}
-	if(type === "relmarker" || type === "resource") {
-		if(Dom.get("dty_PtrTargetRectypeIDs")) {
-			args = Dom.get("dty_PtrTargetRectypeIDs").value;
-		}
-	}
-	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-						(top.HEURIST.database.name?top.HEURIST.database.name:''));
-	if(args) {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args+"&db="+db;
-	} else {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type+"&db="+db;
-	}
-	if(type === "relmarker" || type === "resource" || type === "fieldsetmarker") {
-		Hul.popupURL(top, URL, {
-			"close-on-blur": false,
-			"no-resize": true,
-			height: 480,
-			width: 440,
-			callback: function(recordTypesSelected) {
-				if(!Hul.isnull(recordTypesSelected)) {
-					if(type === "fieldsetmarker") { // Change comma seperated list to right format
-						Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
-					} else {
-						Dom.get("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
-					}
+	function _onSelectRectype()
+	{
 
-						_recreateRecTypesPreview(type, recordTypesSelected);
+		var type = Dom.get("dty_Type").value;
+		if(type === "relmarker" || type === "resource" || type === "fieldsetmarker")
+		{
+
+			var args,URL;
+
+			if(type === "fieldsetmarker") {
+				if(Dom.get("dty_FieldSetRecTypeID")) {
+					args = Dom.get("dty_FieldSetRecTypeID").value;
 				}
 			}
-		});
-	}
+			if(type === "relmarker" || type === "resource") {
+				if(Dom.get("dty_PtrTargetRectypeIDs")) {
+					args = Dom.get("dty_PtrTargetRectypeIDs").value;
+				}
+			}
+
+			if(args) {
+				URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+			} else {
+				URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type+"&db="+_db;
+			}
+
+			Hul.popupURL(top, URL, {
+				"close-on-blur": false,
+				"no-resize": true,
+				height: 480,
+				width: 440,
+				callback: function(recordTypesSelected) {
+					if(!Hul.isnull(recordTypesSelected)) {
+						if(type === "fieldsetmarker") { // Change comma seperated list to right format
+							Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
+						} else {
+							Dom.get("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
+						}
+
+							_recreateRecTypesPreview(type, recordTypesSelected);
+					}
+				}
+			});
+		}
 	}
 
 	/**
@@ -644,11 +651,9 @@ function DetailTypeEditor() {
 //DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
-			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
-			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
+			var params = "method=saveDT&db="+_db+"&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
 		} else {
 			window.close(null);

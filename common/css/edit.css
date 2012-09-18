@@ -692,15 +692,15 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	cursor: pointer;
 	position: relative;/* left: 383px; */
 }
-.input-cell .resource-div .file-resource-div .delete-resource {
+.input-cell .resource-div .file-resource-div, .delete-resource{
 	cursor: pointer;
-	margin-left: 5px;
+	margin-left: 2px;
 	background-image: url('../images/cross.png');
 }
-.input-cell .resource-div.empty .file-resource-div.empty img.edit-resource {
+.file-resource-div.empty .delete-resource, .resource-div.empty .delete-resource, .resource-div.empty .edit-resource {
 	visibility: hidden;
 }
-.input-cell .resource-div.empty .file-resource-div.empty img.delete-resource {
+.input-cell .resource-div.empty .file-resource-div.empty { /* ART img.delete-resource { */
 	cursor: default;
 	margin-left: 5px;
 	background-image: url('../images/cross-grey.png');
@@ -737,7 +737,7 @@ td.input-cell.readonly img.edit-resource {
 	border: 0;
 	outline: none;
 }
-.input-cell .delete-file, .input-cell .delete-geo {
+.input-cell .delete-file, .input-cell .delete-geo { /*ART , .input-cell .delete-resource*/
 	margin-left: 1ex;
 	vertical-align: middle;
 	border: 0;

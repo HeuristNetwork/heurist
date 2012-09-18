@@ -1678,6 +1678,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 
 	if(this.promptDiv.innerHTML){
 		var br = this.document.createElement("br");
+		br.style.lineHeight = "2px";
 		newDiv.parentNode.insertBefore(br, this.promptDiv);
 	}
 
