@@ -227,10 +227,17 @@
 				//$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
 				$rv = array();
 				$rv['result'] = array(); //result
+				$definit = @$_REQUEST['definit'];
 
 				foreach ($data['rectype']['defs'] as $rtyID => $rt) {
 					if ($rtyID == -1) {	// new rectypes
-						array_push($rv['result'], createRectypes($commonNames, $rt));
+
+						$ress = createRectypes($commonNames, $rt);
+						if(is_numeric($ress) && $definit=="1"){
+							addDefaultFieldForNewRecordType(abs($ress));
+						}
+
+						array_push($rv['result'], $ress);
 					}else{
 						array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
 					}
@@ -774,6 +781,74 @@
 
 	}
 
+
+	//
+	//
+	//
+	function getInitRty($ri, $di, $dt, $dtid, $defvals){
+
+		$dt = $dt[$dtid]['commonFields'];
+
+		$arr_target = array();
+
+		$arr_target[$ri['rst_DisplayName']] = $dt[$di['dty_Name']];
+		$arr_target[$ri['rst_DisplayHelpText']] = $dt[$di['dty_HelpText']];
+		$arr_target[$ri['rst_DisplayExtendedDescription']] = $dt[$di['dty_ExtendedDescription']];
+		$arr_target[$ri['rst_DefaultValue']] = "";
+		$arr_target[$ri['rst_RequirementType']] = $defvals[0];
+		$arr_target[$ri['rst_MaxValues']] = "1";
+		$arr_target[$ri['rst_MinValues']] = $defvals[1]; //0 -repeatable, 1-single
+		$arr_target[$ri['rst_DisplayWidth']] = $defvals[2];
+		$arr_target[$ri['rst_RecordMatchOrder']] = "0";
+		$arr_target[$ri['rst_DisplayOrder']] = "null";
+		$arr_target[$ri['rst_DisplayDetailTypeGroupID']] = "1";
+		$arr_target[$ri['rst_FilteredJsonTermIDTree']] = null;
+		$arr_target[$ri['rst_PtrFilteredIDs']] = null;
+		$arr_target[$ri['rst_TermIDTreeNonSelectableIDs']] = null;
+		$arr_target[$ri['rst_CalcFunctionID']] = null;
+		$arr_target[$ri['rst_Status']] = "open";
+		$arr_target[$ri['rst_OrderForThumbnailGeneration']] = null;
+		$arr_target[$ri['rst_NonOwnerVisibility']] = "viewable";
+		//$arr_target[$ri['dty_TermIDTreeNonSelectableIDs']] = "null";
+		//$arr_target[$ri['dty_FieldSetRectypeID']] = "null";
+
+		 ksort($arr_target);
+
+error_log(">>>>".print_r($arr_target, true));
+
+		return $arr_target;
+	}
+
+	//
+	//
+	//
+	function addDefaultFieldForNewRecordType($rtyID)
+	{
+
+			$dt = getAllDetailTypeStructures();
+			$dt = $dt['typedefs'];
+
+			$rv = getAllRectypeStructures();
+			$dtFieldNames = $rv['typedefs']['dtFieldNames'];
+
+			$di = $dt['fieldNamesToIndex'];
+			$ri = $rv['typedefs']['dtFieldNamesToIndex'];
+
+			$data = array();
+			$data['dtFields'] = array(
+			DT_NAME => getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40)),
+			DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
+			DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60)),
+			DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
+
+			DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40)),
+			DT_START_DATE => getInitRty($ri, $di, $dt, DT_START_DATE, array('recommended',1,40)),
+			DT_END_DATE => getInitRty($ri, $di, $dt, DT_END_DATE, array('recommended',1,40))
+			);
+
+			updateRecStructure($dtFieldNames, $rtyID, $data);
+	}
+
 	//================================
 	//
 	// update structure for record type
@@ -827,7 +902,8 @@
 
 					$val = array_shift($fieldVals);
 
-					/*****DEBUG****///error_log(">>".$dtyID."   ".$colName."=".$val);
+					/*****DEBUG****///
+					error_log(">>".$dtyID."   ".$colName."=".$val);
 
 					if (array_key_exists($colName, $rstColumnNames) && $colName!="rst_LocallyModified") {
 						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
@@ -858,7 +934,8 @@
 						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					}
 
-					/*****DEBUG****///error_log(">>>3.".$query);
+					/*****DEBUG****///
+error_log(">>>3.".$query);
 
 					$rows = execSQL($db, $query, $parameters, true);
 

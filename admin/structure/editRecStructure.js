@@ -790,17 +790,17 @@ function EditRecStructure() {
 
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_FilteredJsonTermIDTree');
 
-
+/* Ian's request - no more filtering. ARTEM. WTF??? Why hardcode index again????!!!
 					recreateTermsPreviewSelector(rst_type,
 					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),//dty_JsonTermIDTree
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value),//dty_TermIDTreeNonSelectableIDs
 					edt_def.value);
-/* Ian's request - no more filtering
-					recreateTermsPreviewSelector(rst_type,
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree],
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs],
-						edt_def.value); //default value
 */
+					recreateTermsPreviewSelector(rst_type,
+						(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree]:edt2.value),
+						(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs]:edt.value),
+						edt_def.value); //default value
+
 					//editedTermTree, editedDisabledTerms);
 					Dom.setStyle(edt_def, "visibility", "hidden");
 
@@ -1034,7 +1034,7 @@ function EditRecStructure() {
 		var k;
 		for(k=0; k<arrDty_ID.length; k++){
 			var dty_ID = arrDty_ID[k];
-			if(Hul.isnull(recDetTypes[dty_ID])){
+			if(Hul.isnull(recDetTypes[dty_ID])){ //not added
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
@@ -1789,6 +1789,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], _defvalue, isdefselector);
 							el_sel.style.backgroundColor = bgcolor;
 							el_sel.onchange =  onchangehandler;
+							el_sel.className = "previewList";
 							parent.appendChild(el_sel);
 						}
 						else if(datatype === "relmarker" || datatype === "relationtype") {

@@ -43,6 +43,7 @@
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/php/displayPreferences.php"></script>
+<!-- script src="../../common/php/getMagicNumbers.php"></script -->
 <script src="../../common/php/loadCommonInfo.php"></script>
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script	 type="text/javascript">
@@ -175,8 +176,8 @@
     <div class="input-header-cell" for="rty_ShowURLOnEditForm">Show record URL on edit form:</div>
     <div class="input-cell">
       <input id="rty_ShowURLOnEditForm" type="checkbox"/>
-      <div class="help prompt">Display URL at top of edit form for this record type. 
-                This is a special URL used to hyperlink search results. 
+      <div class="help prompt">Display URL at top of edit form for this record type.
+                This is a special URL used to hyperlink search results.
                 It is distinct from any URL fields in the record, which are not affected</div>
     </div>
    </div>
@@ -185,7 +186,7 @@
     <div class="input-header-cell" for="rty_ShowDescriptionOnEditForm">Show description on edit form:</div>
     <div class="input-cell">
       <input id="rty_ShowDescriptionOnEditForm" type="checkbox"/>
-      <div class="help prompt">Display record type description at top of edit form for this record type. 
+      <div class="help prompt">Display record type description at top of edit form for this record type.
                 This is a useful way of providing some context for the content of the form</div>
     </div>
    </div>
@@ -241,6 +242,7 @@
     <input id="rty_RecTypeGroupID" />
   </div>
   <div class="actionButtons">
+  	<div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
     <input type="button" value="Save & close" onClick="EditPopup.save(false);" />
     <input type="button" value="Save & show fields >> " onClick="EditPopup.save(true)"/>
     <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
@@ -280,6 +282,8 @@
 		}
 		if(newRectypeCode > 0) { // Create empty form
 			initializeEmptyForm();
+		}else{
+			document.getElementById("definitdiv").style.display = "none";
 		}
 		if(newRectypeCode == 2) { // Give error message
 			document.getElementById("statusMsg").style.display = "block";
@@ -323,6 +327,12 @@
         document.getElementById("rty_ShowURLOnEditForm").checked = true;
         document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
 		document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
+
+		/*var dtName = "Name";
+		if(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
+			dtName = top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']];
+			"["+  dtName +"]"; //
+		}*/
 
 		document.getElementById("rty_TitleMask").value = "record [ID]: Please set title mask for this record type once fields have been defined";
 
@@ -586,7 +596,9 @@
 			// TODO: Change base URL
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
-			var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
+			var params = "method=saveRT&db="+db+"&definit="+
+				document.getElementById("definit").value+
+				"&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
 		} else { //nothing changed
 

@@ -1375,6 +1375,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				return option;
 	},
 
+	isArray: function (a)
+	{
+		return Object.prototype.toString.apply(a) === '[object Array]';
+	},
+//@todo check for instanceof(Array)
 /**
 * Helper function that creates a select HTML object filled with an option element for each term "depth first"
 * tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
@@ -1390,7 +1395,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 	createTermSelectExt: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID, isAddFirstEmpty) { // Creates the preview
 		var selObj = document.createElement("select");
-		var temp = ( disabledTermIDsList instanceof(Array)
+		var temp = ( top.HEURIST.util.isArray(disabledTermIDsList)   //instanceof(Array)
 						? disabledTermIDsList
 						: (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
 							disabledTermIDsList.split(","):
@@ -1419,7 +1424,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 
 				if(top.HEURIST.util.isempty(termName)) continue;
-				if(isNotFirefox && depth>1){
+				if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
 					//for non mozilla add manual indent
 					var a = new Array(depth*2);
 					termName = a.join('. ') + termName;
@@ -1430,7 +1435,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				var isHeader   = ((disabledTerms[termID]? true:false) && hasChildren);
 
 
-				if(isHeader) { // header term behaves like an option group
+
+				//in FF optgroup is allowed on first level only - otherwise it is invisible
+
+				if(isHeader && depth==0) { // header term behaves like an option group
 					//opt.className +=  ' termHeader';
 
 					var new_optgroup = document.createElement("optgroup");

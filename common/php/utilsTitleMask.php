@@ -200,11 +200,13 @@ function _title_mask__check_field_name($field_name, $rt)
 		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_field_name = $matches[2];
 	} else {	// match all characters before and after a fullstop
-		preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches);
-		if ( array_key_exists(strtolower($matches[1]), $rdr[$rt])) {
-			$rdt_id = $rdr[$rt][strtolower($matches[1])]['dty_ID'];
-		}else{
-			$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+
+		if(checkPointerRec($field_name, $rdr[$rt], $matches)){
+			$rdt_id = $matches[1];
+			if(!$rdt_id){
+				preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches);
+				$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+			}
 		}
 		if (!$rdt_id) {
 			return 'Type "' . $rct[$rt] . '" does not have "' . $matches[1] . '" field';
@@ -259,6 +261,33 @@ function _title_mask__check_field_name($field_name, $rt)
 
 	return _title_mask__check_field_name($inner_field_name, $inner_rec_type);
 }
+
+
+/**
+* check that field_name is recordpointer fieldname
+*
+* @param mixed $field_name
+* @param mixed $rdr
+* @param string $matches
+*/
+function checkPointerRec($field_name, $rdr, &$matches)
+{
+	if(preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
+
+		//specific case - recordtype name ends with point.
+		if(substr($matches[2],0,1)=="."){
+			$matches[1] = $matches[1].".";
+			$matches[2] = substr($matches[2],1);
+		}
+
+		$matches[1] = @$rdr[strtolower($matches[1])]['dty_ID'];  //$rdt_id
+		$matches[2] = $matches[2]; //$inner_field_name
+		return true;
+	}else{
+		return false;
+	}
+}
+
 
 /**
 * gets value of field
@@ -365,15 +394,15 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 		$rdt_id = $matches[1];
 		$inner_field_name = $matches[2];
 	// match all characters before and after a fullstop
-	} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
-		$rdt_id = @$rdr[$rt][strtolower($matches[1])]['dty_ID'];
+	} else if (checkPointerRec($field_name, $rdr[$rt], $matches)) {
+
+		$rdt_id = $matches[1]; //@$rdr[$rt][strtolower($matches[1])]['dty_ID'];
 		$inner_field_name = $matches[2];
 	} else {	// doesn't match a title mask pattern so return an empty string so nothing is added to title
 		return '';
 	}
 	$rt_id = @$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 	$rt_id = $rt_id ? explode(",",$rt_id) : 0;
-
 
 	$res = mysql_query('select dtl_Value from recDetails
 							left join defDetailTypes on dty_ID=dtl_DetailTypeID

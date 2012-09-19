@@ -626,10 +626,17 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 	**/
 	function _createPreview() {
 		//clear select/combobox
-		var sel = Dom.get('previewList');
+		/*var sel = Dom.get('previewList');
 		while (sel.length>0){
 			sel.remove(0);
+		}*/
+
+		var prev = Dom.get("previewListDiv"),
+		i, len = prev.children.length;
+		for (i = 0; i < len; i++) {
+			prev.removeChild(prev.childNodes[0]);
 		}
+
 
 		var termIDTree = _createTermArray(_selectedTermsTree.getRoot());
 
@@ -640,47 +647,13 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			_setDisabledTerms();
 		}catch(e) { }
 
-		var headers = {};
-		var id;
-		for (id in disabledTermsList) {  //??????? we may use indexOf, why so complexity?
-			headers[disabledTermsList[id]] = disabledTermsList[id];
-		}
 
-		function __createSubTreeOptions(depth, termSubTree) {
-			var termID;
-			for( termID in termSubTree)
-			{ // For every term in 'term'
-				var termName = termsByDomainLookup[termID][0];
-				var isHeader = (headers[termID]? true:false);
-				var opt = new Option(termName,termID);
-
-				var option = document.createElement("option");
-				option.text = termName;
-				option.value = termID;
-				option.className = "depth" + depth;
-
-				if(isHeader) { // header term behaves like an option group
-					option.className +=  ' termHeader';
-					option.disabled = true;
-				}
-				// not used if (termID == defaultTermID) {option.selected = true;}
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (e){
-					sel.add(option,null);
-				}
-
-				if(typeof termSubTree[termID] === "object") {
-					if(depth === 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
-						__createSubTreeOptions(depth, termSubTree[termID]);
-					} else {
-						__createSubTreeOptions(depth+1, termSubTree[termID]);
-					}
-				}
-			}
-		}
-		__createSubTreeOptions(0,termIDTree);
+		var el_sel = top.HEURIST.util.createTermSelect(termIDTree,
+													(disabledTermsList || ""),
+													termsByDomainLookup,
+													null);
+		el_sel.className = "previewList";
+		prev.appendChild(el_sel);
 
 		//if (!defaultTermID) sel.selectedIndex = 0;
 	}
