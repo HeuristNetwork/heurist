@@ -34,6 +34,7 @@
 	top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };
 	top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
 	top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
+	top.HEURIST.grpDbOwners = <?=HEURIST_SYS_GROUP_ID ?>;
 	top.HEURIST.is_wgAdmin = function(wgID) {
 		if (!top.HEURIST.workgroups || !top.HEURIST.workgroups[wgID]) return false;
 		var usrID = top.HEURIST.get_user_id(),

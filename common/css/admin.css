@@ -308,18 +308,17 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 	padding:0px;
 }
 .togglepnl {
-	background-image: url("../images/tright.gif");
-	background-repeat: no-repeat;
-	padding-left:20px;
 	background-color: #ECF1FB;
 }
 .togglepnl a{
+	background-image: url("../images/tright.gif");
+	background-repeat: no-repeat;
+	padding-left:20px;
 	cursor: pointer;
 	font-size: 1.1em;
 }
-.show {
+.show a{
 	background-image: url("../images/tdown.gif");
-	background-repeat: no-repeat;
 }
 
 #rectypeIcon img {

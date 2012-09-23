@@ -13,6 +13,7 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	//require_once(dirname(__FILE__).'/../../admin/ugrps/saveUsergrpsFs.php');
 
 	if (! is_admin()) {
 		print "<html><body><p>You must be an adminstrator to access user information</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
@@ -24,11 +25,12 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Heurist - Import user from another database</title>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 	</head>
-	<body>
-		<!-- script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-		<script src="../../common/php/loadCommonInfo.php"></script -->
+	<body class="popup">
+
+		<div class="banner"><h2>Import user from another database</h2></div>
+		<div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
 		<?php
 
@@ -38,7 +40,7 @@
 			}
 
 			print "<h2>Import user from another database</h2>";
-			print "Imports a user record from another Heurist database on the system and adds the user to the current database, making them a member of the database owners group";
+			print "Imports a user record from another Heurist database on the system and adds the user to the current database. You will need to allocate imported users to groups.";
 
 			$sourcedbname = NULL;
 
@@ -86,18 +88,18 @@
 				$query1 = "SELECT * FROM $sourcedb.sysUGrps where ugr_Type='user'";
 				$res1 = mysql_query($query1);
 				if (mysql_num_rows($res1) == 0) {
-					die ("<p><b>Sorry, unable to read users from this database</b>");
+					die ("<p><b>Sorry, unable to read users from this database</b></p>");
 				}
 
 				print "<p>Choose user: <select id='usr' name='usr'>";
 				while ($row1 = mysql_fetch_assoc($res1)) {
-					$rt=$row1['rec_RecTypeID'];	print "<option value=$row1[ugr_ID]>".$row1[ugr_Name]."</option>";
+					print "<option value=".$row1['ugr_ID'].">".$row1['ugr_Name']."</option>";
 				} // loop through users
 				print "</select>";
 				print "<input type='submit' value='Insert user' />";
 			}
 
-			// ---- Fimd and add user -----------------------------------------------------------------
+			// ---- Find and add user -----------------------------------------------------------------
 
 			$sourcedbname = $_REQUEST['sourcedbname'];
 
@@ -110,22 +112,15 @@
 				} else {
 					die ("<p>Sorry, selected user $userID does not exist");
 				}
-				$query1 = "insert into sysUGrps ".
-				"(ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,".
-				"ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,ugr_MinHyperlinkWords,ugr_LoginCount,ugr_IsModelUser,".
-				"ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT) ".
-				"SELECT ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,".
-				"ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,ugr_MinHyperlinkWords,ugr_LoginCount,ugr_IsModelUser,".
-				"ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT ".
-				"FROM $sourcedb.sysUGrps where ugr_ID=$userID";
-
-				$res1 = mysql_query($query1);
-				$err=mysql_error();
-				if (!$res1) {
+				
+				$err = transferUser($sourcedb, $userID, DATABASE, false);
+				
+				if ($err) {
 					print "<p>MySQL returns: ".$err;
 					print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb into the current database</b>".
 						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 				} else {
+/* IJ: 19-Sep-12 Don’t make imported users members of the database owners group - too risky. 
 					$newUserID =  mysql_insert_id();
 					$query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')"; // adds to 1 = 'database owners' as 'member'
 					// todo: should really offer choice of existing user groups to add the user to, as well as their role
@@ -138,12 +133,48 @@
 					} else {
 					print "<p><b>New user allocated as a member of the 'database owners' group (# 1) - edit group allocation as required".
 						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+
 					}
+*/
+					print "<p><b>New user allocated as not a member of any group. Edit group allocation as required".
+						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 				}
 			}
 
-		?>
+	/**
+	*  Transfer user from one database to another
+	*/
+	function transferUser($sourcedb, $sourceuserid, $destdb, $isowner){
+		
+			$fields = "ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,".
+						"ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,ugr_City,".
+						"ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,".
+						"ugr_MinHyperlinkWords,ugr_LoginCount,ugr_IsModelUser,".
+						"ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT";
+		
+			$query1 = "insert into $destdb.sysUGrps ($fields) ".
+						"SELECT $fields ".
+						"FROM $sourcedb.sysUGrps where ugr_ID=$sourceuserid";
 
+			$res1 = mysql_query($query1);
+			$err = mysql_error();
+			/*		
+			if (!$err && $isowner) {
+					$newUserID =  mysql_insert_id();
+					
+					$query1 = "delete from $destdb.sysUGrps where ugr_ID=2";
+					mysql_query($query1);
+					$err = mysql_error();
+					if(!$err){
+						$query1 = "update $destdb.sysUGrps set ugr_ID=2 where ugr_ID=".$newUserID;
+						mysql_query($query1);
+						$err = mysql_error();
+					}
+			}*/
+			return $err;
+	}			
+		?>
+		</div>
 	</body>
 </html>

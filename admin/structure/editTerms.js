@@ -362,7 +362,7 @@ function EditTerms() {
 
 
 				var dbId = Number(top.HEURIST.database.id),
-					original_dbId = node.data.original_db,
+					original_dbId = Number(node.data.original_db),
 					status = node.data.status;
 
 				if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
@@ -383,10 +383,10 @@ function EditTerms() {
 
 
 				_optionReserved(add_reserved);
-				_toggleAll(disable_status || disable_fields, disable_status);
-
 				var selstatus = Dom.get("trm_Status");
 				selstatus.value = status;
+				
+				_toggleAll(disable_status || disable_fields, disable_status);
 			}//node!=null
 		}
 
@@ -418,10 +418,40 @@ function EditTerms() {
 
 			Dom.get("trm_Status").disabled = reserved;
 
-			Dom.get("btnDelete").disabled = disable;
-			Dom.get("btnInverseSetClear").disabled = disable;
+			if(disable){
+				Dom.get("btnDelete").onclick = _disableWarning;
+				Dom.get("btnInverseSetClear").onclick = _disableWarning2;
+			}else{
+				Dom.get("btnDelete").onclick = _doDelete;
+				Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
+			}
 	}
-
+	
+	/**
+	* Clear button listener
+	*/
+	function _setOrclearInverseTermId(){
+		if(Dom.get('btnInverseSetClear').value==='cancel'){
+			Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
+			Dom.get('formInverse').style.display = "none";
+		}else if(Dom.get('edInverseTermId').value==="0"){
+			//show inverse div
+			Dom.get('btnInverseSetClear').value = 'cancel';
+			Dom.get('formInverse').style.display = "block";
+		}else{
+			Dom.get('btnInverseSetClear').value = 'set';
+			Dom.get('edInverseTerm').value = "";
+			Dom.get('edInverseTermId').value = "0";
+		}
+	}
+	
+	function _disableWarning(){
+		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+" and cannot therefore be deleted");
+	}
+	function _disableWarning2(){
+		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+". Inverse term cannot be set");
+	}
+	
 	/**
 	*
 	*/
@@ -630,7 +660,9 @@ function EditTerms() {
 
 			if(isExistingTerm){
 				//this term exists in database - delete it
-
+					Dom.get('deleteMessage').style.display = "block";
+					Dom.get('formEditor').style.display = "none";
+					
 					function __updateAfterDelete(context) {
 
 							if(!context){
@@ -645,6 +677,7 @@ function EditTerms() {
 								_onNodeClick(null);
 								_isSomethingChanged = true;
 							}
+							Dom.get('deleteMessage').style.display = "none";
 					}
 
 					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -656,6 +689,7 @@ function EditTerms() {
 				_currTreeView.render();
 				_currentNode = null;
 				_onNodeClick(null);
+				Dom.get('deleteMessage').style.display = "none";
 			}
 		}
 	}
@@ -1111,23 +1145,6 @@ function EditTerms() {
 * general functions
 */
 
-/**
-* Clear button listener
-*/
-function setOrclearInverseTermId(){
-	if(Dom.get('btnInverseSetClear').value==='cancel'){
-		Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-		Dom.get('formInverse').style.display = "none";
-	}else if(Dom.get('edInverseTermId').value==="0"){
-		//show inverse div
-		Dom.get('btnInverseSetClear').value = 'cancel';
-		Dom.get('formInverse').style.display = "block";
-	}else{
-		Dom.get('btnInverseSetClear').value = 'set';
-		Dom.get('edInverseTerm').value = "";
-		Dom.get('edInverseTermId').value = "0";
-	}
-}
 
 /**
 *

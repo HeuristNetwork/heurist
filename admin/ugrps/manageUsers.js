@@ -97,6 +97,8 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 							var filter_role   = filterByRole.value;
 							var filter_disabled = ((filterByDisable && filterByDisable.checked)?1:0);
 
+							Dom.get("dbOwnerInfo").style.display = (filter_group==top.HEURIST.grpDbOwners)?"block":"none";
+							
 							var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
 							var callback = _updateUserList;
 							var params = "method=searchuser&db=" + _db +

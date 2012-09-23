@@ -158,6 +158,14 @@
 			die ("<h2>Error</h2>Unable to process database upload command: <i>mysql -u... -p... $msg[1]</i>".
 				"<p>The SQL file might not have been written correctly. Please ask your sysadmin for help and report the problem to the Heurist development team");
 		}
+		
+		// RESET register db ID 
+		$query1 = "update $newname.sysIdentification set sys_dbRegisteredID=0 where sys_ID=1";
+		$res1 = mysql_query($query1);
+		if (mysql_error())  { //(mysql_num_rows($res1) == 0)
+			print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().")<br> Please reset the registration ID manually</b></p>";
+		}	
+			
 		/* Actually not a bad idea to leave the file in the directory
 		print " processing: $cleanup_command<br><p>";
 		exec("$cleanup_command". ' 2>&1', $output, $res1);

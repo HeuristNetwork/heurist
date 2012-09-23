@@ -151,6 +151,14 @@ function EditRecStructure() {
 
 			var myColumnDefs = [
 			{
+				key:'rst_NonOwnerVisibility', 
+				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>", 
+				sortable:false,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+				}
+			},
+			{
 				key:"rst_ID", label: "Code", sortable:false, className:"right"
 			},
 			{
@@ -224,9 +232,6 @@ function EditRecStructure() {
             },
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center"
-			},
-			{
-				key:"rst_NonOwnerVisibility", hidden: true
 			},
 			{
 				key: "rst_values",
@@ -379,7 +384,7 @@ function EditRecStructure() {
 
 				//prevent any operation in case of opened popup
 				if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
-				(!Hul.isnull(column) && column.key === 'rst_values'))
+				(!Hul.isnull(column) && (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility') ))
 				{ return; }
 
 
@@ -1369,6 +1374,14 @@ function EditRecStructure() {
 			proxyEl = this.proxyEl = this.getDragEl();
 			srcEl = this.srcEl = this.getEl();
 
+			if(x>50){
+				proxyEl.innerHTML = "";
+				Dom.setStyle(this.proxyEl, "visibility", "hidden");
+				Dom.setStyle(srcEl, "visibility", "");
+				this.srcIndex = null;
+				return;
+			}
+			
 			var rec = _myDataTable.getRecord(this.srcEl);
 			if(Hul.isnull(rec)) { return; }
 			this.srcData = rec.getData();
@@ -1384,6 +1397,9 @@ function EditRecStructure() {
 		},
 
 		endDrag: function(x,y) {
+			
+			if(this.srcIndex==null) return;
+			
 			var position,
 			srcEl = this.srcEl;
 
@@ -1410,6 +1426,9 @@ function EditRecStructure() {
 			// Reorder rows as user drags
 			var srcIndex = this.srcIndex,
 			destEl = Dom.get(id);
+
+			if(srcIndex==null) return;
+			
 			if(destEl){
 
 				var destIndex = destEl.sectionRowIndex,

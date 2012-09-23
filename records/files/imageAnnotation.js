@@ -60,7 +60,8 @@ function ImageAnnotation(self, _recID) {
 		edittoolbar.appendChild(btnEdit);
 		edittoolbar.appendChild(btnDelete);
 
-		lblInfo = document.createElement('lblInfoCoords');
+		lblInfo = document.createElement('label');
+		lblInfo.id = 'lblInfoCoords';
 		lblInfo.innerHTML = "";
 		edittoolbar.appendChild(lblInfo);
 
@@ -93,9 +94,10 @@ function ImageAnnotation(self, _recID) {
 			cell.innerHTML = "";
 
 			var edittoolbar = document.createElement('div');
-			lblInfo = document.createElement('lblInfoCoords');
+			lblInfo = document.createElement('label');
+			lblInfo.id = 'lblInfoCoords';
 			lblInfo.style.color = '#ff0000';
-			lblInfo.innerHTML = "No appropriate record type found for annotation. Import from Core definitions or create new one";
+			lblInfo.innerHTML = "Image annotation feature is disabled. No appropriate record type found. Import from Core definitions or create new one";
 			edittoolbar.appendChild(lblInfo);
 			image_digitizer_container.appendChild(edittoolbar);
 

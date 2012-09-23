@@ -139,9 +139,9 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 
 			<!-- <h2 id="lblGroupTitleSelection" class="selection"></h2> -->
 
-			<div>
+			<div  style="float: left;">
 				<div id="pnlFilterByGroup">
-                        <label for="inputFilterByGroup">Filter by group:</label>
+                        <label style="width:120px;display:inline-block;text-align:right" for="inputFilterByGroup">Filter by group:</label>
                             <select id="inputFilterByGroup" size="1" style="width:138px">
                                 <option value="all">all groups</option>
                             </select>
@@ -171,9 +171,12 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 
 			</div>
 
+			<div id="dbOwnerInfo" style="display:none;float: right; width:40%"><i>User #2 - the first in this group - is the OWNER of this database (the only user who can register the database with the Heurist master index, who receives email to the owner and is permitted certain destructive actions)</i>
+			</div>
+			
             <p></p>
 
-			<div id="toolbar2">
+			<div id="toolbar2" style="clear: both;text-align: left;">
 
 				<label style="width:120px;display:inline-block;text-align:right">Filter by name:</label>
 					<input type="text" id="inputFilterByName" style="width:140px;" value=""/>

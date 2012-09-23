@@ -152,6 +152,24 @@
 			top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"],createRectypeChanger );
 			window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
 
+
+			function editRecordType(){
+
+				window.open("../../admin/adminMenu.php?db="+
+								top.HEURIST.database.name+
+								"&mode=rectype&rtID="+
+								top.HEURIST.edit.record.rectypeID, "_blank");
+
+				var smsg = "Changes made to the record type will not become active until you reload the edit form. Please Save the record first in order not to lose data";
+				var ele = document.getElementById("editRectype-message-text");
+				ele.innerHTML = smsg;
+				ele = document.getElementById("editRectype-message");
+
+				var w = top.HEURIST.util.popupTinyElement(top, ele,
+						{ "no-titlebar": false, "no-close": false, width: 300, height: 100 });
+
+			}
+
 			function createRectypeChanger() {
 				var rectypeEdit = document.getElementById("rectype-edit");
 
@@ -184,8 +202,7 @@
 
 				if(top.HEURIST.is_admin()){
 					var edt = document.getElementById("admin_editrectype");
-					edt.innerHTML = "<a href='../../admin/adminMenu.php?db="+
-							top.HEURIST.database.name+"&mode=rectype&rtID="+top.HEURIST.edit.record.rectypeID+"' target='_blank'>Edit record type<img src='../../common/images/edit-pencil.png'></a>";
+					edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}'>Edit record type<img src='../../common/images/edit-pencil.png'></a>";
 				}
 				if(top.HEURIST.edit.record && top.HEURIST.edit.record.isTemporary){
 					top.document.title = "Add ["+top.HEURIST.edit.record.rectype + ", "+ top.HEURIST.edit.record.rectypeID + "] "+top.document.title;
@@ -485,6 +502,10 @@
             </div>
 	</div>
 	</div>
+
+		<div id="editRectype-message" style="display:none;">
+			<div id="editRectype-message-text" style="text-align:center;width:280px;color:#FF0000;font-weight:bold;margin:10px;"></div>
+		</div>
 
 		<div id=workgroup-message style="display: none;">
 	<div style="padding: 5px;">

@@ -900,7 +900,7 @@ function RectypeManager() {
 			"close-on-blur": false,
 			"no-resize": false,
 			height: dim.h*0.9,
-			width: 840,
+			width: 860,
 			callback: function(context) {
 				if(Hul.isnull(context)) {
 					// Canceled

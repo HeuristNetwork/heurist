@@ -28,8 +28,7 @@ function SelectDetailType() {
 			_myDataTable,
 			_myDataSource,
 			_arr_selection = [],
-			rty_ID,  // the target record type (to filter out types that are already has been added)
-			showTimer, hideTimer;
+			rty_ID;  // the target record type (to filter out types that are already has been added)
 
 			//
 			// filtering UI controls
@@ -44,7 +43,7 @@ function SelectDetailType() {
 
 		//for tooltip
 		var currentTipId,
-			needHideTip = true;
+			_rolloverInfo;
 
 	/**
 	* Updates filter conditions for datatable
@@ -52,10 +51,6 @@ function SelectDetailType() {
 	var _updateFilter  = function () {
 							// Reset timeout
 							filterTimeout = null;
-
-							// Reset sort
-							var state = _myDataTable.getState();
-							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
 							var filter_name  = filterByName.value;
 							var filter_group = filterByGroup.value;
@@ -68,6 +63,8 @@ function SelectDetailType() {
 								scope   : _myDataTable,
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 							});
+							
+							
 	};
 
 
@@ -82,6 +79,8 @@ function SelectDetailType() {
 	function _init() {
 
 		if(isnull(_myDataTable)){
+			
+			_rolloverInfo = new HintDiv('inforollover33', 200, 170, '<div id="inforollover3"></div>');
 
 								// 1. Reads GET parameters
 								if (location.search.length > 1) {
@@ -105,7 +104,7 @@ function SelectDetailType() {
 
 										var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 
-										if(isnull(aUsage) || aUsage.indexOf(rty_ID)<0){
+										if( deftype[fi.dty_ShowInLists]!="0" && (isnull(aUsage) || aUsage.indexOf(rty_ID)<0)){
 
 											var iusage = isnull(aUsage) ? 0 : aUsage.length;
 											var ptr_1 = isnull(deftype[fi.dty_FieldSetRectypeID])?'':deftype[fi.dty_FieldSetRectypeID];
@@ -124,7 +123,10 @@ function SelectDetailType() {
 
 										}
 									}
-								}
+								}//for
+								
+								//sort by name
+								arr.sort(function(a,b){return a[2]>b[2]});
 
 								_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
@@ -133,6 +135,7 @@ function SelectDetailType() {
 									},
 									doBeforeCallback : function (req, raw, res, cb) {
 										// This is the filter function
+
 										var data  = res.results || [],
 										filtered = [],
 										i,l;
@@ -165,13 +168,13 @@ function SelectDetailType() {
 
 								var myColumnDefs = [
 								{ key: "selection", label: "", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+								{ key: "name", label: "Field type name", sortable:true },
 								{ key: "order", label: "Order", hidden:true },
-								{ key: "name", label: "Field type name", sortable:true, width:100 },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
 								{ key: "type", label: "Field Type", sortable:true,
 									formatter: function(elLiner, oRecord, oColumn, oData) {
 										var type = oRecord.getData("type");
-										elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+										elLiner.innerHTML = "<div style='width:80px'>"+top.HEURIST.detailTypes.lookups[type]+"</div>";
 									}
 								},
 								{ key: "status", label: "Status", hidden:true, sortable:false },
@@ -179,12 +182,13 @@ function SelectDetailType() {
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
-								{ key: "usage", label: "Used in", sortable:true, width:25, className:'center' },
+								{ key: "usage", label: "Used in", sortable:true, width:25, className:'center'},
 								{ key: "fieldset_rectypeid",   hidden:true},
 								{ key: "ptrtarget_rectypeids", label: "Pointer targets"}
 								];
 
 								var myConfigs = {
+									sortedBy:{key:"name", dir:"asc"},
 									//selectionMode: "singlecell",
 									paginator : new YAHOO.widget.Paginator({
 										rowsPerPage: 100, // REQUIRED
@@ -210,140 +214,20 @@ function SelectDetailType() {
 									_toggleSelection(elCheckbox);
 								});
 
-								// hides tooltip div
-								function __hideToolTip(){
-									if(needHideTip){
-										currentTipId = null;
-										__clearHideTimer();
-										var my_tooltip = $("#toolTip2");
-										my_tooltip.css( {
-											left:"-9999px"
-										});
-									}
-								}
-								// clear hidetimer
-								function __clearHideTimer(){
-									if (hideTimer) {
-										window.clearTimeout(hideTimer);
-										hideTimer = 0;
-									}
-								}
-
 								//
 								// hide tooltip on mouse over
-								//
+								/*
 								_myDataTable.on('cellMouseoutEvent', function (oArgs) {
-									hideTimer = window.setTimeout(__hideToolTip, 2000);
-								});
+									currentTipId = '';
+									_rolloverInfo.close();
+								});*/
 
 								//
 								// mouse over "help" column shows the datailed description (tooltip)
 								//
-								_myDataTable.on('cellMouseoverEvent', function (oArgs){
-
-									__clearHideTimer();
-
-									var forceHideTip = true,
-										textTip = null,
-										target = oArgs.target,
-										column = this.getColumn(target),
-										record = this.getRecord(target),
-										xy;
-
-									/*if (!isnull(column) && column.key === 'help') {
-										var description = record.getData('description') || 'no further description';
-										xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
-										textTip = '<p>'+description+'</p>';
-
-									}else*/
-									if(!isnull(column) && column.key === 'type') {
-
-										var dttype = record.getData('type');
-										var value;
-										if(dttype === "fieldsetmarker") {
-											value = record.getData('fieldset_rectypeid');
-										} else {
-											value = record.getData('ptrtarget_rectypeids');
-										}
-
-										textTip = _getRecPointers(dttype, value);
-										currentTipId=record.getData('info');
-										xy = [parseInt(oArgs.event.clientX,10), parseInt(oArgs.event.clientY,10) - 20 ];
-
-									}else if(!isnull(column) && column.key === 'usage') {
-										var dty_ID = record.getData('info');
-
-										if(currentTipId!==dty_ID){
-											currentTipId=dty_ID;
-
-											xy = [parseInt(oArgs.event.clientX,10), parseInt(oArgs.event.clientY,10) - 20 ];
-
-											//find all records that reference this type
-											var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-											if(!isnull(aUsage)){
-												textTip = "<p><ul>";
-												var k;
-												for (k in aUsage) {   //<a href='editRecordType.html'></a>
-													textTip = textTip + "<li>"+top.HEURIST.rectypes.names[k]+"</li>";
-												}
-												textTip = textTip + "</ul></p>";
-											}
-										}else{
-											forceHideTip = false;
-										}
-									}
-
-									if(!isnull(textTip) && textTip.length>0){
-
-										needHideTip = true;
-
-										var my_tooltip = $("#toolTip2");
-
-										my_tooltip.mouseover(function(){needHideTip = false; __clearHideTimer();});
-										my_tooltip.mouseout(function(){ needHideTip = true;});
-
-					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
-
-//					var xy = Hul.getMousePos(oArgs);
-					xy[1] = xy[1] + $(window).scrollTop();
-					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
-
-/*
-										var border_top = $(window).scrollTop();
-										var border_right = $(window).width();
-										var border_height = $(window).height();
-										var left_pos;
-										var top_pos;
-										var offset = 15;
-										if(border_right - (offset *2) >= my_tooltip.width() +  xy[0]) {
-											left_pos = xy[0]+offset;
-										} else {
-											left_pos = border_right-my_tooltip.width()-offset;
-										}
-
-										if((border_top + offset *2) >=  xy[1] - my_tooltip.height()) {
-											top_pos = border_top + offset + xy[1]; //
-										} else {
-											top_pos = border_top + xy[1] - my_tooltip.height()-offset;
-										}
-										if(top_pos + my_tooltip.height() > border_top+border_height){
-											top_pos	= border_top + border_height - my_tooltip.height()-5;
-										}
-
-
-										//var lft = my_tooltip.css('left');
-										my_tooltip.css( {
-											left:left_pos+'px', top:top_pos+'px'
-										});//.fideIn(500).fideOut(5000);
-										//lft = my_tooltip.css('left');
-*/
-										hideTimer = window.setTimeout(__hideToolTip, 5000);
-									}
-									else if(forceHideTip)
-									{
-										__hideToolTip();
-									}
-								});//end _onCellMouseOver
+								_myDataTable.on('cellMouseoverEvent', _showInfoToolTip)
+								
+						
 
 								//
 								// Subscribe to events for row selection highlighting
@@ -375,9 +259,74 @@ function SelectDetailType() {
 								//4. init listeners for filter controls
 								_initListeners();
 
+
 		} //isnull(_myDataTable)
 	}//end of initialization ==============================
+	
+	/**
+	* Show popup div with information about field types
+	*/
+	function _showInfoToolTip(oArgs) {
 
+		var forceHideTip = true,
+			textTip = null,
+			target = oArgs.target,
+			column = _myDataTable.getColumn(target),
+			record = _myDataTable.getRecord(target),
+			event = oArgs.event;
+		
+		if(!isnull(column) && (column.key === 'ptrtarget_rectypeids' || column.key === 'usage')) {
+		
+				var dty_ID = record.getData('info'),
+					newID = ((column.key === 'usage')?"u":"pt")+dty_ID;
+			
+				if(!Hul.isnull(dty_ID)){
+					if(currentTipId !== newID) {
+						currentTipId = newID;
+
+						if(column.key==="usage"){
+							
+								//find all records that reference this type
+								var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+								if(!isnull(aUsage)){
+									textTip = "<p><ul>";
+									var k;
+									for (k=0; k<aUsage.length; k++) {   //<a href='editRecordType.html'></a>
+										textTip = textTip + "<li>"+top.HEURIST.rectypes.names[aUsage[k]]+"</li>";
+									}
+									textTip = textTip + "</ul></p>";
+								}							
+						}else{
+							
+								var dttype = record.getData('type');
+								var value;
+								if(dttype === "fieldsetmarker") {
+									value = record.getData('fieldset_rectypeid');
+								} else {
+									value = record.getData('ptrtarget_rectypeids');
+								}
+								textTip = _getRecPointers(dttype, value);							
+						}
+
+
+					} else {
+						forceHideTip = false;
+					}
+				}
+				if(!Hul.isempty(textTip)) {
+					var xy = [event.clientX, event.clientY];
+					//var xy = Hul.getMousePos(event);
+					xy[0] = xy[0] - 80;
+
+					_rolloverInfo.showInfoAt(xy,"inforollover3",textTip);
+				}
+				else if(forceHideTip) {
+					currentTipId = '';
+					_rolloverInfo.close();
+				}
+		}
+	}
+	
 	/**
 	* recreateRecTypesPreview - creates and fills selector for Record(s) pointers if datatype
 	* is relmarker or resource
@@ -396,7 +345,7 @@ function SelectDetailType() {
 			if(value) {
 					var arr = value.split(","),
 					ind, dtName;
-					for (ind in arr) {
+					for (ind=0; ind<arr.length; ind++) {
 						dtName = top.HEURIST.rectypes.names[arr[ind]];
 						txt = txt + "<li>"+dtName+"</li>";
 					} //for

@@ -780,7 +780,7 @@ td.input-cell.readonly img.edit-resource {
 	font-size: 18px;
 	background-color: RGBA(0,0,0,0.8);
 	padding: 5px 0 0 0;
-	width: 150px;
+	width: 200px;
 	height: 50px;
 	top: 50%;
 	left:50%;
@@ -816,7 +816,7 @@ td.input-cell.readonly img.edit-resource {
 	line-height: 4px;
 	margin: 10px 3px 3px;
 	padding: 0;
-	width: 144px;
+	width: 194px;
 	overflow: hidden;
 }
 #uploads div.upload-status div.progress-bar div {

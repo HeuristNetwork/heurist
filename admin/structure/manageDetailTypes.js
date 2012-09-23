@@ -648,8 +648,8 @@ function DetailTypeManager() {
 						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 						if(!Hul.isnull(aUsage)){
 
-							textTip = '<h3>'+detname+'</h3>'+
-							'<b>Used in record types:</b><label style="color: #999;margin-left:5px">Click on field type to edit</label><ul>';
+							textTip = '<h3>'+detname+'</h3><br/>'+
+							'<b>Used in record types:</b><br/><label style="color: #999;margin-left:5px">Click on field type to edit</label><ul>';
 
 							var k;
 							for (k in aUsage) {

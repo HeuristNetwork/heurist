@@ -124,7 +124,7 @@
     </div>
   </div>
 
-  <div class="input-row required">
+  <div class="input-row required" id="rty_TitleMask_row">
     <div class="input-header-cell" for="rty_TitleMask">Title mask:</div>
     <div class="input-cell">
       <input maxlength="500" id="rty_TitleMask" style="width:300px;"/>
@@ -282,6 +282,7 @@
 		}
 		if(newRectypeCode > 0) { // Create empty form
 			initializeEmptyForm();
+			document.getElementById("rty_TitleMask_row").style.display = "none";
 		}else{
 			document.getElementById("definitdiv").style.display = "none";
 		}
@@ -327,14 +328,6 @@
         document.getElementById("rty_ShowURLOnEditForm").checked = true;
         document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
 		document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
-
-		/*var dtName = "Name";
-		if(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
-			dtName = top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']];
-			"["+  dtName +"]"; //
-		}*/
-
-		document.getElementById("rty_TitleMask").value = "record [ID]: Please set title mask for this record type once fields have been defined";
 
 		getGroups();
 		// Set group from URL
@@ -734,6 +727,8 @@
 		} else {
 			var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
 		}
+		
+	
 		var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
 
 		var index;
@@ -802,6 +797,19 @@
 
 	function testTitleMask()
 	{
+		if(!rectypeID || rectypeID < 0){
+			var val = "record [ID]";
+			if(document.getElementById("definit").checked && 
+				top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
+				val = "["+top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']]+"]";
+			}
+
+			document.getElementById("rty_TitleMask").value = val
+			titleMaskIsOk = true;
+			updateRectypeOnServer_continue();
+			
+		}else{
+		
 					var mask = document.getElementById("rty_TitleMask").value;
 
             		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
@@ -820,6 +828,7 @@
 							updateRectypeOnServer_continue();
 						}
 					}, squery);
+		}
 	}
 
 	var needHideTip = true,

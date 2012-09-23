@@ -1063,6 +1063,12 @@ top.HEURIST.search = {
 		if (top.HEURIST.is_logged_in && top.HEURIST.is_logged_in()) {
 			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+">log&nbsp;out</a>";
 		} else {
+
+			var registrationButton = "";
+			if(top.HEURIST.is_registration_allowed){
+				registrationButton = " <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n";
+			}
+
 			logged_in_elt.innerHTML = "not logged in : <a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+">log in</a>";
 			left_panel_elt.innerHTML =
 				"<div style=\"padding: 10px;\">\n" +
@@ -1070,7 +1076,7 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <br><br>New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
+				registrationButton +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -3720,6 +3726,10 @@ top.HEURIST.search = {
 			document.getElementById("q").select();
 		});
 		top.HEURIST.search.loadSearchParameters();
+
+		if(!top.HEURIST.is_registration_allowed){
+			document.getElementById("p-registration").style.display = "none";
+		}
 	},
 
 /* Depricated

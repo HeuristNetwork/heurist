@@ -198,7 +198,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 					var my_tooltip = $("#"+divid);
 					my_tooltip.html(divcontent);
 					
-                    _setSize([260, my_tooltip.height()+25]);
+                    _setSize([my_tooltip.width(), my_tooltip.height()+25]);
 					_showAtXY(xy);
 		},
 		setSize: function(wh){

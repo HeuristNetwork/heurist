@@ -246,9 +246,9 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 		width: 640,
 		callback: function(fileJSON) {
 
-			if(!HEURIST.util.isnull(fileJSON)){
-				//var filedata = (typeof fileJSON == 'String')?HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
-				var filedata = HEURIST.util.expandJsonStructure(fileJSON);
+			if(!top.HEURIST.util.isnull(fileJSON)){
+				//var filedata = (typeof fileJSON == 'String')?top.HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
+				var filedata = top.HEURIST.util.expandJsonStructure(fileJSON);
 				if(filedata){
 					element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);
 				}
@@ -278,9 +278,9 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(e
 */
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, visibleValue, hiddenValue) {
 
-	element.textElt.value = element.textElt.defaultValue = HEURIST.util.isempty(visibleValue)? "" :visibleValue;
+	element.textElt.value = element.textElt.defaultValue = top.HEURIST.util.isempty(visibleValue)? "" :visibleValue;
 
-	if (HEURIST.util.isempty(visibleValue)) {
+	if (top.HEURIST.util.isempty(visibleValue)) {
 		element.className += " empty";
 	} else if (! element.className.match(/(^|\s+)empty(\s+|$)/)) {
 		element.className = element.className.replace(/(^|\s+)empty(\s+|$)/g, "");
@@ -288,9 +288,9 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(ele
 
 	top.HEURIST.util.autoSize(element.textElt, {});
 
-	element.hiddenElt.value = element.hiddenElt.defaultValue = HEURIST.util.isempty(hiddenValue)? "" :hiddenValue;
+	element.hiddenElt.value = element.hiddenElt.defaultValue = top.HEURIST.util.isempty(hiddenValue)? "" :hiddenValue;
 
-	element.className = HEURIST.util.isempty(hiddenValue)?"file-resource-div empty":"file-resource-div";
+	element.className = top.HEURIST.util.isempty(hiddenValue)?"file-resource-div empty":"file-resource-div";
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();

@@ -52,15 +52,19 @@
 		<?php include("includeNewDatabaseWorkflow.html"); ?>
 		<div class="separator_row" style="margin:20px 0;"></div>
 
-	   		<div id="challengeForDB" style="display:<?=$passwordForDatabaseCreation==''?'none':'block'?>">
+	   		<div id="challengeForDB" style="<?='display:'+(($passwordForDatabaseCreation=='')?'none':'block')?>;">
 				<h3>Enter the password set by your system adminstrator for new database creation:</h3>
 					<input type="password" maxlength="64" size="25" id="pwd">
 					<input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
-				</div>
-				<br /><br /><div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
-			</form>
+			</div>
+			<br /><br />
+			<div id="loading" style="display:none">
+					<img src="../../common/images/mini-loading.gif" width="16" height="16" /> 
+					<strong>&nbspCreating database, please wait...</strong>
+			</div>
+			
 
-		<div id="createDBForm" style="display:<?=$passwordForDatabaseCreation==''?'block':'none'?>;">
+		<div id="createDBForm" style="<?='display:'+($passwordForDatabaseCreation==''?'block':'none')?>;">
 			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
 				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
@@ -78,7 +82,10 @@
 				<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
                 </div>
 				<br /><br />
-				<div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
+				<div id="loading" style="display:none">
+					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
+					<strong>&nbspCreating database, please wait...</strong>
+				</div>
 			</form>
 		</div>
 	</body>

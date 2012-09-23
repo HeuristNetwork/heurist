@@ -846,10 +846,13 @@ top.HEURIST.edit = {
 			};
 
 			var b = uploadsDiv.appendChild(this.document.createElement("b"));
-				b.appendChild(this.document.createTextNode(fileObj.origName));
+			var fname = this.document.createTextNode(fileObj.origName);
+				b.appendChild(fname);
 				b.title = fileObj.origName;
 			uploadsDiv.appendChild(this.document.createElement("br"));
 			uploadsDiv.appendChild(this.document.createTextNode("File has been uploaded"));
+			//does not work top.HEURIST.util.autosizeContainer2(fname, uploadsDiv, "width");
+			setTimeout(function() { uploadsDiv.parentNode.removeChild(uploadsDiv); }, 2000);
 
 			// update the BibDetailFileInput to show the file
 			element.input.replaceInput(element, { file: fileObj });

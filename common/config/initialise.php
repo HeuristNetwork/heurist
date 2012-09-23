@@ -234,6 +234,12 @@
 	define('HEURIST_URL_BASE',HEURIST_BASE_URL);
 	$heuristURLBase=HEURIST_URL_BASE;
 
+	if ($sysValues['sys_AllowRegistration']){
+		define ('HEURIST_ALLOW_REGISTRATION', 1);
+	}else{
+		define ('HEURIST_ALLOW_REGISTRATION', 0);
+	}
+
 	if ($sysValues['sys_OwnerGroupID']){
 		define ('HEURIST_OWNER_GROUP_ID', $sysValues['sys_OwnerGroupID']);
 	}else{

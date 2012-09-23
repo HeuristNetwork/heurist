@@ -105,6 +105,10 @@ if (!is_admin()) {
 		</h3>
 		Click button on the left to add a new vocabulary
 
+		<div id="deleteMessage" style="display:none;width:500px;">
+			<h3 style="border-style: none;">Deleting Term</h3>
+		</div>
+		
 	    <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
         <div id="formEditor" style="display:none;width:500px;">
 			<h3 style="border-style: none;">Edit Selected Term</h3>
@@ -123,7 +127,7 @@ if (!is_admin()) {
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input id="edCode" style="width:80px"/></div>
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
-				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px" onClick="{setOrclearInverseTermId()}" />
+				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
 				<input id="edInverseTermId" type="hidden"/>
 			</div>
             <div id="divStatus" class="dtyField"><label class="dtyLabel">Status:</label>

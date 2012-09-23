@@ -142,7 +142,7 @@
 	print "    };\n";
 ?>
 
-
+top.HEURIST.is_registration_allowed = <?=((defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION) ?"true" :"false")?>;
 top.HEURIST.is_logged_in = function() { return <?= intval(is_logged_in()) ?> > 0; };
 top.HEURIST.get_user_id = function() { return <?= intval(get_user_id()) ?>; };
 top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };

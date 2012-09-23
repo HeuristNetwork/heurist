@@ -492,7 +492,8 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 			break;
 			case 'relationtype':
 			*/
-
+			case 'separator':
+					return null;
 			case 'enum':	//@todo!!!!
 
 /*
