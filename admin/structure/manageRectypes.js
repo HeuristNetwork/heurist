@@ -158,7 +158,7 @@ function RectypeManager() {
 					'&nbsp;&nbsp;&nbsp;'+
 			'<input id="btnSave'+grpID+'" type="button" value="Save order" '+
 							'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-				'<input type="button" id="btnAddRecordType'+grpID+'" value="Define new record type" class="add"/>'+
+				'<input type="button" id="btnAddRecordType'+grpID+'" value="Define new record type / fields" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')

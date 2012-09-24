@@ -144,15 +144,15 @@ if(array_key_exists('mode',$_REQUEST)){
 				<div class="adminSection">
 					<ul>
 						<li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
-							title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
-							title="Direct access to the global field definitions">Field types</a></li>
-						<li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
-							title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
+							title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
 						<li><a href="#" onClick="loadContent('structure/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
-							title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
+							title="Define constraints on the record types which can be related, and allowable relationship types">Record constraints</a></li>
 						<li  class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 							title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
+                        <li><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Direct access to the global field definitions">Manage field types</a></li>
+                        <li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 							title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
 						<li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
@@ -171,18 +171,18 @@ if(array_key_exists('mode',$_REQUEST)){
 					<ul>
 						<!-- 17/10/11 - Artem has moved addition of users to the workgroups page -->
 						<!-- TO DO: Take this menu entry out so that navigation is via user groups -->
-						<li class="seperator"><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=<?=HEURIST_DBNAME?>')"
-							title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
-						<li><a href="#"
-							onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
-							title="Assign users to usergroups and set their roles">Manage groups</a></li>
-						<li><a href="#"
+                        <li><a href="#"
+                            onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
+                            title="Assign users to usergroups and set their roles">Manage workgroups</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('ugrps/editGroupTags.php?db=<?=HEURIST_DBNAME?>')" title="Add and remove workgroup tags">Workgroup tags</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('ugrps/quitGroupForSession.php?db=<?=HEURIST_DBNAME?>')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
+						<li class="seperator"><a href="#"
 							onClick="loadContent('setup/getUserFromDB.php?db=<?=HEURIST_DBNAME?>')"
 							title="Import users one at a time from another database on the system">Import a user</a></li>
-						<li class="seperator"><a href="#"
-							onClick="loadContent('ugrps/editGroupTags.php?db=<?=HEURIST_DBNAME?>')" title="Add and remove workgroup tags">Workgroup tags</a></li>
-						<li><a href="#"
-							onClick="loadContent('ugrps/quitGroupForSession.php?db=<?=HEURIST_DBNAME?>')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
+                        <li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
 </ul>
 				</div>
 
@@ -190,9 +190,9 @@ if(array_key_exists('mode',$_REQUEST)){
 				<h3><a href="#">UTILITIES: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#"
-												onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
-												title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
+                        <li class="seperator"><a href="#"
+						    onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
+							title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
 						<!-- : Also have capabuility for specific records and rectypes</p> -->
 						<li><a href="#"
 							onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
@@ -220,6 +220,10 @@ if(array_key_exists('mode',$_REQUEST)){
 							title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
 						<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
 							title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URL search</a></li>
+                        <!-- Other non-verification functions -->
+                        <li class="seperator"><a href="#"
+                            onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear database locks</a></li>
 						<li class="seperator"><a href="../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>" target="_blank"
 							title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database transfer</a></li>
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->

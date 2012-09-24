@@ -1063,12 +1063,6 @@ top.HEURIST.search = {
 		if (top.HEURIST.is_logged_in && top.HEURIST.is_logged_in()) {
 			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+">log&nbsp;out</a>";
 		} else {
-
-			var registrationButton = "";
-			if(top.HEURIST.is_registration_allowed){
-				registrationButton = " <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n";
-			}
-
 			logged_in_elt.innerHTML = "not logged in : <a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+">log in</a>";
 			left_panel_elt.innerHTML =
 				"<div style=\"padding: 10px;\">\n" +
@@ -1076,7 +1070,7 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <br><br>New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
-				registrationButton +
+				" <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -2347,8 +2341,12 @@ top.HEURIST.search = {
 				innerHTML += "<div id=workgroup-searches-" + w + (hide ? " class=hide" : "") + ">";
 				innerHTML += "<div class=saved-search-subheading title=\"" + (top.HEURIST.workgroups[w].description || "" ) + "\" onclick=\"top.HEURIST.search.toggleSavedSearches(this.parentNode);\">" + top.HEURIST.workgroups[w].name + "</div>";
 				innerHTML += "<div class=content>";
-				innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + w +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
-				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") +"'>"+top.HEURIST.workgroups[w].name+" Blog</a></div>";
+				// innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + w +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
+
+                // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
+                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations();return false;}'>Aggregations</a></div>";
+
+				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") +"'>" /* +top.HEURIST.workgroups[w].name */ +" Blog</a></div>";
 
 				var searches = top.HEURIST.user.workgroupSavedSearches[w];
 				if (searches  &&  searches.length) {
@@ -2392,6 +2390,18 @@ top.HEURIST.search = {
 			});
 
 		}
+	},
+	
+	loadAggregations: function(w){ // creates a search URL for Aggregation records
+		if(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_AGGREGATION'])
+		{
+			var code = top.HEURIST.magicNumbers['RT_AGGREGATION'];
+		
+			window.location.href = top.HEURIST.basePath+ 
+                "search/search.html?q=t:"+code+"&label=Aggregation records (a root record to which a group of records point)&w=" + 
+                w + "&amp;" + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;?db=" + top.HEURIST.database.name : "")
+		}
+	
 	},
 
 	toggleSavedSearches: function(div) {
@@ -3726,10 +3736,6 @@ top.HEURIST.search = {
 			document.getElementById("q").select();
 		});
 		top.HEURIST.search.loadSearchParameters();
-
-		if(!top.HEURIST.is_registration_allowed){
-			document.getElementById("p-registration").style.display = "none";
-		}
 	},
 
 /* Depricated

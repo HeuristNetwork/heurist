@@ -1,4 +1,5 @@
 <!--
+<!--
 
 /**
 * search.html, the main Heursit search page, effectively the home page for Heurist
@@ -71,6 +72,7 @@
 			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
 			( HeuristBaseURL ? HeuristBaseURL : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
+            
 			var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
 				// was hBase, but ../ seems to work jsut as well
 
@@ -441,8 +443,9 @@
 						<div class=content>
 							<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
-							<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
+                            <div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
+                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
+                            <div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 							<div class=saved-search-subsubheading>Saved searches</div>
 							<div id=my-records-saved-searches-searches></div>
@@ -452,7 +455,9 @@
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>							<div class=saved-search-subsubheading>Saved searches</div>
+							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>							
+                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations();return false;}">Aggregations</a></div>
+                            <div class=saved-search-subsubheading>Saved searches</div>
 							<div id=all-records-saved-searches-searches></div>
 						</div>
 					</div>
@@ -463,7 +468,7 @@
 						</div>
 					</div>
 					<div id=curated-collections>
- 					<div><a href="?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions" target="_blank">Example collections</a></div>
+ 					<div><a href='?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;" target="_blank">Example collections</a></div>
 					<div id=collection-info></div>
 					</div>
 				</div>
@@ -507,7 +512,7 @@
 							<p>We are also very happy to provide advice - from simple email assistance
 							( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> ) to the design of complete eResearch systems. </p>
 							<br>
-							<p id="p-registration">Please <a href="../admin/ugrps/editUser.html" name="auto-popup">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
+							<p>Please <a href="../admin/ugrps/editUser.html" name="auto-popup">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
 						</div>
 						<div id="noresult-search-status" class="errorMsg"> <span>&nbsp;&nbsp;No records match the search&nbsp;&nbsp;</span>
 							<div class="not-logged-in-only">To see workgoup-owned and non-public records you may need to log in</div>

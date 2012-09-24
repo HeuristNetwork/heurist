@@ -330,7 +330,8 @@
 	'RT_JOURNAL_VOLUME' => array(3,1013),
 	'RT_KML_LAYER' => array(3,1014),
 	'RT_AUTHOR_EDITOR' => array(3,23),//Depricated
-	'RT_FACTOID' => array(3,22)//depricated
+	'RT_FACTOID' => array(3,22),//depricated
+    'RT_AGGREGATION' => array(2,21)
 	);
 
 	foreach ($rtDefines as $str => $id) {

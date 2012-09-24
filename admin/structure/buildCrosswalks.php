@@ -111,7 +111,7 @@
 			// error log says “supplied argument is not a valid MySQL result resources
 			echo "Definitions are already being modified or SQL failure on lock check.";
 			header('Location: ' . BASE_PATH . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
-			die("Definitions are already being modified.<p> If this is not the case, you will need to delete the lock record in sysLocks table. <br>Consult Heurist team for assistance if needed");
+			die("Definitions are already being modified.<p> If this is not the case, you will need to remove the locks on the database.<br>Use Utilities > Clear database locks (administrators only)");
 		} // detect lock and shuffle out
 
 		// Mark database definitons as being modified by adminstrator

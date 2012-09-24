@@ -55,12 +55,12 @@ function EditRecStructure() {
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
 		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" style="margin:0" value="Insert separator" onClick="onAddSeparator()" class="add"/>'+
+        '<input type="button" class="add" value="Insert existing field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
 		'<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
-		'<input type="button" style="margin:0" value="Separator" onClick="onAddSeparator()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-		'</div>';
+		'Use existing fields where possible</div>';
 
 		Dom.get("recordTitle").innerHTML += hToolBar;
 	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign"><div id="tableContainer"></div></div>';
@@ -766,7 +766,8 @@ function EditRecStructure() {
 		var status = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
 		var isReserved = (status === "reserved");// || status === "approved");
 
-		if (((dbId>0) && (dbId<1001) && (original_dbId===dbId)) || isReserved)
+        // Reserved can only be set on database controleld by the Heurist group, identified by DBID<1000
+		if (((dbId>0) && (dbId<1001) /* && ian 23/9/12 allow setting Reserved even if not origin (original_dbId===dbId) */ ) || isReserved)
 		{
 			_optionReserved(selstatus, true);
 		}else{
