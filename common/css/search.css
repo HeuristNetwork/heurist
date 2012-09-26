@@ -1533,6 +1533,61 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	z-index:105
 }*/
 
+/* summary div */
+.summaryDiv {
+	-moz-user-select: none;
+	user-select: none;
+	-webkit-user-select: none;
+	background:#EEE;
+	background:-moz-linear-gradient(center top, #FFFFFF, #EEEEEE) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
+	display: none;
+
+	border-bottom: 1px solid #CCCCCC;
+	border-collapse: collapse;
+	border-radius: 0;
+	border-top: 1px solid #FFFFFF;
+	height: 20px;
+	left: 0;
+	margin: 0;
+	padding: 4px 8px;
+	position: relative;
+	text-align: left;
+	overflow:hidden;
+	cursor:pointer;
+}
+.summary .summaryDiv {
+	display: block;
+}
+.summaryDiv .rectypeTitle {
+	display: block;
+	height: 1.1em;
+	left: 90px;
+	overflow: hidden;
+	position: absolute;
+	right: 32px;
+	text-overflow: ellipsis;
+	top: 8px;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+.summaryDiv .rectypeCount {
+	display: block;
+	height: 1.1em;
+	left: 32px;
+	overflow: hidden;
+	position: absolute;
+	width: 40px;
+	text-overflow: ellipsis;
+	top: 8px;
+	vertical-align: middle;
+ 	text-align: right;
+ 	font-weight: bold;
+}
+.summaryDiv .recordIcons {
+	display:table-cell;
+	min-width:50px;
+}
 
 
 /* record templates */
@@ -1581,8 +1636,8 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	white-space: nowrap;
 }
 .list .recordDiv .recordIcons, .two-col .recordDiv .recordIcons {
- display:table-cell;
- min-width:50px;
+	display:table-cell;
+	min-width:50px;
 }
 .thumbnails div.recordDiv:hover, .thumbs div.recordDiv:hover {
 	z-index:10;
@@ -2164,9 +2219,11 @@ ul.menu li ul li a {
 ul.menu li ul li.checked a {
 	color:#CCC;
 }
+/* ARTEM
 .recordDiv {
 	display:none !important;
 }
+*/
 div.list > div.recordDiv.lnk {
 	display:block !important;
 }
@@ -2174,8 +2231,12 @@ div.list > div.recordDiv.lnk {
 	display:inline-block !important;
 }
 /*.is-not-logged-in #results-level0 {padding:15px 0}
-*/#results-level0 .recordDiv {
-	display:inline-block !important;
+*/
+.summary .recordDiv{
+	display: none !important;
+}
+#results-level0 .recordDiv {
+	display:inline-block;
 }
 #results-level0.list > div.recordDiv  {
 	display:block !important;

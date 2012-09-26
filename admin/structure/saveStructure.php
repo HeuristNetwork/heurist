@@ -577,6 +577,15 @@
 				$query = $query."?";
 				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
 				array_push($parameters, $val);
+
+				/* it is not possible to create canonical title mask at this stage
+					if($colName == "rty_TitleMask"){
+					$colName = "rty_CanonicalTitleMask";
+					$colNames = $colNames.",".$colName;
+					$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
+					$val = make_canonical_title_mask($val, $rt);
+					array_push($parameters, $val);
+				}*/
 			}
 
 			$query = "insert into defRecTypes ($colNames) values ($query)";
@@ -814,8 +823,6 @@
 
 		 ksort($arr_target);
 
-error_log(">>>>".print_r($arr_target, true));
-
 		return $arr_target;
 	}
 
@@ -902,8 +909,7 @@ error_log(">>>>".print_r($arr_target, true));
 
 					$val = array_shift($fieldVals);
 
-					/*****DEBUG****///
-					error_log(">>".$dtyID."   ".$colName."=".$val);
+					/*****DEBUG****///error_log(">>".$dtyID."   ".$colName."=".$val);
 
 					if (array_key_exists($colName, $rstColumnNames) && $colName!="rst_LocallyModified") {
 						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
@@ -934,8 +940,7 @@ error_log(">>>>".print_r($arr_target, true));
 						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					}
 
-					/*****DEBUG****///
-error_log(">>>3.".$query);
+					/*****DEBUG****///error_log(">>>3.".$query);
 
 					$rows = execSQL($db, $query, $parameters, true);
 

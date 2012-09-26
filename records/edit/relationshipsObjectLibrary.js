@@ -270,7 +270,8 @@ if (!top.Relationship) {
 															"Related record",
 															"resource",
 															"",
-															null,null,
+															null,
+															null,  //alowed pointers
 															this.rectypes? this.rectypes : (rectypes ? rectypes : 0));
 
 		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
@@ -696,7 +697,7 @@ if (!top.Relationship) {
 						newRow.style.width = "100%";
 
 						thisRef.parentElement.insertBefore(newRow, tRow.nextSibling);
-						var rel = new top.EditableRelationship(newCell, null, rtype || 0,dtID,thisRef);
+						var rel = new top.EditableRelationship(newCell, null, rtype || 0, dtID, thisRef);
 						rel.nonce = thisRef.getNonce();
 						thisRef.openRelationships[rel.nonce] = rel;
 						rel.relTypeSelect.focus();
@@ -716,8 +717,10 @@ if (!top.Relationship) {
 		}
 
 		var addOtherTd = document.createElement("div");
+		var addBefore = addOtherTd;
 		//var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
 		addOtherTd.style.paddingTop = "5px";
+		addOtherTd.style.display = "inline-block";
 		//addOtherTd.colSpan = 7;
 		addOtherTd.id = "addRelationshipLink";
 		var a = addOtherTd.appendChild(document.createElement("a"));
@@ -743,9 +746,9 @@ if (!top.Relationship) {
 			var newCell = newRow.appendChild(document.createElement("div"));
 
 			//newCell.colSpan = 7;
-			thisRef.parentElement.insertBefore(newRow, thisRef.parentElement.lastChild);
+			thisRef.parentElement.insertBefore(newRow, addBefore); //thisRef.parentElement.lastChild);
 
-			var rel = new top.EditableRelationship(newCell,null,rtypes,dtID,thisRef);
+			var rel = new top.EditableRelationship(newCell,null,rtypes,dtID, thisRef);
 			rel.nonce = thisRef.getNonce();
 			thisRef.openRelationships[rel.nonce] = rel;
 			rel.relTypeSelect.focus();
@@ -753,6 +756,63 @@ if (!top.Relationship) {
 			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
 
 		this.parentElement.appendChild(addOtherTd);
+
+		//IJ asked to add special link for aggregation relationship ----------------
+
+		addOtherTd = document.createElement("div");
+		addOtherTd.style.paddingTop = "5px";
+		addOtherTd.style.display = "inline-block";
+		addOtherTd.id = "addRelationshipAggrLink";
+		a = addOtherTd.appendChild(document.createElement("a"));
+		a.href = "#";
+		a.style.padding = "3px 6px 3px 0px";
+
+		addImg = a.appendChild(document.createElement("img"));
+		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.className = "add_records_img";
+		addImg.title = "Add relationship to Aggregation";
+		a.appendChild(document.createTextNode("Add to Aggregation"));
+		a.style.textDecoration = "none";
+		a.onclick = function(rtypes,dtID) { return function() {
+			var newRow = document.createElement("div");
+			newRow.style.width = "100%";
+			newRow.className = "relation";
+
+			var newCell = newRow.appendChild(document.createElement("div"));
+
+			//newCell.colSpan = 7;
+			thisRef.parentElement.insertBefore(newRow, addBefore); //thisRef.parentElement.lastChild);
+
+			var relationshipRec = {
+				relnID:0,
+				role:"",
+				relTerm: "",
+				relTermID: "IsPartOf",
+				relInvTerm: "",
+				relInvTermID: "",
+				relatedRec: { title: "", rectype: top.HEURIST.magicNumbers['RT_AGGREGATION'], URL: "", recID: 0 },
+				intrpRec: { title: "", rectype: top.HEURIST.magicNumbers['RT_INTERPRETATION'], URL: "", recID: 0 },
+				notes: "",
+				title: "",
+				startDate: null,
+				endDate: null
+			};
+
+
+			var rel = new top.EditableRelationship(newCell, relationshipRec, ""+top.HEURIST.magicNumbers['RT_AGGREGATION'], dtID, thisRef);
+			rel.nonce = thisRef.getNonce();
+			thisRef.openRelationships[rel.nonce] = rel;
+			rel.relTypeSelect.focus();
+
+			rel.relatedRecord.chooseResourceAuto();
+
+			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
+
+		this.parentElement.appendChild(addOtherTd);
+
+
+
+
 
 
 	//saw TODO  fix ellipses as they have been temporarily disabled  4/4/10

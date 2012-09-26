@@ -490,9 +490,14 @@ top.HEURIST.search = {
 										'<li><a href="#" class="two-col" title="View results as 2 column list" onClick="top.HEURIST.search.setResultStyle(\'two-col\','+level+');">2 columns</a></li>'+
 										'<li><a href="#" class="icons" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'icons\','+level+');">Icons</a></li>'+
 										'<li><a href="#" class="thumbnails" title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
+										'<li><a href="#" class="summary" title="View summary list grouped by type" onClick="top.HEURIST.search.setResultStyle(\'summary\','+level+');">Summary</a></li>'+
 									'</ul>';
 		filterMenu.appendChild(viewStyleMenu);
 		top.HEURIST.search.setResultStyle(style,level);
+
+		var summaryDiv =  $(".summaryDiv",resultsDiv);
+		var isAddSummary = (summaryDiv.length == 0);
+		var html = "";
 
 		//create rectype filter menu
 		if (levelRecTypes){
@@ -517,15 +522,29 @@ top.HEURIST.search = {
 				var rtInfo = rtNames[j].split(":");
 				li = document.createElement("li");
 				li.rectype = rtID = rtInfo[1];
+				li.id = "fm"+level+"_"+rtID;
 				$(li).attr("rectype", rtInfo[1]);
 				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRectypeFilter(this.parentNode,"+level+","+rtID+")>" + rtInfo[0] + "</a>";
 				li.className = (!filterRtIDs || filterRtIDs &&
 													(filterRtIDs.indexOf(parseInt(rtID)) != -1 ||
 														filterRtIDs.indexOf(rtID) != -1)? "checked ":'') + "level"+level;
 				rectypeList.appendChild(li);
+
+				if(isAddSummary){
+					var dd = top.HEURIST.search.renderSummary(rtID, levelRecTypes[rtID].length, level);
+					resultsDiv.appendChild(dd);
+				}
+
 			}
+
 			rectypeMenuItem.appendChild(rectypeList);
 			filterMenu.appendChild(rectypeMenuItem);
+
+			/*this function calls twice - to avoid duplication - check that summaries already added
+			var summaryDiv =  $(".summaryDiv",resultsDiv);
+			if (summaryDiv.length == 0) {
+				resultsDiv.innerHTML += html;
+			}*/
 		}
 
 		//create ptrtype filter menu
@@ -698,6 +717,11 @@ top.HEURIST.search = {
 	},
 
 	toggleRectypeFilter: function(menuItem, level, rtID){
+
+		//restore "normal" view for this level
+		var style = top.HEURIST.util.getDisplayPreference("search-result-style"+level);
+		top.HEURIST.search.setResultStyle(style, level);
+
 		var resultsDiv =  $("#results-level" + level).get(0);
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].rectypes[rtID];
 		// for each record in this level of the given type toggle the filter class
@@ -710,7 +734,7 @@ top.HEURIST.search = {
 		$(menuItem).toggleClass('checked')
 		// recalc lower level filters (pushdown filtering)
 		top.HEURIST.search.recalcLinkMenus(level);
-		top.HEURIST.search.filterRelated(level+1);
+		top.HEURIST.search.filterRelated(level);
 		top.HEURIST.search.updateMapRelated();
 	},
 
@@ -948,6 +972,47 @@ top.HEURIST.search = {
 		return html;
 	},
 
+	filterByRecType: function(level, rt_ID) {
+
+				var menuItem = document.getElementById("fm"+level+"_"+rt_ID);
+
+				// restore normal style MOVED TO toggleRectypeFilter
+				//var style = top.HEURIST.util.getDisplayPreference("search-result-style"+level);
+				//top.HEURIST.search.setResultStyle(style, level);
+
+				top.HEURIST.search.setAllFilterItems(menuItem.parentNode, level, false);
+				top.HEURIST.search.toggleRectypeFilter(menuItem, level, rt_ID);
+	},
+
+	renderSummary: function(rt_ID, cnt, level) {
+
+		var rectypeTitle = top.HEURIST.rectypes.names[parseInt(rt_ID)],
+			rectypeImg = "style='background-image:url("+ top.HEURIST.iconBaseURL + rt_ID + ".png)'";
+
+		var newSearchWindow = "";/*"<div><a href='"+top.HEURIST.basePath+"search/search.html?q=t:"+rt_ID+
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
+			"' target='_blank' title='Open in new window' class='externalLink'></a></div>";*/
+
+		//var html = "<div class='summaryDiv' title='Click to filter the result by this record type' rectype='"+rt_ID+"' onclick='{"+
+				//"top.HEURIST.search.filterByRecType("+level+","+rt_ID+");}'>" +  "</div>";
+		var html =
+			"<div class=recordIcons>" +
+				"<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
+			"</div>" +
+			"<div class='rectypeCount' title='Count of records'>"+ cnt +"</div>" +
+			"<div class='rectypeTitle'>"+
+				rectypeTitle +
+				newSearchWindow +
+			"</div>";
+
+		var resultsDiv = document.createElement("div");
+		resultsDiv.className = 'summaryDiv';
+		resultsDiv.title = 'Click to filter the result by this record type';
+		resultsDiv.onclick = function(){ top.HEURIST.search.filterByRecType(level,rt_ID) };
+		resultsDiv.innerHTML = html;
+
+		return resultsDiv;
+	},
 
 	displaySearchParameters: function() {
 		// Transfer query components to their form elements
@@ -1063,6 +1128,12 @@ top.HEURIST.search = {
 		if (top.HEURIST.is_logged_in && top.HEURIST.is_logged_in()) {
 			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+">log&nbsp;out</a>";
 		} else {
+
+			var registrationButton = "";
+			if(top.HEURIST.is_registration_allowed){
+				registrationButton = " <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n";
+			}
+
 			logged_in_elt.innerHTML = "not logged in : <a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+">log in</a>";
 			left_panel_elt.innerHTML =
 				"<div style=\"padding: 10px;\">\n" +
@@ -1070,7 +1141,7 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <br><br>New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
+				registrationButton+
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -1497,7 +1568,9 @@ top.HEURIST.search = {
 		for (;i<l; i++) {
 			resultsDiv = document.getElementById("results-level"+i);
 			if (resultsDiv) {
-				top.HEURIST.util.setDisplayPreference("search-result-style"+ i, style, null,null,true,true);
+				if(style!=='summary'){
+					top.HEURIST.util.setDisplayPreference("search-result-style"+ i, style, null,null,true,true);
+				}
 				resultsDiv.className = style + (i>0?" related-results":"") +
 										($(resultsDiv).hasClass("collapsed") ? " collapsed" : "");
 				$("li.view > ul > li", resultsDiv).removeClass("checked");
@@ -1744,6 +1817,7 @@ top.HEURIST.search = {
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
 		var sortbyValSelect = document.getElementById("sortby-select");
 		sortbyValSelect.innerHTML = '<option value="t" selected>record title</option>'+
+									'<option value="rt">record type</option>'+
 									'<option value="u">record URL</option>'+
 									'<option value="m">date modified</option>'+
 									'<option value="a">date added</option>'+
@@ -2269,11 +2343,11 @@ top.HEURIST.search = {
 
 		if (! top.HEURIST.user) return;
 
-		var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
+		var savedSearches = (wg>0) ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
 
 		if (! savedSearches) return;
 		var innerHTML = "";
-		if (wg) {
+		if (wg>0) {
 			for (var i = 0; i < savedSearches.length; ++i) {
 				cmb = savedSearches[i];
 				innerHTML += printSavedSearch(cmb, wg);
@@ -2344,7 +2418,7 @@ top.HEURIST.search = {
 				// innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + w +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
 
                 // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
-                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations();return false;}'>Aggregations</a></div>";
+                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(w);return false;}'>Aggregations</a></div>";
 
 				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") +"'>" /* +top.HEURIST.workgroups[w].name */ +" Blog</a></div>";
 
@@ -2391,17 +2465,20 @@ top.HEURIST.search = {
 
 		}
 	},
-	
+
 	loadAggregations: function(w){ // creates a search URL for Aggregation records
 		if(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_AGGREGATION'])
 		{
 			var code = top.HEURIST.magicNumbers['RT_AGGREGATION'];
-		
-			window.location.href = top.HEURIST.basePath+ 
-                "search/search.html?q=t:"+code+"&label=Aggregation records (a root record to which a group of records point)&w=" + 
-                w + "&amp;" + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;?db=" + top.HEURIST.database.name : "")
+			if(!w){
+				w = 'all';
+			}
+
+			window.location.href = top.HEURIST.basePath+
+                "search/search.html?q=t:"+code+"&label=Aggregation records (a root record to which a group of records point)&w=" +
+                w + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")
 		}
-	
+
 	},
 
 	toggleSavedSearches: function(div) {
@@ -2443,32 +2520,61 @@ top.HEURIST.search = {
 		}
 	},
 
+	/**
+	* add link of saved search to particular workgroup or section in nav list
+	*
+	* svs_ID - existing search - if defined just rename label
+	*/
 	insertSavedSearch: function(label, url, wg, svs_ID) {
 		var w_all = url.match(/w=bookmark/) ? 0 : 1;
-		var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
-		var newEntry = wg ? [label, url, svs_ID] : [label, url, svs_ID, 0, w_all];
-		var i = 0;
-		while (i < savedSearches.length) {
-			var sid = savedSearches[i][2];
-			//if this is a renamed search or ovewritten search
-			if (sid == svs_ID) {
-				document.getElementById("active-label").innerHTML = newEntry[0];
-				document.getElementById("active-label").title = newEntry[0];
-				savedSearches[i] = newEntry;
-				top.HEURIST.search.fillInSavedSearches();
-				return;
-			}
-			// if it's a workgroup search, or the right type of personal search,
-			// and it should go before the current search, splice it in
-			if ((wg || savedSearches[i][4] == w_all)  &&  savedSearches[i][0].toLowerCase() >= label.toLowerCase())
-				break;
-			// the case below is when the search should be placed last in the list of "My records" searches
-			if (! wg  &&  savedSearches[i][4] != w_all  &&  i > 0  &&  savedSearches[i-1][4] == w_all)
-				break;
-			++i;
+		var savedSearches = [],
+			newEntry;
+		if(wg>0){
+			newEntry = [label, url, svs_ID];
+			savedSearches = top.HEURIST.user.workgroupSavedSearches[wg];
+		}else{
+		 	newEntry = [label, url, svs_ID, 0, w_all];
+		 	savedSearches = top.HEURIST.user.savedSearches;
 		}
-		savedSearches.splice(i, 0, newEntry);
-		top.HEURIST.search.fillInSavedSearches();
+
+		if(!savedSearches || savedSearches.length<1){
+			if(wg && wg>0){
+				top.HEURIST.user.workgroupSavedSearches[wg] = [newEntry];
+			}else{
+				top.HEURIST.user.savedSearches = [newEntry];
+			}
+		}else{
+			var i = 0;
+			while (i < savedSearches.length) {
+				var sid = savedSearches[i][2];
+				//if this is a renamed search or ovewritten search
+				if (sid == svs_ID) {
+					document.getElementById("active-label").innerHTML = newEntry[0];
+					document.getElementById("active-label").title = newEntry[0];
+					savedSearches[i] = newEntry;
+					top.HEURIST.search.fillInSavedSearches(); //update ui
+					return;
+				}
+				// if it's a workgroup search, or the right type of personal search,
+				// and it should go before the current search, splice it in
+				if ((wg || savedSearches[i][4] == w_all)  &&  savedSearches[i][0].toLowerCase() >= label.toLowerCase())
+					break;
+				// the case below is when the search should be placed last in the list of "My records" searches
+				if (! wg  &&  savedSearches[i][4] != w_all  &&  i > 0  &&  savedSearches[i-1][4] == w_all)
+					break;
+				++i;
+			}
+			savedSearches.splice(i, 0, newEntry);
+
+			if(wg>0){
+				top.HEURIST.user.workgroupSavedSearches[wg] = savedSearches;
+			}else{
+				top.HEURIST.user.savedSearches = savedSearches;
+			}
+
+		}
+
+		top.HEURIST.search.fillInSavedSearches(); //update ui
 	},
 
 	removeSavedSearch: function(label, wg) {
@@ -3736,6 +3842,10 @@ top.HEURIST.search = {
 			document.getElementById("q").select();
 		});
 		top.HEURIST.search.loadSearchParameters();
+
+		if(!top.HEURIST.is_registration_allowed){
+			document.getElementById("p-registration").style.display = "none";
+		}
 	},
 
 /* Depricated

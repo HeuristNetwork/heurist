@@ -122,11 +122,16 @@ if(array_key_exists('mode',$_REQUEST)){
 							type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
+<?php
+if (is_admin()) {
+?>
 						<li><a href="setup/deleteCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Delete a database completely">Delete entire database</a></li>
 						<li><a href="setup/clearCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
-
+<?php
+}
+?>
 						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=<?=HEURIST_DBNAME?>')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
 						<li><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=<?=HEURIST_DBNAME?>')"

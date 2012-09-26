@@ -1,9 +1,3 @@
-<html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Export record type structures to XForms</title>
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-	</head>
 <?php
 
     /* getDBStructureAsXForms.php - returns database definitions (rectypes, details etc.)
@@ -36,11 +30,18 @@
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
-	if (! is_admin()) {
-		print "<body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+	if (!is_admin()) {
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to export structure as XForms</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
-
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Export record type structures to XForms</title>
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+	</head>
+<?php
 	if(array_key_exists("rectypes", $_REQUEST)){
 		$rectypes = $_REQUEST['rectypes'];
 	}else{

@@ -72,7 +72,7 @@
 			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
 			( HeuristBaseURL ? HeuristBaseURL : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-            
+
 			var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
 				// was hBase, but ../ seems to work jsut as well
 
@@ -118,7 +118,7 @@
 				action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
 				(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 
-				top.HEURIST.search.createUsedRectypeSelector(false);
+				top.HEURIST.search.createUsedRectypeSelector(true); //IJ asked to use codes
 				top.HEURIST.search.createUsedDetailTypeSelector(true);
 				document.getElementById("sortAsc").onclick = top.HEURIST.search.calcShowSimpleSearch;
 
@@ -330,6 +330,7 @@
 							<div class="simple-search-row">
 								<label for="sortby-select">Sortby:</label>
 								<select id="sortby-select" >
+									<option value=rt>record type</option>
 									<option value=t>record title</option>
 									<option value=u>record URL</option>
 									<option value=m>date modified</option>
@@ -368,7 +369,7 @@
 								<ul>
 									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
 									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
-									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search as ...</a></li>
+									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="{top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;}">Save search as ...</a></li>
 
 									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
 									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
@@ -455,8 +456,8 @@
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>							
-                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations();return false;}">Aggregations</a></div>
+							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
+                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
                             <div class=saved-search-subsubheading>Saved searches</div>
 							<div id=all-records-saved-searches-searches></div>
 						</div>
@@ -512,7 +513,7 @@
 							<p>We are also very happy to provide advice - from simple email assistance
 							( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> ) to the design of complete eResearch systems. </p>
 							<br>
-							<p>Please <a href="../admin/ugrps/editUser.html" name="auto-popup">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
+							<p id="p-registration">Please <a href="../admin/ugrps/editUser.html" name="auto-popup">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
 						</div>
 						<div id="noresult-search-status" class="errorMsg"> <span>&nbsp;&nbsp;No records match the search&nbsp;&nbsp;</span>
 							<div class="not-logged-in-only">To see workgoup-owned and non-public records you may need to log in</div>

@@ -72,6 +72,7 @@ $prefs = array(
 	"defaultPrintView" => "default",
 	"showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
+	"savedSearchDest" => "",  //last saved search destination
 	"defaultSearch" => "tag:Favourites",
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue

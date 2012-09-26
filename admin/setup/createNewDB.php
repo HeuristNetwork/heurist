@@ -20,7 +20,6 @@
 		return;
 	}
 ?>
-
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
@@ -31,9 +30,24 @@
 	<style>
 		.detailType {width:180px !important}
 	</style>
-	<body class="popup">
-
 	<script>
+		function hideProgress(){
+			var ele = document.getElementById("loading");
+			if(ele){
+				ele.style.display = "none";
+			}
+		}
+		function showProgress(){
+			var ele = document.getElementById("loading");
+			if(ele.style.display != "none"){
+				ele = document.getElementById("divProgress");
+				if(ele){
+					ele.innerHTML = ele.innerHTML + ".";
+					setTimeout(showProgress, 500);
+				}
+			}
+		}
+
 		function challengeForDB(){
 		  var pwd_value = document.getElementById("pwd").value;
 		  if(pwd_value==="<?=$passwordForDatabaseCreation?>"){
@@ -45,6 +59,8 @@
 		}
 	</script>
 
+	<body class="popup" onload="hideProgress()">
+
 		<div class="banner"><h2>Create new Heurist database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
@@ -52,19 +68,37 @@
 		<?php include("includeNewDatabaseWorkflow.html"); ?>
 		<div class="separator_row" style="margin:20px 0;"></div>
 
-	   		<div id="challengeForDB" style="<?='display:'+(($passwordForDatabaseCreation=='')?'none':'block')?>;">
-				<h3>Enter the password set by your system adminstrator for new database creation:</h3>
-					<input type="password" maxlength="64" size="25" id="pwd">
-					<input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
-			</div>
-			<br /><br />
-			<div id="loading" style="display:none">
-					<img src="../../common/images/mini-loading.gif" width="16" height="16" /> 
-					<strong>&nbspCreating database, please wait...</strong>
-			</div>
-			
+<?php
+	$newDBName = "";
+	$isNewDB = false; // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
+	// or by querying an existing Heurist database using getDBStructure (for crosswalk)
 
-		<div id="createDBForm" style="<?='display:'+($passwordForDatabaseCreation==''?'block':'none')?>;">
+	global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
+	global $done; // Prevents the makeDatabase() script from running twice
+	$done = false; // redundant
+
+	/*****DEBUG****///error_log(" post dbname: $_POST['dbname'] ");  //debug
+
+	if(isset($_POST['dbname'])) {
+?>
+		<div id="loading">
+					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
+					<strong><span id="divProgress">&nbspCreating database, please wait</span></strong>
+		</div>
+		<script type="text/javascript">showProgress();</script>
+<?php
+		ob_flush();flush();
+		//sleep(5);
+		makeDatabase(); // this does all the work
+	}else{
+?>
+	   	<div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
+			<h3>Enter the password set by your system adminstrator for new database creation:</h3>
+				<input type="password" maxlength="64" size="25" id="pwd">
+				<input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
+		</div>
+
+		<div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;">
 			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
 				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
@@ -79,31 +113,11 @@
                     _  </b>
 					<input type="text" maxlength="64" size="25" name="dbname">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;" >
-				<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
+					<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
                 </div>
-				<br /><br />
-				<div id="loading" style="display:none">
-					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
-					<strong>&nbspCreating database, please wait...</strong>
-				</div>
 			</form>
 		</div>
-	</body>
-</html>
-
-<?php
-	$newDBName = "";
-	$isNewDB = false; // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
-	// or by querying an existing Heurist database using getDBStructure (for crosswalk)
-
-	global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
-	global $done; // Prevents the makeDatabase() script from running twice
-	$done = false; // redundant
-
-	/*****DEBUG****///error_log(" post dbname: $_POST['dbname'] ");  //debug
-
-	if(isset($_POST['dbname'])) {
-		makeDatabase(); // this does all the work
+<?
 	}
 
 
@@ -133,16 +147,13 @@
 			if(ADMIN_DBUSERNAME == "") {
 				if(ADMIN_DBUSERPSWD == "") {
 					echo "DB Admin username and password have not been set in config.ini. Please do so before trying to create a new database.<br>";
-					echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 					return;
 				}
 				echo "DB Admin username has not been set in config.ini. Please do so before trying to create a new database.<br>";
-				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 				return;
 			}
 			if(ADMIN_DBUSERPSWD == "") {
 				echo "DB Admin password has not been set in config.ini. Please do so before trying to create a new database.<br>";
-				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 				return;
 			} // checking for current administrative user
 
@@ -381,7 +392,8 @@
 		} // isset
 
 	} //makedatabase
-
-
 ?>
+	</body>
+</html>
+
 

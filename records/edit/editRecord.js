@@ -1754,6 +1754,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	}
 };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getPrimaryValue = function(input) { return input? input.hiddenElt.value : ""; };
+top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResourceAuto = function() {
+	this.chooseResource(this.inputs[0]);
+}
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = function(element, searchValue) {
 	if (this.choosing) return;	// we are already choosing a resource!
 	this.choosing = true;

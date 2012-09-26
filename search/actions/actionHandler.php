@@ -441,12 +441,12 @@ function save_search() {
 
 		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	} else {
-		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');';
-		if ($publish) {
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : \'&db='.HEURIST_DBNAME.'\');';
+		$onload = "location.replace('actionHandler.php?db=".HEURIST_DBNAME."'); top.HEURIST.search.insertSavedSearch('".slash($_REQUEST['svs_Name'])."', '".slash($_REQUEST['svs_Query'])."', ".$wg.", ".$ss.");";
+		/*if ($publish) {
+			$onload .= " top.location.href = top.location.href + (top.location.href.match(/\?/) ? '&' : '?') + 'pub=1&label=".$label."&sid=".$ss."'+(top.location.href.match(/db=/) ? '' : '&db=".HEURIST_DBNAME."');";
 		}else{
 			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'label='.$label.'&sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : \'&db='.HEURIST_DBNAME.'\');';
-		}
+		}*/
 	}
 	return $onload;
 }
@@ -457,15 +457,21 @@ function set_wg_and_vis() {
 		$wg = intval(@$_REQUEST['wg_id']);
 		$vis = $_REQUEST['vis'];
 
-		if (($wg == 0 ||  in_array($wg, get_group_ids()))  &&
+		if (($wg == -1 ||  $wg == 0 || in_array($wg, get_group_ids()))  &&
 			(in_array(strtolower($vis),array('viewable','hidden','pending','public')))) {
 			mysql_connection_db_overwrite(DATABASE);
 
 			if ($wg === 0 && $vis === 'hidden') $vis = 'viewable';
+			if ($wg >= 0){
+				$editable = ' rec_OwnerUGrpID = ' . $wg . ', ';
+			}else{
+				$editable = '';
+			}
 
-			mysql_query('update Records'.
-							' set rec_OwnerUGrpID = ' . $wg . ', rec_NonOwnerVisibility = "' . $vis . '"'.
-							' where rec_ID in (' . join(',', $bib_ids) . ')');
+			$query = 'update Records set '.$editable.'rec_NonOwnerVisibility = "' . $vis . '"'.
+							' where rec_ID in (' . join(',', $bib_ids) . ')';
+error_log(">>>>".$query);
+			mysql_query($query);
 
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
 			session_write_close();

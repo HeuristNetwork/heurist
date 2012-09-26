@@ -15,12 +15,17 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	//require_once(dirname(__FILE__).'/../../admin/ugrps/saveUsergrpsFs.php');
 
-	if (! is_admin()) {
-		print "<html><body><p>You must be an adminstrator to access user information</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+	if (! is_logged_in()) {
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
-?>
+	// User must be system administrator or admin of the owners group for this database
+	if (!is_admin()) {
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to import user</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		return;
+	}
 
+?>
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -112,15 +117,15 @@
 				} else {
 					die ("<p>Sorry, selected user $userID does not exist");
 				}
-				
+
 				$err = transferUser($sourcedb, $userID, DATABASE, false);
-				
+
 				if ($err) {
 					print "<p>MySQL returns: ".$err;
 					print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb into the current database</b>".
 						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 				} else {
-/* IJ: 19-Sep-12 Don’t make imported users members of the database owners group - too risky. 
+/* IJ: 19-Sep-12 Don't make imported users members of the database owners group - too risky.
 					$newUserID =  mysql_insert_id();
 					$query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')"; // adds to 1 = 'database owners' as 'member'
 					// todo: should really offer choice of existing user groups to add the user to, as well as their role
@@ -146,23 +151,23 @@
 	*  Transfer user from one database to another
 	*/
 	function transferUser($sourcedb, $sourceuserid, $destdb, $isowner){
-		
+
 			$fields = "ugr_Type,ugr_Name,ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,".
 						"ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,ugr_City,".
 						"ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,".
 						"ugr_MinHyperlinkWords,ugr_LoginCount,ugr_IsModelUser,".
 						"ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT";
-		
+
 			$query1 = "insert into $destdb.sysUGrps ($fields) ".
 						"SELECT $fields ".
 						"FROM $sourcedb.sysUGrps where ugr_ID=$sourceuserid";
 
 			$res1 = mysql_query($query1);
 			$err = mysql_error();
-			/*		
+			/*
 			if (!$err && $isowner) {
 					$newUserID =  mysql_insert_id();
-					
+
 					$query1 = "delete from $destdb.sysUGrps where ugr_ID=2";
 					mysql_query($query1);
 					$err = mysql_error();
@@ -173,7 +178,7 @@
 					}
 			}*/
 			return $err;
-	}			
+	}
 		?>
 		</div>
 	</body>

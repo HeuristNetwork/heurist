@@ -39,6 +39,8 @@
 
   <script>
 
+var Hul = top.HEURIST.util;
+
 var relTargetID;
 var recCountSpan;
 var relTypeSelect;
@@ -57,23 +59,35 @@ function init () {
 	recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
 	var reltypDT = top.HEURIST.magicNumbers['DT_RELATION_TYPE'];
 	var relRT = top.HEURIST.magicNumbers['RT_RELATION'];
-	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']]);
-	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs']]);
+	var relTypeTerms = top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']];
+	var relTypeTermsDisabled = top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs']];
 
-	relTypeSelect = top.HEURIST.util.createTermSelect(relTypeTerms,
+	if(Hul.isempty(relTypeTerms)){
+		relTypeTerms = top.HEURIST.detailTypes.typedefs[relRT].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree]
+	}
+	if(Hul.isempty(relTypeTermsDisabled)){
+		relTypeTermsDisabled = top.HEURIST.detailTypes.typedefs[reltypDT].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs];
+	}
+	relTypeTerms = Hul.expandJsonStructure(relTypeTerms);
+	relTypeTermsDisabled = Hul.expandJsonStructure(relTypeTermsDisabled);
+
+	relTypeSelect = Hul.createTermSelect(relTypeTerms,
 													(relTypeTermsDisabled || ""),
 													top.HEURIST.terms.termsByDomainLookup.relation,
-													null);
+													"IsPartOf");
 	relTypeSelectDiv.appendChild(relTypeSelect);
 
-	relTargetInput.onclick = function () {
-		top.HEURIST.util.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&db=" + database, {
+	relTargetInput.onclick = selectRelRecord;
+	selectRelRecord();
+}
+
+function selectRelRecord() {
+		Hul.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&t="+top.HEURIST.magicNumbers['RT_AGGREGATION']+"&db=" + database, {
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recID && recTitle ? recTitle : "";
 				relTargetID = recID || null;
 			}
 		});
-	}
 }
 
 function save () {	// xhrFormSubmit only uses the form's action and elements(name & value) properties
@@ -87,7 +101,7 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 		]
 	};
 
-	top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
+	Hul.xhrFormSubmit(fakeForm, function(json) {
 		var i, l, rels;
 		var vals = eval(json.responseText);
 		if (! vals) {

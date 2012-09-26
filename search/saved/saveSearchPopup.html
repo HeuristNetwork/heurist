@@ -57,18 +57,27 @@
 	top.HEURIST.registerEvent(window, "load", function() {
 		var iHTML;
 
+		var ele = document.getElementById("wg-select");
+		var selval = top.HEURIST.util.getDisplayPreference("savedSearchDest"),
+			selIndex = 0;
+
 		if (top.HEURIST.parameters["w"]) {
 			var optElem = document.createElement("option");
 			optElem.value = "";
 			optElem.innerHTML = top.HEURIST.parameters["w"] === "all" ?  '"All records" saved searches' : '"My bookmarks" saved searches';
-			document.getElementById("wg-select").replaceChild(optElem,document.getElementById("wg-select").firstElementChild );
+			ele.replaceChild(optElem, ele.firstElementChild );
 		}
 
 		for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
 			var wg = top.HEURIST.user.workgroups[i];
 			iHTML += "<option value=" + wg + ">" + top.HEURIST.workgroups[wg].name + "</option>";
+			if(selval==wg){
+				selIndex =  i + 1;
+			}
 		}
 		document.getElementById("wg-options").innerHTML += iHTML;
+
+		ele.selectedIndex = selIndex;
 	});
 
 	function init() {
@@ -157,7 +166,8 @@
 		var cmb_instance = action_fr.document.getElementById("db");
 		var publish_elt = action_fr.document.getElementById("publish");
 		var bkmk_only = document.getElementById("bookmark-check");
-		var saveFilters = document.getElementById("saveFilters");
+
+		var saveFilters = document.getElementById("rbS2").checked;
 
 		if (publish == "yes"){
 			publish_elt.value = "true";
@@ -170,6 +180,9 @@
 		action_elt.value = "save_search";
 		cmb_label_elt.value = document.getElementById("search-name").value;
 		cmb_workgroup_elt.value = document.getElementById("wg-select").value;
+
+		top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup_elt.value);
+
 
 		if (mode == "rename") {
 			cmb_id_elt.value = sid;
@@ -193,7 +206,7 @@
 			}
 		}
 
-		if (saveFilters.checked) {
+		if (saveFilters) {
 			if (rtFilter.length){
 				query.push(rtFilter[1]);
 			}
@@ -225,12 +238,15 @@
 		setTimeout(function() { window.close(); }, 10);
 	}
 
+	//
 	function displayBookmarkCheck(){
+		/* IJ req - always hide
 		if (document.getElementById("wg-select").value) {
 			document.getElementById("bookmark-check-p").style.display = "";
 		} else {
 			document.getElementById("bookmark-check-p").style.display = "none";
 		}
+		*/
 	}
   </script>
   <style>
@@ -271,7 +287,10 @@
   </p>
   		<div class="separator_row" style="margin:20px 0"></div>
 
-<div style="float: right;"><label  for="saveFilters">  save Filters  <input style="display: inline; margin-right: 20px;" type="checkbox" id="saveFilters"/></label>
+<div style="float: right;">
+	<input id="rbS1" type="radio" name="rbFilter" checked="true" style="vertical-align:text-bottom;"><label style="padding:3px;">Save query</label>
+	<input id="rbS2" type="radio" name="rbFilter" style="vertical-align:text-bottom;"><label style="padding:3px;">Save query and filter rules</label>
+<br>
 <input style="float:right" type=button value=Save id=save onClick="check();"></div>
   <p id=message></p>
 <!--  </div>-->

@@ -37,6 +37,7 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
 		<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
@@ -71,6 +72,7 @@ if (!is_admin()) {
 		<script src="../../common/php/getMagicNumbers.php"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
 		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+		<script src="tabDragDrop.js"></script>
 		<script src="manageRectypes.js"></script>
 
 

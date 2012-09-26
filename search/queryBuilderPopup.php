@@ -435,6 +435,7 @@
 				}
 			</script>
 			<select name=sortby id=sortby onChange="setAscDescLabels(options[selectedIndex].value); update(this);">
+				<option value=rt>record type</option>
 				<option value=t>record title</option>
 				<option value=u>record URL</option>
 				<option value=m>date modified</option>

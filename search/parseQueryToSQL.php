@@ -540,6 +540,8 @@ class SortPhrase {
 
 			case 't': case 'title':
 				return array('rec_Title'.$scending, NULL);
+			case 'rt': case 'type':
+				return array('rec_RecTypeID'.$scending, NULL);
 		}
 	}
 }

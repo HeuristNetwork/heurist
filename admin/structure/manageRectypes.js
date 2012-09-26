@@ -36,6 +36,7 @@ function RectypeManager() {
 		_rolloverInfo;
 
 	var _groups = [],  //for dropdown list
+		myDTDrags = {},
 		_deleted = [], //keep removed types to exclude on filtering
 		_cloneHEU = null; //keep Heurist for rollback in case user cancels group/visibility editing
 
@@ -130,8 +131,25 @@ function RectypeManager() {
 		}
 */			initTabView();
 
+			dragDropEnable();
 	}//end _init
 
+	/*
+	*/	
+	function dragDropEnable() {
+
+		var i;
+		for (i=0; i<_groups.length; i++){
+			var id = ""+_groups[i].value;
+			if (myDTDrags[id]) {
+				myDTDrags[id].unreg();
+				delete myDTDrags[id];
+			}
+			myDTDrags[id] = new YAHOO.example.DDList(id, _updateOrderAfterDrag);
+		} // for
+		
+	}
+	
 	//
 	// adds new tab and into 3 spec arrays
 	//
@@ -1090,6 +1108,7 @@ function RectypeManager() {
 					grpID = context['0'].result;
 					ind = _groups.length;
 					_addNewTab(ind, grpID, name, description);
+					dragDropEnable();
 				}else{
 					//update label
 					for (ind in _groups){
@@ -1132,6 +1151,43 @@ function RectypeManager() {
               }
         }
     }
+    
+    /**
+	* Updates group order after drag and drop
+	*/
+	function _updateOrderAfterDrag() {
+
+		var orec = {rectypegroups:{
+				colNames:['rtg_Order'],
+				defs: {}
+		}};
+
+		var i, 
+			parentNode = document.getElementsByClassName("yui-nav")[0];
+			
+ 		for (var i = 0; i < parentNode.childNodes.length; i++) {
+      		var child = parentNode.childNodes[i];
+      		var id = child.id;
+      		var ind = top.HEURIST.rectypes.groups.groupIDToIndex[id];
+			if(!Hul.isnull(ind)){
+				grp = top.HEURIST.rectypes.groups[ind];
+				grp.order = i;
+				orec.rectypegroups.defs[id] = [i];
+			}
+    	}		
+		
+		var str = YAHOO.lang.JSON.stringify(orec);
+
+		if(!Hul.isnull(str)) {
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = null;//_updateOnSaveGroup;
+			var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
+
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		}
+		
+	}
+    
     //
 	//
 	//
@@ -1157,6 +1213,12 @@ function RectypeManager() {
 				function _updateAfterDeleteGroup(context) {
 					if(Hul.isnull(context.error)){
 						//remove tab from tab view and select 0 index
+						var id = _groups[ind].value;
+						if (myDTDrags[id]) {
+							myDTDrags[id].unreg();
+							delete myDTDrags[id];
+						}
+						
 						_groups.splice(ind, 1);
 						arrTables.splice(ind, 1);
 						arrDataSources.splice(ind, 1);

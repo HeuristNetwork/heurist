@@ -17,7 +17,7 @@
 	}
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to clone a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 
@@ -158,14 +158,14 @@
 			die ("<h2>Error</h2>Unable to process database upload command: <i>mysql -u... -p... $msg[1]</i>".
 				"<p>The SQL file might not have been written correctly. Please ask your sysadmin for help and report the problem to the Heurist development team");
 		}
-		
-		// RESET register db ID 
+
+		// RESET register db ID
 		$query1 = "update $newname.sysIdentification set sys_dbRegisteredID=0 where sys_ID=1";
 		$res1 = mysql_query($query1);
 		if (mysql_error())  { //(mysql_num_rows($res1) == 0)
 			print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().")<br> Please reset the registration ID manually</b></p>";
-		}	
-			
+		}
+
 		/* Actually not a bad idea to leave the file in the directory
 		print " processing: $cleanup_command<br><p>";
 		exec("$cleanup_command". ' 2>&1', $output, $res1);
