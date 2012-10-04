@@ -961,10 +961,20 @@ td.not-query-collected .collected-hidden {
 #blog-link-cell {
 	text-align: right;
 }
-img.saved-search-edit {
+
+div.saved-search:hover > .saved-search-edit {
+	display: block;
+}
+.saved-search {
+	padding-left:20px;
+	height:15px;
+}
+.saved-search-edit {
+	display: none;
 	cursor: pointer;
-	padding-left: 3px;
+	height:15px;
 	float:right;
+	padding-right:2px;
 }
 .saved-search-subheading {
 	font-weight: bold;
@@ -1862,11 +1872,18 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .recorddiv.linkselected {
 	border-color:#B0D3FB;
 }
-.recorddiv.linkhilited {
-	/*border-color:#FFA7F8;*/
-	-moz-box-shadow:0 0 3px 1px #DC8501;
-	-webkit-box-shadow:0 0 3px 1px #DC8501;
-	box-shadow:0 0 3px 1px #DC8501;
+
+.list .recordDiv.linkHilited {
+	-moz-box-shadow:0 0 0 0 #DC8501;
+	-webkit-box-shadow:0 0 0 0 #DC8501;
+	box-shadow: 0 0 0 0 #DC8501;
+	background:-moz-linear-gradient(center top, #FFFFFF, #DC8501) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#DC8501));
+}
+.recordDiv.linkHilited {
+	-moz-box-shadow:0 0 3px 2px #DC8501;
+	-webkit-box-shadow:0 0 3px 2px #DC8501;
+	box-shadow: 0px 0px 3px 2px #DC8501;
 }
 .recorddiv.selected, .recorddiv.selected:hover {
 	border-color:#62A7F8;

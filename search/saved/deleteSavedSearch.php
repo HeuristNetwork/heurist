@@ -25,16 +25,19 @@ if (! is_logged_in()) {
 	jsonError("no logged-in user");
 }
 
-if (! @$_REQUEST["label"]) {
-	jsonError("missing argument: label");
+$label = @$_REQUEST["label"];
+$wg = intval(@$_REQUEST["wg"]);
+$id = intval(@$_REQUEST["id"]);
+
+if($label && $id){
+	jsonError("missing argument (id or label) for saved search deletion");
 }
 
 mysql_connection_db_overwrite(DATABASE);
 
-$label = @$_REQUEST["label"];
-$wg = intval(@$_REQUEST["wg"]);
-
-if ($wg > 0) {
+if($id>0){
+	mysql_query("delete from usrSavedSearches where svs_ID=$id");
+}else if ($wg > 0) { //OLD WAY
 	mysql_query("delete from usrSavedSearches where svs_Name='$label' and svs_UGrpID=$wg");
 } else {
 	mysql_query("delete from usrSavedSearches where svs_Name='$label' and svs_UGrpID=".get_user_id());

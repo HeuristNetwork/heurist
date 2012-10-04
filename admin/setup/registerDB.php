@@ -106,7 +106,7 @@
 					echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE." </div></div>";
 					echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div><div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
 					echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
-					$url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+					$url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
 					echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
 					<a href=$url target=_blank>Click here to edit</a> (login as person who registered this database - note: use EMAIL ADDRESS as username)
 					</div></div>";
@@ -172,7 +172,7 @@
 							echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE."</div></div>";
 							echo "<div class='input-row'><div class='input-header-cell'>Registration successful, database ID allocated is</div><div class='input-cell'>" . $dbID . "</div></div>";
 							echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
-							$url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+							$url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
 							echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
 							<a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself) </div></div>";
 						?>

@@ -218,8 +218,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				newIframe.style.visibility = "hidden";
 				newIframe.close = function() {
 					var newArgs = [ newIframe.HEURIST_WINDOW_ID ];
+
 					for (var i=0; i < arguments.length; ++i) {
-						newArgs.push(arguments[i]);
+						if(i < arguments.length){
+							newArgs.push(arguments[i]);
+						}
 					}
 					top.HEURIST.util.closePopup.apply(this, newArgs);
 				};
@@ -1521,16 +1524,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	cloneObj: function(o) {
 		//return eval($.toJSON(o));
 
-		function isArray(a)
-		{
-			return Object.prototype.toString.apply(a) === '[object Array]';
-		}
-
 		if(typeof(o) != "object") return o;
 
 		if(o == null) return o;
 
-		if(isArray(o)){
+		if(top.HEURIST.util.isArray(o)){
 			var new2 = [];
 			for(var i in o) new2.push(top.HEURIST.util.cloneObj(o[i]));
 			return new2;
@@ -1672,6 +1670,26 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				input.width(newWidth);
 		}
 		*/
+	},
+
+	/*
+	*
+	*/
+	getUrlParameter: function getUrlParameter(name, query){
+
+		if(!query){
+			query = window.location.search;
+		}
+
+		var regexS = "[\\?&]"+name+"=([^&#]*)";
+		var regex = new RegExp( regexS );
+		var results = regex.exec( query );
+
+		if( results == null ) {
+			return null;
+		} else {
+			return results[1];
+		}
 	}
 
 

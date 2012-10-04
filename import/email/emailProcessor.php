@@ -87,7 +87,7 @@
 		}
 		$senders = $senders.$email['ugr_IncomingEmailAddresses'];
 	}
-	//TODO!!!!  remove this before shipping -- hardcoded $senders='bugs@acl.arts.usyd.edu.au, osmakov@gmail.com, steven.hayes@sydney.edu.au, stephenawhite@hotmail.com';
+	//TODO!!!!  remove this before shipping -- hardcoded $senders='osmakov@gmail.com, steven.hayes@sydney.edu.au, stephenawhite@hotmail.com';
 
 	$use_ssl = ($protocol!='noprotocol');
 	// delete processed mails from mail server

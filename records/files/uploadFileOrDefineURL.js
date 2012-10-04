@@ -75,13 +75,10 @@ function findDetailTypeByType(type){
 	return null; //nothing found
 }
 
-
 //
 function initPage() {
 
 		var fieldValues = [];
-
-
 
 		//toremove
 		var dt = findDetailTypeByType("file"); //top.HEURIST.detailTypes.typedefs[221]['commonFields']; //associated file
@@ -174,6 +171,29 @@ function initPage() {
 
 }
 
+// returns
+function isChanged(){
+  if(_fileuploaded){
+  		return true;
+  }else{
+  		var src = document.getElementById("cbSource").value;
+
+  		var mt = document.getElementById("cbType").value;
+  		if(mt=="unknown") mt = "";
+
+  		if(src!=='heurist' && !Hul.isempty(curr_link)){
+			 return (Hul.isempty(_filedata) ||
+			 _filedata.remoteURL != curr_link ||
+			 _filedata.remoteSource != src ||
+			 _filedata.mediaType != mt);
+			 //(Hul.isnullcurr_ext && _filedata.ext != curr_ext));
+		}else{
+			return (_filedata.mediaType != mt);
+		}
+  }
+  return false;
+}
+
 function onApply(){
 /*
 	if(Hul.isempty(_filedata)){ //new
@@ -197,6 +217,9 @@ function onApply(){
 		_filedata.id = fileId;
 	}
 */
+
+	var wasChanged = isChanged();
+
 	if(_fileuploaded){
 		_filedata = fileUploadInput.getFileData();
 	}
@@ -217,9 +240,9 @@ function onApply(){
 	}
 
 	var res = top.YAHOO.lang.JSON.stringify(_filedata);
-	window.close( res );//curr_link, document.getElementById("cbSource").value, document.getElementById("cbType").value);
+	window.close( wasChanged, res );//curr_link, document.getElementById("cbSource").value, document.getElementById("cbType").value);
 }
 
 function onCancel(){
-	window.close(null);
+	window.close( isChanged(), null);
 }

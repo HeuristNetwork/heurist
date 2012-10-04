@@ -44,6 +44,12 @@
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
 <link rel=stylesheet href="../common/css/global.css" media="all">
 <link rel=stylesheet href="../common/css/search.css" media="all">
+
+<!-- multilevel menu -->
+<link rel="stylesheet" type="text/css" href="../external/js/sf/	superfish.css" media="screen">
+<script type="text/javascript" src="../external/js/sf/superfish.js"></script>
+<script type="text/javascript" src="../external/js/sf/supersubs.js"></script>
+
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 /* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
@@ -364,18 +370,52 @@
 				<div id="viewTriggers">
 					<div id="navButton" title="Hide Navigation Panel">Hide Navigation</div>
 					<div id="tabbar">
-						<ul id="tabs" class="horizontal not-query-collected">
-							<li><span>Search</span>
+						<ul class="sf-menu"> <!-- was  id="tabs"  horizontal not-query-collected -->
+							<li><div>Navigation</div>
+								<ul>
+									<li><a href="#">My Bookmarks</a>
+										<ul id="menuBookmarks">
+											<li><a href="#">Favourites</a></li>
+											<li><a href="#">Recent changes</a></li>
+											<li><a href="#">All by date</a></li>
+											<li><a href="#">Aggregations</a></li>
+											<li><a href="#">Search by tags</a></li>
+											<li><a href="#">Saved Searches</a>
+												<ul id="menuSavedSearchesBookmarks">
+												</ul>
+											</li>
+										</ul>
+									</li>
+									<li><a href="#">All Records</a>
+										<ul id="menuAllRecs">
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All by date</a></li>
+											<li><a href="#">Aggregations</a></li>
+											<li><a href="#">Saved Searches</a>
+												<ul id="menuSavedSearchesAllRecs">
+												</ul>
+											</li>
+										</ul>
+									</li>
+									<li><a href="#">Shared Searches</a>
+										<ul id="menuSavedSearchesShared">
+										</ul>
+									</li>
+									<li><a href="#">Collections</a></li>
+								</ul>
+							</li>
+							<li><div>Search</div>
 								<ul>
 									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
 									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
-									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="{top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;}">Save search as ...</a></li>
+									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"
+												onClick="{top.HEURIST.search.savedSearchEdit(0); return false;}">Save search as ...</a></li>
 
 									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
 									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
 								</ul>
 							</li>
-							<li><span>Edit</span>
+							<li><div>Edit</div>
 								<ul>
 									<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
@@ -388,7 +428,8 @@
 									<li><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
 								</ul>
 							</li>
-							<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
+							<!-- </span><span class="collected-shown" style="display:inline"> -->
+							<li><div id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</div>
 								<ul>
 									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
 									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
@@ -397,14 +438,14 @@
 									<li><a class=toolbar-large-icon-link-normal href=" " onClick="top.HEURIST.search.loadSearchLocation('?q=_COLLECTED_&amp;label=Collected');return false;" title="Show current set of records in collection" >Show</a></li>
 								</ul>
 							</li>
-							<li><span>Share</span>
+							<li><div>Share</div>
 								<ul>
 									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
 								</ul>
 							</li>
-							<li><span>Layout</span>
+							<li><div>Layout</div>
 								<ul>
 									<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
 									<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
@@ -416,6 +457,10 @@
 									also, provide this in the Advanced pulldown to render the current selection
 									-->
 									<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
+									<li><a href="#"> Saved Filters and layouts</a>
+										<ul id="menuSavedFiltersAndLayouts">
+										</ul>
+									</li>
 								</ul>
 							</li>
 						</ul>
@@ -468,6 +513,9 @@
 							<div id=workgroup-saved-searches-searches></div>
 						</div>
 					</div>
+
+
+
 					<div id=curated-collections>
  					<div><a href='?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;" target="_blank">Example collections</a></div>
 					<div id=collection-info></div>

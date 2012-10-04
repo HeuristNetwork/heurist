@@ -1,7 +1,7 @@
 <?php
 
 /**
- * It seems this is old way of upload file.
+ * It seems this is old way of upload file for isEarlyWebkit (ref in editRecord.js only)
  * It is utilized only for old version. (for early webkit)
  * See hapi/php/saveFile.php
  *

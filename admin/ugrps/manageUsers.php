@@ -173,7 +173,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 
 			<div id="dbOwnerInfo" style="display:none;float: right; width:40%"><i>User #2 - the first in this group - is the OWNER of this database (the only user who can register the database with the Heurist master index, who receives email to the owner and is permitted certain destructive actions)</i>
 			</div>
-			
+
             <p></p>
 
 			<div id="toolbar2" style="clear: both;text-align: left;">
@@ -215,7 +215,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
 					<?php } ?>
 					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px">
-						<input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" />
+						<div id="pnlAdd1" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" /></div>
 						<div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
 							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
 					</div>
@@ -251,7 +251,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
 					<?php } ?>
 					<div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">
-						<input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" />
+						<div id="pnlAdd2" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" /></div>
 						<div id="btnSelectAdd2"><input type="button" tabindex="11" value="Find and Add User"
 							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
 					</div>

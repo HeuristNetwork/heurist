@@ -98,7 +98,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 							var filter_disabled = ((filterByDisable && filterByDisable.checked)?1:0);
 
 							Dom.get("dbOwnerInfo").style.display = (filter_group==top.HEURIST.grpDbOwners)?"block":"none";
-							
+
 							var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
 							var callback = _updateUserList;
 							var params = "method=searchuser&db=" + _db +
@@ -125,6 +125,12 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 							Dom.get("pnlFilterByRole").style.display = nstyle2;
 							Dom.get("btnSelectAdd1").style.display	 = nstyle2;
 							Dom.get("btnSelectAdd2").style.display	 = nstyle2;
+
+							if(!top.HEURIST.is_admin()){
+								//hide create new user for non admin - IJ req 27-09-2012
+								Dom.get("pnlAdd1").style.display = "none";
+								Dom.get("pnlAdd2").style.display = "none";
+							}
 
 							if(_myDataTable) {
 									var col_1 = _myDataTable.getColumn("role");
@@ -910,7 +916,9 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 		if(userID>0) {
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
 		}
-		else {
+		else if(!top.HEURIST.is_admin()){
+			return; //IJ req 27-09-12 - only dbowner is able to create new users
+		}else {
 			//add new user to specified group
 			var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 			if(!Hul.isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {

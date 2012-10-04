@@ -410,7 +410,7 @@ function save_search() {
 //    define('T1000_DEBUG', 1);
 	mysql_connection_db_overwrite(DATABASE);
 	$wg = intval(@$_REQUEST['svs_UGrpID']);
-	$ss = $_REQUEST['svs_ID'];
+	$sID = $_REQUEST['svs_ID'];
 	$publish = $_REQUEST['publish'];
 	$label = @$_REQUEST['svs_Name'];
 
@@ -418,30 +418,30 @@ function save_search() {
 	$cmb = Array(
 		'svs_Name'     => $_REQUEST['svs_Name'],
 		'svs_Query'    => urldecode($_REQUEST['svs_Query']),
-		'svs_UGrpID'   => $wg?$wg:get_user_id(),
+		'svs_UGrpID'   => ($wg>0?$wg:get_user_id()),
 		'svs_Added'     => $now,
 		'svs_Modified'  => $now);
 
-	// overwrites saved search with same name
+	/* overwrites saved search with same name
 	$res = mysql_query('select svs_ID, svs_UGrpID from usrSavedSearches where svs_Name="'.slash($_REQUEST['svs_Name']).'"'.
 						' and svs_UGrpID='.$cmb['svs_UGrpID']);
-	$row = mysql_fetch_row($res);
+	$row = mysql_fetch_row($res);*/
 
-	if ($row || $ss) {
-		if ($row ) {
+	if ($sID) {
+		/*$row ||  if ($row ) {
 		 	$ss = intval($row[0]);
-		}
-		mysql__update('usrSavedSearches', 'svs_ID='.$ss, $cmb);
+		}*/
+		mysql__update('usrSavedSearches', 'svs_ID='.$sID, $cmb);
 	} else {
 		mysql__insert('usrSavedSearches', $cmb);
-		$ss = mysql_insert_id();
+		$sID = mysql_insert_id();
 	}
 
 	if (mysql_error()) {
 
 		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	} else {
-		$onload = "location.replace('actionHandler.php?db=".HEURIST_DBNAME."'); top.HEURIST.search.insertSavedSearch('".slash($_REQUEST['svs_Name'])."', '".slash($_REQUEST['svs_Query'])."', ".$wg.", ".$ss.");";
+		$onload = "location.replace('actionHandler.php?db=".HEURIST_DBNAME."'); top.HEURIST.search.insertSavedSearch('".slash($_REQUEST['svs_Name'])."', '".slash($_REQUEST['svs_Query'])."', ".$wg.", ".$sID.");";
 		/*if ($publish) {
 			$onload .= " top.location.href = top.location.href + (top.location.href.match(/\?/) ? '&' : '?') + 'pub=1&label=".$label."&sid=".$ss."'+(top.location.href.match(/db=/) ? '' : '&db=".HEURIST_DBNAME."');";
 		}else{

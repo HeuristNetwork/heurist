@@ -244,15 +244,25 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 	top.HEURIST.util.popupURL(window, url, {
 		height: 480,
 		width: 640,
-		callback: function(fileJSON) {
+		"no-close": true,
+		callback: function(isChanged, fileJSON) {
 
-			if(!top.HEURIST.util.isnull(fileJSON)){
-				//var filedata = (typeof fileJSON == 'String')?top.HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
-				var filedata = top.HEURIST.util.expandJsonStructure(fileJSON);
-				if(filedata){
-					element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);
+			if(isChanged){
+
+				if(top.HEURIST.util.isnull(fileJSON)){
+					var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
+					return r;
+				}else{
+					//var filedata = (typeof fileJSON == 'String')?top.HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
+					var filedata = top.HEURIST.util.expandJsonStructure(fileJSON);
+					if(filedata){
+						element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);
+					}
 				}
+
 			}
+			return true; //prevent close
+
 
 /*
 			//it returns url - link to external or heurist file
