@@ -108,9 +108,14 @@ if(array_key_exists('mode',$_REQUEST)){
 
 		<!-- sidebar -->
 		<div id="sidebar">
+             <div style="padding:20px;">
+         <a  href="../index.php?db=<?=HEURIST_DBNAME?>" 
+         title="Click the logo at top left of any Heurist page to return to the main search page"><b>USER VIEW &nbsp;></b></a>
+            </div>
+  
 			<div id="sidebar-inner">
 				<!-- <div id="accordion">-->
-
+ 
 				<h3><a href="#">DATABASE: </a>
 				<span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
 				<div class="adminSection">

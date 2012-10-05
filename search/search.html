@@ -172,7 +172,7 @@
 
 <div id="masthead">
 			<a id=home-link><div id=logo title="Click the database logo at top left of any Heurist page to return to your Favourites"></div></a>
-
+  
 			<div id=version></div>
 			<!-- database name -->
 			<a id=dbSearch-link><div id=dbname ></div></a>
@@ -186,7 +186,7 @@
 					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu">
-							<li><a href="../admin/profile/editPreferences.html" class="small" name="auto-popup"
+							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
 
 							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup"
@@ -207,12 +207,13 @@
 							<li><a href="../admin/profile/manageReminders.php" name="auto-popup"
 								title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 
+                            <li><a href="../export/backup/exportMyDataPopup.html" class="small" name="auto-popup"
+                                title="Retreives and writes all the data in the database that you own or have bookmarked, including attached files, to a ZIP file">Export my data</a></li>
+
 							<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;"
 								title="Click to send a bug report">Report bug</a></li>
 						</ul>
 					</li>
-
-					<li class="logged-in-only"><a href="#" id="link_admin" title="Administer database structure"><b>DB Admin</b></a></li>
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
@@ -226,7 +227,7 @@
 								title="Find bookmarked records which you have not tagged">
 								Bookmarked records with&nbsp;no&nbsp;tags</a></li>
 							<!-- --- sep --- -->
-							<div class="separator">HARVEST</div>
+							<div class="seperator">HARVEST</div>
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
 								title="Import web links from a browser bookmarks file or an html web page file">
 								Hyperlinks (webpage/bookmarks)</a></li>
@@ -284,11 +285,14 @@
 						</ul>
 					</li>
 
+                    <!-- We need a better way of placing a link to the Project home page and to Help- probably a small logo
 					<li> <a href="../help/webhelp" target=_blank title="Online help for Heurist"><b>Help</b></a> </li>
-					<li> <a href="../index.html" target=_blank title="The Heurist project plus comprehensive detailed help"><b>Project</b></a> </li>
+                    <li> <a href="../index.html" target=_blank title="The Heurist project plus comprehensive detailed help"><b>Project</b></a> </li>
+                    -->
 					<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
 
-						<script>
+					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there --> 
+                        <script>
 							var bookmarkletname = top.HEURIST.VERSION;
 							var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
 							+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
@@ -304,19 +308,23 @@
 							+ "})();\"><b>>> "+database+" </b></a>";
 							document.write(html);
 						</script>
+
 					</li>
 					<li>
     					<a href="#" id="rss_feed_link" title="Data feed, drag to bookmarks or a feed reader" target="_blank">
 								<img src="../common/images/logo_rss_feed.png"/></a>
 					</li>
-				</ul>
+                </ul>
 			</div>
+
 
 			<!-- search and menu -->
 			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
-				<form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
+                <div class="logged-in-only" align="left" style="padding:10px;display:inline-block;" ><a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;></b></a></div>
+    			<form id="formSearch" style="padding-left:120px;float:left;" onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
-<div style="position:relative">					<div class="searchInput" id="searchInput"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
+            <div style="position:relative">					
+            <div class="searchInput" id="searchInput"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
 						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
@@ -483,17 +491,18 @@
 <div id="sidebar">
 
 			<div id=left-panel-content class="panel-main-content">
-				<div id=saved>
+                <div id=saved>
 					<div id=my-records-saved-searches class=hide>
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
-							<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
+							<div class=saved-search-subsubheading id="divFavLink"><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
                             <div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
-                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
+                            <div class=saved-search-subsubheading id="divAggLink1"><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
                             <div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
-							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
-							<div class=saved-search-subsubheading>Saved searches</div>
+							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#"><img src='../common/images/external_link_16x16.gif' width=12px; height=12px;>&nbsp;My Blog</a></div>
+							<!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+                            <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=my-records-saved-searches-searches></div>
 						</div>
 					</div>
@@ -502,22 +511,27 @@
 						<div class=content>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
-                            <div class=saved-search-subsubheading><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
-                            <div class=saved-search-subsubheading>Saved searches</div>
+                            <div class=saved-search-subsubheading id="divAggLink2"><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
+                            <!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+                            <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=all-records-saved-searches-searches></div>
 						</div>
 					</div>
-					<div id=workgroup-saved-searches class=hide>
+                                         
+					<div id=workgroup-saved-searches class=hide style="display: none;">
 						<div class=search-type title="Saved searches which are shared with the members of the workgroups to which you belong" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">Workgroups</div>
 						<div class=content>
-							<div id=workgroup-saved-searches-searches></div>
 						</div>
 					</div>
 
-
+                    <div class=content>
+                        <div id=workgroup-saved-searches-searches></div>
+                    </div>
 
 					<div id=curated-collections>
- 					<div><a href='?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;" target="_blank">Example collections</a></div>
+ 					<!-- Removed ian  27/9/12: No good on local database, needs to go to HeuristScholar.org, but this requires login. So better to reference examples in help file 
+                    <div><a href='?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;" target="_blank">Example collections</a></div>
+                    -->
 					<div id=collection-info></div>
 					</div>
 				</div>

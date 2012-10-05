@@ -2461,11 +2461,12 @@ top.HEURIST.search = {
                 // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
                 // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(w);return false;}'>Aggregations</a></div>";
 
-				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + _db +"'>" /* +top.HEURIST.workgroups[w].name */ +" Blog</a></div>";
+				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") +"'>" /* +top.HEURIST.workgroups[w].name */ +"<img src='../common/images/external_link_16x16.gif' width=12px; height=12px;> Blog</a></div>";
 
 				var searches = top.HEURIST.user.workgroupSavedSearches[w];
 				if (searches  &&  searches.length) {
-					innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
+					// Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+                    // innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
 					for (var j = 0; j < searches.length; ++j) {
 						innerHTML += printSavedSearch(searches[j]);
 						innerHTML_inmenu += printSavedSearchAsMenuItem(searches[j]);
@@ -3918,7 +3919,7 @@ top.HEURIST.search = {
 		document.getElementById("legend-box-list").innerHTML = iHTML;
 
 		iHTML = "<hr><ul>";
-		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow.gif'><span>Resource is in </span><span style=\"font-weight: bold;\">my records</span></li>";
+		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-red.gif'><span>Resource is in </span><span style=\"font-weight: bold;\">my records</span></li>";
 		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-green-7.gif'><span>Belongs to workgroup 7<br></span><span style=\"margin-left: 25px;\">- read-only to others</span></li>";
 		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-red-3.gif'><span>Belongs to workgroup 3<br></span><span style=\"margin-left: 25px;\">- hidden to others</span></li>";
 		iHTML += "</ul>";
@@ -4137,6 +4138,23 @@ top.HEURIST.search = {
 		inputInstance.value = top.HEURIST.database.name;
 //		searchForm.appendChild(inputInstance);
 		document.getElementsByTagName("body")[0].removeChild(document.getElementById("loadingCover"))
+        
+        var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
+        if(isShowAggregations=="false"){
+            document.getElementById("divAggLink1").style.display ="none";
+            document.getElementById("divAggLink2").style.display ="none";
+        }
+
+        var isShowMyBookmarks = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
+        if(isShowMyBookmarks=="false"){
+            document.getElementById("my-records-saved-searches").style.display ="none";
+        }
+
+        var isShowFavouritesSearch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
+        if(isShowFavouritesSearch=="false"){
+            document.getElementById("divFavLink").style.display ="none";
+        }
+        
 	}
 };
 
@@ -4245,7 +4263,10 @@ function removeCustomAlert() {
 			navButton.style.width = leftPanelWidth-1;
 			tabBar.style.right = Math.max(21,rightPanelWidth-1)
 			tabBar.style.left = Math.max(21,leftPanelWidth);
-			searchTable.style.paddingLeft = (leftPanelWidth+5);
+			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
+            var leftPos = (leftPanelWidth+5);
+            document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?120:leftPos;
+            
 			if (centerPanelWidth <= 180) {
 				layout.getUnitByPosition('right').set("width",maxRightWidth);
 				top.HEURIST.util.setDisplayPreference("searchWidth", maxRightWidth);
@@ -4272,7 +4293,9 @@ function removeCustomAlert() {
 		if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 					layout.getUnitByPosition('left').collapse();
 					navButton.className +=" closed";
-					searchTable.style.paddingLeft = "5px";
+					//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
+                    document.getElementById("formSearch").style.paddingLeft = "120px";
+
 					navButton.style.width = "20px";
 					navButton.title = "Show Navigation Panel";
 					//tabBar.style.width = layout.getSizes().center.w-29;
@@ -4294,14 +4317,19 @@ function removeCustomAlert() {
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","closed");
 				navButton.className +=" closed";
 				navButton.style.width = "20px";
-				searchTable.style.paddingLeft = "5px";
+				//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
+                document.getElementById("formSearch").style.paddingLeft = "120px";
+
 				navButton.title = "Show Navigation Panel";
 				layout.resize();
 			}else{
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				navButton.className = navButton.className.replace(" closed", "");
-				searchTable.style.paddingLeft = top.HEURIST.util.getDisplayPreference("leftWidth");
+				//IJ place DBadmin here!!! searchTable.style.paddingLeft = top.HEURIST.util.getDisplayPreference("leftWidth");
+                var leftPos = top.HEURIST.util.getDisplayPreference("leftWidth");
+                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?120:leftPos;
+
 				navButton.title = "Hide Navigation Panel";
 				layout.resize();
 			}
