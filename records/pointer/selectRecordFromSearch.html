@@ -114,14 +114,31 @@
 				document.title = "Find " + recTypeName + " records";
 			}
 
+			/*
+			*
+			*/
 			function addRecord(){
+
+				var recTypeId = document.getElementById('t').value;
+
+				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(recTypeId);
+
+				var forrectype = top.HEURIST.util.getRectypeIconAndName(window.HEURIST.parameters["target_recordtype"]);
+				if(forrectype){
+					title = title + " for " + forrectype;
+				}
+
+
+				var _db = (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
+								(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
+									(top.HEURIST.database.name? top.HEURIST.database.name:'')));
+
 				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
-				document.getElementById('t').value+
+				recTypeId+
 				'&title='+document.getElementById('q').value+	// q is a string to match against rectitle so let's start with this in the title field
-				'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
-				(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
-				(top.HEURIST.database.name? top.HEURIST.database.name:''))),
-				{ callback: function(title, bd, bibID) {
+				'&db='+ _db,
+				{	title: title,
+					callback: function(title, bd, bibID) {
 						if (bibID) {
 							window.close(bibID, title);
 						} else {
@@ -160,6 +177,7 @@
 					title.appendChild(document.createTextNode(record[1]));
 					title.title = record[1];
 					title.className = "title";
+
 
 					//select record and close
 					top.HEURIST.registerEvent(recordDiv, "click", function(bibID, bibTitle, recType) {

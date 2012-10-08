@@ -2123,7 +2123,7 @@ div.searchInput > .simplesearch.collapsed {
 	display: block;
 	position: absolute;
 	right: 5px;
-	top: 0;
+	top: 4px;
 	border-left: 1px solid #CCC;
 }
 .simple-search-row {
@@ -2407,7 +2407,7 @@ div.recorddiv:hover > #recordID {
 	text-align:right;
 	width: 120px;
 	overflow: hidden;
-	margin-left:313px
+	margin-left:5px;
 }
 #searchButtons, #searchInput, #add-record {
 	position:absolute;

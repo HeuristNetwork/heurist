@@ -47,7 +47,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 	$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$_REQUEST['ulf_ID'].".png";
 	/* if we here we create file. See uploadFile, there we check the existence of file
 	if($standard_thumb && file_exists($thumbnail_file)){
-		header("Location: ".HEURIST_THUNB_URL_BASE."ulf_".$_REQUEST['ulf_ID'].".png");
+		header("Location: ".HEURIST_THUMB_URL_BASE."ulf_".$_REQUEST['ulf_ID'].".png");
 		return;
 	}*/
 

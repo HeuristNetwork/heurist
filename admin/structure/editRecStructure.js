@@ -151,8 +151,8 @@ function EditRecStructure() {
 
 			var myColumnDefs = [
 			{
-				key:'rst_NonOwnerVisibility', 
-				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>", 
+				key:'rst_NonOwnerVisibility',
+				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>",
 				sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
@@ -473,6 +473,7 @@ function EditRecStructure() {
 						_myDataTable.deleteRow(oRecord.getId(), -1);
 
 						top.HEURIST.rectypes = context.rectypes;
+						top.HEURIST.detailTypes = context.detailTypes;
 					}
 					_isServerOperationInProgress = false;
 				}
@@ -1200,6 +1201,7 @@ function EditRecStructure() {
 			var updateResult = function(context){
 				if(context){
 					top.HEURIST.rectypes = context.rectypes;
+					top.HEURIST.detailTypes = context.detailTypes;
 				}else{
 					alert("Unknown error on server side");
 				}
@@ -1382,7 +1384,7 @@ function EditRecStructure() {
 				this.srcIndex = null;
 				return;
 			}
-			
+
 			var rec = _myDataTable.getRecord(this.srcEl);
 			if(Hul.isnull(rec)) { return; }
 			this.srcData = rec.getData();
@@ -1398,9 +1400,9 @@ function EditRecStructure() {
 		},
 
 		endDrag: function(x,y) {
-			
+
 			if(this.srcIndex==null) return;
-			
+
 			var position,
 			srcEl = this.srcEl;
 
@@ -1429,7 +1431,7 @@ function EditRecStructure() {
 			destEl = Dom.get(id);
 
 			if(srcIndex==null) return;
-			
+
 			if(destEl){
 
 				var destIndex = destEl.sectionRowIndex,

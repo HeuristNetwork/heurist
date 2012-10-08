@@ -62,6 +62,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	width:200px;
 	color:#6A7C99;
 	font-weight: bold;
+	font-size: 1.4em;
+
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 #record-title {
 	bottom:0;

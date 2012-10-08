@@ -69,7 +69,7 @@ function DetailTypeManager() {
 				ind++;
 			}
 		} //for
-		
+
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		tabView.addTab(new YAHOO.widget.Tab({
@@ -91,7 +91,7 @@ function DetailTypeManager() {
 		}));
 
 		tabView.appendTo("modelTabs");
-		
+
 		//new YAHOO.util.DDTarget("ul"+i);
 
 /*		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
@@ -124,7 +124,7 @@ function DetailTypeManager() {
 	}//end _init
 
 	/*
-	*/	
+	*/
 	function dragDropEnable() {
 
 		var i;
@@ -136,9 +136,9 @@ function DetailTypeManager() {
 			}
 			myDTDrags[id] = new YAHOO.example.DDList(id, _updateOrderAfterDrag);
 		} // for
-		
+
 	}
-	
+
 
 	//
 	// adds new tab and into 3 spec arrays
@@ -171,7 +171,7 @@ function DetailTypeManager() {
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 		});
-		
+
 		tabView.addTab(newTab, ind);
 
 		// style="float:right; text-align:right"
@@ -453,8 +453,21 @@ function DetailTypeManager() {
 
 				}else if(elLink.hash === "#delete"){
 
-					var iUsage = oRecord.getData('usage');
-					if(iUsage<1){
+					//find all records that reference this type
+					var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+					var sUsage = "";
+					if(!Hul.isnull(aUsage)){
+						var k;
+						for (k in aUsage) {
+							sUsage = sUsage + "<li><a href='#' onclick='{top.frames[\"adminFrame\"].detailTypeManager.editRecStructure("+aUsage[k]+");}'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
+						}
+					}
+
+					/*OLD WAY var iUsage = oRecord.getData('usage');
+					if(iUsage<1){*/
+					if(Hul.isempty(sUsage))
+					{
+
 						if(_needToSaveFirst()) {
 							return;
 						}
@@ -484,21 +497,22 @@ function DetailTypeManager() {
 						}
 					}else{
 
-						//find all records that reference this type
-						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-						var sUsage = "";
-						if(!Hul.isnull(aUsage)){
-							var k;
-							for (k in aUsage) {
-								sUsage = sUsage + top.HEURIST.rectypes.names[aUsage[k]]+"\n";
-							}
-						}
-						if(sUsage!=""){
+						sUsage = "<h3 style='padding-top:0px;margin:0px;'>Warning!</h3><div>This field type is used in the following record types:<ul>"+sUsage+
+							"</ul>You will need to delete these record types before you can delete this field.</div>";
+
+						var ele = document.getElementById("delete-message-text");
+						ele.innerHTML = sUsage;
+						ele = document.getElementById("delete-message");
+
+						top.HEURIST.util.popupTinyElement(top, ele,
+								{ "no-titlebar": false, "no-close": false, width: 320, height:220 });
+
+						/*if(sUsage!=""){
 							alert("This field type is used in the following record types:\n"+sUsage+
 							"\nYou will need to delete these record types before you can delete this field.");
 						}else{
 							alert("This field type cannot be deleted as it is in use by a record type");
-						}
+						}*/
 					}
 				}
 
@@ -650,6 +664,33 @@ function DetailTypeManager() {
 		}
 	}//initTabContent =============================================== END DATATABLE INIT
 
+
+	//
+	// edit strcuture (to remove unwanted fieldtypes)
+	//
+	function _editRecStructure(rty_ID) {
+
+		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+		//this.location.replace(URL);
+
+		var dim = Hul.innerDimensions(this.window);
+
+		Hul.popupURL(top, URL, {
+			"close-on-blur": false,
+			"no-resize": false,
+			height: dim.h*0.9,
+			width: 860,
+			callback: function(context) {
+				if(Hul.isnull(context)) {
+					// Canceled
+				} else {
+					// alert("Structure is saved");
+				}
+			}
+		});
+
+		return false;
+	}
 
 	/**
 	* Show popup div with information about field types in use for given record type
@@ -1041,7 +1082,7 @@ function DetailTypeManager() {
               }
         }
     }
-    
+
     /**
 	* Updates group order after drag and drop
 	*/
@@ -1051,10 +1092,10 @@ function DetailTypeManager() {
 				colNames:['dtg_Order'],
 				defs: {}
 		}};
-		
-		var i, 
+
+		var i,
 			parentNode = document.getElementsByClassName("yui-nav")[0];
-			
+
  		for (var i = 0; i < parentNode.childNodes.length; i++) {
       		var child = parentNode.childNodes[i];
       		var id = child.id;
@@ -1064,8 +1105,8 @@ function DetailTypeManager() {
 				grp.order = i;
 				orec.dettypegroups.defs[id] = [i];
 			}
-    	}		
-		
+    	}
+
 		var str = YAHOO.lang.JSON.stringify(orec);
 
 		if(!Hul.isnull(str)) {
@@ -1075,7 +1116,7 @@ function DetailTypeManager() {
 
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		}
-		
+
 	}
 
     //
@@ -1102,13 +1143,13 @@ function DetailTypeManager() {
 				//
 				function _updateAfterDeleteGroup(context) {
 					if(Hul.isnull(context.error)){
-						
+
 						var id = _groups[ind].value;
 						if (myDTDrags[id]) {
 							myDTDrags[id].unreg();
 							delete myDTDrags[id];
 						}
-						
+
 						//remove tab from tab view and select 0 index
 						_groups.splice(ind, 1);
 						arrTables.splice(ind, 1);
@@ -1178,6 +1219,12 @@ function DetailTypeManager() {
 		hasChanges: function(){ return  (_updatesCnt>0); },
 		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
 		hideInfo: function() {  currentTipId = ''; _rolloverInfo.hide();},
+
+		editRecStructure: function(rty_ID) {
+			 _editRecStructure(rty_ID);
+			 return false;
+		},
+
 		getClass: function () {
 				return _className;
 		},

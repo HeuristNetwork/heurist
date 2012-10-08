@@ -182,16 +182,14 @@ div.yui-dt-liner span.count {
 	display: inline-block;
 	height: 16px;
 	color: white;
-	background-color: RGB(185,185,185);
 	border-radius: 8px;
 	line-height: 17px;
 	font-weight: bolder;
 	text-align: center;
-	min-width: 17px;
-	padding:0 3px;
-}
-div.yui-dt-liner span.count:hover {
-	padding:0 20px 0 3px;
+	min-width: 25px;
+
+	background-color: RGB(185,185,185);
+	padding: 0px 15px 0 3px;
 	background-image:url(../images/edit-pencil.png);
 	background-repeat:no-repeat;
 	background-position:right;

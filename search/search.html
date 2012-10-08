@@ -172,7 +172,7 @@
 
 <div id="masthead">
 			<a id=home-link><div id=logo title="Click the database logo at top left of any Heurist page to return to your Favourites"></div></a>
-  
+
 			<div id=version></div>
 			<!-- database name -->
 			<a id=dbSearch-link><div id=dbname ></div></a>
@@ -252,7 +252,7 @@
 								title="Update or add fields in existing records from delimited text" name="auto-popup">
 								Update records (CSV)</a></li>
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
-								title="Import KML files (geographic data in WKT can be imported from CSV & tab delimtied files)">
+								title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimtied files)">
 								Geographic import (KML)</a></li>
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
 								title="Import bibliographic exchange format files">
@@ -291,7 +291,7 @@
                     -->
 					<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
 
-					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there --> 
+					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there -->
                         <script>
 							var bookmarkletname = top.HEURIST.VERSION;
 							var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
@@ -320,11 +320,13 @@
 
 			<!-- search and menu -->
 			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
-                <div class="logged-in-only" align="left" style="padding:10px;display:inline-block;" ><a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;></b></a></div>
-    			<form id="formSearch" style="padding-left:120px;float:left;" onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
+                <div class="logged-in-only" align="left" style="padding:10px;display:inline-block;" >
+                	<a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;&gt;</b></a>
+                </div>
+    			<form id="formSearch" style="display:inline-block;" onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
-            <div style="position:relative">					
-            <div class="searchInput" id="searchInput"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
+<div style="position:relative">
+	<div class="searchInput" id="searchInput2"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
 						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
@@ -500,8 +502,8 @@
                             <div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
                             <div class=saved-search-subsubheading id="divAggLink1"><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
                             <div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
-							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#"><img src='../common/images/external_link_16x16.gif' width=12px; height=12px;>&nbsp;My Blog</a></div>
-							<!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#"><img src='../common/images/external_link_16x16.gif' width="12" height="12">&nbsp;My Blog</a></div>
+							<!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=my-records-saved-searches-searches></div>
 						</div>
@@ -512,12 +514,12 @@
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
                             <div class=saved-search-subsubheading id="divAggLink2"><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
-                            <!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+                            <!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=all-records-saved-searches-searches></div>
 						</div>
 					</div>
-                                         
+
 					<div id=workgroup-saved-searches class=hide style="display: none;">
 						<div class=search-type title="Saved searches which are shared with the members of the workgroups to which you belong" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">Workgroups</div>
 						<div class=content>
@@ -529,7 +531,7 @@
                     </div>
 
 					<div id=curated-collections>
- 					<!-- Removed ian  27/9/12: No good on local database, needs to go to HeuristScholar.org, but this requires login. So better to reference examples in help file 
+ 					<!-- Removed ian  27/9/12: No good on local database, needs to go to HeuristScholar.org, but this requires login. So better to reference examples in help file
                     <div><a href='?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;" target="_blank">Example collections</a></div>
                     -->
 					<div id=collection-info></div>
@@ -568,7 +570,7 @@
 							<br>
 							<p>We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite approachable and very, very helpful.</p>
 							<br>
-							<p>You may also wish to visit some <a target="_blank" href="http://heuristscholar.org/?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions">Example collections on the HeuristScholar.org server</a> </p>
+							<p>You may also wish to visit some <a target="_blank" href="http://heuristscholar.org/?ver=1&amp;w=all&amp;q=tag:%22Heurist+System\Featured+Subsets%22&amp;label=Featured+subsets&amp;description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions">Example collections on the HeuristScholar.org server</a> </p>
 							<br>
 							<p>Heurist is a stable system running several major web sites (see Example Collections once you've logged in). It is also a system in rapid development, so if you have suggestions we want to hear them. You may be surprised how quickly your suggestions pop up in the software. </p>
 							<br>

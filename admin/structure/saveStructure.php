@@ -265,6 +265,7 @@
 					array_push($rv['result'], updateRecStructure($dtFieldNames, $rtyID, $rt));
 				}
 				$rv['rectypes'] = getAllRectypeStructures();
+				$rv['detailTypes'] = getAllDetailTypeStructures();
 				break;
 
 			case 'deleteRTS':
@@ -279,6 +280,7 @@
 					$rv = deleteRecStructure($rtyID, $dtyID);
 					if (!array_key_exists('error', $rv)) {
 						$rv['rectypes'] = getAllRectypeStructures();
+						$rv['detailTypes'] = getAllDetailTypeStructures();
 					}
 				}
 				break;
@@ -635,6 +637,12 @@
 				if (mysql_error()) {
 					$ret['error'] = "SQL error deleting record type $rtyID from defRecTypes table: ".mysql_error();
 				} else {
+
+					$icon_filename = HEURIST_ICON_DIR.$rtyID.".png";
+					if(file_exists($icon_filename)){
+						unlink($icon_filename);
+					}
+
 					$ret['result'] = $rtyID;
 				}
 			}

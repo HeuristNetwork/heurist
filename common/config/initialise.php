@@ -173,7 +173,7 @@
 		}
 
 		define('HEURIST_UPLOAD_DIR', $upload); // upload must be a full path
-		} else {
+	} else {
 		define('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName.'/');
 	}
 
@@ -189,7 +189,7 @@
 		define('HEURIST_ICON_URL_BASE', "/HEURIST_FILESTORE/".$dbName."/".HEURIST_ICON_DIRNAME); // uploaded-heurist-files to 14 Nov 2011
 	}
 
-	define('HEURIST_THUNB_URL_BASE', 'http://'.HEURIST_HOST_NAME."/HEURIST_FILESTORE/".$dbName."/filethumbs/");
+	define('HEURIST_THUMB_URL_BASE', 'http://'.HEURIST_HOST_NAME."/HEURIST_FILESTORE/".$dbName."/filethumbs/");
 	define('HEURIST_THUMB_DIR', HEURIST_UPLOAD_DIR."filethumbs/");
 
 	//temporary - to remove

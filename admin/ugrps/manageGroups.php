@@ -66,7 +66,6 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 <?php if ($isPopup) { ?>
 			#page-inner {top:0 !important}
 <?php } ?>
-			div.yui-dt-liner span.count {padding:0 3px; line-height:16px}
 		</style>
 	</head>
 

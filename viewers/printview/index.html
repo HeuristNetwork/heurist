@@ -650,6 +650,8 @@
 							" Word:" + annoStruct.addr.startWord + "\n" +
 							"End  Elem:" + annoStruct.addr.endElems.join(":") +
 							" Word:" + annoStruct.addr.endWord)+ " ?"; */
+				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(top.HEURIST.magicNumbers['RT_ANNOTATION']);
+
 				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 							top.HEURIST.magicNumbers['RT_ANNOTATION']+
 										'&addr='+annoStruct.addr.startElems.join(",") +":"+
@@ -663,7 +665,8 @@
 										'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
 														(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
 															(top.HEURIST.database.name? top.HEURIST.database.name:''))),
-									{ callback: function(title, bd, bibID) {
+									{	title: title,
+										callback: function(title, bd, bibID) {
 													if (bibID) {
 														//save scroll location
 														//reload Document

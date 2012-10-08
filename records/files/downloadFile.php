@@ -147,13 +147,69 @@ if(isset($filename) && file_exists($filename)){ //local resources
 
 }else if ($filedata['URL']!=null && (strpos($filedata['URL'],'downloadFile.php')<1)  ){  //Remote resources - just redirect
 
+	if($filedata['ext']=="kml"){
+		// use proxy
+		downloadViaProxy(HEURIST_UPLOAD_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
+
+	}else{
 /*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
 		/* Redirect browser */
 		//header('HTTP/1.1 201 Created', true, 201);
 		//if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
 		header('Location: '.$filedata['URL']);
-		/* Make sure that code below does not get executed when we redirect. */
-		exit;
+	}
+	/* Make sure that code below does not get executed when we redirect. */
+	exit;
+}
+
+/**
+*
+*
+* @param mixed $filedata
+*/
+function downloadViaProxy($filename, $mimeType, $url){
+
+	if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
+
+      $ch = curl_init();
+      //curl_setopt($ch, CURLOPT_FILE, $fp);
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_HEADER, 0);
+
+	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
+	  curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+	  curl_setopt($ch, CURLOPT_TIMEOUT, 5);	// timeout after 5 seconds
+
+      curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT'] );
+
+      curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);//"web-cache.usyd.edu.au:8080");
+
+      $raw = curl_exec($ch);
+
+	  $error = curl_error($ch);
+	  if ($error) {
+			$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+			error_log("$error ($code)" . " url = ". $url);
+			curl_close($ch);
+			return;
+	  }else{
+			curl_close($ch);
+
+			if(file_exists($filename)){
+				unlink($filename);
+			}
+			$fp = fopen($filename, "w");
+			//$fp = fopen($filename, "x");
+			fwrite($fp, $raw);
+			//fflush($fp);    // need to insert this line for proper output when tile is first requestet
+			fclose($fp);
+
+	  }
+    }
+
+	if(file_exists($filename)){
+		downloadFile($mimeType, $filename);
+	}
 }
 
 /**

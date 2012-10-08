@@ -412,13 +412,16 @@ function ImageAnnotation(self, _recID) {
 					window.open(top.HEURIST.basePath+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
 			}else if(_recordID>0){
 
+				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(rectype);
+
 				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 							rectype+ //top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']+
 										'&addr='+marker[0]+":"+marker[1]+":"+marker[2]+":"+marker[3]+
 										'&trgRecID='+_recordID +
 										(recImageTitle ? '&trgRecTitle='+ recImageTitle: "") +
 										'&db='+ _db,
-									{ callback: function(title, bd, bibID) {
+									{	title: title,
+										callback: function(title, bd, bibID) {
 													if (bibID) {
 														//save scroll location
 														//reload Document

@@ -190,7 +190,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			titleSpan = top.document.createElement("span");
 			titleSpan.id = "titleSpan";
 			titleSpan.innerHTML = (options["title"]);
-			titleSpan.title = (options["title"]);
+			//titleSpan.title = (options["title"]);
 			titleDiv.appendChild(titleSpan);
 		}
 
@@ -296,7 +296,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					try {
 						titleSpan = top.document.createElement("span");
 						titleSpan.id = "titleSpan";
-						titleSpan.innerHTML = newIframe.contentWindow.document.title;
+						titleSpan.innerHTML = (options["title"])?options["title"]:newIframe.contentWindow.document.title;
 						titleSpan.title = newIframe.contentWindow.document.title;
 						titleDiv.replaceChild(titleSpan, titleDiv.lastChild);
 	//					titleDiv.replaceChild(top.document.createTextNode(newIframe.contentWindow.document.title), titleDiv.lastChild);
@@ -1690,9 +1690,18 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		} else {
 			return results[1];
 		}
+	},
+
+	getRectypeIconAndName: function(recTypeID)
+	{
+		if(recTypeID && top.HEURIST.rectypes && top.HEURIST.rectypes.names[recTypeID]){
+			return "<img src=\"../../common/images/16x16.gif\" "+
+					"style=\"background-image: url('"+top.HEURIST.iconBaseURL+recTypeID+".png');\" /> "+top.HEURIST.rectypes.names[recTypeID];
+		}else{
+			return "";
+		}
+
 	}
-
-
 
 };
 

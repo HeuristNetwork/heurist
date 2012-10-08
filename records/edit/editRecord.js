@@ -243,9 +243,10 @@ top.HEURIST.edit = {
 //		document.getElementById('rectype-val').innerHTML = '';
 //		document.getElementById('rectype-val').appendChild(document.createTextNode(top.HEURIST.record.rectype));
 		if (document) {
+			/* ARTEM 2012-10-08
 			if (document.getElementById('rectype-img')) {
 				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
-			}
+			}*/
 			if (document.getElementById('title-val')) {
 				document.getElementById('title-val').innerHTML = top.HEURIST.edit.record.title;
 				// document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.edit.record.title));
@@ -326,12 +327,15 @@ top.HEURIST.edit = {
 		if (message === null  ||  confirm(message)) {
 			for (var eachName in modules)
 				top.HEURIST.edit.unchanged(eachName);
-			top.location.reload();
+
+			if(message != null && !top.HEURIST.edit.isAdditionOfNewRecord()){
+					top.location.reload();
+			}
 		} else {
 			// Nothing
 		}
 
-		top.HEURIST.edit.doSaveAction();
+		top.HEURIST.edit.doSaveAction(true);
 	},
 
 	savePopup: null,
@@ -405,12 +409,23 @@ top.HEURIST.edit = {
 			document.getElementById("popup-saved").style.display = "block";
 			setTimeout(function() {
 				document.getElementById("popup-saved").style.display = "none";
-				top.HEURIST.edit.doSaveAction();
+				top.HEURIST.edit.doSaveAction(false);
 			}, 1000);
 		}, 0);
 	},
-	doSaveAction: function() {
-		if (document.getElementById("act-close").checked) {
+
+	isAdditionOfNewRecord: function(){
+		if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']){
+			return (top.HEURIST.parameters['fromadd']=="new_bib");
+		}else{
+			return false
+		}
+	},
+	doSaveAction: function(isCancel) {
+
+		var forceClose = (isCancel && top.HEURIST.edit.isAdditionOfNewRecord());
+
+		if (forceClose || document.getElementById("act-close").checked) {
 			// try to close this window, and restore focus to the window that opened it
 			try {
 				var topOpener = top.opener;
@@ -560,7 +575,7 @@ top.HEURIST.edit = {
 			fdt.push("");
 		}
 		fdt[fieldIndexMap['dty_ID']] = dtyID ? dtyID : 0;
-		fdt[fieldIndexMap['dty_Name']] = dtyName?dtyName : " fake DetailType";
+		fdt[fieldIndexMap['dty_Name']] = dtyName?dtyName : "";
 		fdt[fieldIndexMap['dty_Type']] = dtyType ? dtyType : "freetext";
 		fdt[fieldIndexMap['dty_HelpText']] = dtyHelpText ? dtyHelpText :"";
 		fdt[fieldIndexMap['dty_Status']] = "open";
@@ -1764,7 +1779,8 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 
 	if (! searchValue) searchValue = element.textElt.value;
 	var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
-				(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
+				(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"") +
+				"&target_recordtype="+top.HEURIST.edit.record.rectypeID;
 	if (element.input.constrainrectype)
 		url += "&t="+element.input.constrainrectype;
 	top.HEURIST.util.popupURL(window, url, {
@@ -1902,7 +1918,10 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
-	var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
+	var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']];
+	if(!sDisTerms){
+		sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
+	}
 
 	var	allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
 	if(allTerms==null){
@@ -2492,7 +2511,8 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 							parent.HEURIST.edit.record &&
 							parent.HEURIST.edit.record.bibID == this.recID &&
 							parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
-	this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification,true);
+	this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,
+									this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification, true, false);
 
 };
 

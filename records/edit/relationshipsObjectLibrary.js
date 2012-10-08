@@ -193,6 +193,7 @@ if (!top.Relationship) {
 		td = tr.appendChild(this.document.createElement("div"));
 		td.className = "input2-header-cell";
 		td.style.paddingLeft = '10px';
+		td.style.paddingRight = '10px';
 		td.appendChild(this.document.createTextNode("This record"));
 
 
@@ -200,6 +201,7 @@ if (!top.Relationship) {
 
 		//td = tr.appendChild(this.document.createElement("div"));
 		//td.style.display = "inline-block";
+/* OLD WAY
 		this.relTypeSelect = top.HEURIST.util.createTermSelect(this.manager.relTerms,
 																	(this.manager.termHeadersList || ""),
 																	top.HEURIST.terms.termsByDomainLookup.relation,
@@ -209,6 +211,7 @@ if (!top.Relationship) {
 		this.relTypeSelect.id = "relationship-type";
 		this.relTypeSelect.name = "relationship-type";
 		td.appendChild(this.relTypeSelect);
+*/
 	/*	var firstOption = this.relTypeSelect.options[0] = new Option("(select relationship type)", "");
 		firstOption.disabled = true;
 		firstOption.selected = true;
@@ -246,35 +249,38 @@ if (!top.Relationship) {
 			//13,"rst_TermIDTreeNonSelectableIDs" 14,"rst_CalcFunctionID" 15,"rst_Status"
 			//16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
 			//18,"dty_FieldSetRectypeID"
-/*
-		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']?
-																'' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:''),
-															"This record",
-															"relationtype",
+
+		var fakeBDT = top.HEURIST.edit.createFakeDetailType((this.manager.dtID?this.manager.dtID:
+															(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']?
+																'' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'')),
 															"",
-															null, //dtyTermIDs
-															"[]", //dtyTermNonSelectableIDs
-															0);
+															"relationtype",
+															"",  //help text
+															YAHOO.lang.JSON.stringify(this.manager.relTerms),   //terms ids
+															(this.manager.termHeadersList || ""), //non selectable
+															0); // allowed record pointers
 		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+		fakeBDR[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType']] = 'required';
+		if(this.relationshipRec && this.relationshipRec.relTermID){ //default value for aggregation isPartOf
+			fakeBDR[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DefaultValue']] = this.relationshipRec.relTermID;
+		}
 
-		//fakeBDR[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
-
-		this.relationType = new top.HEURIST.edit.inputs.BibDetailDropdownInput(this.manager.recID, fakeBDT, fakeBDR, [this.relationshipRec.relTermID], tr, "input2");
+		this.relationType = new top.HEURIST.edit.inputs.BibDetailDropdownInput(this.manager.recID, fakeBDT, fakeBDR,
+										[], td, "input2");
 		this.relTypeSelect = this.relationType.inputs[0];
 		this.relTypeSelect.id = "relationship-type";
 		this.relTypeSelect.name = "relationship-type";
-*/
 
-		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']?
+		fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']?
 																'' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:''),
 															"Related record",
 															"resource",
 															"",
 															null,
-															null,  //alowed pointers
+															null,
 															this.rectypes? this.rectypes : (rectypes ? rectypes : 0));
 
-		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+		fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
 
 		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], tr, "input2"); //was tbody);
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
@@ -508,7 +514,7 @@ if (!top.Relationship) {
 	* @param changeNotification a callback for notifying the owner that the relations in this manager have changed
 	* @param supressHeaders a boolean indicating where to show headers for teh different types of relations.
 	*/
-	top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders) {
+	top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders, needAddToAggregation) {
 		if (!parentElement || !record || isNaN(record.recID)) return null;
 
 		this.supressHeaders = supressHeaders;
@@ -530,7 +536,7 @@ if (!top.Relationship) {
 		//get all constraints for src rectype or global constraints
 		this.constraints = (top.HEURIST.rectypes.constraints[this.rectypeID] || top.HEURIST.rectypes.constraints['any']);
 
-		if (dtIDRelmarker>0) { // we are dealing with a relmark so get definitions and process them for UI
+		if (Number(dtIDRelmarker)>0) { // we are dealing with a relmark so get definitions and process them for UI
 
 			var rfr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker];
 			// get any trgPointer restrictions
@@ -546,13 +552,13 @@ if (!top.Relationship) {
 
 			// get HeaderTerms list - the values from the structure can be null
 			var rfrHdr = rfr[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']];
+			if(!rfrHdr){
+				rfrHdr = rfr[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
+			}
+
 			var headerList = {};
 			if (rfrHdr) {
-				rfrHdr = rfrHdr.split(",");
-				for (var i = 0; i < rfrHdr.length; i++) {
-					headerList[rfrHdr[i]] = rfrHdr[i];
-				}
-				this.termHeadersList = headerList;
+				this.termHeadersList = rfrHdr;//top.HEURIST.util.expandJsonStructure(rfrHdr);
 			}
 
 			// get relationship terms from relmarker definition
@@ -567,7 +573,7 @@ if (!top.Relationship) {
 				var sDisTerms = rfr[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
 
 				this.relTerms = top.HEURIST.util.expandJsonStructure(sAllTerms);
-				this.termHeadersList = top.HEURIST.util.expandJsonStructure(sDisTerms);
+				this.termHeadersList = sDisTerms;
 
 			}else{
 
@@ -759,6 +765,8 @@ if (!top.Relationship) {
 
 		//IJ asked to add special link for aggregation relationship ----------------
 
+		if(needAddToAggregation){
+
 		addOtherTd = document.createElement("div");
 		addOtherTd.style.paddingTop = "5px";
 		addOtherTd.style.display = "inline-block";
@@ -810,7 +818,7 @@ if (!top.Relationship) {
 
 		this.parentElement.appendChild(addOtherTd);
 
-
+		}//needAddToAggregation
 
 
 

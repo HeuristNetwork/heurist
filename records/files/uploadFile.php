@@ -645,7 +645,7 @@
 
 			$thumbnail_file = "ulf_".$res["nonce"].".png";
 			if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-				$res["thumbURL"] = HEURIST_THUNB_URL_BASE.$thumbnail_file;
+				$res["thumbURL"] = HEURIST_THUMB_URL_BASE.$thumbnail_file;
 			}else{
 				$res["thumbURL"] =
 				HEURIST_URL_BASE."common/php/resizeImage.php?".
@@ -754,7 +754,7 @@
 
 				$thumbnail_file = "ulf_".$file['ulf_ObfuscatedFileID'].".png";
 				if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-					$thumb_url = HEURIST_THUNB_URL_BASE.$thumbnail_file;
+					$thumb_url = HEURIST_THUMB_URL_BASE.$thumbnail_file;
 				}else{
 					$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
 				}

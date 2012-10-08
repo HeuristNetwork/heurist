@@ -72,7 +72,8 @@ if(array_key_exists('mode',$_REQUEST)){
 				$( "#sidebar-inner" ).accordion({
 					collapsible: true,
 					active:false,
-					icons: icons
+					icons: icons,
+					autoHeight: false
 				});
 			});
 

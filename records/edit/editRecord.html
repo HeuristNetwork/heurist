@@ -175,7 +175,7 @@
 
 				//<span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] + ": </span>"
 				var rectypeName = document.getElementById("rectype-name");
-				rectypeName.innerHTML = top.HEURIST.edit.record.rectype;
+				rectypeName.innerHTML = top.HEURIST.util.getRectypeIconAndName(top.HEURIST.edit.record.rectypeID);//top.HEURIST.edit.record.rectype;
 
 				var rectypeValSelect = document.createElement("select");
 				rectypeValSelect.id = "rectype-select";
@@ -320,9 +320,9 @@
 	<!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
 
 	<div id=rectype-edit class=edit >
-		<div style="display:inline-block;padding-right:2px;"><img id=rectype-img src="../../common/images/16x16.gif"></div>
-		<div style="display:inline-block;"><label id="rectype-name"></label><img src="../../common/images/edit-pencil.png"
-			onclick="{event.target.parentNode.style.display='none';document.getElementById('rectype-select').style.display='inline-block';}"></div>
+		<!-- div style="display:inline-block;padding-right:2px;"><img id=rectype-img src="../../common/images/16x16.gif"></div -->
+		<div id="rectype-name" style="display:inline-block;"></div><img src="../../common/images/edit-pencil.png"
+			onclick="{document.getElementById('rectype-name').style.display='none';document.getElementById('rectype-select').style.display='inline-block';}">
 	</div>
 	<div id=record-title>
 		<div id=title-val></div>
@@ -354,7 +354,7 @@
 	<div class="sidebar-link disabled" style="background-image: url(../../common/images/user_personal.gif);" id=personal-link
 		disabledTitle="Click here to add a bookmark for this record"
 		disabledDescription="Click here to bookmark this record"><img src="../../common/images/16x16.gif">
-		<b>Personal information</b>
+		<b>Private information</b>
 		<span id=desc>Tags, passwords, ratings, notifications</span>
 	</div>
 
@@ -436,16 +436,19 @@
 
 			switch (top.HEURIST.displayPreferences["action-on-save"]) {
 				case "close":
-				if (canCloseWindow) {
-					document.getElementById("act-close").checked = true;
-					break;
-				}
+					if (canCloseWindow) {
+						document.getElementById("act-close").checked = true;
+						break;
+					}
 				default:
-				if (top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']) {
-					document.getElementById("act-close").checked = true;
-				} else {
+					/*  IJ request 2012-10-08
+					if (top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']) {
+						document.getElementById("act-close").checked = true;
+					} else {
+						document.getElementById("act-stay").checked = true;
+					}
+					*/
 					document.getElementById("act-stay").checked = true;
-				}
 			}
 
 			var helpLink = top.document.getElementById("help-link");

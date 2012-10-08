@@ -62,7 +62,7 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script> -->
 
-		
+
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
@@ -79,12 +79,14 @@ if (!is_admin()) {
 		<script src="manageDetailTypes.js"></script>
 
 
+	<div id="delete-message" style="display:none;">
+		<div id="delete-message-text" style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;"></div>
+	</div>
 
-	<div>
 	<div class="banner"><h2>Field Types</h2></div>
 	<div id="page-inner">
 
-<!--
+<!--   height:auto; max-height:500px;
 				<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
 						style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>
 						&nbsp;&nbsp;&nbsp;

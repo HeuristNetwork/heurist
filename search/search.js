@@ -2465,7 +2465,7 @@ top.HEURIST.search = {
 
 				var searches = top.HEURIST.user.workgroupSavedSearches[w];
 				if (searches  &&  searches.length) {
-					// Remove heading and indent for cleaner, neater navigation - Ian 3/10/12 
+					// Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                     // innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
 					for (var j = 0; j < searches.length; ++j) {
 						innerHTML += printSavedSearch(searches[j]);
@@ -4138,7 +4138,7 @@ top.HEURIST.search = {
 		inputInstance.value = top.HEURIST.database.name;
 //		searchForm.appendChild(inputInstance);
 		document.getElementsByTagName("body")[0].removeChild(document.getElementById("loadingCover"))
-        
+
         var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
         if(isShowAggregations=="false"){
             document.getElementById("divAggLink1").style.display ="none";
@@ -4154,7 +4154,7 @@ top.HEURIST.search = {
         if(isShowFavouritesSearch=="false"){
             document.getElementById("divFavLink").style.display ="none";
         }
-        
+
 	}
 };
 
@@ -4265,8 +4265,8 @@ function removeCustomAlert() {
 			tabBar.style.left = Math.max(21,leftPanelWidth);
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
             var leftPos = (leftPanelWidth+5);
-            document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?120:leftPos;
-            
+            document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+
 			if (centerPanelWidth <= 180) {
 				layout.getUnitByPosition('right').set("width",maxRightWidth);
 				top.HEURIST.util.setDisplayPreference("searchWidth", maxRightWidth);
@@ -4294,7 +4294,7 @@ function removeCustomAlert() {
 					layout.getUnitByPosition('left').collapse();
 					navButton.className +=" closed";
 					//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
-                    document.getElementById("formSearch").style.paddingLeft = "120px";
+                    document.getElementById("formSearch").style.paddingLeft = "5px";
 
 					navButton.style.width = "20px";
 					navButton.title = "Show Navigation Panel";
@@ -4318,7 +4318,7 @@ function removeCustomAlert() {
 				navButton.className +=" closed";
 				navButton.style.width = "20px";
 				//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
-                document.getElementById("formSearch").style.paddingLeft = "120px";
+                document.getElementById("formSearch").style.paddingLeft = "5px";
 
 				navButton.title = "Show Navigation Panel";
 				layout.resize();
@@ -4328,7 +4328,7 @@ function removeCustomAlert() {
 				navButton.className = navButton.className.replace(" closed", "");
 				//IJ place DBadmin here!!! searchTable.style.paddingLeft = top.HEURIST.util.getDisplayPreference("leftWidth");
                 var leftPos = top.HEURIST.util.getDisplayPreference("leftWidth");
-                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?120:leftPos;
+                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
 
 				navButton.title = "Hide Navigation Panel";
 				layout.resize();

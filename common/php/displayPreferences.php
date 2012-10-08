@@ -72,7 +72,7 @@ $prefs = array(
 	"defaultPrintView" => "default",
 	"showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
-	"savedSearchDest" => "",  //last saved search destination
+	"savedSearchDest" => "",  //last saved search destination (workgroup id)
 	"defaultSearch" => "tag:Favourites",
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
@@ -83,7 +83,9 @@ $prefs = array(
 	"relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
 	"tagging-popup" => "true",
 	"mapbackground" => "",
-	"report-output-limit" => "1000"   //report output limit for smarty and map
+	"report-output-limit" => "1000",   //report output limit for smarty and map
+
+	"record-edit-date" => "",
 );
 
 foreach (get_group_ids() as $gid) {

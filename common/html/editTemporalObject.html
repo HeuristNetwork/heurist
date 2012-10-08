@@ -362,10 +362,18 @@
 				{
 					if (date) {
 						document.getElementById("simpleDate").value = date;
+						if(top.HEURIST.util.setDisplayPreference){
+								top.HEURIST.util.setDisplayPreference("record-edit-date", date);
+						}
 						calendarViewer.close();
 					}
 				}
-				calendarViewer.showAt([buttonElt.offsetLeft-120, buttonElt.offsetTop], "", callback);
+				var date = document.getElementById("simpleDate").value;
+				if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
+					date = top.HEURIST.util.getDisplayPreference("record-edit-date");
+				}
+
+				calendarViewer.showAt([buttonElt.offsetLeft-120, buttonElt.offsetTop], date, callback);
 			}
 
 			function setPDBtoTPQ () {

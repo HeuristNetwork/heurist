@@ -156,11 +156,13 @@ function detectSourceAndType(link, extension){
 		}else if(extension==="mp3" || extension==="wav"){
 			type = 'audio';
 		}else if(extension==="html" || extension==="htm" || extension==="txt"){
-			type = 'text/htnl';
+			type = 'text/html';
 		}else if(extension==="pdf" || extension==="doc" || extension==="xls"){
 			type = 'document';
 		}else if(extension==="swf"){
 			type = 'flash';
+		}else if(extension==="kml"){
+			type = 'xml';
 		}else{ //undefined extension
 
 			//extension is not recognized
