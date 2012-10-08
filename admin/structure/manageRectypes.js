@@ -89,7 +89,7 @@ function RectypeManager() {
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
-			label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>edit</label>",
+			label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>+/-</label>",
 			content:
 			('<div id="formGroupEditor">'+
 				'<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
@@ -342,20 +342,14 @@ function RectypeManager() {
 			});
 
 			var myColumnDefs = [
-			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right',
+			{ key: "id", label: "Code", sortable:true, minWidth:20, maxAutoWidth:20, width:20, className:'right',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var rectypeID = oRecord.getData('id');
 	                elLiner.innerHTML = '<a href="#search">'+ rectypeID + '</a>';
+			        },
 			},
-			},
-			{ key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
-			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
-				var rectypeID = oRecord.getData('id');
-                elLiner.innerHTML = '<img src="../../common/images/info.png"'+
-                'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
-			},
-			{ key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: "usage", label: "Usage", hidden:true },
+			// 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
+            { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
 			{ key: "icon", label: "Icon", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
@@ -395,15 +389,22 @@ function RectypeManager() {
 					elLiner.innerHTML = '<span title="'+tit+'">'+str+'</span>';
 			}},
 
-			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
-				formatter: YAHOO.widget.DataTable.formatDropdown,
-				dropdownOptions: _groups },
 			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
 			{ key: "struc", label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
 			},
+            { key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+            { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+                var rectypeID = oRecord.getData('id');
+                elLiner.innerHTML = '<img src="../../common/images/info.png"'+
+                'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
+            },
+            { key: "usage", label: "Usage", hidden:true },
+            { key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
+                formatter: YAHOO.widget.DataTable.formatDropdown,
+                dropdownOptions: _groups },
 			/*{ key: null, label: "Del", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
 			},*/

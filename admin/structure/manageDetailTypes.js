@@ -74,7 +74,7 @@ function DetailTypeManager() {
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
-			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>edit</label>",
+			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>+/-</label>",
 			content:
 			('<div id="formGroupEditor">'+
 				'<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
@@ -351,17 +351,11 @@ function DetailTypeManager() {
 			YAHOO.widget.DataTable.Formatter.formatterDelete = formatterDelete;*/
 
 			var myColumnDefs = [
-			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
-			{ key: "conceptid", label: "Concept", sortable:true, width:40, className:'right',resizeable:false },
-			{ key: "usage", label: "Info", sortable:true, className:'count',
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-				var str = oRecord.getData("usage");
-				var id = oRecord.getData("id");
-				elLiner.innerHTML = '<span class="count" onmouseover="detailTypeManager.showInfo('+id+', event)" onmouseout="detailTypeManager.hideInfo()"/>'+str+'</span>';
-				}},
-			{ key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+			{ key: "id", label: "Code", sortable:true, width:20, className:'right',resizeable:false },
+            // 8/10/12 - removed Ian to make space for more important fields, these should be shown as rollovers
+            { key: "conceptid", label: "Concept", sortable:true, width:35, className:'right',resizeable:false, hidden:true },
 			{ key: "order", hidden:true },
-			{ key: "name", label: "Name", sortable:true, className:'bold_column', width:160, minWidth:160,
+			{ key: "name", label: "Name", sortable:true, className:'bold_column', width:120, minWidth:120,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("name");
 					var tit = "";
@@ -383,23 +377,31 @@ function DetailTypeManager() {
 					}*/
 					elLiner.innerHTML = '<div title="'+tit+'">'+str+'</div>';
 			}},
-			{ key: "type", label: "Data Type", sortable:true,
+			{ key: "type", label: "Data Type", width:90, sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("type");
 					elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
 				}
 			},
 			{ key: "description",   hidden:true},
-			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
-				formatter: YAHOO.widget.DataTable.formatDropdown,
-				dropdownOptions:_groups},
-			{ key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+            { key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
+            { key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+            { key: "usage", label: "Used in ...", sortable:true, className:'count',
+                formatter: function(elLiner, oRecord, oColumn, oData) {
+                var str = oRecord.getData("usage");
+                var id = oRecord.getData("id");
+                elLiner.innerHTML = '<span class="count" onmouseover="detailTypeManager.showInfo('+id+', event)" onmouseout="detailTypeManager.hideInfo()"/>'+str+'</span>';
+                }},
+            { key: "grp_id", label: "Show in group ...", sortable:false, width:90, className:'center',
+                formatter: YAHOO.widget.DataTable.formatDropdown,
+                dropdownOptions:_groups},
+
 			/*{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },*/
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
-			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
+			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:20, maxAutoWidth:40, width:25,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("status");
 					if (str === "reserved") {

@@ -1233,24 +1233,24 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
 											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())),
 						'lookups' => array(
-						"enum" => "Enumerated (terms)",
-						"float" => "Numeric (integer/decimal)",
+						"enum" => "Terms list",
+						"float" => "Numeric",
 						"date" => "Date / temporal",
-						"file" => "File - local or uploaded",
-						"geo" => "Geospatial object",
+						"file" => "File",
+						"geo" => "Geospatial",
 						"freetext" => "Text (single line)",
 						"blocktext" => "Memo (multi-line)",
 						"resource" => "Record pointer",
 						"relmarker" => "Relationship marker",
-						"separator" => "Separator (no data)",
-						"calculated" => "Calculated value (not yet impl.)",
+						"separator" => "Heading (no data)",
+						"calculated" => "Calculated (not yet impl.)",
 						// Note=> the following types are no longer deinable but may be required for backward compatibility
-						"relationtype" => "Relationship type (terms)",
+						"relationtype" => "Relationship type",
 						//"fieldsetmarker" => "Field set marker",
 						"integer" => "Numeric - integer",
 						"year" => "Year (no mm-dd)",
 						//"urlinclude" => "File/URL of include content",
-						"boolean" => "Boolean (true/false)") );
+						"boolean" => "Boolean (T/F)") );
 
 
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());

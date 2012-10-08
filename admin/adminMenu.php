@@ -98,7 +98,7 @@ if(array_key_exists('mode',$_REQUEST)){
 		<div id=version></div>
 		<!-- database name -->
 		<a id="dbSearch-link" href="../index.php?db=<?=HEURIST_DBNAME?>">
-			<div id="dbname" ><?=HEURIST_DBNAME?> <span>Database Administration</span></div>
+			<div id="dbname" ><?=HEURIST_DBNAME?> <span>Designer View</span></div>
 		</a>
 		<div id="quicklinks" style="top:10px;right:15px">
 			<ul id=quicklink-cell>
@@ -116,9 +116,26 @@ if(array_key_exists('mode',$_REQUEST)){
   
 			<div id="sidebar-inner">
 				<!-- <div id="accordion">-->
- 
+
+                <h3><a href="#">ESSENTIALS: </a>
+                <span class="description">The main functions needed to create and design a database</span></h3>
+                <div class="adminSection">
+                    <ul>
+                        <li><a href="#" onClick="loadContent('setup/createNewDB.php')"
+                            type="Create a new database with essential structure elements">New database</a></li>
+                        <li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
+                        <li><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
+                        <li><a href="#"
+                            onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
+                            title="Assign users to workgroups and set their roles">Manage workgroups</a></li>
+                        <li class="seperator"></li>
+        </ul>
+                </div>
+
 				<h3><a href="#">DATABASE: </a>
-				<span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
+				<span class="description">Find, copy, delete and set properties of the database</span></h3>
 				<div class="adminSection">
 					<ul>
 
@@ -151,7 +168,7 @@ if (is_admin()) {
 				</div>
 
 				<h3><a href="#">STRUCTURE: </a>
-				<span class="description">Management of the database model which defines the types of data which can be recorded and the layout of data entry</span></h3>
+				<span class="description">Design data types and data entry rules for the database</span></h3>
 				<div class="adminSection">
 					<ul>
 						<li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
@@ -177,14 +194,12 @@ if (is_admin()) {
 				</div>
 
 
-				<h3><a href="#">ACCESS: </a><span class="description">Management of users and groups, the assignment of users to group and the assignment of group tags</span></h3>
+				<h3><a href="#">ACCESS: </a><span class="description">Manage database users and workgroup membership</span></h3>
 				<div class="adminSection">
 					<ul>
-						<!-- 17/10/11 - Artem has moved addition of users to the workgroups page -->
-						<!-- TO DO: Take this menu entry out so that navigation is via user groups -->
                         <li><a href="#"
                             onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
-                            title="Assign users to usergroups and set their roles">Manage workgroups</a></li>
+                            title="Assign users to workgroups and set their roles">Manage workgroups</a></li>
                         <li><a href="#"
                             onClick="loadContent('ugrps/editGroupTags.php?db=<?=HEURIST_DBNAME?>')" title="Add and remove workgroup tags">Workgroup tags</a></li>
                         <li><a href="#"
@@ -198,7 +213,7 @@ if (is_admin()) {
 				</div>
 
 
-				<h3><a href="#">UTILITIES: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
+				<h3><a href="#">UTILITIES: </a><span class="description">Verify and fix database integrity, specialised tools</span></h3>
 				<div class="adminSection">
 					<ul>
                         <li class="seperator"><a href="#"

@@ -29,7 +29,7 @@ require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 header("Content-type: text/javascript");
 
 
-/* an array of the properties that may be set, and default values */
+/* an array of the properties that may be set, and default values. */
 $prefs = array(
 	"help" => "show",
 	"advanced" => "hide",
@@ -72,16 +72,21 @@ $prefs = array(
 	"defaultPrintView" => "default",
 	"showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
+    // Properties which can be set in the My profile > Preferences dialogue
 	"savedSearchDest" => "",  //last saved search destination (workgroup id)
 	"defaultSearch" => "tag:Favourites",
+    
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
 	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
 	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
+    "showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
 	"autoSelectRelated" => "false", // autoSelect related records
 	"autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
 	"relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
-	"tagging-popup" => "true",
+	"tagging-popup" => "true", // popup a tagging dialogue if record saved without any tags -switch on/off in this popup or preferences
+    "showAggregations" => "false", // show link Aggregations under My Bookmarks and All records in teh search navigation menu
+    "showFavouritesSearch" => "false", // ditto for Favourites search
 	"mapbackground" => "",
 	"report-output-limit" => "1000",   //report output limit for smarty and map
 

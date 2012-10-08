@@ -55,12 +55,14 @@ function EditRecStructure() {
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
 		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" style="margin:0" value="Insert separator" onClick="onAddSeparator()" class="add"/>'+
-        '<input type="button" class="add" value="Insert existing field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" style="margin:0" value="Insert heading" onClick="onAddSeparator()" class="add"/>'+
+        '<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
-		'<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
+		// Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
+        // '<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-		'Use existing fields where possible</div>';
+		'Use existing fields where possible &nbsp;&nbsp;'+
+        '</div>';
 
 		Dom.get("recordTitle").innerHTML += hToolBar;
 	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign"><div id="tableContainer"></div></div>';
@@ -153,13 +155,13 @@ function EditRecStructure() {
 			{
 				key:'rst_NonOwnerVisibility',
 				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>",
-				sortable:false,
+				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
 				}
 			},
 			{
-				key:"rst_ID", label: "Code", sortable:false, className:"right"
+				key:"rst_ID", label: "Code", sortable:false, className:"center"
 			},
 			{
 				key:"expandColumn",
@@ -172,8 +174,8 @@ function EditRecStructure() {
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
-				key:"rst_DisplayName", label: "Field prompt/display name", width:120, sortable:false },
-			{ key: "dty_Type", label: "Data Type", sortable:false,
+				key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false },
+			{ key: "dty_Type", label: "Data Type", sortable:false, width:90,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("dty_Type");
 					elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
@@ -228,7 +230,7 @@ function EditRecStructure() {
 				}
 			},
             {
-                key:"dty_Name", label: "Based on template field", width:120, sortable:false
+                key:"dty_Name", label: "Based on template", width:100, sortable:false
             },
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center"
@@ -927,11 +929,11 @@ function EditRecStructure() {
 
 			var _detailType = new Array();
 
-			_detailType[fnames[fi.dty_Name]] = 'separator#'+k;
+			_detailType[fnames[fi.dty_Name]] = 'HEADING '+k;
 			_detailType[fnames[fi.dty_ExtendedDescription]] = '';
 			_detailType[fnames[fi.dty_Type]] = 'separator';
 			_detailType[fnames[fi.dty_OrderInGroup]] = 0;
-			_detailType[fnames[fi.dty_HelpText]] = 'Another separator field';
+			_detailType[fnames[fi.dty_HelpText]] = 'Headings serve to break the data entry form up into sections';
 			_detailType[fnames[fi.dty_ShowInLists]] = 1;
 			_detailType[fnames[fi.dty_Status]] = 'open';
 			_detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;

@@ -187,10 +187,14 @@
 		</div>
 		</div>
 		<div style="bottom:10px;left:10px; right:10px;text-align:left; position:absolute;">
-        	<span style="float:left">Click row to edit or Drag to change the order</span>
+        	<span style="float:left">
+            We recommend using an appropriate existing field (Insert Field button above) if one is already defined:
+             <input type="button" value="Define new field type" title="Create a completely new field type - it is preferable to use an exsiting type (choose with Insert Field button above) before creating a new field type." onClick="onDefineNewType()"/>
+             <br>Click row to edit field specifications. Drag arrows at left to change the order in the form.
+            </span>
+           
             <span style="float:right; text-align:right">
 			<!--<input type="button" value="Back to list of record types" onClick="{window.history.back();}"/>-->
-			<input type="button" value="New field type" onClick="onDefineNewType()"/>
             <!-- input type="button" value="Preview" onClick="editStructure.initPreview()"/ -->
             <input type="button" value="Done" onClick="window.close(null);"/>
             </span>
