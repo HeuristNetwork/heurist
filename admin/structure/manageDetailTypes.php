@@ -27,8 +27,6 @@ if (!is_admin()) {
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Heurist - Field Types</title>
 
-		<link rel=stylesheet href="../../common/css/global.css">
-
 		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
@@ -36,7 +34,6 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-		<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
 		<!-- DATATABLE DEFS -->
@@ -54,18 +51,13 @@ if (!is_admin()) {
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 		<!-- END PAGINATOR -->
 
-		<!-- OVERLAYS
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/button/button-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-		END OVERLAYS -->
-
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script> -->
 
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-    	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
 
 	</head>
 

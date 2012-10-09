@@ -343,4 +343,32 @@ function json_format($obj, $purdy=false) {
 	}
 }
 
+/**
+* returns list of databases as array
+*
+* @param mixed $with_prefix
+*/
+function mysql__getdatabases($with_prefix=false){
+
+    $query = "show databases";
+    $res = mysql_query($query);
+    $result = array();
+
+    while ($row = mysql_fetch_array($res)) {
+       	$test = strpos($row[0], HEURIST_DB_PREFIX);
+       	if (is_numeric($test) && ($test==0) ) {
+
+    			if($with_prefix){
+    				array_push($result, $row[0]);
+				}else{
+					// delete the prefix
+       				array_push($result, substr($row[0],strlen(HEURIST_DB_PREFIX)));
+				}
+		}
+    }
+
+    return $result;
+
+}
+
 ?>

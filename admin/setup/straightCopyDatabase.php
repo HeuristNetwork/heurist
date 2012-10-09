@@ -113,6 +113,12 @@
 			return false;
 		} // rejecting illegal characters in db name
 
+		$list = mysql__getdatabases();
+		if(in_array($targetdbname, $list)){
+			echo "<h3>Error: database '".$targetdbname."' already exists. Choose different name</h3>";
+			return false;
+		}
+
 		straightCopyDatabase($targetdbname);
 	}
 
@@ -180,12 +186,16 @@
 		print "<br>Copying upload files: $copy_file_directory";
 		exec("$copy_file_directory" . ' 2>&1', $output, $res1);
 		if ($res1 != 0 ) {
-			die ("<h2>Error</h2>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
-				"<p>Please copy the directory manually or ask you sysadmin to help you");
+			die ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
+				"<p>Please copy the directory manually or ask you sysadmin to help you</p>");
 		}
 
-		print "<br><p>Done. New database <b>$newname</b> created<br>";
-		print "<p>New upload directory ".HEURIST_UPLOAD_ROOT."$targetdbname";
+		echo "<h2>New database '$targetdbname' created successfully</h2>";
+
+		print "<p>New upload directory ".HEURIST_UPLOAD_ROOT."$targetdbname</p>";
+		print "<p>The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$targetdbname."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$targetdbname."</a>.</p>";
+		print "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$targetdbname."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
+
 		print "</body></html>";
 		exit;
 

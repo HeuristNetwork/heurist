@@ -284,7 +284,9 @@
 				var lastSearchString = top.HEURIST.util.getDisplayPreference("record-search-string");
 				var searchScope = top.HEURIST.util.getDisplayPreference("record-search-scope");
 				var lastSelected = top.HEURIST.util.getDisplayPreference("record-search-last");
-				var lastSearchType = top.HEURIST.util.getDisplayPreference("record-search-type");
+				var lastSearchType = window.HEURIST.parameters["deft"]
+											?window.HEURIST.parameters["deft"]
+											:top.HEURIST.util.getDisplayPreference("record-search-type");
 				var rectypeIDList = [];
 				//set focus
 				window.setTimeout(function() { document.forms[0].elements["q"].focus(); },100);

@@ -19,12 +19,14 @@
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 <link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/searchRSS.php?q=tag:Favourite+OR+tag:Favorite">
+
+<script src="../external/jquery/jquery-1.6.min.js"></script>
+
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
-<script src="../external/jquery/jquery-1.6.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
@@ -328,9 +330,9 @@
 <div style="position:relative">
 	<div class="searchInput" id="searchInput2"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
-						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
+						<div id="btnSimpleSearch" class="simplesearch" title="Click to show simple search builder panel"></div>
 
-						<div id="simple-search" class="collapsed">
+						<div id="simple-search" style="display: none;">
 							<div class="simple-search-row">
 								<label for="rectype-select">Record type:</label>
 								<select id="rectype-select" >
@@ -646,15 +648,15 @@
 			<div><b>Username / password reminder:</b></div>
 			<div id=reminder></div>
 		</div>
-		<div style="position: absolute; left: 50%; top: 145px;">
-			<div id=popup-notice style="display: none; position: relative; left: -100px; width: 200px; height: 50px; border: 2px solid gray;">
+
+		<div id=popup-notice style="display: none;	position: fixed; top: 50%; left: 50%;  margin-top: -25px;  margin-left: -100px; height: 50px; width: 200px;border: 2px solid gray; z-index: 101;">
 				<table border=0 cellspacing=0 cellpadding=0 style="background-color: light-blue; width: 100%; height: 100%;">
 					<tr>
 						<td style="vertical-align: middle; text-align: center;"><b id=popup-notice-content></b></td>
 					</tr>
 				</table>
-			</div>
-</div>
+		</div>
+
 </div>
 <script>
 /* lightweight page-specific autosizing */

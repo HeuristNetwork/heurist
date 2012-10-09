@@ -3409,7 +3409,11 @@ top.HEURIST.search = {
 			top.HEURIST.search.selectBookmarkMessage("to set ratings");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/setRatingsPopup.php" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+		var url = top.HEURIST.basePath+ "search/actions/setRatingsPopup.php" +
+									(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+
+		//top.HEURIST.util.showDialog(url, {modal:true});
+		top.HEURIST.util.popupURL(window, url, {'no-resize': true, 'close-on-blur': true});
 	},
 
 	setWorkgroupPopup: function() {
@@ -4058,6 +4062,26 @@ top.HEURIST.search = {
 				extraWidth:  1
 			 }).superfish();
 
+
+		//$("#simple-search").fadeOut();
+		//close simple search in outside click
+		$("#btnSimpleSearch").click(function(){
+				if($("#simple-search").is(':visible')){
+					$("#simple-search").fadeOut();
+				}else{
+					$("#simple-search").fadeIn();
+				}
+				$("#btnSimpleSearch").toggleClass("collapsed");
+				return false;
+		});
+		$("#simple-search").click(function(){ return false; });
+		// onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'
+		$(document).bind("click", function() {
+			if($("#simple-search").is(':visible')){
+				$("#simple-search").fadeOut();
+				$("#btnSimpleSearch").toggleClass("collapsed");
+			}
+		});
 	},
 
 	popupNotice: function(content, reload) {

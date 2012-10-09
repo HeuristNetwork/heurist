@@ -473,11 +473,8 @@
 		// gets to here if database not specified properly. This is an error if set up properly, but mot at first initialisaiton of the system
 		// Test for existence of databases, if none then Heurist has not been set up yet
 		// Placed here rather than up-front test to avoid having to test this in every script
-		$query = "show databases";
-		$res = mysql_query($query);
-		while ($row = mysql_fetch_array($res)) { // only show error message if there are databases
-			$test=strpos($row[0],$dbPrefix);
-			if (is_numeric($test) && ($test==0) ) { // there are databases
+		$list = mysql__getdatabases();
+		if(count($list)>0){
 				// echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
 				$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
 
@@ -495,8 +492,6 @@
 
 
 */
-				exit ();
-			}
 		}
 		exit(); // it will drop through to here without an error message if the system has not been set up yet
 	}

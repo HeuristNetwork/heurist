@@ -115,14 +115,10 @@
 				print "<input name='h2' value='".($is_h2?1:0)."' type='hidden'>";
 				// print "Enter source database name (prefix added automatically): <input type='text' name='sourcedbname' />";
 				print "Choose source database: <select id='db' name='sourcedbname'>";
-				$query = "show databases";
-				$res = mysql_query($query);
-				while ($row = mysql_fetch_array($res)) {
-					$test=strpos($row[0],$db_prefix);
-					if (is_numeric($test) && ($test==0) ) {
-						$name = substr($row[0],strlen($db_prefix));  // delete the prefix
+
+				$list = mysql__getdatabases();
+				foreach ($list as $name) {
 						print "<option value='$name'>$name</option>";
-					}
 				}
 				print "</select>";
 				if(!$is_h2){

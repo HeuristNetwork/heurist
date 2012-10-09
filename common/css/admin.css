@@ -178,7 +178,7 @@ td div.yui-dt-liner {
 th.yui-dt-asc div.yui-dt-liner, th.yui-dt-desc div.yui-dt-liner {
 	text-align:left;
 }
-div.yui-dt-liner span.count {
+div.yui-dt-liner span.count, span.count_edit {
 	display: inline-block;
 	height: 16px;
 	color: white;
@@ -187,13 +187,14 @@ div.yui-dt-liner span.count {
 	font-weight: bolder;
 	text-align: center;
 	min-width: 25px;
-
 	background-color: RGB(185,185,185);
+}
+span.count_edit {
 	padding: 0px 15px 0 3px;
 	background-image:url(../images/edit-pencil.png);
 	background-repeat:no-repeat;
 	background-position:right;
-	}
+}
 
 html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.yui-content div div#tabContainer1.yui-dt table thead tr.yui-dt-first th#yui-dt1-th-active.center div#yui-dt1-th-active-liner.yui-dt-liner span.yui-dt-label {
 	text-align:center

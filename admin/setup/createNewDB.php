@@ -80,6 +80,13 @@
 	/*****DEBUG****///error_log(" post dbname: $_POST['dbname'] ");  //debug
 
 	if(isset($_POST['dbname'])) {
+
+		/*verify that database name is unique
+		$list = mysql__getdatabases();
+		$dbname = $_POST['uname']."_".$_POST['dbname'];
+		if(array_key_exists($dbname, $list)){
+			echo "<h3>Database '".$dbname."' already exists. Choose different name</h3>";
+		}else{*/
 ?>
 		<div id="loading">
 					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
@@ -87,9 +94,10 @@
 		</div>
 		<script type="text/javascript">showProgress();</script>
 <?php
-		ob_flush();flush();
-		//sleep(5);
-		makeDatabase(); // this does all the work
+			ob_flush();flush();
+			//sleep(5);
+			makeDatabase(); // this does all the work
+
 	}else{
 ?>
 	   	<div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
@@ -179,8 +187,14 @@
 			if ($res1 != 0 ) {
 				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
 				echo("\n\n");
-				$sqlErrorCode = split(" ", $output);
-				if(count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007")
+
+				if(is_array($output)){
+					$isExists = (strpos($output[0],"1007")>0);
+				}else{
+					$sqlErrorCode = split(" ", $output);
+					$isExists = (count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007");
+				}
+				if($isExists)
 					echo "<strong>A database with that name already exists.</strong>";
 				return false;
 			}
@@ -261,13 +275,13 @@
 			$warnings = 0;
 
 			// Create a default upload directory for uploaded files eg multimedia, images etc.
-			$uploadPath =HEURIST_UPLOAD_ROOT.$newDBName;
+			$uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
 			$cmdline = "mkdir -p -m a=rwx ".$uploadPath;
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.
 				// Old uplaod directories hanging around could cause problems if upload file IDs are duplicated,
 				// so should probably NOT allow their re-use
-				echo ("<h2>Warning:</h2> Unable to create $uploadPath directory for database $newDBName<br>&nbsp;<br>");
+				echo ("<h3>Warning:</h3> Unable to create $uploadPath directory for database $newDBName<br>&nbsp;<br>");
 				echo ("This may be because the directory already exists or the parent folder is not writable<br>");
 				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
 				echo($output2);
@@ -278,73 +292,38 @@
 			$cmdline = "cp -R rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
+				echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
 				echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
 				echo($output2);
 				$warnings = 1;
-				}
+			}
 			// copy smarty template directory from default set in the program code
 			$cmdline = "cp -R smarty-templates $uploadPath";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create/copy smarty-templates folder to $uploadPath<br>");
+				echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
 				echo($output2);
 				$warnings = 1;
-				}
+			}
 			// copy xsl template directories from default set in the program code
 			$cmdline = "cp -R xsl-templates $uploadPath";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create/copy xsl-templates folder to $uploadPath<br>");
-				echo($output2);
-				$warnings = 1;
-				}
-
-			// create a settings space for files such as import mappings
-			$cmdline = "mkdir $uploadPath/settings";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create settings directory $uploadPath"."settings (used to store import mappings and the like)<br>");
-				echo($output2);
-				$warnings = 1;
-				}
-
-			// create a scratch space for teemporary files
-			$cmdline = "mkdir $uploadPath/scratch";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create scratch directory $uploadPath"."scratch (used to store temporary files)<br>");
-				echo($output2);
-				$warnings = 1;
-				}
-
-			// create an output directory for HML files
-			$cmdline = "mkdir $uploadPath/hml-output";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."hml-output (used to write published records as hml files)<br>");
-				echo($output2);
-				$warnings = 1;
-				}
-
-			// create an output directory for HTML files
-			$cmdline = "mkdir $uploadPath/html-output";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) {
-				echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."html-output (used to write published records as generic html files)<br>");
+				echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
 				echo($output2);
 				$warnings = 1;
 			}
 
-			//for generated reports
-			$folder = $uploadPath."/generated-reports";
+			$warnings =+ createFolder("settings","used to store import mappings and the like");
+			$warnings =+ createFolder("scratch","used to store temporary files");
+			$warnings =+ createFolder("hml-output","used to write published records as hml files");
+			$warnings =+ createFolder("html-output","used to write published records as generic html files");
+			$warnings =+ createFolder("generated-reports","used to write generated reports");
 
-			if(!file_exists($folder)){
-				if (!mkdir($folder, 0777, true)) {
-					echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."generated-reports (used to write generated reports)<br>");
-					echo($output2);
-					$warnings = 1;
-				}
+			if ($warnings > 0) {
+				echo "<h2>Please take note of warnings above</h2>";
+				echo "You must create the folders indicated or uploads, icons and templates will not work<br>";
+				echo "If upload folder is created but icons and template forlders are not, look at file permissions on new folder creation";
 			}
 
             // Prepare to write to the newly created database
@@ -355,12 +334,10 @@
                 set sys_hmlOutputDirectory = "'.$uploadPath.'/hml-output",
                 sys_htmlOutputDirectory = "'.$uploadPath.'/html-output"';
   			mysql_query($query);
-			if ($warnings == 1) {
-				echo "<h2>Please take note of warnings above</h2>";
-				echo "Unable to update sysIdentification table - please go to DBAdmin > Databases > Properties &".
-				" Advanced Properties, and check the path to the upload, hml and html directories";
+			if (mysql_error()) {
+				echo "<h3>Warning: </h3> Unable to update sysIdentification table - please go to DBAdmin > Databases > Properties &".
+				" Advanced Properties, and check the path to the upload, hml and html directories. (".mysql_error().")";
 			}
-
 
             // Make the current user the owner and admin of the new database
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
@@ -369,22 +346,14 @@
 			ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
 			ugr_interests="'.$interests.'" WHERE ugr_ID=2');
 			// TODO: error check, although this is unlikely to fail
-			echo "<p>New database <strong>" . $newname . "</strong> created successfully";
 
-			if ($warnings == 1) {
-				echo "<h2>Please take note of warnings above</h2>";
-				echo "You must create the folders indicated or uploads, icons and templates will not work<br>";
-				echo "If upload folder is created but icons and template forlders are not, look at file permissions on new folder creation";
-			}
+			echo "<h2>New database '$newDBName' created successfully</h2>";
 
 			echo "<p><strong>Admin username:</strong> ".$name."<br />";
-			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;<p>";
+			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-			echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
-			echo "The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
-
-			echo "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database<br />";
-
+			echo "<p>The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.</p>";
+			echo "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
 
 			// TODO: automatically redirect to the new database, maybe, in a new window
 
@@ -392,6 +361,35 @@
 		} // isset
 
 	} //makedatabase
+
+	//
+	//
+	//
+	function createFolder($name, $msg){
+		global 	$newDBName;
+		$uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
+		$folder = $uploadPath."/".$name;
+
+		if(file_exists($folder) && !is_dir($folder)){
+			if(!unlink($folder)){
+				echo ("<h3>Warning:</h3> Unable to remove file $folder. We have to create folder with such name ($msg)<br>");
+				return 1;
+			}
+		}
+
+		if(!file_exists($folder)){
+			if (!mkdir($folder, 0777, true)) {
+				echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
+				return 1;
+			}
+		}else if (!is_writable($folder)) {
+			echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
+			return 1;
+		}
+
+		return 0;
+	}
+
 ?>
 	</body>
 </html>

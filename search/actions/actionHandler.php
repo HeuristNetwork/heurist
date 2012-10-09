@@ -252,21 +252,26 @@ function remove_tags() {
 	return $onload;
 }
 
-function set_ratings() {
+function set_ratings()
+{
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
 	$rating = intval($_REQUEST['rating']);
 
+	$query =  'update usrBookmarks set bkm_Rating = ' . $rating . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id();
+
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('update usrBookmarks set bkm_Rating = ' . $rating
-			  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id());
+	mysql_query($query);
+
 	$update_count = mysql_affected_rows();
 	if (mysql_error()) {
 		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - ratings not set\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	} else if ($update_count == 0) {
 		$onload = 'top.HEURIST.search.popupNotice(\'No changes made - ratings are up-to-date\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	} else {
-		$onload = 'top.HEURIST.search.popupNotice(\'Ratings have been set\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
+		$onload = "location.replace('actionHandler.php?db=".HEURIST_DBNAME."'); top.HEURIST.search.popupNotice(\"Ratings have been set\"); ";
 	}
+
+
 	return $onload;
 }
 

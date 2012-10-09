@@ -22,16 +22,21 @@ mysql_connection_db_select(DATABASE);
 
 ?>
 <html>
- <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+<head>
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+<title>Set ratings</title>
 
-  <title>Set ratings</title>
-
-  <script type="text/javascript">
+<script type="text/javascript">
 
 function set_ratings() {
-	var ratingSelect = document.getElementById('overall-rating');
 
+	var elements = document.getElementsByName('r');
+	for (var i=0, iLen=elements.length; i<iLen; i++) {
+  		if (elements[i].checked) {
+    		value = elements[i].value;
+    		break;
+  		}
+	}
 
 	var action_fr = parent.document.getElementById('i_action').contentWindow;
 	var bkmk_ids_elt = action_fr.document.getElementById('bkmk_ids');
@@ -48,7 +53,7 @@ function set_ratings() {
 		return;
 	}
 
-	updateRatingElt.value = ratingSelect.value;
+	updateRatingElt.value = value;
 
 	var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 	bkmk_ids_elt.value = bkmk_ids_list.join(',');
@@ -58,39 +63,29 @@ function set_ratings() {
 
 	setTimeout(function() { window.close(); }, 10);
 }
+</script>
+<style>
+.lblr{
+background-image: url(../../common/images/star-yellow.png);
+display:block;
+height:14px;
+}
+</style>
+</head>
 
-  </script>
- </head>
+<body class="popup" width="200" height="160">
 
- <body class="popup" width=350 height=250>
+		<table>
+				<tr><td><input type="radio" value="0" name="r" id="r0"></td><td><label for="r0">No Rating</label></td></tr>
+				<tr><td><input type="radio" value="1" name="r" id="r1"></td><td><label for="r1" class="lblr" style="width:14px;"></label></td></tr>
+				<tr><td><input type="radio" value="2" name="r" id="r2"></td><td><label for="r2" class="lblr" style="width:24px;"></label></td></tr>
+				<tr><td><input type="radio" value="3" name="r" id="r3"></td><td><label for="r3" class="lblr" style="width:38px;"></label></td></tr>
+				<tr><td><input type="radio" value="4" name="r" id="r4"></td><td><label for="r4" class="lblr" style="width:50px;"></label></td></tr>
+				<tr><td><input type="radio" value="5" name="r" id="r5"></td><td><label for="r5" class="lblr" style="width:64px;"></label></td></tr>
+		</table>
+		<div style="text-align: right; padding-top: 10px;">
+			<input type="button" value="Set ratings" style="font-weight: bold;" onclick="set_ratings();">
+		</div>
 
-   <table>
-    <tr>
-     <td style="font-weight: bold; margin-bottom: 5px;" colspan="3"><nobr>Set ratings</nobr></td>
-    </tr>
-
-    <tr>
-     <td>&nbsp;&nbsp;</td>
-     <td style="text-align: right;">Rating</td>
-     <td><select name="overall-rating" id="overall-rating" style="width: 150px;">
-			<option value="0">Not Rated</option>
-			<option value="1" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:8px;"></option>
-			<option value="2" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:24px;"></option>
-			<option value="3" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:40px;"></option>
-			<option value="4" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:56px;"></option>
-			<option value="5" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:72px;"></option>
-         </select>
-     </td>
-    </tr>
-
-    <tr>
-     <td colspan="2">&nbsp;</td>
-     <td style="padding-top: 10px;">
-      <input type="button" value="Set ratings" style="font-weight: bold;" onclick="set_ratings();">
-     </td>
-    </tr>
-
-   </table>
-  </form>
- </body>
+</body>
 </html>

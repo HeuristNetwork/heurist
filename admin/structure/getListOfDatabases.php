@@ -31,16 +31,12 @@
 	print "<div id='page-inner'>";
     print "Click on the database name to open in new window";
 	print "<ul class='dbList'>";
-    $query = "show databases";
-    $res = mysql_query($query);
 
-    while ($row = mysql_fetch_array($res)) {
-        $test=strpos($row[0],$dbPrefix);
-        if (is_numeric($test) && ($test==0) ) {
-            $name = substr($row[0],strlen($dbPrefix));  // delete the prefix
+	$list = mysql__getdatabases();
+	foreach ($list as $name) {
             print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
-        }
-    }
+	}
+
 	print "</div></body></html>";
 
 ?>

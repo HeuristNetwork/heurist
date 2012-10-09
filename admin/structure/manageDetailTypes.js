@@ -387,7 +387,7 @@ function DetailTypeManager() {
             { key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
             { key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-            { key: "usage", label: "Used in ...", sortable:true, className:'count',
+            { key: "usage", label: "Used in ...", sortable:true, className:'center',
                 formatter: function(elLiner, oRecord, oColumn, oData) {
                 var str = oRecord.getData("usage");
                 var id = oRecord.getData("id");

@@ -57,14 +57,10 @@
 				print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 				print "<p>Choose source database: <select id='db' name='sourcedbname'>";
-				$query = "show databases";
-				$res = mysql_query($query);
-				while ($row = mysql_fetch_array($res)) {
-					$test=strpos($row[0],$dbPrefix);
-					if (is_numeric($test) && ($test==0) ) {
-						$name = substr($row[0],strlen($dbPrefix));  // delete the prefix
+
+				$list = mysql__getdatabases();
+				foreach ($list as $name) {
 						print "<option value='$name'>$name</option>";
-					}
 				}
 				print "</select>";
 				print "<input type='submit' value='Select database' />";

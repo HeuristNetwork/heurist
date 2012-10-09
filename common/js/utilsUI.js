@@ -447,6 +447,26 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		return top.HEURIST.util.popupWindow(parentWindow, options);
 	},
 
+	/*
+	*  uses jQuery dialog widget
+	showDialog: function(url, dialogoptions, elementid)
+	{
+		if(!elementid){
+			elementid = 'popup-dialog';
+		}
+		if(!dialogoptions){
+			dialogoptions = {};
+		}
+
+		if($("#"+elementid).length<1){
+			//create new element for dialogue
+			$('body').append('<div id="'+elementid+'"></div>');
+		}else{
+
+		}
+		$("#"+elementid).load(url).dialog(dialogoptions);
+	},
+	*/
 
 	coverall: null,
 	coverallDiv: null,

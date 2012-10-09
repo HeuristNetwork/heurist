@@ -57,7 +57,7 @@ if (!is_admin()) {
 		<!-- END PAGINATOR -->
 
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-		<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script> -->
+		
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">

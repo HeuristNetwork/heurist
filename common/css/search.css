@@ -1721,9 +1721,12 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .icons div.recordDiv:hover a {
 	text-decoration: none
 }
+/* ARTEM It hides rectype icon!!!!
 #results-level0.icons div.recordDiv:hover .recTypeThumb {
 	display:none
-} /* once all levels have thumbs we can remove results-level0 declaration */
+}
+*/
+ /* once all levels have thumbs we can remove results-level0 declaration */
 .list .recordDiv .thumbnail, .two-col .recordDiv .thumbnail {
 	display:none
 }

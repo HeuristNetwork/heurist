@@ -265,7 +265,7 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pe
 elLiner.innerHTML = '<div align="center">'+
 		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.php?db=" +
 		_db + "&grpID="+oRecord.getData("id")+(_ispopup?"&popup=yes":"")+
-		'" title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';
+		'" title="Show listing of members/Edit membership"><span class="count_edit">'+oRecord.getData('members')+'</span></a></div>';
 
 //IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
 				}},
