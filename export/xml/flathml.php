@@ -631,7 +631,10 @@ function outputRecords($result) {
 
 
 function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = null) {
-	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,$USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
+	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT, 
+            $USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, 
+            $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs;
+            
 	$record = $recordInfo['record'];
 	$depth = $recordInfo['depth'];
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
@@ -651,7 +654,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 		}
 	}
 /*****DEBUG****///if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
-	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable')));
+	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable'),
+                'selected' => (in_array($record['rec_ID'],$selectedIDs)?'yes':'no') ));
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
 		closeTag('record');
