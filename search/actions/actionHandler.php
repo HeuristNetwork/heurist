@@ -299,8 +299,16 @@ function bookmark_references() {
 		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()) . ') - no bookmarks added\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	} else if ($inserted_count < 1  &&  count($existing_bkmk_ids) < 1) {
 		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
+	} else if(isset($bib_ids) && count($bib_ids)>1){
+			$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\'); top.HEURIST.search.addTagsPopup(true);';
 	} else {
-		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\'); top.HEURIST.search.addTagsPopup(true);';
+			if(isset($bkmk_ids)){
+				$bib_id = explode(':',$bkmk_ids[0]);
+				$bib_id = $bib_id[0];
+			}else{
+				$bib_id = 'null';
+			}
+			$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\'); top.HEURIST.search.addRemoveTagsPopup(true, '.$bib_ids[0].','.$bib_id.');';
 	}
 	return $onload;
 }

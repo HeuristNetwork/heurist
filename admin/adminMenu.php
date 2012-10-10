@@ -109,11 +109,11 @@ if(array_key_exists('mode',$_REQUEST)){
 
 		<!-- sidebar -->
 		<div id="sidebar">
-             <div style="padding:20px;">
-         <a  href="../index.php?db=<?=HEURIST_DBNAME?>" 
-         title="Click the logo at top left of any Heurist page to return to the main search page"><b>USER VIEW &nbsp;></b></a>
-            </div>
-  
+			<div class="banner" style="padding-left:20px;border-bottom:1px solid #696969;">
+			          <a  href="../index.php?db=<?=HEURIST_DBNAME?>"
+             		title="Click the logo at top left of any Heurist page to return to the main search page"><b>USER VIEW &nbsp;&gt;</b></a>
+			</div>
+
 			<div id="sidebar-inner">
 				<!-- <div id="accordion">-->
 
@@ -130,8 +130,7 @@ if(array_key_exists('mode',$_REQUEST)){
                         <li><a href="#"
                             onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
                             title="Assign users to workgroups and set their roles">Manage workgroups</a></li>
-                        <li class="seperator"></li>
-        </ul>
+        			</ul>
                 </div>
 
 				<h3><a href="#">DATABASE: </a>
@@ -163,8 +162,7 @@ if (is_admin()) {
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=<?=HEURIST_DBNAME?>')"
 							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
-						<li class="seperator"></li>
-		</ul>
+					</ul>
 				</div>
 
 				<h3><a href="#">STRUCTURE: </a>

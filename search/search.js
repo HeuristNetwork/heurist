@@ -198,6 +198,7 @@ top.HEURIST.search = {
 		if (top.HEURIST.parameters["label"]) {
 			delete top.HEURIST.parameters["label"];
 		}
+		/*
 		if (!$("#simple-search").hasClass("collapsed")) {
 			$("#simple-search").toggleClass("collapsed");
 			$("div.simplesearch").toggleClass("collapsed");
@@ -206,6 +207,11 @@ top.HEURIST.search = {
 		if (!$("#searchButtons").hasClass("collapsed")) {
 			$("#searchButtons").toggleClass("collapsed");
 			$("div.searchButtonsTrigger").toggleClass("collapsed");
+		}
+		*/
+		if($("#simple-search").is(':visible')){
+			$("#simple-search").fadeOut();
+			$("#btnSimpleSearch").toggleClass("collapsed");
 		}
 		top.HEURIST.search.results = null;
 		top.HEURIST.search.loadSearch();
@@ -875,8 +881,11 @@ top.HEURIST.search = {
 		/* res[7]          res[8]                 res[9]         res[10]        res[11]   */
 		/* rec_NonOwnerVisibility, rec_URLLastVerified, rec_URLErrorMessage, bkm_PwdReminder, thumbnailURL */
 
-		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
+		var pinAttribs = res[0] ?"class='logged-in-only bookmarked' "  //title='Rating is 5!'"
 								:"class='logged-in-only unbookmarked' title='Bookmark this record'";
+
+		pinAttribs = pinAttribs+" onmouseover='{top.HEURIST.search.resultItemMenu(event);}' ";
+
 
 		var href = res[3];
 		var linkText = res[5] + " ";
@@ -951,7 +960,7 @@ top.HEURIST.search = {
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])]  + " ["+res[4]+"] - click to select, shift/ctrl for multiple select";
 		var html =
-		"<div class='recordDiv' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' recID="+res[2]+" rectype="+res[4]+">" +
+		"<div class='recordDiv' id='rd"+res[2]+"' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' recID="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"<div class='recTypeThumb' "+rectypeThumb+" ></div>" +
 		(res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"") +
@@ -1721,44 +1730,50 @@ top.HEURIST.search = {
 		top.HEURIST.search.gotoResultPage(0, true);
 	},
 
-	handleFieldSelectSimpleSearch: function(){
+	handleFieldSelectSimpleSearch: function(e){
 		var fld = $("#field-select").val();
 		var dtID = fld.match(/f\:(\d+)\:/);
-		if (!dtID[1]){
-			return;
-		}else{
+		var isEnum = false;
+		if (dtID && dtID.length>1){
 			dtID=dtID[1];
+
+			var dtyDefs = top.HEURIST.detailTypes.typedefs;
+			isEnum = (dtyDefs[dtID] && dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_Type']] === 'enum');
+			// if detatilType is enumeration then create a select for the values.
+			if (isEnum){
+				//tagging the div as enum hides the inputfield
+				$("#field-select").parent().addClass('enum');
+				//create selector from typedef
+				var allTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']]),
+					disabledTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']]);
+				var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+				if (enumSelector){
+					enumSelector.id = "simple-search-enum-selector";
+				}
+				//attach onchange handler
+				enumSelector.onchange = function(e){
+					top.HEURIST.search.calcShowSimpleSearch(e);
+				}
+				//add it to the popup
+				YAHOO.util.Dom.insertAfter(enumSelector,$("#input-contains").get(0))
+			}
 		}
-		var dtyDefs = top.HEURIST.detailTypes.typedefs;
-		// if detatilType is enumeration then create a select for the values.
-		if (dtyDefs[dtID] && dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_Type']] === 'enum'){
-			//tagging the div as enum hides the inputfield
-			$("#field-select").parent().addClass('enum');
-			//create selector from typedef
-			var allTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']]),
-				disabledTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']]);
-			var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
-			if (enumSelector){
-				enumSelector.id = "simple-search-enum-selector";
-			}
-			//attach onchange handler
-			enumSelector.onchange = function(){
-				top.HEURIST.search.calcShowSimpleSearch();
-			}
-			//add it to the popup
-			YAHOO.util.Dom.insertAfter(enumSelector,$("#input-contains").get(0))
-		}else{//reset to standard freetext input field
-			//if enum selector exist remove it
-			if ($("#simple-search-enum-selector").length>0) {
-				$("#simple-search-enum-selector").remove();
-			}
-			//untagging the div shows the regular input field
-			$("#field-select").parent().removeClass('enum');
+
+		if(!isEnum){
+				//reset to standard freetext input field
+				//if enum selector exist remove it
+
+				if ($("#simple-search-enum-selector").length>0) {
+					$("#simple-search-enum-selector").remove();
+				}
+				//untagging the div shows the regular input field
+				$("#field-select").parent().removeClass('enum');
 		}
-		top.HEURIST.search.calcShowSimpleSearch();
+
+		top.HEURIST.search.calcShowSimpleSearch(e);
 	},
 
-	calcShowSimpleSearch: function () {
+	calcShowSimpleSearch: function (e) {
 		var q = $("#rectype-select").val();
 		var fld = $("#field-select").val();
 		var ctn = $("#field-select").parent().hasClass('enum') ?$("#simple-search-enum-selector").val() :
@@ -1769,6 +1784,13 @@ top.HEURIST.search = {
 		q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?'"'+ctn+'"':"") + (srt? " " + srt : "");
 		if (q) {
 			$("#q").val(q);
+		}
+		//alert('calc');
+		//return false;
+		if (!e) var e = window.event;
+		if(e){
+			e.cancelBubble = true;
+			if (e.stopPropagation) e.stopPropagation();
 		}
 	},
 
@@ -1812,21 +1834,29 @@ top.HEURIST.search = {
 		}
 	},
 
-	createUsedDetailTypeSelector: function (useIDs) {
-		var detailTypes = top.HEURIST.detailTypes;
-		var fieldValSelect = document.getElementById("field-select");
-		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
+	_initSortBySelector:function(){
 		var sortbyValSelect = document.getElementById("sortby-select");
-		sortbyValSelect.innerHTML = '<option value="t" selected>record title</option>'+
+		sortbyValSelect.onchange = null;
+		var keepVal = sortbyValSelect.value;
+
+		sortbyValSelect.innerHTML = '<option value="t">record title</option>'+
 									'<option value="rt">record type</option>'+
 									'<option value="u">record URL</option>'+
 									'<option value="m">date modified</option>'+
 									'<option value="a">date added</option>'+
 									'<option value="r">personal rating</option>'+
 									'<option value="p">popularity</option>';
+		return keepVal;
+	},
 
+	createUsedDetailTypeSelector: function (useIDs) {
+		var detailTypes = top.HEURIST.detailTypes;
+		var fieldValSelect = document.getElementById("field-select");
+		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
-		sortbyValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+
+		var keepVal = top.HEURIST.search._initSortBySelector();
+		var sortbyValSelect = document.getElementById("sortby-select");
 
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var index in detailTypes.groups){
@@ -1852,9 +1882,14 @@ top.HEURIST.search = {
 					var sortValue =  "" + (useIDs ? detailTypeID : '"'+name+'"');
 					fieldValSelect.appendChild(new Option(name,value));
 					sortbyValSelect.appendChild(new Option(name,sortValue));
+					//if(sortValue==keepVal){}
 				}
 			}
 		}
+
+		//if(isNotFound && keepVal!=""){}
+		sortbyValSelect.value = keepVal;
+		sortbyValSelect.onchange =  function(e){top.HEURIST.search.calcShowSimpleSearch(e); return true;};
 	},
 
 
@@ -1862,17 +1897,15 @@ top.HEURIST.search = {
 		var fields = top.HEURIST.rectypes.typedefs[rt].dtFields;
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
+
+		var keepVal = top.HEURIST.search._initSortBySelector();
 		var sortbyValSelect = document.getElementById("sortby-select");
-		sortbyValSelect.innerHTML = '<option value="t" selected>record title</option>'+
-									'<option value="u">record URL</option>'+
-									'<option value="m">date modified</option>'+
-									'<option value="a">date added</option>'+
-									'<option value="r">personal rating</option>'+
-									'<option value="p">popularity</option>'+
-									'<optgroup label="'+ top.HEURIST.rectypes.names[rt] +' fields"></optgroup>'
+		var grp = document.createElement("optgroup");
+		grp.label = top.HEURIST.rectypes.names[rt]+' fields';
+		sortbyValSelect.appendChild(grp);
 
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
-		sortbyValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var dtID in fields){
 			var name = fields[dtID][0] +" (" + dtID + ")";
@@ -1881,6 +1914,9 @@ top.HEURIST.search = {
 			fieldValSelect.appendChild(new Option(name,value));
 			sortbyValSelect.appendChild(new Option(name,sortValue));
 		}
+
+		sortbyValSelect.value = keepVal;
+		sortbyValSelect.onchange =  function(e){top.HEURIST.search.calcShowSimpleSearch(e); return true;};
 	},
 
 	gotoResultPage: function(pageNumber, all) {
@@ -2045,8 +2081,11 @@ top.HEURIST.search = {
 		return false;
 	},
 
-	resultItemMouseOver: function(e, targ) {
-		//find the event and target element
+	//
+	// find the event and target element
+	//
+	resultItemFind: function(e, targ){
+
 		if (! e) e = window.event;
 
 		if (e) {
@@ -2056,100 +2095,128 @@ top.HEURIST.search = {
 			}
 		}
 
-		if (! targ) {
+		if (!targ) {
 			if (e.target) {
 				targ = e.target;
 			}else if (e.srcElement) {
 				targ = e.srcElement;
 			}
-			if (targ.nodeType == 3) {
+			/*if (targ.nodeType == 3) {
 				targ = targ.parentNode;
+			}*/
+		}
+
+		//find recordDiv - main parent div for record
+		while (targ && targ.className.indexOf('recordDiv')!=0){
+			if(targ.parentNode){
+				targ = targ.parentNode;
+			}else{
+				return null;
 			}
 		}
 
 		if (targ.getAttribute("recID")) {
-			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
-			var resultDiv = targ.parentNode;
+			return targ;
 		}else{
-			return;  // no target so we can't do anything
+			return null;  // no target so we can't do anything
 		}
 
-		var recID = $(resultDiv).attr("recID");
-		if(parseInt(recID)>=0) {
-			if ($(resultDiv).hasClass("hilited")) return;
-			$(resultDiv).addClass("hilited");
-			$(".link"+recID,$("#results")).toggleClass("linkHilited");
+	},
+
+	resultItemMouseOver: function(e, targ) {
+		//find the event and target element
+		var resultDiv = top.HEURIST.search.resultItemFind(e, targ);
+		if(resultDiv){
+			var recID = $(resultDiv).attr("recID");
+			if(parseInt(recID)>=0) {
+				if ($(resultDiv).hasClass("hilited")) return;
+				$(resultDiv).addClass("hilited");
+				$(".link"+recID,$("#results")).toggleClass("linkHilited");
+			}
 		}
 	},
 
 	resultItemMouseOut: function(e, targ) {
 		//find the event and target element
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) {
-				e.stopPropagation();
+		var resultDiv = top.HEURIST.search.resultItemFind(e, targ);
+		if(resultDiv){
+			var recID = $(resultDiv).attr("recID");
+			if(parseInt(recID)>=0) {
+				$(resultDiv).removeClass("hilited");
+				$(".link"+recID,$("#results")).toggleClass("linkHilited");
 			}
 		}
+	},
 
-		if (! targ) {
-			if (e.target) {
-				targ = e.target;
-			}else if (e.srcElement) {
-				targ = e.srcElement;
+	recMenu:null,
+	recMenuBkmk:null,
+	/*
+	* show menu for record
+	*/
+	resultItemMenu: function(e){
+		var resultDiv = top.HEURIST.search.resultItemFind(e, null);
+		if(resultDiv){
+			var recID = $(resultDiv).attr("recID");
+			var bkmkID = $(resultDiv).attr("bkmk_id");
+			var oMenu;
+
+			if(bkmkID){
+				if(!top.HEURIST.search.recMenuBkmk){
+					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark", {classname:"heurist-menu"} );  //e.parentNode.id
+					top.HEURIST.search.recMenuBkmk.addItems([
+						{ text: "Tag" },
+						{ text: "Rate" },
+						{ text: "Un-bookmark" },
+						{ text: "Delete" }
+					]);
+					top.HEURIST.search.recMenuBkmk.render(document.body);
+				}
+				oMenu = top.HEURIST.search.recMenuBkmk;
+				if(top.HEURIST.search.recMenu) top.HEURIST.search.recMenu.hide();
+			}else{
+				if(!top.HEURIST.search.recMenu){
+					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd", {classname:"heurist-menu"} );  //e.parentNode.id
+					top.HEURIST.search.recMenu.addItems([
+						{ text: "Tag" },
+						{ text: "Bookmark" },
+						{ text: "Delete" }
+					]);
+					top.HEURIST.search.recMenu.render(document.body);//"rd"+recID);
+				}
+				oMenu = top.HEURIST.search.recMenu;
+				if(top.HEURIST.search.recMenuBkmk) top.HEURIST.search.recMenuBkmk.hide();
 			}
-			if (targ.nodeType == 3) {
-				targ = targ.parentNode;
+
+			function _onMenuClick(eventName, eventArgs, subscriptionArg){
+					var fname = subscriptionArg.shift();
+					var args = subscriptionArg;
+					top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
 			}
-		}
 
-		if (targ.getAttribute("recID")) {
-			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
-			var resultDiv = targ.parentNode;
-		}else{
-			return;  // no target so we can't do anything
-		}
+			var items = oMenu.getItems();
+			items[0].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["addRemoveTagsPopup", false, recID, bkmkID] } );
+			if(bkmkID){
+				items[1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["setRatingsPopup", bkmkID] } );
+				items[2].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["deleteBookmarks", bkmkID] } );
+			}else{
+				items[1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["addBookmarks", recID] } );
+			}
 
-		var recID = $(resultDiv).attr("recID");
-		if(parseInt(recID)>=0) {
-			$(resultDiv).removeClass("hilited");
-			$(".link"+recID,$("#results")).toggleClass("linkHilited");
+			items[items.length-1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["deleteRecords", recID] } );
+
+
+			oMenu.cfg.setProperty("context",
+					[e.target, "bl", "br"]);
+    		oMenu.show();
 		}
 	},
 
 	activeLevel:0,
 
 	resultItemOnClick: function(e, targ) {
-		//find the event and target element
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) {
-				e.stopPropagation();
-			}
-		}
-
-		if (! targ) {
-			if (e.target) {
-				targ = e.target;
-			}else if (e.srcElement) {
-				targ = e.srcElement;
-			}
-			if (targ.nodeType == 3) {
-				targ = targ.parentNode;
-			}
-		}
-
-		if (targ.getAttribute("recID")) {
-			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
-			var resultDiv = targ.parentNode;
-		}else{
-			return;  // no target so we can't do anything
+		var resultDiv = top.HEURIST.search.resultItemFind(e, targ);
+		if(!resultDiv){
+			return;
 		}
 
 		var recID = $(resultDiv).attr("recID");
@@ -3330,9 +3397,20 @@ top.HEURIST.search = {
 	removeTagsPopup: function(reload) {
 		top.HEURIST.search.addRemoveTagsPopup(reload);
 	},
-	addRemoveTagsPopup: function(reload) {
-		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-		var bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+	addRemoveTagsPopup: function(reload, recID, bkmkID) {
+
+		var	recIDs_list = [];
+		var bkmkIDs_list = [];
+
+		if(recID || bkmkID){
+			if(recID) recIDs_list = [recID];
+			if(bkmkID) bkmkIDs_list = [bkmkID];
+		}else{
+			recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+			bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+		}
+
+
 		var hasRecordsNotBkmkd = false;
 		if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
 			//nothing selected
@@ -3403,8 +3481,15 @@ top.HEURIST.search = {
 		} });
 	},
 
-	setRatingsPopup: function() {
-		var bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+	setRatingsPopup: function(bkmkID) {
+
+		var bkmkIDs_list = [];
+		if(bkmkID){
+			bkmkIDs_list = [bkmkID];
+		}else{
+			bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+		}
+
 		if (bkmkIDs_list.length == 0) {
 			top.HEURIST.search.selectBookmarkMessage("to set ratings");
 			return;
@@ -3463,8 +3548,15 @@ top.HEURIST.search = {
 				: ""));
 	},
 
-	addBookmarks: function() {
-		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+	addBookmarks: function(recID) {
+
+		var recIDs_list = [];
+		if(recID){
+			recIDs_list = [recID];
+		}else{
+			recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+		}
+
 		if (recIDs_list.length == 0) {
 			alert("Select at least one record to bookmark");
 			return;
@@ -3484,8 +3576,15 @@ top.HEURIST.search = {
 		action_elt.form.submit();
 	},
 
-	deleteBookmarks: function() {
-		var bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+	deleteBookmarks: function(bkmkID) {
+
+		var bkmkIDs_list = [];
+		if(bkmkID){
+			bkmkIDs_list = [bkmkID];
+		}else{
+			bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
+		}
+
 		if (bkmkIDs_list.length == 0) {
 			alert("Select at least one bookmark to delete");
 			return;
@@ -3509,8 +3608,15 @@ top.HEURIST.search = {
 		action_elt.form.submit();
 	},
 
-	deleteBiblios: function() {
-		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+	deleteRecords: function(recID) {
+
+		var recIDs_list = [];
+		if(recID){
+			recIDs_list = [recID];
+		}else{
+			recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+		}
+
 		if (recIDs_list.length == 0) {
 			alert("Select at least one record to delete");
 			return;
@@ -4063,7 +4169,6 @@ top.HEURIST.search = {
 			 }).superfish();
 
 
-		//$("#simple-search").fadeOut();
 		//close simple search in outside click
 		$("#btnSimpleSearch").click(function(){
 				if($("#simple-search").is(':visible')){
@@ -4074,8 +4179,10 @@ top.HEURIST.search = {
 				$("#btnSimpleSearch").toggleClass("collapsed");
 				return false;
 		});
-		$("#simple-search").click(function(){ return false; });
-		// onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'
+		$("#simple-search").click(function(){
+				return false;
+		});
+
 		$(document).bind("click", function() {
 			if($("#simple-search").is(':visible')){
 				$("#simple-search").fadeOut();

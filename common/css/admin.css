@@ -48,7 +48,6 @@ body.popup #page-inner {
 }
 #sidebar {
 	width:170px;
-	background-color: #FFEEAA;
 }
 .dbList li {
 	list-style: none;
@@ -61,8 +60,9 @@ body.popup #page-inner {
 #page {
 	left:190px
 }
-#sidebar-inner {
-	top:10px
+#sidebar-inner h3{
+	margin-top: 0px;
+	padding-top: 10px;
 }
 .adminSection {
 	position:relative;

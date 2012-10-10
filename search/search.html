@@ -187,7 +187,7 @@
 				<ul id=quicklink-cell>
 					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
-						<ul id="my-heurist-menu">
+						<ul id="my-heurist-menu" class="heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
 
@@ -218,7 +218,7 @@
 					</li>
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
-						<ul id="advanced-menu">
+						<ul id="advanced-menu" class="heurist-menu">
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait"
 								title="Navigate to and login to another Heurist database">
 								Select database</a></li>
@@ -358,7 +358,7 @@
 									<optgroup label="Detail fields"></optgroup>
 								</select>
 								<label for="sortAsc">Sort Ascending</label>
-								<input type="checkbox" id="sortAsc" checked="checked"/>
+								<input type="checkbox" id="sortAsc" checked="true"/>
 							</div>
 							<div class="simple-search-row" style="text-align:center;">
 								<a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a>
@@ -434,9 +434,9 @@
 									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships" class="seperator">Relate to ...</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags" class="seperator">Tag</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings" >Rate</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(null); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deleteRecords(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
 								</ul>
 							</li>
