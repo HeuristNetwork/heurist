@@ -45,7 +45,8 @@ String.prototype.htmlEscape = function() {
 	return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
 
-var _TAB_MAP = 1,
+var _TAB_RECORDVIEW = 0,
+	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
 	_TAB_SPECIAL = 3;
 
@@ -2323,15 +2324,19 @@ top.HEURIST.search = {
 		//send selectionChange event
 		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
 		var recordFrame = document.getElementById("record-view-frame");
-		if (!selectedRecIDs.length){
-			recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
-		}else{
-			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
-			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recID+
-							("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},
-							50);
-		};
+		if ((typeof _tabView!=="undefined") && (_tabView!==null)) {
+			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+			if(currentTab==_TAB_RECORDVIEW) {
+				if (!selectedRecIDs.length){
+					recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+				}else{
+					recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
+					setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recID+
+									("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+									(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},50);
+				};
+			}
+		}
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
