@@ -15,14 +15,35 @@
 		return;
 	}
 
+	$user_id = get_user_id();
+
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
+		$sError = "You must be logged in as system administrator to register a database";
+	}else  if (get_user_id() != 2) {
+		$sError = "Only the owner/creator of the database (user #2) may register the database. ".
+		"<br/><br/>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database";
+		return;
+	}
+
+	// Look up current user email from sysUGrps table in the current database (the one being registered)
+	// Registering user must be a real user so that there is an email address and password to attach to the registration record.
+	// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better
+	// to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
+	$res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
+	if(mysql_num_rows($res) == 0) {
+		$sError = "Non-critical warning<br/><br/>Unable to read your email address from sysUGrps. Note: not currently supporting deferred users database";
+	}
+
+	if($sError){
 		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head>".
-		"<body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span>".
+		"<body><div class=wrap><div id=errorMsg><span>$sError</span>".
 		"<p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
 		" target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
+
+
 ?>
 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
@@ -70,23 +91,6 @@
 				$dbName = $row[1];
 				$dbDescription = $row[2];
 				$ownerGrpID = $row[3];
-
-				// Look up current user email from sysUGrps table in the current database (the one being registered)
-				// Registering user must be a real user so that there is an email address and password to attach to the registration record.
-				// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better
-				// to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
-				$user_id=get_user_id();
-				if ($user_id !=2) {
-					print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
-					"<div id=errorMsg><span>Only the owner/creator of the database (user #2) may register the database. ".
-					"<br>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
-					return;
-				}
-				$res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
-				if(mysql_num_rows($res) == 0) {
-					echo "<div class=wrap><div id=errorMsg><span>Non-critical warning</span>Unable to read your email address from sysUGrps. Note: not currently supporting deferred users database</div></div>";
-					return;
-				}
 
 				$row = mysql_fetch_row($res);
 				$usrEmail = $row[0]; // Get the current user's email address from UGrps table

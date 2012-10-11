@@ -121,6 +121,15 @@ body.popup #page-inner {
 .yui-skin-sam .yui-dt table {
 	width:100%
 }
+/* Class for disabled rows */
+.yui-skin-sam .yui-dt tr.greyout,
+.yui-skin-sam .yui-dt tr.greyout td.yui-dt-asc,
+.yui-skin-sam .yui-dt tr.greyout td.yui-dt-desc,
+.yui-skin-sam .yui-dt tr.greyout td.yui-dt-asc,
+.yui-skin-sam .yui-dt tr.greyout td.yui-dt-desc{
+    background-color: #CCCCCC;
+    color: #fff;
+}
 .yui-navset {
 	width: 100%;
 }

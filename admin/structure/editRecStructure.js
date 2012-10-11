@@ -256,12 +256,17 @@ function EditRecStructure() {
 
 			//special formatter
 			var myRowFormatter = function(elTr, oRecord) {
-				var val1 = oRecord.getData('rst_NonOwnerVisibility');
-				var val2 = oRecord.getData('rst_RequirementType');
-				if (val1==='hidden' || val2==='forbidden') {
-					Dom.addClass(elTr, 'gray');
+				var val0 = oRecord.getData('dty_Type');
+				if(val0 == 'separator'){
+					Dom.addClass(elTr, 'greyout');
 				}else{
-					Dom.removeClass(elTr, 'gray');
+					var val1 = oRecord.getData('rst_NonOwnerVisibility');
+					var val2 = oRecord.getData('rst_RequirementType');
+					if (val1==='hidden' || val2==='forbidden') {
+						Dom.addClass(elTr, 'gray');
+					}else{
+						Dom.removeClass(elTr, 'gray');
+					}
 				}
 				return true;
 			};

@@ -165,7 +165,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 							//do it only once - on load
 							if(!Hul.isnull(_initRecID)){
-								_editUser(_initRecID);
+								_editUser(_initRecID, top.HEURIST.is_admin());
 								_initRecID = null
 
 							}
@@ -496,7 +496,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 				if(elLink.hash === "#edit_user") {
 					YAHOO.util.Event.stopEvent(oArgs.event);
-					_editUser(recID);
+					_editUser(recID, false);
 
 				}else if(elLink.hash === "#kickoff_user"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
@@ -908,13 +908,13 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 	/**
 	* call new popup - to edit User
 	*/
-	function _editUser(user) {
+	function _editUser(user, isApproval) {
 		var URL = "";
 
 		var userID = (!Hul.isnull(user))?Number(user):0;
 
 		if(userID>0) {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
+			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID+(isApproval?"&approve=1":"");
 		}
 		else if(!top.HEURIST.is_admin()){
 			return; //IJ req 27-09-12 - only dbowner is able to create new users
@@ -932,7 +932,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 		top.HEURIST.util.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: 560,
+			height: 620,
 			width: 740,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
@@ -1035,7 +1035,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				/**
 				* @param user - userID or email
 				*/
-				editUser: function(user){ _editUser( user ); },
+				editUser: function(user){ _editUser( user, false ); },
 
 				findAndAddUser: function(){ _findAndAddUser(); },
 

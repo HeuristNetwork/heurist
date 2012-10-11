@@ -134,6 +134,7 @@ if (@$_REQUEST['logout']) {
    top.location = window.location;
    <?php } ?>
  }
+
 </script>
 <script src='../../common/js/utilsLoad.js'></script>
 <script src='../../common/js/utilsUI.js'></script>
@@ -160,10 +161,10 @@ if (@$_REQUEST['logout']) {
 		if ($LOGIN_ERROR)
 			echo "<p style=\"margin-left: 100px; color: red;\">".$LOGIN_ERROR."</p>";
 ?>
-<table cellpadding=3 id="login-table">
+<table cellpadding=3 id="login-table" border="0">
 	<tr class="input-row">
 	<td class="input-header-cell">Database name</td>
-	<td class="input-cell"><b><?php echo HEURIST_DBNAME; ?></b></td>
+	<td class="input-cell" style="padding-top:0px !important;"><h2 style="font-size: 20px"><?php echo HEURIST_DBNAME; ?></h2></td>
 	</tr>
 
 	<tr class="input-row">
@@ -197,8 +198,18 @@ if (@$_REQUEST['logout']) {
    <tr><td colspan="2"></td></tr>
 
    <tr>
-    <td></td>
-    <td><input type="submit" value="  Login  " >&nbsp;&nbsp;&nbsp;</td>
+    <td align="right">
+    	<div id=login-button><a href="#" onclick="{document.forms['mainform'].submit()}" title="Log in to use Heurist - new users please register first">
+    			<img src=../images/111x30.gif></a></div>
+	</td>
+    <td align="left"><?php if(defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION){?>
+    	<div id=register-button><a href="#"
+    			onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>', {height:640, width:700});return false}"
+    			title="Register to use Heurist - takes only a couple of minutes"><img src=../images/111x30.gif></a></div>
+    	<?}
+//onclick="window.open(this.href,'','status=0,scrollbars=0,width=500,height=200'); return false;"
+    	?>
+    </td>
    </tr>
 
 </table>
@@ -206,7 +217,9 @@ if (@$_REQUEST['logout']) {
  <p align=center>
   Forgotten your password?
   &nbsp;
-  <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=500,height=200'); return false;">Click here to reset your password</a>
+  <a href='#'
+		onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>', {height:200, width:400});return false}">
+  		Click here to reset your password</a>
  </p>
 
 

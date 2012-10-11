@@ -135,7 +135,7 @@ function RectypeManager() {
 	}//end _init
 
 	/*
-	*/	
+	*/
 	function dragDropEnable() {
 
 		var i;
@@ -147,9 +147,9 @@ function RectypeManager() {
 			}
 			myDTDrags[id] = new YAHOO.example.DDList(id, _updateOrderAfterDrag);
 		} // for
-		
+
 	}
-	
+
 	//
 	// adds new tab and into 3 spec arrays
 	//
@@ -420,7 +420,17 @@ function RectypeManager() {
 			}},
 			];
 
+			// Define a custom row formatter function
+			var myRowFormatter = function(elTr, oRecord) {
+					if (!oRecord.getData('active')) {
+						Dom.addClass(elTr, 'greyout');
+					}
+					return true;
+			};
+
 			var myConfigs = {
+				// Enable the row formatter
+				formatRow: myRowFormatter,
 				//selectionMode: "singlecell",
 				paginator : new YAHOO.widget.Paginator({
 					rowsPerPage: 100,
@@ -541,8 +551,8 @@ function RectypeManager() {
 				var data = oRecord.getData();
 				data.active = elCheckbox.checked;//?1:0;
 
-				//var recindex = dt.getRecordIndex(oRecord);
-				//dt.updateRow(recindex, data);
+				var recindex = dt.getRecordIndex(oRecord);
+				dt.updateRow(recindex, data);
 
 				//keep the track of changes in special array
 				_updateRecordType(oRecord);
@@ -1152,7 +1162,7 @@ function RectypeManager() {
               }
         }
     }
-    
+
     /**
 	* Updates group order after drag and drop
 	*/
@@ -1163,9 +1173,9 @@ function RectypeManager() {
 				defs: {}
 		}};
 
-		var i, 
+		var i,
 			parentNode = document.getElementsByClassName("yui-nav")[0];
-			
+
  		for (var i = 0; i < parentNode.childNodes.length; i++) {
       		var child = parentNode.childNodes[i];
       		var id = child.id;
@@ -1175,8 +1185,8 @@ function RectypeManager() {
 				grp.order = i;
 				orec.rectypegroups.defs[id] = [i];
 			}
-    	}		
-		
+    	}
+
 		var str = YAHOO.lang.JSON.stringify(orec);
 
 		if(!Hul.isnull(str)) {
@@ -1186,9 +1196,9 @@ function RectypeManager() {
 
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		}
-		
+
 	}
-    
+
     //
 	//
 	//
@@ -1219,7 +1229,7 @@ function RectypeManager() {
 							myDTDrags[id].unreg();
 							delete myDTDrags[id];
 						}
-						
+
 						_groups.splice(ind, 1);
 						arrTables.splice(ind, 1);
 						arrDataSources.splice(ind, 1);

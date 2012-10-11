@@ -207,7 +207,7 @@ function print_header_line($bib) {
 	$webIcon = @$webIcon[0];
 ?>
 
-<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
+<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class="normal" target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
 </div>
 
 <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>"><h2 style="text-transform:none; line-height:16px"><?= $bib['rec_Title'] ?></h2>
@@ -220,7 +220,9 @@ function print_header_line($bib) {
         </h3>
         <br>
         <?php if (@$url) { ?>
-        <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
+        <span class="link">
+			<a target="_new" class="external-link" href="http://web.archive.org/web/*/<?=htmlspecialchars($url)?>">page history</a>
+        	<a target="_new" class="external-link" href="<?=htmlspecialchars($url)?>"><?= output_chunker($url) ?></a>
         <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
          </span>
         <?php } ?>
@@ -427,9 +429,9 @@ function print_private_details($bib) {
 					}
 
 					if($filedata['URL']==$filedata['remoteURL']){ //remote resource
-						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['URL']).'</a>';
+						$bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['URL']).'</a>';
 					}else{
-						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
+						$bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
 					}
 				}
 
@@ -444,7 +446,7 @@ function print_private_details($bib) {
 							'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
 						));
 					}
-					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . 'kB]';
+					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'" class="external-link">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . 'kB]';
 				}
 				*/
 			} else {
@@ -524,7 +526,7 @@ function print_private_details($bib) {
 ?>
 
 <div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
-<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank
+<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank class="external-link"
     href="<?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
           <?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
 <?php
@@ -650,7 +652,7 @@ function print_text_details($bib) {
 <div class=detailRowHeader>Text
 
 <?php
-    
+
 	print_woot_precis($result["woot"],$bib);
 	print_threaded_comments($cmts);
     print '<br>&nbsp;'; // avoid ugly spacing
@@ -714,7 +716,7 @@ Array (
 							[groupName] => ) ) ) ) )
 */
 function print_woot_precis($woot,$bib) {
-    
+
 	$content = "";
 	foreach ($woot["chunks"] as $chunk) {
 		$content .= $chunk["text"] . " ";

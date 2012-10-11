@@ -385,7 +385,7 @@ function EditTerms() {
 				_optionReserved(add_reserved);
 				var selstatus = Dom.get("trm_Status");
 				selstatus.value = status;
-				
+
 				_toggleAll(disable_status || disable_fields, disable_status);
 			}//node!=null
 		}
@@ -426,7 +426,7 @@ function EditTerms() {
 				Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
 			}
 	}
-	
+
 	/**
 	* Clear button listener
 	*/
@@ -444,14 +444,14 @@ function EditTerms() {
 			Dom.get('edInverseTermId').value = "0";
 		}
 	}
-	
+
 	function _disableWarning(){
 		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+" and cannot therefore be deleted");
 	}
 	function _disableWarning2(){
 		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+". Inverse term cannot be set");
 	}
-	
+
 	/**
 	*
 	*/
@@ -648,12 +648,20 @@ function EditTerms() {
 	*/
 	function _doDelete(needConfirm){
 		if(_currentNode===null) return;
-		var isExistingTerm = isExistingNode(_currentNode);
+		var isExistingTerm = isExistingNode(_currentNode),
+			sMessage = "";
 
-		var r = (!needConfirm) ||
-		confirm(isExistingTerm
-		?("Delete term\n\n     '"+_currentNode.label+"'\n\nAre you sure? \nWarning: All child terms will be deleted as well")
-		:"Cancel the addition of new term?");
+		if(isExistingTerm){
+			sMessage = "Delete term '"+_currentNode.label+"'?";
+			if(_currentNode.children.length>0){
+ 				sMessage = sMessage + "\nWarning: All child terms will be deleted as well";
+			}
+		}else{
+			sMessage = "Cancel the addition of new term?";
+		}
+
+
+		var r = (!needConfirm) || confirm(sMessage);
 
 		if (r && !Hul.isnull(_currTreeView)) {
 			//_currTreeView.removeChildren(_currentNode);
@@ -662,7 +670,7 @@ function EditTerms() {
 				//this term exists in database - delete it
 					Dom.get('deleteMessage').style.display = "block";
 					Dom.get('formEditor').style.display = "none";
-					
+
 					function __updateAfterDelete(context) {
 
 							if(!context){

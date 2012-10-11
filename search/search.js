@@ -2512,6 +2512,7 @@ top.HEURIST.search = {
 			className = wgDiv.className.replace(/\s*hide/, "");
 			wgDiv.className = (showSS["wg"] ? className : className + " hide");
 			searchDiv = document.getElementById("workgroup-saved-searches-searches");
+			_db2 = (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "");
 
 			innerHTML = "";
 			var innerHTML_inmenu = "";
@@ -2533,7 +2534,8 @@ top.HEURIST.search = {
                 // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
                 // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(w);return false;}'>Aggregations</a></div>";
 
-				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") +"'>" /* +top.HEURIST.workgroups[w].name */ +"<img src='../common/images/external_link_16x16.gif' width=12px; height=12px;> Blog</a></div>";
+				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" class='external-link' href='" +
+									top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + _db2 +"'>Blog</a></div>";
 
 				var searches = top.HEURIST.user.workgroupSavedSearches[w];
 				if (searches  &&  searches.length) {
@@ -2621,22 +2623,6 @@ top.HEURIST.search = {
 		} else {
 			div.className += " hide";
 			top.HEURIST.util.setDisplayPreference(prefName, "hide");
-		}
-	},
-
-	fillInKeywordSearches: function() {
-		if (! top.HEURIST.user) return;
-
-		var tags = top.HEURIST.user.tags;
-		var innerHTML = "";
-		var kwd;
-		for (var i = 0; i < tags.length; ++i) {
-			kwd = encodeURIComponent(tags[i]);
-			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\""+ (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "") +"'>" + tags[i] + "</a> ";
-		}
-		var kwd_search_elt = top.document.getElementById("tag-search-links");
-		if (kwd_search_elt) {
-			kwd_search_elt.innerHTML = innerHTML;
 		}
 	},
 
@@ -2739,6 +2725,13 @@ top.HEURIST.search = {
 			top.HEURIST.search.executeQuery(ss[1]);
 		}
 		return false;
+	},
+
+	executeQueryByTag: function(tag) {
+		if(!top.HEURIST.util.isnull(tag)){
+			//var kwd = encodeURIComponent(tag);
+			top.HEURIST.search.executeQuery('?ver=1&w=bookmark&q=tag:"' + tag + '"&label=Tag "'+tag+'"');
+		}
 	},
 
 	//
@@ -3712,13 +3705,6 @@ top.HEURIST.search = {
 					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))));
 	},
 
-	showTagSearchLinks: function() {
-		var elt = document.getElementById("tag-search-links");
-		var link = document.getElementById("saved");
-		var pos = top.HEURIST.getPosition(link);
-		top.HEURIST.util.popupTinyElement(window, elt, { x: pos.x, y: pos.y, width: link.offsetWidth, height: 300 });
-	},
-
 	passwordPopup: function(elt) {
 		var pos = top.HEURIST.getPosition(elt);
 		var scroll = document.getElementById("results").scrollTop;
@@ -3978,7 +3964,7 @@ top.HEURIST.search = {
 //		 document.getElementById("home-link").href = top.HEURIST.basePath + "index.html";
 		 document.getElementById("home-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 		 document.getElementById("dbSearch-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
-		 document.getElementById("bookmarklet-link").innerHTML = (top.HEURIST.database && top.HEURIST.database.name ? "<b>>> "+top.HEURIST.database.name + "</b>" : "<b>Bookmarklet</b>");
+//ART document.getElementById("bookmarklet-link").innerHTML = (top.HEURIST.database && top.HEURIST.database.name ? "<b>>> "+top.HEURIST.database.name + "</b>" : "<b>Bookmarklet</b>");
 	},
 
 	writeRSSLinks: function() {
@@ -4167,11 +4153,11 @@ top.HEURIST.search = {
 		});
 
 		//init menu
-			$("ul.sf-menu").supersubs({
+		$("ul.sf-menu").supersubs({
 		            minWidth:    15,
 		            maxWidth:    57,
 				extraWidth:  1
-			 }).superfish();
+		}).superfish();
 
 
 		//close simple search in outside click
@@ -4195,6 +4181,46 @@ top.HEURIST.search = {
 			}
 		});
 	},
+
+	recMenuTags:null,
+
+	buildMenuForTagSearchs: function() {
+
+		if(!top.HEURIST.search.recMenuTags){     //search-by-tag-link
+			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {classname:"heurist-menu", context:["search-recent", "tl", "br"]} );
+
+		}
+
+		function _onMenuClick(eventName, eventArgs, subscriptionArg){
+				var fname = subscriptionArg.shift();
+				var args = subscriptionArg;
+				top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
+		}
+
+		var innerHTML = "";
+		if (top.HEURIST.user && top.HEURIST.user.tags && top.HEURIST.user.tags.length>0)
+		{
+
+			var tags = top.HEURIST.user.tags;
+			var kwd, squery, i;
+
+			for (i = 0; i < tags.length; ++i) {
+				//kwd = encodeURIComponent(tags[i]);
+				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
+				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: _onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
+			}
+		}else{
+			innerHTML = "<li>No tags defined</li>";
+			top.HEURIST.search.recMenuTags.addItem({ text: 'No tags defined' });
+		}
+		top.HEURIST.search.recMenuTags.render(document.body);
+
+		var menuItem = document.getElementById("menuSearchesByTag");
+		menuItem.innerHTML = innerHTML;
+		//menuItem = document.getElementById("menuSearchesByTag_in_sidebar");
+		//menuItem.innerHTML = innerHTML;
+	},
+
 
 	popupNotice: function(content, reload) {
 		setTimeout(function() {
@@ -4244,9 +4270,10 @@ top.HEURIST.search = {
 	*/
 	renderSearchPage: function() {
 		top.HEURIST.search.fillInSavedSearches();
-		top.HEURIST.search.fillInKeywordSearches();
 		top.HEURIST.search.displaySearchParameters();
 		top.HEURIST.search.buildMenu();
+		top.HEURIST.search.buildMenuForTagSearchs();
+
 		top.HEURIST.search.renderLoginDependentContent();
 		top.HEURIST.search.renderCollectionUI();
 		top.HEURIST.search.setContactLink();
@@ -4397,8 +4424,9 @@ function removeCustomAlert() {
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
 			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
 			navButton.style.width = leftPanelWidth-1;
-			tabBar.style.right = Math.max(21,rightPanelWidth-1)
 			tabBar.style.left = Math.max(21,leftPanelWidth);
+			tabBar.style.width = Math.max(360, centerPanelWidth-5);
+
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
             var leftPos = (leftPanelWidth+5);
             document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;

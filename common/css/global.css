@@ -93,6 +93,12 @@ a:hover {
 #divider-cell {
 	width: 4px;
 }
+.external-link{
+	background-image:url(../images/external_link_16x16.gif);
+	background-repeat: no-repeat;
+	padding-left: 16px;
+}
+
 .panel {
 	border: 1px solid #BFBFBF;
 	font-size: 85%;

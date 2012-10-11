@@ -402,6 +402,7 @@ Go to the address below to review further details and approve the registration:
 ".HEURIST_URL_BASE."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users
 
 ";
+//http://heuristscholar.org/h3-ao/admin/adminMenu.php?db=artem_delete1&recID=5&mode=users
 
 				$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
 								"From: root");

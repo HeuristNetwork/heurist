@@ -413,8 +413,18 @@ function DetailTypeManager() {
 			}},
 			];
 
+			// Define a custom row formatter function
+			var myRowFormatter = function(elTr, oRecord) {
+					if (!oRecord.getData('vis')) {
+						Dom.addClass(elTr, 'greyout');
+					}
+					return true;
+			};
+
 
 			var myConfigs = {
+				// Enable the row formatter
+				formatRow: myRowFormatter,
 				//selectionMode: "singlecell",
 				paginator : new YAHOO.widget.Paginator({
 					rowsPerPage: 100, // REQUIRED
@@ -561,11 +571,13 @@ function DetailTypeManager() {
 				var data = oRecord.getData();
 				data.vis = elCheckbox.checked;//?1:0;
 
-				//var recindex = dt.getRecordIndex(oRecord);
-				//dt.updateRow(recindex, data);
+				var recindex = dt.getRecordIndex(oRecord);
+				dt.updateRow(recindex, data);
 
 				//keep the track of changes in special array
 				_updateDetailType(oRecord);
+
+				dt.render();
 			});
 
 			//

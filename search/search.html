@@ -185,7 +185,9 @@
 			<div id="quicklinks">
 				<div id=logged-in></div>
 				<ul id=quicklink-cell>
-					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
+					<li class="admin-only" id="reportBug"><a href="#"
+									onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;"
+									title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu" class="heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
@@ -214,6 +216,25 @@
 
 							<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;"
 								title="Click to send a bug report">Report bug</a></li>
+
+					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there -->
+                        <script>
+							var bookmarkletname = top.HEURIST.VERSION;
+							var html = "<li><a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
+							+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+							+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
+							+ "d=document;c=d.contentType;"
+							+ "if(c=='text/html'||!c){"
+							+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+							+ "s=d.createElement('script');s.type='text/javascript';"
+							+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
+							+ "d.getElementsByTagName('head')[0].appendChild(s);}"
+							+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
+							+ "window.setTimeout('w.focus()',200);}"
+							+ "})();\">&gt;&gt;"+database+"</a></li>"; //"+database+"
+							document.write(html);
+						</script>
+
 						</ul>
 					</li>
 
@@ -291,31 +312,15 @@
 					<li> <a href="../help/webhelp" target=_blank title="Online help for Heurist"><b>Help</b></a> </li>
                     <li> <a href="../index.html" target=_blank title="The Heurist project plus comprehensive detailed help"><b>Project</b></a> </li>
                     -->
-					<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
-
-					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there -->
-                        <script>
-							var bookmarkletname = top.HEURIST.VERSION;
-							var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
-							+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
-							+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
-							+ "d=document;c=d.contentType;"
-							+ "if(c=='text/html'||!c){"
-							+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-							+ "s=d.createElement('script');s.type='text/javascript';"
-							+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
-							+ "d.getElementsByTagName('head')[0].appendChild(s);}"
-							+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
-							+ "window.setTimeout('w.focus()',200);}"
-							+ "})();\"><b>>> "+database+" </b></a>";
-							document.write(html);
-						</script>
-
+					<li style="display:none">
+						<a id=contact-link title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
 					</li>
+
 					<li>
     					<a href="#" id="rss_feed_link" title="Data feed, drag to bookmarks or a feed reader" target="_blank">
-								<img src="../common/images/logo_rss_feed.png"/></a>
+							<img src="../common/images/logo_rss_feed.png"/></a>
 					</li>
+
                 </ul>
 			</div>
 
@@ -391,7 +396,10 @@
 											<li><a href="#">Recent changes</a></li>
 											<li><a href="#">All by date</a></li>
 											<li><a href="#">Aggregations</a></li>
-											<li><a href="#">Search by tags</a></li>
+											<li><a href="#">Search by tags</a>
+												<ul id="menuSearchesByTag">
+												</ul>
+											</li>
 											<li><a href="#">Saved Searches</a>
 												<ul id="menuSavedSearchesBookmarks">
 												</ul>
@@ -499,12 +507,25 @@
 					<div id=my-records-saved-searches class=hide>
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
-							<div class=saved-search-subsubheading id="divFavLink"><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-                            <div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
+							<div class=saved-search-subsubheading id="divFavLink">
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"");}'>My Favourites</a>
+							</div>
+							<div class=saved-search-subsubheading>
+								<a id="search-recent" href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a>
+							</div>
+							<div class=saved-search-subsubheading>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m");}'>All (date order)</a>
+							</div>
                             <div class=saved-search-subsubheading id="divAggLink1"><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
-                            <div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
-							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#"><img src='../common/images/external_link_16x16.gif' width="12" height="12">&nbsp;My Blog</a></div>
+                            <div class=saved-search-subsubheading><a id="search-by-tag-link" href="#" onClick="top.HEURIST.search.recMenuTags.show(); return false;">My Tags</a></div>
+                            <!-- it shows behind central panel because of YUI layout
+                            <ul class="sf-menu sf-vertical">
+        						<li><div>My Tags</div>
+									<ul id="menuSearchesByTag_in_sidebar"></ul>
+								</li>
+							</ul> -->
+
+							<div class="saved-search-subsubheading"><a id="my-blog-link" target="_blank" href="#" class="external-link">My Blog</a></div>
 							<!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=my-records-saved-searches-searches></div>
@@ -513,8 +534,10 @@
 					<div id=all-records-saved-searches class=hide>
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
+							<div class=saved-search-subsubheading>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></div>
+							<div class=saved-search-subsubheading>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All (date order)</a></div>
                             <div class=saved-search-subsubheading id="divAggLink2"><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
                             <!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
@@ -539,7 +562,6 @@
 					<div id=collection-info></div>
 					</div>
 				</div>
-				<div id=tag-search-links></div>
 			</div>
 
 </div>

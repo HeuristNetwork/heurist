@@ -1325,7 +1325,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 var alts2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
                 var alts1 = { "hide": "<span>Show Help</span>", "show": "<span>Hide Help</span>" };
 
-                var helpStatus = top.HEURIST.util.getDisplayPreference("help");
+                var helpStatus = top.HEURIST.util.displayPreferences?top.HEURIST.util.getDisplayPreference("help"):'show';
                 helpDiv.title = alts2[helpStatus];
                 helpDiv.innerHTML = alts1[helpStatus];
         }
@@ -1733,7 +1733,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			context = context[namespaces[i]];
 		}
 		return context[func].apply(this, args);
-	}
+	},
 
 };
 

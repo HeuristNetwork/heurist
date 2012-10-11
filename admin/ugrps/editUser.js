@@ -38,6 +38,7 @@ function UserEditor() {
 			_updatedDetails = [], //field values
 			_db,
 			_isAdmin = true,
+			_isApprove = false,
 			_isRegistration = false;
 
 	/**
@@ -56,6 +57,7 @@ function UserEditor() {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				_recID = top.HEURIST.parameters.recID;
 				_groupID = top.HEURIST.parameters.groupID;
+				_isApprove = (top.HEURIST.is_admin() && top.HEURIST.parameters.approve=='1');
 
 				if(Hul.isempty(_groupID) && Hul.isempty(_recID)){
 					_recID = top.HEURIST.get_user_id();
@@ -107,6 +109,11 @@ function UserEditor() {
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "inline-block";
 		}
+		if(_isApprove){
+			Dom.get("ugr_Enabled").checked = true;
+			Dom.get("btn_approve").style.display = "inline-block";
+		}
+
 
 	}
 
