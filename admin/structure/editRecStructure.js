@@ -150,6 +150,13 @@ function EditRecStructure() {
 				}
 			});
 
+			function _hidevalueforseparator(elLiner, oRecord, oColumn, oData){
+					var type = oRecord.getData("dty_Type");
+					if(type!=='separator'){
+						elLiner.innerHTML = oData;
+					}
+			}
+
 
 			var myColumnDefs = [
 			{
@@ -157,7 +164,9 @@ function EditRecStructure() {
 				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>",
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+					if(_expandedRecord != oRecord.getData("rst_ID")){
+						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+					}
 				}
 			},
 			{
@@ -178,7 +187,9 @@ function EditRecStructure() {
 			{ key: "dty_Type", label: "Data Type", sortable:false, width:90,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("dty_Type");
-					elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+					if(type!=='separator'){
+						elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+					}
 				}
 			},
 			{
@@ -200,7 +211,8 @@ function EditRecStructure() {
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
-				key:"rst_RequirementType", label: "Requirement", sortable:false
+				key:"rst_RequirementType", label: "Requirement", sortable:false,
+				formatter: _hidevalueforseparator
 			},
 			{
 				key:"rst_MinValues", label: "Min", hidden:true
@@ -208,15 +220,18 @@ function EditRecStructure() {
 			{
 				key:"rst_MaxValues", label: "Repeatability", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
-					var minval = oRecord.getData('rst_MinValues');
-					var maxval = oRecord.getData('rst_MaxValues');
-					var res = 'repeatable';
-					if(Number(maxval)===1){
-						res = 'single value';
-					}else if(Number(maxval)>1){
-						res = 'limit '+maxval;
+					var type = oRecord.getData("dty_Type");
+					if(type!=='separator'){
+						var minval = oRecord.getData('rst_MinValues');
+						var maxval = oRecord.getData('rst_MaxValues');
+						var res = 'repeatable';
+						if(Number(maxval)===1){
+							res = 'single value';
+						}else if(Number(maxval)>1){
+							res = 'limit '+maxval;
+						}
+						elLiner.innerHTML = res;
 					}
-					elLiner.innerHTML = res;
 				}
 
 			},
@@ -230,10 +245,12 @@ function EditRecStructure() {
 				}
 			},
             {
-                key:"dty_Name", label: "Based on template", width:100, sortable:false
+                key:"dty_Name", label: "Based on template", width:100, sortable:false,
+				formatter: _hidevalueforseparator
             },
 			{
-				key:"rst_Status", label: "Status", sortable:false, className:"center"
+				key:"rst_Status", label: "Status", sortable:false, className:"center",
+				formatter: _hidevalueforseparator
 			},
 			{
 				key: "rst_values",
@@ -242,14 +259,14 @@ function EditRecStructure() {
 				sortable: false,
 				className:"center",
 				formatter: function(elLiner, oRecord, oColumn, oData){
-					var status = oRecord.getData('rst_Status');
-					var isRequired = (oRecord.getData('rst_RequirementType')==='required');
-					if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
-						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
-					}else{
-						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-					};
-					elLiner.innerHTML = statusLock;
+						var status = oRecord.getData('rst_Status');
+						var isRequired = (oRecord.getData('rst_RequirementType')==='required');
+						if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
+							statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
+						}else{
+							statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
+						};
+						elLiner.innerHTML = statusLock;
 				}
 			}
 			];
@@ -299,12 +316,12 @@ function EditRecStructure() {
 					// Required/recommended optional
                     '<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
 					'<div class="input-cell">'+
-					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:20px">'+
+					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px">'+
 					'<option value="required">required</option>'+
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
-					'<span id="ed'+rst_ID+'_spanMinValue"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
+					'<span id="ed'+rst_ID+'_spanMinValue" style="visibility:hidden;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					// Minimum values
                     '_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
@@ -316,9 +333,10 @@ function EditRecStructure() {
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
 					'<option value="repeatable">repeatable</option>'+
-					'<option value="limited">limited</option></select>'+
+					'<option value="limited">limited</option>'+ //IJ request HIDE IT 2012-10-12
+					'</select>'+
 					// Maximum values
-                    '<span id="ed'+rst_ID+'_spanMaxValue"><label>Maximum&nbsp;values:</label>'+
+                    '<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Maximum Values" style="width:20px; text-align:center;" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
@@ -412,8 +430,10 @@ function EditRecStructure() {
 				function __toggle(){
 
 					if(!isExpanded){ //now it is expanded
-						_myDataTable.onEventToggleRowExpansion(record_id);
 						_expandedRecord = rst_ID;
+
+						_myDataTable.onEventToggleRowExpansion(record_id);
+
 						_fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
 
 
@@ -422,9 +442,21 @@ function EditRecStructure() {
 						var pos = rowrec.offsetTop;
 						maindiv.scrollTop = pos - 30;
 
+						var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
+						elLiner.innerHTML = "";
+
 					}else{
 						_saveUpdates(false); //save on server
+						_expandedRecord = null;
 					}
+
+					/*var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
+					if(_expandedRecord != null){
+						elLiner.innerHTML = "";
+					}else{
+						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+					}*/
+
 				}
 
 				if(!Hul.isnull(record_id)){
@@ -616,6 +648,10 @@ function EditRecStructure() {
 		var oRecord = _getRecordById(rst_ID).record;
 		var record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
 		if(!Hul.isnull(record_id)){
+
+			var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
+			elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>";
+
 			if(needSave){
 				_fromUItoArray(rst_ID); //before collapse save from UI to HEURIST
 			}
@@ -740,11 +776,13 @@ function EditRecStructure() {
 	* add or remove 'reserved' option in status dropdown
 	*/
 	function _optionReserved(selstatus, isAdd){
-		if(isAdd && selstatus.length<4){
-			Hul.addoption(selstatus, "reserved", "reserved");
-		}else if (!isAdd && selstatus.length===4){
-			selstatus.length=3;
-			//selstaus.remove(3);
+		if(selstatus){
+			if(isAdd && selstatus.length<4){
+				Hul.addoption(selstatus, "reserved", "reserved");
+			}else if (!isAdd && selstatus.length===4){
+				selstatus.length=3;
+				//selstaus.remove(3);
+			}
 		}
 	}
 
@@ -775,13 +813,15 @@ function EditRecStructure() {
 		var isReserved = (status === "reserved");// || status === "approved");
 
         // Reserved can only be set on database controleld by the Heurist group, identified by DBID<1000
-		if (((dbId>0) && (dbId<1001) /* && ian 23/9/12 allow setting Reserved even if not origin (original_dbId===dbId) */ ) || isReserved)
-		{
-			_optionReserved(selstatus, true);
-		}else{
-			_optionReserved(selstatus, false);
+		if(selstatus){
+			if (((dbId>0) && (dbId<1001) /* && ian 23/9/12 allow setting Reserved even if not origin (original_dbId===dbId) */ ) || isReserved)
+			{
+				_optionReserved(selstatus, true);
+			}else{
+				_optionReserved(selstatus, false);
+			}
+			selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001));
 		}
-		selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001));
 
 		var k;
 		for(k=0; k<fieldnames.length; k++){
@@ -870,21 +910,23 @@ function EditRecStructure() {
 			var dr = Dom.get('divRepeatability');
 			Dom.setStyle(dr, "display", "none");
 		}else{
+
+			//determine what is repeatability type
+			var sel = Dom.get("ed"+rst_ID+"_Repeatability");
+			var maxval = Number(Dom.get("ed"+rst_ID+"_rst_MaxValues").value);
+			var res = 'repeatable';
+			if(maxval===1){
+				res = 'single';
+			}else if(maxval>1){
+				res = 'limited';
+			}
+			sel.value = res;
+			onRepeatChange(Number(rst_ID));
+
 			//update min/max visibility
 			onReqtypeChange(Number(rst_ID));
 		}
 
-		//determine what is repeatability type
-		var sel = Dom.get("ed"+rst_ID+"_Repeatability");
-		var maxval = Number(Dom.get("ed"+rst_ID+"_rst_MaxValues").value);
-		var res = 'repeatable';
-		if(maxval===1){
-			res = 'single';
-		}else if(maxval>1){
-			res = 'limited';
-		}
-		sel.value = res;
-		onRepeatChange(Number(rst_ID));
 
 		//If reserved, requirements can only be increased, nor can you change min or max values
 		onStatusChange(Number(rst_ID));
@@ -1122,6 +1164,9 @@ function EditRecStructure() {
 			// in case of addition - all fields were affected
 			_updatedFields = null;
 
+			dragDropDisable();
+			dragDropEnable();
+
 			_saveUpdates(false);
 		}
 
@@ -1268,6 +1313,7 @@ function EditRecStructure() {
 			// Create a Drag instance for each row
 			myDTDrags[id] = new YAHOO.example.DDRows(id);
 		}
+		_isDragEnabled = true;
 	}
 	//////////////////////////////////////////////////////////////////////////////
 	// Diable drag and drop class
@@ -1285,6 +1331,7 @@ function EditRecStructure() {
 			}
 		}
 		myDTDrags = {};
+		_isDragEnabled = false;
 	}
 
 	/**
@@ -1678,36 +1725,38 @@ function onReqtypeChange(evt){
 		name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
 	}
 
-	var span_min = Dom.get(name+'_spanMinValue');
+	var rep_el =  Dom.get(name+'_Repeatability');
+
 	var el_min = Dom.get(name+"_rst_MinValues");
 	var el_max = Dom.get(name+"_rst_MaxValues");
+	//var status = Dom.get(name+"_rst_Status").value;
 
 	if(el.value === "required"){
-		if(Number(el_min.value)===0) {  el_min.value = 1; }
-		//el_max.value = 1;
-		Dom.setStyle(span_min, "visibility", "visible");
+		if(Number(el_min.value)===0)
+		{
+			el_min.value = 1;
+		}
+
+		//Dom.setStyle(span_min, "visibility", "visible");
 	} else if(el.value === "recommended"){
 		el_min.value = 0;
-		//el_max.value = 1;
-		Dom.setStyle(span_min, "visibility", "hidden");
+
+		//Dom.setStyle(span_min, "visibility", "hidden");
 	} else if(el.value === "optional"){
 		el_min.value = 0;
-		//el_max.value = 1;
-		Dom.setStyle(span_min, "visibility", "hidden");
+
+		//Dom.setStyle(span_min, "visibility", "hidden");
 	} else if(el.value === "forbidden"){
 		el_min.value = 0;
 		el_max.value = 0;
-		Dom.setStyle(span_min, "visibility", "hidden");
 
-		var status = Dom.get(name+"_rst_Status").value;
-		Dom.get(name+"_Repeatability").disabled = (!(status === "reserved"));// || status === "approved"));
+		var span_max = Dom.get(name+'_spanMaxValue');
+		Dom.setStyle(span_max, "visibility", "hidden");
 	}
 
 	if(el.value !== "forbidden"){
-		Dom.get(name+"_Repeatability").disabled = false;
-		if(typeof evt !== 'number'){
-			onRepeatChange(evt);
-		}
+		//rep_el.disabled = false;
+		onRepeatChange(evt);
 	}
 }
 
@@ -1726,21 +1775,31 @@ function onRepeatChange(evt){
 	 	name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
 	}
 
+	var el =  Dom.get(name+'_rst_RequirementType');
+	if(el.value !== "forbidden"){
+
+		el =  Dom.get(name+'_Repeatability');
 	var span_min = Dom.get(name+'_spanMinValue');
 	var span_max = Dom.get(name+'_spanMaxValue');
 	var el_min = Dom.get(name+"_rst_MinValues");
 	var el_max = Dom.get(name+"_rst_MaxValues");
 
+	Dom.setStyle(span_max, "visibility", "hidden");
+
 	if(el.value === "single"){
 		el_max.value = 1;
-		Dom.setStyle(span_max, "visibility", "hidden");
+		//Dom.setStyle(span_min, "visibility", "hidden");
+		//Dom.setStyle(span_max, "visibility", "hidden");
 	} else if(el.value === "repeatable"){
 		el_max.value = 0;
-		Dom.setStyle(span_max, "visibility", "hidden");
+		//Dom.setStyle(span_min, "visibility", "hidden");
+		//Dom.setStyle(span_max, "visibility", "hidden");
 	} else if(el.value === "limited"){
 		if(el_max.value<2) el_max.value = 2;
-		Dom.setStyle(span_min, "visibility", "visible");
 		Dom.setStyle(span_max, "visibility", "visible");
+		//TEMP Dom.setStyle(span_max, "visibility", "visible");
+	}
+
 	}
 }
 

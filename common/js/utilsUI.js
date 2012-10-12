@@ -1530,6 +1530,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	validate: function(evt) {
 		var theEvent = evt || window.event;
 		var key = theEvent.keyCode || theEvent.which;
+		if(key==37 || key==39) return;
 		key = String.fromCharCode( key );
 		var regex = /[0-9]|\./;
 		if( !regex.test(key) ) {

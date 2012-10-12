@@ -135,6 +135,22 @@ if (@$_REQUEST['logout']) {
    <?php } ?>
  }
 
+
+ function onKeyPress(event) {
+    var charCode;
+
+    if(event && event.which){
+        charCode = event.which;
+    }else if(window.event){
+        event = window.event;
+        charCode = event.keyCode;
+    }
+
+    if(charCode == 13 && document.getElementById('password').value && document.getElementById('username').value) {
+       document.forms['mainform'].submit();
+    }
+}
+
 </script>
 <script src='../../common/js/utilsLoad.js'></script>
 <script src='../../common/js/utilsUI.js'></script>
@@ -174,12 +190,12 @@ if (@$_REQUEST['logout']) {
 
 	<tr class="input-row">
 	<td class="input-header-cell">Username</td>
-	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"><br/>email address by default</td>
+	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in" onkeypress="onKeyPress(event)"><br/>email address by default</td>
 	</tr>
 
    <tr class="input-row">
     <td class="input-header-cell">Password</td>
-    <td class="input-cell"><input type="password" name="password" size="20" class="in"><br/>case sensitive</td>
+    <td class="input-cell"><input type="password" name="password" id="password" size="20" class="in" onkeypress="onKeyPress(event)"><br/>case sensitive</td>
    </tr>
 
    <tr class="input-row">
@@ -198,15 +214,16 @@ if (@$_REQUEST['logout']) {
    <tr><td colspan="2"></td></tr>
 
    <tr>
-    <td align="right">
+    <td align="right">&nbsp;</td>
+    <td align="left">
     	<div id=login-button><a href="#" onclick="{document.forms['mainform'].submit()}" title="Log in to use Heurist - new users please register first">
     			<img src=../images/111x30.gif></a></div>
-	</td>
-    <td align="left"><?php if(defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION){?>
+    	<?php if(false && defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION){?>
     	<div id=register-button><a href="#"
     			onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>', {height:640, width:700});return false}"
     			title="Register to use Heurist - takes only a couple of minutes"><img src=../images/111x30.gif></a></div>
-    	<?}
+    	<?php
+    		}
 //onclick="window.open(this.href,'','status=0,scrollbars=0,width=500,height=200'); return false;"
     	?>
     </td>
@@ -221,6 +238,15 @@ if (@$_REQUEST['logout']) {
 		onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>', {height:200, width:400});return false}">
   		Click here to reset your password</a>
  </p>
+ <?php if(defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION){?>
+ <p align=center>
+  <a href='#'
+		onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>', {height:200, width:400});return false}">
+  		Don't have a login? Cluicjk here to register</a>
+ </p>
+ <?php } ?>
+
+
 
 
 

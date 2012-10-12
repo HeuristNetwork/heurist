@@ -593,7 +593,9 @@
 			$query = "insert into defRecTypes ($colNames) values ($query)";
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0 || is_string($rows) ) {
+			if($rows == "1062"){
+				$ret =  "Record type with specified name already exists in the database, please use the existing record type";
+			}else if ($rows==0 || is_string($rows) ) {
 				$ret = "SQL error inserting data into table defRecTypes: ".$rows;
 			} else {
 				$rtyID = $db->insert_id;
@@ -781,7 +783,9 @@
 				/*****DEBUG****///error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
 
 				$res = execSQL($db, $query, $parameters, true);
-				if(!is_numeric($res)){
+				if($rows == "1062"){
+					$ret =  "Record type with specified name already exists in the database, please use the existing record type";
+				}else if(!is_numeric($res)){
 					$ret = "SQL error updating record type $rtyID in updateRectype: ".$res;
 					//}else if ($rows==0) {
 					//	$ret = "error updating $rtyID in updateRectype - ".$msqli->error;
@@ -1316,7 +1320,9 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0 || is_string($rows) ) {
+			if($rows == "1062"){
+				$ret =  "Field type with specified name already exists in the database, please use the existing field type";
+			}else  if ($rows==0 || is_string($rows) ) {
 				$ret = "Error inserting data into defDetailTypes table: ".$rows;
 			} else {
 				$dtyID = $db->insert_id;
@@ -1417,7 +1423,9 @@
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
 				$rows = execSQL($db, $query, $parameters, true);
-				if ($rows==0 || is_string($rows) ) {
+				if($rows == "1062"){
+					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
+				}else if ($rows==0 || is_string($rows) ) {
 					$ret = "SQL error updating field type $dtyID in updateDetailType: ".$query."  ".$parameters[1]."  ".$parameters[2]; //$db->error;
 				} else {
 					$ret = $dtyID;
@@ -1729,11 +1737,17 @@
 		$result;
 
 		if($close){
-			$result = $mysqli->error;
+
+			if($mysqli->errno==1062){
+				$result = "1062";
+			}else{
+				$result = $mysqli->error;
+			}
+
 			if($result == ""){
 				$result = $mysqli->affected_rows;
 			}else{
-				error_log(">>>Error=".$mysqli->error);
+				error_log(">>>Error=".$mysqli->error."   Code:".$mysqli->errno);
 			}
 		} else {
 			$meta = $stmt->result_metadata();

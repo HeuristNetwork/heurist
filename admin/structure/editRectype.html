@@ -143,7 +143,9 @@
 	</div>
 
 	<!-- OPTIONAL FIELDS -->
-	<div id="optional" class="togglepnl"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Optional information</a>
+	<div id="optional" class="togglepnl"><a
+		style="margin-left: 40px;"
+			onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
 	<div id="options" class="hidden" style="background-color:#ffffff;">
 
 	<div class="input-row">
@@ -543,8 +545,8 @@
 			document.getElementById("rty_Status").disabled = reserved;
 			document.getElementById("rty_OrderInGroup").disabled = disable;
 			document.getElementById("rty_FlagAsFieldset").disabled = disable;
-			document.getElementById("rty_ReferenceURL").disabled = disable;
 
+			//document.getElementById("rty_ReferenceURL").disabled = disable;
 			//document.getElementById("rty_Name").disabled = disable;
 			//document.getElementById("rty_Plural").disabled = disable;
 			//groupDropdown.disabled = disable;

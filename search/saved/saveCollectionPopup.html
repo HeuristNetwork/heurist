@@ -65,11 +65,12 @@
 					q = q[1].replace(/\+?sortby:('[^']+'|"[^"]+"|\S+)/g,'');	//remove any sortby predicates
 					q = q.replace(/OR(?![^:='"]+['"])/g,'');	// remove any 'OR' s not in a quoted string
 					var preds = q.match(/\S+[:=](?:'[^']+'|"[^"]+"|\S+)|[^:='"\s]+/g);	//create an array of all predicates including stand alone words
-
-					for (var j =0; j < preds.length; j++) {
-						if(preds[j].indexOf('ids:')===0){
-							res.push([ss[0], i]); //name and index in top.HEURIST.user.savedSearches
-							break;
+					if(preds){
+						for (var j =0; j < preds.length; j++) {
+							if(preds[j].indexOf('ids:')===0){
+								res.push([ss[0], i]); //name and index in top.HEURIST.user.savedSearches
+								break;
+							}
 						}
 					}
 				}
@@ -208,7 +209,16 @@
 
 					var m = ss[1].match(/ids:([^&]*)/);
 					var ex_rec_ids = m[1];
-					var q = ss[1].replace(/ids:([^&]*)/ , "ids:"+ex_rec_ids+","+rec_ids);
+
+					function _unique(array){
+    					return $.grep(array,function(el,index){
+        									return index == $.inArray(el,array);
+    									});
+    				};
+					var arr = (ex_rec_ids+","+rec_ids).split(",");
+					arr = _unique(arr);
+
+					var q = ss[1].replace(/ids:([^&]*)/ , "ids:"+arr.join(","));
 
 					ss_query_elt.value = q;
 
@@ -225,7 +235,7 @@
 
 
 					var query = new Array();
-					if (ss_wgid_elt.value > 0 ){
+					//ARTEM 2012-10-12 if (ss_wgid_elt.value > 0 ){
 
 						var bkmk_only = document.getElementById("bookmark-check");
 
@@ -234,9 +244,9 @@
 							query.push("w=all");
 						} else {
 							query.push("w=bookmark");
-							rec_ids = rec_ids + " user:" + top.HEURIST.get_user_id();
+							//ARTEM 2012-10-12 rec_ids = rec_ids + " user:" + top.HEURIST.get_user_id();
 						}
-					}
+					//}
 					query.push("q=ids:"+rec_ids);
 
 					for (var p in top.HEURIST.parameters) { //remove it at all????
@@ -365,7 +375,7 @@
 				<input type="radio" name="ssType" id="ssType2" value="2" checked="checked"
 				onclick="switchMode('add_to_collection',['add_to_search','create_new_search'],'collection-select');"
 				style="float:left;">
-				<div style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing collection</div>
+				<label for="ssType2" style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing collection</label>
 				<span id="add_to_collection_span">
 					<select id="collection-select" style="width:150px">
 					</select>
@@ -378,7 +388,7 @@
 				<input type="radio" name="ssType" id="ssType0" value="0"
 				onclick="switchMode('add_to_search',['add_to_collection','create_new_search'],'search-select');"
 				style="float:left;">
-				<div style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing saved search</div>
+				<label for="ssType0" style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing saved search</label>
 				<span id="add_to_search_span">
 					<select id="search-select" style="width:150px" onchange="showTagInfo(event);">
 					</select>
@@ -396,7 +406,7 @@
 
 		<div id="create_new_search">
 			<input type="radio" name="ssType" id="ssType1" value="1"
-					onclick="switchModeNew()">&nbsp;<b>Create new collection</b><br/>
+					onclick="switchModeNew()">&nbsp;<label for="ssType1"><b>Create new collection</b></label><br/>
 			<div style="margin-left:16px">
 					<div class="div-section">
 						<div style="width:170px; text-align:right; display:inline-block">Name for this search:</div>

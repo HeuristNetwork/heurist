@@ -157,11 +157,11 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
 
-						Dom.get('toolbar').style.display = 'none';
+						Dom.get('filtertoolbar').style.display = 'none';
 
 
 				}else{
-						Dom.get('toolbar').style.display = 'block';
+						Dom.get('filtertoolbar').style.display = 'block';
 
 						//create datatable and fill it values of all rectypes
 						for (rty_ID in top.HEURIST.rectypes.typedefs) {
@@ -251,17 +251,17 @@ oRecord.getData('description')+'"/>';}
 
 								var myConfigs = {
 									//selectionMode: "singlecell",
-									paginator : new YAHOO.widget.Paginator({
+									/*paginator : new YAHOO.widget.Paginator({
 										rowsPerPage: 100, // REQUIRED
 										totalRecords: arr.length, // OPTIONAL
 										containers: ['dt_pagination_top','dt_pagination_bottom'],
 										// use a custom layout for pagination controls
-										template: "{PageLinks}",  //" Show {RowsPerPageDropdown} per page",
+										template: "&nbsp;Page: {PageLinks}", // Show {RowsPerPageDropdown} per page",
 										// show all links
 										pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
 										// use these in the rows-per-page dropdown
 										//, rowsPerPageOptions: [100]
-									})
+									})*/
 								};
 
 								_myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);

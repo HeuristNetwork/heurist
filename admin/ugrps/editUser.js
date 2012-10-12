@@ -38,7 +38,6 @@ function UserEditor() {
 			_updatedDetails = [], //field values
 			_db,
 			_isAdmin = true,
-			_isApprove = false,
 			_isRegistration = false;
 
 	/**
@@ -49,6 +48,8 @@ function UserEditor() {
 	function _init() {
 
 		_isAdmin = true;
+
+		var	_isApprove = false;
 
 		var groupID;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -109,7 +110,7 @@ function UserEditor() {
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "inline-block";
 		}
-		if(_isApprove){
+		if(_isApprove && !Dom.get("ugr_Enabled").checked){
 			Dom.get("ugr_Enabled").checked = true;
 			Dom.get("btn_approve").style.display = "inline-block";
 		}

@@ -74,11 +74,11 @@
 	width: 100%;
 }
 .input-row label {width: auto;color: black;margin: 0 10px 0 0;padding: 0;}
-#toolbar .input-cell select { margin-right:10px}
+#filtertoolbar .input-cell select { margin-right:10px}
 .input-row .input-header-cell {vertical-align:baseline}
 .input-row div.input-header-cell {width:100px}
-			#toolbar .input-row div.input-header-cell {min-width:100px}
-			#toolbar .input-row label {min-width:100px; width:100px}
+			#filtertoolbar .input-row div.input-header-cell {min-width:100px}
+			#filtertoolbar .input-row label {min-width:100px; width:100px}
 </style>
 </head>
 
@@ -88,13 +88,13 @@
 <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 <script type="text/javascript" src="selectDetailType.js"></script>
 
-<div id="toolbar">
+<div id="filtertoolbar">
     <div class="input-row">
         <div class="input-header-cell">
             Filter by group
         </div>
         <div class="input-cell">
-            <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:20">
+            <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;">
                     <option value="all">all groups</option>
             </select>
         </div>
@@ -124,7 +124,7 @@
   <div style="display:inline-block;"> </div>
   <div style="float:right; text-align:right;padding-top:5px">
     <label id="lblDefinenew1"></label>
-        <input type="button" style="margin:0 5px" value="Define New" onClick="onDefineNewType()" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selection) before creating a new field type." />     
+        <input type="button" style="margin:0 5px" value="Define New" onClick="onDefineNewType()" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selection) before creating a new field type." />
   </div>
   <div style="float:right; text-align:right;padding-top:5px">
     <label id="lblSelect1"></label>

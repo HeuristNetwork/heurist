@@ -153,19 +153,6 @@
 				}
 			}
 
-			/**
-			*
-			*/
-			function saveCollection()
-			{
-				if (top.HEURIST.search.collectCount == 0) {
-					alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
-				}else{
-					top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:380});
-				}
-				//return false;
-			}
-
 		</script>
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
@@ -451,11 +438,12 @@
 							<!-- </span><span class="collected-shown" style="display:inline"> -->
 							<li><div id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</div>
 								<ul>
-									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
-									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
-									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a></li>
-									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="saveCollection()">Save to...</a></li>
-									<li><a class=toolbar-large-icon-link-normal href=" " onClick="top.HEURIST.search.loadSearchLocation('?q=_COLLECTED_&amp;label=Collected');return false;" title="Show current set of records in collection" >Show</a></li>
+									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.collectionAdd();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
+									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.collectionDel(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
+									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection"
+											onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.collectionOnUpdate); document.getElementById("q").focus(); return false;'>Remove all</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="top.HEURIST.search.collectionSave()">Save to...</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" onClick="{top.HEURIST.search.executeQuery('?q=_COLLECTED_&amp;label=Collected');}" title="Show current set of records in collection" >Show</a></li>
 								</ul>
 							</li>
 							<li><div>Share</div>
@@ -476,7 +464,8 @@
 									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
 									also, provide this in the Advanced pulldown to render the current selection
 									-->
-									<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
+									<li><a href="#" id="resetPanels" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
+									<li><a href="#" id="resetPanels_HideNav" title="Hide Navigation panel and set Search and View panels to 1:2" class="seperator">Search + View</a></li>
 									<li><a href="#"> Saved Filters and layouts</a>
 										<ul id="menuSavedFiltersAndLayouts">
 										</ul>

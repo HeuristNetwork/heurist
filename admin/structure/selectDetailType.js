@@ -63,8 +63,8 @@ function SelectDetailType() {
 								scope   : _myDataTable,
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 							});
-							
-							
+
+
 	};
 
 
@@ -79,7 +79,7 @@ function SelectDetailType() {
 	function _init() {
 
 		if(isnull(_myDataTable)){
-			
+
 			_rolloverInfo = new HintDiv('inforollover33', 200, 170, '<div id="inforollover3"></div>');
 
 								// 1. Reads GET parameters
@@ -124,7 +124,7 @@ function SelectDetailType() {
 										}
 									}
 								}//for
-								
+
 								//sort by name
 								arr.sort(function(a,b){return a[2]>b[2]});
 
@@ -188,19 +188,19 @@ function SelectDetailType() {
 								];
 
 								var myConfigs = {
-									sortedBy:{key:"name", dir:"asc"},
+									sortedBy:{key:"name", dir:"asc"}
 									//selectionMode: "singlecell",
-									paginator : new YAHOO.widget.Paginator({
-										rowsPerPage: 100, // REQUIRED
+									/*, paginator : new YAHOO.widget.Paginator({
+										rowsPerPage: 10, // REQUIRED
 										totalRecords: arr.length, // OPTIONAL
 										containers: ['dt_pagination_top','dt_pagination_bottom'],
 										// use a custom layout for pagination controls
-										template: "{PageLinks}",  //" Show {RowsPerPageDropdown} per page",
+										template: "&nbsp;Page: {PageLinks} Show {RowsPerPageDropdown} per page",
 										// show all links
 										pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
 										// use these in the rows-per-page dropdown
 										//, rowsPerPageOptions: [100]
-									})
+									})*/
 								};
 
 								_myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);
@@ -226,8 +226,8 @@ function SelectDetailType() {
 								// mouse over "help" column shows the datailed description (tooltip)
 								//
 								_myDataTable.on('cellMouseoverEvent', _showInfoToolTip)
-								
-						
+
+
 
 								//
 								// Subscribe to events for row selection highlighting
@@ -262,7 +262,7 @@ function SelectDetailType() {
 
 		} //isnull(_myDataTable)
 	}//end of initialization ==============================
-	
+
 	/**
 	* Show popup div with information about field types
 	*/
@@ -274,18 +274,18 @@ function SelectDetailType() {
 			column = _myDataTable.getColumn(target),
 			record = _myDataTable.getRecord(target),
 			event = oArgs.event;
-		
+
 		if(!isnull(column) && (column.key === 'ptrtarget_rectypeids' || column.key === 'usage')) {
-		
+
 				var dty_ID = record.getData('info'),
 					newID = ((column.key === 'usage')?"u":"pt")+dty_ID;
-			
+
 				if(!Hul.isnull(dty_ID)){
 					if(currentTipId !== newID) {
 						currentTipId = newID;
 
 						if(column.key==="usage"){
-							
+
 								//find all records that reference this type
 								var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 								if(!isnull(aUsage)){
@@ -295,9 +295,9 @@ function SelectDetailType() {
 										textTip = textTip + "<li>"+top.HEURIST.rectypes.names[aUsage[k]]+"</li>";
 									}
 									textTip = textTip + "</ul></p>";
-								}							
+								}
 						}else{
-							
+
 								var dttype = record.getData('type');
 								var value;
 								if(dttype === "fieldsetmarker") {
@@ -305,7 +305,7 @@ function SelectDetailType() {
 								} else {
 									value = record.getData('ptrtarget_rectypeids');
 								}
-								textTip = _getRecPointers(dttype, value);							
+								textTip = _getRecPointers(dttype, value);
 						}
 
 
@@ -326,7 +326,7 @@ function SelectDetailType() {
 				}
 		}
 	}
-	
+
 	/**
 	* recreateRecTypesPreview - creates and fills selector for Record(s) pointers if datatype
 	* is relmarker or resource
