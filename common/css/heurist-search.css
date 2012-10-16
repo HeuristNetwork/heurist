@@ -293,7 +293,7 @@ body div.result_row.expanded { background-image: url(../images/tdown.gif); backg
 /*.result_row img.bookmarked, div.result_row img.unbookmarked { display: none; }*/
 
 .bookmarked, .unbookmarked { margin-left: 2px; }
-.bookmarked { background-image: url(../images/star-yellow.gif); }
+.bookmarked { background-image: url(../images/star-red.gif); }
 .unbookmarked { background-image: url(../images/star-white.gif); cursor: pointer; }
 .unbookmarked:hover { background-image: url(../images/star-grey.gif); }
 
@@ -519,7 +519,7 @@ nobr#activesaved div {
 }
 nobr.bkmk#activesaved,  nobr#activesaved {
 	background: #A4B4CB;
-	padding-left: 18px;
+	padding-left: 14px;
 	background-image:url(../images/saved-searches-bg.png);
 }
 nobr#activesaved a { padding-left:0; }

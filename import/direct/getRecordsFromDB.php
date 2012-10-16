@@ -648,7 +648,7 @@
 							$key = $_REQUEST['cbd'.$row3[0]];
 							if(intval($key)<1) {
 								if($rt==52){//debug
-									print "mapping not defined for detail #".$dtid;
+									print "mapping not defined for detail (field) #".$dtid;
 								}
 								//mapping for this detail type is not specified
 								continue;

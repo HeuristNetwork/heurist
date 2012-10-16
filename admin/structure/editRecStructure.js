@@ -357,7 +357,8 @@ function EditRecStructure() {
                     '<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
 					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-                    //REMOVED BY IAN's request on 16-09	- too much complexity
+                    '<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Select Recprd Types"</span>'+
+                                        //REMOVED BY IAN's request on 16-09	- too much complexity
                     // '<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
 					'</div></div>'+
 
@@ -522,7 +523,7 @@ function EditRecStructure() {
 
 				if(elLink.hash === "#delete"){
 					var dty_name = oRecord.getData('dty_Name');
-					var r=confirm("Delete detail #"+dty_ID+" '"+dty_name+"' from this record structure?");
+					var r=confirm("Delete field #"+dty_ID+" '"+dty_name+"' from this record structure?");
 					if (r) {
 
 						_doExpliciteCollapse(null ,false); //force collapse this row
