@@ -54,6 +54,7 @@
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script type="text/javascript" src="../../external/tinymce3.4.4/jscripts/tiny_mce/tiny_mce.js"></script>
+
 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
 <style type="text/css">
@@ -89,34 +90,26 @@
 -->
 
 <div id="viewercontainer">
-	<div id="toolbar"
-				style="width:100%;text-align:left;">
-		<!--<div id="rep_list" style="padding-left:10px;display:inline-block;">
-					<label style="width:100px">Select template</label>
-					<select id="selTemplates" onChange="onSelectTemplate()" style="width:200px;"></select>
-					<button onClick="onSelectTemplate()">Reload</button>
-					<button onClick="onPrint()">Print</button>
-					<button onClick="onFile()">Get URL</button>
-					<button onClick="onShowEditor()">Edit</button>
-					<button onClick="onGenerate()">New Template</button>
-					<input type="checkbox" id="cbUseAllRecords1" onChange="onUseAll(event)"/>Selected only
-				</div>-->
-		<div><label style="width:100px">Select template</label>
-		<select id="selTemplates" onChange="onSelectTemplate()" style="width:200px;vertical-align:middle"class="button">
-		</select>
+	<div id="toolbardiv" style="width:100%;height:30px;">
+		<div style="padding:5px;display:inline-block;">
+			<select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
+				<option value="all" selected="selected">All on page</option>
+				<option value="selected">Selected only</option>
+				<option value="main">Query result</option>
+			</select>
+		</div>
+		<label style="width:100px">Select template:</label>
+		<select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;"></select>
+
+		<span id="recordCount"></span>
+
 		<ul id="rep_list" class="horizontal menu">
-			<li><span class="button">Menu</span>
+			<li style="width:130px;"><span class="button">Menu</span>
 				<ul id="toolMenuItems">
 				</ul>
 			</li>
-		</ul></div>
-		<div><label style="width:100px">View</label>
-		<select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:200px;vertical-align:middle"class="button">
-			<option value="all" selected="selected">All on page</option>
-			<option value="selected">Selected only</option>
-			<option value="main">Query result</option>
-		</select></div>
-		<span id="recordCount"></span> </div>
+		</ul>
+	</div>
 	<div id="rep_container"></div>
 </div>
 <div id="editorcontainer" style="display:none">
@@ -189,7 +182,7 @@
 		</div>
 	</div>
 	<div class="actionButtons">
-		<button onClick="doExecuteFromEditor()" title="Test your template">TEST</button>
+		<button onClick="doExecuteFromEditor()" title="Test your template" style="font-size:1.1em;">TEST</button>
 		&nbsp;
 		<div style="display:inline-block;">
 			<select id="cbErrorReportLevel">

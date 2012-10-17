@@ -527,8 +527,8 @@ function ShowReps() {
 		_isviewer=isviewer;
 		_iseditor=iseditor;
 
-		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
-		Dom.get("rep_container").style.top = (iseditor) ?"0px" :"65px";
+		Dom.get("toolbardiv").style.display = (iseditor) ?"none" :"block";
+		Dom.get("rep_container").style.top = (iseditor) ?"0px" :"30px";
 		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
 		var dim = Hul.innerDimensions(this);

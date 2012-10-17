@@ -47,7 +47,7 @@
 <link rel=stylesheet href="../common/css/global.css" media="all">
 <link rel=stylesheet href="../common/css/search.css" media="all">
 
-<!-- multilevel menu -->
+<!-- multilevel menu @todo replace to YUI menu -->
 <link rel="stylesheet" type="text/css" href="../external/js/sf/	superfish.css" media="screen">
 <script type="text/javascript" src="../external/js/sf/superfish.js"></script>
 <script type="text/javascript" src="../external/js/sf/supersubs.js"></script>
@@ -75,6 +75,8 @@
 		<script src="../common/js/browserDetect.js"></script>
 		<script src="../common/php/loadHAPI.php"></script>
 		<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
+		<script type="text/javascript" src="../common/js/hintDiv.js"></script>
+
 		<script src="../common/php/getMagicNumbers.php"></script>
 		<script>
 			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
@@ -140,9 +142,12 @@
 					}
 				}
 			});
-			top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
-				// register handlers and render non-static elements of page
-				top.HEURIST.search.setupSearchPage();
+			
+			YAHOO.util.Event.onDOMReady(function(){
+				top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
+					// register handlers and render non-static elements of page
+					top.HEURIST.search.setupSearchPage();
+				});
 			});
 
 			function _bugReportCallback(title, bd, bibID) {
@@ -176,7 +181,7 @@
 									onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;"
 									title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
-						<ul id="my-heurist-menu" class="heurist-menu">
+						<ul id="my-heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
 
@@ -226,7 +231,7 @@
 					</li>
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
-						<ul id="advanced-menu" class="heurist-menu">
+						<ul id="advanced-menu">
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait"
 								title="Navigate to and login to another Heurist database">
 								Select database</a></li>
@@ -413,6 +418,7 @@
 							</li>
 							<li><div>Search</div>
 								<ul>
+									<li><a href="#" title="Simple search builder panel" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Simple search</a></li>
 									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
 									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
 									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"
@@ -493,7 +499,7 @@
 
 			<div id=left-panel-content class="panel-main-content">
                 <div id=saved>
-					<div id=my-records-saved-searches class=hide>
+					<div id=my-records-saved-searches class="sidebar-firstlevel hide">
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
 							<div class=saved-search-subsubheading id="divFavLink">
@@ -520,7 +526,7 @@
 							<div id=my-records-saved-searches-searches></div>
 						</div>
 					</div>
-					<div id=all-records-saved-searches class=hide>
+					<div id=all-records-saved-searches class="sidebar-firstlevel hide">
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
 							<div class=saved-search-subsubheading>

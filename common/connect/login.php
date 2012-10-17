@@ -241,8 +241,8 @@ if (@$_REQUEST['logout']) {
  <?php if(defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION){?>
  <p align=center>
   <a href='#'
-		onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>', {height:200, width:400});return false}">
-  		Don't have a login? Cluicjk here to register</a>
+		onclick="{top.HEURIST.util.popupURL(top, '../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>', {height:620, width:740});return false}">
+  		Don't have a login? Click here to register</a>
  </p>
  <?php } ?>
 

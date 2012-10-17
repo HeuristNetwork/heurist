@@ -39,24 +39,20 @@ function set_ratings() {
 	}
 
 	var action_fr = parent.document.getElementById('i_action').contentWindow;
-	var bkmk_ids_elt = action_fr.document.getElementById('bkmk_ids');
-	if (! action_fr  ||  ! bkmk_ids_elt) {
-		alert('Problem contacting server - try again in a moment');
-		return;
+	var bkmk_ids_elt, action_elt, updateRatingElt;
+
+	if (action_fr){
+		bkmk_ids_elt = action_fr.document.getElementById('bkmk_ids');
+		action_elt = action_fr.document.getElementById('action');
+		updateRatingElt = action_fr.document.getElementById('rating');
+	}
+	if(! bkmk_ids_elt || ! updateRatingElt) {
+			alert('Problem contacting server - try again in a moment');
+			return;
 	}
 
-	var action_elt = action_fr.document.getElementById('action');
-	var updateRatingElt = action_fr.document.getElementById('rating');
-
-	if (! action_elt  ||  ! updateRatingElt  ) {
-		alert('Problem contacting server - try again in a moment');
-		return;
-	}
 
 	updateRatingElt.value = value;
-
-	var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
-	bkmk_ids_elt.value = bkmk_ids_list.join(',');
 	action_elt.value = 'set_ratings';
 
 	action_elt.form.submit();

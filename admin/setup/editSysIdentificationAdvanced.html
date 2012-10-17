@@ -22,19 +22,32 @@
     <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
  </head>
 
- <body class="popup">
+ <body class="popup" onload="showMessage()">
+<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+<script>
+	// quite weird way - since it is not possibel (or unknown) how to treat t1000 in case of error
+ 	function showMessage(){
+ 		if(document.getElementById('divErrors').innerHTML=="" && top.HEURIST.util.getUrlParameter('was', this.location.search)){
+			top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
+			setTimeout(function(){
+				top.HEURIST.util.closePopupLast();
+			}, 1000);
+		}
+	}
+</script>
+
 <div class="banner"><h2>Advanced Database Properties</h2></div>
 
   <!--{PageHeader} -->
 
-  <div id="page-inner">
+ <div id="page-inner">
 
- <p><span class="red">[errors]</span></p>
+ <div id="divErrors">[errors]</div>
 
 
 [foreach SYSID sys]
 
-<form action="editSysIdentificationAdvanced.php?db=[dbname!]" method="post">
+<form action="editSysIdentificationAdvanced.php?was=1&amp;db=[dbname!]" method="post">
 
 [update SYSID sysid_update]
 
@@ -109,6 +122,13 @@ If in doubt, leave as 'locktypetotype'</div>
 </form>
 
 [end-foreach]
+
+</div>
+
+<div id="divMessage" style="display:none;width:180px;height:80px;text-align: center; ">
+	<div id="divMessage-text" style="color:black;font-weight:bold;margin:10px;">Properties Saved</div>
+	<button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
+</div>
 
  </body>
 </html>

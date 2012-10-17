@@ -725,7 +725,7 @@ function DetailTypeEditor() {
 		case "relationtype":
 			Dom.get("pnl_enum").style.display = "block";
 			break;
-		case "fieldsetmarker":
+		case "fieldsetmarker": //NOT USED ANYMORE
 			Dom.get("pnl_fieldsetmarker").style.display = "block";
 			break;
 		default:

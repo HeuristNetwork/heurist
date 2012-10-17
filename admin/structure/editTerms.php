@@ -196,6 +196,11 @@ if (!is_admin()) {
 
 	</div>
 
+	<div id="divMessage" style="display:none;height:80px;text-align: center; ">
+		<div id="divMessage-text" style="text-align:left;width:280px;color:red;font-weight:bold;margin:10px;"></div>
+		<button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
+	</div>
+	
 
 	<script  type="text/javascript">
 

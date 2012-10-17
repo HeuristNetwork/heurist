@@ -1103,9 +1103,9 @@ top.HEURIST.search = {
 	},
 
 	format_web_error: function(err, ver_date, href) {
-		if (! err  &&  ! ver_date)
+		if (! err  &&  ! ver_date){
 			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad\" title=\"URL not yet tested\">";
-
+		}
 		var err_string;
 
 		if (err.match(/401/) || err.match(/403/))
@@ -1788,11 +1788,7 @@ top.HEURIST.search = {
 		}
 		//alert('calc');
 		//return false;
-		if (!e) var e = window.event;
-		if(e){
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
+		e = top.HEURIST.util.stopEvent(e);
 	},
 
 	createUsedRectypeSelector: function (useIDs) {
@@ -1964,12 +1960,8 @@ top.HEURIST.search = {
 	},
 
 	edit: function(e, targ) {
-		if (! e) e = window.event;
 
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
+		e = top.HEURIST.util.stopEvent(e);
 
 		if (! targ) {
 			if (e.target) targ = e.target;
@@ -2087,14 +2079,7 @@ top.HEURIST.search = {
 	//
 	resultItemFind: function(e, targ){
 
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) {
-				e.stopPropagation();
-			}
-		}
+		e = top.HEURIST.util.stopEvent(e);
 
 		if (!targ) {
 			if (e.target) {
@@ -2518,26 +2503,33 @@ top.HEURIST.search = {
 			var innerHTML_inmenu = "";
 
 			for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
-				var w = top.HEURIST.user.workgroups[i];
+				var wg_ID = top.HEURIST.user.workgroups[i]; //workgroup code
 
-				if (!top.HEURIST.workgroups[w]) {
+				if (!top.HEURIST.workgroups[wg_ID]) {
 					continue;
 				}
-				var pref = top.HEURIST.util.getDisplayPreference("workgroup-searches-" + w);
+				var pref = top.HEURIST.util.getDisplayPreference("workgroup-searches-" + wg_ID);
 				var hide = (! pref  ||  pref == "hide");
 
-				innerHTML += "<div id=workgroup-searches-" + w + (hide ? " class=hide" : "") + ">";
-				innerHTML += "<div class=saved-search-subheading title=\"" + (top.HEURIST.workgroups[w].description || "" ) + "\" onclick=\"top.HEURIST.search.toggleSavedSearches(this.parentNode);\">" + top.HEURIST.workgroups[w].name + "</div>";
+				innerHTML += "<div class=sidebar-firstlevel id=workgroup-searches-" + wg_ID + (hide ? " class=hide" : "") + ">";
+				innerHTML += "<div class=search-type title=\"" + (top.HEURIST.workgroups[wg_ID].description || "" ) +
+								"\" onclick=\"top.HEURIST.search.toggleSavedSearches(this.parentNode);\">" + top.HEURIST.workgroups[wg_ID].name;
+
+				innerHTML += '<div class="saved-search-edit">';
+				innerHTML += '<img height="11" title="info" src="'+top.HEURIST.basePath+'common/images/info.png" '+
+									'onclick="{top.HEURIST.search.workgroupInfoPopup(event, '+wg_ID+');}" onmouseout="{top.HEURIST.search.hidePopup();}">';
+				innerHTML += "</div></div>";
+
 				innerHTML += "<div class=content>";
-				// innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + w +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
+				// innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + wg_ID +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
 
                 // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
-                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(w);return false;}'>Aggregations</a></div>";
+                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(wg_ID);return false;}'>Aggregations</a></div>";
 
 				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" class='external-link' href='" +
-									top.HEURIST.basePath+ "viewers/blog/index.html?g=" + w + _db2 +"'>Blog</a></div>";
+									top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'>Blog</a></div>";
 
-				var searches = top.HEURIST.user.workgroupSavedSearches[w];
+				var searches = top.HEURIST.user.workgroupSavedSearches[wg_ID];
 				if (searches  &&  searches.length) {
 					// Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                     // innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
@@ -2550,13 +2542,13 @@ top.HEURIST.search = {
 				var tags = [];
 				for (var j = 0; j < top.HEURIST.user.workgroupTagOrder.length; ++j) {
 					var tag = top.HEURIST.user.workgroupTags[top.HEURIST.user.workgroupTagOrder[j]];
-					if (tag[0] == w) tags.push(tag[1]);
+					if (tag[0] == wg_ID) tags.push(tag[1]);
 				}
 
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
-						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] +
+						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" + top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] +
 						_db + "\"'>" + tags[j] + "</a></nobr>";
 					}
 				}
@@ -2836,7 +2828,8 @@ top.HEURIST.search = {
 
 
 	autoPopupLink: function(e) {
-		if (! e) e = window.event;
+		e = top.HEURIST.util.stopEvent(e);
+
 		var targ;
 		if (e.target) targ = e.target;
 		else if (e.srcElement) targ = e.srcElement;
@@ -2851,12 +2844,11 @@ top.HEURIST.search = {
 		}else{
 			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.8, width:dim.w*0.8});
 		}
-		e.cancelBubble = true;
-		if (e.stopPropagation) e.stopPropagation();
+
 		return false;
 	},
 
-	popupLink: function(url,size) {
+	popupLink: function(url, size) {
 
 		var dim = top.HEURIST.util.innerDimensions(window);
 		if (size == "small"){
@@ -2866,8 +2858,8 @@ top.HEURIST.search = {
 		}else{
 			top.HEURIST.util.popupURL(top, url, {height:dim.h*0.8, width:dim.w*0.8});
 		}
-		e.cancelBubble = true;
-		if (e.stopPropagation) e.stopPropagation();
+
+		top.HEURIST.util.stopEvent(window.event);
 		return false;
 	},
 
@@ -3502,7 +3494,10 @@ top.HEURIST.search = {
 		var url = top.HEURIST.basePath+ "search/actions/setRatingsPopup.php" +
 									(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 
-		//top.HEURIST.util.showDialog(url, {modal:true});
+		var action_fr = document.getElementById("i_action");
+		var bkmk_ids_elt = action_fr.contentWindow.document.getElementById("bkmk_ids");
+		bkmk_ids_elt.value = bkmkIDs_list.join(',');
+
 		top.HEURIST.util.popupURL(window, url, {'no-resize': true, 'close-on-blur': true});
 	},
 
@@ -4227,9 +4222,14 @@ top.HEURIST.search = {
 
 	buildMenuForTagSearchs: function() {
 
-		if(!top.HEURIST.search.recMenuTags){     //search-by-tag-link
-			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {classname:"heurist-menu", context:["search-recent", "tl", "br"]} );
+		if($("#search-recent").length==0) return; //not logged in
 
+		if(!top.HEURIST.search.recMenuTags){     //search-by-tag-link
+			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {classname:"heurist-menu", context:["search-recent", "tl", "bl"]} );
+			/* @todo!!!!
+			top.HEURIST.search.recMenuTags.subscribe("mouseout", function(sType , aArgs){
+					top.HEURIST.search.recMenuTags.hide();
+			}, top.HEURIST.search.recMenuTags, true);*/
 		}
 
 		function _onMenuClick(eventName, eventArgs, subscriptionArg){
@@ -4343,6 +4343,8 @@ top.HEURIST.search = {
 //		searchForm.appendChild(inputInstance);
 		document.getElementsByTagName("body")[0].removeChild(document.getElementById("loadingCover"))
 
+		if(!document.getElementById("divAggLink1"))return; //Artem: if not-logged in the elements below are not created
+
         var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
         if(isShowAggregations=="false"){
             document.getElementById("divAggLink1").style.display ="none";
@@ -4359,7 +4361,66 @@ top.HEURIST.search = {
             document.getElementById("divFavLink").style.display ="none";
         }
 
+	},
+
+	_rolloverInfo:null,
+
+	hidePopup : function(){
+		if(top.HEURIST.search._rolloverInfo){
+			top.HEURIST.search._rolloverInfo.hide();
+		}
+	},
+	// show popup info window with detailed info about workgroup
+	workgroupInfoPopup: function(event, wg_ID){
+
+		if(!top.HEURIST.search._rolloverInfo){
+			top.HEURIST.search._rolloverInfo = new HintDiv('inforollover-insearch', 260, 170, '');//'<div id="inforollover-insearch-content"></div>');
+			//$('#inforollover-insearch').css({'background-color':'white'});
+		}
+
+		//create content for popup
+		var textTip = '<h3 style="padding-left: 5px;display:block">'+top.HEURIST.workgroups[wg_ID].name+'</h3>'+
+		'<div style="max-height:4em;padding:2px;text-overflow: ellipsis;overflow: hidden;">'+(top.HEURIST.workgroups[wg_ID].description || "" )+'</div><p/>';
+
+		var _db = (top.HEURIST.database && top.HEURIST.database.name ? '&db='+top.HEURIST.database.name : "");
+		var _url = top.HEURIST.basePath +'admin/ugrps/loadUserGrps.php?method=getgroup&all=1&recID='+wg_ID+_db;
+
+		var xy = top.HEURIST.util.getMousePos(event);
+		top.HEURIST.util.stopEvent(event);
+
+		$.ajax({
+			url: _url,
+			data: null,
+			success: function(data) {
+
+				var members = data.groups[wg_ID].members;
+				var admins = data.groups[wg_ID].admins;
+				var usrid, k=0;
+				textTip += '<div style="padding-left:20px">';
+				for(usrid in members) {
+					if(!top.HEURIST.util.isnull(usrid)){
+						textTip += '<div><a target="_blank" style="color:light-blue;" href="';
+						textTip += top.HEURIST.basePath+ "viewers/blog/index.html?g=" + usrid +_db;
+						textTip += '" class="external-link">blog</a>&nbsp;&nbsp;'+members[usrid]+
+									(admins.indexOf(usrid)<0?'':'[A]')+'</div>';
+						k++;
+						if(k>9){
+							textTip += '<div>there are'+(Number(top.HEURIST.workgroups[wg_ID].memberCount)-k)+' members more</div>';
+							break;
+						}
+					}
+				}
+				textTip += '</div>';
+
+  				top.HEURIST.search._rolloverInfo.showInfoAt(xy, null, textTip);
+			},
+			dataType: 'json'
+		});
+
+
+		return false;
 	}
+
 };
 
 top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
@@ -4458,6 +4519,7 @@ function removeCustomAlert() {
 
 
 		var setWidths = function() {
+			var dw = layout.getSizes().doc.w;
 			var leftPanelWidth = layout.getSizes().left.w;
 			var rightPanelWidth = layout.getSizes().right.w;
 			var centerPanelWidth = layout.getSizes().center.w;
@@ -4465,8 +4527,13 @@ function removeCustomAlert() {
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
 			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
 			navButton.style.width = leftPanelWidth-1;
-			tabBar.style.left = Math.max(21,leftPanelWidth);
-			tabBar.style.width = Math.max(360, centerPanelWidth-5);
+			var ll = Math.max(21, leftPanelWidth);
+			var rr = Math.max(21, rightPanelWidth);
+			if(dw-rr-ll<360){
+				rr = dw-(ll+360);
+			}
+			tabBar.style.left = ll;
+			tabBar.style.right = rr;
 
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
             var leftPos = (leftPanelWidth+5);
@@ -4579,7 +4646,7 @@ function removeCustomAlert() {
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
 					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
-					tabBar.style.width = layout.getSizes().center.w - 29;
+					tabBar.style.width = layout.getSizes().center.w;// - 29;
 		});
 		Event.on('resetPanels_HideNav', 'click', function(ev) {
 			Event.stopEvent(ev);

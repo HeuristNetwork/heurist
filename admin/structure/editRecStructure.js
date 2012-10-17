@@ -1634,7 +1634,7 @@ function onAddSeparator(){
 /**
 * Invokes popup window to create and add new field type
 */
-	function onDefineNewType(){
+function onDefineNewType(){
 
 		if(Hul.isnull(popupSelect))
 		{

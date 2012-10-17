@@ -58,7 +58,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 				'box-shadow':'0px 1px 5px RGBA(0,0,0,0.5)'});
 
 			if(!initcontent){
-				initcontent	= "<p>test popup</p>";
+				initcontent	= "<div id='"+_id+"-content'>test popup</div>";
 			}
 
 			popup_div.html(initcontent);
@@ -80,17 +80,17 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	}
 
 	/**
-	* 
+	*
 	*/
 	function _setSize(wh){
 		if(popup_div!=null){
-		
+
 				popup_div.css({
 					'width':wh[0]+'px',
 					'height':wh[1]+'px'});
 		}
 	}
-		
+
 	/**
 	* Returns array that contain the mouse position relative to the document
 	*/
@@ -129,10 +129,9 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
  		top_pos=Math.max(xy[1]-(div_height/2)+offset,0)+scrollValue;
 
-		popup_div.css( {	left:left_pos+'px',
+		popup_div.css( {left:left_pos+'px',
 					top:top_pos+'px',
-					visibility:'visible',
-					opacity:'1'});
+					visibility:'visible',opacity:'1'});
 	}
 
 
@@ -144,10 +143,10 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			var xy = _getMousePos(event);
 			_showAtXY(xy);
 	}
-			
-	function _showAtXY(xy){	
-	
-			_init();	
+
+	function _showAtXY(xy){
+
+			_init();
 			//xy = [posx = event.target.x,posy = event.target.y];
 
 			//var _map_popup = $("#mapPopup");
@@ -178,10 +177,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		if(needHideTip && popup_div){
 			//!!! currentTipId = null;
 			_clearHideTimer();
-			popup_div.css( {
-				visibility:"hidden",
-				opacity:"0"
-			});
+			popup_div.css( {visibility:"hidden",opacity:"0"});
 		}
 	}
 
@@ -195,9 +191,14 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			_showAtXY(xy);
 		},
 		showInfoAt: function(xy, divid, divcontent){
+
+					if(!divid){
+						divid = id+"-content";
+					}
+
 					var my_tooltip = $("#"+divid);
 					my_tooltip.html(divcontent);
-					
+
                     _setSize([my_tooltip.width(), my_tooltip.height()+25]);
 					_showAtXY(xy);
 		},

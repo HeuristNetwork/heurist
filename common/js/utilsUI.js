@@ -525,8 +525,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (popupsList.length > 0) {
 			top.HEURIST.util.closePopup(popupsList[popupsList.length-1].id);
 
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
+			e = top.HEURIST.util.stopEvent(e);
+
 			return false;
 		}
 		return true;
@@ -645,8 +645,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		top.HEURIST.util.dragDetails = dragDetails;
 
-		evt.cancelBubble = true;
-		if (evt.stopPropagation) evt.stopPropagation();
+		top.HEURIST.util.stopEvent(evt);
 
 		return false;
 	},
@@ -667,8 +666,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		top.HEURIST.deregisterEvent(evt.view.document, "mousemove", top.HEURIST.util.dragDetails.updateCallback);
 		top.HEURIST.util.dragDetails = { dragging: false };
 
-		evt.cancelBubble = true;
-		if (evt.stopPropagation) evt.stopPropagation();
+		top.HEURIST.util.stopEvent(evt);
 
 		return false;
 	},
@@ -725,8 +723,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		resizeDetails.element.style.width = newWidth + "px";
 		resizeDetails.element.style.height = newHeight + "px";
 
-		e.cancelBubble = true;
-		if (e.stopPropagation) e.stopPropagation();
+		top.HEURIST.util.stopEvent(e);
 
 		return false;
 	},
@@ -801,8 +798,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			moveDetails.element.style.bottom = newBottom + "px";
 		}
 
-		e.cancelBubble = true;
-		if (e.stopPropagation) e.stopPropagation();
+		top.HEURIST.util.stopEvent(e);
 
 		return false;
 	},
@@ -816,6 +812,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (moveDetails.element.isScratchpad) {
 			top.HEURIST.util.setDisplayPreference("scratchpad-bottom", parseInt(moveDetails.element.style.bottom));
 			top.HEURIST.util.setDisplayPreference("scratchpad-right", parseInt(moveDetails.element.style.right));
+		}
+	},
+
+	closePopupLast: function() {
+		var pups = top.HEURIST.util.popups;
+		if(pups && pups.list.length>0){
+			var windowID = pups.list[pups.list.length-1].id;
+			top.HEURIST.util.closePopup(windowID);
 		}
 	},
 
@@ -1735,6 +1739,18 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 		return context[func].apply(this, args);
 	},
+
+	//
+	// stop event propogation
+	//
+	stopEvent: function(e){
+		if (!e) e = window.event;
+		if (e) {
+			e.cancelBubble = true;
+			if (e.stopPropagation) e.stopPropagation();
+		}
+		return e;
+	}
 
 };
 

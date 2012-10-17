@@ -57,6 +57,32 @@
 			  alert("Password incorrect, please check with system administrator. Note: password is case sensitive");
 		  }
 		}
+
+		function onKeyPress(event){
+
+			event = event || window.event;
+			var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+			if (charCode && charCode > 31)
+			{
+					var keyChar = String.fromCharCode(charCode);
+					if(!/^[a-zA-Z0-9$_]+$/.test(keyChar)){
+
+						event.cancelBubble = true;
+						event.returnValue = false;
+						event.preventDefault();
+						if (event.stopPropagation) event.stopPropagation();
+
+						/* does not work
+						var ele = event.target;
+						var evt = document.createEvent("KeyboardEvent");
+						evt.initKeyEvent("keypress",true, true, window, false, false,false, false, 0, 'A'.charCodeAt(0));
+						ele.dispatchEvent(evt);*/
+
+						return false;
+					}
+			}
+			return true;
+		}
 	</script>
 
 	<body class="popup" onload="hideProgress()">
@@ -76,10 +102,12 @@
 	global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
 	global $done; // Prevents the makeDatabase() script from running twice
 	$done = false; // redundant
+    $isCreateNew = true;
 
 	/*****DEBUG****///error_log(" post dbname: $_POST['dbname'] ");  //debug
 
 	if(isset($_POST['dbname'])) {
+		$isCreateNew = false;
 
 		/*verify that database name is unique
 		$list = mysql__getdatabases();
@@ -96,9 +124,12 @@
 <?php
 			ob_flush();flush();
 			//sleep(5);
+
 			makeDatabase(); // this does all the work
 
-	}else{
+	}
+
+	if($isCreateNew){
 ?>
 	   	<div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
 			<h3>Enter the password set by your system adminstrator for new database creation:</h3>
@@ -116,11 +147,11 @@
                 <div style="margin-left: 40px;">
                     <!-- user name used as prefix -->
                     <b><?= HEURIST_DB_PREFIX ?>
-                    <input type="text" maxlength="20" size="6" name="uname"
+                    <input type="text" maxlength="20" size="6" name="uname"  onkeypress="{onKeyPress(event)}"
                     style="padding-left:3px; font-weight:bold;" value=<?=substr(get_user_username(),0,5)?> >
                     _  </b>
-					<input type="text" maxlength="64" size="25" name="dbname">
-					<input type="submit" name="submit" value="Create database" style="font-weight: bold;" >
+					<input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
+					<input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
 					<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
                 </div>
 			</form>
@@ -145,7 +176,7 @@
 
 
 	function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
-		global $newDBName, $isNewDB, $done;
+		global $newDBName, $isNewDB, $done, $isCreateNew;
 		$error = false;
 		$warning=false;
 
@@ -196,6 +227,7 @@
 				}
 				if($isExists)
 					echo "<strong>A database with that name already exists.</strong>";
+					$isCreateNew = true;
 				return false;
 			}
 

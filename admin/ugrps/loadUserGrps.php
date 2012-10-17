@@ -1,19 +1,16 @@
 <?php
 
-/*<!--
- * filename, brief description, date of creation, by whom
+/*
+ * loadUserGrps.php
+ *
+ * load the particular user info and list of its groups, or group info and list of its memebrs
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- -->*/
-
-?>
-
-<?php
-
-/* load the particular user info and list of its groups, or group info and list of its memebrs */
+ */
 
 define("SAVE_URI", "disabled");
 
@@ -202,24 +199,54 @@ if (is_logged_in() || $metod=="getuser") {
 			$query = null;
 		}
 
+		if(@$_REQUEST['all']==null){
+			$sAdminOnly = "ugl_Role = 'admin' and";
+		}else{
+			$sAdminOnly = null;
+		}
+
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {
 				$userGrp['groups'][$row[0]] = $row;
 
-				$res2 = mysql_query("select ugl_UserID from ".USERS_DATABASE.
-							".sysUsrGrpLinks where ugl_Role = 'admin' and ugl_GroupID=".$row[0]);
+				if($sAdminOnly){
+					$query = "select ugl_UserID from ".USERS_DATABASE.
+							".sysUsrGrpLinks where ".$sAdminOnly." ugl_GroupID=".$row[0];
+				}else{
+					$query = "select ugl_UserID, ugl_Role, ugr_FirstName, ugr_LastName from ".USERS_DATABASE.
+							".sysUsrGrpLinks g, ".USERS_DATABASE.".sysUGrps u where u.ugr_ID=g.ugl_UserID and g.ugl_GroupID=".$row[0];
+				}
+
+				$res2 = mysql_query($query);
+
 				$admins = array();
+				$members = array();
 				while ($row2 = mysql_fetch_assoc($res2)) {
-					array_push($admins, $row2["ugl_UserID"]);
+					if($sAdminOnly){
+						array_push($admins, $row2["ugl_UserID"]);
+					}else{
+						if($row2["ugl_Role"]=="admin"){
+							array_push($admins, $row2["ugl_UserID"]);
+						}
+						$members[$row2["ugl_UserID"]] = $row2["ugr_FirstName"]." ".$row2["ugr_LastName"];
+						//array_push($members, array($row2["ugl_UserID"]=>($row2["ugr_FirstName"]." ".$row2["ugr_LastName"]) ));  //array
+					}
 				}
 				$userGrp['groups'][$row[0]]["admins"] = $admins;
+				if(!$sAdminOnly){
+					$userGrp['groups'][$row[0]]["members"] = $members;
+				}
 			}
 		}
 
-		print "top.HEURIST.userGrp = " . json_format($userGrp) . ";\n";
-		print "\n";
+		if($sAdminOnly){
+			print "top.HEURIST.userGrp = " . json_format($userGrp) . ";\n";
+			print "\n";
+		}else{
+			print json_format($userGrp);
+		}
 
 	}else if($metod=="getuser"){ //----------------- only one user with detailed information
 

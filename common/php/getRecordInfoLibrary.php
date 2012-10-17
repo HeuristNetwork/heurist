@@ -982,10 +982,28 @@ function getAllRectypeStructures($useCachedData = false) {
 		$rtStructs['pluralNames'][$row[0]] = $row[8];
 	}
 	$rtStructs['constraints'] = getAllRectypeConstraint();
-	setCachedData($cacheKey,$rtStructs);
+	setCachedData($cacheKey, $rtStructs);
 	return $rtStructs;
 }
 
+//
+// After addition of new record - update this value
+//
+function updateRecTypeUsageCount(){
+	
+	$cacheKey = DATABASE.":AllRecTypeInfo";
+	$rtStructs = getCachedData($cacheKey);
+	if ($rtStructs) { 
+		$usageCount = getRecTypeUsageCount();
+		$rtStructs['usageCount'] = $usageCount;
+		//save into cache
+		setCachedData($cacheKey, $rtStructs);
+		return $usageCount;
+	}else{ //there is no cache - create entire structure
+		$rtStructs = getAllRectypeStructures(true);
+		return $rtStructs['usageCount'];
+	}
+}
 
 function getRectypeGroups() {
 	$rtGroups = array('groupIDToIndex'=>array());

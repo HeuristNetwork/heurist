@@ -28,8 +28,6 @@ if (!is_admin()) {
     return;
 }
 
-
-
 mysql_connection_overwrite(DATABASE);
 
 $template = file_get_contents('editSysIdentification.html');
@@ -41,9 +39,10 @@ $body->global_vars['dbname'] = HEURIST_DBNAME;
 $body->verify();
 if ($_REQUEST['_submit']) {
 	$body->input_check();
-	if ($body->satisfied) $body->execute();
+	if ($body->satisfied) {
+	   $body->execute();
+	}
 }
 
 $body->render();
-
 ?>

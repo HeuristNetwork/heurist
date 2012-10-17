@@ -549,8 +549,8 @@ body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;t
 body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;top:0px;}
 
 .outline {border:1px solid #999;padding:0 10px 0 5px;background-image:url("../images/backgrounds/banner_bg_dark.png");background-position:bottom;display:inline-block;height: 22px;/* overflow: hidden; */vertical-align:middle;}
-#my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(	../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
-#my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide, .relType.hide {background-image:url(../images/heading_saved_search-hidden.png);}
+.relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(	../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
+.relType.hide {background-image:url(../images/heading_saved_search-hidden.png);}
 #saved .search-type, .relTypeHeading  {color: #6A7C99;font-weight:bold;cursor: pointer;padding-top: 5px;padding-right: 6px;padding-bottom: 4px;padding-left: 18px;background-position: bottom;border: 1px none #999;}
 
 
@@ -1016,4 +1016,54 @@ body.is-not-logged-in div.not-logged-in-only {
 }
 .depth7 {
 	margin-left: 70px;
+}
+
+
+a.bare {
+	color: black;
+	text-decoration: none;
+}
+a.bare:hover{
+	text-decoration: none;
+}
+/* overwrite default menu style */
+.yui-skin-sam .yuimenu .bd li.divider {
+	border-top: 1px solid #808080;
+}
+.yui-skin-sam .yuimenu .bd a, .yuimenu .bd a {
+	margin: 0;
+	padding: 5px 15px;
+	color: #CCCCCC;
+}
+.yuimenu .bd a:hover {
+	text-decoration: none;
+	color: white;
+	background-color:black;
+	cursor:pointer;
+	-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;
+}
+.yui-skin-sam .yuimenuitem-selected{
+	background-color:black;
+}
+
+.yui-skin-sam .yuimenu .bd, .yuimenu .bd{
+	background:RGBA(0,0,0,0.7);
+	-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;
+	-webkit-box-shadow:0 3px 6px #999;-moz-box-shadow:0 3px 6px #999;box-shadow:0 3px 6px #999;
+	text-align:left!important;
+	width:auto;
+	min-width:8em;
+}
+
+.menuButton {
+	background-image: url("../images/blue-down-triangle.png") !important;
+	background-position: right center;
+	background-repeat: no-repeat;
+
+	height: 20px !important;
+	padding: 0 26px 0 0;
+	margin: 5px;
+	text-align: left;
+	width: 60px;
+	float: right;
 }

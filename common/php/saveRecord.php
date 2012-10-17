@@ -36,6 +36,7 @@
 	require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 	require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+	require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 
 	$msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
@@ -248,8 +249,11 @@
 		}
 		if (@$msgInfoSaveRec['error']) {//should never get here with error set
 			$rval["error"] = $msgInfoSaveRec['error'];
+		}else{
+			//$rval["usageCount"] = 
+			updateRecTypeUsageCount();
 		}
-		/*****DEBUG****///	error_log($log);
+		/*****DEBUG****///error_log($log);
 
 		return $rval;
 	}

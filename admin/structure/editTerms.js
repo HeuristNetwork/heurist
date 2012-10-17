@@ -445,11 +445,16 @@ function EditTerms() {
 		}
 	}
 
+	function _showWarning(message){
+		var ele = Dom.get('divMessage');
+		Dom.get('divMessage-text').innerHTML =  message;
+		Hul.popupTinyElement(this, ele);
+	}
 	function _disableWarning(){
-		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+" and cannot therefore be deleted");
+		_showWarning("Sorry, this term is marked as "+Dom.get("trm_Status").value+" and cannot therefore be deleted");
 	}
 	function _disableWarning2(){
-		alert("Sorry, this term is marked as "+Dom.get("trm_Status").value+". Inverse term cannot be set");
+		_showWarning("Sorry, this term is marked as "+Dom.get("trm_Status").value+". Inverse term cannot be set");
 	}
 
 	/**

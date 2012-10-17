@@ -77,56 +77,58 @@ function SelectDetailType() {
 	* 4. assign listeners for filter UI controls
 	*/
 	function _init() {
+		
+		//refill array
+		// 1. Reads GET parameters
+		if (location.search.length > 1) {
+			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			rty_ID = top.HEURIST.parameters.rty_ID;
+			document.title = "Insert fields -> " + top.HEURIST.rectypes.names[rty_ID];
+		}
+
+		//////////////////// create data table
+		var arr = [],
+			dty_ID,
+			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+		//2. create datatable and fill it values of particular group
+		for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+			if(!isNaN(Number(dty_ID)))
+			{
+				var td = top.HEURIST.detailTypes.typedefs[dty_ID];
+				var deftype = td.commonFields;
+
+				var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+
+				if( deftype[fi.dty_ShowInLists]!="0" && (isnull(aUsage) || aUsage.indexOf(rty_ID)<0)){
+
+					var iusage = isnull(aUsage) ? 0 : aUsage.length;
+					var ptr_1 = isnull(deftype[fi.dty_FieldSetRectypeID])?'':deftype[fi.dty_FieldSetRectypeID];
+					var ptr_2 = isnull(deftype[fi.dty_PtrTargetRectypeIDs])?'':deftype[fi.dty_PtrTargetRectypeIDs];
+					// add order in group, name, help, type and status,
+					// doc will be hidden (for pop-up)
+					arr.push([0,
+						deftype[fi.dty_OrderInGroup],
+						deftype[fi.dty_Name],
+						deftype[fi.dty_HelpText],
+						deftype[fi.dty_Type],
+						deftype[fi.dty_Status],
+						deftype[fi.dty_ExtendedDescription],
+						deftype[fi.dty_DetailTypeGroupID],
+						dty_ID,iusage,ptr_1,ptr_2]);
+
+				}
+			}
+		}//for
+
+		//sort by name
+		arr.sort(function(a,b){return a[2]>b[2]});
+		
 
 		if(isnull(_myDataTable)){
 
 			_rolloverInfo = new HintDiv('inforollover33', 200, 170, '<div id="inforollover3"></div>');
-
-								// 1. Reads GET parameters
-								if (location.search.length > 1) {
-									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									rty_ID = top.HEURIST.parameters.rty_ID;
-									document.title = "Insert fields -> " + top.HEURIST.rectypes.names[rty_ID];
-								}
-
-								//////////////////// create data table
-								var arr = [],
-									dty_ID,
-									fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-
-								//2. create datatable and fill it values of particular group
-								for (dty_ID in top.HEURIST.detailTypes.typedefs) {
-									if(!isNaN(Number(dty_ID)))
-									{
-										var td = top.HEURIST.detailTypes.typedefs[dty_ID];
-										var deftype = td.commonFields;
-
-										var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-
-										if( deftype[fi.dty_ShowInLists]!="0" && (isnull(aUsage) || aUsage.indexOf(rty_ID)<0)){
-
-											var iusage = isnull(aUsage) ? 0 : aUsage.length;
-											var ptr_1 = isnull(deftype[fi.dty_FieldSetRectypeID])?'':deftype[fi.dty_FieldSetRectypeID];
-											var ptr_2 = isnull(deftype[fi.dty_PtrTargetRectypeIDs])?'':deftype[fi.dty_PtrTargetRectypeIDs];
-											// add order in group, name, help, type and status,
-											// doc will be hidden (for pop-up)
-											arr.push([0,
-												deftype[fi.dty_OrderInGroup],
-												deftype[fi.dty_Name],
-												deftype[fi.dty_HelpText],
-												deftype[fi.dty_Type],
-												deftype[fi.dty_Status],
-												deftype[fi.dty_ExtendedDescription],
-												deftype[fi.dty_DetailTypeGroupID],
-												dty_ID,iusage,ptr_1,ptr_2]);
-
-										}
-									}
-								}//for
-
-								//sort by name
-								arr.sort(function(a,b){return a[2]>b[2]});
 
 								_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
@@ -167,7 +169,8 @@ function SelectDetailType() {
 								});
 
 								var myColumnDefs = [
-								{ key: "selection", label: "", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+								{ key: "selection", label: "", sortable:true, 
+									formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 								{ key: "name", label: "Field type name", sortable:true },
 								{ key: "order", label: "Order", hidden:true },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
@@ -261,6 +264,21 @@ function SelectDetailType() {
 
 
 		} //isnull(_myDataTable)
+		else{
+					// all stuff is already inited, change livedata in datasource only
+					_myDataSource.liveData = arr;
+
+					//refresh table
+					_myDataSource.sendRequest("", {
+								success : _myDataTable.onDataReturnInitializeTable,
+								failure : _myDataTable.onDataReturnInitializeTable,
+								scope   : _myDataTable,
+								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+					});
+					
+					_updateFilter();
+
+		}		
 	}//end of initialization ==============================
 
 	/**
@@ -460,6 +478,31 @@ function SelectDetailType() {
 							if(btnClear) btnClear.onclick = _clearSelection;
 	} //end init listener
 
+	function _onDefineNewType(){
+
+			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+								(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+
+			popupSelect = Hul.popupURL(top, url,
+			{	"close-on-blur": false,
+				"no-resize": false,
+			height: 700,
+
+			width: 650,
+				callback: function(context) {
+
+					if(!Hul.isnull(context)){
+						//refresh the local heurist
+						top.HEURIST.detailTypes = context.detailTypes;
+
+						//new field type to be added - refresh list
+						_init();
+					}
+				}
+			});
+	}	
+	
 	//
 	//public members
 	//
@@ -478,6 +521,10 @@ function SelectDetailType() {
 				 */
 				cancel : function () {
 					window.close(null);
+				},
+				
+				onDefineNewType: function(){
+					_onDefineNewType();
 				},
 
 				getClass: function () {

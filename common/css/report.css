@@ -124,8 +124,16 @@ H2 span {
 	text-align: right;
 	vertical-align: bottom;
 }
+#toolbar select {
+	background-color: #FFFFFF !important;
+	height: 18px !important;
+	padding-right: 0;
+	vertical-align: middle;
+	width: 200px;
+}
+
 #rep_list {
-	display:inline-block;
+	float:right;
 	text-align: right;
 }
 ul#rep_list.menu li span {
@@ -145,13 +153,6 @@ ul#rep_list.menu > li:hover {
 }
 ul#rep_list.menu li ul {
 	margin-left:0
-}
-#toolbar select {
-	background-color: #FFFFFF !important;
-	height: 18px !important;
-	padding-right: 0;
-	vertical-align: middle;
-	width: 200px;
 }
 .grey {
 	background-color:#CFCFCF;

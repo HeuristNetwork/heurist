@@ -35,6 +35,7 @@ function ShowMap() {
 		_sQueryMode = "all",
 		//squery_all,		squery_sel,		squery_main,
 		currentQuery,
+		_menu = null,
 		systemAllLayers; //all image layers (3-6) and kml layers (3-24) in the system with detail type 3-679 true
 
 	/**
@@ -334,7 +335,7 @@ function ShowMap() {
 		_ismap=ismap;
 		_istime=istime;
 
-		var toolbar = { position: 'top', body: 'toolbarcontainer', height:(_hidetoolbar?0:25),
+		var toolbar = { position: 'top', body: 'toolbarcontainer', height:(_hidetoolbar?0:30),
 						visible: _hidetoolbar,
 						resize:false, collapse:false};
 
@@ -389,7 +390,43 @@ function ShowMap() {
 
 			top.HEURIST.currentQuery_main = location.search;
 		}
+		
+		if(YAHOO.widget.Menu){ //there is not menu for showMapS.html (publish map)
 
+			if(!_menu){     //search-by-tag-link
+				_menu = new YAHOO.widget.Menu("menu_map_publish", {context:["menuButton", "tl", "br"]} );
+			}
+
+			function _onMenuClick(eventName, eventArgs, subscriptionArg){
+				
+				var dest = subscriptionArg[0];
+				if(dest=="code"){
+					Hul.popupURL(this,'../viewers/map/mapMenu.html',null);
+				}else{
+					var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+	 				var currentSearchQuery =
+	 					(mode=="selected")
+							?top.HEURIST.currentQuery_sel  //top.HEURIST.search.currentSearchQuery_sel
+							:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
+
+					if(currentSearchQuery)
+					{
+						if(dest=="earth"){
+							url = top.HEURIST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
+						}else{
+							url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
+						}
+						window.open(url, '_blank');
+					}
+				}				
+			}
+
+			_menu.addItems([
+						{ text: 'Google Map/Timeline', onclick:{ fn: _onMenuClick, obj: ["map"] } },
+						{ text: 'Google Earth', onclick:{ fn: _onMenuClick, obj: ["earth"] } },
+						{ text: 'Embed Map Code', onclick:{ fn: _onMenuClick, obj: ["code"] } }]);
+			_menu.render(this.document.body);
+		}
 
 		setLayout(true, true);
 
@@ -684,6 +721,17 @@ function ShowMap() {
 		//to fix issue with gmap after tab switching
 		checkResize: function(){
 			RelBrowser.Mapping.checkResize();
+		},
+
+		showMenu: function(){
+			if(_menu){
+				_menu.show();
+			}
+		},
+		hideMenu: function(){
+			if(_menu){
+				_menu.hide();
+			}
 		},
 
 		getClass: function () {
