@@ -86,6 +86,7 @@ $prefs = array(
 	"relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
 	"tagging-popup" => "true", // popup a tagging dialogue if record saved without any tags -switch on/off in this popup or preferences
     "showAggregations" => "false", // show link Aggregations under My Bookmarks and All records in teh search navigation menu
+    "showNavMenuAlways" => "false", // show the navigation menu even when the navigation panel is open
     "showFavouritesSearch" => "false", // ditto for Favourites search
 	"mapbackground" => "",
 	"report-output-limit" => "1000",   //report output limit for smarty and map

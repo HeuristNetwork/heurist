@@ -23,7 +23,7 @@
 
 </head>
 
-<body class="popup" onLoad="showPreferences()" width=500 height=400>
+<body class="popup" onLoad="showPreferences()" width=400 height=700>
 
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
@@ -45,6 +45,8 @@
 		var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
 		document.getElementById("defaultMyBookmarksSearch").checked
 			= (bkm==='true');
+        var mybkm = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
+        document.getElementById("showMyBookmarks").checked = (mybkm!=='false');
 		var asr = top.HEURIST.util.getDisplayPreference("autoSelectRelated"); // auto select related records (one level for now)
 		document.getElementById("autoSelectRelated").checked
 			= (asr!=='false');
@@ -52,8 +54,17 @@
 		document.getElementById("autoDeselectOtherLevels").checked
 			= (adl!=='false');
 
-		var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
-		document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
+        var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
+        document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
+
+        var agg = top.HEURIST.util.getDisplayPreference("showAggregations");
+        document.getElementById("showAggregations").checked = (agg!=='false');
+
+        var navi = top.HEURIST.util.getDisplayPreference("showNavMenuAlways");
+        document.getElementById("showNavMenuAlways").checked = (navi!=='false');
+
+        var favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
+        document.getElementById("showFavouritesSearch").checked = (favsrch!=='false');
 
 		var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
 		if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
@@ -67,9 +78,13 @@
 		var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
 		var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
 		var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
+        var mybkm = (document.getElementById("showMyBookmarks").checked)?'true':'false';
 		var asr = (document.getElementById("autoSelectRelated").checked)?'true':'false';
 		var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
-		var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
+        var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
+        var agg = (document.getElementById("showAggregations").checked)?'true':'false';
+        var navi = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
+        var favsrch = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
 
 
 		if (isNaN(rpp) || rpp < 1 || rpp > 500) {
@@ -94,11 +109,15 @@
 		top.HEURIST.util.setDisplayPreference("favourites", fav);
 		top.HEURIST.util.setDisplayPreference("loadRelatedOnSearch", rel);
 		top.HEURIST.util.setDisplayPreference("defaultRecentPointerSearch", rec);
-		top.HEURIST.util.setDisplayPreference("defaultMyBookmarksSearch", bkm);
+        top.HEURIST.util.setDisplayPreference("defaultMyBookmarksSearch", bkm);
+        top.HEURIST.util.setDisplayPreference("showMyBookmarks", mybkm);
 		top.HEURIST.util.setDisplayPreference("autoSelectRelated", asr);
 		top.HEURIST.util.setDisplayPreference("autoDeselectOtherLevels", adl);
 		top.HEURIST.util.setDisplayPreference("tagging-popup", ptd);
-		top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
+        top.HEURIST.util.setDisplayPreference("showAggregations", agg);
+        top.HEURIST.util.setDisplayPreference("showNavMenuAlways", navi);
+        top.HEURIST.util.setDisplayPreference("showFavouritesSearch", favsrch);
+        top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
 		window.close();
 	}
   </script>
@@ -110,10 +129,10 @@
 	<div class="input-header-cell">Search results per page (20 - 500)</div><div  class="input-cell"><input id="results-per-page"></div>
    </div>
    <div class="input-row">
-	<div class="input-header-cell">Limit for report output</div><div  class="input-cell"><input id="report-output-limit"></div>
+	<div class="input-header-cell">Limit number of lines in report output (no warning if limit exceeded)</div><div  class="input-cell"><input id="report-output-limit"></div>
    </div>
    <div class="input-row">
-	<div class="input-header-cell">Default search on load</div><div  class="input-cell"><input id="defaultSearch">
+	<div class="input-header-cell">Heurist search string to execute when loading the search page<br> for example, tag:Favourites</div><div  class="input-cell"><input id="defaultSearch">
 	<br><input type="checkbox" id="defaultMyBookmarksSearch" style="vertical-align:middle">Search MyBookmarks only
 <!--	<br><input type="radio" name="defaultMyBookmarksSearch" value="myBookmarks">My Bookmarks
 	<br><input type="radio" name="defaultMyBookmarksSearch" value="allBookmarks">All Bookmarks-->
@@ -123,24 +142,70 @@
 	<div class="input-header-cell">How do you spell Favourites/Favorites?</div><div  class="input-cell"><input id="favourites"></div>
    </div>
    <div class="input-row">
-	<div class="input-header-cell">Load related records below search (leave off if not required)</div><div class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
+	<div class="input-header-cell">Load related records below search <br>(leave off if not required)</div><div class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
+  </div>
+    <div class="input-row">
+    <div class="input-header-cell">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
   </div>
    <div class="input-row">
-	<div class="input-header-cell">Default pointer field search in edit to show recent records (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+    <div class="input-header-cell">Automatically deselect when changing active level in search</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
   </div>
    <div class="input-row">
-	<div class="input-header-cell">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
+    <div class="input-header-cell">Show Aggregations link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showAggregations"></div>
   </div>
    <div class="input-row">
-	<div class="input-header-cell">Automatically deselect when changing active level</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
+    <div class="input-header-cell">Show Navigation menu in search screen even when navigation panel is open</div><div  class="input-cell"><input type="checkbox" id="showNavMenuAlways"></div>
   </div>
    <div class="input-row">
-	<div class="input-header-cell">Prompt for tags on data addition</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
+    <div class="input-header-cell">Show Favourites link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showFavouritesSearch"></div>
   </div>
+  <div class="input-row">
+    <div class="input-header-cell">Show My Bookmarks section in the search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showMyBookmarks"></div>
+  </div>
+  <div class="input-row">
+	<div class="input-header-cell">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+  </div>
+   <div class="input-row">
+    <div class="input-header-cell">When exiting record edit, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
+  </div>
+  
   <div id="buttons" class="actionButtons">
    <input type="button" value="save" onClick="save();">
    <input type="button" value="cancel" onClick="window.close();">
   </div>
+
+  <p><hr>Use the link below to add a bookmarklet to your browser toolbar. The bookmarklet captures highlighted 
+  <br>text from a web page and creates an Internet Bookmark record, extracting certain fields (DOI, ISBN, ISSN etc.). </p>
+  <i>Drag this link to your bookmarks bar:</i> &nbsp;&nbsp; 
+  
+  <!-- TODO: THIS IS NOT YET WORKING EVEN THOUGH IT DISPLAYS THE BOOKMARKLET OK
+       It is not setting the path properly, it is putting in path to calling location, 
+       not sure how much of the top. Heurist stuff is needed-->
+  <script>
+    var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
+            ( HeuristBaseURL ? HeuristBaseURL : ""));
+    var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
+    top.HEURIST.search.setHomeLink(); // ??
+    top.HEURIST.parameters["db"] = database; // ??
+    var bookmarkletname = top.HEURIST.VERSION;
+    var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
+    + " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+    + " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
+    + "d=document;c=d.contentType;"
+    + "if(c=='text/html'||!c){"
+    + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+    + "s=d.createElement('script');s.type='text/javascript';"
+    + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
+    + "d.getElementsByTagName('head')[0].appendChild(s);}"
+    + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
+    + "window.setTimeout('w.focus()',200);}"
+    + "})();\"><b>>> "+database+" </b></a>"; 
+    document.write(html);
+</script>
+
+Note: this bookmarklet not yet debugged
+
+ 
  </body>
 </html>
 

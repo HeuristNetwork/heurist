@@ -121,6 +121,8 @@ if(array_key_exists('mode',$_REQUEST)){
                 <span class="description">The main functions needed to create and design a database</span></h3>
                 <div class="adminSection">
                     <ul>
+                        <li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
+                            type="List the databases on the current server to which you have access">Open database</a></li>
                         <li><a href="#" onClick="loadContent('setup/createNewDB.php')"
                             type="Create a new database with essential structure elements">New database</a></li>
                         <li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
@@ -139,7 +141,7 @@ if(array_key_exists('mode',$_REQUEST)){
 					<ul>
 
 						<li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
-							type="List the databases on the current server">List databases</a></li>
+							type="List the databases on the current server to which you have access">Open database</a></li>
 						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
