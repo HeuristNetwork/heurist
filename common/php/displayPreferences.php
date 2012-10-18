@@ -75,7 +75,7 @@ $prefs = array(
     // Properties which can be set in the My profile > Preferences dialogue
 	"savedSearchDest" => "",  //last saved search destination (workgroup id)
 	"defaultSearch" => "tag:Favourites",
-    
+
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
 	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
@@ -108,19 +108,16 @@ foreach ($_REQUEST as $property => $value) {
 		$writeMode = true;
 	}
 }
+
 if ($writeMode) return;	// suppress normal output
 
 ?>
-
 //document.domain = "<?= HEURIST_HOST_NAME ?>";
-
 if (! document.body) {
 	// Document manipulation becomes much harder if we can't access the body.
 	throw document.location.href + ": include displayPreferences.php in the body, not the head";
 }
-
 <?php
-
 if ($prefs) {
 	print "top.HEURIST.displayPreferences = {";
 	$first = true;

@@ -304,7 +304,7 @@ iframe#coverall, div.coverall-div, #coverall, .coverall {
 div#loadingCover.On {
 	position:absolute;
 	left:10px;
-	top: 97px;
+	top: 84px;
 	right:10px;
 	bottom:30px;
 	border: 1px solid #999999;
@@ -637,17 +637,6 @@ input { padding: 0; margin: 0; }
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
 #rectype-val {left:2ex;position:relative;top:2.5ex;}
 #masthead {position:absolute; left:0;right:0;z-index:4}
-#mainbody {
-	position:absolute;
-	top:97px;
-	bottom:10px;
-	left:10px;
-	right:10px;
-
-	}
-#mainbody.hidden div {
-	visibility:hidden !important;
-	}
 
 input[type="radio"] {vertical-align: text-top;}
 .div-section {padding: 5px 0;}
@@ -1032,7 +1021,7 @@ a.bare:hover{
 }
 .yui-skin-sam .yuimenu .bd a, .yuimenu .bd a {
 	margin: 0;
-	padding: 5px 15px;
+	padding: 4px 15px;
 	color: #CCCCCC;
 }
 .yuimenu .bd a:hover {
@@ -1053,17 +1042,4 @@ a.bare:hover{
 	text-align:left!important;
 	width:auto;
 	min-width:8em;
-}
-
-.menuButton {
-	background-image: url("../images/blue-down-triangle.png") !important;
-	background-position: right center;
-	background-repeat: no-repeat;
-
-	height: 20px !important;
-	padding: 0 26px 0 0;
-	margin: 5px;
-	text-align: left;
-	width: 60px;
-	float: right;
 }

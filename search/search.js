@@ -668,6 +668,7 @@ top.HEURIST.search = {
 		}
 	},
 
+	/* artem - to remove???? */
 	setBodyClass: function() {
 		top.HEURIST.parameters["w"] = document.getElementById("w-input").value;
 		var searchType = document.getElementById("w-input").value;
@@ -2148,7 +2149,7 @@ top.HEURIST.search = {
 
 			if(bkmkID){
 				if(!top.HEURIST.search.recMenuBkmk){
-					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark", {classname:"heurist-menu"} );  //e.parentNode.id
+					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark");
 					top.HEURIST.search.recMenuBkmk.addItems([
 						{ text: "Tag" },
 						{ text: "Rate" },
@@ -2156,18 +2157,24 @@ top.HEURIST.search = {
 						{ text: "Delete" }
 					]);
 					top.HEURIST.search.recMenuBkmk.render(document.body);
+					$("#menu_boomark").bind("mouseleave",function(){
+						top.HEURIST.search.recMenuBkmk.hide();
+					});
 				}
 				oMenu = top.HEURIST.search.recMenuBkmk;
 				if(top.HEURIST.search.recMenu) top.HEURIST.search.recMenu.hide();
 			}else{
 				if(!top.HEURIST.search.recMenu){
-					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd", {classname:"heurist-menu"} );  //e.parentNode.id
+					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd");  //e.parentNode.id
 					top.HEURIST.search.recMenu.addItems([
 						{ text: "Tag" },
 						{ text: "Bookmark" },
 						{ text: "Delete" }
 					]);
 					top.HEURIST.search.recMenu.render(document.body);//"rd"+recID);
+					$("#menu_recordrd").bind("mouseleave",function(){
+						top.HEURIST.search.recMenu.hide();
+					});
 				}
 				oMenu = top.HEURIST.search.recMenu;
 				if(top.HEURIST.search.recMenuBkmk) top.HEURIST.search.recMenuBkmk.hide();
@@ -2192,7 +2199,7 @@ top.HEURIST.search = {
 
 
 			oMenu.cfg.setProperty("context",
-					[e.target, "bl", "br"]);
+					[e.target, "bl", "bl"]);
     		oMenu.show();
 		}
 	},
@@ -2548,8 +2555,9 @@ top.HEURIST.search = {
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
-						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" + top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] +
-						_db + "\"'>" + tags[j] + "</a></nobr>";
+						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" +
+						top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + '\"'+
+						_db + "'>" + tags[j] + "</a></nobr>";
 					}
 				}
 
@@ -4196,7 +4204,7 @@ top.HEURIST.search = {
 		}).superfish();
 
 
-		//close simple search in outside click
+		//close Assisted search in outside click
 		$("#btnSimpleSearch").click(function(){
 				if($("#simple-search").is(':visible')){
 					$("#simple-search").fadeOut();
@@ -4224,12 +4232,10 @@ top.HEURIST.search = {
 
 		if($("#search-recent").length==0) return; //not logged in
 
-		if(!top.HEURIST.search.recMenuTags){     //search-by-tag-link
-			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {classname:"heurist-menu", context:["search-recent", "tl", "bl"]} );
-			/* @todo!!!!
-			top.HEURIST.search.recMenuTags.subscribe("mouseout", function(sType , aArgs){
-					top.HEURIST.search.recMenuTags.hide();
-			}, top.HEURIST.search.recMenuTags, true);*/
+		var needCreate = !top.HEURIST.search.recMenuTags;
+
+		if(needCreate){     //search-by-tag-link
+			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {context:["search-recent", "tl", "bl"]} );
 		}
 
 		function _onMenuClick(eventName, eventArgs, subscriptionArg){
@@ -4255,6 +4261,11 @@ top.HEURIST.search = {
 			top.HEURIST.search.recMenuTags.addItem({ text: 'No tags defined' });
 		}
 		top.HEURIST.search.recMenuTags.render(document.body);
+		if(needCreate){
+			$("#menu_tags").bind("mouseleave",function(){
+				top.HEURIST.search.recMenuTags.hide();
+			});
+		}
 
 		var menuItem = document.getElementById("menuSearchesByTag");
 		menuItem.innerHTML = innerHTML;
@@ -4504,10 +4515,9 @@ function removeCustomAlert() {
 		};
 		var appPanelButton = document.getElementById("appPanelButton");
 		var navButton = document.getElementById("navButton");
-		var tabBar = document.getElementById("tabbar");
 		var searchTable = document.getElementById("search");
 
-		var layout = new YAHOO.widget.Layout('mainbody',{
+		var layout = new YAHOO.widget.Layout('searchpage-mainbody',{
 			units: [
 				//{ position: 'top', height: 95, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 20, resize: false, body: 'footer', gutter: '0', collapse: false },
@@ -4526,14 +4536,6 @@ function removeCustomAlert() {
 			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
 			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
-			navButton.style.width = leftPanelWidth-1;
-			var ll = Math.max(21, leftPanelWidth);
-			var rr = Math.max(21, rightPanelWidth);
-			if(dw-rr-ll<360){
-				rr = dw-(ll+360);
-			}
-			tabBar.style.left = ll;
-			tabBar.style.right = rr;
 
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
             var leftPos = (leftPanelWidth+5);
@@ -4562,49 +4564,64 @@ function removeCustomAlert() {
 		layout.render();
 		YAHOO.util.Event.addListener(window, "resize", setWidths);
 
-		if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
-					layout.getUnitByPosition('left').collapse();
-					navButton.className +=" closed";
-					//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
-                    document.getElementById("formSearch").style.paddingLeft = "5px";
+		//
+		function __sidebarPanelStatus(isFirst)
+		{
+			var status = top.HEURIST.util.getDisplayPreference("sidebarPanel");
 
-					navButton.style.width = "20px";
-					navButton.title = "Show Navigation Panel";
-					//tabBar.style.width = layout.getSizes().center.w-29;
-					};
+			if (!isFirst){
+				var status = (status=="open"?"closed":"open");
+				top.HEURIST.util.setDisplayPreference("sidebarPanel",status);
+			}
+
+			if (status == "closed"){
+
+				if (!isFirst){
+					var oldLeftPanelWidth = layout.getSizes().left.w;
+					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth);
+				}
+
+				layout.getUnitByPosition('left').collapse();
+
+				navButton.className +=" closed";
+				navButton.style.width = "20px";
+				navButton.title = "Show Navigation Panel";
+
+                document.getElementById("formSearch").style.paddingLeft = "5px";
+               	document.getElementById("menuNavigation").style.display = 'block';
+
+			}else{
+
+				layout.getUnitByPosition('left').expand();
+				navButton.className = navButton.className.replace(" closed", "");
+				navButton.title = "Hide Navigation Panel";
+
+                var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
+				navButton.style.width = leftPos-1;
+
+                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+
+                if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){
+                	document.getElementById("menuNavigation").style.display = 'none';
+				}
+			}
+		}
+
+		__sidebarPanelStatus(true);
+
 		if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
 					layout.getUnitByPosition('right').collapse();
 					appPanelButton.className +=" closed";
 					appPanelButton.title = "Show Applications";
-					};
+		};
 
 		Event.on(window, 'resize', layout.resize, layout, true);
 
 		Event.on('navButton', 'click', function(ev) {
 			Event.stopEvent(ev);
-			if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
-				var oldLeftPanelWidth = layout.getSizes().left.w;
-					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth);
-				layout.getUnitByPosition('left').collapse();
-				top.HEURIST.util.setDisplayPreference("sidebarPanel","closed");
-				navButton.className +=" closed";
-				navButton.style.width = "20px";
-				//IJ place DBadmin here!!! searchTable.style.paddingLeft = "5px";
-                document.getElementById("formSearch").style.paddingLeft = "5px";
+			__sidebarPanelStatus(false);
 
-				navButton.title = "Show Navigation Panel";
-				layout.resize();
-			}else{
-				layout.getUnitByPosition('left').expand();
-				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
-				navButton.className = navButton.className.replace(" closed", "");
-				//IJ place DBadmin here!!! searchTable.style.paddingLeft = top.HEURIST.util.getDisplayPreference("leftWidth");
-                var leftPos = top.HEURIST.util.getDisplayPreference("leftWidth");
-                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
-
-				navButton.title = "Hide Navigation Panel";
-				layout.resize();
-			}
+			layout.resize();
 		});
 		Event.on('appPanelButton', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -4614,7 +4631,7 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('right').collapse();
 				top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
 				appPanelButton.className +=" closed";
-				appPanelButton.style.width = "20px";
+				//appPanelButton.style.width = "20px";
 				appPanelButton.title = "Show Applications";
 				layout.resize();
 			}else{
@@ -4628,25 +4645,20 @@ function removeCustomAlert() {
 		});
 		Event.on('resetPanels', 'click', function(ev) {
 			Event.stopEvent(ev);
+
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open"){
-						layout.getUnitByPosition('left').expand();
-						top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
-						navButton.className = navButton.className.replace(" closed", "");
-						navButton.title = "Hide Navigation Panel";
-						};
-					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-						layout.getUnitByPosition('right').expand();
-						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
-						appPanelButton.className = appPanelButton.className.replace(" closed", "");
-						appPanelButton.title = "Hide Applications";
+						navButton.click();
 					}
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
+						appPanelButton.click();
+					}
+
 					layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
 					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
 					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
-					tabBar.style.width = layout.getSizes().center.w;// - 29;
 		});
 		Event.on('resetPanels_HideNav', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -4670,7 +4682,6 @@ function removeCustomAlert() {
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
 					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
-					tabBar.style.width = layout.getSizes().center.w - 9;
 					*/
 		});
 	});

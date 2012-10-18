@@ -71,6 +71,7 @@
 	</head>
 
 	<body>
+
 		<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
 		<script src="../common/js/browserDetect.js"></script>
 		<script src="../common/php/loadHAPI.php"></script>
@@ -142,7 +143,7 @@
 					}
 				}
 			});
-			
+
 			YAHOO.util.Event.onDOMReady(function(){
 				top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
 					// register handlers and render non-static elements of page
@@ -159,7 +160,9 @@
 			}
 
 		</script>
+
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
+
 		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
 		<!-- actionHandler.php is written to return a form by default or running javascript followed by reload the default-->
 
@@ -203,7 +206,7 @@
 							<li><a href="../admin/profile/manageReminders.php" name="auto-popup"
 								title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 
-                            <li><a href="../export/backup/exportMyDataPopup.html" class="small" name="auto-popup"
+                            <li><a href="../export/backup/exportMyDataPopup.html" name="auto-popup"
                                 title="Retreives and writes all the data in the database that you own or have bookmarked, including attached files, to a ZIP file">Export my data</a></li>
 
 							<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;"
@@ -246,10 +249,10 @@
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
 								title="Import web links from a browser bookmarks file or an html web page file">
 								Hyperlinks (webpage/bookmarks)</a></li>
-							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup"
 								title="Settings for web links importer">
 								Settings<br>(hyperlink harvester)</a></li>
-							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator small'
+							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator'
 								title="Harvest email from a designated IMAP email server (set in configuration)">
 								Email from IMAP server</a></li>
 							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php"
@@ -318,7 +321,7 @@
 
 
 			<!-- search and menu -->
-			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
+			<div id="searchpage-header" class="banner searchTable" style="border-bottom:1px solid #696969;">
                 <div class="logged-in-only" align="left" style="padding:10px;display:inline-block;" >
                 	<a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;&gt;</b></a>
                 </div>
@@ -327,7 +330,7 @@
 <div style="position:relative">
 	<div class="searchInput" id="searchInput2"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
-						<div id="btnSimpleSearch" class="simplesearch" title="Click to show simple search builder panel"></div>
+						<div id="btnSimpleSearch" class="simplesearch" title="Click to show Assisted Search builder panel"></div>
 
 						<div id="simple-search" style="display: none;">
 							<div class="simple-search-row">
@@ -375,126 +378,17 @@
 	</div>
 </div>
 				</form>
-
-				<div id="viewTriggers">
-					<div id="navButton" title="Hide Navigation Panel">Hide Navigation</div>
-					<div id="tabbar">
-						<ul class="sf-menu"> <!-- was  id="tabs"  horizontal not-query-collected -->
-							<li><div>Navigation</div>
-								<ul>
-									<li><a href="#">My Bookmarks</a>
-										<ul id="menuBookmarks">
-											<li><a href="#">Favourites</a></li>
-											<li><a href="#">Recent changes</a></li>
-											<li><a href="#">All by date</a></li>
-											<li><a href="#">Aggregations</a></li>
-											<li><a href="#">Search by tags</a>
-												<ul id="menuSearchesByTag">
-												</ul>
-											</li>
-											<li><a href="#">Saved Searches</a>
-												<ul id="menuSavedSearchesBookmarks">
-												</ul>
-											</li>
-										</ul>
-									</li>
-									<li><a href="#">All Records</a>
-										<ul id="menuAllRecs">
-											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></li>
-											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All by date</a></li>
-											<li><a href="#">Aggregations</a></li>
-											<li><a href="#">Saved Searches</a>
-												<ul id="menuSavedSearchesAllRecs">
-												</ul>
-											</li>
-										</ul>
-									</li>
-									<li><a href="#">Shared Searches</a>
-										<ul id="menuSavedSearchesShared">
-										</ul>
-									</li>
-									<li><a href="#">Collections</a></li>
-								</ul>
-							</li>
-							<li><div>Search</div>
-								<ul>
-									<li><a href="#" title="Simple search builder panel" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Simple search</a></li>
-									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
-									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
-									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"
-												onClick="{top.HEURIST.search.savedSearchEdit(0); return false;}">Save search as ...</a></li>
-
-									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
-									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
-								</ul>
-							</li>
-							<li><div>Edit</div>
-								<ul>
-									<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships" class="seperator">Relate to ...</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags" class="seperator">Tag</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings" >Rate</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(null); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deleteRecords(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
-								</ul>
-							</li>
-							<!-- </span><span class="collected-shown" style="display:inline"> -->
-							<li><div id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</div>
-								<ul>
-									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.collectionAdd();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
-									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.collectionDel(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
-									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection"
-											onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.collectionOnUpdate); document.getElementById("q").focus(); return false;'>Remove all</a></li>
-									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="top.HEURIST.search.collectionSave()">Save to...</a></li>
-									<li><a class=toolbar-large-icon-link-normal href="#" onClick="{top.HEURIST.search.executeQuery('?q=_COLLECTED_&amp;label=Collected');}" title="Show current set of records in collection" >Show</a></li>
-								</ul>
-							</li>
-							<li><div>Share</div>
-								<ul>
-									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
-								</ul>
-							</li>
-							<li><div>Layout</div>
-								<ul>
-									<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
-									<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
-									<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
-									<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
-									<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
-
-									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
-									also, provide this in the Advanced pulldown to render the current selection
-									-->
-									<li><a href="#" id="resetPanels" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
-									<li><a href="#" id="resetPanels_HideNav" title="Hide Navigation panel and set Search and View panels to 1:2" class="seperator">Search + View</a></li>
-									<li><a href="#"> Saved Filters and layouts</a>
-										<ul id="menuSavedFiltersAndLayouts">
-										</ul>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-
-
-
-
-					<div id="appPanelButton" title="Toggle search applications panel">Hide Applications</div>
-
-
-				</div>
-
 			</div>
 
+			<div id="navButton" title="Hide Navigation Panel">Hide Navigation</div>
+			<div id="appPanelButton" title="Toggle search applications panel">Hide Applications</div>
+
 </div>
+
+
 <!-- sidebar -->
 <div id="loadingCover" class="On" ></div>
-<div id="mainbody">
+<div id="searchpage-mainbody">
 <div id="sidebar">
 
 			<div id=left-panel-content class="panel-main-content">
@@ -566,16 +460,121 @@
 <!-- page -->
 <div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
 			<div id="result-container">
+
+				<!-- @todo - replace to YUI menu -->
+				<div id="result-menubar">
+						<ul class="sf-menu"> <!-- was  id="tabs"  horizontal not-query-collected -->
+							<li id="menuNavigation"><div>Navigation</div>
+								<ul>
+									<li><a href="#">My Bookmarks</a>
+										<ul id="menuBookmarks">
+											<li><a href="#">Favourites</a></li>
+											<li><a href="#">Recent changes</a></li>
+											<li><a href="#">All by date</a></li>
+											<li><a href="#">Aggregations</a></li>
+											<li><a href="#">Search by tags</a>
+												<ul id="menuSearchesByTag">
+												</ul>
+											</li>
+											<li><a href="#">Saved Searches</a>
+												<ul id="menuSavedSearchesBookmarks">
+												</ul>
+											</li>
+										</ul>
+									</li>
+									<li><a href="#">All Records</a>
+										<ul id="menuAllRecs">
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All by date</a></li>
+											<li><a href="#">Aggregations</a></li>
+											<li><a href="#">Saved Searches</a>
+												<ul id="menuSavedSearchesAllRecs">
+												</ul>
+											</li>
+										</ul>
+									</li>
+									<li><a href="#">Shared Searches</a>
+										<ul id="menuSavedSearchesShared">
+										</ul>
+									</li>
+									<!-- li><a href="#">Collections</a></li -->
+								</ul>
+							</li>
+							<li><div>Search</div>
+								<ul>
+									<li><a href="#" title="Assisted Search builder panel" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Assisted search</a></li>
+									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
+									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
+									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"
+												onClick="{top.HEURIST.search.savedSearchEdit(0); return false;}">Save search as ...</a></li>
+
+									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
+									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
+								</ul>
+							</li>
+							<li><div>Edit</div>
+								<ul>
+									<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships" class="seperator">Relate to ...</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags" class="seperator">Tag</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings" >Rate</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(null); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deleteRecords(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
+								</ul>
+							</li>
+							<!-- </span><span class="collected-shown" style="display:inline"> -->
+							<li><div id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</div>
+								<ul>
+									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.collectionAdd();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
+									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.collectionDel(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
+									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection"
+											onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.collectionOnUpdate); document.getElementById("q").focus(); return false;'>Remove all</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="top.HEURIST.search.collectionSave()">Save to...</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" onClick="{top.HEURIST.search.executeQuery('?q=_COLLECTED_&amp;label=Collected');}" title="Show current set of records in collection" >Show</a></li>
+								</ul>
+							</li>
+							<li><div>Share</div>
+								<ul>
+									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
+								</ul>
+							</li>
+							<li><div>Layout</div>
+								<ul>
+									<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
+									<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
+									<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
+									<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
+									<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
+
+									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
+									also, provide this in the Advanced pulldown to render the current selection
+									-->
+									<li><a href="#" id="resetPanels" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
+									<li><a href="#" id="resetPanels_HideNav" title="Hide Navigation panel and set Search and View panels to 1:2" class="seperator">Search + View</a></li>
+									<li><a href="#"> Saved Filters and layouts</a>
+										<ul id="menuSavedFiltersAndLayouts">
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+				</div> <!-- end result-menubar"-->
 				<div id="result-header">
+						<label id="active-label"></label>
+						<div id=pageNavCount>
+							<div id=page-nav></div>
+							<div id=resource-count></div>
+						</div>
 				</div>
 				<div id="results">
-					<div id=pageNavCount>
-						<div id=page-nav></div>
-						<div id=resource-count></div>
-					</div>
-					<div id="active-label"></div>
 					<div id="search-description"></div>
 					<div id="results-message"></div>
+					<!-- messages -->
 					<div id="search-status" class="loading">
 						<div id="loading-search-status">
 							<div><a href="#" onClick="document.getElementById('search-not-loading-message').style.display = ''; this.style.display = 'none'; return false;">Search not loading?</a></div>
@@ -616,7 +615,6 @@
 <!--  application tabs -->
 <div id="page-right" class=" yui-skin-sam">
 			<div id=applications class="yui-navset">
-				<!-- <a href="#" id="resultsButton" title="Toggle search results panel"></a>-->
 				<ul class="yui-nav">
 					<li class="selected"><a href="#r" ><em>Record View</em></a></li>
 					<!--    <li><a href="#c" ><em>Side-By-Side</em></a></li>-->
@@ -633,12 +631,6 @@
 					</div>
 					<!--    <div id="c"><iframe id="sidebyside-frame" class=viewers></iframe></div>-->
 					<div id="m3">
-						<!-- artem move it to showMap.html div style="height:25px;">
-							<input type="checkbox" style="display:inline-block;position:absolute; top:5px;left:5px;"
-								id="cbMapUseAllRecords" onChange="top.HEURIST.search.onMapUseAllRecords(event)">
-							<label style="padding-left: 20px;">Selected only</label>
-							<a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results"><div id="mapButton" class="button">Publish Map</div></a>
-						</div -->
 						<iframe id="map-frame3" class=viewers></iframe>
 					</div>
 					<div id="s">
@@ -687,7 +679,8 @@ rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offs
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 */
 /*_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
-*/top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+*/
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
 top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions

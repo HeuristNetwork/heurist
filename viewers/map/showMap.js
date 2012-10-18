@@ -390,15 +390,15 @@ function ShowMap() {
 
 			top.HEURIST.currentQuery_main = location.search;
 		}
-		
+
 		if(YAHOO.widget.Menu){ //there is not menu for showMapS.html (publish map)
 
 			if(!_menu){     //search-by-tag-link
-				_menu = new YAHOO.widget.Menu("menu_map_publish", {context:["menuButton", "tl", "br"]} );
+				_menu = new YAHOO.widget.Menu("menu_map_publish");
 			}
 
 			function _onMenuClick(eventName, eventArgs, subscriptionArg){
-				
+
 				var dest = subscriptionArg[0];
 				if(dest=="code"){
 					Hul.popupURL(this,'../viewers/map/mapMenu.html',null);
@@ -418,7 +418,7 @@ function ShowMap() {
 						}
 						window.open(url, '_blank');
 					}
-				}				
+				}
 			}
 
 			_menu.addItems([
@@ -426,6 +426,9 @@ function ShowMap() {
 						{ text: 'Google Earth', onclick:{ fn: _onMenuClick, obj: ["earth"] } },
 						{ text: 'Embed Map Code', onclick:{ fn: _onMenuClick, obj: ["code"] } }]);
 			_menu.render(this.document.body);
+			$("#menu_map_publish").bind("mouseleave",function(){
+				_menu.hide();
+			});
 		}
 
 		setLayout(true, true);
@@ -725,6 +728,8 @@ function ShowMap() {
 
 		showMenu: function(){
 			if(_menu){
+				_menu.cfg.setProperty("context",
+					["menuButton", "tl", "bl"]);
 				_menu.show();
 			}
 		},

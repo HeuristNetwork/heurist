@@ -10,6 +10,7 @@
 	-->*/
 
 	require_once(dirname(__FILE__).'/../../configIni.php');  // read in the configuration file
+	require_once(dirname(__FILE__)."/../php/dbMySqlWrappers.php");
 
 	/*
 	the standard initialisation file configIni.php is in the root directory of the Heurist
