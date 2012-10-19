@@ -31,20 +31,18 @@
 
 -- ***************************************************************************
 
+-- phpMyAdmin SQL Dump
 
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Mar 04, 2012 at 11:04 PM
--- Note: This is not the actual time of generation (at this date it was version 1.0.0)
---       The SQL below has been updated separately using H3CORECLONE some time in July 2012 (version 1.1.0)
+-- Generation Time: Oct 19, 2012 at 12:14 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
 -- Database: 'hdb_H3CoreDefinitions'
--- Updated July 2012 using H3CORECLONE
 -- 
 
 -- --------------------------------------------------------
@@ -328,7 +326,8 @@ CREATE TABLE defRelationshipConstraints (
   PRIMARY KEY  (rcs_ID),
   UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
-  KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
+  KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
@@ -781,6 +780,28 @@ CREATE TABLE usrRemindersBlockList (
 -- --------------------------------------------------------
 
 -- 
+-- Table structure for table 'usrReportSchedule'
+-- 
+
+CREATE TABLE usrReportSchedule (
+  rps_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary ID of a report output update specification',
+  rps_Type enum('smarty') collate utf8_unicode_ci NOT NULL default 'smarty' COMMENT 'The type of report being generated',
+  rps_Title varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'A title for this specification for use in selection menus',
+  rps_FilePath varchar(128) collate utf8_unicode_ci default NULL COMMENT 'The full file path to whic hthe report is to be generated, filestore/dbname/generated-reports if blank',
+  rps_URL varchar(128) collate utf8_unicode_ci default NULL COMMENT 'The corresponding URL for web access to the directory in which this report is published, to , filestore/dbname/generated-reports if blank',
+  rps_FileName varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
+  rps_HQuery text collate utf8_unicode_ci NOT NULL COMMENT 'The Heurist query to be used in generating this report',
+  rps_Template varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The name of the template file to be used in generating this report',
+  rps_IntervalMinutes tinyint(4) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
+  rps_Added timestamp NULL default NULL COMMENT 'The date when this specification was added',
+  rps_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date this specification was last updated',
+  PRIMARY KEY  (rps_ID),
+  UNIQUE KEY rps_path_filename (rps_FilePath,rps_FileName)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Specs for writing out static files from a query plus templat';
+
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table 'usrSavedSearches'
 -- 
 
@@ -888,6 +909,7 @@ CREATE TABLE woots (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
 
+
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -935,9 +957,10 @@ INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
 
 
 -- The owners of the database - always group 1
-INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
+INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (1,'Database owners',
  'Group 1 owns databases by default. DO NOT DELETE.',
+ 'This workgroup contains the administrators of the database. The first user (user #2) has special status as the master user. They cannot be deleted',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','y','db','owners');
  -- Note: ugr_id=1 is set as the database owner group in the sysidentification table
 
@@ -957,7 +980,7 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMa
 
 -- insert as 4 then change - cannot insert 0 straight up, as it gets reset to 4 in any case
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
- VALUES (4,'Everyone',
+ VALUES (4,'Everyone',  -- see note above
  'Group 0 represents all logged in users. DO NOT DELETE.',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
  -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint

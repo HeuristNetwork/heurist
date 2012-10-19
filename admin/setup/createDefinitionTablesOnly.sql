@@ -28,20 +28,22 @@
 -- -------------------------------------------------------------------------------------------------------
 
 -- phpMyAdmin SQL Dump
+
+-- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Mar 04, 2012 at 11:04 PM
+-- Generation Time: Oct 19, 2012 at 12:14 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
 -- Database: 'hdb_H3CoreDefinitions'
 -- 
 
+
 -- --------------------------------------------------------
 
-                              
 -- 
 -- Table structure for table 'defCalcFunctions'
 -- 
@@ -287,7 +289,8 @@ CREATE TABLE defRelationshipConstraints (
   PRIMARY KEY  (rcs_ID),
   UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
-  KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
+  KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
@@ -352,5 +355,4 @@ CREATE TABLE defURLPrefixes (
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
--- --------------------------------------------------------
-                                                                                               
+
