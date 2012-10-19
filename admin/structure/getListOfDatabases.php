@@ -29,10 +29,48 @@
 
     print "<div class='banner'><h2>Heurist databases on this server</h2></div>";
 	print "<div id='page-inner'>";
-    print "Click on the database name to open in new window";
+
+	$email = null;
+	$role = null;
+
+	if(is_logged_in() && get_user_id()>0){
+
+		//current user email
+		$query = 'select '.USERS_EMAIL_FIELD.' from '.USERS_TABLE.' where '.USERS_ID_FIELD.'='.get_user_id();
+
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			if ($row[USERS_EMAIL_FIELD])
+				$email = $row[USERS_EMAIL_FIELD];
+			else
+				$email = null;
+		}
+
+		if(array_key_exists('role',$_REQUEST)){
+			$role = $_REQUEST['role'];
+		}else{
+			$role = 'user'; // by default
+		}
+	}
+
+	if($email){
+
+		if(!(($role=='user')||($role=='admin'))){
+			$role = null;
+		}
+
+		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&role=\"+this.value;}'>";
+		print "<option ".
+					(($role==null)?'selected':'')." value='0'>All</option><option ".
+					(($role=='user')?'selected':'')." value='user'>User</option><option ".
+					(($role=='admin')?'selected':'')." value='admin'>Administrator</option></select></div>";
+	}
+
+
+    print "<div>Click on the database name to open in new window</div>";
 	print "<ul class='dbList'>";
 
-	$list = mysql__getdatabases();
+	$list = mysql__getdatabases(false, $email, $role);
 	foreach ($list as $name) {
             print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
 	}

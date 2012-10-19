@@ -23,12 +23,19 @@
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Heurist - FieldHelper synchronisation</title>
+		<link rel=stylesheet href="../../common/css/global.css" media="all">
+	</head>
+	<body class="popup">
+<?php
 	if (! is_admin()) {
-		print "<html><body><p>FieldHelper synchronisation requires you to be an adminstrator of the database owners group</p><p>".
-		"<a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<p>FieldHelper synchronisation requires you to be an adminstrator of the database owners group.</p></body></html>";
 		return;
 	}
-
 
 	$titleDT = (defined('DT_NAME')?DT_NAME:0);
 	$geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
@@ -44,22 +51,21 @@
 		"DateTimeOriginal" => $startdateDT,
 		"filename" => "file",
 		"latitude" => "lat",
-		"longitude" => "lon"
+		"longitude" => "lon",
+
+		"file_name" => (defined('DT_FILE_NAME')?DT_FILE_NAME:0),
+		"file_path" => (defined('DT_FILE_FOLDER')?DT_FILE_FOLDER:0),
+		"extension"  => (defined('DT_FILE_EXT')?DT_FILE_EXT:0),
+
+		"device"  	=> (defined('DT_FILE_DEVICE')?DT_FILE_DEVICE:0),
+		"duration"  => (defined('DT_FILE_DURATION')?DT_FILE_DURATION:0),
+		"filesize"  => (defined('DT_FILE_SIZE')?DT_FILE_SIZE:0),
+		"md5"  		=> (defined('DT_FILE_MD5')?DT_FILE_MD5:0)
 	);
 
 	$rep_counter = null;
 	$rep_issues = null;
 	$currfile = null;
-
-?>
-<html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - FieldHelper synchronisation</title>
-	</head>
-
-
-	<?php
 
 		mysql_connection_db_overwrite(DATABASE);
 		if(mysql_error()) {
@@ -74,14 +80,23 @@
 
 		print "<p> At this time, synchronisation is a one-shot, one way import, from FieldHelper to Heurist".
 		"<br>Later this function will do two-way synchronsiation";
-		print "<br>";
+		print "</p>";
 
+		$notfound = array();
+		foreach ($fieldhelper_to_heurist_map as $key=>$id){
+			if(is_numeric($id) && $id==0){
+				array_push($notfound, $key);
+			}
+		}
+		if(count($notfound)>0){
+			print "<p style='color:red;'> There are not detail types in this instance of Heurist database for following manifest elements: ".implode(",",$notfound).". They will be ignored</p>";
+		}
 
 		// ----FORM 1 - CHECK MEDIA FOLDERS --------------------------------------------------------------------------------
 
 		if(!array_key_exists('mode', $_REQUEST)) {
 
-			if(HEURIST_DBID==0){ //is not registered
+			if(false && HEURIST_DBID==0){ //is not registered
 
 				print "<p style=\"color:red\">Database must be registered to use FieldHelper sync function</p>";
 
@@ -148,7 +163,7 @@
 			$rep_counter = 0;
 			$rep_issues = "";
 
-			harvest($dirs);
+			doHarvest($dirs);
 
 			print "<div>Syncronization completed</div>";
 			print "<div style=\"color:green\">Total records created: $rep_counter </div>";
@@ -159,7 +174,7 @@
 
 		// ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
 
-		function harvest($dirs) {
+		function doHarvest($dirs) {
 
 			global $rep_counter, $rep_issues;
 
@@ -182,13 +197,13 @@
 									array_push($subdirs, $dir.$filename."/");
 								}else if($isfirst){ //if($filename == "fieldhelper.xml"){
 									$isfirst = false;
-									$rep_counter = $rep_counter + harvest_in_dir($dir);
+									$rep_counter = $rep_counter + doHarvestInDir($dir);
 								}
 							}
 						}
 
 						if(count($subdirs)>0){
-							harvest($subdirs);
+							doHarvest($subdirs);
 							flush();
 						}
 					}
@@ -223,7 +238,7 @@
 		* @global array $fieldhelper_to_heurist_map
 		* @param type $dir
 		*/
-		function harvest_in_dir($dir) {
+		function doHarvestInDir($dir) {
 
 			global $rep_issues, $fieldhelper_to_heurist_map,
 			$geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
@@ -317,6 +332,15 @@
 											$filename = $dir.$value;
 											$filename_base = $value;
 
+											$key = $fieldhelper_to_heurist_map['file_name'];
+											if($key>0){
+												$details["t:".$key] = array("1"=>$value);
+											}
+											$key = $fieldhelper_to_heurist_map['file_path'];
+											if($key>0){
+												$details["t:".$key] = array("1"=>$dir);
+											}
+
 										}else if($key=="lat"){
 
 											$lat = floatval($value);
@@ -331,7 +355,7 @@
 										}else if(intval($key)>0) {
 											//add to details
 											$details["t:".$key] = array("1"=>$value);
-										}
+										}// else field type not defined in this instance
 
 								}
 							}//for item keys
@@ -378,8 +402,15 @@
 
 								//set title by default
 								if (!array_key_exists("t:".$titleDT, $details)){
-									$details["t:".$titleDT] = "title for ".$filename;
+									$details["t:".$titleDT] = array("1"=>"title for ".$filename);
 									print "<div style=\"color:#ff8844\">warning $filename_base no title</div>";
+								}
+
+								$new_md5 = null;
+								$key = $fieldhelper_to_heurist_map['md5'];
+								if($key>0){
+									$new_md5 = md5_file($filename);
+									$details["t:".$key] = array("1"=>$new_md5);
 								}
 
 								/*****DEBUG****///error_log(">>>>>>details: ".print_r($details, true));
@@ -409,11 +440,11 @@
 								if (@$out['error']) {
 									print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";
 								}else{
-
+									if($new_md5==null){
+										$new_md5 = md5_file($filename);
+									}
 									//update xml
 									if($recordId==null){
-
-										$new_md5 = md5_file($filename);
 										if($old_md5!=$new_md5){
 											print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
 										}
@@ -477,7 +508,7 @@ XML;
 				$f_items = $fh_data->addChild("items");
 			}
 
-			$allowed_exts = array("jpg", "jpeg", "png", "gif");
+			$allowed_exts = array("jpg", "jpeg", "png", "gif", "doc", "docx");
 
 			//for files in folder that are not specified in the directory
 			foreach ($all_files as $filename){
@@ -514,6 +545,24 @@ XML;
 						$details["t:".$geoDT] = array("1"=>$file_id);
 						*/
 
+						$new_md5 = md5_file($filename);
+						$key = $fieldhelper_to_heurist_map['md5'];
+						if($key>0){
+							$details["t:".$key] = array("1"=>$new_md5);
+						}
+						$key = $fieldhelper_to_heurist_map['file_name'];
+						if($key>0){
+							$details["t:".$key] = array("1"=>$flleinfo['basename']);
+						}
+						$key = $fieldhelper_to_heurist_map['file_path'];
+						if($key>0){
+							$details["t:".$key] = array("1"=>$flleinfo['dirname']);
+						}
+						$key = $fieldhelper_to_heurist_map['extension'];
+						if($key>0){
+							$details["t:".$key] = array("1"=>$flleinfo['extension']);
+						}
+
 						//add-update Heurist record
 						$out = saveRecord(null, //record ID
 							RT_MEDIA_RECORD, //record type
@@ -549,7 +598,7 @@ XML;
 						$f_item->addChild("original_metadata", "chk");
 						$f_item->addChild("Name0", "title for ".$flleinfo['basename']);
 						$f_item->addChild("heurist_id", $out["bibID"]);
-						$f_item->addChild("md5", md5_file($filename));
+						$f_item->addChild("md5", $new_md5);
 
 						$rep_processed_dir++;
 					}//check ext

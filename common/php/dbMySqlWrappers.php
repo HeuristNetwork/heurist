@@ -346,24 +346,44 @@ function json_format($obj, $purdy=false) {
 /**
 * returns list of databases as array
 *
-* @param mixed $with_prefix
+* @param mixed $with_prefix - if false it remove "hdb_" prefix
+* @param mixed $email - current user email
+* @param mixed $role - admin - returns database where current user is admin, user - where current user exists
 */
-function mysql__getdatabases($with_prefix=false){
+function mysql__getdatabases($with_prefix=false, $email=null, $role=null){
 
     $query = "show databases";
     $res = mysql_query($query);
     $result = array();
 
+    $isFilter = ($email!=null && $role!=null);
+
     while ($row = mysql_fetch_array($res)) {
        	$test = strpos($row[0], HEURIST_DB_PREFIX);
        	if (is_numeric($test) && ($test==0) ) {
 
-    			if($with_prefix){
-    				array_push($result, $row[0]);
-				}else{
-					// delete the prefix
-       				array_push($result, substr($row[0],strlen(HEURIST_DB_PREFIX)));
+       		if($isFilter){
+       			if($role=='user'){
+       				$query = "select ugr_ID from ".$row[0].".sysUGrps where ugr_eMail='".$email."'";
+				}else if($role=='admin'){
+					$query = "select ugr_ID from ".$row[0].".sysUGrps, ".$row[0].".sysUsrGrpLinks where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='".$email."'";
 				}
+				if($query){
+					$res2 = mysql_query($query);
+					if(mysql_num_rows ( $res2 )<1){
+						continue;
+					}
+				}else{
+					continue;
+				}
+			}
+
+    		if($with_prefix){
+    			array_push($result, $row[0]);
+			}else{
+				// delete the prefix
+       			array_push($result, substr($row[0],strlen(HEURIST_DB_PREFIX)));
+			}
 		}
     }
 

@@ -91,12 +91,14 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$ignored = mysql__select_assoc('usrHyperlinkFilter', 'lcase(hyf_String)', '-1',
 		                               'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
 		$wildcard_ignored = array();
-		foreach ($ignored as $key => $val) {
-			$key_len = strlen($key);
+		if($ignored){
+			foreach ($ignored as $key => $val) {
+				$key_len = strlen($key);
 
-			if (@$key[$key_len-1] == '*') {	/* wildcard at the end of the string only */
-				unset($ignored[$key]);
-				$wildcard_ignored[substr($key, 0, $key_len-1)] = $key_len - 1;
+				if (@$key[$key_len-1] == '*') {	/* wildcard at the end of the string only */
+					unset($ignored[$key]);
+					$wildcard_ignored[substr($key, 0, $key_len-1)] = $key_len - 1;
+				}
 			}
 		}
 
@@ -226,7 +228,7 @@ if (@$urls) {
 	<title>Import Hyperlinks</title>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-   	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+   	<!-- link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css" -->
 
     <style type="text/css">
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
@@ -240,7 +242,7 @@ if (@$urls) {
 <script src="getTitleFromURL.js"></script>
 <script src="importHyperlinks.js"></script>
 
-<body class="popup" width=600 height=400>
+<body class="popup" width=600 height=400 style="margin:10px;">
 
 <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
@@ -334,10 +336,11 @@ hyperlinks of interest).</p>
 		mysql_connection_db_overwrite(DATABASE);
 
 ?>
-<p>Web links in <b><?= htmlspecialchars($srcname) ?></b></p>
+<h2 style="padding-left: 20px;">Import Hyperlinks</h2>
+<p style="padding-left: 20px;">
+Web links in <b><?= htmlspecialchars($srcname) ?></b>
 <input type="hidden" name="old_srcname" value="<?= htmlspecialchars($srcname) ?>">
 
-<p style="margin-left: 20px;" class="normal">
 Note: the list only shows links which you have not already bookmarked.<br>
 <?php if ($word_limit) { ?>
   Only links with at least <?= ($word_limit == 1)? 'one word' : $word_limit.' words' ?> are shown,
@@ -346,38 +349,30 @@ Note: the list only shows links which you have not already bookmarked.<br>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
   <input type="button" onClick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&db=<?=HEURIST_DBNAME?>&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
-</p>
-
-<p style="margin-left: 20px;" class="normal">
-We recommend bookmarking a few links at a time.<br>
-The list is reloaded after each addition and after change of settings.
-</p>
+<br />
+We recommend bookmarking a few links at a time.<br />The list is reloaded after each addition and after change of settings.
 
 <?php		if (@$error) {	?>
- <div class="input-row"><div class="input-header-cell"><?= $error ?></div></div>
- <div class="input-row"><div class="input-cell"></div></div>
+ <div class="input-row"><?= $error ?></div>
 <?php		} ?>
 <?php		if (@$success) {	?>
- <div class="input-row"><div class="input-header-cell"><?= htmlspecialchars($success) ?></div></div>
- <div class="input-row"><div class="input-cell"></div></div>
+ <div class="input-row"><?= htmlspecialchars($success) ?></div>
 <?php		} ?>
 <?php		if (@$disambiguate_bib_ids) { ?>
- <div class="input-row"><div class="input-header-cell">
+ <div class="input-row">
   <b><?= (count($disambiguate_bib_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
   similar to record(s) already in the database.</b><br>
   The similar records are shown below: please select the appropriate page, or add a new URL to the database.<br>
   Then click on "Bookmark checked links" again.
- </div></div>
- <div class="input-row"></div>
+ </div>
 <?php		} ?>
- <div class="input-row">
-  <div class="input-header-cell">
+</p>
+ <div class="input-row" style="padding-left: 20px;">
    <a href="#" onClick="checkAll(); return false;">Check all</a>
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
    <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_tags_elt').value = 1; document.forms[0].submit(); } } ); return false;">
-  </div>
  </div>
 
 
@@ -550,24 +545,23 @@ function print_link($url, $title) {
 	global $notes;
 
 ?>
- <div class="input-row">
-  <div class="input-header-cell">
-   <label>&nbsp;<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onChange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">&nbsp;</label>
-  </div>
-  <div class="input-cell"><input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width: 100%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
-      <input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
-      <input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
-  </div>
-  <div class="input-cell">&#91;<a href="<?= $url ?>" target="_blank">visit</a>&#93;</div>
-  <div class="input-cell"><input type="button" name="lookup[<?= $linkno ?>]" value="Lookup" onClick="if (value == 'Lookup') { lookupTitle(this); } else { var e1 = document.getElementById('t<?= $linkno ?>'); var e2 = document.getElementById('at<?= $linkno ?>'); var tmp = e1.value; e1.value = e2.value; e2.value = tmp; }" id="lu<?= $linkno ?>"></div>
-  <div class="input-cell"><input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>"></div>
- </div>
- <div class="input-row">
-  <div class="input-header-cell"><div class="inline_url"><a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a></div></div>
- </div>
- <div class="input-row">
-    <div class="input-header-cell"><nobr>
-      <label>&nbsp;<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox">&nbsp;
+<div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:80%;">
+		<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onChange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">
+		&nbsp;<input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
+		<input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
+		<input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
+
+  		&nbsp;&#91;<a href="<?= $url ?>" target="_blank"><span class="button">Visit</span></a>&#93;&nbsp;
+		<input type="button" style="padding-top: 2px;height:23px !important;" name="lookup[<?= $linkno ?>]" value="Lookup" onClick="if (value == 'Lookup') { lookupTitle(this); } else { var e1 = document.getElementById('t<?= $linkno ?>'); var e2 = document.getElementById('at<?= $linkno ?>'); var tmp = e1.value; e1.value = e2.value; e2.value = tmp; }" id="lu<?= $linkno ?>">
+		<input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>">
+</div>
+
+<div class="input-row" style="padding-left: 60px;">
+  <a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a>
+</div>
+<div class="input-row" style="padding-left: 60px;">
+	<div style="display:inline-block;">
+		<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox"><label>&nbsp;
 <?php
 	if (@$_REQUEST['notes'][$linkno])
 		$word_count = str_word_count($_REQUEST['notes'][$linkno]);
@@ -579,13 +573,11 @@ function print_link($url, $title) {
 		print "<small>$word_count words</small>";
 	}
 ?></label>
-      <input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
-  </nobr></div>
-     <div class="input-header-cell"><div class="inline_notes"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?></div></div>
-    </div>
+      	<input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
+	  </div>
+      <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?></div>
+</div>
 
-  </div>
- </div>
 <?php
 	if (@$disambiguate_bib_ids[$url]) {
 ?>

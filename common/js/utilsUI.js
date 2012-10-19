@@ -35,7 +35,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+if (!top.HEURIST){
+	top.HEURIST = {};
+}
 
 if (! top.HEURIST.util) top.HEURIST.util = {
 	setVersion: function() {

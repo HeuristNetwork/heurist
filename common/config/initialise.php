@@ -382,6 +382,16 @@
 	'DT_DETAIL_TYPE'=>array(2,54),
 	'DT_COMMAND'=>array(2,55),
 	'DT_COLOUR'=>array(2,56),
+	// ARTEM: IJ added these detail types 2012-10-19.
+	// I hope next step will be keep file info as record not as entry in recUploadedFiles.
+	'DT_FILE_NAME'=>array(2,62),
+	'DT_FILE_FOLDER'=>array(2,63),
+	'DT_FILE_EXT'=>array(2,64),
+	'DT_FILE_DEVICE'=>array(2,65),
+	'DT_FILE_DURATION'=>array(2,66),
+	'DT_FILE_SIZE'=>array(2,67),
+	'DT_FILE_MD5'=>array(2,68),
+
 	'DT_EDITOR' => array(3,1013),
 	'DT_OTHER_FILE' => array(3,62),//TODO: remove from code
 	'DT_LOGO_IMAGE' => array(3,222),//TODO: remove from code
