@@ -402,7 +402,7 @@
 
 								//set title by default
 								if (!array_key_exists("t:".$titleDT, $details)){
-									$details["t:".$titleDT] = array("1"=>"title for ".$filename);
+									$details["t:".$titleDT] = array("1"=>$filename);
 									print "<div style=\"color:#ff8844\">warning $filename_base no title</div>";
 								}
 
@@ -450,6 +450,8 @@
 										}
 										$f_item->addChild("heurist_id", $out["bibID"]);
 										$f_item->addChild("md5", $new_md5);
+										$f_item->addChild("filesize", filesize($filename));
+
 									}else{
 										$el_heuristid["heurist_id"] = $out["bibID"];
 									}
@@ -537,7 +539,7 @@ XML;
 							continue;
 						}
 
-						$details["t:".$titleDT] = array("1"=>"title for ".$flleinfo['basename']);
+						$details["t:".$titleDT] = array("1"=>$flleinfo['basename']);
 						/* TODO - extract these data from exif
 						$details["t:".$descriptionDT] = array("1"=>$file_id);
 						$details["t:".$startdateDT] = array("1"=>$file_id);
@@ -562,6 +564,10 @@ XML;
 						if($key>0){
 							$details["t:".$key] = array("1"=>$flleinfo['extension']);
 						}
+						$key = $fieldhelper_to_heurist_map['filesize'];
+						if($key>0){
+							$details["t:".$key] = array("1"=>filesize($filename));
+						}
 
 						//add-update Heurist record
 						$out = saveRecord(null, //record ID
@@ -584,6 +590,8 @@ XML;
 						);
 
 
+error_log(">>>>>".filemtime($filename)."  ".date("Y/m/d H:i:s.", filemtime($filename)));
+
 						$f_item = $f_items->addChild("item");
 						$f_item->addChild("filename", $flleinfo['basename']);
 						$f_item->addChild("nativePath", $filename);
@@ -591,14 +599,15 @@ XML;
 						$f_item->addChild("extension", $flleinfo['extension']);
 						//$f_item->addChild("DateTime", );
 						//$f_item->addChild("DateTimeOriginal", );
-						$f_item->addChild("filedate", date("Y/m/d H:i:s.", filectime($filename)));
+						$f_item->addChild("filedate", date("Y/m/d H:i:s.", filemtime($filename)));
 						$f_item->addChild("typeContent", "image");
 						$f_item->addChild("device", "image");
 						$f_item->addChild("duration", "2000");
 						$f_item->addChild("original_metadata", "chk");
-						$f_item->addChild("Name0", "title for ".$flleinfo['basename']);
+						$f_item->addChild("Name0", $flleinfo['basename']);
 						$f_item->addChild("heurist_id", $out["bibID"]);
 						$f_item->addChild("md5", $new_md5);
+						$f_item->addChild("filesize", filesize($filename));
 
 						$rep_processed_dir++;
 					}//check ext

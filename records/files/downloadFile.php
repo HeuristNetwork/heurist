@@ -70,7 +70,8 @@ if($isplayer){
 	}
 	else if($type_media=='video')
 	{
-		print createVideoTag($filedata['URL'], $filedata['mimeType'], $size);
+		$size = ' height="280" width="420" ';
+		print createVideoTag2($filedata['URL'], $filedata['mimeType'], $size);
 	}
 	else if($type_media=='audio')
 	{
@@ -221,6 +222,9 @@ function downloadViaProxy($filename, $mimeType, $url){
 function createVideoTag($url, $mimeType, $size) {
 // width="320" height="240"
  	return '<video '.$size.' controls="controls"><source src="'.$url.'" type="'.$mimeType.'"/>Your browser does not support the video element.</video>';
+}
+function createVideoTag2($url, $mimeType, $size) {
+	return '<embed '.$size.' name="plugin" src="'.$url.'" type="'.$mimeType.'" controls="CONSOLE" controller="TRUE">';
 }
 
 function createAudioTag($url, $mimeType) {

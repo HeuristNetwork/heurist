@@ -168,29 +168,26 @@
    <div class="input-row">
     <div class="input-header-cell">When exiting record edit, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
   </div>
-  
+
   <div id="buttons" class="actionButtons">
    <input type="button" value="save" onClick="save();">
    <input type="button" value="cancel" onClick="window.close();">
   </div>
 
-  <p><hr>Use the link below to add a bookmarklet to your browser toolbar. The bookmarklet captures highlighted 
+  <p><hr>Use the link below to add a bookmarklet to your browser toolbar. The bookmarklet captures highlighted
   <br>text from a web page and creates an Internet Bookmark record, extracting certain fields (DOI, ISBN, ISSN etc.). </p>
-  <i>Drag this link to your bookmarks bar:</i> &nbsp;&nbsp; 
-  
-  <!-- TODO: THIS IS NOT YET WORKING EVEN THOUGH IT DISPLAYS THE BOOKMARKLET OK
-       It is not setting the path properly, it is putting in path to calling location, 
-       not sure how much of the top. Heurist stuff is needed-->
+  <i>Drag this link to your bookmarks bar:</i> &nbsp;&nbsp;
+
   <script>
-    var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
-            ( HeuristBaseURL ? HeuristBaseURL : ""));
+    var hBase = (top.HEURIST && top.HEURIST.baseURL)? top.HEURIST.baseURL
+    			: document.location.href.replace(/admin\/.*/,"");
     var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-    top.HEURIST.search.setHomeLink(); // ??
-    top.HEURIST.parameters["db"] = database; // ??
+
     var bookmarkletname = top.HEURIST.VERSION;
+
     var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
     + " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
-    + " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
+    + " href=\"javascript:(function(){h='" + hBase + "';"
     + "d=document;c=d.contentType;"
     + "if(c=='text/html'||!c){"
     + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
@@ -199,13 +196,11 @@
     + "d.getElementsByTagName('head')[0].appendChild(s);}"
     + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
     + "window.setTimeout('w.focus()',200);}"
-    + "})();\"><b>>> "+database+" </b></a>"; 
+    + "})();\"><b>>> "+database+" </b></a>";
     document.write(html);
 </script>
 
 Note: this bookmarklet not yet debugged
-
- 
  </body>
 </html>
 

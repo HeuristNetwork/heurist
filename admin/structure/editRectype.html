@@ -51,21 +51,10 @@
 	var Hul = top.HEURIST.util,
 			  _keepStatus;
 
-
-	try {
-		var hash;
-		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-		for(var i = 0; i < hashes.length; i++) {
-			hash = hashes[i].split('=');
-			if(hash[0] == "rectypeID") {
-				var rectypeID = hash[1]; // Get rectype ID from URL
-			}
-			else if(hash[0] == "groupID") {
-				var defaultGroupID = hash[1]; // Get selected tab (group) from URL
-			}
-		}
-	}
-	catch(e) {} // No rectypeID, so give empty form to create a new one
+	var query = this.location.search;
+	var rectypeID = Hul.getUrlParameter('rectypeID',query);
+	var defaultGroupID = Hul.getUrlParameter('groupID',query);
+	var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
 </script>
 <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
@@ -254,8 +243,8 @@
 
 	<div class="actionButtons">
 		<div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
-		<input type="button" value="Save & close" onClick="EditPopup.save(false);" />
-		<input type="button" value="Save & show fields >> " onClick="EditPopup.save(true)"/>
+		<input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
+		<div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
 		<!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
 	</div>
 </div>
@@ -298,6 +287,10 @@
 		if(newRectypeCode == 2) { // Give error message
 			document.getElementById("statusMsg").style.display = "block";
 			document.getElementById("statusMsg").innerHTML = "<strong>Error: rectype could not be found. Clicking 'save' button will create a new rectype.</strong><br /><br />";
+		}
+
+		if(supressEditStructure){
+			document.getElementById('btnSaveAndEditStructure').style.display = 'none';
 		}
 	}
 

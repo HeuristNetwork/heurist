@@ -163,6 +163,10 @@ label input {
 label {
 	line-height: 100%;
 }
+.labelBold{
+	font-weight: bold;
+	padding-left:2em;
+}
 .dialogBox {
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;

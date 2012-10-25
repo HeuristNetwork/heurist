@@ -80,7 +80,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	*/
 	function _init(dtyID, _callback)
 	{
-		_callback_func = _callback;
+		if(_callback) _callback_func = _callback;
 
 				if (Hul.isnull(dtyID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
@@ -387,6 +387,17 @@ oRecord.getData('description')+'"/>';}
 
 								});//_myDataTable.onEventSelectRow);
 
+
+						//there are not filter and search controls
+						if(!_isFilterMode){
+							// init Group Combo Box Filter
+							_initGroupComboBoxFilter();
+
+											//init listeners for filter controls
+							_initListeners();
+						}
+
+
 				}else{
 					// all stuff is already inited, change livedata in datasource only
 					_myDataSource.liveData = arr;
@@ -399,15 +410,8 @@ oRecord.getData('description')+'"/>';}
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 					});
 
-				}
+					_updateFilter();
 
-				//there are not filter and search controls
-				if(!_isFilterMode){
-					// init Group Combo Box Filter
-					_initGroupComboBoxFilter();
-
-									//init listeners for filter controls
-					_initListeners();
 				}
 
 	}//end of initialization =====================
@@ -515,6 +519,31 @@ oRecord.getData('description')+'"/>';}
 
 	} //end init listener
 
+	function _onDefineNewType(){
+
+			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+								(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var url = top.HEURIST.basePath + "admin/structure/editRectype.html?supress=1&db="+db;
+
+			popupSelect = Hul.popupURL(top, url,
+			{	"close-on-blur": false,
+				"no-resize": false,
+			height: 700,
+
+			width: 650,
+				callback: function(context) {
+
+					if(!Hul.isnull(context)){
+						//refresh the local heurist
+						top.HEURIST.rectypes = context.rectypes;
+
+						//new field type to be added - refresh list
+						_init();
+					}
+				}
+			});
+	}
+
 	//
 	//public members
 	//
@@ -543,6 +572,10 @@ oRecord.getData('description')+'"/>';}
 				},
 				setFilterMode : function (val) {
 					_isFilterMode = val;
+				},
+
+				onDefineNewType: function(){
+					_onDefineNewType();
 				},
 
 				/**

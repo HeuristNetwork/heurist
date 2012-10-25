@@ -923,7 +923,11 @@ function smarty_function_wrap($params, &$smarty)
 					}else if($value['remoteSource']=='youtube' ){
 						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
 					}else if($type_media=='video'){
-						$sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
+						//UNFORTUNATELY HTML5 dores not work properly
+						// $sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
+
+						$sres = $sres.createVideoTag2($value['URL'], $value['mimeType'], $size);
+
 					}else if($type_media=='audio'){
 						$sres = $sres.createAudioTag($value['URL'], $value['mimeType']);
 					}else{

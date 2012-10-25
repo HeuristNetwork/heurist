@@ -101,6 +101,13 @@
 
 	// Check if someone else is already modifying database definitions, if so: stop.
 
+	if($isNewDB && !file_exists("../setup/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
+		$errorCreatingTables = true;
+		$isCreateNew = true;
+		echo (($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." not found</br>");
+		return false;
+	}
+
 	if ($isExistingDB) {
 		$res = mysql_query("select lck_UGrpID from sysLocks where lck_Action='buildcrosswalks'");
 		// 6/9/11 $res is not being recognised as a valid MySQL result, and always returns false. This appear to be identical
@@ -138,10 +145,9 @@
 	// Query heuristscholar.org Index database to find the URL of the installation you want to use as source
 	// The query should be based on DOAP metadata and keywords which Steven is due to set up in the Index database
 
-
-
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructure returns
-		$file = fopen("../setup/coreDefinitions.txt", "r");
+
+		$file = fopen("../setup/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"), "r");
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);
 		}

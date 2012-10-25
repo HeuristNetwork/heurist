@@ -73,14 +73,14 @@ top.HEURIST.search = {
 		}
 	},
 
-	submitSearchForm: function() {
+	submitSearchForm: function(clearLabel) {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
 		top.HEURIST.search.currentPage = 0;
 		top.HEURIST.search.resultsPerPage = top.HEURIST.util.getDisplayPreference("results-per-page");
 		top.HEURIST.search.clearResultRows();
 		top.HEURIST.search.clearRelatesRows();
-		top.HEURIST.search.reloadSearch();
+		top.HEURIST.search.reloadSearch(clearLabel);
 		top.HEURIST.search.setBodyClass();
 	},
 
@@ -190,13 +190,14 @@ top.HEURIST.search = {
 		window.location.href = temp;
 	},
 
-	reloadSearch: function() {
+	reloadSearch: function(clearLabel) {
+
 		if(top.HEURIST.util.isempty(document.getElementById("w-input").value)){
 			document.getElementById("w-input").value = "all";
 		}
 		top.HEURIST.parameters["q"] = document.getElementById("q").value;
 		top.HEURIST.parameters["w"] = document.getElementById("w-input").value;
-		if (top.HEURIST.parameters["label"]) {
+		if (top.HEURIST.parameters["label"] && (clearLabel==undefined || clearLabel)) {
 			delete top.HEURIST.parameters["label"];
 		}
 		/*
@@ -226,19 +227,20 @@ top.HEURIST.search = {
 		}
 		var iframeElt = document.createElement("iframe");
 		var params = top.HEURIST.parameters;
+		var lbl = document.getElementById("active-label");
 		if (params["label"]) {
-			document.getElementById("active-label").innerHTML = params["label"];
-			document.getElementById("active-label").title = params["label"];
+			lbl.innerHTML = params["label"];
+			lbl.title = (params['q'])?params["q"]:params["label"];
 			if (params["label"] == "Favourites") {
 				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
 				document.getElementById("results-message").style.display = "block";
 			}
 		} else if (params['q']){
-			document.getElementById("active-label").innerHTML = params['q'];
-			document.getElementById("active-label").title = params['q'];
+			lbl.innerHTML = params['q'];
+			lbl.title = params['q'];
 		}else{
-			document.getElementById("active-label").innerHTML = "Search results";
-			document.getElementById("active-label").title = params['q'];
+			lbl.innerHTML = "Search results";
+			lbl.title = params['q'];
 		}
 		iframeElt.style.border = "0";
 		iframeElt.style.width = "0";
@@ -1056,17 +1058,21 @@ top.HEURIST.search = {
 		} else {
 			document.getElementById("q").value = params["q"] ? params["q"] : "";
 		}
+
+		var lbl = document.getElementById("active-label");
 		if (params["label"]) {
-			document.getElementById("active-label").innerHTML = params["label"];
-			document.getElementById("active-label").title = params["label"];
+			lbl.innerHTML = params["label"];
+			lbl.title = (params['q'])?params["q"]:params["label"];
 			if (params["label"] == "Favourites") {
 				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
 				document.getElementById("results-message").style.display = "block";
 			}
-		} else {
-			document.getElementById("active-label").innerHTML = "Search results";
-			document.getElementById("active-label").title = "Search results";
+		} else if (params['q']){
+			lbl.title = lbl.innerHTML = params['q'];
+		}else{
+			lbl.title = lbl.innerHTML = "Search results";
 		}
+
 		if (params["description"]) {
 			document.getElementById("search-description").innerHTML = params["description"];
 			document.getElementById("search-description").style.display = "block";
@@ -2180,22 +2186,16 @@ top.HEURIST.search = {
 				if(top.HEURIST.search.recMenuBkmk) top.HEURIST.search.recMenuBkmk.hide();
 			}
 
-			function _onMenuClick(eventName, eventArgs, subscriptionArg){
-					var fname = subscriptionArg.shift();
-					var args = subscriptionArg;
-					top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
-			}
-
 			var items = oMenu.getItems();
-			items[0].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["addRemoveTagsPopup", false, recID, bkmkID] } );
+			items[0].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["addRemoveTagsPopup", false, recID, bkmkID] } );
 			if(bkmkID){
-				items[1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["setRatingsPopup", bkmkID] } );
-				items[2].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["deleteBookmarks", bkmkID] } );
+				items[1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["setRatingsPopup", bkmkID] } );
+				items[2].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["deleteBookmarks", bkmkID] } );
 			}else{
-				items[1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["addBookmarks", recID] } );
+				items[1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["addBookmarks", recID] } );
 			}
 
-			items[items.length-1].cfg.setProperty("onclick", { fn: _onMenuClick, obj: ["deleteRecords", recID] } );
+			items[items.length-1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["deleteRecords", recID] } );
 
 
 			oMenu.cfg.setProperty("context",
@@ -2717,7 +2717,8 @@ top.HEURIST.search = {
 			}else{
 				top.HEURIST.parameters["q"] = document.getElementById("q").value = q;
 				top.HEURIST.parameters["w"] = document.getElementById("w-input").value = __getParam("w");
-				top.HEURIST.search.submitSearchForm();
+				top.HEURIST.parameters['label'] = __getParam("label");
+				top.HEURIST.search.submitSearchForm(false);
 			}
 		}
 
@@ -2766,7 +2767,7 @@ top.HEURIST.search = {
 	savedSearchExecute: function(sid) {
 		var ss = top.HEURIST.search.savedSearchFind(sid);
 		if(!top.HEURIST.util.isnull(ss)){
-			top.HEURIST.search.executeQuery(ss[1]);
+			top.HEURIST.search.executeQuery(ss[1]+'"&label='+ss[0]);
 		}
 		return false;
 	},
@@ -2811,6 +2812,9 @@ top.HEURIST.search = {
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""));
 	},
 
+	launchAssistedSearch: function() {
+		$('#btnSimpleSearch').click();
+	},
 	launchAdvancedSearch: function() {
 		var q = document.getElementById("q").value;
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name : "");
@@ -4184,7 +4188,72 @@ top.HEURIST.search = {
 		}
 	},
 */
+
+/* @todo - repalce superfish to YUI menu
+	oSearchMenuBar:null,
+
+	initTopMenu: function() {
+
+		var mainMenuData = [
+			{ text: "Navigation" }, { text: "Search" }
+		];
+
+		var subMenuData = [
+		{  id: "menuNavigation2",
+        	itemdata: [
+		         { text: "My Bookmarks", submenu: { id: "menuBookmarks2",
+		         	itemdata: [
+		                { text: "Favourites" , onclick:{ fn: onMenuClick, obj: ["executeQuery", "?w=bookmark&q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\""] } },
+		                { text: "Recent changes" , onclick:{ fn: onMenuClick, obj: ["executeQuery", "?w=bookmark&q=sortby:-m after:\"1 week ago\""] } },
+		                { text: "All by date" , onclick:{ fn: onMenuClick, obj: ["executeQuery", "?w=bookmark&q=sortby:-m"] } },
+		                { text: "Search by tags", submenu: { id: "menuSearchesByTag2", itemdata: [ ] }
+		                },
+		                { text: "Saved Searches", submenu: { id: "menuSavedSearchesBookmarks2", itemdata: [ ] }
+		                }
+		            ]}},
+		        { text: "All Records", submenu: {  id: "menuAllRecs2",
+		        	itemdata: [
+		                { text: "Recent changes" , onclick:{ fn: onMenuClick, obj: ["executeQuery", tags[i]] } },
+		                { text: "All by date" , onclick:{ fn: onMenuClick, obj: ["executeQuery", tags[i]] } },
+		                { text: "Saved Searches", submenu: { id: "menuSavedSearchesAllRecs2", itemdata: [ ] }
+		                }
+		        	]}},
+		        { text: "Shared Searches", submenu: {  id: "menuSavedSearchesShared2", itemdata: []}}
+		    ]
+		},
+		{  id: "menuSearch",
+        	itemdata: [
+		                { text: "Assisted search", title: "Assisted Search builder panel",
+		                			onclick:{ fn: onMenuClick, obj: ["launchAssistedSearch"] }},
+		                { text: "Advanced search", title: "Advanced search function builds complex search strings through an easy form-based interface",
+		                			onclick:{ fn: onMenuClick, obj: ["launchAdvancedSearch"] }},
+		                { text: "Advanced search help", title: "Detailed description of the syntax for advanced search strings",
+		                			url:"../help/advanced_search.html", target:"_blank"},
+		                { text: "Save search as ..." , title: "Save current results set as a Saved Search, either personal or shared with workgroup members",
+		                			onclick:{ fn: onMenuClick, obj: ["savedSearchEdit", 0] }},
+		                { text: "Open selection in new window", title: "Launch selected records in a new search window",
+		                			onclick:{ fn: onMenuClick, obj: ["openSelected"] } }
+		    ]
+		}
+		];
+
+
+			// Instantiate a MenuBar, passing in the id of the element to be created
+			top.HEURIST.search.oSearchMenuBar = new YAHOO.widget.MenuBar("mainmenubar",{autosubmenudisplay: true});
+				//,{hidedelay: 750,lazyload: true,effect: {effect: YAHOO.widget.ContainerEffect.FADE,duration: 0.25}}
+
+    		// Add items to the MenuBar instance
+    		top.HEURIST.search.oSearchMenuBar.addItems(mainMenuData);
+			top.HEURIST.search.oSearchMenuBar.getItem(0).cfg.setProperty("submenu", subMenuData[0]);
+	        top.HEURIST.search.oSearchMenuBar.getItem(1).cfg.setProperty("submenu", subMenuData[1]);
+ 			// Render the MenuBar instance
+    		top.HEURIST.search.oSearchMenuBar.render();
+
+    		top.HEURIST.search.buildMenuForTagSearchs();
+	},
+*/
 	buildMenu: function() {
+
 		YAHOO.util.Event.onDOMReady(function() {
 			top.HEURIST.search.myHeuristMenu = new YAHOO.widget.Menu("my-heurist-menu", {
 				context: ["my-heurist-menu-link", "tl", "bl", ["beforeShow", "windowResize"]]
@@ -4194,6 +4263,13 @@ top.HEURIST.search = {
 			$("#my-heurist-menu-link a").bind("click mouseover", function() {
 				top.HEURIST.search.myHeuristMenu.show(); return false;
 			});
+
+
+			/*$(document).bind("click", function(event) {
+					alert(event.target.id);
+			});*/
+
+
 		});
 
 		//init menu
@@ -4201,7 +4277,9 @@ top.HEURIST.search = {
 		            minWidth:    15,
 		            maxWidth:    57,
 				extraWidth:  1
-		}).superfish();
+		}).superfish().click(function(){
+                $(this).find("ul").hide();
+            });
 
 
 		//close Assisted search in outside click
@@ -4224,6 +4302,19 @@ top.HEURIST.search = {
 				$("#btnSimpleSearch").toggleClass("collapsed");
 			}
 		});
+
+
+		//verify that following record types presents in current database  6 Record collection, 14 Transform, 15 Annotation, 17 Pipeline transformation, 19 Tool
+		if(!(top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_COLLECTION']] &&
+		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TRANSFORM']] &&
+		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_ANNOTATION']] &&
+		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_ANNOTATION']] &&
+		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_PIPELINE']] &&
+		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
+		{
+			_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
+		}
+
 	},
 
 	recMenuTags:null,
@@ -4238,13 +4329,8 @@ top.HEURIST.search = {
 			top.HEURIST.search.recMenuTags = new YAHOO.widget.Menu("menu_tags", {context:["search-recent", "tl", "bl"]} );
 		}
 
-		function _onMenuClick(eventName, eventArgs, subscriptionArg){
-				var fname = subscriptionArg.shift();
-				var args = subscriptionArg;
-				top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
-		}
-
 		var innerHTML = "";
+		var tagMenuTems = [];
 		if (top.HEURIST.user && top.HEURIST.user.tags && top.HEURIST.user.tags.length>0)
 		{
 
@@ -4254,13 +4340,40 @@ top.HEURIST.search = {
 			for (i = 0; i < tags.length; ++i) {
 				//kwd = encodeURIComponent(tags[i]);
 				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
-				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: _onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
+				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
+				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
 			}
 		}else{
 			innerHTML = "<li>No tags defined</li>";
+			tagMenuTems = [{ text: 'No tags defined' }];
 			top.HEURIST.search.recMenuTags.addItem({ text: 'No tags defined' });
 		}
+		//top.HEURIST.search.recMenuTags.addItems(tagMenuTems);
 		top.HEURIST.search.recMenuTags.render(document.body);
+
+		/* @todo - replace superfish to YUI menu
+		function findSubMenu(menu, id){
+			var i=0, items = menu.getItems();
+			for(;i<items.length;i++){
+				var submenu = items[i].cfg.getProperty("submenu");
+				if(submenu){
+					if(submenu.id==id){
+						return items[i];
+					}else{
+						return findSubMenu(submenu, id);
+					}
+				}
+			}
+			return null; //not found
+		}
+		var mitem = findSubMenu(top.HEURIST.search.oSearchMenuBar, "menuSearchesByTag2");
+		//var oSubmenu = mitem.cfg.getProperty("submenu");
+		//mitem = oSubmenu.getItem(3);
+		mitem.cfg.setProperty("submenu", tagMenuTems);
+
+		top.HEURIST.search.oSearchMenuBar.render();
+		*/
+
 		if(needCreate){
 			$("#menu_tags").bind("mouseleave",function(){
 				top.HEURIST.search.recMenuTags.hide();
@@ -4269,8 +4382,8 @@ top.HEURIST.search = {
 
 		var menuItem = document.getElementById("menuSearchesByTag");
 		menuItem.innerHTML = innerHTML;
-		//menuItem = document.getElementById("menuSearchesByTag_in_sidebar");
-		//menuItem.innerHTML = innerHTML;
+
+
 	},
 
 
@@ -4522,11 +4635,14 @@ function removeCustomAlert() {
 				//{ position: 'top', height: 95, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 20, resize: false, body: 'footer', gutter: '0', collapse: false },
 				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150, maxWidth:300},
-				{ position: 'center', body: 'page', gutter: '0', minWidth: 400 },
+				{ position: 'center', body: 'page', gutter: '0', minWidth: 350, scroll: null, zIndex: 2},
 				{ position: 'right', width: searchWidth, resize: true, useShim: true, body: 'page-right', gutter:'0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150},
 			]
 		});
 
+		/*layout.on('render', function() {
+			YAHOO.util.Event.onContentReady("mainmenubar", top.HEURIST.search.initTopMenu);
+		});*/
 
 		var setWidths = function() {
 			var dw = layout.getSizes().doc.w;
@@ -4686,6 +4802,7 @@ function removeCustomAlert() {
 		});
 	});
 
+
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
 	//if (viewerTabIndex == _TAB_MAP){top.HEURIST.search.mapSelected()} //initialises map
 	/*
@@ -4733,3 +4850,9 @@ function removeCustomAlert() {
 	*/
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
+
+	var onMenuClick = function (eventName, eventArgs, subscriptionArg){
+			var fname = subscriptionArg.shift();
+			var args = subscriptionArg;
+			top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
+	}

@@ -48,7 +48,7 @@
 <link rel=stylesheet href="../common/css/search.css" media="all">
 
 <!-- multilevel menu @todo replace to YUI menu -->
-<link rel="stylesheet" type="text/css" href="../external/js/sf/	superfish.css" media="screen">
+<link rel="stylesheet" type="text/css" href="../external/js/sf/superfish.css" media="screen">
 <script type="text/javascript" src="../external/js/sf/superfish.js"></script>
 <script type="text/javascript" src="../external/js/sf/supersubs.js"></script>
 
@@ -397,13 +397,13 @@
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
 							<div class=saved-search-subsubheading id="divFavLink">
-								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"");}'>My Favourites</a>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"&amp;label=My Favourites");}'>My Favourites</a>
 							</div>
 							<div class=saved-search-subsubheading>
-								<a id="search-recent" href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a>
+								<a id="search-recent" href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m after:\"1 week ago\"&amp;label=Recent bookmarks changes");}'>Recent changes</a>
 							</div>
 							<div class=saved-search-subsubheading>
-								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m");}'>All (date order)</a>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m&amp;label=All bookmarks");}'>All (date order)</a>
 							</div>
                             <div class=saved-search-subsubheading id="divAggLink1"><a href='#' onClick="{top.HEURIST.search.loadAggregations('bookmark');return false;}">Aggregations</a></div>
                             <div class=saved-search-subsubheading><a id="search-by-tag-link" href="#" onClick="top.HEURIST.search.recMenuTags.show(); return false;">My Tags</a></div>
@@ -424,9 +424,9 @@
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
 							<div class=saved-search-subsubheading>
-								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></div>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"&amp;label=Recent changes");}'>Recent changes</a></div>
 							<div class=saved-search-subsubheading>
-								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All (date order)</a></div>
+								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m&amp;label=All records");}'>All (date order)</a></div>
                             <div class=saved-search-subsubheading id="divAggLink2"><a href='#' onClick="{top.HEURIST.search.loadAggregations('all');return false;}">Aggregations</a></div>
                             <!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
@@ -459,7 +459,8 @@
 -->
 <!-- page -->
 <div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
-			<div id="result-container">
+			<div style="position:absolute;left:0;right:0;top:0;height:20px;">
+				<!--div id="mainmenubar"></div -->
 
 				<!-- @todo - replace to YUI menu -->
 				<div id="result-menubar">
@@ -468,10 +469,10 @@
 								<ul>
 									<li><a href="#">My Bookmarks</a>
 										<ul id="menuBookmarks">
-											<li><a href="#">Favourites</a></li>
-											<li><a href="#">Recent changes</a></li>
-											<li><a href="#">All by date</a></li>
-											<li><a href="#">Aggregations</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"&amp;label=My Favourites");}'>Favourites</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m after:\"1 week ago\"&amp;label=Recent bookmarks changes");}'>Recent changes</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=sortby:-m&amp;label=All bookmarks");}'>All by date</a></li>
+											<!-- li><a href="#">Aggregations</a></li -->
 											<li><a href="#">Search by tags</a>
 												<ul id="menuSearchesByTag">
 												</ul>
@@ -484,9 +485,9 @@
 									</li>
 									<li><a href="#">All Records</a>
 										<ul id="menuAllRecs">
-											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"");}'>Recent changes</a></li>
-											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m");}'>All by date</a></li>
-											<li><a href="#">Aggregations</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m after:\"1 week ago\"&amp;label=Recent changes");}'>Recent changes</a></li>
+											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=all&amp;q=sortby:-m&amp;label=All records by date");}'>All by date</a></li>
+											<!-- li><a href="#">Aggregations</a></li -->
 											<li><a href="#">Saved Searches</a>
 												<ul id="menuSavedSearchesAllRecs">
 												</ul>
@@ -564,6 +565,10 @@
 							</li>
 						</ul>
 				</div> <!-- end result-menubar"-->
+
+			</div>
+			<div id="result-container">
+
 				<div id="result-header">
 						<label id="active-label"></label>
 						<div id=pageNavCount>
@@ -614,13 +619,13 @@
 
 <!--  application tabs -->
 <div id="page-right" class=" yui-skin-sam">
-			<div id=applications class="yui-navset">
+			<div id="applications" class="yui-navset">
 				<ul class="yui-nav">
 					<li class="selected"><a href="#r" ><em>Record View</em></a></li>
 					<!--    <li><a href="#c" ><em>Side-By-Side</em></a></li>-->
 					<li><a href="#m3"><em>Map View</em></a></li>
 					<li><a href="#s"><em>Report View</em></a></li>
-					<li><a href="#p" ><em>Special</em></a></li>
+					<li id="tabTransforms"><a href="#p" ><em>Transforms</em></a></li>
 					<!-- art temp old mapping
 					<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View v2</em></a></li>
 					-->

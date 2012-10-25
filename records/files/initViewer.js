@@ -108,7 +108,7 @@ function detectSourceAndType(link, extension){
 	if(link){
 
 	//1. detect source
-	if(link.indexOf(location.protocol+'//'+location.hostname)==0){
+	if(link.indexOf(location.protocol+'//'+location.hostname)==0 && link.indexOf('records/files/downloadFile.php')>0 ){
 		source = 'heurist';
 	}else if(link.indexOf('http://www.flickr.com')==0){
 		source = 'flickr';
@@ -290,6 +290,8 @@ function showViewer(container, url_and_cfg, _recordID){
 			if(sSource === "youtube"){
 				//var id = /^.*((youtu.be\/)|(v\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/.exec(curr_link);
 				container.innerHTML = linkifyYouTubeURLs(sUrl);
+			}else{
+				container.innerHTML = '<embed width="100%" height="100%" name="plugin" src="'+sUrl+'">';// type="'.$mimeType.'">';;
 			}
 		}
 }

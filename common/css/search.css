@@ -1147,7 +1147,7 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	overflow-y:auto;
 	position:absolute;
 	right:0;
-	top:0px;
+	top:20px;
 	/*border-right:1px solid #666;*/
 	border-right:none;
 	overflow-x: hidden
@@ -2512,3 +2512,5 @@ div#tabbar {
 .externalLink:hover {
 	background-image: url("../images/jump_white.png");
 }
+
+

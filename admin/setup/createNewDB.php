@@ -90,10 +90,6 @@
 		<div class="banner"><h2>Create new Heurist database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
-		<h3>Suggested workflow for new databases:</h3>
-		<?php include("includeNewDatabaseWorkflow.html"); ?>
-		<div class="separator_row" style="margin:20px 0;"></div>
-
 <?php
 	$newDBName = "";
 	$isNewDB = false; // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
@@ -108,6 +104,7 @@
 
 	if(isset($_POST['dbname'])) {
 		$isCreateNew = false;
+		$isExtended = ($_POST['dbtype']=='1');
 
 		/*verify that database name is unique
 		$list = mysql__getdatabases();
@@ -137,8 +134,14 @@
 				<input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
 		</div>
 
-		<div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;">
+		<div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
 			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
+
+				<input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1" class="labelBold">Standard database</label>
+				<div style="padding-left: 38px;padding-bottom:10px">Gives an uncluttered database with essential record and field types<br />Recommended for general use</div>
+				<input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">Extended database</label>
+				<div style="padding-left: 38px;">A database structure with extra record types and fields to support tool such as XSL transforsm<br />The additional structure elements can be imported later from the H3ToolSupport database</div>
+
 				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
 					The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
@@ -176,7 +179,7 @@
 
 
 	function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
-		global $newDBName, $isNewDB, $done, $isCreateNew;
+		global $newDBName, $isNewDB, $done, $isCreateNew, $isExtended;
 		$error = false;
 		$warning=false;
 
@@ -274,11 +277,12 @@
 			// Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
 			// yes, this is badly structured, but it works - if it ain't broke ...
 			$isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
+
 			require_once('../structure/buildCrosswalks.php');
 
 			// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 			if($errorCreatingTables) {
-				echo ("Error importing core definitions from coreDefinitions.txt for database $newname<br>");
+				echo ("Error importing core definitions from ".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." for database $newname<br>");
 				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed");
 				cleanupNewDB($newname);
 				return false;
