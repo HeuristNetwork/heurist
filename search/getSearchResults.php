@@ -264,9 +264,14 @@
 
 		$details = array();
 		while ($rd = mysql_fetch_assoc($res)) {
-			if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+			// skip all invalid value
+			if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
+				(($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
+				error_log("found INVALID detail in rec $rd[rec_ID] dtl $rd[dtl_ID] dty $rd[dtl_DetailTypeID] with value = $rd[dtl_Value]");
+				continue;
+			}
 
-			if ( !$rd["dtl_DetailTypeID"] === "file" && $rd["dtl_Value"] === null ) continue;//TODO: check this for URLinclude, etc.
+			if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
 			$detailValue = null;
 

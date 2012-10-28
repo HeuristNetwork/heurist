@@ -88,14 +88,17 @@ while ($row = mysql_fetch_row($res)) {
 					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
 				}
 			}
+			$trmCnt = count($trmIDs);
 			$trmIDs = join(",",$trmIDs);
+//			error_log("$trmCnt enum terms for $row[1] ====>".print_r($trmIDs,true));
 			if ($trmIDs) {
 				$resTerm = mysql_query("select trm_ID,trm_Label from defTerms ".
 										"where trm_ID in ($trmIDs) and trm_Domain = 'enum'");
-				if (mysql_num_rows($resTerm) != count($matches[0])){
+				if (mysql_num_rows($resTerm) != $trmCnt){
+//					error_log("".mysql_num_rows($resTerm)." enum terms found for $row[1] ");
 					$row[4] = array( array("0","Invalid Terms for $row[1]"));
 				}else{
-		$row[4] = array();
+					$row[4] = array();
 					while($trmSet = mysql_fetch_row($resTerm)) {
 						array_push($row[4],$trmSet);
 					}
@@ -117,12 +120,14 @@ while ($row = mysql_fetch_row($res)) {
 					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
 				}
 			}
+			$trmCnt = count($trmIDs);
 			$trmIDs = join(",",$trmIDs);
+//			error_log("rel terms array ====>".print_r($trmIDs,true));
 			if ($trmIDs) {
 				$resTerm = mysql_query("select trm.trm_ID,trm.trm_Label,inv.trm_ID as invID, inv.trm_Label as invLabel ".
 										"from defTerms trm left join defTerms inv on trm.trm_InverseTermID = inv.trm_ID ".
 										"where trm.trm_ID in ($trmIDs) and trm.trm_Domain = 'relation' ");
-				if (mysql_num_rows($resTerm) != count($matches[0])){
+				if (mysql_num_rows($resTerm) != $trmCnt){
 					$row[4] = array( array("0","Invalid Terms for $row[1]"));
 				}else{
 					$row[4] = array();

@@ -1910,8 +1910,11 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 		return _constrainedRecTypeID;
 	};
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
-	this.getIdForEnumerationValue = function(value) { return (_termsMap[("" + value).toLowerCase()]  ||  null); };
-	this.getEnumerationValueFromId = function(id) { return (_enumsMap[id]  ||  null); };
+	this.getIdForEnumerationValue = function(value) { return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
+																			(_enumsMap[value] ? value : null)); };
+	this.getEnumerationValueFromId = function(id) { return (isNaN(id) ? (_termsMap[("" + id).toLowerCase()]? id :  null) :
+																			(_enumsMap[id] ? _enumsMap[id] : null)); };
+
 
 
 	this.checkValue = function(value) {
