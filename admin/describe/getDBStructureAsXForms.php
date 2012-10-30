@@ -21,7 +21,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 	// Deals with all the database connections stuff
-	//define("DT_SKETCH","2-59");
+	//define("DT_DRAWING","2-59");
 	mysql_connection_db_select(DATABASE);
 	if(mysql_error()) {
 		die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
@@ -416,7 +416,7 @@
 				}else if($fieldtype=="binary"){
 					//todo check for sketch type
 					$isDrawing = false;
-					$appearance = $dt_id == DT_SKETCH ? "draw":"annotate";
+					$appearance = $dt_id == DT_DRAWING ? "draw":"annotate";
 					$body = $body."<upload ref=\"".$xpathPrefix."dt$dt_id\" appearance=\"$appearance\"  mediatype=\"image/*\">\n".
 					$inputDefBody.
 					"</upload>\n";
@@ -424,6 +424,10 @@
 				}else if($fieldtype=="groupbreak"){// if we get to here we have a legitament sepearator so break
 					$body .= $groupSeparator;
 					$atGroupStart = true;
+				}else if ($dt_id == DT_COUNTER){//we have a counter field so let's launch the Inventory Counter
+					$body = $body."<input appearance=\"ex:faims.android.INVENTORYCOUNT\" ref=\"".$xpathPrefix."dt$dt_id\">\n".
+					$inputDefBody.
+					"</input>\n";
 				}else{  //all others and  $fieldtype=="geopoint"  as well
 					$body = $body."<input ref=\"".$xpathPrefix."dt$dt_id\">\n".
 					$inputDefBody.

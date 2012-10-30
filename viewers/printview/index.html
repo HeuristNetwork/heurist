@@ -18,7 +18,8 @@
 		<script src="../js/getAnnotationPointers.js"></script>
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDX33AyVh9F-yVfZzU6YhzqQrWYee8fTYc&amp;sensor=false&amp;libraries=weather"></script>
+		<script src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true" type="text/javascript"></script>
 		<script src="loadPrintFormats.php"></script>
 		<script>
 			function loadXMLDocFromFile(filename)
@@ -183,7 +184,7 @@
 					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
 				}
 				if(!selectedIds || selectedIds.length == 0){
-					clearAndDisplayNoRecordSelected();
+					clearAndDisplayMessage("No Records Selected from Search Results");
 				}else{
 
 				}
@@ -488,12 +489,12 @@
 				resultDiv.appendChild(loadingDiv);
 			}
 
-			function clearAndDisplayNoRecordSelected(){
+			function clearAndDisplayMessage(message){
 				var resultDiv =document.getElementById("displayResult");
 				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
 				var noSelectedDiv = document.createElement("div");
 					noSelectedDiv.id = "errorMsg";
-					noSelectedDiv.innerHTML = "<div style='height:50%'></div><span>No Records Selected from Search Results</span>";
+					noSelectedDiv.innerHTML = "<div style='height:50%'></div><span>"+message+"</span>";
 				resultDiv.appendChild(noSelectedDiv);
 			}
 
@@ -531,6 +532,27 @@
 					}
 					if (!xsls[style]) {
 						alert("Unable to read '"+ style +"' file, check to see if this style sheet is readable in your browser or another browser.");
+						return;
+					}else if ( xsls[style].activeElement && xsls[style].activeElement.nodeName == "parsererror") {//the transform is invalid
+						// tell the user
+							alert("The tranformation you have chosen is invalid. \n Please contact the owner/creator of the tranform");
+						//and remove it from the list of choices
+							var sElt = document.getElementById("transform_select");
+							var optElt = sElt.options[sElt.selectedIndex];
+							if (optElt.text == style){ // we have a match, not sure why we wouldn't
+								if ((optElt.previousSibling.nodeName == "OPTGROUP") &&
+									(optElt.nextSibling.nodeName == "OPTGROUP" || sElt.selectedIndex == sElt.length -1)){
+										//last option in a group so remove previousSibling also
+										var optGrpElt = optElt.previousSibling;
+										sElt.removeChild(optGrpElt);
+								}
+								sElt.removeChild(optElt);
+							}
+						//and remove the document
+						delete xsls[style];
+						curStyle = null;
+						sElt.selectedIndex = 0;
+						clearAndDisplayMessage("Please select a transform template");
 						return;
 					}
 					// code for IE
