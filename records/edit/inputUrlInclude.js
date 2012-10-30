@@ -77,9 +77,10 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 	this.addInputHelper.call(this, bdValue, newDiv);
 
 	if(this.promptDiv.innerHTML){
+		/* in chrome it give a huge gap - issue was fixed with edit.css
 		var br = this.document.createElement("br");
 		br.style.lineHeight = "2px";
-		newDiv.parentNode.insertBefore(br, this.promptDiv);
+		newDiv.parentNode.insertBefore(br, this.promptDiv);*/
 	}
 
 	var valueVisible = "";

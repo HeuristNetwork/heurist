@@ -35,7 +35,13 @@ if (!top.Relationship) {
 		deleteTd.className = "delete";
 		deleteTd.title = "Delete this relationship";
 		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
-		deleteTd.onclick = function() { thisRef.remove(); };
+		deleteTd.onclick = function() {
+			thisRef.remove();
+
+			if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
+					thisRef.manager.addOtherTd.style.display = 'inline-block';
+			}
+		};
 		var editTd = this.tr.appendChild(this.document.createElement("div"));
 		editTd.className = "edit";
 		editTd.title = "Edit this relationship";
@@ -307,7 +313,14 @@ if (!top.Relationship) {
 		var cancelButton = this.document.createElement("input");
 		cancelButton.type = "button";
 		cancelButton.value = "Cancel";
-		cancelButton.onclick = function() { thisRef.remove(); };
+		cancelButton.onclick = function() {
+
+			if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
+					thisRef.manager.addOtherTd.style.display = 'inline-block';
+			}
+
+			thisRef.remove();
+		};
 
 		td.appendChild(cancelButton);
 
@@ -512,12 +525,14 @@ if (!top.Relationship) {
 	* @param dtIDRelmarker the id of the detail (relmarker) type, can be omitted
 	* @param relatedRecords array of records related to the managed record indexed by recID, can be null
 	* @param changeNotification a callback for notifying the owner that the relations in this manager have changed
-	* @param supressHeaders a boolean indicating where to show headers for teh different types of relations.
+	* @param supressHeaders a boolean indicating where to show headers for the different types of relations.
+	* @param needAddToAggregation - if true - call from 'Relationships' tab, otherwise from main edit tab
 	*/
 	top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders, needAddToAggregation) {
 		if (!parentElement || !record || isNaN(record.recID)) return null;
 
 		this.supressHeaders = supressHeaders;
+		this.needAddToAggregation = needAddToAggregation;
 		var thisRef = this;
 		this.parentElement = parentElement; // the containing element for display of relationships
 		this.rectypeID = parseInt(record.rectypeID);
@@ -723,10 +738,21 @@ if (!top.Relationship) {
 		}
 
 		var addOtherTd = document.createElement("div");
+		this.addOtherTd = addOtherTd;
 		var addBefore = addOtherTd;
 		//var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
 		addOtherTd.style.paddingTop = "5px";
-		addOtherTd.style.display = "inline-block";
+
+
+		if (needAddToAggregation || this.relationships.length > 0){
+			//if on time of creation there is relations - hide this element - aplicable for main editRecord BibDetailRelationMarker
+			addOtherTd.style.display = "none";
+		}else{
+			addOtherTd.style.display = "inline-block";
+		}
+
+
+
 		//addOtherTd.colSpan = 7;
 		addOtherTd.id = "addRelationshipLink";
 		var a = addOtherTd.appendChild(document.createElement("a"));
@@ -736,15 +762,21 @@ if (!top.Relationship) {
 		var addImg = a.appendChild(document.createElement("img"));
 		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
 		addImg.className = "add_records_img";
-		if (this.relationships.length > 0) {
+		if (needAddToAggregation && this.relationships.length > 0) {
 			addImg.title = "Add another relationship";
 			a.appendChild(document.createTextNode("add more ..."));
 		} else {
 			addImg.title = "Add a relationship";
-			a.appendChild(document.createTextNode("Add a relationship"));
+			a.appendChild(document.createTextNode("Add a relationship 102 "+this.relationships.length));
 		}
 		a.style.textDecoration = "none";
-		a.onclick = function(rtypes,dtID) { return function() {
+		a.onclick = function(rtypes, dtID) { return function() {
+
+			//hide Add new relationship for editRecord mode
+			if(!needAddToAggregation){
+				addOtherTd.style.display = 'none';
+			}
+
 			var newRow = document.createElement("div");
 			newRow.style.width = "100%";
 			newRow.className = "relation";
@@ -781,7 +813,7 @@ if (!top.Relationship) {
 		addImg.title = "Add relationship to Aggregation";
 		a.appendChild(document.createTextNode("Add to Aggregation"));
 		a.style.textDecoration = "none";
-		a.onclick = function(rtypes,dtID) { return function() {
+		a.onclick = function(rtypes,dtID) {	return function() {
 			var newRow = document.createElement("div");
 			newRow.style.width = "100%";
 			newRow.className = "relation";
@@ -814,7 +846,9 @@ if (!top.Relationship) {
 
 			rel.relatedRecord.chooseResourceAuto();
 
-			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
+			};
+		}((trgRectypeList ? trgRectypeList : 0), dtIDRelmarker);
+
 
 		this.parentElement.appendChild(addOtherTd);
 
@@ -847,6 +881,11 @@ if (!top.Relationship) {
 	*/
 	}
 
+	top.RelationManager.prototype.allowAddNew = function () {
+		this.addOtherTd.style.display = 'inline-block';
+		//this.addOtherTd.style.backgroundColor= '#00ddff';
+	}
+
 	top.RelationManager.prototype.saveAllOpen = function () {
 		for (var i in this.openRelationships) {
 			this.openRelationships[i].save();
@@ -854,6 +893,7 @@ if (!top.Relationship) {
 	}
 
 	top.RelationManager.prototype.remove = function (relObj) {
+
 		if (relObj instanceof EditableRelationship) {
 			delete this.openRelationships[relObj.nonce];
 		}else if (this.changeNotification) {

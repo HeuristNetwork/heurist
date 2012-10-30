@@ -105,10 +105,20 @@
 	}
 
 	if (!@$dbName) {
+<<<<<<< Updated upstream:common/config/initialise.php
 		//		if (@$_SESSION["heurist_last_used_dbname"]) {//if no DB known check session
 		//			$dbName = $_SESSION["heurist_last_used_dbname"];
 		//		}else
 		if (defined("HEURIST_DEFAULT_DBNAME") && defined("ROOTINIT")) {//if enter at site root  index.php and default is set use it
+=======
+//		if (@$_SESSION["heurist_last_used_dbname"]) {//if no DB known check session
+//			$dbName = $_SESSION["heurist_last_used_dbname"];
+//		}else
+		$length = strlen('createNewDB.php');
+
+		if (defined("HEURIST_DEFAULT_DBNAME") && (defined("ROOTINIT") || (substr($_SERVER['PHP_SELF'], -15) === 'createNewDB.php')))
+		{//if enter at site root  index.php and default is set use it
+>>>>>>> Stashed changes:common/config/initialise.php
 			$dbName = HEURIST_DEFAULT_DBNAME;
 		} else {
 			returnErrorMsgPage(0,"Ambiguous database name, or no database name supplied. Please supply as '?db=' parameter or ask sysadmin to set in configIni.php");
@@ -494,7 +504,7 @@
 			if(defined('ROOTINIT')){
 				header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
 			}else{
-				echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
+				echo "/*DEBUG: it happens in ".$_SERVER['PHP_SELF']." */ location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
 			}
 
 			/*		echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg='<p>&nbsp;<h2>Heurist initialisation error</h2><p>

@@ -41,6 +41,8 @@ function ShowReps() {
 		_sQueryMode = "all",
 		mySimpleDialog,
 		needReload = true,
+		codeEditor = null,
+		_isAceEditor = false,
 		infoMessageBox,
 		_db;
 
@@ -267,6 +269,22 @@ function ShowReps() {
 				if(_isEditorVisible()){
 					var ed = tinyMCE.get('edTemplateBody');
 					ed.setContent(context['text']);
+				}else if(true) {
+
+					//ApplyLineBreaks
+					var text = context['text'];
+					var k = text.indexOf("\\n");
+					var res = "";
+					while (k>=0){
+						res += text.substr(0, k) + "\n"; // + text.substr(k+2);
+						text = text.substr(k+2);
+						k = text.indexOf("\\n");
+					}
+					res += text;
+
+					Dom.get("edTemplateName").innerHTML = name;
+					_initEditor(res);
+					_keepTemplateValue = codeEditor.getValue();
 				}else{
 					Dom.get("edTemplateName").innerHTML = name;
 					ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
@@ -318,15 +336,41 @@ function ShowReps() {
 			}
 	}
 
+	function _initEditor(content) {
+		if(codeEditor==null){
+			if(_isAceEditor){
+    			codeEditor = ace.edit("editor");
+    			codeEditor.setTheme("ace/theme/chrome");
+    			codeEditor.getSession().setMode("ace/mode/php");
+    			codeEditor.setValue(content);
+			}else{
+				codeEditor = CodeMirror(Dom.get("templateCode"), {lineNumbers:true, });
+			}
+		}else if(!_isAceEditor){
+			$('.CodeMirror').hide();
+		}
+
+		codeEditor.setValue(content);
+
+		if(!_isAceEditor){
+			setTimeout(function(){
+				$('.CodeMirror').show();
+				codeEditor.refresh();
+			},2000);
+		}
+	}
+
 	/**
 	* Creates new template from the given query
 	*/
 	function _showEditor(template_file) {
 
 		function _onGetTemplate(context){
+
 			Dom.get("edTemplateName").innerHTML = template_file;
-			Dom.get("edTemplateBody").value = context;
-			_keepTemplateValue = Dom.get("edTemplateBody").value;
+			_initEditor(context);
+			//Dom.get("edTemplateBody").value = context;
+			_keepTemplateValue = context; //Dom.get("edTemplateBody").value;
 			_setLayout(true, true);
 		}
 
@@ -372,7 +416,7 @@ function ShowReps() {
 					Dom.get("edTemplateName").innerHTML = template_file;
 				}
 
-				var template_body = Dom.get("edTemplateBody").value;
+				var template_body = codeEditor.getValue();// Dom.get("edTemplateBody").value;
 				if(template_body && template_body.length>10){
 					squery = squery + 'save&template='+encodeURIComponent(template_file)+'&template_body='+encodeURIComponent(template_body);
 
@@ -436,7 +480,7 @@ function ShowReps() {
 
 		if(mode===0){ //for close
 
-			if(_keepTemplateValue!=Dom.get("edTemplateBody").value){
+			if(_keepTemplateValue!=codeEditor.getValue()){ //.get("edTemplateBody").value){
 
 				/*var myButtons = [
 				    { text: "Save", handler: handleYes, isDefault:true },
@@ -486,6 +530,8 @@ function ShowReps() {
 		if(_isEditorVisible()){
 			var ed = tinyMCE.get('edTemplateBody');
 			template_body = ed.getContent();
+		}else if (true){
+			template_body = codeEditor.getValue();
 		}else{
 			template_body = Dom.get("edTemplateBody").value;
 		}
@@ -1181,10 +1227,17 @@ function ShowReps() {
 	}
 
 
+	function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
+		if(_isAceEditor){
+			codeEditor.insert(myValue);
+		}else{
+			codeEditor.replaceSelection(myValue);
+		}
+	}
 	//
 	// utility function - move to HEURIST.utils
 	//
-	function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
+	function insertAtCursor_fortextarea(myField, myValue, isApplyBreaks, cursorIndent) {
 
 			var scrollTop = myField.scrollTop;
 
@@ -1416,7 +1469,7 @@ function ShowReps() {
 				if(_needSelection){
 					alert('Please select some records in the search results before editing the template');
 				}else{
-				_showEditor(template_file);
+					_showEditor(template_file);
 				}
 			},
 

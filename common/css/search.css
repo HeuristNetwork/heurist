@@ -1838,7 +1838,7 @@ div.recorddiv:hover {
 	-moz-box-shadow:0 1px 4px #000;
 	-webkit-box-shadow:0 1px 4px #000;
 	box-shadow:0 1px 4px #000;
-	z-index: 20;
+	z-index: 2;
 	background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }

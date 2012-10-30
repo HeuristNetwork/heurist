@@ -716,7 +716,7 @@ if($isunconstrained){
 							}
 
 							//add relationship specific variables
-							if(array_key_exists('RelatedRecID',$value)){
+							if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
 									$res0["recRelationType"] = $value['RelTerm'];
 									/*if(array_key_exists('interpRecID', $value)){
 										$record = loadRecord($value['interpRecID']);

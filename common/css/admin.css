@@ -281,12 +281,15 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 	width:180px;
 	min-width:180px;
 }
+/**/
 .input-row input:not([type="submit"]) {
 	font-size:10px
 }
 .input-row input:not([type="button"]) {
 	font-size:10px
 }
+
+
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]),.input-row textarea {
 	background-color: #ECF1FB;
 	min-width:40ex;

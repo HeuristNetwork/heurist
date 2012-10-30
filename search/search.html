@@ -241,7 +241,8 @@
 							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
 								title="Click to refresh the internal working memory of Heurist" >
 								Refresh memory</a></li>
-							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator'
+							<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags");}'
+								class='seperator'
 								title="Find bookmarked records which you have not tagged">
 								Bookmarked records with&nbsp;no&nbsp;tags</a></li>
 							<!-- --- sep --- -->
@@ -249,7 +250,7 @@
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
 								title="Import web links from a browser bookmarks file or an html web page file">
 								Hyperlinks (webpage/bookmarks)</a></li>
-							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup"
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
 								title="Settings for web links importer">
 								Settings<br>(hyperlink harvester)</a></li>
 							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator'

@@ -1695,9 +1695,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.style.width = "";
 
 	if(this.promptDiv.innerHTML){
-		var br = this.document.createElement("br");
+		/*var br = this.document.createElement("br");
 		br.style.lineHeight = "2px";
-		newDiv.parentNode.insertBefore(br, this.promptDiv);
+		newDiv.parentNode.insertBefore(br, this.promptDiv);*/
 	}
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
@@ -2496,6 +2496,13 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = f
 		});
 	}
 		//	this.windowRef.changed();
+};
+
+top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.duplicateInput = function() {
+	//add new relationship
+	this.relManager.allowAddNew();
+
+	//this.addInput();
 };
 
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bdValue) {

@@ -12,7 +12,7 @@
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
+define('ROOTINIT',1);
 require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 
 if (! is_logged_in()) {

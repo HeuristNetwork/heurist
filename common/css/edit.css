@@ -600,9 +600,6 @@ div.temporal-div input.temporal-button:hover {
 	max-width:400px;
 	background-color:#ECF1FB;
 }
-.input-row div {
-	display: inline-block;
-}
 .input-row tr select {
 	display: inline;
 }
@@ -612,12 +609,19 @@ div.temporal-div input.temporal-button:hover {
 	text-align: right;
 	color: #6A7C99;
 	min-width:150px;
+	display:inline-block;
+}
+/* ARTEM: this is mess
+.input-row div {
+	display: inline-block;
 }
 .input-row div, .input-header-cell {
 	padding-bottom:0px;
 	vertical-align: top;
 	display:table-cell
 }
+*/
+
 .input-row.required div.input-header-cell {
 /*	color: #354F75;
 */	color: #CC0000;
@@ -642,11 +646,12 @@ div.temporal-div input.temporal-button:hover {
 	padding-left:2px;
 }
 
-.prompt {
+.prompt *{
 	font-size: 10px;
 	color:#999;
 	font-weight: normal;
 	max-width:450px;
+	line-height: 1ex;
 }
 input#tags, .input-cell .in, .resource-title, .in, .input-row input:not([type="submit"]) {
 	font-size:2ex;
@@ -674,6 +679,11 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	-webkit-box-shadow:0 0 4px #6A7C99;
 	box-shadow:0 0 4px #6A7C99;
 }
+
+.input-cell {
+	/* ARTEM width:100%;*/
+	display:inline-block;
+}
 .input-cell .date-div * {
 	vertical-align: middle;
 }
@@ -684,8 +694,21 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	position: relative;
 	white-space: nowrap;
 	padding: 0;
-	display:block
+	display:block !important;
 }
+.resource-div.empty {
+	background-image: url("../images/blue-down-triangle.png");
+	background-position: 5 center;
+	background-repeat: no-repeat;
+	display:block;
+}
+.file-resource-div.empty {
+	background-image: url("../images/icon_picture.png");
+	background-position: 5 center;
+	background-repeat: no-repeat;
+	display:block;
+}
+
 .input-row .resource-div .file-resource-div * {
 	vertical-align: middle;
 }
@@ -942,7 +965,6 @@ div.reminder-table in.input, div.reminder-table select {
 	height:23px;
 	border:none
 }
-.input-cell {width:100%}
 div.input-cell fieldset.reminder .reminder-table input[type="radio"], div.input-cell fieldset .reminder-table input[type="radio"] {
 	vertical-align: bottom;
 	margin: 0 5px 0 20px;
@@ -1083,16 +1105,6 @@ hr {
 .file-size {
 	margin:0 6px;
 	color:#666666;
-}
-.resource-div.empty {
-	background-image: url("../images/blue-down-triangle.png");
-	background-position: 5 center;
-	background-repeat: no-repeat;
-}
-.file-resource-div.empty {
-	background-image: url("../images/icon_picture.png");
-	background-position: 5 center;
-	background-repeat: no-repeat;
 }
 
 .thumbPopup {

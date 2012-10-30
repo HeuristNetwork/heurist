@@ -212,9 +212,9 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				<!-- edit contols -->
 				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
 					<?php if(array_key_exists('grpID', $_REQUEST)){?>
-						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
+						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
 					<?php } ?>
-					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px">
+					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px;padding-left:2px">
 						<div id="pnlAdd1" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" /></div>
 						<div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
 							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
@@ -225,6 +225,11 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 			<div id="tabContainer">
 
 				<script  type="text/javascript">
+
+				function backToGroup(){
+					window.location.href = top.HEURIST.baseURL + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=$_REQUEST['popup']?>";
+					//window.history.go(-1);
+				}
 
 				//  starts initialization on load completion of this window
 				function createManagerObj(){
@@ -248,7 +253,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				<!-- edit contols -->
 				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
 					<?php if(array_key_exists('grpID', $_REQUEST)){?>
-						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{history.go(-1)};" />
+						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
 					<?php } ?>
 					<div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">
 						<div id="pnlAdd2" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" /></div>

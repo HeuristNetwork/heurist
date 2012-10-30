@@ -82,10 +82,6 @@ $rectype_to_bdt_id_map = array(
 );
 
 
-
-
-
-
 mysql_connection_db_overwrite(DATABASE);
 mysql_query('set @logged_in_user_id = ' . get_user_id());
 
@@ -360,7 +356,7 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');">
 <?php	} else { ?>
    <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
@@ -398,7 +394,7 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');">
 <?php	} else { ?>
    <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
@@ -414,7 +410,7 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');">
 <?php	} else { ?>
    <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
@@ -430,7 +426,7 @@ function mode_file_parsing() {
    <hr>
    <br clear=all>
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
 <?php	} else { ?>
    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
@@ -562,7 +558,7 @@ function mode_print_rectype_selection() {
    <table cellpadding="5">
     <tr>
      <td>
-      <span style="vertical-align: top;">All unspecified records <b>have this type</b>&nbsp;</span><img src="bent-arrow.gif">&nbsp;
+      <span style="vertical-align: top;">All unspecified records <b>have this type</b>&nbsp;</span>&nbsp;
      </td>
 
 <?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
@@ -610,7 +606,7 @@ function heuristic_enabler() { }
    <hr>
    <br clear=all>
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
 <?php	} else { ?>
    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
@@ -749,7 +745,7 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
 <?php		} else { ?>
    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php		} ?>
@@ -762,7 +758,7 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
 <?php		} else { ?>
    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php		} ?>
@@ -775,7 +771,7 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');">
 <?php		} else { ?>
    <input type="button" value="Cancel" onClick="window.close();">
 <?php		} ?>
@@ -789,6 +785,7 @@ function mode_crosswalking() {
 	global $session_data;
 	global $import_id;
 	global $heurist_rectypes;
+
 	if (! $heurist_rectypes) load_heurist_rectypes();
 
 	set_progress_bar_title('Crosswalking entries');
@@ -991,7 +988,7 @@ function add_tag(tag) {
    <br clear=all>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="margin-right: 4ex;">
 <?php	} else { ?>
    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
@@ -1013,7 +1010,7 @@ function add_tag(tag) {
       <a target="_errors" href="interface/downloadRecsWithErrors.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a>
 <?php		} ?>
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');">
 <?php		} else { ?>
    <input type="button" value="Cancel" onClick="window.close();">
 <?php		} ?>
@@ -1060,7 +1057,7 @@ function mode_entry_insertion() {
 <?php
 	set_progress_bar_title('Preparing database entries');
 
-	$creatorDT = define('DT_CREATOR')?DT_CREATOR:0;
+	$creatorDT = defined('DT_CREATOR')?DT_CREATOR:0;
 
 	$j = 0;
 	foreach (array_keys($session_data['out_entries']) as $i) {
@@ -1289,7 +1286,7 @@ $etime = $sec + $usec;
    <a target="_errors" href="interface/downloadNonImported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onClick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
 <?php		}
 		if (! $ambig_count  &&  $session_data['non_out_entries']) { ?>
-   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
+   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
 <?php		}	?>
 <?php	} else {	?>
 <?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
@@ -1300,7 +1297,7 @@ $etime = $sec + $usec;
 <?php		if (@$session_data["zoteroImport"]) {	?>
    <input type="button" value="Finished" onClick="window.close();" style="font-weight: bold;">
 <?php		} else {	?>
-   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php');" style="font-weight: bold;">
+   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php?db=<?=HEURIST_DBNAME?>');" style="font-weight: bold;">
 <?php		} ?>
 <?php	}
 

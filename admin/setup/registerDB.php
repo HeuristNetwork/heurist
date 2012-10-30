@@ -9,6 +9,7 @@
 	* @todo
 	**/
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 	if (!is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -17,6 +18,7 @@
 
 	$user_id = get_user_id();
 
+	$sError = null;
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
 		$sError = "You must be logged in as system administrator to register a database";
@@ -26,13 +28,27 @@
 		return;
 	}
 
+	mysql_connection_db_insert(DATABASE); // Connect to the current database (the one being registered)
+
 	// Look up current user email from sysUGrps table in the current database (the one being registered)
 	// Registering user must be a real user so that there is an email address and password to attach to the registration record.
 	// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better
 	// to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
 	$res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
 	if(mysql_num_rows($res) == 0) {
-		$sError = "Non-critical warning<br/><br/>Unable to read your email address from sysUGrps. Note: not currently supporting deferred users database";
+		$sError = "Warning<br/><br/>Unable to read your email address from user table. Note: not currently supporting deferred users database";
+	}else{
+
+			$row = mysql_fetch_row($res);
+			$usrEmail = $row[0]; // Get the current user's email address from UGrps table
+			$usrPassword = $row[1];
+			$usrName = $row[2];
+			$usrFirstName = $row[3];
+			$usrLastName = $row[4];
+
+			if(!$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword){
+					$sError = "Warning<br/><br/>You have to specify your full name, login and email in your profile. Note: not currently supporting deferred users database";
+			}
 	}
 
 	if($sError){
@@ -68,9 +84,6 @@
 			</div>
 
 			<?php
-				require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-				mysql_connection_db_insert(DATABASE); // Connect to the current database (the one being registered)
 
 				$res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
 
@@ -91,13 +104,6 @@
 				$dbName = $row[1];
 				$dbDescription = $row[2];
 				$ownerGrpID = $row[3];
-
-				$row = mysql_fetch_row($res);
-				$usrEmail = $row[0]; // Get the current user's email address from UGrps table
-				$usrPassword = $row[1];
-				$usrName = $row[2];
-				$usrFirstName = $row[3];
-				$usrLastName = $row[4];
 
 				/*****DEBUG****///error_log('registerDB.php: current dbid = '.$dbID.'   user ID = '.$user_id.' user email = '.$usrEmail);
 
@@ -145,9 +151,11 @@
 					"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 					"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 					curl_setopt($ch, CURLOPT_URL,$reg_url);
-					/*****DEBUG****///	error_log('Calling, CURLOPT_URL = '.$reg_url);
+					/*****DEBUG****///
+					error_log('Calling, CURLOPT_URL = '.$reg_url);
 					$data = curl_exec($ch);
-					/*****DEBUG****///    error_log('return data from getNextDBReg..ID = '.$data);
+					/*****DEBUG****///
+					error_log('return data from getNextDBReg..ID = '.$data);
 					$error = curl_error($ch);
 					if ($error) {
 						$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
@@ -166,6 +174,7 @@
 						error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID is 0');
 						$msg = "Problem allocating a database identifier from the Heurist index.\n" .
 						"Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+						echo $msg . "<br />";
 						return;
 					} else if($dbID == -1) { // old title update function, should no longer be called
 						$res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");

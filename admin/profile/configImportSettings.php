@@ -71,10 +71,10 @@ function _issel($val){
 	<link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 
 	<style type="text/css">
-		#ignored_hyperlinks {height: 180px; overflow: auto; background-color: #EEEEEE; padding-left: 5px;}
-		.bookmark_import #ignored_hyperlinks {
-				height: 350px;
-				display: inline;
+		#ignored_hyperlinks {
+				overflow: auto; background-color: #EEEEEE;
+				padding-left: 5px;
+				height: 260px;
 		}
 	</style>
 
@@ -82,21 +82,22 @@ function _issel($val){
 
 <body class="popup" width=600 height=450>
 
-<a name="bookmark_import"><h2>Bookmark import settings</h2></a>
-
-<p>
-Heurist can import bookmarks from any html file, notably bookmarks.htm/html
-which is either used by (IE) or can be exported by (Firefox - Bookmarks
-- Organize Bookmarks ... File &gt; Export) most internet browsers. To
-avoid many unnecessary hyperlinks when importing search engine results,
-it can ignore commonly occurring hyperlink text and very short hyperlinks.
-</p>
+<h2>Bookmark import settings</h2>
 
 <form method="post">
 	<input type="hidden" name="submitted" value="1">
 
-	<p>
-		While importing bookmarks, show only hyperlinks with
+	<table border="0" cellspacing="4" width="100%">
+	<tr>
+	<td width="260px" valign="top">
+		<p>
+		Heurist can import bookmarks from any html file, notably bookmarks.htm/html
+		which is either used by (IE) or can be exported by (Firefox - Bookmarks
+		- Organize Bookmarks ... File &gt; Export) most internet browsers. To
+		avoid many unnecessary hyperlinks when importing search engine results,
+		it can ignore commonly occurring hyperlink text and very short hyperlinks.
+		</p>
+		<p>While importing bookmarks, <b>show only hyperlinks</b> with
 	<select name="word_limit" onChange="form.submit();">
 		<option value="0" <?=_issel(0)?>>any number of words</option>
 		<option value="1" <?=_issel(1)?>>at least one word</option>
@@ -106,28 +107,27 @@ it can ignore commonly occurring hyperlink text and very short hyperlinks.
 		<option value="5" <?=_issel(5)?>>at least five words</option>
 	</select>
 	in the text of the link.
-	</p>
-
-	Ignore the following hyperlink texts when importing bookmarks:
-	<table style="width: 100%;" border=0 cellpadding=0 cellspacing="20px"><tr>
-		<td>
+		</p>
+	</td>
+	<td>
+			<b>Ignore the following hyperlink texts when importing bookmarks:</b><br /><br />
 			<div id="ignored_hyperlinks">
 				<?=$hyperlinks_ignored?>
 			</div>
-		</td>
-		<td>
-			Hyperlink text to ignore:<br><br>
-			<nobr>
-		 		<input type="text" name="new_hyp_text" value="" size="30">
-		 		<input type="submit" value="Add">
-		 	</nobr>
-		</td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td style="text-align: right;"><input type=button value=Done onclick="window.close();"></td></tr>
+
+				Hyperlink text to ignore:<br />
+
+	 			<input type="text" name="new_hyp_text" value="" size="30">
+	 			<input type="submit" value="Add">
+	</td>
+	</tr>
 	</table>
+
 </form>
+
+	<div style="position:absolute;bottom:10; text-align:right;">
+		<input type=button value=Done onclick="window.close();">
+	</div>
 
 </body>
 

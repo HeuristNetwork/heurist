@@ -114,12 +114,14 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 			$squery2 = $squery2." from Records,".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere2;
 		}
 
-/*****DEBUG****///error_log("1.>>>>".$squery);
+/*****DEBUG****///
+error_log("1.>>>>".$squery);
 
 		$res = mysql_query($squery);
 		$wkt_reccount = mysql_num_rows($res);
 
-/*****DEBUG****///error_log("2.>>>>".$wkt_reccount);
+/*****DEBUG****///
+error_log("2.>>>>".$wkt_reccount);
 
 /*****DEBUG****///error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
 		if($isSearchKml){
@@ -196,7 +198,7 @@ function prepareQuery($squery, $search_type, $detailsTable, $where, $limit)
 			}
 
 			//$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
-			$squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
+			$squery = preg_replace('/ where /', ", ".$detailsTable." where ", $squery, 1);
 
 			//add our where clause and limit
 			$squery = $squery.$where." limit ".$limit;

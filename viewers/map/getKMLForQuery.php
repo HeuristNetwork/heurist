@@ -1,6 +1,8 @@
 <?php
 
 /**
+   ARTEM: TOREMOVE ???
+
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org

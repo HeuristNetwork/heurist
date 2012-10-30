@@ -151,8 +151,10 @@ top.HEURIST.search = {
 				top.HEURIST.search.updateMapOrSmarty();
 			});
 			top.HEURIST.registerEvent(window, "load", function() {
-				document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/index.html" +
-					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+				if(document.getElementById("viewer-frame")){
+					document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/index.html" +
+						(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+				}
 			});
 		}
 
@@ -1948,12 +1950,14 @@ top.HEURIST.search = {
 			document.getElementById("results").scrollTop = 0;
 			top.HEURIST.search.renderSearchResults(firstOnPage, lastOnPage);
 			var viewerFrame = document.getElementById("viewer-frame");
-			if (all) {
-				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectall");
-			}else{
-				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
+			if(viewerFrame){
+				if (all) {
+					top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectall");
+				}else{
+					top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
+				}
+				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
 			}
-			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
 
 		}
 		top.HEURIST.search.updateMapOrSmarty();
@@ -2155,14 +2159,14 @@ top.HEURIST.search = {
 
 			if(bkmkID){
 				if(!top.HEURIST.search.recMenuBkmk){
-					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark");
+					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark",{zindex: 21});
 					top.HEURIST.search.recMenuBkmk.addItems([
 						{ text: "Tag" },
 						{ text: "Rate" },
 						{ text: "Un-bookmark" },
 						{ text: "Delete" }
 					]);
-					top.HEURIST.search.recMenuBkmk.render(document.body);
+					top.HEURIST.search.recMenuBkmk.render(document.getElementById('page')); //document.body);
 					$("#menu_boomark").bind("mouseleave",function(){
 						top.HEURIST.search.recMenuBkmk.hide();
 					});
@@ -2171,13 +2175,13 @@ top.HEURIST.search = {
 				if(top.HEURIST.search.recMenu) top.HEURIST.search.recMenu.hide();
 			}else{
 				if(!top.HEURIST.search.recMenu){
-					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd");  //e.parentNode.id
+					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd",{zindex: 21});  //e.parentNode.id
 					top.HEURIST.search.recMenu.addItems([
 						{ text: "Tag" },
 						{ text: "Bookmark" },
 						{ text: "Delete" }
 					]);
-					top.HEURIST.search.recMenu.render(document.body);//"rd"+recID);
+					top.HEURIST.search.recMenu.render(document.getElementById('page')); //document.body);//"rd"+recID);
 					$("#menu_recordrd").bind("mouseleave",function(){
 						top.HEURIST.search.recMenu.hide();
 					});
@@ -2336,8 +2340,10 @@ top.HEURIST.search = {
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 
 		var viewerFrame = document.getElementById("viewer-frame");
-		var ssel = "selectedIds=" + selectedRecIDs.join(",");
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		if(viewerFrame){
+			var ssel = "selectedIds=" + selectedRecIDs.join(",");
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		}
 
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
@@ -3196,11 +3202,10 @@ top.HEURIST.search = {
 				top.HEURIST.search.selectedRecordIds[0].push(recID);
 			});
 		var viewerFrame = document.getElementById("viewer-frame");
-
-		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
-
-
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		if(viewerFrame){
+			var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		}
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
@@ -3222,10 +3227,10 @@ top.HEURIST.search = {
 			var bkmk_id = bibs[i].parentNode.getAttribute("bkmk_id");
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
-
-		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
-
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		if(viewerFrame){
+			var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		}
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
@@ -3312,10 +3317,11 @@ top.HEURIST.search = {
 		top.HEURIST.search.setSelectedCount();
 
 		var viewerFrame = document.getElementById("viewer-frame");
-
-		var recordFrame = document.getElementById("record-view-frame");
-		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";// saw BUG this code shoulw be part of the event response to selection change
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
+		if(viewerFrame){
+			var recordFrame = document.getElementById("record-view-frame");
+			recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";// saw BUG this code shoulw be part of the event response to selection change
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
+		}
 
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
@@ -4312,7 +4318,9 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_PIPELINE']] &&
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
-			_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
+			if(_tabView){
+				_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
+			}
 		}
 
 	},
@@ -4644,6 +4652,9 @@ function removeCustomAlert() {
 			YAHOO.util.Event.onContentReady("mainmenubar", top.HEURIST.search.initTopMenu);
 		});*/
 
+		//
+		//
+		//
 		var setWidths = function() {
 			var dw = layout.getSizes().doc.w;
 			var leftPanelWidth = layout.getSizes().left.w;
@@ -4817,10 +4828,12 @@ function removeCustomAlert() {
 		if(currentTab===_TAB_SPECIAL){ //printview
 
 			var viewerFrame = document.getElementById("viewer-frame");
-			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
-			var ssel = "selectedIds=" + selectedRecIDs.join(",");
-			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-
+			if(viewerFrame){
+				var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+				var ssel = "selectedIds=" + selectedRecIDs.join(",");
+				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+			}
+s
 		}else  if(currentTab===_TAB_MAP){ //map
 
 			var mapFrame3 = document.getElementById("map-frame3");
