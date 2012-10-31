@@ -1145,47 +1145,34 @@ top.HEURIST.edit = {
 	makeDateButton: function(dateBox, doc) {
 		var buttonElt = doc.createElement("input");
 			buttonElt.type = "button";
-			buttonElt.className = "temporal-button";
+			buttonElt.className = "date-button";
 		if (dateBox.nextSibling)
 			dateBox.parentNode.insertBefore(buttonElt, dateBox.nextSibling);
 		else
 			dateBox.parentNode.appendChild(buttonElt);
 
-		var popupOptions = {
-			callback: function(date) {
-				if (date) {
-					dateBox.value = date;
-					windowRef.changed();
-				}
-			},
-			"close-on-blur": true,
-			"no-titlebar": true,
-			"no-resize": true
-		};
-
-		var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
-		buttonElt.onclick = function() {
-
-
 				var callback =	function(date)
 				{
 					if (date) {
 						dateBox.value = date;
-						windowRef.changed();
+						dateBox.strTemporal = "";
+						dateBox.disabled = false;
+						dateBox.disabledStrictly = false;
+
+						if(top.HEURIST.util.setDisplayPreference){
+								top.HEURIST.util.setDisplayPreference("record-edit-date", date);
+						}
 						calendarViewer.close();
 					}
 				}
-				var buttonPos = top.HEURIST.getPosition(buttonElt, true);
-				calendarViewer.showAt([buttonPos.x, buttonPos.y], "", callback);
 
-			/* old way
-			var buttonPos = top.HEURIST.getPosition(buttonElt, true);
-			popupOptions.x = buttonPos.x + 8 - 120;
-			popupOptions.y = buttonPos.y + 8 - 80;
-
-			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/html/calendarTemplate.html#"+dateBox.value, popupOptions);
-			*/
-		}
+				buttonElt.onclick = function() {
+					var date = dateBox.value;
+					if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
+						date = top.HEURIST.util.getDisplayPreference("record-edit-date");
+					}
+					calendarViewer.showAt([buttonElt.offsetLeft, buttonElt.offsetTop+120], date, callback); //offsetLeft-120
+				}
 
 		return buttonElt;
 	},
@@ -1195,32 +1182,36 @@ top.HEURIST.edit = {
 			buttonElt.type = "button";
 			buttonElt.title = "Create a fuzzy date";
 			buttonElt.className = "temporal-button";
-		if (dateBox.nextSibling)
-			dateBox.parentNode.insertBefore(buttonElt, dateBox.nextSibling);
+		if (dateBox.dateButton)
+			dateBox.parentNode.insertBefore(buttonElt, dateBox.dateButton.nextSibling);
 		else
 			dateBox.parentNode.appendChild(buttonElt);
+
+		function disableCtrls (value) {
+			dateBox.disabled = value;
+			dateBox.disabledStrictly = value;
+			dateBox.dateButton.disabled = value;
+			dateBox.dateButton.disabledStrictly = value;
+		}
+
 		function decodeValue (inputStr) {
 			var str = inputStr;
-			dateBox.disabled = false;
-			dateBox.disabledStrictly = false;
+			disableCtrls(false);
 
 			if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 				dateBox.strTemporal = str;
-				dateBox.disabled = true;
-				dateBox.disabledStrictly = true;
+				disableCtrls(true);
 				if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
 					str = str.match(/SRT=([^\|]+)/)[1];
 				}else if (str.search(/TYP=s/) != -1 ) {
 					if (str.match(/DAT=([^\|]+)/)) {
 						if (str.search(/COM=[^\|]+/) == -1) {
-							dateBox.disabled = false;
-							dateBox.disabledStrictly = false;
+							disableCtrls(false);
 						}
 						str = str.match(/DAT=([^\|]+)/)[1];
 					}else if (str.search(/COM=[^\|]+/) != -1) {
 						str = str.match(/COM=([^\|]+)/)[1];
-						dateBox.disabled = false;
-						dateBox.disabledStrictly = false;
+						disableCtrls(false);
 					}
 				}else if (str.search(/TYP=c/) != -1 ) { //c14 date
 					var bce = str.match(/BCE=([^\|]+)/);
@@ -1614,8 +1605,9 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput = function(bdV
 //	var isTemporal = /^\|\S\S\S=/.test(textElt.value);		//sw check the beginning of the string for temporal format
 //	var isDate = ( !isTemporal && /\S/.test(textElt.value));	//sw not temporal and has non - white space must be a date
 //	if (!isTemporal) top.HEURIST.edit.makeDateButton(textElt, this.document); //sw
-	top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
 
+	textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);
+	top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
 };
 
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(input) {

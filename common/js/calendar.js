@@ -79,7 +79,7 @@ function getCalendarString(month, year) {
 			'<td id="cal_month">&nbsp;' + monthsInYear[month] + '&nbsp;' + year + '&nbsp;</td>' +
 			'<td id="monthyearnav" style="text-align: right;"><nobr>' +
 				'<span onClick="init_calendar(\''+nextMonthURL+'\')" title="Next month"><img src="../../common/images/calendar-r-arrow.gif"></span>' +
-				'<img src="../../common/images/5x10.gif">' +
+				'<img src="../../common/images/calendar-5x10.gif">' +
 				'<span onClick="init_calendar(\''+nextYearURL+'\')" title="Next year"><img src="../../common/images/calendar-rr-arrow.gif"></span>' +
 			'</nobr></td>' +
 				'</tr></table></td></tr>';

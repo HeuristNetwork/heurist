@@ -542,24 +542,26 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	width:auto !important
 }
 /***** date and temporal buttons *****/
-.date-button {
-	background: url("../images/cal.gif") no-repeat scroll center center lightgray;
-	border: medium none;
-	height: 13px;
-	margin: 5px;
-	width: 19px;
-}
 div.temporal-div input.in {vertical-align:top; margin:0}
-div.temporal-div input.temporal-button, .temporal-button {
-	background: url("../images/temporal.png") no-repeat scroll center center transparent !important;
+div.temporal-div input.temporal-button, .temporal-button, .date-button {
 	border: medium none;
-	margin: 2px 5px;
 	padding: 3px;
-	width: 19px;
 	border-radius:3px;
 	height:18px;
 	width:24px
 }
+div.temporal-div input.temporal-button, .temporal-button {
+	background: url("../images/temporal.png") no-repeat scroll center center transparent !important;
+	margin: 2px 5px;
+	width: 19px;
+}
+.date-button {
+	background: url("../images/cal.gif") no-repeat scroll center center transparent !important;
+	margin-left: 5px !important;
+	margin-top: 2px !important;
+	width: 26px;
+}
+
 div.temporal-div input.temporal-button:hover {
 	box-shadow: 0 1px 3px #666 inset;
 }
@@ -1128,3 +1130,4 @@ hr {
 .resource-title:hover div.thumbPopup {
 	display:block;
 }*/
+
