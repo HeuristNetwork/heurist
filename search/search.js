@@ -4684,6 +4684,16 @@ function removeCustomAlert() {
 				if (centerPanelWidth < 180 && twocollink.className !== " disabled") {
 					 twocollink.className += " disabled";
 					 };
+
+			var ele = document.getElementById('result-container');
+			var newtop = '20px';
+			if (centerPanelWidth<200){
+				newtop = '60px';
+			}else if (centerPanelWidth<380){
+				newtop = '40px';
+			}
+			ele.style.top = newtop;
+
 		};
 
 		layout.on('resize',setWidths);
@@ -4691,7 +4701,8 @@ function removeCustomAlert() {
 		layout.render();
 		YAHOO.util.Event.addListener(window, "resize", setWidths);
 
-		//
+
+		// open/close sidebar panel
 		function __sidebarPanelStatus(isFirst)
 		{
 			var status = top.HEURIST.util.getDisplayPreference("sidebarPanel");
@@ -4810,6 +4821,44 @@ function removeCustomAlert() {
 					layout.getUnitByPosition('right').resize();
 					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
 					*/
+		});
+
+		var keepLeftPanelWidth=null, keepRightPanelWidth=null;
+
+		Event.on('resetPanels_SmartyOn', 'click', function(ev) {
+			Event.stopEvent(ev);
+				if(keepLeftPanelWidth==null){
+					keepLeftPanelWidth = layout.getSizes().left.w;
+					keepRightPanelWidth = layout.getSizes().right.w;
+
+					//hide left panel
+					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
+						navButton.click();
+					}
+					//show right panel
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
+						appPanelButton.click();
+					}
+					var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
+					layout.getUnitByPosition('right').set("width", topWindowDims.w-240);
+					layout.getUnitByPosition('right').resize();
+				}
+		});
+		Event.on('resetPanels_SmartyOff', 'click', function(ev) {
+			Event.stopEvent(ev);
+			if(keepLeftPanelWidth!=null){
+					if (keepLeftPanelWidth>0 &&  (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open")){
+						navButton.click();
+					}
+					if (keepRightPanelWidth==0 &&  (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open")){
+						appPanelButton.click();
+					}else{
+						layout.getUnitByPosition('right').set("width", keepRightPanelWidth);
+					}
+					layout.getUnitByPosition('left').set("width", keepLeftPanelWidth);
+					keepLeftPanelWidth = null;
+					layout.getUnitByPosition('right').resize();
+			}
 		});
 	});
 

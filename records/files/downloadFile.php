@@ -282,16 +282,21 @@ function linkifyYouTubeURLs($text, $size) {
 * @param mixed $filename
 */
 function downloadFile($mimeType, $filename){
+/*****DEBUG****///error_log(">>>>>".$mimeType."   ".$filename);
+
 		if ($mimeType) {
 			header('Content-type: ' .$mimeType);
 		}else{
 			header('Content-type: binary/download');
 		}
 
-		header('access-control-allow-origin: *');
-		header('access-control-allow-credentials: true');
-
+		if($mimeType!="video/mp4"){
+			header('access-control-allow-origin: *');
+			header('access-control-allow-credentials: true');
+		}
 		readfile($filename);
+
+
 }
 
 /*

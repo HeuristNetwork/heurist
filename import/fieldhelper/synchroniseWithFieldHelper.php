@@ -179,6 +179,11 @@
 			global $rep_counter, $rep_issues;
 
 			foreach ($dirs as $dir){
+
+				if(substr($dir, -1) != '/'){
+						$dir .= "/";
+				}
+
 				if(file_exists($dir) && is_dir($dir))
 				{
 					$files = scandir($dir);
@@ -510,7 +515,7 @@ XML;
 				$f_items = $fh_data->addChild("items");
 			}
 
-			$allowed_exts = array("jpg", "jpeg", "png", "gif", "doc", "docx");
+			$allowed_exts = array("jpg", "jpeg", "png", "gif", "doc", "docx", "mp4");
 
 			//for files in folder that are not specified in the directory
 			foreach ($all_files as $filename){
@@ -533,7 +538,7 @@ XML;
 						if(is_numeric($file_id)){
 							$details["t:".$fileDT] = array("1"=>$file_id);
 						}else{
-							print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
+							print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created:  .$file_id</div>";
 							//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
 							$file_id = null;
 							continue;
@@ -590,7 +595,7 @@ XML;
 						);
 
 
-error_log(">>>>>".filemtime($filename)."  ".date("Y/m/d H:i:s.", filemtime($filename)));
+						/*****DEBUG****///error_log(">>>>>".filemtime($filename)."  ".date("Y/m/d H:i:s.", filemtime($filename)));
 
 						$f_item = $f_items->addChild("item");
 						$f_item->addChild("filename", $flleinfo['basename']);

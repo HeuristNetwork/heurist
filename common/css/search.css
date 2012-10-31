@@ -2252,6 +2252,7 @@ div.recorddiv:hover > #recordID {
 #result-header {
  	clear:both;
  	background: none repeat scroll 0 0 #DCDFE6 !important;
+ 	overflow:auto;
 }
 #active-label {
 	/*background: none repeat scroll 0 0 #DCDFE6 !important;*/

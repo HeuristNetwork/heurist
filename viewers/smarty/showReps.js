@@ -570,6 +570,15 @@ function ShowReps() {
 		{
 			return;
 		}
+
+		if(_iseditor!=iseditor){
+			//find in parent
+			var restLayout = top.document.getElementById("resetPanels_Smarty"+(iseditor?"On":"Off"));
+			if(restLayout){
+				restLayout.click();
+			}
+		}
+
 		_isviewer=isviewer;
 		_iseditor=iseditor;
 
