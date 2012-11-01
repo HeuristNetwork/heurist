@@ -85,11 +85,12 @@ function update_counts2(processed, total) {
    new title would be blank (an error condition).
 </p>
 <p>This will take some time for large databases.</p>
- <p>The scanning step does not write to the database
-and can be cancelled safely at any time</p>
+<!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
 <div><span id=total_count><?=count($recs)?></span> records in total</div>
 <div><span id=processed_count>0</span> processed so far</div>
+<div><span id=percent>0</span> %</div>
+<br />
 <div><span id=changed_count>0</span> to be updated</div>
 <div><span id=same_count>0</span> are unchanged</div>
 <div><span id=repair_count>0</span> marked for update</div>
@@ -157,7 +158,7 @@ foreach ($recs as $rec_id => $rec) {
 //print '</ul>';
 
 
-print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.count($updates).')</script>'."\n";
+print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 print '<hr>';
 $titleDT = (defined('DT_NAME')?DT_NAME:0);
 
@@ -198,7 +199,9 @@ if (count($updates) > 0) {
 
 	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
 }
-print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+if(count($blanks)>0){
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+}
 
 ob_flush();
 flush();

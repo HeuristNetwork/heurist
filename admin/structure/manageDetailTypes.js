@@ -484,6 +484,7 @@ function DetailTypeManager() {
 							return;
 						}
 
+
 						var r=confirm("Delete field type#"+dty_ID+" '"+oRecord.getData('name')+"?");
 						if (r) {
 
@@ -507,6 +508,7 @@ function DetailTypeManager() {
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 						}
+
 					}else{
 
 						sUsage = "<h3 style='padding-top:0px;margin:0px;'>Warning!</h3><div>This field type is used in the following record types:<ul>"+sUsage+
@@ -962,7 +964,7 @@ function DetailTypeManager() {
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 680,
-			width: 660,
+			width: 700,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 

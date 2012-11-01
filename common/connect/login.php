@@ -157,8 +157,9 @@ if (@$_REQUEST['logout']) {
 
 
 <div id=page style="padding: 20px;">
-<a id=home-link href='../../'>
-<div id=logo title="Click the logo at top left of any Heurist page to return to your main page"></div>
+
+<a id="home-link" href='../../'  title="Click the logo at top left of any Heurist page to return to your main page">
+<div id="logo">&nbsp;</div>
 </a>
 
 <div><h1>PLEASE LOGIN or <a href='../../' style='font-size:16px'>SEARCH</a></h1></div>
@@ -206,9 +207,9 @@ if (@$_REQUEST['logout']) {
 
    <tr class="input-row">
     <td class="input-header-cell"></td>
-    <td class="input-cell"><input type="radio" name="session_type" value="public">Expire on browser close (public computer)<br>
-        <input type="radio" name="session_type" value="shared">Expire on user logout (shared computer)<br>
-        <input type="radio" name="session_type" value="remember" checked>Remember me on this computer (your computer)</td>
+    <td class="input-cell"><input type="radio" name="session_type" value="public">&nbsp;Expire on browser close (public computer)<br>
+        <input type="radio" name="session_type" value="shared">&nbsp;Expire on user logout (shared computer)<br>
+        <input type="radio" name="session_type" value="remember" checked>&nbsp;Remember me on this computer (your computer)</td>
    </tr>
 
    <tr><td colspan="2"></td></tr>

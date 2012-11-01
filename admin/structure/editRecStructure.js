@@ -56,17 +56,17 @@ function EditRecStructure() {
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
 		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
 		'<input type="button" style="margin:0" value="Insert heading" onClick="onAddSeparator()" class="add"/>'+
-        '<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
 		// Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
-        // '<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
+		// '<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'Use existing fields where possible &nbsp;&nbsp;'+
-        '</div>';
+		'</div>';
 
 		Dom.get("recordTitle").innerHTML += hToolBar;
-	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign"><div id="tableContainer"></div></div>';
-	  	_initTabDesign(null);
+		Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';
+		_initTabDesign(null);
 	}
 
 	/**
@@ -164,8 +164,8 @@ function EditRecStructure() {
 				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>",
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					if(_expandedRecord != oRecord.getData("rst_ID")){
-						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+					if(Number(_expandedRecord) !== Number(oRecord.getData("rst_ID"))){
+						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>";
 					}
 				}
 			},
@@ -194,20 +194,20 @@ function EditRecStructure() {
 			},
 			{
 				key:"rst_DisplayWidth", label: "Width", sortable:false, width:25, className:"center" ,
-                formatter: function(elLiner, oRecord, oColumn, oData){
-                    var wid = oRecord.getData('rst_DisplayWidth');
-                    var typ = oRecord.getData('dty_Type');
-                    if (_isNoWidth(typ))
-                    {
-                        res = "";
-                    }
-                    else{
-                        res = wid;
+				formatter: function(elLiner, oRecord, oColumn, oData){
+					var wid = oRecord.getData('rst_DisplayWidth');
+					var typ = oRecord.getData('dty_Type');
+					if (_isNoWidth(typ))
+					{
+						res = "";
+					}
+					else{
+						res = wid;
 					}
 
 
-                    elLiner.innerHTML = res;
-                }
+					elLiner.innerHTML = res;
+				}
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
@@ -244,10 +244,10 @@ function EditRecStructure() {
 					}
 				}
 			},
-            {
-                key:"dty_Name", label: "Based on template", width:100, sortable:false,
+			{
+				key:"dty_Name", label: "Based on template", width:100, sortable:false,
 				formatter: _hidevalueforseparator
-            },
+			},
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center",
 				formatter: _hidevalueforseparator
@@ -265,7 +265,7 @@ function EditRecStructure() {
 							statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
 						}else{
 							statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-						};
+						}
 						elLiner.innerHTML = statusLock;
 				}
 			}
@@ -274,7 +274,7 @@ function EditRecStructure() {
 			//special formatter
 			var myRowFormatter = function(elTr, oRecord) {
 				var val0 = oRecord.getData('dty_Type');
-				if(val0 == 'separator'){
+				if(val0 === 'separator'){
 					Dom.addClass(elTr, 'greyout');
 				}else{
 					var val1 = oRecord.getData('rst_NonOwnerVisibility');
@@ -306,15 +306,15 @@ function EditRecStructure() {
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
 
-                    '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
+					'<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
 
-                    // Field width
-                    '<div class="input-row"><div class="input-header-cell">Field width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
+					// Field width
+					'<div class="input-row"><div class="input-header-cell">Field width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
 
 					'<div class="input-row"><div class="input-header-cell">Help text (under field):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div></div>'+
 
 					// Required/recommended optional
-                    '<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
+					'<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px">'+
 					'<option value="required">required</option>'+
@@ -324,11 +324,11 @@ function EditRecStructure() {
 					'<span id="ed'+rst_ID+'_spanMinValue" style="visibility:hidden;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					// Minimum values
-                    '_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
+					'_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Repeatability
-                    '<div class="input-row" id="divRepeatability"><div class="input-header-cell">Repeatability :</div>'+
+					'<div class="input-row" id="divRepeatability"><div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
@@ -336,40 +336,40 @@ function EditRecStructure() {
 					'<option value="limited">limited</option>'+ //IJ request HIDE IT 2012-10-12
 					'</select>'+
 					// Maximum values
-                    '<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
+					'<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Maximum Values" style="width:20px; text-align:center;" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Terms - enums and relmarkers
-                    '<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
+					'<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
 					'<div class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-                    //REMOVED BY IAN's request on 16-09-11 - this provides too much complexity
-                    //'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
-                    //					'Preview:'+
+					//REMOVED BY IAN's request on 16-09-11 - this provides too much complexity
+					//'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
+					//					'Preview:'+
 					'<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
 					'<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Change Vocabulary"</span>'+
 					'</div></div>'+
 
 					// Pointer target types - pointers and relmarkers
-                    '<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
+					'<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
 					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-                    '<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Select Recprd Types"</span>'+
-                                        //REMOVED BY IAN's request on 16-09	- too much complexity
-                    // '<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
+					'<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Select Recprd Types"</span>'+
+										//REMOVED BY IAN's request on 16-09	- too much complexity
+					// '<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
 					'</div></div>'+
 
 
-                    // Default value
-                    '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
-                    '<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
-                    '<input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
+					// Default value
+					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
+					'<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
+					'<input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
 
 					// Status
-                    '<div class="input-row"><div class="input-header-cell">Status:</div>'+
+					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
 					'<option value="open">open</option>'+
@@ -378,7 +378,7 @@ function EditRecStructure() {
 					'</select>'+  //<option value="reserved">reserved</option>
 
 					// Non-owner visibility
-                    '<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
+					'<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
 					'_rst_NonOwnerVisibility">'+  // style="display:inline-block"
 					'<option value="hidden">hidden</option>'+
 					'<option value="viewable">viewable</option>'+
@@ -522,22 +522,42 @@ function EditRecStructure() {
 				}
 
 				if(elLink.hash === "#delete"){
-					var dty_name = oRecord.getData('dty_Name');
-					var r=confirm("Delete field #"+dty_ID+" '"+dty_name+"' from this record structure?");
-					if (r) {
-
-						_doExpliciteCollapse(null ,false); //force collapse this row
 
 						var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 											(top.HEURIST.database.name?top.HEURIST.database.name:''));
 						var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-						var callback = __updateAfterDelete;
-						var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
-						_isServerOperationInProgress = true;
-						Hul.getJsonData(baseurl, callback, params);
 
+						function _onCheckEntries(context)
+						{
+							if(Hul.isnull(context.error))
+							{
+								var dty_name = oRecord.getData('dty_Name');
 
-					}
+								var sWarn;
+								if(context[rty_ID]){
+									sWarn = "This field #"+dty_ID+" '"+dty_name+"' is utilized in this record type title mask. You have to edit title mask in Essentials > Record types / fields\n Still wish to delete this field?";
+								}else{
+									sWarn =  "Delete field #"+dty_ID+" '"+dty_name+"' from this record structure?";
+								}
+
+								var r=confirm(sWarn);
+								if (r) {
+
+									_doExpliciteCollapse(null ,false); //force collapse this row
+
+									var callback = __updateAfterDelete;
+									var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
+									_isServerOperationInProgress = true;
+									Hul.getJsonData(baseurl, callback, params);
+								}
+
+							}
+						}
+
+						var callback = _onCheckEntries;
+						var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
+						top.HEURIST.util.getJsonData(baseurl, callback, params);
+
 				}
 			});
 
@@ -813,7 +833,7 @@ function EditRecStructure() {
 		var status = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
 		var isReserved = (status === "reserved");// || status === "approved");
 
-        // Reserved can only be set on database controleld by the Heurist group, identified by DBID<1000
+		// Reserved can only be set on database controleld by the Heurist group, identified by DBID<1000
 		if(selstatus){
 			if (((dbId>0) && (dbId<1001) /* && ian 23/9/12 allow setting Reserved even if not origin (original_dbId===dbId) */ ) || isReserved)
 			{
@@ -888,7 +908,7 @@ function EditRecStructure() {
 					//show disable target pnr rectype
 
 			}else if(rst_type === "separator"  &&
-				!(fieldnames[k] === "rst_DisplayName")){
+					fieldnames[k] !== "rst_DisplayName"){
 					//hide all but name
 					edt.parentNode.parentNode.style.display = "none";
 			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
@@ -937,9 +957,9 @@ function EditRecStructure() {
 	* These field types have no width
 	*/
 	function _isNoWidth(typ){
-	       return ((typ == "enum") || (typ=="resource") ||
-                    (typ=="relmarker") || (typ === "relationtype") ||
-                    (typ=="file") || (typ=="geo") || (typ=="separator"));
+		   return ((typ === "enum") || (typ==="resource") ||
+					(typ==="relmarker") || (typ === "relationtype") ||
+					(typ==="file") || (typ==="geo") || (typ==="separator"));
 	}
 
 
@@ -963,8 +983,8 @@ function EditRecStructure() {
 						k++;
 						ft_separator_group = dtypes[ind].commonFields[fi.dty_DetailTypeGroupID];
 						if(Hul.isnull(recDetTypes[ind])){
-						 	ft_separator_id = ind;
-						 	break;
+							ft_separator_id = ind;
+							break;
 						}
 					}
 				}
@@ -975,7 +995,7 @@ function EditRecStructure() {
 			_addDetails(ft_separator_id);
 		}else{ //"not used" separator field type not found - create new one
 
-			var _detailType = new Array();
+			var _detailType = [];//new Array();
 
 			_detailType[fnames[fi.dty_Name]] = 'HEADING '+k;
 			_detailType[fnames[fi.dty_ExtendedDescription]] = '';
@@ -1094,18 +1114,18 @@ function EditRecStructure() {
 			if(Hul.isnull(recDetTypes[dty_ID])){ //not added
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
-                // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
+				// note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
 				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
 
-                if (_isNoWidth(dt_type))
+				if (_isNoWidth(dt_type))
 				{
-                    def_width = 0;
+					def_width = 0;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
 							dt_type === "calculated") {
-                    def_width = 15;
+					def_width = 15;
 				}else if (dt_type === "boolean") {
-                    def_width = 4; break;
+					def_width = 4; break;
 				}
 
 				var arr_target = new Array();
@@ -1456,7 +1476,7 @@ function EditRecStructure() {
 
 		endDrag: function(x,y) {
 
-			if(this.srcIndex==null) return;
+			if(this.srcIndex===null) { return; }
 
 			var position,
 			srcEl = this.srcEl;
@@ -1485,7 +1505,7 @@ function EditRecStructure() {
 			var srcIndex = this.srcIndex,
 			destEl = Dom.get(id);
 
-			if(srcIndex==null) return;
+			if(srcIndex===null) { return; }
 
 			if(destEl){
 
@@ -1628,7 +1648,7 @@ function onAddNewDetail(){
 * Adds separator field type
 */
 function onAddSeparator(){
-  editStructure.onAddSeparator();
+		editStructure.onAddSeparator();
 }
 
 /**
@@ -1648,8 +1668,7 @@ function onDefineNewType(){
 			{	"close-on-blur": false,
 				"no-resize": false,
 			height: 700,
-
-			width: 650,
+			width: 700,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){

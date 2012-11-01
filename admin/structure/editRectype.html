@@ -253,7 +253,8 @@
 
 	var rectype,
 		rectypeID,
-		titleMaskIsOk = true;
+		titleMaskIsOk = true,
+		_keepTitleMask;
 
 	init();
 
@@ -381,6 +382,7 @@
 					  document.getElementById("rty_ShowURLOnEditForm").checked = (Number(rectype[fi.rty_ShowURLOnEditForm]) !== 0);
 					  document.getElementById("rty_ShowDescriptionOnEditForm").checked = (Number(rectype[fi.rty_ShowDescriptionOnEditForm]) !== 0);
 			document.getElementById("rty_TitleMask").value = rectype[fi.rty_TitleMask];
+											_keepTitleMask = rectype[fi.rty_TitleMask];
 			document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[fi.rty_FlagAsFieldset]) === 1);
 			document.getElementById("rty_ReferenceURL").value = rectype[fi.rty_ReferenceURL];
 			document.getElementById("rty_AlternativeRecEditor").value = rectype[fi.rty_AlternativeRecEditor];
@@ -595,14 +597,15 @@
 				document.getElementById("definit").value+
 				"&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
+
 		} else { //nothing changed
 
 			var context = null;
 			if(_openEditStrucutreAfterClose){
 				//editRecStructure();
-				context = {rty_ID:rectypeID, isOpenEditStructure:true};
+				context = {rty_ID:rectypeID, isOpenEditStructure:true };
 			}else if(_isIconWasUpdated){
-				context = {rty_ID:rectypeID, isOpenEditStructure:false};
+				context = {rty_ID:rectypeID, isOpenEditStructure:false };
 			}
 
 			window.close(context);
@@ -638,6 +641,12 @@
 						// this alert is a pain  alert("Record types with IDs :"+report+ " were succesfully "+ss);
 					}else{
 						// this alert is a pain  alert("Record type with ID " + report + " was succesfully "+ss);
+					}
+
+					context.changeTitleMask = false;
+					if(rectypeID>0 &&
+						document.getElementById("rty_TitleMask").value !== _keepTitleMask){
+							context.changeTitleMask = true;
 					}
 
 					rectypeID = Math.abs(rectypeID);
@@ -824,7 +833,7 @@
 						var obj = xhr.responseText;
 						if(obj!=""){
 							titleMaskIsOk = false;
-							alert(obj);
+							alert("Title Mask verification:\n"+obj);
 						}else{
 							titleMaskIsOk = true;
 							updateRectypeOnServer_continue();

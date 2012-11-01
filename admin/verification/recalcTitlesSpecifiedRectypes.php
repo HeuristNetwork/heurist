@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -31,7 +27,7 @@ if(@$_REQUEST['recTypeIDs']) {
  $recTypeIds = $_REQUEST['recTypeIDs'];
 }else{
 ?>
-You must specify a record type (?recTypeIDs=55) a set of record types (?recTypeIDs=55,174,175) to use this page.
+	You must specify a record type (?recTypeIDs=55) a set of record types (?recTypeIDs=55,174,175) to use this page.
 <?php
 }
 
@@ -42,12 +38,14 @@ mysql_connection_db_overwrite(DATABASE);
 
 
 $res = mysql_query("select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_RecTypeID in ($recTypeIds) order by rand()");
-$bibs = array();
+$recs = array();
 while ($row = mysql_fetch_assoc($res)) {
-	$bibs[$row['rec_ID']] = $row;
+	$recs[$row['rec_ID']] = $row;
 }
 
-$masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
+$rt_names = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', 'rty_ID in ('.$recTypeIds.')');
+
+$masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', 'rty_ID in ('.$recTypeIds.')');
 $updates = array();
 $blank_count = 0;
 $repair_count = 0;
@@ -56,29 +54,37 @@ $processed_count = 0;
 //print '<style type="text/css">b span { color: red; }</style>';
 //print '<style type="text/css">li.same, li.same * { color: lightgray; }</style>';
 //print '<ul>';
-
 ?>
-<h2>CONSTRUCTED TITLE RECALCULATION</h2>
-
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>CONSTRUCTED TITLE RECALCULATION</title>
+	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+</head>
+<body class="popup">
 <p>
-   This function recalculates the constructed record titles for the given
-   recordset, compares them with the existing title and updates the title
-   where the title has changed. At the end of the process it will display
-   a list of records for which the titles were changed and a list of
-   records for which the new title would be blank (an error condition).</p>
+	The composite record title mask has been changed.
+ 	You need to rebuild the titles of existing records.
+ 	Rebuild record titles for <b><?=implode(',',$rt_names)?></b>
+</p>
 <p>This will take some time for large databases.</p>
- <p>The scanning step does not write to the database 
-and can be cancelled safely at any time</p>
+<!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
 
 <script type="text/javascript">
 function update_counts(processed, blank, repair, changed) {
+	if(changed==undefined) {
+		 changed = 0;
+	}
+
 	document.getElementById('processed_count').innerHTML = processed;
+	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
+
+
 	document.getElementById('changed_count').innerHTML = changed;
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
 	document.getElementById('repair_count').innerHTML = repair;
 	document.getElementById('blank_count').innerHTML = blank;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($bibs) ?>) / 10;
 }
 
 function update_counts2(processed, total) {
@@ -86,18 +92,21 @@ function update_counts2(processed, total) {
 	document.getElementById('percent2').innerHTML = Math.round(1000 * processed / total) / 10;
 }
 </script>
-<?php
 
-print '<div><span id=total_count>'.count($bibs).'</span> records in total</div>';
-print '<div><span id=processed_count>0</span> processed so far</div>';
-print '<div><span id=changed_count>0</span> to be updated</div>';
-print '<div><span id=same_count>0</span> are unchanged</div>';
-print '<div><span id=repair_count>0</span> marked for update</div>';
-print '<div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>';
+<div><span id=total_count><?=count($recs)?></span> records in total</div>
+<div><span id=processed_count>0</span> processed</div>
+<div><span id=percent>0</span> %</div>
+<br />
+<div><span id=changed_count>0</span> to be updated</div>
+<div><span id=same_count>0</span> are unchanged</div>
+<div><span id=repair_count>0</span> marked for update</div>
+<div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>
+
+<?php
 
 $blanks = array();
 $reparables = array();
-foreach ($bibs as $rec_id => $bib) {
+foreach ($recs as $rec_id => $bib) {
 	if ($rec_id % 10 == 0) {
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();
@@ -143,7 +152,7 @@ foreach ($bibs as $rec_id => $bib) {
 //print '</ul>';
 
 
-print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.count($updates).')</script>'."\n";
+print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 print '<hr>';
 
 $titleDT = (defined('DT_NAME')?DT_NAME:0);
@@ -167,7 +176,7 @@ if (count($updates) > 0) {
 		}
 	}
 	foreach ($reparables as $rec_id) {
-		$rec = $bibs[$rec_id];
+		$rec = $recs[$rec_id];
 		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
 			$has_detail_160 = (mysql_num_rows(mysql_query("select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id)) > 0);
 			//touch the record so we can update it  (required by the heuristdb triggers)
@@ -183,11 +192,15 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.join(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Updated records</a><br>';
 }
-print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.join(',', $blanks).'&db='.HEURIST_DBNAME.'">Unchanged records (title would be blank)</a>';
+if(count($blanks)>0){
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.'">Unchanged records (title would be blank)</a>';
+}
 
 ob_flush();
 flush();
 
 ?>
+</body>
+</html>

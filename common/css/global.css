@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /******* global font ********/
-*|* {
+* {
 	font-family: Helvetica, Arial, Verdana !important;
 	font-size: 11px;
 	line-height: 2ex;

@@ -16,6 +16,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -46,7 +47,8 @@
 		"deleteDT",
 		"deleteRT",
 		"deleteRTG",
-		"deleteDTG"
+		"deleteDTG",
+		"checkDTusage"
 	);
 
 	$rtyColumnNames = array(
@@ -231,13 +233,7 @@
 
 				foreach ($data['rectype']['defs'] as $rtyID => $rt) {
 					if ($rtyID == -1) {	// new rectypes
-
-						$ress = createRectypes($commonNames, $rt);
-						if(is_numeric($ress) && $definit=="1"){
-							addDefaultFieldForNewRecordType(abs($ress));
-						}
-
-						array_push($rv['result'], $ress);
+						array_push($rv['result'], createRectypes($commonNames, $rt, ($definit=="1")));
 					}else{
 						array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
 					}
@@ -440,6 +436,15 @@
 				$rv['detailTypes'] = getAllDetailTypeStructures();
 				break;
 
+			case 'checkDTusage':
+
+
+				$rtyID = @$_REQUEST['rtyID'];
+				$dtyID = @$_REQUEST['dtyID'];
+
+				$rv = findCanonicalTitleMaskEntries($rtyID, $dtyID);
+
+				break;
 
 			case 'deleteDetailType':
 			case 'deleteDT':
@@ -560,9 +565,9 @@
 	*/
 
 	//
+	// add new record type
 	//
-	//
-	function createRectypes($commonNames, $rt) {
+	function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields) {
 		global $db, $rtyColumnNames;
 
 		$ret = null;
@@ -572,6 +577,7 @@
 			$colNames = join(",",$commonNames);
 
 			$parameters = array("");
+			$titleMask = null;
 			$query = "";
 			foreach ($commonNames as $colName) {
 				$val = array_shift($rt[0]['common']);
@@ -580,14 +586,10 @@
 				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
 				array_push($parameters, $val);
 
-				/* it is not possible to create canonical title mask at this stage
-					if($colName == "rty_TitleMask"){
-					$colName = "rty_CanonicalTitleMask";
-					$colNames = $colNames.",".$colName;
-					$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
-					$val = make_canonical_title_mask($val, $rt);
-					array_push($parameters, $val);
-				}*/
+				//keep value of text title mask to create canonical one
+				if($colName == "rty_TitleMask"){
+					$titleMask = $val;
+				}
 			}
 
 			$query = "insert into defRecTypes ($colNames) values ($query)";
@@ -600,6 +602,12 @@
 			} else {
 				$rtyID = $db->insert_id;
 				$ret = -$rtyID;
+				if($isAddDefaultSetOfFields){
+					//add default set of detail types
+					addDefaultFieldForNewRecordType($rtyID);
+					//create canonical title mask
+					updateCanonicalTitleMask($rtyID, $titleMask);
+				}
 			}
 
 		}
@@ -772,8 +780,18 @@
 
 					$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
+
+					if($colName == "rty_TitleMask"){ //update canonical
+						$val = make_canonical_title_mask($val, $rtyID);
+
+						$colName = "rty_CanonicalTitleMask";
+						$query = $query.",".$colName." = ?";
+						$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
+						array_push($parameters, $val);
+					}
 				}
 			}
+
 			//
 			if($query!=""){
 
@@ -800,6 +818,56 @@
 		}
 		return $ret;
 
+	}
+
+	//
+	// update canonical title mask
+	//
+	function updateCanonicalTitleMask($rtyID, $mask) {
+		global $rtyColumnNames, $db;
+
+		$ret = 0;
+		if($mask){
+				$val = make_canonical_title_mask($mask, $rtyID);
+
+				$colName = "rty_CanonicalTitleMask";
+				$parameters = array("");
+				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
+				array_push($parameters, $val);
+
+				$query = "update defRecTypes set $colName = ? where rty_ID = $rtyID";
+
+				$res = execSQL($db, $query, $parameters, true);
+				if(!is_numeric($res)){
+					$ret = "SQL error updating record type $rtyID in updateRectype: ".$res;
+				}
+		}
+		return $ret;
+	}
+
+	//
+	//
+	//
+	function findCanonicalTitleMaskEntries($rtyID, $dtyID) {
+
+		global $db;
+
+		$ret = array();
+
+		$query = "select rty_ID, rty_Name from defRecTypes where (rty_CanonicalTitleMask LIKE '%[{$dtyID}]%') OR (rty_CanonicalTitleMask LIKE '%.{$dtyID}]%')";
+		if($rtyID){
+			$query .= " AND (rty_ID=".$rtyID.")";
+		}
+
+		$res = $db->query($query);
+
+		if ($res->num_rows>0){ //$db->affected_rows<1){
+			while($row = $res->fetch_object()){
+				$ret[$row->rty_ID] = $row->rty_Name;
+			}
+		}
+
+		return $ret;
 	}
 
 

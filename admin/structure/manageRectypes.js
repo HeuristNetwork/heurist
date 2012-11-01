@@ -903,8 +903,8 @@ function RectypeManager() {
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: dim.h*0.9,
-			width: dim.w*0.6,
+			height: 700,
+			width: 700,
 			callback: function(changedValues) {
 				if(Hul.isnull(changedValues)) {
 					// Canceled
@@ -936,6 +936,19 @@ function RectypeManager() {
 				} else {
 					// alert("Structure is saved");
 				}
+			}
+		});
+	}
+
+	function _updateTitleMask(rty_ID){
+		var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
+
+		Hul.popupURL(top, URL, {
+			"close-on-blur": false,
+			"no-resize": true,
+			height: 400,
+			width: 400,
+			callback: function(context) {
 			}
 		});
 	}
@@ -1017,6 +1030,9 @@ function RectypeManager() {
 					if(context.isOpenEditStructure){
 						_editRecStructure(rty_ID);
 						//alert("open edit strcutre");
+					}
+					if(context.changeTitleMask){
+						_updateTitleMask(rty_ID);
 					}
 
 					/*

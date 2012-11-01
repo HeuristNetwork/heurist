@@ -714,8 +714,8 @@ FlexImport = (function () {
 								top.HEURIST.util.popupURL(top, url,
 								{	"close-on-blur": false,
 									"no-resize": false,
-									height: 680,
-									width: 660,
+										height: 700,
+										width: 700,
 									callback: function(context) {
 									}
 								});

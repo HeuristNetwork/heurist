@@ -77,7 +77,7 @@ function SelectDetailType() {
 	* 4. assign listeners for filter UI controls
 	*/
 	function _init() {
-		
+
 		//refill array
 		// 1. Reads GET parameters
 		if (location.search.length > 1) {
@@ -124,7 +124,7 @@ function SelectDetailType() {
 
 		//sort by name
 		arr.sort(function(a,b){return a[2]>b[2]});
-		
+
 
 		if(isnull(_myDataTable)){
 
@@ -169,7 +169,7 @@ function SelectDetailType() {
 								});
 
 								var myColumnDefs = [
-								{ key: "selection", label: "", sortable:true, 
+								{ key: "selection", label: "", sortable:true,
 									formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 								{ key: "name", label: "Field type name", sortable:true },
 								{ key: "order", label: "Order", hidden:true },
@@ -275,10 +275,10 @@ function SelectDetailType() {
 								scope   : _myDataTable,
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 					});
-					
+
 					_updateFilter();
 
-		}		
+		}
 	}//end of initialization ==============================
 
 	/**
@@ -488,8 +488,7 @@ function SelectDetailType() {
 			{	"close-on-blur": false,
 				"no-resize": false,
 			height: 700,
-
-			width: 650,
+			width: 700,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){
@@ -501,8 +500,8 @@ function SelectDetailType() {
 					}
 				}
 			});
-	}	
-	
+	}
+
 	//
 	//public members
 	//
@@ -522,7 +521,7 @@ function SelectDetailType() {
 				cancel : function () {
 					window.close(null);
 				},
-				
+
 				onDefineNewType: function(){
 					_onDefineNewType();
 				},
