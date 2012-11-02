@@ -2090,11 +2090,11 @@ div.searchInput > .simplesearch.collapsed {
 	-webkit-border-radius:3px;
 	border-radius:3px;
 	padding:0 3px;
-	font-size:11px;
+	font-size:10px;
 	color:#666;
 	margin:3px;
-	height:20px;
-	line-height:18px;
+	height:18px;
+	line-height:15px;
 	display:inline-block;
 }
 .advanced-search-row .button:hover {

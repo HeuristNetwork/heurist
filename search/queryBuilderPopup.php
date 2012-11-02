@@ -29,9 +29,15 @@
 
 	var last_vals = new Object();
 
-	var updateTimeoutID = 0;
+	var updateTimeoutID = 0,
+		allowUpdate = false;
 
 	function update(elt) {
+
+		if(!allowUpdate){
+			return;
+		}
+
 		if (updateTimeoutID) { clearTimeout(updateTimeoutID); updateTimeoutID = 0; }
 
 		var q_elt = document.getElementById('q');
@@ -216,7 +222,7 @@
 	function reconstruct_query() {
 		// reconstruct the query in the SEARCH box (using the canonical fully-modified form)
 
-		var field_names = ['title', 'tag', 'url', 'type', 'notes', 'user'];
+		var field_names = ['title', 'tag', 'url', 'type', 'user']; //'notes',
 
 		var q_val = '';
 		for (var i=0; i < field_names.length; ++i) {
@@ -384,38 +390,70 @@
 	function clear_fields() {
 		document.getElementById('q').value='';
 		var elts = document.getElementsByTagName('input');
-		for (var i = 0; i < elts.length; i++)
-		elts[i].value = elts[i].defaultValue;
+		for (var i = 0; i < elts.length; i++){
+			elts[i].value = elts[i].defaultValue;
+		}
+
 		var elts = document.getElementsByTagName('select');
-		for (var i = 0; i < elts.length; i++)
-		elts[i].selectedIndex = 0;
+		for (var i = 0; i < elts.length; i++){
+			elts[i].selectedIndex = 0;
+		}
 		reset_usernames();
+	}
+
+	//
+	//
+	//
+	function add_to_search(id){
+		allowUpdate = true;
+		var ele = document.getElementById(id);
+		update(ele);
+		allowUpdate = false;
+	}
+
+	//
+	//
+	//
+	function setIndividually(ele){
+		allowUpdate = !ele.checked;
+		var elts = document.getElementsByTagName('button');
+		for (var i = 0; i < elts.length; i++){
+			if(elts[i].id!="btnSearch"){
+				elts[i].style.visibility = allowUpdate?"hidden":"visible";
+			}
+		}
 	}
 
 		</script>
 
 	</head>
-	<body class="popup" width=700 height=530 style="overflow: hidden;" onLoad="load_query();">
+	<body class="popup" width=700 height=500 style="overflow: hidden;" onLoad="load_query();">
 
-		<div>
-			<h2>Search&nbsp;string</h2>
-			<div class="searchInput" style="position:relative; display:block;"><input id=q name=q type=text style="width:100%; clear:both;"></div>
+		<div class="advanced-search-row" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
+			<b>Search&nbsp;string</b>
+			<div class="searchInput" style="position:relative; display:inline-block;">
+				<input id=q name=q type=text style="width:600;">
+			</div>
+			<button id="btnSearch" type="button" onClick="do_search();" class="button">Search</button>
+
+			<div style="width: 100%; text-align: center; padding-top: 4px;">Build search using fields below, or edit the search string directly. <a href="#" onClick="clear_fields(); return false;">Clear search string</a></div>
 		</div>
-		<div style="padding-left: 30px; color: #666;">
+		<div style="padding-left: 30px; color: #666;border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 			<p>See also <a href="#" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.</p>
-			<p style="line-height:14px">Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
+			<div>Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
 				To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
 				<b>latitude:10 longitude:100</b><br>
 				Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
 				To find records that include either of two search terms, use an uppercase OR. e.g. <b>timemap OR &quot;time map&quot;</b><br>
-			To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b></p>
+			To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b></div>
+
+			<div style="text-align:right;padding-right:10px;">
+				<label for="setInd">Set individually: </label>
+				<input id="setind" iname="setind" type="checkbox" style="display:inline-block !important;" checked="checked" onchange="setIndividually(this)" />
+			</div>
 		</div>
-		<div style="padding-left: 30px; color: #666;">
 
-		</div>
-
-
-		<div class="advanced-search-row">
+		<div class="advanced-search-row"  style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 			<label for="sortby">Sort by:</label>
 			<script>
 				function setAscDescLabels(sortbyValue) {
@@ -459,8 +497,10 @@
 			<select id=ascdesc style="width: 100px;" onChange="update(document.getElementById('sortby'));">
 				<option value="" selected id=asc-label>ascending</option>
 				<option value="-" id=desc-label>descending</option>
-			</select><span>Bibliographic (sort by first value only)</span>
+			</select>
+			<!-- <span>Bibliographic (sort by first value only)</span> -->
 
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('sortby');" class="button" title="Add to Search">Add</button>
 		</div>
 
 
@@ -488,37 +528,10 @@
 				?>
 				</optgroup>
 			</select>
-		</div>
-		<div class="advanced-search-row">
-			<label for="fieldtype">Fields:</label>
-			<select name=fieldtype id=fieldtype onChange="update(this);">
-				<option value="" style="font-weight: bold;">Any field</option>
-				<optgroup id="rectype-specific-fields" label="rectype specific fields" style="display: none;"></optgroup>
-				<optgroup label="Generic fields">
-					<?php
-						$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
-						while ($row = mysql_fetch_assoc($res)) {
-						?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
-						<?php	}	?>
-				</optgroup>
-			</select>
-			<span>contains</span><input id=field name=field onChange="update(this);" onKeyPress="return keypress(event);" style="width: 200px;">
 
-
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('type');" class="button" title="Add to Search">Add</button>
 		</div>
 
-		<div class="advanced-search-row">
-			<label for="title">Title:</label>
-			<input name=title id=title onChange="update(this);" onKeyPress="return keypress(event);">
-		</div>
-		<div class="advanced-search-row">
-			<label for="url">URL:</label>
-			<input name=url id=url onChange="update(this);" onKeyPress="return keypress(event);">
-		</div>
-		<div class="advanced-search-row">
-			<label for="notes">Notes:</label>
-			<input id=notes name=notes onChange="update(this);" onKeyPress="return keypress(event);">
-		</div>
 		<div class="advanced-search-row">
 			<label for="tag">Tags:</label>
 			<input name=tag id=tag onChange="update(this);" onKeyPress="return keypress(event);">
@@ -526,8 +539,8 @@
 				$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
 				if (mysql_num_rows($res) > 0) {
 				?>
-				<span>or</span>
-				<select onChange="if (selectedIndex) add_tag(options[selectedIndex].value);" style="width: 100px;">
+				<span style="padding-left:28px;">or</span>
+				<select id="wgtag" onChange="if (selectedIndex) add_tag(options[selectedIndex].value);" style="width: 200px;">
 					<option value="" selected disabled>(select...)</option>
 					<?php		while ($row = mysql_fetch_row($res)) {	?>
 						<option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
@@ -539,23 +552,69 @@
 				<?php
 					}
 			?>
-			<?php
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('tag');" class="button" title="Add to Search">Add</button>
+		</div>
+
+		<div class="advanced-search-row">
+			<label>Fields:</label>
+			<div style="width:200px;display:inline-block;text-align:right;">Title (the full title of the record):</div>
+			<span>contains</span><input name=title id=title onChange="update(this);" onKeyPress="return keypress(event);">
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('title');" class="button" title="Add to Search">Add</button>
+		</div>
+		<div class="advanced-search-row">
+			<div style="width:313px;display:inline-block;text-align:right;">URL (the hyperlink for the record):</div>
+			<span>contains</span><input name=url id=url onChange="update(this);" onKeyPress="return keypress(event);">
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('url');" class="button" title="Add to Search">Add</button>
+		</div>
+
+		<div class="advanced-search-row">
+			<label>&nbsp;</label>
+			<select name=fieldtype id=fieldtype onChange="update(this);">
+					<option value="" style="font-weight: bold;">Any field</option>
+					<optgroup id="rectype-specific-fields" label="rectype specific fields" style="display: none;"></optgroup>
+					<optgroup label="Generic fields">
+						<?php
+							$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
+							while ($row = mysql_fetch_assoc($res)) {
+							?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+							<?php	}	?>
+					</optgroup>
+			</select>
+			<span>contains</span><input id=field name=field onChange="update(this);" onKeyPress="return keypress(event);" style="width: 200px;">
+			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('field');" class="button" title="Add to Search">Add</button>
+		</div>
+
+<!--
+		<div class="advanced-search-row">
+			<label for="notes">Notes:</label>
+			<input id=notes name=notes onChange="update(this);" onKeyPress="return keypress(event);">
+		</div>
+-->
+
+		<?php
 				$groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='workgroup' order by ".GROUPS_NAME_FIELD);
 				if ($groups  &&  count($groups) > 0) {
 				?>
-				<span>Owned&nbsp;by:</span><select name="owner" id="owner" onChange="update(this);" style="width: 100px;">
+		<div class="advanced-search-row">
+				<label for="user">Owned&nbsp;by:</label>
+				<select name="owner" id="owner" onChange="update(this);" style="width:200px;">
 					<option value="" selected="selected">(any owner or ownergroup)</option>
 					<option value="&quot;<?= get_user_username()?>&quot;"><?= get_user_name()?></option>
 					<?php	foreach ($groups as $id => $name) { ?>
 						<option value="&quot;<?= htmlspecialchars($name) ?>&quot;"><?= htmlspecialchars($name) ?></option>
 						<?php	} ?>
 				</select>
+				<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('owner');" class="button" title="Add to Search">Add</button>
+		</div>
 				<?php
 					}
-			?>
-		</div>
+		?>
+
+
 		<div class="advanced-search-row">
 			<label for="user">Bookmarked&nbsp;by:</label>
+			<input onChange="refilter_usernames()" onKeyPress="invoke_refilter()" value="(search for a user)" id=user_search onFocus="if (value == defaultValue) { value = ''; }">
+			<span style="padding-left:15px;">then</span>
 			<select name="user" id="user" onChange="style.color = 'black'; update(this);" onkeypress="return keypressRedirector(event)">
 				<option value="" selected="selected">(matching users)</option>
 			</select>
@@ -567,14 +626,11 @@
 					}
 				?>
 			</select>
+			<button type="button" style="visibility:visible; float:right;" onClick="add_to_search('user');" class="button" title="Add to Search">Add</button>
+			<!--
 			<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
-			<input onChange="refilter_usernames()" onKeyPress="invoke_refilter()" value="(search for a user)" id=user_search onFocus="if (value == defaultValue) { value = ''; }">
 			<span style="color: green;">Type name to find users</span>
-		</div>
-
-		<div class="advanced-search-row" style="text-align:right; padding:20px 0 0 0">
-			<button type="button" onClick="clear_fields(); return false;" style="margin-right:10px" class="button">Clear</button>
-			<button type="button" onClick="do_search();" class="button">Search</button>
+			-->
 		</div>
 
 	</body>

@@ -305,7 +305,6 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 }
 .input-row div.input-cell {
 	vertical-align:baseline;
-	max-width:450px;
 }
 .input-row label {
 	display:inline-block

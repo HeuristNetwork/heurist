@@ -529,10 +529,10 @@ div#notes {
 }
 div.input-row div.input-cell div#relations-tbody {
 	width:100% !important;
-	display:block;
+	display:table-cell;
 }
 div.input-row div.input-cell div#relations-tbody div.relation {
-	display:block;
+	display:table-cell; /* ARTEM: was block!!!! */
 }
 div#relations-tbody {
 	display: inline-block;
@@ -611,7 +611,7 @@ div.temporal-div input.temporal-button:hover {
 	text-align: right;
 	color: #6A7C99;
 	min-width:150px;
-	display:inline-block;
+	display:table-cell;
 }
 /* ARTEM: this is mess
 .input-row div {
@@ -682,9 +682,8 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	box-shadow:0 0 4px #6A7C99;
 }
 
-.input-cell {
-	/* ARTEM width:100%;*/
-	display:inline-block;
+.input-cell{
+	display:table-cell;
 }
 .input-cell .date-div * {
 	vertical-align: middle;

@@ -767,7 +767,7 @@ if (!top.Relationship) {
 			a.appendChild(document.createTextNode("add more ..."));
 		} else {
 			addImg.title = "Add a relationship";
-			a.appendChild(document.createTextNode("Add a relationship 102 "+this.relationships.length));
+			a.appendChild(document.createTextNode("Add a relationship")); //debug 102 "+this.relationships.length));
 		}
 		a.style.textDecoration = "none";
 		a.onclick = function(rtypes, dtID) { return function() {
