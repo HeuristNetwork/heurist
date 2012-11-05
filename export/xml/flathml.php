@@ -631,10 +631,10 @@ function outputRecords($result) {
 
 
 function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = null) {
-	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT, 
-            $USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, 
-            $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs;
-            
+	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,
+			$USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT,
+			$relTrgDT, $relTypDT, $relSrcDT, $selectedIDs;
+
 	$record = $recordInfo['record'];
 	$depth = $recordInfo['depth'];
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
@@ -655,7 +655,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 	}
 /*****DEBUG****///if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
 	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable'),
-                'selected' => (in_array($record['rec_ID'],$selectedIDs)?'yes':'no') ));
+			'selected' => (in_array($record['rec_ID'],$selectedIDs)?'yes':'no') ));
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
 		closeTag('record');
@@ -857,6 +857,9 @@ function makeFileContentNode($file){
 		$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$xml);
 		//embedding so remove any DOCTYPE  TODO saw need to validate first then this is fine. also perhaps attribute with type and ID
 		$content = preg_replace("/\<\!DOCTYPE[^\[]+\s*\[\s*(?:(?:\<--)?\s*\<[^\>]+\>\s*(?:--\>)?)*\s*\]\>/","",$content,1);
+		if (preg_match("/\<\!DOCTYPE/",$content)){
+			$content = preg_replace("/\<\!DOCTYPE[^\>]+\>/","",$content,1);
+		}
 		if ($content) {
 			makeTag('content',array("type" => "xml"),$content,true,false);
 		}
@@ -921,7 +924,7 @@ function loadRemoteURLContent($url) {
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 		echo "$error ($code)" . " url = ". $url;
 		return false;
-	} else {
+	} else {//TODO: check for valid html error page returned.
 		return $data;
 	}
 }

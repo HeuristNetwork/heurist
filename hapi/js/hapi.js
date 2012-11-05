@@ -1880,9 +1880,9 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 			// related values are given as well; enums is an array of string-string pairs
 			for (i=0; i < enums.length; ++i) {
 			_enums.push(enums[i][1]);
-			_enumsMap[("" + enums[i][1]).toLowerCase()] = enums[i][1];
+			_enumsMap[("" + enums[i][1]).toLowerCase()] = enums[i][1];//id or string to enum
 			_enumsMap["" + enums[i][0]] = enums[i][1];
-			_termsMap[("" + enums[i][1]).toLowerCase()] = enums[i][0];
+			_termsMap[("" + enums[i][1]).toLowerCase()] = enums[i][0];//string to term id
 			if (variety === "relationtype" && enums[i][2] && enums[i][3]){ // there is an inverse term
 				_relatedEnums[enums[i][0]] = enums[i][2];
 				_relatedEnums[enums[i][1]] = enums[i][3];
@@ -1912,8 +1912,8 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
 	this.getIdForEnumerationValue = function(value) { return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
 																			(_enumsMap[value] ? value : null)); };
-	this.getEnumerationValueFromId = function(id) { return (isNaN(id) ? (_termsMap[("" + id).toLowerCase()]? id :  null) :
-																			(_enumsMap[id] ? _enumsMap[id] : null)); };
+	this.getEnumerationValueFromId = function(id) { return (isNaN(id) ? (_enumsMap[("" + id).toLowerCase()] || null) :
+																			(_enumsMap[id] || null)); };
 
 
 

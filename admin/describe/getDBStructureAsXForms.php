@@ -193,7 +193,7 @@
 		switch ($ourtype)
 		{
 			case "blocktext":
-				return "text";
+				return "string";
 			case "date":
 			case "year":
 				return "date";
@@ -272,13 +272,13 @@
 
 			// output structure variables
 			$model = "<instance>\n".
-			"<fhml>".
+			"<fhml id=\"heuristscholar.org:$concept_id\" version=\"".date("Ymd")."\">\n".
 			"<database id=\"".HEURIST_DBID."\" urlBase=\"".HEURIST_URL_BASE."\">".HEURIST_DBNAME."</database>\n".
 			"<query depth=\"0\" db=\"".HEURIST_DBNAME."\" q=\"t:$rt_id\" />\n".
 			"<generatedBy userID=\"".get_user_id()."\">".get_user_name()."</generatedBy>\n".
 			"<createdBy/>\n".
 			"<deviceID/>\n".
-			"<dateStamp/>\n".
+			"<createTime/>\n".
 			"<uuid/>\n".
 			"<records count=\"1\">\n".
 			"<record depth=\"0\">\n".
@@ -288,11 +288,11 @@
 			"</type>\n".
 			"<nonce/>\n".
 			"<details>\n";
-			$bind ="<bind nodeset=\"createdBy\" type=\"string\" jr:preload=\"context\" jr:preloadParams=\"UserID\"/>\n".
-			"<bind nodeset=\"dateStamp\" type=\"dateTime\" jr:preload=\"timestamp\" jr:preloadParams=\"start\"/>\n".
+			$bind ="<bind nodeset=\"createdBy\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"username\"/>\n".
+			"<bind nodeset=\"createTime\" type=\"dateTime\" jr:preload=\"timestamp\" jr:preloadParams=\"start\"/>\n".
 			"<bind nodeset=\"deviceID\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"deviceid\"/>\n".
 			"<bind nodeset=\"uuid\" type=\"string\" readonly=\"true()\" calculate=\"uuid()\"/>\n".
-			"<bind nodeset=\"records/record/nonce\" type=\"string\" readonly=\"true()\" calculate=\"concat(/fhml/deviceID,'|',/fhml/dateStamp,'|',/fhml/uuid)\"/>\n";
+			"<bind nodeset=\"records/record/nonce\" type=\"string\" readonly=\"true()\" calculate=\"concat(/fhml/deviceID,'|',/fhml/createTime,'|',/fhml/uuid)\"/>\n";
 
 			$body = "<h:body>\n".
 					"<group appearance=\"field-list\">\n";
@@ -357,8 +357,9 @@
 					}
 				}
 
-				$model = $model."<dt$dt_id conceptID=\"$dt_conceptid\" type=\"$fieldTypeName\" name=\"$fieldName\">".($defaultValue? htmlentities($defaultValue):"")."</dt".$dt_id.">\n";
-
+				if ($fieldtype != "groupbreak") {
+					$model = $model."<dt$dt_id conceptID=\"$dt_conceptid\" type=\"$fieldTypeName\" name=\"$fieldName\">".($defaultValue? htmlentities($defaultValue):"")."</dt".$dt_id.">\n";
+				}
 				if($rt_dt[$rid['rst_RequirementType']]=='required'){
 					$isrequired = 'required="true()"';
 				}else if($rt_dt[$rid['rst_RequirementType']]=='forbidden') {
@@ -392,7 +393,9 @@
 							($fieldsLeft? $groupSeparator : "");
 				$atGroupStart = false;// past detection code so
 
-				$bind = $bind."<bind nodeset=\"records/record/details/dt$dt_id\" type=\"$fieldtype\" $isrequired $constraint/>\n";
+				if ($fieldtype != "groupbreak") {
+					$bind = $bind."<bind nodeset=\"records/record/details/dt$dt_id\" type=\"$fieldtype\" $isrequired $constraint/>\n";
+				}
 
 				if ($isRepeatable){
 					$body .= $groupRepeatHdr;
@@ -492,9 +495,9 @@
 	function createRecordLookup($rtIDs) {
 		$emptyLookup = "<item>\n".
 		"<label>\"no records found for rectypes '$rtIDs'\"</label>\n".
-		"<value></value>\n".
+		"<value>0</value>\n".
 		"</item>\n";
-		$recs = mysql__select_assoc("Records","rec_ID","rec_Title","rec_RecTypeID in ($rtIDs)");
+		$recs = mysql__select_assoc("Records","rec_ID","rec_Title","rec_RecTypeID in ($rtIDs) order by rec_Title");
 		if (!count($recs)){
 			return $emptyLookup;
 		}
@@ -503,7 +506,7 @@
 			if ($recTitle && $recTitle != ""){
 				$ret = $ret."<item>\n".
 				"<label>\"$recTitle\"</label>\n".
-				"<value>\"$recID\"</value>\n".
+				"<value>$recID</value>\n".
 				"</item>\n";
 			}
 		}
@@ -543,7 +546,7 @@
 
 			$res = $res."<item>\n".
 			"<label>\"$termName\"</label>\n".
-			"<value>\"$termCode\"</value>\n".
+			"<value>$termCode</value>\n".
 			"</item>\n";
 		}
 		return $res;

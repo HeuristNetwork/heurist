@@ -94,10 +94,12 @@
 		<script>
 			var bibID =(top.HEURIST.parameters["recID"]? top.HEURIST.parameters["recID"] :
 							(window.location.search.match(/recID=(\d+).*$/)? window.location.search.match(/recID=(\d+).*$/)[1] : ""));
-			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:
-							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "");
+			var dbname = top.HEURIST.getQueryVar("db");
+			if (!dbname) {
+					dbname = top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "";
+			}
 
-			var bugReportURL = top.HEURIST.baseURL + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+			var bugReportURL = top.HEURIST.baseURL + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+dbname;
 
 			var queryStr = "",
 				recordEvent = "record";
@@ -109,7 +111,7 @@
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
 			if ( queryStr) {
-				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+database+"&"+queryStr);
+				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr);
 			}
 		</script>
 		<script>
@@ -125,17 +127,17 @@
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
 					// Load that page (and make a best effort to stop this one from continuing)
-					window.location.replace("?recID=" + rec.replacedBy +"&db="+database);
+					window.location.replace("?recID=" + rec.replacedBy +"&db="+dbname);
 				}
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+database+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
+					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
 						if (! context) return;
 						document.getElementById("search-nav").innerHTML =
 						"<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
 						"<div>" +
-						(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
-						(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
+						(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
+						(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
 						"<div style=\"clear:both\"></div></div>";
 					});
 				}
@@ -568,7 +570,7 @@
 					top.HEURIST.edit.unchanged(eachName);
 				}
 
-				top.location.replace(top.HEURIST.baseURL+"records/edit/editRecord.html?db="+database+"&recID="+choice.details.id);
+				top.location.replace(top.HEURIST.baseURL+"records/edit/editRecord.html?db="+dbname+"&recID="+choice.details.id);
 			}
 		});
 	}
