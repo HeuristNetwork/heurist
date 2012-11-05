@@ -2561,9 +2561,13 @@ top.HEURIST.search = {
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
+
+						innerHTML += '<nobr><a href="#" onclick="{top.HEURIST.search.executeQueryByTag(\''+top.HEURIST.workgroups[wg_ID].name+'\',\''+tags[j]+'\');}">'+ tags[j] + '</a></nobr>';
+						/* old way
 						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" +
 						top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + '\"'+
 						_db + "'>" + tags[j] + "</a></nobr>";
+						*/
 					}
 				}
 
@@ -2689,10 +2693,14 @@ top.HEURIST.search = {
 		top.HEURIST.search.fillInSavedSearches(); //update ui
 	},
 
-	executeQueryByTag: function(tag) {
+	executeQueryByTag: function(wg, tag) {
 		if(!top.HEURIST.util.isnull(tag)){
 			//var kwd = encodeURIComponent(tag);
-			top.HEURIST.search.executeQuery('?ver=1&w=bookmark&q=tag:"' + tag + '"&label=Tag "'+tag+'"');
+			var tagval = tag;
+			if(wg){
+				tagval = wg + '\\' + tagval;
+			}
+			top.HEURIST.search.executeQuery('?ver=1&w='+(wg?'all':'bookmark')+'&q=tag:"' +tagval+ '"&label=Tag "'+tag+'"');
 		}
 	},
 
@@ -4347,9 +4355,9 @@ top.HEURIST.search = {
 
 			for (i = 0; i < tags.length; ++i) {
 				//kwd = encodeURIComponent(tags[i]);
-				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
-				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
-				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", tags[i]] } });
+				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(null,\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
+				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", null, tags[i]] } });
+				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", null, tags[i]] } });
 			}
 		}else{
 			innerHTML = "<li>No tags defined</li>";

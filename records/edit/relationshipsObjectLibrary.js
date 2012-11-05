@@ -31,23 +31,6 @@ if (!top.Relationship) {
 		this.tr = this.document.createElement("div");
 		this.tr.className = "relation";
 
-		var deleteTd = this.tr.appendChild(this.document.createElement("div"));
-		deleteTd.className = "delete";
-		deleteTd.title = "Delete this relationship";
-		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
-		deleteTd.onclick = function() {
-			thisRef.remove();
-
-			if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
-					thisRef.manager.addOtherTd.style.display = 'inline-block';
-			}
-		};
-		var editTd = this.tr.appendChild(this.document.createElement("div"));
-		editTd.className = "edit";
-		editTd.title = "Edit this relationship";
-		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
-		editTd.onclick = function() { thisRef.edit(); };
-
 		this.relSpan = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.relSpan.parentNode.className = "rel";
 		this.relSpan.appendChild(this.document.createTextNode(relationshipRec.relTerm));
@@ -60,7 +43,27 @@ if (!top.Relationship) {
 	//	this.ellipsesTd1.className = "ellipses";
 	//	this.ellipsesTd1.innerHTML = "&nbsp;...";
 
-		this.datesTd = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
+		var deleteTd = this.tr.appendChild(this.document.createElement("div"));
+		deleteTd.className = "delete";
+		deleteTd.title = "Delete this relationship";
+		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
+		deleteTd.onclick = function() {
+			thisRef.remove();
+
+			/* 2012-11-05
+			if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
+					thisRef.manager.addOtherTd.style.display = 'inline-block';
+			}*/
+		};
+		var editTd = this.tr.appendChild(this.document.createElement("div"));
+		editTd.className = "edit";
+		editTd.title = "Edit this relationship";
+		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
+		editTd.onclick = function() { thisRef.edit(); };
+
+		var optionalTd = this.tr.appendChild(this.document.createElement("div"));
+
+		this.datesTd = optionalTd.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.datesTd.parentNode.className = "dates";
 		if (relationshipRec.startDate) {
 			this.datesTd.appendChild(this.document.createTextNode(relationshipRec.startDate));
@@ -69,7 +72,7 @@ if (!top.Relationship) {
 			}
 		}
 
-		this.notesField = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
+		this.notesField = optionalTd.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.notesField.parentNode.className = "notes-field";
 		this.notesField.appendChild(this.document.createTextNode(relationshipRec.notes || ""));
 
@@ -158,15 +161,23 @@ if (!top.Relationship) {
 			};
 		}
 
-		this.div = parentElement.appendChild(this.document.createElement("fieldset"));
-		this.div.className = "relation editable reminder";
+		var tbody;
 
-		this.header = this.div.appendChild(this.document.createElement("legend"));
-		//this.header.className = "header";
-		//this.header.style.marginBottom = "0.5ex";
-		this.header.appendChild(this.document.createTextNode("Add new relationship"));
+		if(thisRef.manager.needAddToAggregation){
+			this.div = parentElement.appendChild(this.document.createElement("fieldset"));
+			this.div.className = "relation editable reminder";
 
-		var tbody = this.div.appendChild(this.document.createElement("div"));
+			this.header = this.div.appendChild(this.document.createElement("legend"));
+			//this.header.className = "header";
+			//this.header.style.marginBottom = "0.5ex";
+			this.header.appendChild(this.document.createTextNode("Add new relationship"));
+		}else{
+			this.div = parentElement.appendChild(this.document.createElement("div"));
+			//tbody = parentElement.appendChild(this.document.createElement("div"));
+		}
+		tbody = this.div.appendChild(this.document.createElement("div"));
+
+
 		tbody.className = "resource";
 
 	/*	var tr = tbody.appendChild(this.document.createElement("div"));
@@ -292,13 +303,10 @@ if (!top.Relationship) {
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
 
 
-		//tr = tbody.appendChild(this.document.createElement("div"));
-		//ART tr.className = "input-row";
-		//ART td = tr.appendChild(this.document.createElement("div"));
-		//ART td.className = "input-header-cell";
 		td = tr.appendChild(this.document.createElement("div"));
 		td.className = "input2-header-cell";
 		td.style.padding = "0px 10px 0px 10px ";
+
 
 		var saveButton = this.document.createElement("input");
 		saveButton.type = "button";
@@ -310,34 +318,54 @@ if (!top.Relationship) {
 		td.appendChild(saveButton);
 
 
-		var cancelButton = this.document.createElement("input");
-		cancelButton.type = "button";
-		cancelButton.value = "Cancel";
-		cancelButton.onclick = function() {
+		if(thisRef.manager.needAddToAggregation){
+			var cancelButton = this.document.createElement("input");
+			cancelButton.type = "button";
+			cancelButton.value = "Cancel";
+			cancelButton.onclick = function() {
 
-			if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
-					thisRef.manager.addOtherTd.style.display = 'inline-block';
-			}
+				/* 2012-11-05
+				if(thisRef.manager.addOtherTd && !thisRef.manager.needAddToAggregation){
+						thisRef.manager.addOtherTd.style.display = 'inline-block';
+				}
+				*/
 
-			thisRef.remove();
-		};
+				thisRef.remove();
+			};
 
-		td.appendChild(cancelButton);
+			td.appendChild(cancelButton);
+		}
 
 		// insert a div for optional items
 		opt = tbody.appendChild(this.document.createElement("div"));
 		opt.className = "resource optional";
 
-		tr = opt.appendChild(this.document.createElement("div"));
-		tr.className = "input-row optional";
-
-		td = tr.appendChild(this.document.createElement("div"));
-		td.className = "section-header-cell optional";
 
 		// show hide optional fields
-		var a = td.appendChild(document.createElement("a"));
+		var optionalLink = this.document.createElement("a");
+		optionalLink.href = "#";
+		var optionalLinkImg = optionalLink.appendChild(document.createElement("img"));
+		optionalLink.appendChild(this.document.createTextNode("Optional Fields"));
+		optionalLink.style.textDecoration = "none";
+		optionalLink.style.background = "none";
+		optionalLink.title = "Optional Fields";
+		//td.appendChild(optionalLink);
+
+		if(thisRef.manager.needAddToAggregation){
+			tr = opt.appendChild(this.document.createElement("div"));
+			tr.className = "input-row optional";
+			td = tr.appendChild(this.document.createElement("div"));
+			td.className = "section-header-cell optional";
+			td.appendChild(optionalLink);
+		}else{
+			td.insertBefore(optionalLink, saveButton);
+		}
+
+
+		/*var a = td.appendChild(document.createElement("a"));
 		a.href = "#";
 		a.innerHTML = "Optional Fields";
+		a.onclick = */
 
 		opt = opt.appendChild(this.document.createElement("div"));
 		var isvisible = top.HEURIST.util.getDisplayPreference("relationship-optional-fields");
@@ -345,13 +373,16 @@ if (!top.Relationship) {
 			isvisible = (isvisible=="true");
 		}
 		opt.style.display = (isvisible)?"block":"none";
+		optionalLinkImg.src = top.HEURIST.basePath +"common/images/"+((isvisible)?"tdown":"tright")+".gif";
 
-		a.onclick = function(opt)
+		optionalLink.onclick = function(opt)
 					{ return function() {
 							if(opt.style.display == "block"){
+								optionalLinkImg.src = top.HEURIST.basePath +"common/images/tright.gif";
 								opt.style.display = "none";
 							}else{
 								opt.style.display = "block";
+								optionalLinkImg.src = top.HEURIST.basePath +"common/images/tdown.gif";
 							}
 							top.HEURIST.util.setDisplayPreference("relationship-optional-fields", (opt.style.display == "block"));
 
@@ -359,6 +390,7 @@ if (!top.Relationship) {
 						}
 					}(opt);
 		//td.appendChild(this.document.createTextNode("Optional Fields"));
+
 
 		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE'] &&
 										top.HEURIST.magicNumbers['RT_INTERPRETATION']) {
@@ -382,6 +414,7 @@ if (!top.Relationship) {
 		td.className = "input-header-cell";
 		td.appendChild(this.document.createTextNode("Validity"));
 		td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input-cell";
 
 		this.startDate = td.appendChild(this.document.createElement("input"));
 		this.startDate.className = "in";
@@ -403,6 +436,7 @@ if (!top.Relationship) {
 		td.className = "input-header-cell";
 		td.appendChild(this.document.createTextNode("Description"));
 		td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input-cell";
 		this.description = td.appendChild(this.document.createElement("input"));
 		this.description.value = "Relationship";
 		this.description.className = "in";
@@ -413,6 +447,7 @@ if (!top.Relationship) {
 		td.className = "input-header-cell";
 		td.appendChild(this.document.createTextNode("Notes"));
 		td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input-cell";
 		this.notes = td.appendChild(this.document.createElement("textarea"));
 		this.notes.className = "in";
 	};
@@ -744,15 +779,6 @@ if (!top.Relationship) {
 		addOtherTd.style.paddingTop = "5px";
 
 
-		if (needAddToAggregation || this.relationships.length > 0){
-			//if on time of creation there is relations - hide this element - aplicable for main editRecord BibDetailRelationMarker
-			addOtherTd.style.display = "none";
-		}else{
-			addOtherTd.style.display = "inline-block";
-		}
-
-
-
 		//addOtherTd.colSpan = 7;
 		addOtherTd.id = "addRelationshipLink";
 		var a = addOtherTd.appendChild(document.createElement("a"));
@@ -793,7 +819,20 @@ if (!top.Relationship) {
 
 			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
 
+		addOtherTd.addnewlink = a;
+
+		if (!needAddToAggregation){// || this.relationships.length > 0){
+			//if on time of creation there is relations - hide this element - aplicable for main editRecord BibDetailRelationMarker
+			addOtherTd.style.display = "none";
+		}else{
+			addOtherTd.style.display = "inline-block";
+		}
+
 		this.parentElement.appendChild(addOtherTd);
+
+		if (!needAddToAggregation && this.relationships.length < 1){
+			a.click();
+		}
 
 		//IJ asked to add special link for aggregation relationship ----------------
 
@@ -882,8 +921,8 @@ if (!top.Relationship) {
 	}
 
 	top.RelationManager.prototype.allowAddNew = function () {
-		this.addOtherTd.style.display = 'inline-block';
-		//this.addOtherTd.style.backgroundColor= '#00ddff';
+		this.addOtherTd.addnewlink.click();
+		//2012-11-05  this.addOtherTd.style.display = 'inline-block';
 	}
 
 	top.RelationManager.prototype.saveAllOpen = function () {

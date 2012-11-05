@@ -489,10 +489,10 @@ div#notes {
 	border-bottom: 1px solid RGBA(100,100,100,0.2);
 }
 .relation-title {	margin:20px 0 0 0;}
-.relation {display:table}
+
 .relation > div {
 	display: table-cell;
-	vertical-align: middle;
+	vertical-align: top;
 }
 /*ARTEM  .relation div div {display:inline-block} */
 
@@ -503,11 +503,11 @@ div#notes {
 	padding:0 2ex 0 0;
 }
 .relation div.rel > div {width:20ex}
-.relation div.title {width:100%}
+.relation div.title {min-width:200px;}
 .resource .input-row {
 	display:block;
 	width:100%;
-	border-bottom-color: RGBA(100,100,100,0.1);
+	/*border-bottom-color: RGBA(100,100,100,0.1);*/
 }
 .resource .input-cell {width:80%}
 .relation.editable.reminder {margin:10px 0 0 0;}
@@ -532,7 +532,7 @@ div.input-row div.input-cell div#relations-tbody {
 	display:table-cell;
 }
 div.input-row div.input-cell div#relations-tbody div.relation {
-	display:table-cell; /* ARTEM: was block!!!! */
+	display:table; /* ARTEM: was block!!!! */
 }
 div#relations-tbody {
 	display: inline-block;

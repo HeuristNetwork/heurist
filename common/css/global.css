@@ -583,7 +583,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;t
 .relation-title a{color: #6A7C99;}
 .relation-title td {padding: 20px 0 5px 0;border-bottom: 1px solid #A4B4CB;   }
 .relation td {padding: 5px 0;border-bottom: 1px solid #A4B4CB;border-top: 1px solid #FFF;}
-.resource td{border: none;}.resource {background-color: RGBA(0,0,0,0.1);}
+/*ARTEM .resource td{border: none;}.resource {background-color: RGBA(0,0,0,0.1);} */
 .add_records_img {vertical-align: text-bottom;padding: 0 1ex 0 0;}
 *.openTools {position:absolute;right:5px;bottom:5px;z-index:11;cursor:pointer;height: 15px;width:28px;background-image: url("../images/cog.png");background-position: 0 0;}
 .openTools {position:absolute;left:40px;}
