@@ -12,6 +12,7 @@
 ?>
 
 <?php
+define('ISSERVICE',1);
 
 /* Provide a JavaScript file which loads the latest (or a given) version of the Heurist API.
  * The stable version is supplied by default;

@@ -10,6 +10,8 @@
 	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
  * @todo
 */
+define('ISSERVICE',1);
+
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 header("Content-type: text/javascript");

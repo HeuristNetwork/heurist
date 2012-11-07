@@ -21,7 +21,7 @@
  *
  * Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
  */
-
+define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 require_once(dirname(__FILE__)."/../connect/applyCredentials.php");

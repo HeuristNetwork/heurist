@@ -35,7 +35,7 @@
 
 	-->*/
 
-
+define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");

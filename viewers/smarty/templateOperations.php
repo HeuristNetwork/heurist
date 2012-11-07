@@ -13,6 +13,8 @@
  * @todo
  **/
 // called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+define('ISSERVICE',1);
+
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -22,6 +24,7 @@ if (! is_logged_in()) {
 	//header('Content-type: text/html; charset=utf-8');
 	return;
 }
+
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
 
@@ -46,7 +49,6 @@ if($mode){ //opeartion with template files
 			getTemplate($template_file);
 		break;
 		case 'save':
-			header("Content-type: text/javascript");
 			//get template body from request (for execution from editor)
 			$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
 			//add extension and save in default template directory

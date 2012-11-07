@@ -77,7 +77,7 @@
 		<div class="input-cell" id="ugr_ID"></div>
 	</div>
 
-    <div class="input-row required">
+	<div class="input-row required">
 		<div class="input-header-cell" for="ugr_FirstName">Given name</div>
 		<div class="input-cell"><input id="ugr_FirstName" style="width:50;" maxlength="40" /></div>
 	</div>
@@ -90,80 +90,80 @@
 		<div class="input-header-cell" for="ugr_eMail">Email</div>
 		<div class="input-cell"><input id="ugr_eMail" style="width:200;" maxlength="100" onKeyUp="document.getElementById('ugr_Name').value=this.value;"/></div>
 	</div>
-    <div class="input-row required">
-        <div class="input-header-cell" for="ugr_Name">Login name</div>
-        <div class="input-cell"><input id="ugr_Name" style="width:200;" maxlength="63" /></div>
-    </div>
-    <div class="input-row required">
-        <div class="input-header-cell" for="ugr_Password">Password</div>
-        <div class="input-cell"><input id="ugr_Password" type="password" style="width:50;" maxlength="40" />&nbsp;If editing, leave blank for no change
-            <div class="help prompt help1" >
-                <div style="color:red;">Warning: non-encrypted, please don't use an important password such as institutional login</div>
-            </div>
-            </div>
-    </div>
-    <div class="input-row required">
-        <div class="input-header-cell" for="ugr_Password2">Repeat password</div>
-        <div class="input-cell"><input id="ugr_Password2" type="password" style="width:50;" maxlength="40" />
-        </div>
-    </div>
-    <div class="input-row required">
-        <div class="input-header-cell" for="ugr_Organisation">Institution/company</div>
-        <div class="input-cell"><input id="ugr_Organisation" style="width:200;" maxlength="120" />
-            <div class="help prompt help1">
-                <div>Enter 'None' if not affiliated with an institution or company </div>
-            </div>
-        </div>
-    </div>
-    <div class="input-row required">
-        <div class="input-header-cell"  style="vertical-align:top" for="ugr_Interests">Research Interests</div>
-        <div class="input-cell"><textarea id="ugr_Interests" rows="2" style="width:420;" maxlength="255"></textarea>
-            <div class="help prompt help1">
-                <div>Enter a concise description (up to 250 characters) of your research interests</div>
-            </div>
-        </div>
-    </div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Name">Login name</div>
+		<div class="input-cell"><input id="ugr_Name" style="width:200;" maxlength="63" /></div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Password">Password</div>
+		<div class="input-cell"><input id="ugr_Password" type="password" style="width:50;" maxlength="40" />&nbsp;If editing, leave blank for no change
+			<div class="help prompt help1" >
+				<div style="color:red;">Warning: non-encrypted, please don't use an important password such as institutional login</div>
+			</div>
+			</div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Password2">Repeat password</div>
+		<div class="input-cell"><input id="ugr_Password2" type="password" style="width:50;" maxlength="40" />
+		</div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Organisation">Institution/company</div>
+		<div class="input-cell"><input id="ugr_Organisation" style="width:200;" maxlength="120" />
+			<div class="help prompt help1">
+				<div>Enter 'None' if not affiliated with an institution or company </div>
+			</div>
+		</div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell"  style="vertical-align:top" for="ugr_Interests">Research Interests</div>
+		<div class="input-cell"><textarea id="ugr_Interests" rows="2" style="width:420;" maxlength="255"></textarea>
+			<div class="help prompt help1">
+				<div>Enter a concise description (up to 250 characters) of your research interests</div>
+			</div>
+		</div>
+	</div>
 
-     <div id="div-inpit-ugr_Enabled" class="input-row">
-         <div class="input-header-cell" for="ugr_Enabled">Enabled:</div>
-         <div class="input-cell"><input id="ugr_Enabled" type="checkbox"/>
-             <div class="help prompt help1">
-                 <div>Check to enable the user, unchecked users will not be able to log in</div>
-             </div>
-         </div>
-     </div>
+	 <div id="div-inpit-ugr_Enabled" class="input-row">
+		 <div class="input-header-cell" for="ugr_Enabled">Enabled:</div>
+		 <div class="input-cell"><input id="ugr_Enabled" type="checkbox"/>
+			 <div class="help prompt help1">
+				 <div>Check to enable the user, unchecked users will not be able to log in</div>
+			 </div>
+		 </div>
+	 </div>
 
-     <div id="div-inpit-ugr_IsModelUser" class="input-row">
-         <div class="input-header-cell" for="ugr_IsModelUser">Model user</div>
-         <div class="input-cell"><input id="ugr_IsModelUser" type="checkbox"/>
-             <div class="help prompt help1">
-                 <div>If checked, user's tags, searches and bookmarks will appear in My Profile &gt; Load Profiles</div>
-             </div>
-         </div>
-     </div>
-    <!-- OPTIONAL FIELDS -->
-    <div id="optional" class="togglepnl"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Optional information</a>
-    <div id="options" class="hidden" style="background-color:#ffffff;">
+	 <div id="div-inpit-ugr_IsModelUser" class="input-row">
+		 <div class="input-header-cell" for="ugr_IsModelUser">Model user</div>
+		 <div class="input-cell"><input id="ugr_IsModelUser" type="checkbox"/>
+			 <div class="help prompt help1">
+				 <div>If checked, user's tags, searches and bookmarks will appear in My Profile &gt; Load Profiles</div>
+			 </div>
+		 </div>
+	 </div>
+	<!-- OPTIONAL FIELDS -->
+	<div id="optional" class="togglepnl"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Optional information</a>
+	<div id="options" class="hidden" style="background-color:#ffffff;">
 
-    <div class="input-row">
-        <div class="input-header-cell" style="vertical-align:top" for="ugr_IncomingEmailAddresses">Incoming email addresses</div>
-        <div class="input-cell"><textarea cols="200" id="ugr_IncomingEmailAddresses" rows="2" style="width:420;"></textarea>
-            <div class="help prompt help1">
-                <div>Comma-separated list of email addresses you may use to send email to the database<br>
-                    Email sent from these addresses may be harvested into database records</div>
-            </div>
-        </div>
-    </div>
+	<div class="input-row">
+		<div class="input-header-cell" style="vertical-align:top" for="ugr_IncomingEmailAddresses">Incoming email addresses</div>
+		<div class="input-cell"><textarea cols="200" id="ugr_IncomingEmailAddresses" rows="2" style="width:420;"></textarea>
+			<div class="help prompt help1">
+				<div>Comma-separated list of email addresses you may use to send email to the database<br>
+				    Email sent from these addresses may be harvested into database records</div>
+			</div>
+		</div>
+	</div>
 
-    <div class="input-row">
-        <div class="input-header-cell" style="vertical-align:top" for="ugr_TargetEmailAddresses">Outgoing email addresses</div>
-        <div class="input-cell"><textarea cols="200" id="ugr_TargetEmailAddresses" rows="2" style="width:420;"></textarea>
-            <div class="help prompt help1">
-                <div>Comma-separated list of email addresses to which you may want to send database records as email.
-                    This will be added to the default list for the database when choosing an email destination to which to email records.</div>
-            </div>
-        </div>
-    </div>
+	<div class="input-row">
+		<div class="input-header-cell" style="vertical-align:top" for="ugr_TargetEmailAddresses">Outgoing email addresses</div>
+		<div class="input-cell"><textarea cols="200" id="ugr_TargetEmailAddresses" rows="2" style="width:420;"></textarea>
+			<div class="help prompt help1">
+				<div>Comma-separated list of email addresses to which you may want to send database records as email.
+				    This will be added to the default list for the database when choosing an email destination to which to email records.</div>
+			</div>
+		</div>
+	</div>
 
 	<div class="input-row">
 		<div class="input-header-cell" for="ugr_Department">Department</div>
@@ -182,40 +182,40 @@
 		<div class="input-cell"><input id="ugr_Postcode" style="width:50;" maxlength="20" /></div>
 	</div>
 
-    <!--
-    <div class="input-row">
+	<!--
+	<div class="input-row">
 		<div class="input-header-cell" for="ugr_State">State</div>
 		<input id="ugr_State" style="width:50;" maxlength="40" />
-    </div>
-    <div class="input-row">
+	</div>
+	<div class="input-row">
 		<div class="input-header-cell" for="ugr_Postcode">Post/zipcode</div>
 		<input id="ugr_Postcode" style="width:50;" maxlength="20" />
-    </div>
-    -->
+	</div>
+	-->
 
 	 <!-- This field is really intended more for user groups-->
-     <div class="input-row" style="display: none;">
-         <div class="input-header-cell" style="vertical-align:top" for="ugr_Description">Description</div>
-         <div class="input-cell"><textarea cols="200" id="ugr_Description" rows="4" style="width:420;"></textarea>
-             <div class="help prompt help1">
-                 <div>Description of a workgroup, used in workgroup homepage<br>&nbsp;</div>
-             </div>
-         </div>
-     </div>
+	 <div class="input-row" style="display: none;">
+		 <div class="input-header-cell" style="vertical-align:top" for="ugr_Description">Description</div>
+		 <div class="input-cell"><textarea cols="200" id="ugr_Description" rows="4" style="width:420;"></textarea>
+			 <div class="help prompt help1">
+				 <div>Description of a workgroup, used in workgroup homepage<br>&nbsp;</div>
+			 </div>
+		 </div>
+	 </div>
 
-     <div class="input-row">
-         <div class="input-header-cell" style="vertical-align:top" for="ugr_URLs">Personal Website URLs</div>
-         <div class="input-cell"><textarea cols="200" id="ugr_URLs" rows="1" style="width:420;"></textarea></div>
-     </div>
+	 <div class="input-row">
+		 <div class="input-header-cell" style="vertical-align:top" for="ugr_URLs">Personal Website URLs</div>
+		 <div class="input-cell"><textarea cols="200" id="ugr_URLs" rows="1" style="width:420;"></textarea></div>
+	 </div>
 
-     <!-- TODO: THESE FIELDS NEED TO BE ACCESSIBLE ONLY TO DATABASE ADMINS -->
+	 <!-- TODO: THESE FIELDS NEED TO BE ACCESSIBLE ONLY TO DATABASE ADMINS -->
 
 
 	</div> <!-- optional div -->
 	</div>
 	<div style="padding-top: 5px">&nbsp;</div>
-    <div id="condition" class="togglepnl hidden"><a onMouseDown="$('#options2').slideToggle('fast'); $('#condition').toggleClass('show'); $('#options2').toggleClass('hidden');">Conditions</a>
-    <div id="options2" class="hidden" style="background-color:#ffffff;">
+	<div id="condition" class="togglepnl hidden"><a onMouseDown="$('#options2').slideToggle('fast'); $('#condition').toggleClass('show'); $('#options2').toggleClass('hidden');">Conditions</a>
+	<div id="options2" class="hidden" style="background-color:#ffffff;">
 	<br/>
 	<div>HEURIST is an experimental system maintained by the University of
 	Sydney, Arts eResearch and our funding is modest. By using the HEURIST
@@ -276,8 +276,8 @@
   </li>
 </ul>
 
-    </div> <!-- optional div -->
-    </div>
+	</div> <!-- optional div -->
+	</div>
 
 
 </div>
@@ -310,7 +310,7 @@ I have read and agree to the Terms and Conditions of Use above<br>
 	<span id="btn_view">
 		<input type="button" value="Close" onClick="window.close(null);" />
 	</span>
-    <br>&nbsp;<br>
+	<br>&nbsp;<br>
 </div>
 
 <script type="text/javascript">

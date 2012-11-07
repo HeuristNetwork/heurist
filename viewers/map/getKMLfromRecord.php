@@ -1,5 +1,7 @@
 <?php
 
+// ARTEM: TO REMOVE
+
 /*<!--
  * getKMLfromRecord.php
  *

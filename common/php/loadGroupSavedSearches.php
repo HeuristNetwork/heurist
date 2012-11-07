@@ -15,6 +15,7 @@
 
 /* Take a wg_id and fill in top.HEURIST.workgroups[wg_id].members with member details
    and top.HEURIST.workgroups[wg_id].savedSearches with workgroup saved search details */
+define('ISSERVICE',1);
 
 define("SAVE_URI", "disabled");
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant

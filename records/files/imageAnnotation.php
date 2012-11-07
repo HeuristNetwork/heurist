@@ -12,6 +12,9 @@
 	* @todo
 	**/
 
+	define('ISSERVICE',1);
+	define("SAVE_URI", "disabled");
+
 	require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
 	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

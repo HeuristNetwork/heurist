@@ -1,7 +1,7 @@
 <?php
 
 /**
- * saveURLasFile
+ * saveURLasFile.php
  * Downloads file from given URL and saves in uploaded-images.
  * Registers it in recUploadedFiles table
  *
@@ -19,6 +19,7 @@
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 /*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
 /*
@@ -60,7 +61,7 @@ function generate_thumbnail($sURL, $needConnect){
 
 	/*****DEBUG****///error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
 
-	$filesize = save_image($remote_path, $heurist_path);
+	$filesize = saveURLasFile($remote_path, $heurist_path);
 
 	/*****DEBUG****///error_log(">>>>>SAVED SIZE=".$filesize);
 
@@ -99,34 +100,6 @@ function save_image3($inPath, $outPath){
 	file_put_contents($outPath, file_get_contents($inPath));
 	return filesize($outPath);
 }
-
-function save_image($inPath, $outPath)
-{ //Download images from remote server
-
-	$ch = curl_init($inPath);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 100);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-	}
-
-    $rawdata=curl_exec($ch);
-
-    curl_close ($ch);
-    if(file_exists($outPath)){
-        unlink($outPath);
-    }
-    $fp = fopen($outPath,'x');
-    fwrite($fp, $rawdata);
-    fclose($fp);
-
-return filesize($outPath);
-}
-
 //
 //
 function getError($message) {

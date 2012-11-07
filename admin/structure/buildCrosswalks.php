@@ -37,11 +37,13 @@
 	// and/or download data from another instance.
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
+	/* ARTEM
 	if (!is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
-	}
+	}*/
 
 	// ------Administrative stuff ------------------------------------------------------------------------------------
 
@@ -67,9 +69,6 @@
 	global $errorCreatingTables;
 	$errorCreatingTables = FALSE;
 
-	// Deals with all the database connections stuff
-	mysql_connection_db_insert(DATABASE);
-
 	global $dbname;
 	global $tempDBName;
 
@@ -81,6 +80,9 @@
 		$dbname = DATABASE;
 		$isNewDB = false;
 		$tempDBName = "temp_".$dbname;
+		// Deals with all the database connections stuff
+		mysql_connection_db_insert(DATABASE);
+
 	} // existing database
 
 	/*****DEBUG****///error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
@@ -171,21 +173,11 @@
 			$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 		}
 /*****DEBUG****///error_log("source url ".print_r($source_url,true));
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return curl_exec output as string
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_NOBODY, 0);
-		curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);	  // timeout after ten seconds
-		curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	   // no more than 5 redirections
-		curl_setopt($ch, CURLOPT_URL,$source_url);
-		$data = curl_exec($ch);
-		$error = curl_error($ch);
-		if ($error || !$data || substr($data, 0, 6) == "unable") {
-			$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+		$data = loadRemoteURLContent($source_url);
+
+		if (!$data || substr($data, 0, 6) == "unable") {
+
 			mysql_connection_db_insert(DATABASE); // Use logged into DB
 			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
 			//unlock
@@ -202,21 +194,25 @@
 	$splittedData = split($startToken, $data);
 	$tableNumber =1;
 
-	preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+	if ($isExistingDB)
+	{
 
-	preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+		preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+
+		preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
 /*****DEBUG****///error_log("source ".print_r($sourceDBVersion,true));
 /*****DEBUG****///error_log("this  ".print_r($thisDBVersion,true));
 	// we ignore following test if creating a new database, because the current database version is irrelevant, the definition files determine the version created
 	// Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database rather than the current open database
-	if ($isExistingDB && !($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
-		echo "<p><strong>The source database $source_db_name ($sourceDBVersion[0]) is a different major/minor version from the current ".DATABASE." database (Vsn ".HEURIST_DBVERSION.
-		")</strong><p>One or other database will need updating to the same major/minor version #";
-		//unlock
-		mysql_connection_db_insert(DATABASE); // Use logged into DB
-		mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
-		mysql_query("DROP DATABASE IF EXIST `" . $tempDBName . "`"); // Delete temp database
-		exit();
+		if (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
+			echo "<p><strong>The source database $source_db_name ($sourceDBVersion[0]) is a different major/minor version from the current ".DATABASE." database (Vsn ".HEURIST_DBVERSION.
+			")</strong><p>One or other database will need updating to the same major/minor version #";
+			//unlock
+			mysql_connection_db_insert(DATABASE); // Use logged into DB
+			mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
+			mysql_query("DROP DATABASE IF EXIST `" . $tempDBName . "`"); // Delete temp database
+			exit();
+		}
 	}
 
 	function getNextDataSet($splittedData) { // returns and removes the first set of data between markers from $splitteddata
@@ -464,9 +460,9 @@
 	} else if(!$isNewDB){ // do crosswalking for exisitn database, no action for new database
 		require_once("createCrosswalkTable.php"); // offer user choice of fields to import
 		//		mysql_query("DROP DATABASE `" . $tempDBName . "`");
-		}
+		// TODO: Replace this line with centralised locking methodology
+		mysql_connection_db_insert(DATABASE); // Use logged into DB
+		$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
+	}
 
-	// TODO: Replace this line with centralised locking methodology
-	mysql_connection_db_insert(DATABASE); // Use logged into DB
-	$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
 ?>

@@ -11,6 +11,9 @@
 	* @package Heurist academic knowledge management system
 	* @todo
 	**/
+	define('ISSERVICE',1);
+
+
 	require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");

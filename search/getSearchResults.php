@@ -76,9 +76,9 @@
 		$fresh = !! @$args["f"];
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
+		/*****DEBUG****///print("QUERY:".$query);
 
 		$res = mysql_query($query);
-		/*****DEBUG****///error_log($query);
 
 		if (mysql_error()) {
 			error_log("queryError in getSearchResults -".mysql_error());

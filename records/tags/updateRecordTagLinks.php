@@ -13,7 +13,7 @@
  **/
 
 
-
+define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");

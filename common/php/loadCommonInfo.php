@@ -11,6 +11,7 @@
 
 
 	/* load some very basic HEURIST objects into top.HEURIST */
+	define('ISSERVICE',1);
 
 	// session_cache_limiter("private");
 

@@ -66,6 +66,7 @@
 	$rep_counter = null;
 	$rep_issues = null;
 	$currfile = null;
+	$mediaExts = null;
 
 		mysql_connection_db_overwrite(DATABASE);
 		if(mysql_error()) {
@@ -96,13 +97,13 @@
 
 		if(!array_key_exists('mode', $_REQUEST)) {
 
-			if(false && HEURIST_DBID==0){ //is not registered
+			if(HEURIST_DBID==0){ //is not registered
 
 				print "<p style=\"color:red\">Database must be registered to use FieldHelper sync function</p>";
 
 			}else{
 				// Find out which folders to parse for XML manifests
-				$query1 = "SELECT sys_MediaFolders from sysIdentification where sys_ID=1";
+				$query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where sys_ID=1";
 				$res1 = mysql_query($query1);
 				if (!$res1 || mysql_num_rows($res1) == 0) {
 					die ("<p><b>Sorry, unable to read the sysIdentification from the current databsae. Possibly wrong database format, please consult Heurist team");
@@ -112,10 +113,19 @@
 				$mediaFolders = $row1[0];
 				$dirs = explode(';', $mediaFolders); // get an array of folders
 
+				if($row1[1]==null){
+					$mediaExts = "jpg,jpeg,png,gif,doc,docx,mp4";
+					//array("jpg", "jpeg", "png", "gif", "doc", "docx", "mp4");
+				}else{
+					$mediaExts = $row1[1];
+					//$mediaExts = explode(',', $row1[1]);
+				}
+
 				if ($mediaFolders=="" || count($dirs) == 0) {
 					print ("<p><b>It seems that there are no media folders specified for this database</b>");
 				}else{
-					print "<p><b>Media folders for harvesting:</b> $mediaFolders<p>";
+					print "<p><b>Folders to scan :</b> $mediaFolders<p>";
+					print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 				}
 				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>".
 				"<img src='../../common/images/external_link_16x16.gif'>Set media folders</a><p>";
@@ -126,6 +136,7 @@
 					print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
 					print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 					print "<input name='media' value='$mediaFolders' type='hidden'>";
+					print "<input name='exts' value='$mediaExts' type='hidden'>";
 					print "<input type='submit' value='Continue' />";
 				}
 			}
@@ -159,6 +170,9 @@
 			print "<p>Now harvesting FieldHelper metadata into <b> ". HEURIST_DBNAME. "</b><br> ";
 
 			$dirs = explode(';', $mediaFolders); // get an array of folders
+
+			$mediaExts = $_REQUEST['exts'];
+			$mediaExts = explode(',', $mediaExts);
 
 			$rep_counter = 0;
 			$rep_issues = "";
@@ -245,7 +259,7 @@
 		*/
 		function doHarvestInDir($dir) {
 
-			global $rep_issues, $fieldhelper_to_heurist_map,
+			global $rep_issues, $fieldhelper_to_heurist_map, $mediaExts,
 			$geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
 
 			$rep_processed = 0;
@@ -515,8 +529,6 @@ XML;
 				$f_items = $fh_data->addChild("items");
 			}
 
-			$allowed_exts = array("jpg", "jpeg", "png", "gif", "doc", "docx", "mp4");
-
 			//for files in folder that are not specified in the directory
 			foreach ($all_files as $filename){
 				if(!($filename=="." || $filename==".." || is_dir($dir.$filename))){
@@ -529,7 +541,7 @@ XML;
 					$flleinfo = pathinfo($filename);
 
 					//checks for allowed extensions
-					if(in_array(strtolower($flleinfo['extension']),$allowed_exts))
+					if(in_array(strtolower($flleinfo['extension']),$mediaExts))
 					{
 
 						$details = array();

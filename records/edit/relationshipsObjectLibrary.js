@@ -310,7 +310,8 @@ if (!top.Relationship) {
 
 		var saveButton = this.document.createElement("input");
 		saveButton.type = "button";
-		saveButton.style.fontWeight = "bold";
+		//saveButton.style.fontWeight = "bold";
+		//saveButton.style.fontSize = "2ex";
 		saveButton.style.marginRight = "10px";
 		saveButton.value = "Add";// relationship";
 		saveButton.onclick = function() { thisRef.save(); };

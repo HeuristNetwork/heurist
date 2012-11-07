@@ -17,6 +17,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -907,28 +908,11 @@
 				}
 
 				if(false && $externalFile){
-					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
-					curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-					curl_setopt($ch, CURLOPT_NOBODY, 0);
-					curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-					curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-					curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-					if (defined("HEURIST_HTTP_PROXY")) {
-						curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-					}
+					//@todo - copy external file and save
+					$data = loadRemoteURLContent($filename);
 
-					curl_setopt($ch, CURLOPT_URL, $filename);
-					$data = curl_exec($ch);
-
-					$error = curl_error($ch);
-					if ($error) {
-						$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-						error_log("$error ($code)" . " url = ". $remote_url);
-						print "<div  style='color:red;'>Error $filename - $error. Can't register URL</div>";
+					if (!$data) {
+						print "<div  style='color:red;'>Error. Can't download $filename. Can't register URL</div>";
 						ob_flush();flush(); // flush to screen
 						return null;
 					}

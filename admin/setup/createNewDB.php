@@ -12,13 +12,9 @@
 	* a series of files with checks on each stage and cleanup code
 	*
 	* **/
+	define('NO_DB_ALLOWED',1);
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-
-	if(!is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-		return;
-	}
 ?>
 <html>
 	<head>
@@ -26,6 +22,7 @@
 		<title>Create New Heurist Database</title>
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
 	</head>
 	<style>
 		.detailType {width:180px !important}
@@ -83,6 +80,50 @@
 			}
 			return true;
 		}
+
+		function setUserPartOfName(){
+			var ele = document.getElementById("uname");
+			if(ele.value==""){
+				ele.value = document.getElementById("ugr_Name").value.substr(0,5);
+			}
+		}
+
+		function onBeforeSubmit(){
+<?php if(!is_logged_in()) { ?>
+
+			function __checkMandatory(field, label)
+			{
+
+				if(document.getElementById(field).value==="") {
+					alert(label+" is mandatory field");
+					document.getElementById(field).focus();
+					return true;
+				}else{
+					return false;
+				}
+			}
+
+			// check mandatory fields
+			if(
+				__checkMandatory("ugr_FirstName","First name") ||
+				__checkMandatory("ugr_LastName","Last name") ||
+				__checkMandatory("ugr_eMail","Email") ||
+				//__checkMandatory("ugr_Organisation","Institution/company") ||
+				//__checkMandatory("ugr_Interests","Research Interests") ||
+				__checkMandatory("ugr_Name","Login") ||
+				__checkMandatory("ugr_Password","Password")
+			){
+					return false;
+			}
+
+			if(document.getElementById("ugr_Password").value!==document.getElementById("ugr_Password2").value){
+					alert("Passwords are different");
+					document.getElementById("ugr_Password2").focus();
+					return false;
+			}
+<?php } ?>
+			return true;
+		}
 	</script>
 
 	<body class="popup" onload="hideProgress()">
@@ -115,7 +156,7 @@
 ?>
 		<div id="loading">
 					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
-					<strong><span id="divProgress">&nbspCreating database, please wait</span></strong>
+					<strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
 		</div>
 		<script type="text/javascript">showProgress();</script>
 <?php
@@ -135,8 +176,47 @@
 		</div>
 
 		<div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
-			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
+			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
+<?php if(!is_logged_in()) { ?>
+<div id="detailTypeValues" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 
+	<div style="padding-left:160px">
+		Define master user for new database
+	</div>
+
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_FirstName">Given name</div>
+		<div class="input-cell"><input id="ugr_FirstName" name="ugr_FirstName" style="width:50;" maxlength="40" /></div>
+	</div>
+
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_LastName">Family name</div>
+		<div class="input-cell"><input id="ugr_LastName" name="ugr_LastName" style="width:50;" maxlength="63" /></div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_eMail">Email</div>
+		<div class="input-cell"><input id="ugr_eMail" name="ugr_eMail" style="width:200;" maxlength="100" onKeyUp="document.getElementById('ugr_Name').value=this.value;"/></div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Name">Login name</div>
+		<div class="input-cell"><input id="ugr_Name" name="ugr_Name" style="width:200;" maxlength="63" onkeypress="{onKeyPress(event)}" onblur="{setUserPartOfName()}"/></div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Password">Password</div>
+		<div class="input-cell"><input id="ugr_Password" name="ugr_Password" type="password" style="width:50;" maxlength="40" />
+			<div class="help prompt help1" >
+				<div style="color:red;">Warning: non-encrypted, please don't use an important password such as institutional login</div>
+			</div>
+		</div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="ugr_Password2">Repeat password</div>
+		<div class="input-cell"><input id="ugr_Password2" type="password" style="width:50;" maxlength="40" />
+		</div>
+	</div>
+</div>
+<?php } ?>
+			<div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
 				<input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1" class="labelBold">Standard database</label>
 				<div style="padding-left: 38px;padding-bottom:10px">Gives an uncluttered database with essential record and field types<br />Recommended for general use</div>
 				<input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">Extended database</label>
@@ -146,19 +226,21 @@
 					You will become the owner and administrator of the new database.<br>
 					The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
 				(all databases created by this installation of the software will have the same prefix).</p>
-				<h3>Enter a name for the new database:</h3>
-                <div style="margin-left: 40px;">
-                    <!-- user name used as prefix -->
-                    <b><?= HEURIST_DB_PREFIX ?>
-                    <input type="text" maxlength="20" size="6" name="uname"  onkeypress="{onKeyPress(event)}"
-                    style="padding-left:3px; font-weight:bold;" value=<?=substr(get_user_username(),0,5)?> >
-                    _  </b>
+			</div>
+
+			<h3>Enter a name for the new database:</h3>
+			<div style="margin-left: 40px;">
+					<!-- user name used as prefix -->
+					<b><?= HEURIST_DB_PREFIX ?>
+					<input type="text" maxlength="20" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
+				    style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?substr(get_user_username(),0,5):'')?> >
+				    _  </b>
 					<input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
 					<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
-                </div>
+			</div>
 			</form>
-		</div>
+		</div> <!-- createDBForm -->
 <?
 	}
 
@@ -179,7 +261,9 @@
 
 
 	function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
-		global $newDBName, $isNewDB, $done, $isCreateNew, $isExtended;
+
+		global $newDBName, $isNewDB, $done, $isCreateNew, $isExtended,$errorCreatingTables;
+
 		$error = false;
 		$warning=false;
 
@@ -200,9 +284,9 @@
 			} // checking for current administrative user
 
 			// Create a new blank database
-            $newDBName = trim($_POST['uname']).'_';
-            if ($newDBName == '_') {$newDBName='';}; // don't double up underscore if no user prefix
-            $newDBName = $newDBName . trim($_POST['dbname']);
+		    $newDBName = trim($_POST['uname']).'_';
+		    if ($newDBName == '_') {$newDBName='';}; // don't double up underscore if no user prefix
+		    $newDBName = $newDBName . trim($_POST['dbname']);
 			$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
 			// Avoid illegal chars in db name
@@ -289,24 +373,44 @@
 			}
 
 			// Get and clean information for the user creating the database
-			mysql_connection_db_insert(DATABASE);
-			$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
-			$details = mysql_fetch_row($query);
-			$longName = mysql_escape_string($details[0]);
-			$firstName = mysql_escape_string($details[1]);
-			$lastName = mysql_escape_string($details[2]);
-			$eMail = mysql_escape_string($details[3]);
-			$name = mysql_escape_string($details[4]);
-			$password = mysql_escape_string($details[5]);
-			$department = mysql_escape_string($details[6]);
-			$organisation = mysql_escape_string($details[7]);
-			$city = mysql_escape_string($details[8]);
-			$state = mysql_escape_string($details[9]);
-			$postcode = mysql_escape_string($details[10]);
-			$interests = mysql_escape_string($details[11]);
+			if(!is_logged_in()) {
+				$longName = "";
+				$firstName = $_REQUEST['ugr_FirstName'];
+				$lastName = $_REQUEST['ugr_LastName'];
+				$eMail = $_REQUEST['ugr_eMail'];
+				$name = $_REQUEST['ugr_Name'];
+				$password = $_REQUEST['ugr_Password'];
+				$department = '';
+				$organisation = '';
+				$city = '';
+				$state = '';
+				$postcode = '';
+				$interests = '';
 
-			//     todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
-			//     todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
+				$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+				$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+				$password = crypt($password, $salt);
+
+			}else{
+				mysql_connection_db_insert(DATABASE);
+				$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
+				$details = mysql_fetch_row($query);
+				$longName = mysql_escape_string($details[0]);
+				$firstName = mysql_escape_string($details[1]);
+				$lastName = mysql_escape_string($details[2]);
+				$eMail = mysql_escape_string($details[3]);
+				$name = mysql_escape_string($details[4]);
+				$password = mysql_escape_string($details[5]);
+				$department = mysql_escape_string($details[6]);
+				$organisation = mysql_escape_string($details[7]);
+				$city = mysql_escape_string($details[8]);
+				$state = mysql_escape_string($details[9]);
+				$postcode = mysql_escape_string($details[10]);
+				$interests = mysql_escape_string($details[11]);
+			}
+
+			//	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
+			//	 todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
 
 			$warnings = 0;
 
@@ -362,20 +466,20 @@
 				echo "If upload folder is created but icons and template forlders are not, look at file permissions on new folder creation";
 			}
 
-            // Prepare to write to the newly created database
+			// Prepare to write to the newly created database
 			mysql_connection_db_insert($newname);
 
-            // Update file locations
+			// Update file locations
 			$query='update sysIdentification
-                set sys_hmlOutputDirectory = "'.$uploadPath.'/hml-output",
-                sys_htmlOutputDirectory = "'.$uploadPath.'/html-output"';
+			    set sys_hmlOutputDirectory = "'.$uploadPath.'/hml-output",
+			    sys_htmlOutputDirectory = "'.$uploadPath.'/html-output"';
   			mysql_query($query);
 			if (mysql_error()) {
 				echo "<h3>Warning: </h3> Unable to update sysIdentification table - please go to DBAdmin > Databases > Properties &".
 				" Advanced Properties, and check the path to the upload, hml and html directories. (".mysql_error().")";
 			}
 
-            // Make the current user the owner and admin of the new database
+			// Make the current user the owner and admin of the new database
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
 			ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
 			ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",

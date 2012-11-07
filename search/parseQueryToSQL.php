@@ -84,7 +84,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-/*****DEBUG****///error_log("q after parse ".print_r($q,true));
+/*****DEBUG****///error_log("QUERY after parse ".print_r($q,true));
 	return $q;
 }
 

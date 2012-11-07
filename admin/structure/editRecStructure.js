@@ -1080,7 +1080,7 @@ function EditRecStructure() {
 	function _addDetails(dty_ID_list){
 
 		var arrDty_ID = dty_ID_list.split(",");
-		if(arrDty_ID.length<1) {
+		if(Hul.isempty(dty_ID_list) || arrDty_ID.length<1) {
 			return;
 		}
 

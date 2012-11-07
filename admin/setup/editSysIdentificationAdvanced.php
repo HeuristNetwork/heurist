@@ -40,7 +40,7 @@ $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 $body->global_vars['dbname'] = HEURIST_DBNAME;
 $body->verify();
-if ($_REQUEST['_submit']) {
+if (@$_REQUEST['_submit']) {
 	$body->input_check();
 	if ($body->satisfied) $body->execute();
 }

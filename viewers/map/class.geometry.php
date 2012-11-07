@@ -1,5 +1,7 @@
 <?php
 
+// ARTEM: TO REMOVE
+
 /**
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -16,13 +18,13 @@
  *
  * Filename: class.geometry.php
  * Author:   Tobias Peirick
- * Description: 
+ * Description:
  * This class has been written to be a wrapper from the OpenGIS format,
- * that is the geometry format of MySQL. 
+ * that is the geometry format of MySQL.
  *
  * Information about the OpenGIS standard of MySQL can be found at
- * http://dev.mysql.com/doc/refman/5.0/en/spatial-extensions.html 
- * 
+ * http://dev.mysql.com/doc/refman/5.0/en/spatial-extensions.html
+ *
  * change history:
  * 2007-04-02 Tobias Peirick initial version
  *
@@ -40,14 +42,14 @@ class Geometry {
 
   /**
    *  Constructor
-   *     
+   *
    *  @param $geo the WKF (Well Known Format) OpenGIS string
-   *  @param $type the type of the geometry object. can be 
+   *  @param $type the type of the geometry object. can be
    *          pl = Polygon
    *          p  = Point
    *          r  = Rectangle
-   *          c  = Circle            
-   */    
+   *          c  = Circle
+   */
 	function Geometry ($geo, $type, $rect) {
 		$this->geo = $geo;
 		$this->type = $type;
@@ -55,13 +57,13 @@ class Geometry {
 		$this->innerMatrices = null;
 		$this->_process();
 	}
-	
+
 	/**
 	 * Break up the WKF (Well Known Format) geo string.
-	 * 
+	 *
 	 * @return void
-	 */	 
-	function _process(){  
+	 */
+	function _process(){
 	  if (preg_match('/^POLYGON[(][(]([^ ]+) ([^,]+),[^ ]+ [^,]+,([^ ]+) ([^,]+),[^ ]+ [^)]+[)][)]/i', $this->envelope, $matches))
 	  	list($_, $this->minX, $this->minY, $this->maxX, $this->maxY) = array_map('floatval', $matches);
 
@@ -80,27 +82,27 @@ class Geometry {
 					}
       			}
       			break;
-			
+
 		 case 'l':
       			if (preg_match('/LINESTRING\\((.*)\\)/i', $this->geo, $matches)) {
       				preg_match_all('/(\\S+) (\\S+)(?:,|$)/', $matches[1], $matches, PREG_PATTERN_ORDER);
       				$this->matrix = $matches;
       			}
       			break;
-			
+
 		case 'p':
       			if (preg_match('/POINT\\((.*) (.*)\\)/i', $this->geo, $matches)) {
       		    $this->matrix = $matches;
       			}
       			break;
-			
+
 		case 'r':
       			if (preg_match('/POLYGON\\(\\((.*)\\)\\)/i', $this->geo, $matches)) {
       				preg_match_all('/(\\S+) (\\S+)(?:,|$)/', $matches[1], $matches, PREG_PATTERN_ORDER);
       			 $this->matrix = $matches;
       			}
       			break;
-      			
+
 		case 'c':
       			if (preg_match('/LINESTRING\\((.*)\\)/i', $this->geo, $matches)) {
       				preg_match_all('/(\\S+) (\\S+)(?:,|$)/', $matches[1], $matches, PREG_PATTERN_ORDER);
@@ -109,41 +111,41 @@ class Geometry {
       			break;
 		}
   }
-  
+
   /**
    *
-   * @return the type of the geometry object. can be 
+   * @return the type of the geometry object. can be
    *          pl = Polygon
    *          p  = Point
    *          r  = Rectangle
-   *          c  = Circle            
-   */           
+   *          c  = Circle
+   */
   function getType() {
     return $this->type;
   }
-  
-  
+
+
   /**
    * Returns the coordinates of a circle
-   * 
+   *
    * @return array with coordinates of the circle
-   */           
+   */
   function getCircle(){
     if($this->type == 'c'){
-      
+
       $centerX = $this->matrix[1][0];
       $centerY = $this->matrix[2][0];
-      
+
       $endX = $this->matrix[1][1];
       $endY = $this->matrix[2][1];
-      
+
       $radius = $endX - $centerX;
-      
+
       $this->circle = array();
       $this->circle[] = array();
       $this->circle[] = array();
       $this->circle[] = array();
-      
+
       for($i=0; $i <= 40; $i += 10){
         $aRad = $i/40 * (2*pi());
         $y = $centerY + $radius * sin($aRad);
@@ -155,20 +157,20 @@ class Geometry {
       return $this->circle;
     }
   }
-  
-  
+
+
   /**
    *
    *  @return array with coordinates depending of the type
-   */     
+   */
   function getMatrix() {
-    return $this->matrix;  
+    return $this->matrix;
   }
-  
+
   function getInnerMatrices() {
     return $this->innerMatrices;
   }
-  
+
 
 }
 

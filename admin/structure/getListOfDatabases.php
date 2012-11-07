@@ -75,6 +75,6 @@
             print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
 	}
 
-	print "</div></body></html>";
+	print "</ul></div></body></html>";
 
 ?>

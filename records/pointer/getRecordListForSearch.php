@@ -28,6 +28,7 @@
  */
 
 define("RESULT_LIMIT", 100);
+define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 define("SEARCH_VERSION", 1);

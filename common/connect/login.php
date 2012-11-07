@@ -12,7 +12,6 @@
 ?>
 
 <?php
-
 define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__).'/applyCredentials.php');
 require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');

@@ -23,7 +23,6 @@ if (@$_REQUEST['mobcfg']){
 
 mysql_connection_db_select(DATABASE);
 
-
 // May be best to avoid the possibility of somebody harvesting ulf_ID=1, 2, 3, ...
 // so the files are indexed by the SHA-1 hash of the concatenation of the ulf_ID and a random integer.
 
@@ -164,56 +163,6 @@ if(isset($filename) && file_exists($filename)){ //local resources
 }
 
 /**
-*
-*
-* @param mixed $filedata
-*/
-function downloadViaProxy($filename, $mimeType, $url){
-
-	if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
-
-      $ch = curl_init();
-      //curl_setopt($ch, CURLOPT_FILE, $fp);
-      curl_setopt($ch, CURLOPT_URL, $url);
-      curl_setopt($ch, CURLOPT_HEADER, 0);
-
-	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
-	  curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	  curl_setopt($ch, CURLOPT_TIMEOUT, 5);	// timeout after 5 seconds
-
-      curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT'] );
-
-      curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);//"web-cache.usyd.edu.au:8080");
-
-      $raw = curl_exec($ch);
-
-	  $error = curl_error($ch);
-	  if ($error) {
-			$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-			error_log("$error ($code)" . " url = ". $url);
-			curl_close($ch);
-			return;
-	  }else{
-			curl_close($ch);
-
-			if(file_exists($filename)){
-				unlink($filename);
-			}
-			$fp = fopen($filename, "w");
-			//$fp = fopen($filename, "x");
-			fwrite($fp, $raw);
-			//fflush($fp);    // need to insert this line for proper output when tile is first requestet
-			fclose($fp);
-
-	  }
-    }
-
-	if(file_exists($filename)){
-		downloadFile($mimeType, $filename);
-	}
-}
-
-/**
 * create HTML5 video tag
 *
 * @param mixed $url
@@ -275,29 +224,6 @@ function linkifyYouTubeURLs($text, $size) {
     return $text;
 }
 
-/**
-* direct file download
-*
-* @param mixed $mimeType
-* @param mixed $filename
-*/
-function downloadFile($mimeType, $filename){
-/*****DEBUG****///error_log(">>>>>".$mimeType."   ".$filename);
-
-		if ($mimeType) {
-			header('Content-type: ' .$mimeType);
-		}else{
-			header('Content-type: binary/download');
-		}
-
-		if($mimeType!="video/mp4"){
-			header('access-control-allow-origin: *');
-			header('access-control-allow-credentials: true');
-		}
-		readfile($filename);
-
-
-}
 
 /*
 $file = file_get_contents('some.zip');

@@ -42,6 +42,7 @@
  * of being on the server with the hapi key database it can look at that directly
  * and save us hard-coding a map of database => key (yuck).
  */
+define('ISSERVICE',1);
 
 header("Content-type: text/javascript");
 /* hapi key's removed saw 17/1/11

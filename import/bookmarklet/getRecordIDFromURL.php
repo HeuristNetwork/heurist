@@ -13,6 +13,7 @@
 
 <?php
 
+define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 // using ob_gzhandler makes this stuff up on IE6-

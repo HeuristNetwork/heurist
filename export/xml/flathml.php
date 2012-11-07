@@ -33,7 +33,6 @@
 
 	-->*/
 
-
 if (@$argv) {
 	// handle command-line queries
 
@@ -67,7 +66,10 @@ if (@$argv) {
 }
 /*****DEBUG****///error_log("flathml session".print_r(@$_SESSION,true));
 /*header("Content-type: text/javascript");
-*/header('Content-type: text/xml; charset=utf-8');
+*/
+if(@$_REQUEST['mode']!='1'){
+	header('Content-type: text/xml; charset=utf-8');
+}
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
@@ -75,6 +77,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 mysql_connection_db_select(DATABASE);
 
@@ -287,7 +290,6 @@ if (@$ARGV) {	// commandline actuation
 	$ss_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 }
-
 
 $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 								'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
@@ -564,6 +566,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
 /*****DEBUG****///	error_log("max depth = ".print_r($MAX_DEPTH,true));
 	$depth = 0;
+
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ($rtfilter){
 		$query = 'SELECT rec_ID from Records '.
@@ -634,6 +637,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,
 			$USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT,
 			$relTrgDT, $relTypDT, $relSrcDT, $selectedIDs;
+
 
 	$record = $recordInfo['record'];
 	$depth = $recordInfo['depth'];
@@ -901,34 +905,6 @@ function makeFileContentNode($file){
 	}
 }
 
-function loadRemoteURLContent($url) {
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-	}
-
-	curl_setopt($ch, CURLOPT_URL, $url);
-	$data = curl_exec($ch);
-
-	$error = curl_error($ch);
-	if ($error) {
-		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		echo "$error ($code)" . " url = ". $url;
-		return false;
-	} else {//TODO: check for valid html error page returned.
-		return $data;
-	}
-}
-
 function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $parentID) {
 	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS,$relTypDT;
 
@@ -957,6 +933,27 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 			}
 		} else if (array_key_exists('file', $value)) {
 			$file = $value['file'];
+
+			if(@$_REQUEST['includeresources']=='1' && @$_REQUEST['mode']=='1'){
+
+				$file = get_uploaded_file_info_internal($file['id'],false);
+
+				if($file['fullpath'] && file_exists($file['fullpath']))
+				{
+
+					//backup file inot backup/user folder
+					$folder = HEURIST_UPLOAD_DIR."backup/".get_user_username()."/";
+
+					$path_parts = pathinfo($file['fullpath']);
+					$file['URL'] = $path_parts['basename'];
+					$filename_bk = $folder.$file['URL'];
+
+					copy($file['fullpath'], $filename_bk);
+
+					unset($file['thumbURL']);
+				}
+			}
+
 			openTag('detail', $attrs);
 				openTag('file');
 					makeTag('id', null, $file['id']);
@@ -985,6 +982,7 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 					}
 				closeTag('file');
 			closeTag('detail');
+
 		} else if (array_key_exists('geo', $value)) {
 			openTag('detail', $attrs);
 				openTag('geo');
@@ -1241,21 +1239,20 @@ function check($text) {
 if (! @$ARGV) {
 	@apache_setenv('no-gzip', 1);
 }
-@ini_set('zlib.output_compression', 0);
-@ini_set('implicit_flush', 1);
-for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
-ob_implicit_flush(1);
-
+if(@$_REQUEST['mode']!='1'){ //not include
+	@ini_set('zlib.output_compression', 0);
+	@ini_set('implicit_flush', 1);
+	for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
+	ob_implicit_flush(1);
+}
 
 //----------------------------------------------------------------------------//
 //  Output
 //----------------------------------------------------------------------------//
 
-//$result = loadSearch($_REQUEST);
-
-
 //echo "request = ".print_r($_REQUEST,true)."\n";
-$result = loadSearch($_REQUEST,false,true, $PUBONLY);
+
+$result = loadSearch($_REQUEST, false, true, false, $PUBONLY);
 /*****DEBUG****///error_log("$result = ".print_r($result,true)."\n");
 $hmlAttrs = array();
 if($USEXINCLUDE) {
@@ -1300,6 +1297,5 @@ if (array_key_exists('error', $result)) {
 }
 
 closeTag('hml');
-
 ?>
 

@@ -41,6 +41,8 @@ header('Content-type: text/xml; charset=utf-8');
 // called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+
 if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 	return;
 }
@@ -102,41 +104,31 @@ saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&".
 function saveRecordHML($filename){
 global $recID, $outFullName;
 /*****DEBUG****///error_log(" file name = $filename");
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return teh output as a string from curl_exec
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-	}
-	curl_setopt($ch, CURLOPT_URL, $filename);
-	$hml = curl_exec($ch);
-/*****DEBUG****///error_log(" output from flatHML ".print_r($hml,true));
-	$xml = new DOMDocument;
-	$xml->loadXML($hml);
-	// convert to xml
-	if (!$xml){
-		returnXMLErrorMsgPage("unable to generate valid hml for $filename");
-	}else if($outFullName){
-		$text = $xml->saveXML();
-		$ret = file_put_contents( $outFullName,$text);
-/*****DEBUG****/error_log(" output ".($ret?"2":"1")." complete $outFullName");
-		if (!$ret){
-			returnXMLErrorMsgPage("output of $outFullName failed to write");
-		}else if ($ret < strlen($text)){
-			returnXMLErrorMsgPage("output of $outFullName wrote $ret bytes of ".strlen($text));
-		}else{ // success output the contents of the saved file file
-			$text = file_get_contents($outFullName);
+	$hml = loadRemoteURLContent($filename);
+	if($hml)
+	{
+
+		/*****DEBUG****///error_log(" output from flatHML ".print_r($hml,true));
+		$xml = new DOMDocument;
+		$xml->loadXML($hml);
+		// convert to xml
+		if (!$xml){
+			returnXMLErrorMsgPage("unable to generate valid hml for $filename");
+		}else if($outFullName){
+			$text = $xml->saveXML();
+			$ret = file_put_contents( $outFullName,$text);
+		/*****DEBUG****///error_log(" output ".($ret?"2":"1")." complete $outFullName");
+			if (!$ret){
+				returnXMLErrorMsgPage("output of $outFullName failed to write");
+			}else if ($ret < strlen($text)){
+				returnXMLErrorMsgPage("output of $outFullName wrote $ret bytes of ".strlen($text));
+			}else{ // success output the contents of the saved file file
+				$text = file_get_contents($outFullName);
+			}
+			echo $text;
+		}else{
+			echo $xml->saveXML();
 		}
-		echo $text;
-	}else{
-		echo $xml->saveXML();
 	}
 }
 

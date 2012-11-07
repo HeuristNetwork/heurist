@@ -21,16 +21,16 @@
  * @todo
  **/
 
+define('ISSERVICE',1);
 define('SEARCH_VERSION', 1);
 
-// called by applyCredentials  require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
-require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
+//require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
 require_once('libs.inc.php');

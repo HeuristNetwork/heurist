@@ -21,6 +21,7 @@
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
@@ -67,7 +68,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		return;
 	}
 /*****DEBUG****///error_log(">>>>>>>>>".$file['ulf_Parameters']);
-	$fileparams = parseParameters($file['ulf_Parameters']);
+	$fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
 	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
 	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
 
@@ -253,28 +254,8 @@ function get_remote_image($remote_url){
 
 	$img = null;
 
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-	}
-
-	curl_setopt($ch, CURLOPT_URL, $remote_url);
-	$data = curl_exec($ch);
-
-	$error = curl_error($ch);
-	if ($error) {
-		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		error_log("$error ($code)" . " url = ". $remote_url);
-	} else {
+	$data = loadRemoteURLContent($remote_url); //from fileUtils.php
+	if($data){
 		$img = imagecreatefromstring($data);
 	}
 

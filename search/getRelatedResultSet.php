@@ -33,7 +33,6 @@
 
 	-->*/
 
-
 list($usec, $sec) = explode(' ', microtime());
 $stime = $sec + $usec;
 
@@ -64,6 +63,8 @@ if (@$argv) {
 	$_REQUEST['depth'] = @$ARGV['-depth'] ? $ARGV['-depth']: 0;
 	if (@$ARGV['-rev'])$_REQUEST['rev'] = $ARGV['-rev'];
 }
+
+define('ISSERVICE',1);
 
 header("Content-type: text/javascript");
 //header('Content-type: text/xml; charset=utf-8');

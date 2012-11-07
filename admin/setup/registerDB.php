@@ -10,6 +10,7 @@
 	**/
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 	if (!is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -130,16 +131,7 @@
 					$heuristDBname = rawurlencode(HEURIST_DBNAME);
 					global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, $usrName, $usrFirstName, $usrLastName, $dbDescription;
 					$serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
-					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return curl_exec output as string
-					curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-					curl_setopt($ch, CURLOPT_NOBODY, 0);
-					curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
-					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
-					curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
-					curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
+
 					$usrEmail = rawurlencode($usrEmail);
 					$usrName = rawurlencode($usrName);
 					$usrFirstName = rawurlencode($usrFirstName);
@@ -150,23 +142,12 @@
 					"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
 					"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 					"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
-					curl_setopt($ch, CURLOPT_URL,$reg_url);
-					/*****DEBUG****///
-					error_log('Calling, CURLOPT_URL = '.$reg_url);
-					$data = curl_exec($ch);
-					/*****DEBUG****///
-					error_log('return data from getNextDBReg..ID = '.$data);
-					$error = curl_error($ch);
-					if ($error) {
-						$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-						echo $error . " (" . $code . ")";
-						/*****DEBUG****///       error_log('CURL error code = '.$code.'  error = '.$error);
-					} else {
+
+					$data = loadRemoteURLContent($reg_url);
+
+					if ($data) {
 						$dbID = intval($data);
 					}
-
-					/*****DEBUG****///    error_log('CURL returned registered dbid = '.$dbID.'   '.$usrEmail);
-
 
 					if ($dbID == 0) { // Unable to allocate a new database identifier
 						$decodedData = explode(',', $data);

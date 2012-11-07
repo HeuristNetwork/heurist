@@ -483,12 +483,12 @@ div#notes {
 	font-size: 11px;
 }
 /* relationship table styles */
-.relation-title, .relation {
+.relation-title {
 	display: block;
 	padding: 3px 0;
 	border-bottom: 1px solid RGBA(100,100,100,0.2);
+	margin:20px 0 0 0;
 }
-.relation-title {	margin:20px 0 0 0;}
 
 .relation > div {
 	display: table-cell;
@@ -503,7 +503,8 @@ div#notes {
 	padding:0 2ex 0 0;
 }
 .relation div.rel > div {width:20ex}
-.relation div.title {min-width:200px;}
+.relation div.title {width:200px;}
+.relation div.dates, .relation div.notes-field {padding-left:20px;}
 .resource .input-row {
 	display:block;
 	width:100%;

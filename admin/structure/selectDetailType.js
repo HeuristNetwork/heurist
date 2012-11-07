@@ -108,7 +108,7 @@ function SelectDetailType() {
 					var ptr_2 = isnull(deftype[fi.dty_PtrTargetRectypeIDs])?'':deftype[fi.dty_PtrTargetRectypeIDs];
 					// add order in group, name, help, type and status,
 					// doc will be hidden (for pop-up)
-					arr.push([0,
+					arr.push([  (_arr_selection.indexOf(dty_ID)>=0 ),
 						deftype[fi.dty_OrderInGroup],
 						deftype[fi.dty_Name],
 						deftype[fi.dty_HelpText],
@@ -276,6 +276,7 @@ function SelectDetailType() {
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 					});
 
+					_resetFilters();
 					_updateFilter();
 
 		}
@@ -454,6 +455,13 @@ function SelectDetailType() {
 							_updateFilter();
 	}
 
+	function _resetFilters(){
+		filterByName.value = "";
+		filterByGroup.selectedIndex = 0;
+		filterBySelection1.checked = true;
+	}
+
+
 	/**
 	* Assign event listener for filte UI controls
 	* @see _init
@@ -494,6 +502,11 @@ function SelectDetailType() {
 					if(!Hul.isnull(context)){
 						//refresh the local heurist
 						top.HEURIST.detailTypes = context.detailTypes;
+
+						var _dtyID = Number(context.result[0]);
+						if(!isNaN(_dtyID)){
+							_arr_selection.push(""+Math.abs(_dtyID));
+						}
 
 						//new field type to be added - refresh list
 						_init();

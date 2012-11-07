@@ -40,6 +40,8 @@
 // called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+
 if (!is_logged_in()) {
 	return;
 }
@@ -117,27 +119,12 @@ if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
 saveTransformOutput($inputFilename,$styleFilename,$outputFilename);
 
 function loadRemoteFile($filename){
-global $recID, $outName;
-/*****DEBUG****///error_log(" remote file name = $filename");
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return teh output as a string from curl_exec
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+
+	$file_content = loadRemoteURLContent($filename);
+	if(!$file_content){
+		returnXMLErrorMsgPage("Error loading remote file '$filename'");
 	}
-	curl_setopt($ch, CURLOPT_URL, $filename);
-	$file_content = curl_exec($ch);
-/*****DEBUG****///error_log(" remote file content ".print_r($file_content,true));
-	if (curl_error($ch)){
-		returnXMLErrorMsgPage("Error loading remote file '$filename' - ". curl_error($ch));
-	}
+
 	return $file_content;
 }
 

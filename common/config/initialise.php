@@ -59,6 +59,8 @@
 
 	define('HEURIST_SITE_PATH',INSTALL_DIR == ''? '/' : INSTALL_DIR.'/'); // eg. /h3-ij/
 	define('HEURIST_BASE_URL','http://'.HEURIST_HOST_NAME.HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3-ij/
+	// change HEURIST_URL_BASE to HEURIST_BASE_URL
+	define('HEURIST_URL_BASE', HEURIST_BASE_URL);
 
 	//set up database server connection defines
 	if ($dbHost) {
@@ -84,9 +86,9 @@
 	/*****DEBUG****///error_log("in initialise dbHost = $dbHost");
 	//test db connect valid db
 	$db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword) or
-	returnErrorMsgPage('1',"Unable to connect to db server with admin account, set login in configIni.php. MySQL error: ".mysql_error());
+	returnErrorMsgPage(1,"Unable to connect to db server with admin account, set login in configIni.php. MySQL error: ".mysql_error());
 	$db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword) or
-	returnErrorMsgPage('1',"Unable to connect to db server with readonly account, set login in configIni.php. MySQL error: ".mysql_error());
+	returnErrorMsgPage(1,"Unable to connect to db server with readonly account, set login in configIni.php. MySQL error: ".mysql_error());
 
 	if (@$defaultDBname != '') {
 		define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is ambiguous about the db
@@ -94,6 +96,13 @@
 
 	if (@$httpProxy != '') {
 		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
+	}
+
+	// upload path eg. /var/www/htdoCs/HEURIST_FILESTORE
+	if ($defaultRootFileUploadPath) {
+		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
+	} else {
+		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
 	}
 
 	/*****DEBUG****/// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
@@ -105,34 +114,43 @@
 	}
 
 	if (!@$dbName) {
-//		if (@$_SESSION["heurist_last_used_dbname"]) {//if no DB known check session
-//			$dbName = $_SESSION["heurist_last_used_dbname"];
-//		}else
 
-		if (defined("HEURIST_DEFAULT_DBNAME") && (defined("ROOTINIT") || (substr($_SERVER['PHP_SELF'], -15) === 'createNewDB.php')))
-		{//if enter at site root  index.php and default is set use it
-			$dbName = HEURIST_DEFAULT_DBNAME;
-		} else {
-			returnErrorMsgPage(0,"Ambiguous database name, or no database name supplied. Please supply as '?db=' parameter or ask sysadmin to set in configIni.php");
+		/* NO MORE DEFAULT DATABASE!!!
+		else if (defined("HEURIST_DEFAULT_DBNAME")) {//if enter at site root  index.php and default is set use it
+				$dbName = HEURIST_DEFAULT_DBNAME;
+		}*/
+
+		define('HEURIST_DBNAME', '');
+
+		if(defined("NO_DB_ALLOWED")){ //for createNewDB.php and selectDatabase.php
+				return;
+		}else {
+				//Ambiguous database name, or no database name supplied
+				returnErrorMsgPage(2);
 		}
+
 	}
 
 	define('HEURIST_DBNAME', $dbName);
 	$dbFullName = HEURIST_DB_PREFIX.HEURIST_DBNAME;
 	if ($dbFullName == "") {
-		returnErrorMsgPage('0',"Invalid database - both prefix and database name are blank");
+		returnErrorMsgPage(0,"Invalid database - both prefix and database name are blank");
 	}
 	define('HEURIST_SESSION_DB_PREFIX', $dbFullName.".");
 	// we have a database name so test it out
 	if (mysql_query("use $dbFullName")) {
 		define('DATABASE', $dbFullName);
 	} else {
-		returnErrorMsgPage('0',"Unable to open database : <b>$dbName</b>, MySQL error: ".mysql_error());
+		if(defined("NO_DB_ALLOWED")){ //for createNewDB.php and selectDatabase.php
+			return;
+		}else {
+			returnErrorMsgPage(2, "Unable to open database : $dbName, MySQL error: ".mysql_error());
+		}
 	}
 
 	// using the database so let's get the configuration data from it's sys table
 	$res = mysql_query('select * from sysIdentification');
-	if (!$res) returnErrorMsgPage('0',"Unable to read sysIdentification information, MySQL error: ".mysql_error());
+	if (!$res) returnErrorMsgPage(0,"Unable to read sysIdentification information, MySQL error: ".mysql_error());
 	$sysValues = mysql_fetch_assoc($res);
 
 	// set up user access and group table stuff
@@ -161,12 +179,6 @@
 	define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
 	define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
-	// upload path eg. /var/www/htdoCs/HEURIST_FILESTORE
-	if ($defaultRootFileUploadPath) {
-		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
-	} else {
-		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
-	}
 
 	$upload = @$sysValues['sys_UploadDirectory'];
 
@@ -233,8 +245,9 @@
 	// change HOST  HOST_BASE  to  HEURIST_HOST_NAME
 	define('HOST',HEURIST_HOST_NAME);
 	define('HOST_BASE',HEURIST_HOST_NAME);
+
 	// change HEURIST_URL_BASE to HEURIST_BASE_URL
-	define('HEURIST_URL_BASE',HEURIST_BASE_URL);
+	//moved up define('HEURIST_URL_BASE',HEURIST_BASE_URL);
 	$heuristURLBase=HEURIST_URL_BASE;
 
 	if ($sysValues['sys_AllowRegistration']){
@@ -265,7 +278,7 @@
 	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
 	/*****DEBUG****///error_log("initialise DBNAME ".HEURIST_DBNAME." ver ".HEURIST_DBVERSION." with code base from ".HEURIST_BASE_URL);
 	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
-		returnErrorMsgPage('0',"Heurist Code Version ".HEURIST_VERSION." requires database schema version # ".HEURIST_MIN_DBVERSION." or higher. ".
+		returnErrorMsgPage(0,"Heurist Code Version ".HEURIST_VERSION." requires database schema version # ".HEURIST_MIN_DBVERSION." or higher. ".
 			HEURIST_DBNAME." has version # ". HEURIST_DBVERSION." - please update the schema of the database.");
 	}
 
@@ -445,7 +458,7 @@
 		static $RTIDs;
 		if (!$RTIDs) {
 			$res = mysql_query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
-			if (!$res) returnErrorMsgPage('0',"Unable to build internal record type lookup table, MySQL error: ".mysql_error());
+			if (!$res) returnErrorMsgPage(0,"Unable to build internal record type lookup table, MySQL error: ".mysql_error());
 			$RTIDs = array();
 			while ( $row = mysql_fetch_assoc($res)){
 				/*****DEBUG****///		error_log("rt ". print_r($row,true));
@@ -462,7 +475,7 @@
 		static $DTIDs;
 		if (!$DTIDs) {
 			$res = mysql_query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
-			if (!$res) returnErrorMsgPage('0',"Unable to build internal field type lookup table, MySQL error: ".mysql_error());
+			if (!$res) returnErrorMsgPage(0,"Unable to build internal field type lookup table, MySQL error: ".mysql_error());
 			$DTIDs = array();
 			while ( $row = mysql_fetch_assoc($res)){
 				if (!@$DTIDs[$row['dbID']]){
@@ -474,39 +487,49 @@
 		return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID]: null);
 	}
 
-	function returnErrorMsgPage($critical,$msg) {
-		global $dbPrefix;
+	function returnErrorMsgPage($critical, $msg = null) {
 
-		if ($critical==1) { // bad connection to MySQL etc.
+		$redirect = null;
+
+		if ($critical==1) { // bad connection to MySQL server
+
 			echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
-			exit ();
-		}
 
-		// gets to here if database not specified properly. This is an error if set up properly, but mot at first initialisaiton of the system
-		// Test for existence of databases, if none then Heurist has not been set up yet
-		// Placed here rather than up-front test to avoid having to test this in every script
-		$list = mysql__getdatabases();
-		if(count($list)>0){
-			// echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
-			$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+		}else if ($critical==2) { //database not defined or can not connect to it
 
-
-			$msg2 = rawurlencode($msg2);
-
-			if(defined('ROOTINIT')){
-				header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
-			}else{
-				echo "/*DEBUG: it happens in ".$_SERVER['PHP_SELF']." */ location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
+			$redirect = HEURIST_BASE_URL."common/connect/selectDatabase.php";
+			if($msg){
+				$redirect .= "?msg=".rawurlencode($msg);
 			}
 
-			/*		echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg='<p>&nbsp;<h2>Heurist initialisation error</h2><p>
-			$msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>'\");";
+		}else{
 
+			// gets to here if database not specified properly. This is an error if set up properly, but not at first initialisaiton of the system
+			// Test for existence of databases, if none then Heurist has not been set up yet
+			// Placed here rather than up-front test to avoid having to test this in every script
+			$list = mysql__getdatabases();
+			if(count($list)>0){
 
-			*/
+				// echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
+				$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+				$msg2 = rawurlencode($msg2);
+
+				$redirect = HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=".$msg2;
+			}
+
 		}
+
+		if($redirect){
+			if(defined('ISSERVICE')){
+				echo "/*DEBUG: it happens in ".$_SERVER['PHP_SELF']." */ location.replace(\"".$redirect."\");";
+			}else{
+				header("Location: ".$redirect);
+			}
+		}
+
 		exit(); // it will drop through to here without an error message if the system has not been set up yet
 	}
+
 
 	/**
 	* returns full url for current page
