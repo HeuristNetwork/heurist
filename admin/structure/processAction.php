@@ -97,7 +97,7 @@ function import() {
 				$localRtyID = $localRtyID[0];
 				makeLogEntry("Record type", $importRtyID, " exists in $targetDBName as ID = $localRtyID");
 			}else{
-			$localRtyID = importRectype($importRty);
+				$localRtyID = importRectype($importRty);
 			}
 		}
 	}
@@ -293,22 +293,57 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 
 function importRectype($importRty) {
 	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID;
-	static $importRtyGroupID;
+	//was static $importRtyGroupID;
 	$importRtyID = $importRty['rty_ID'];
 /*****DEBUG****///error_log("import rtyID $importRtyID to  $targetDBName DB");
 
 	// Get Imported  rectypeGroupID
-	if(!$error && !$importRtyGroupID) {
+	if(!$error){ // && !$importRtyGroupID) {
+
+		//find group in source
+		$query = "select * from ".$tempDBName.".defRecTypeGroups where rtg_ID = ".$importRty['rty_RecTypeGroupID'];
+
+		$res = mysql_query($query);
+		if(mysql_num_rows($res) == 0) {
+			makeLogEntry("<b>Error</b> Creating Record-type Group", -1, " Can not find group #".$importRty['rty_RecTypeGroupID']);
+			$error = true;
+		}else{
+			$rtyGroup_src = mysql_fetch_assoc($res);
+			//find group by name in target
+			$rtyGroup = mysql_query("select rtg_ID from ".$targetDBName.".defRecTypeGroups where rtg_Name = '".$rtyGroup_src['rtg_Name']."'");
+			if(mysql_num_rows($rtyGroup) == 0) { //not found
+				//add new one
+				mysql_query("INSERT INTO ".$targetDBName.".defRecTypeGroups ".
+						"(rtg_Name,rtg_Domain,rtg_Order, rtg_Description) ".
+						"VALUES ('".$rtyGroup_src['rtg_Name']."','".$rtyGroup_src['rtg_Domain']."' , '".$rtyGroup_src['rtg_Order']."',".
+								" '".$rtyGroup_src['rtg_Description']."')");
+
+				if(mysql_error()) {
+					$error = true;
+					makeLogEntry("<b>Error</b> Creating Record-type Group", -1, ". Could not add record type group '".$rtyGroup_src['rtg_Name']."' - ".mysql_error());
+				} else {
+					$importRtyGroupID = mysql_insert_id();
+					makeLogEntry("Creating Record-type Group", -1, " '".$rtyGroup_src['rtg_Name']."' as #$importRtyGroupID");
+				}
+			}else{
+				$row = mysql_fetch_row($rtyGroup);
+				$importRtyGroupID = $row[0];
+				makeLogEntry("Using Record-type Group", -1, " '".$rtyGroup_src['rtg_Name']."' as #$importRtyGroupID");
+			}
+		}
+
+/* ARTEM: old way with Imported group
 		// Finded 'Imported' rectype group or create it if it doesn't exist
 		$rtyGroup = mysql_query("select rtg_ID from ".$targetDBName.".defRecTypeGroups where rtg_Name = 'Imported'");
-/*****DEBUG****///error_log("import rty 1");
+
 		if(mysql_num_rows($rtyGroup) == 0) {
+			//not exist
 			mysql_query("INSERT INTO ".$targetDBName.".defRecTypeGroups ".
 						"(rtg_Name,rtg_Domain,rtg_Order, rtg_Description) ".
 						"VALUES ('Imported','functionalgroup' , '999',".
 								" 'This group contains all record types that were imported from external databases')");
 		// Write the insert action to $logEntry, and set $error to true if one occurred
-/*****DEBUG****///error_log("import rty 2");
+
 			if(mysql_error()) {
 				$error = true;
 				makeLogEntry("<b>Error</b> Creating Record-type Group", -1, ". Could not find record type group 'Imported' - ".mysql_error());
@@ -317,12 +352,15 @@ function importRectype($importRty) {
 				makeLogEntry("Creating Record-type Group", -1, " 'Imported' as #$importRtyGroupID");
 			}
 		} else {
-/*****DEBUG****///error_log("import rty 3");
+
 			$row = mysql_fetch_row($rtyGroup);
 			$importRtyGroupID = $row[0];
 			makeLogEntry("Using Record-type Group", -1, " 'Imported' as #$importRtyGroupID");
 		}
+*/
 	}
+
+
 /*****DEBUG****///error_log("import rty 3a");
 
 	if(!$error) {

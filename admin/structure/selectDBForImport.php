@@ -57,12 +57,12 @@
 			?>
 
 			<div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
-			<div>
-				<p>    The list below shows available databases registered with the HeuristScholar.org Index database.<br>
-					Use the filter to locate a specific term in the name or title. <br>
-					Click the database icon on the left to view available record types in that database.
-					<br><br>
-				</p></div>
+			<p>    The list below shows available databases registered with the HeuristScholar.org Index database.<br />
+					Use the filter to locate a specific term in the name or title. <br />
+					Click the database icon on the left to view available record types in that database.<br />
+					<b>Bolded</b> databases contain collections of schemas curated by the Heurist team or members of the Heurist community
+					<br />
+			</p>
 			<div class="markup" id="filterDiv" style="display:none">
 				<label for="filter">Filter:</label> <input type="text" id="filter" value="">
 				<div id="tbl"></div>
@@ -132,17 +132,29 @@
 							$dbTitle = $registeredDB->rec_Title;
 							$dbPopularity = $registeredDB->rec_Popularity;
 
+
+							//find version of database. ARTEM - not sure about prefix!
+							/*$query = 'select sys_dbVersion, sys_dbSubVersion, sys_dbSubSubVersion from '.($dbPrefix?$dbPrefix:HEURIST_DB_PREFIX).$dbName.'.sysIdentification';
+							$res = mysql_query($query);
+							$sysValues = mysql_fetch_assoc($res);
+							$version = $sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion'];
+							if ( HEURIST_DBVERSION>$version ) {
+								continue;
+							}*/
+
 							echo 'if(!registeredDBs['.$dbID.']) {' . "\n";
 							echo 'registeredDBs['.$dbID.'] = new Array();' . "\n";
 							echo '}' . "\n";
 							echo 'var registeredDB = [];' . "\n";
-							echo 'registeredDB[0] = "'.$dbID.'";' . "\n";
+							echo 'registeredDB[0] = '.$dbID.';' . "\n";
 							echo 'registeredDB[1] = "'.$dbURL.'";' . "\n";
 							echo 'registeredDB[2] = "'.$dbName.'";' . "\n";
 							echo 'registeredDB[3] = "'.$dbTitle.'";' . "\n";
 							echo 'registeredDB[4] = "'.$dbPopularity.'";' . "\n";
 							echo 'registeredDB[5] = "'.@$dbPrefix.'";' . "\n"; // @ b/c prefix may not be defined
+							//echo 'registeredDB[6] = "'.$version.'";' . "\n";
 							echo 'registeredDBs['.$dbID.'].push(registeredDB);' . "\n";
+
 						}
 					}
 				}
@@ -155,7 +167,15 @@
 						var myColumnDefs = [
 							{key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:true, resizeable:false, width:"40", className:"right"},
 							{key:"crosswalk", label:"Browse", resizeable:false, width:"60", className: "center"},
-							{key:"name", label:"Database Name" , sortable:true, resizeable:true},
+							{key:"name", label:"Database Name" , sortable:true, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
+									var str = oRecord.getData("name");
+									var id = oRecord.getData("id");
+									if(Number(id)<21){
+										elLiner.innerHTML = '<b>'+str+'</b>';
+									}else{
+										elLiner.innerHTML = str;
+									}
+							}},
 							{key:"description", label:"Description", sortable:true, resizeable:true},
 							// Currently no useful data in popularuity value
 							//{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber,sortable:true, resizeable:true, hidden:true }
@@ -169,7 +189,7 @@
 						dataArray = [];
 						for(dbID in registeredDBs) {
 							db = registeredDBs[dbID];
-							dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<a href="#" onClick="doCrosswalk('+dbID+')"><img src="../../common/images/b_database.png" class="button"/></a>']);
+							dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<img src="../../common/images/b_database.png" class="button"/>']);
 						}
 
 						var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{
@@ -207,6 +227,7 @@
 								sortedBy: { key:'id' }
 						}),
 
+
 						// Updates the datatable when filtering
 						filterTimeout = null;
 						updateFilter  = function () {
@@ -233,6 +254,20 @@
 
 						myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
 						myDataTable.subscribe("rowMouseoutEvent", myDataTable.onEventUnhighlightRow);
+
+
+						myDataTable.subscribe("cellClickEvent", function(oArgs){
+
+								var elTargetCell = oArgs.target;
+								if(elTargetCell) {
+									var oColumn = myDataTable.getColumn(elTargetCell);
+									var oRecord = myDataTable.getRecord(elTargetCell);
+									if(oColumn.key !== 'URL' && oRecord){
+										doCrosswalk(oRecord.getData("id"));
+									}
+								}
+
+						});
 
 						return {
 							oDS: myDataSource,

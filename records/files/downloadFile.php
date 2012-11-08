@@ -15,6 +15,7 @@
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
 if (@$_REQUEST['mobcfg']){
 	downloadFile("text/xml", HEURIST_UPLOAD_DIR."settings/mobile-config.xml");

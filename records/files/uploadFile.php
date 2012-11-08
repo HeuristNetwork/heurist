@@ -169,7 +169,7 @@
 		if($mimetypeExt){ //check extension
 			$mimeType = findMimeType($mimetypeExt);
 			if(!$mimeType){
-				return "Error: unsupported extension ".$mimetypeExt;
+				return "Error: mimtype for extension $mimetypeExtis is not defined in database";
 			}
 		}
 

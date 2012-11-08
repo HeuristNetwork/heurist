@@ -74,11 +74,14 @@ var sourceDBID = <?=$source_db_id?>;
 //var crwLocalCode = "";
 var replaceRecTypeName = "";
 
-var rectypeStructures = [];
-var approxRectypes = [];
 // Fills the YUI Datatable with all recordtypes from the temp DB
-function insertData() {
-	<?php
+<?php
+	$groups = mysql_query("select rtg_ID, rtg_Name from ".$tempDBName.".defRecTypeGroups");
+	$rectypeGroups = array();
+	while($group = mysql_fetch_assoc($groups)) {
+		array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
+	}
+
 	$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_Name");
 	$approxMatches = array();
 	$tableRows = array();
@@ -108,23 +111,24 @@ function insertData() {
 				}
 			}
 			// Add recordtypes to the table
-			array_push($tableRows,array('arrow'=>"<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
+			/*array_push($tableRows,array('arrow'=>"<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
 										'rtyID'=>$rectype["rty_ID"],
 										'rectype'=>$rectype["rty_Name"],
 										'matches'=>$numberOfApproxMatches,
-										'import'=>"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>"));
+										'import'=>"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
+										'rtyRecTypeGroupID'=>$rectype["rty_RecTypeGroupID"]));*/
+			array_push($tableRows,array("<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
+										$rectype["rty_ID"],
+										$rectype["rty_Name"],
+										$numberOfApproxMatches,
+										"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
+										$rectype["rty_RecTypeGroupID"]));
 		}
 	}
 
-	echo "approxRectypes = ".json_format($approxMatches,true). ";\n";
-	echo "var tableData = ".json_format($tableRows,true). ";\n\n";
-?>
-	var l = tableData.length,
-		i;
-	for (i=0; i<l; i++) {
-		myDataTable.addRow(tableData[i]);
-	}
-<?php
+echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
+echo "var tableData = ".json_format($tableRows,true). ";\n\n";
+
 	mysql_query("use ".$tempDBName);
 	$rtyRes = mysql_query("select rty_ID,
 									rst_ID,
@@ -165,33 +169,63 @@ function insertData() {
 			}
 		}
 	}
-	echo "rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
-	?>
-}
-<?php
+
+echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
 echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
 echo 'var URLBase = "'.HEURIST_URL_BASE.'";'. "\n";
 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
+echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
 ?>
 var myDataTable;
+var myDataSource;
 var hideTimer;
 var needHideTip;
+
 YAHOO.util.Event.addListener(window, "load", function() {
 	YAHOO.example.Basic = function() {
 		// Create the columns. Arrow contains the collapse/expand arrow, rtyID is hidden and contains the ID, rectype contains the name, matches the amount of matches and a tooltip, import a button
 		var myColumnDefs = [
 			{ key:"arrow", label:"click for details ...", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
 			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
+			{ key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false },
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
 			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:150 },
 			{ key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'><u>Potential dupes in this DB</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
 			];
 
-		var myDataSource = new YAHOO.util.DataSource();
-		myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
-		myDataSource.responseSchema = { fields: ["arrow","rtyID","rectype","matches","import"] };
+		//myDataSource = new YAHOO.util.DataSource();
+
+		myDataSource = new YAHOO.util.LocalDataSource(tableData, {
+			responseType:YAHOO.util.DataSource.TYPE_JSARRAY,
+			responseSchema: {
+										fields: ["arrow","rtyID","rectype","matches","import","rtyRecTypeGroupID"]
+									},
+			doBeforeCallback: function (req, raw, res, cb) {
+										// This is the filter function
+										var data  = res.results || [],
+										filtered = [],
+										i,l;
+
+										if (req) {
+
+
+											for (i = 0, l = data.length; i < l; ++i)
+											{
+												if (req==="all" || data[i].rtyRecTypeGroupID===req)
+												{
+													filtered.push(data[i]);
+												}
+											}
+											res.results = filtered;
+										}
+
+										return res;
+									}
+		});
+
+
 		YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
 		// Create the RowExpansionDataTable
 		myDataTable = new YAHOO.widget.RowExpansionDataTable(
@@ -235,7 +269,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			sortedBy: { key:'rectype' }
 			}
 		);
-		insertData();
 
 		myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
 		myDataTable.subscribe("rowMouseoutEvent", myDataTable.onEventUnhighlightRow);
@@ -301,7 +334,44 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			oDT: myDataTable
 		};
 	}();
+
+	var filterByGroup = document.getElementById("inputFilterByGroup");
+	var index;
+
+	for (index in rectypeGroups) {
+			if( !isNaN(Number(index)) ) {
+
+				var grpID = rectypeGroups[index].id;
+				var grpName = rectypeGroups[index].name;
+
+				top.HEURIST.util.addoption(filterByGroup, grpID, grpName);
+			}
+	} //for
+	filterByGroup.onchange = _updateFilter;
+
 });
+
+//
+// update filter by rectype group
+//
+function _updateFilter(){
+
+							filterTimeout = null;
+
+							// Reset sort
+							/*var state = myDataTable.getState();
+							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};*/
+
+							var filter_group = document.getElementById("inputFilterByGroup").value;
+
+							// Get filtered data
+							myDataSource.sendRequest(filter_group, {
+								success : myDataTable.onDataReturnInitializeTable,
+								failure : myDataTable.onDataReturnInitializeTable,
+								scope   : myDataTable,
+								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+							});
+}
 
 // Create the tooltip
 var currentTipId;
@@ -380,15 +450,17 @@ function _hideToolTip(){
 <div id="page-inner" style="overflow:auto">
 
 <!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
---><div id="crosswalk" style="width:100%;margin:auto;">
+-->
+<div id="crosswalk" style="width:100%;margin:auto;">
+	<div><label>Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select></div>
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
 </div>
 <i>Note: If this function reports 'No records found' this normally means that there are no
-definitions in the selected database which are not already in the current database.<p>
-In version 3.0 this may also mean that the database is in a different format version which is not being read correctly
-</i>
+definitions in the selected database which are not already in the current database.</i>
+<p><i>In version 3.0 this may also mean that the database is in a different format version which is not being read correctly</i></p>
+
 <!-- TODO: need a check on format version and report if there is a difference in format version -->
 
 <br>&nbsp;<br>
@@ -423,6 +495,9 @@ function processAction(rtyID, action, rectypeName) {
 	}
 	strictImport = $("#strict").attr("checked");
 	noRecursion = $("#noRecursion").attr("checked");
+
+	//ARTEM: @todo all this to stuff to jquery ajax
+
 	var xmlhttp;
 	if (action.length == 0) {
 		document.getElementById("log").innerHTML="";
@@ -592,4 +667,4 @@ function dropTempDB(redirect) {
 </script>
 </div>
 </body>
-</head>
+</html>
