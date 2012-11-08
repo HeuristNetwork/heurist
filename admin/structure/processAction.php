@@ -20,6 +20,8 @@ $tempDBName = @$_GET["tempDBName"];
 $sourceDBName = @$_GET["sourceDBName"];
 $importRtyID = @$_GET["importRtyID"];
 $sourceDBID = @$_GET["sourceDBID"];
+$importRefdRectypes = @$_GET["noRecursion"] && $_GET["noRecursion"] == 1 ? false:true;
+$strictImport = @$_GET["strict"] && $_GET["strict"] == 1 ? true:false;
 $currentDate = date("d-m");
 $error = false;
 $importLog = array();
@@ -220,7 +222,7 @@ function importDetailType($importDty) {
 
 // function that translates all rectype ids in the passed string to there local/imported value
 function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
-	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRefdRectypes, $strictImport;
 	if (!$strRtyIDs) {
 		return "";
 	}
@@ -232,13 +234,15 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 	// Get recordtype data that has to be imported
 		$res = mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$importRtyID);
 		if(mysql_num_rows($res) == 0) {
-
 			makeLogEntry("<b>Warning</b> unrecognized Record-type", $importRtyID,
 			" referenced by $contextString in field type #$forDtyID. value ignored");
-			continue;
-			//$error = true;
+			if ($strictImport){
+				$error = true;
+			}else{
+				continue;
+			}
 			//IJ req DON't BOMB OUT return null; // missing rectype in importing DB
-		} else {
+		} else {// get retypeID from temp copy of remoteDB's structure
 			$importRty = mysql_fetch_assoc($res);
 /*****DEBUG****///error_log("tran srcRTY  =  ".print_r($importRty,true));
 		}
@@ -251,15 +255,19 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 					$importRty["rty_IDInOriginatingDB"] = $importRtyID;
 					$importRty["rty_NameInOriginatingDB"] = $importRty["rty_Name"];
 			}
-			//lookup rty in target DB
+			//lookup by conceptID rty in target DB
 			$resRtyExist = mysql_query("select rty_ID from ".$targetDBName.".defRecTypes ".
 							"where rty_OriginatingDBID = ".$importRty["rty_OriginatingDBID"].
 							" AND rty_IDInOriginatingDB = ".$importRty["rty_IDInOriginatingDB"]);
-							// Detailtype is not in target DB so import it
+			// Rectype is not in target DB so import it
 			if(mysql_num_rows($resRtyExist) == 0 ) {
 /*****DEBUG****///error_log("translateRtyIDS import rtyID - ".$importRty['rty_ID']);
-				$localRtyID = importRectype($importRty);
-				$msg = "as #$localRtyID";
+				if ($importRefdRectypes) {
+					$localRtyID = importRectype($importRty);
+					$msg = "as #$localRtyID";
+				}else{
+					$msg = "Referenced ID ($localRtyID) not found. Not importing - 'no Recursion' is set!";
+				}
 			} else {
 				$row = mysql_fetch_row($resRtyExist);
 				$localRtyID = $row[0];
@@ -267,10 +275,13 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 			}
 /*****DEBUG****///error_log($msgCat." $importRtyID to local ID $localRtyID ");
 			if (!$error){
-				makeLogEntry("Importing Record-type",$importRtyID, " referenced by $contextString in field type '$forDtyID'".$msg);
-				copyRectypeIcon($sourceDBName, $importRtyID, $localRtyID);
-
-				array_push($outputRtyIDs, $localRtyID); // store the local ID in output array
+				if (!$importRefdRectypes) {
+					makeLogEntry("Importing Record-type",$importRtyID, $msg);
+				}else{
+					makeLogEntry("Importing Record-type",$importRtyID, " referenced by $contextString in field type '$forDtyID'".$msg);
+					copyRectypeIcon($sourceDBName, $importRtyID, $localRtyID);
+					array_push($outputRtyIDs, $localRtyID); // store the local ID in output array
+				}
 			}
 		}
 		if ($error) {
