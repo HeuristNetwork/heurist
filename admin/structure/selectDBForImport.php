@@ -25,14 +25,18 @@
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 
+		<link rel=stylesheet href="../../common/css/global.css">
+		<link rel=stylesheet href="../../common/css/admin.css">
+
 		<style type="text/css">
 			.yui-skin-sam .yui-dt-liner { white-space:nowrap; }
 			.button {padding:2px; width:auto; height:15px !important}
 			button.button {width:auto;}
+			.yui-dt-highlighted{
+				cursor:pointer !important;
+			}
 		</style>
 
-		<link rel=stylesheet href="../../common/css/global.css">
-		<link rel=stylesheet href="../../common/css/admin.css">
 	</head>
 
 	<body class="popup yui-skin-sam" style="overflow: auto;">
@@ -100,7 +104,7 @@
 				mysql_connection_db_insert(DATABASE); // Connect to the current database
 
 				// Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
-				$reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
+				$reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
 				$data = loadRemoteURLContent($reg_url);
 
 				if($data) {
@@ -116,6 +120,11 @@
 					$data = json_decode($data);
 					foreach($data as $registeredDB) {
 						if($ownDBID != $registeredDB->rec_ID) {
+
+							if(array_key_exists('version',$registeredDB) &&	($registeredDB->version==null || $registeredDB->version<HEURIST_DBVERSION))
+							{
+								continue;
+							}
 
 							$rawURL = $registeredDB->rec_URL;
 							$splittedURL = explode("?", $rawURL);

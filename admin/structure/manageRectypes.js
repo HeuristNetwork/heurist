@@ -366,7 +366,7 @@ function RectypeManager() {
 									"</div>";
 					elLiner.innerHTML = icon;
 			}},
-			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
+			{ key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("name");
 					var tit = "";
@@ -374,7 +374,7 @@ function RectypeManager() {
 						tit = str;
 						str = str.substr(0,25)+"&#8230";
 					}
-					elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label title="'+tit+'">'+str+'</label></a>';
+					elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
 			}},
 			{ key: "description", label: "Description", sortable:false, minWidth:200, width:200,
 				formatter: function(elLiner, oRecord, oColumn, oData) {

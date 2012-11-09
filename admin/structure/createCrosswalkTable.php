@@ -17,6 +17,7 @@
 		return;
 	}
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 	mysql_connection_db_insert($tempDBName); // Use temp database
 
@@ -177,6 +178,7 @@ echo 'var URLBase = "'.HEURIST_URL_BASE.'";'. "\n";
 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
+echo "var dtlookups = ".json_format(getDtLookups(),true). ";\n";
 ?>
 var myDataTable;
 var myDataSource;
@@ -189,7 +191,18 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		var myColumnDefs = [
 			{ key:"arrow", label:"click for details ...", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
 			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
-			{ key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false },
+			{ key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false, formatter:function(elLiner, oRecord, oColumn, oData) {
+					var grpid = oRecord.getData("rtyRecTypeGroupID");
+					elLiner.innerHTML = "group #"+grpid+" not found";
+					var index;
+					for (index in rectypeGroups) {
+							if( !isNaN(Number(index)) && rectypeGroups[index].id==grpid) {
+								elLiner.innerHTML = rectypeGroups[index].name;
+								break;
+							}
+					} //for
+			}
+			},
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
 			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:150 },
 			{ key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'><u>Potential dupes in this DB</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
@@ -256,7 +269,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 						info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +
 								"><td>" + (rectypeStructures[rty_ID][i][5] == 1? "(imported) " : "") + rectypeStructures[rty_ID][i][0] +
 								"</td><td>" + rectypeStructures[rty_ID][i][1] +
-								"</td><td>" + rectypeStructures[rty_ID][i][2] +
+								"</td><td>" + dtlookups[rectypeStructures[rty_ID][i][2]] +
 								"</td><td class=\"status\">" + dtyStatus + "</td></tr>";
 					}
 					info += "</table><br />";
@@ -337,7 +350,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 	var filterByGroup = document.getElementById("inputFilterByGroup");
 	var index;
-
 	for (index in rectypeGroups) {
 			if( !isNaN(Number(index)) ) {
 

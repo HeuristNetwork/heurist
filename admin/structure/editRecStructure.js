@@ -165,7 +165,7 @@ function EditRecStructure() {
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					if(Number(_expandedRecord) !== Number(oRecord.getData("rst_ID"))){
-						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>";
+						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png' style='cursor:pointer;'>";
 					}
 				}
 			},

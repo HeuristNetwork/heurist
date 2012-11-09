@@ -175,6 +175,8 @@ function initPage() {
 function isChanged(){
   if(_fileuploaded){
   		return true;
+  }else if (Hul.isempty(_filedata)){
+  		return false;
   }else{
   		var src = document.getElementById("cbSource").value;
 
@@ -182,7 +184,7 @@ function isChanged(){
   		if(mt=="unknown") mt = "";
 
   		if(src!=='heurist' && !Hul.isempty(curr_link)){
-			 return (Hul.isempty(_filedata) ||
+			 return (
 			 _filedata.remoteURL != curr_link ||
 			 _filedata.remoteSource != src ||
 			 _filedata.mediaType != mt);

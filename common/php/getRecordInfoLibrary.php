@@ -684,18 +684,18 @@ function getAllRectypeConstraint() {
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
 			$cnstrnts[$srcID]['byTerm'][$trmID]= array($trgID=>array('limit'=>$max));
 		}
-		
+
 		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
 			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>array('limit'=>$max, "notes"=>$notes));
 		}else if (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
 			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max, "notes"=>$notes);
 		}
-		
+
 		if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {
 			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = array('limit'=>$max);
 			//$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit'=>$max, "notes"=>$notes);
 		}
-		
+
 		if (@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['addsTo']) {
 			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['limit'] = $max;
 		}
@@ -990,10 +990,10 @@ function getAllRectypeStructures($useCachedData = false) {
 // After addition of new record - update this value
 //
 function updateRecTypeUsageCount(){
-	
+
 	$cacheKey = DATABASE.":AllRecTypeInfo";
 	$rtStructs = getCachedData($cacheKey);
-	if ($rtStructs) { 
+	if ($rtStructs) {
 		$usageCount = getRecTypeUsageCount();
 		$rtStructs['usageCount'] = $usageCount;
 		//save into cache
@@ -1231,6 +1231,29 @@ function getDetailTypeColNames() {
 					"dty_ConceptID");
 }
 
+function getDtLookups() {
+	return array(
+						"enum" => "Terms list",
+						"float" => "Numeric",
+						"date" => "Date / temporal",
+						"file" => "File",
+						"geo" => "Geospatial",
+						"freetext" => "Text (single line)",
+						"blocktext" => "Memo (multi-line)",
+						"resource" => "Record pointer",
+						"relmarker" => "Relationship marker",
+						"separator" => "Heading (no data)",
+						"calculated" => "Calculated (not yet impl.)",
+						// Note=> the following types are no longer deinable but may be required for backward compatibility
+						"relationtype" => "Relationship type",
+						//"fieldsetmarker" => "Field set marker",
+						"integer" => "Numeric - integer",
+						"year" => "Year (no mm-dd)",
+						//"urlinclude" => "File/URL of include content",
+						"boolean" => "Boolean (T/F)");
+}
+
+
 // returns an array of RecType Structures for all RecTypes
 function getAllDetailTypeStructures($useCachedData = false) {
 	global $dbID;
@@ -1250,25 +1273,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'usageCount' => getDetailTypeUsageCount(),
 						'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
 											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())),
-						'lookups' => array(
-						"enum" => "Terms list",
-						"float" => "Numeric",
-						"date" => "Date / temporal",
-						"file" => "File",
-						"geo" => "Geospatial",
-						"freetext" => "Text (single line)",
-						"blocktext" => "Memo (multi-line)",
-						"resource" => "Record pointer",
-						"relmarker" => "Relationship marker",
-						"separator" => "Heading (no data)",
-						"calculated" => "Calculated (not yet impl.)",
-						// Note=> the following types are no longer deinable but may be required for backward compatibility
-						"relationtype" => "Relationship type",
-						//"fieldsetmarker" => "Field set marker",
-						"integer" => "Numeric - integer",
-						"year" => "Year (no mm-dd)",
-						//"urlinclude" => "File/URL of include content",
-						"boolean" => "Boolean (T/F)") );
+						'lookups' =>  getDtLookups());
 
 
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());

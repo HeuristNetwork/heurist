@@ -133,6 +133,9 @@ body.popup #page-inner {
 .yui-navset {
 	width: 100%;
 }
+.yui-dt-highlighted{
+	cursor:auto !important;
+}
 tr.yui-dt-odd, tr.yui-dt-even {
 	height:30px
 }

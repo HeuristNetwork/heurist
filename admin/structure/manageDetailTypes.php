@@ -58,7 +58,11 @@ if (!is_admin()) {
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-
+		<style>
+.yui-dt-highlighted{
+	cursor:auto !important;
+}
+		</style>
 	</head>
 
 	<body class="popup yui-skin-sam">
