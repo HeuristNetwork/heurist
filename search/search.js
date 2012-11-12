@@ -82,6 +82,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch(clearLabel);
 		top.HEURIST.search.setBodyClass();
+
 	},
 
 	searchNotify: function(results) {
@@ -244,20 +245,27 @@ top.HEURIST.search = {
 			lbl.innerHTML = "Search results";
 			lbl.title = params['q'];
 		}
-		iframeElt.style.border = "0";
-		iframeElt.style.width = "0";
-		iframeElt.style.height = "0";
-		iframeElt.frameBorder = 0;
-		iframeElt.style.position = "absolute";
-		iframeElt.src = top.HEURIST.basePath+"search/getResultsPageAsync.php?" +
-			("w=" + encodeURIComponent(params["w"])) + "&" +
+
+		top.HEURIST.currentQuery_main = ("w=" + encodeURIComponent(params["w"])) + "&" +
 			("stype=" + (params["stype"] ? encodeURIComponent(params["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
 			("q=" + encodeURIComponent(params["q"]))+
 			("&db=" + (params['db'] ? params['db'] :
 					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
 
+		if(top.HEURIST.util.getDisplayPreference("searchQueryInBrowser") == "true"){
+			window.history.pushState("object or string", "Title", location.pathname+'?'+ top.HEURIST.currentQuery_main);
+		}
+
+		iframeElt.style.border = "0";
+		iframeElt.style.width = "0";
+		iframeElt.style.height = "0";
+		iframeElt.frameBorder = 0;
+		iframeElt.style.position = "absolute";
+		iframeElt.src = top.HEURIST.basePath+"search/getResultsPageAsync.php?" + top.HEURIST.currentQuery_main;
+
 		document.body.appendChild(iframeElt);
+
 	},
 
 	loadSearchParameters: function() {

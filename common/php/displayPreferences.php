@@ -75,6 +75,7 @@ $prefs = array(
     // Properties which can be set in the My profile > Preferences dialogue
 	"savedSearchDest" => "",  //last saved search destination (workgroup id)
 	"defaultSearch" => "tag:Favourites",
+	"searchQueryInBrowser" => "true",
 
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue

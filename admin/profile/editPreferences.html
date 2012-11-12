@@ -69,6 +69,9 @@
 		var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
 		if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
 		document.getElementById("report-output-limit").value = mol;
+
+		var showquery = top.HEURIST.util.getDisplayPreference("searchQueryInBrowser");
+        document.getElementById("showSearchQueryInBrowser").checked = (showquery!=='false');
 	}
 
 	function save() {
@@ -85,6 +88,7 @@
         var agg = (document.getElementById("showAggregations").checked)?'true':'false';
         var navi = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
         var favsrch = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
+        var showquery = (document.getElementById("showSearchQueryInBrowser").checked)?'true':'false';
 
 
 		if (isNaN(rpp) || rpp < 1 || rpp > 500) {
@@ -118,6 +122,7 @@
         top.HEURIST.util.setDisplayPreference("showNavMenuAlways", navi);
         top.HEURIST.util.setDisplayPreference("showFavouritesSearch", favsrch);
         top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
+        top.HEURIST.util.setDisplayPreference("searchQueryInBrowser", showquery);
 		window.close();
 	}
   </script>
@@ -143,30 +148,23 @@
    </div>
    <div class="input-row">
 	<div class="input-header-cell">Load related records below search <br>(leave off if not required)</div><div class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
-  </div>
-    <div class="input-row">
-    <div class="input-header-cell">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
+    <div class="input-header-cell" style="padding-left: 50px;">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
   </div>
    <div class="input-row">
     <div class="input-header-cell">Automatically deselect when changing active level in search</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
-  </div>
-   <div class="input-row">
-    <div class="input-header-cell">Show Aggregations link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showAggregations"></div>
+    <div class="input-header-cell" style="padding-left: 50px;">Show Aggregations link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showAggregations"></div>
   </div>
    <div class="input-row">
     <div class="input-header-cell">Show Navigation menu in search screen even when navigation panel is open</div><div  class="input-cell"><input type="checkbox" id="showNavMenuAlways"></div>
-  </div>
-   <div class="input-row">
-    <div class="input-header-cell">Show Favourites link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showFavouritesSearch"></div>
+    <div class="input-header-cell" style="padding-left: 50px;">Show Favourites link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showFavouritesSearch"></div>
   </div>
   <div class="input-row">
     <div class="input-header-cell">Show My Bookmarks section in the search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showMyBookmarks"></div>
-  </div>
-  <div class="input-row">
-	<div class="input-header-cell">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+	<div class="input-header-cell" style="padding-left: 50px;">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
   </div>
    <div class="input-row">
     <div class="input-header-cell">When exiting record edit, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
+    <div class="input-header-cell" style="padding-left: 50px;">Show current search query in browser search field</div><div  class="input-cell"><input type="checkbox" id="showSearchQueryInBrowser"></div>
   </div>
 
   <div id="buttons" class="actionButtons">
