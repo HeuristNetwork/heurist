@@ -232,6 +232,13 @@ function clearViewer(container){
 }
 
 //
+// Main function - create viewer in given container for given url
+// simple_js_viewer for images
+// embed for video
+// or youtube player
+//
+// If _recordID is defined it loads related annotations (see imageAnnotation.js)
+//
 function showViewer(container, url_and_cfg, _recordID){
 
 	   var acfg;

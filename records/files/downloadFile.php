@@ -37,6 +37,7 @@ $type_source = $filedata['remoteSource'];
 $type_media = $filedata['mediaType'];
 
 $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
+$isannotation_editor = (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE') && @$_REQUEST['annedit']=='yes');
 
 /*****DEBUG****///error_log(">>>>>".$type_media."   ".$isplayer);
 
@@ -64,7 +65,9 @@ if($isplayer){
 	{
 			$size = 'width="'.$width.'" height="'.$height.'"';
 
-			$text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
+			$annot_edit = ($isannotation_editor)?'&annedit=yes':'';
+
+			$text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].$annot_edit.'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
 
 			print $text;
 	}

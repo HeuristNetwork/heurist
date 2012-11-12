@@ -11,12 +11,16 @@
  */
 var image_digitizer_container;
 
-function ImageAnnotation(self, _recID) {
+//
+// imageviewer - container to add annotations
+// _recID - search annotation for thios record
+//
+function ImageAnnotation(imageviewer, _recID) {
 
 	var _className = "ImageAnnotation",
 		_markers,
 		_markers_div = [],
-		_imageviewer = self,
+		_imageviewer = imageviewer,
 		_selAnnotations, lblInfo, _selRectypes,
 		_isModeAddPoint = false,
 		_isModeAddRect = 0,
@@ -25,7 +29,7 @@ function ImageAnnotation(self, _recID) {
 
 	function _init(){
 
-		if(image_digitizer_container){
+		if(image_digitizer_container){ //editor panel
 
 		var edittoolbar = document.createElement('div');
 
@@ -192,7 +196,7 @@ function ImageAnnotation(self, _recID) {
 			}
 
 			_markers = [];
-			if(_selAnnotations){
+			if(_selAnnotations){ //clear
 				while (_selAnnotations.length>0){
 						_selAnnotations.remove(0);
 				}
@@ -220,10 +224,13 @@ function ImageAnnotation(self, _recID) {
 
 					if(!top.HEURIST.util.isempty(area)){ //temp && area.indexOf("i:")==0){
 
-						if(area.indexOf("i:")<0) area = "i:"+area;
+						//if(area.indexOf("i:")<0) area = "i:"+area;
 						//area = area+":";
 
 						area = area.split(":");
+						if(area.length>0 && !isNaN(Number(area[0]))) {
+							area.splice(0,0,"i");
+						}
 						if(area.length>2){
 							var x0 = Number(area[1]),
 								y0 = Number(area[2]),
@@ -244,8 +251,13 @@ function ImageAnnotation(self, _recID) {
 					}
 
 				}
+			}//for
+
+			if(_selAnnotations && _selAnnotations.length>0){
+				_selAnnotations.selectedIndex = 0;
+				_hightlighSelection(null);
 			}
-		}
+		}//end callback
 
 		var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
 		var callback = _updateList;
@@ -258,36 +270,40 @@ function ImageAnnotation(self, _recID) {
 	//
 	function getAnnotationRectypes(){
 
-		function _updateAnnList(context){
+			function _updateAnnList(context){
 
-			if(!context) {
-				alert("An error occurred trying to contact the database");
-			}else{
+				if(!context) {
+					alert("An error occurred trying to contact the database");
+				}else{
 
-				var ind, k = 0;
+					var ind, k = 0, isAllowed = false;;
 
-				for(ind in context)
-				{
-					if(!top.HEURIST.util.isnull(ind)){
-						var item = context[ind];
-						top.HEURIST.util.addoption(_selRectypes, item['id'], item['name']);
+					for(ind in context)
+					{
+						if(!top.HEURIST.util.isnull(ind)){
+							var item = context[ind];
+							isAllowed = true;
+							if(_selRectypes){
+								top.HEURIST.util.addoption(_selRectypes, item['id'], item['name']);
+							}else{
+								break;
+							}
+						}
 					}
+
 				}
-
+				if(isAllowed){
+					_createAnnotations();
+				}else{
+					_noEditAllowed();
+				}
 			}
-			if(_selRectypes.length<1){
-				_noEditAllowed();
-			}else{
-				_createAnnotations();
-			}
-		}
 
-		if(_selRectypes){
 			var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
 			var callback = _updateAnnList;
 			var params = "listrt=1&db="+_db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
-		}
+
 	}
 
 
@@ -298,8 +314,8 @@ function ImageAnnotation(self, _recID) {
 		var k, mdiv;
 		for (k=0; k<_markers_div.length; k++){
 			mdiv  = _markers_div[k];
-			//mdiv.style.borderColor = (_selAnnotations.selectedIndex==k)?"#ff0000":"#00ff00";
-			mdiv.style.borderWidth = (_selAnnotations.selectedIndex==k)?"3px":"2px";
+			mdiv.style.borderColor = (_selAnnotations.selectedIndex==k)?"#ff0000":"#00ff00";
+			mdiv.style.borderWidth = (_selAnnotations.selectedIndex==k)?"3px":"1px";
 		}
 	}
 
@@ -396,7 +412,7 @@ function ImageAnnotation(self, _recID) {
 
 		var ind = _selAnnotations.selectedIndex;
 
-		if(ind<0 && ind>=_markers_div.length){
+		if(ind<0 || ind>=_markers_div.length){
 			return;
 		}
 

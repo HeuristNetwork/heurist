@@ -93,10 +93,16 @@ var replaceRecTypeName = "";
 		$nameInTempDB = mysql_real_escape_string($rectype["rty_Name"]);
 
 		// Find recordtypes that are already in the local DB (comparing OriginatingDBID and IDInOriginatingDB
-		$identicalMatches = mysql_query("select rty_ID from " . DATABASE . ".defRecTypes where rty_OriginatingDBID = $OriginatingDBID AND rty_IDInOriginatingDB = $IDInOriginatingDB");
+		$cnt_identical = 0;
 
-		// These rectypes are not in the importing database
-		if(!mysql_num_rows($identicalMatches)) {
+		if($OriginatingDBID>0 && $IDInOriginatingDB>0){
+			$identicalMatches = mysql_query("select rty_ID, rty_Name from " . DATABASE . ".defRecTypes where rty_OriginatingDBID = $OriginatingDBID AND rty_IDInOriginatingDB = $IDInOriginatingDB");
+			// These rectypes are not in the importing database
+			$cnt_identical = mysql_num_rows($identicalMatches);
+		}
+
+
+		if(!$cnt_identical) {
 			$approxMatchesRes = mysql_query("select rty_Name, rty_Description from " . DATABASE . ".defRecTypes where (rty_Name like '%$nameInTempDB%')"); // TODO: if rectype is more than one word, check for both words
 			$numberOfApproxMatches = mysql_num_rows($approxMatchesRes);
 			// Add all approximate matches to a javascript array
@@ -111,6 +117,16 @@ var replaceRecTypeName = "";
 					}
 				}
 			}
+		}else{
+
+			if($cnt_identical==1){
+				$rr = mysql_fetch_row($identicalMatches);
+				$numberOfApproxMatches = "#".$rr[0]." ".$rr[1];
+			}else{
+				$numberOfApproxMatches = -$cnt_identical; //identical
+			}
+
+		}
 			// Add recordtypes to the table
 			/*array_push($tableRows,array('arrow'=>"<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
 										'rtyID'=>$rectype["rty_ID"],
@@ -124,7 +140,6 @@ var replaceRecTypeName = "";
 										$numberOfApproxMatches,
 										"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
 										$rectype["rty_RecTypeGroupID"]));
-		}
 	}
 
 echo "var approxRectypes = ".json_format($approxMatches,true). ";\n";
@@ -189,7 +204,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 	YAHOO.example.Basic = function() {
 		// Create the columns. Arrow contains the collapse/expand arrow, rtyID is hidden and contains the ID, rectype contains the name, matches the amount of matches and a tooltip, import a button
 		var myColumnDefs = [
-			{ key:"arrow", label:"click for details ...", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
+			{ key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
 			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
 			{ key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false, formatter:function(elLiner, oRecord, oColumn, oData) {
 					var grpid = oRecord.getData("rtyRecTypeGroupID");
@@ -205,7 +220,20 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			},
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
 			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:150 },
-			{ key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'><u>Potential dupes in this DB</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
+			{ key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'><u>Potential dupes in this DB</u></span>",
+					sortable:true, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
+
+					var dup = oRecord.getData("matches");
+					if(dup<0){
+						elLiner.innerHTML = 'identical to '+Math.abs(dup)+' types';
+					}else if (isNaN(Number(dup))){
+						elLiner.innerHTML = 'identical: '+dup;
+					}else if (dup>0){
+						elLiner.innerHTML = 'same name for: '+dup+' types';
+					}else{
+						elLiner.innerHTML = '';
+					}
+			}}
 			];
 
 		//myDataSource = new YAHOO.util.DataSource();
@@ -223,12 +251,20 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 										if (req) {
 
+											var fvals = req.split("|");
+
+											var sByGroup  = fvals[0];
+											var showIdentical = (fvals[1]==="1");
 
 											for (i = 0, l = data.length; i < l; ++i)
 											{
-												if (req==="all" || data[i].rtyRecTypeGroupID===req)
-												{
-													filtered.push(data[i]);
+												if (showIdentical ||
+														!(data[i].matches<0 || isNaN(Number(data[i].matches))))
+												{//show all or non identical only
+													if (sByGroup==="all" || data[i].rtyRecTypeGroupID===sByGroup)
+													{
+														filtered.push(data[i]);
+													}
 												}
 											}
 											res.results = filtered;
@@ -360,7 +396,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			}
 	} //for
 	filterByGroup.onchange = _updateFilter;
+	var filterByExist = document.getElementById("inputFilterByExist");
+	filterByExist.onchange = _updateFilter;
 
+	_updateFilter();
 });
 
 //
@@ -375,9 +414,10 @@ function _updateFilter(){
 							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};*/
 
 							var filter_group = document.getElementById("inputFilterByGroup").value;
+							var filterByExist = document.getElementById("inputFilterByExist").checked?"1":"0";
 
 							// Get filtered data
-							myDataSource.sendRequest(filter_group, {
+							myDataSource.sendRequest(filter_group+"|"+filterByExist, {
 								success : myDataTable.onDataReturnInitializeTable,
 								failure : myDataTable.onDataReturnInitializeTable,
 								scope   : myDataTable,
@@ -464,7 +504,10 @@ function _hideToolTip(){
 <!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
 -->
 <div id="crosswalk" style="width:100%;margin:auto;">
-	<div><label>Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select></div>
+	<div>
+		<label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select>&nbsp;&nbsp;
+		<label for="inputFilterByExist">Show identical record types:&nbsp;</label><input id="inputFilterByExist" type="checkbox"/>
+	</div>
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>

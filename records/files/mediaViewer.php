@@ -61,9 +61,11 @@ if (@$_REQUEST['ulf_ID']){
 <script type="text/javascript" src="../../external/js/simple_js_viewer/script/extension/toolbar-ext.js"></script>
 <link rel="stylesheet" type="text/css" href="../../external/js/simple_js_viewer/script/extension/toolbar-ext.css" />
 
+<link rel=stylesheet href="../../common/css/global.css">
+
 </head>
 
-<body>
+<body class="popup">
 
 <script>
 
@@ -218,8 +220,16 @@ if (@$_REQUEST['ulf_ID']){
 <script type="text/javascript" src="../../records/files/initViewer.js"></script>
 <script type="text/javascript" src="../../records/files/imageAnnotation.js"></script>
 
-<div id="mediaviewer"></div>
-
+<?php
+if(@$_REQUEST['annedit']=='yes'){
+	 echo '<div id="mediaviewer" style="position:absolute;top:0;bottom:22px;left:0px;right:0px;"></div>';
+?>
+<div id="image_digitizer_container" style="text-align:center;position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
+<?php
+}else{
+	 echo '<div id="mediaviewer"></div>';
+}
+?>
 <script type="text/javascript">
 	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>);
 </script>

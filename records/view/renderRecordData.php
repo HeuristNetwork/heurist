@@ -423,6 +423,10 @@ function print_private_details($bib) {
 					$isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
 					if (is_image($filedata) || $isplayer)
 					{
+						if($isplayer && is_image($filedata) && is_logged_in()){
+							$filedata['playerURL'] .= "&annedit=yes";
+						}
+
 						array_push($thumbs, array(
 							'id' => $filedata['id'],
 							'url' => $filedata['URL'],   //download

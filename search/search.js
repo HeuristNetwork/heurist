@@ -2328,7 +2328,7 @@ top.HEURIST.search = {
 		//send selectionChange event
 		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
 		var recordFrame = document.getElementById("record-view-frame");
-		if ((typeof _tabView!=="undefined") && (_tabView!==null)) {
+		if (!top.HEURIST.util.isnull(_tabView)){ // (typeof _tabView!=="undefined") && (_tabView!==null)) {
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 			if(currentTab==_TAB_RECORDVIEW) {
 				if (!selectedRecIDs.length){
@@ -2993,7 +2993,7 @@ top.HEURIST.search = {
 			top.HEURIST.currentQuery_main = query_string_main;
 
 
-			if ((typeof _tabView==="undefined") || (_tabView===null)) return;
+			if (top.HEURIST.util.isnull(_tabView)) return;
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 			if(!(currentTab==_TAB_MAP || currentTab==_TAB_SMARTY)) return;
 
@@ -4334,7 +4334,7 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_PIPELINE']] &&
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
-			if(_tabView){
+			if(!top.HEURIST.util.isnull(_tabView)){
 				_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
 			}
 		}

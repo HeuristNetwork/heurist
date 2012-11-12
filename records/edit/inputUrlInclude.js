@@ -90,7 +90,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 	if(bdValue){
 		if(bdValue.file){
 			//new way
-			valueHidden = YAHOO.lang.JSON.stringify(bdValue.file);
+			valueHidden = JSON.stringify(bdValue.file); // YAHOO.lang.
 
 			if(bdValue.file.remoteURL){
 				//remote resource
