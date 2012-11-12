@@ -211,7 +211,7 @@
 			var wootTitle = "bookmark:" + parent.HEURIST.edit.record.bkmkID;
 			var recTitle = parent.HEURIST.edit.record.title + " - private notes";
 
-			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
+			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle + "&db=" + db;
 
 //			HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "(empty chunk)";
 			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, element: document.getElementById("personalWoot") });

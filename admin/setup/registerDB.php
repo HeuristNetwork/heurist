@@ -139,7 +139,7 @@
 					$usrPassword = rawurlencode($usrPassword);
 					$dbDescriptionEncoded = rawurlencode($dbDescription);
 					$reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
-					"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
+					"?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
 					"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 					"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 
@@ -152,7 +152,7 @@
 					if ($dbID == 0) { // Unable to allocate a new database identifier
 						$decodedData = explode(',', $data);
 						$errorMsg = $decodedData[0];
-						error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID is 0');
+						error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
 						$msg = "Problem allocating a database identifier from the Heurist index.\n" .
 						"Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 						echo $msg . "<br />";

@@ -64,8 +64,7 @@ $processed_count = 0;
 <body class="popup">
 <p>
 	The composite record title mask has been changed.
- 	You need to rebuild the titles of existing records.
- 	Rebuild record titles for <b><?=implode(',',$rt_names)?></b>
+ 	Rebuilding record titles for <b><?=implode(',',$rt_names)?></b>
 </p>
 <p>This will take some time for large databases.</p>
 <!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
@@ -202,5 +201,8 @@ ob_flush();
 flush();
 
 ?>
+<div style="color: red;padding-top:10px;">
+If the titles of other record types depend on these titles, you should run Designer View > Utilities > Rebuild record titles to rebuild all record titles in the database
+<div>
 </body>
 </html>

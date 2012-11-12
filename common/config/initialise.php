@@ -81,7 +81,7 @@
 	define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix']? $_REQUEST['prefix'] : $dbPrefix)); //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
 	define('HEURIST_SYSTEM_DB', $dbPrefix."HeuristSystem");	// database which contains Heurist System level data - deprecated
 	define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/");	// Heurist Installation which contains reference structure definitions (registered DB # 3)
-	define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/");	// Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
+	define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3-ao/");	//@todo: CHANGE TP h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 	define('HEURIST_SYS_GROUP_ID', 1);	// ID of Heurist System User Group which has special privileges - deprecated, although more generally group 1 on every database is the database owners group
 	/*****DEBUG****///error_log("in initialise dbHost = $dbHost");
 	//test db connect valid db

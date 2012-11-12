@@ -271,7 +271,7 @@
 
 			if(!is_writable($dir)){
 				//$rep_issues = "Folder ".$dir." is not writable. Check permissions";
-				print "<div style=\"color:red\">Folder is not writable. Check permissions</div>";
+				print "<div style=\"color:red\">Folder is not writeable. Check permissions</div>";
 				return 0;
 			}
 
@@ -499,7 +499,7 @@
 						print "<div>$rep_processed records created</div>";
 					}
 					if($rep_ignored>0){
-						print "<div>$rep_ignored entries in manifest ignored</div>";
+						print "<div>$rep_ignored files already indexed</div>";
 						//$rep_issues=$rep_issues."<br> $rep_ignored entries in manifest are ignored for ".$dir;
 					}
 				}

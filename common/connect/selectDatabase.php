@@ -36,7 +36,7 @@
 <h2><?=$msg?></h2>
 Please select the desired database from the list or <a href="../../admin/setup/createNewDB.php">Create New Database</a>
 </div>
-<div id="loginDiv" style="height:auto; margin-top:44px; overflow-y:auto;">
+<div id="loginDiv" style="height:auto; margin-top:44px; overflow-y:auto;text-align:left;">
 <ul class='dbList'>
 <?php
 	$list = mysql__getdatabases(false);
