@@ -256,10 +256,13 @@ function showViewer(container, url_and_cfg, _recordID){
 	   var sUrl = acfg[0];
 	   var sType;
 	   var sSource;
+	   var extension;
+
 	   if(acfg.length<3){
 	   		var oType = detectSourceAndType(sUrl, null);
 	   		sType = oType.type;
 	   		sSource = oType.source;
+	   		extension = oType.extension;
 	   }else{
 	   		sSource = acfg[1];
 	   		sType = acfg[2];
@@ -291,6 +294,16 @@ function showViewer(container, url_and_cfg, _recordID){
 					imageSource: sUrl,
 					frame: ['100%','100%']
 			});
+
+
+		}else if (sType === "document"){
+
+			var mimeType = '';
+			if(extension==='pdf'){
+				mimeType = 'type="application/pdf"';
+			}
+
+			container.innerHTML = '<embed width="100%" height="100%" name="plugin" src="'+sUrl+'" '+mimeType+'>';
 
 		}else if (sType === "video"){
 

@@ -167,15 +167,21 @@ function ImageAnnotation(imageviewer, _recID) {
 		//d.style.backgroundColor = clr;
 		d.style.zIndex=999;
 		d.title = top.HEURIST.util.isempty(params[5])?params[4]:params[5];
-		if(params[4].indexOf('http')==0){
-			d.onclick = function(event){
+
+		d.style.cursor = "pointer";
+		d.onclick = function(event){
 					var k = Number(event.target.id.substr(6));
 					var url = _markers[k][4];
+
+					if(url.indexOf('http')!=0){
+						url = "../../search/search.html?q=ids:"+_markers[k][6]+"&db="+_db;
+					}
+
 					if(!top.HEURIST.util.isempty(url)){
 						window.open(url, '_blank')
 					}
-			};
-		}
+		};
+
 		/*d.onmousewheel = function(event,object,direction) {
 					self.onmousewheel(event,object,direction);
 		};*/

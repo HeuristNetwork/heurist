@@ -678,7 +678,9 @@
 			//@todo - add special parameters for specific sources and media types
 			// QUESTION - store it in database? Or create on-fly??
 			//
-			if($res["remoteSource"]=="youtube" || $res["mediaType"]=="image" || $res["mediaType"]=="video" || $res["mediaType"]=="audio"){
+			if($res["remoteSource"]=="youtube" || $res["mediaType"]=="image" || $res["ext"] == "pdf" ||
+					$res["mediaType"]=="video" || $res["mediaType"]=="audio"
+			){
 				$res["playerURL"] =	$downloadURL."&player=yes";
 			}
 

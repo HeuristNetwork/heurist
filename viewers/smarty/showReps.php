@@ -922,6 +922,12 @@ function smarty_function_wrap($params, &$smarty)
 						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
 					}else if($value['remoteSource']=='youtube' ){
 						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+
+					}else if($type_media=='document' && $value['mimeType']){
+
+						$sres = $sres.'<embed $size name="plugin" src="'.$value['URL'].'" type="'.$value['mimeType'].'" />'
+
+
 					}else if($type_media=='video'){
 						//UNFORTUNATELY HTML5 dores not work properly
 						// $sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
