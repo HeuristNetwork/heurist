@@ -305,6 +305,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 						newIframe.contentWindow.close = newIframe.close;	// make window.close() do what we expect
 						newIframe.contentWindow.popupOpener = parentWindow;	// make a persistent reference to the popup opener
 						newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
+
+						top.HEURIST.util.setHelpDiv(helpDiv);
 					} catch (e) { }	// might get cross-domain woes
 				});
 
@@ -315,7 +317,6 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(closeDiv, "click", function() { newIframe.close(); });
 			}
 			if (! options["no-help"]) {
-				top.HEURIST.util.setHelpDiv(helpDiv);
 				top.HEURIST.registerEvent(helpDiv, "click", function() { top.HEURIST.util.helpToggler(helpDiv); });
 			}
 
@@ -1326,26 +1327,39 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
     setHelpDiv: function(helpDiv){
+
+        var helpStatus = (top.HEURIST.displayPreferences)?top.HEURIST.util.getDisplayPreference("help"):null;
+        if(top.HEURIST.util.isempty(helpStatus)){
+			helpStatus = "show";
+		}
+
         if(!top.HEURIST.util.isnull(helpDiv))
         {
-                var alts2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
-                var alts1 = { "hide": "<span>Show Help</span>", "show": "<span>Hide Help</span>" };
+                var alts_2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
+                var alts_1 = { "hide": "<span>Show Help</span>", "show": "<span>Hide Help</span>" };
 
-                var helpStatus = top.HEURIST.util.displayPreferences?top.HEURIST.util.getDisplayPreference("help"):'show';
-                helpDiv.title = alts2[helpStatus];
-                helpDiv.innerHTML = alts1[helpStatus];
+               	helpDiv.title = alts_2[helpStatus];
+               	helpDiv.innerHTML = alts_1[helpStatus];
         }
+
+		//init class for body element
+		top.HEURIST.displayPreferences["help"] =  helpStatus=="show"?"hide":"show";
+		top.HEURIST.util.setDisplayPreference("help", helpStatus);
     },
 
 	helpToggler: function(helpDiv) {
 		var u = top.HEURIST.util;
+		var helpStatus = u.getDisplayPreference("help");
 
-		if (u.getDisplayPreference("help") === "hide") {
-			u.setDisplayPreference("help", "show");
+		if (helpStatus === "hide") {
+			top.HEURIST.displayPreferences["help"] =  "show";
+			//u.setDisplayPreference("help", "show");
 		}
 		else {
-			u.setDisplayPreference("help", "hide");
+			top.HEURIST.displayPreferences["help"] =  "hide";
+			//u.setDisplayPreference("help", "hide");
 		}
+
         u.setHelpDiv(helpDiv);
 	},
 

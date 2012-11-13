@@ -44,6 +44,14 @@
 
 				}
 		</script>
+		<style>
+			.row {
+				cursor:pointer;
+			}
+			.row:hover {
+				background-color: #CCCCCC;
+			}
+		</style>
 	</head>
 	<body class="popup">
 		<table border="1" cellpadding="4" cellspacing="2" width="100%">
@@ -63,7 +71,7 @@
 
 		$img = "<img src='../common/images/16x16.gif' title='$rectypeTitle' ".$rectypeImg." class='rft' />";
 
-		echo "<tr style='cursor:pointer;' onclick='{onrowclick($rt_ID)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td align='right'>".$row[1]."</td></tr>";
+		echo "<tr class='row' onclick='{onrowclick($rt_ID)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td align='right'>".$row[1]."</td></tr>";
 
 	}//end while
 ?>

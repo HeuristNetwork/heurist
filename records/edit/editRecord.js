@@ -110,6 +110,9 @@ top.HEURIST.edit = {
 				module.loading = false;
 				try {
 					newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
+
+					var helpLink = top.document.getElementById("help-link");
+      				top.HEURIST.util.setHelpDiv(helpLink);
 				} catch (e) { }
 			});
 
