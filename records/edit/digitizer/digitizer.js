@@ -2096,7 +2096,7 @@ function loadCoordinates(type, matches){
 
 	clearMap();
 
-	if(matches && matches.length>2){
+	if(matches && matches.length>0){
 
 	switch (type) {
 		case "p":
@@ -2176,7 +2176,7 @@ function loadCoordinates(type, matches){
 		    setTool(2);
 
 		    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-		    for (var j=0; j < matches.length-1; ++j) {
+		    for (var j=0; j < matches.length; ++j) {
 			    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
 			    var point = new google.maps.LatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
 			    points.push(point);
