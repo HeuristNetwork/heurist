@@ -394,6 +394,9 @@
 
 			<div id=left-panel-content class="panel-main-content">
                 <div id=saved>
+
+					<div class=search-type onclick="{top.HEURIST.search.showDatabaseSummary();}">Database Summary</div>
+
 					<div id=my-records-saved-searches class="sidebar-firstlevel hide">
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
@@ -475,6 +478,7 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 						<ul class="sf-menu"> <!-- was  id="tabs"  horizontal not-query-collected -->
 							<li id="menuNavigation"><div>Navigation</div>
 								<ul>
+									<li><a href="#" onclick='{top.HEURIST.search.showDatabaseSummary();}'>Database Summary</a>
 									<li><a href="#">My Bookmarks</a>
 										<ul id="menuBookmarks">
 											<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"&amp;label=My Favourites");}'>Favourites</a></li>
@@ -578,7 +582,6 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 
 			</div>
 			<div id="result-container">
-
 
 				<div id="result-header">
 						<label id="active-label"></label>

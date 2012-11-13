@@ -117,6 +117,9 @@ top.HEURIST.search = {
 	},
 
 	searchResultsNotify: function(newResults, startIndex) {
+
+		if(!top.HEURIST.search.results) return;
+
 		var rt,rec, recID;
 		for (var i=0; i < newResults.records.length; ++i) {// save the new results
 			top.HEURIST.search.results.infoByDepth[0].count++;
@@ -135,6 +138,8 @@ top.HEURIST.search = {
 		}
 
 		newResults.records = [];	//clear results
+
+		if(!top.HEURIST.search.results) return;
 
 		var loadedRecCount = top.HEURIST.search.results.infoByDepth[0].count;
 		// check if we've fully loaded the page we were expecting to render
@@ -160,6 +165,7 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
+		top.HEURIST.search.renderSummaryForLevel(0);
 
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
@@ -522,8 +528,8 @@ top.HEURIST.search = {
 		filterMenu.appendChild(viewStyleMenu);
 		top.HEURIST.search.setResultStyle(style,level);
 
-		var summaryDiv =  $(".summaryDiv",resultsDiv);
-		var isAddSummary = (summaryDiv.length == 0);
+
+		top.HEURIST.search.renderSummaryForLevel(level);
 
 		//create rectype filter menu
 		if (levelRecTypes){
@@ -555,12 +561,6 @@ top.HEURIST.search = {
 													(filterRtIDs.indexOf(parseInt(rtID)) != -1 ||
 														filterRtIDs.indexOf(rtID) != -1)? "checked ":'') + "level"+level;
 				rectypeList.appendChild(li);
-
-				if(isAddSummary){
-					var dd = top.HEURIST.search.renderSummary(rtID, levelRecTypes[rtID].length, level);
-					resultsDiv.appendChild(dd);
-				}
-
 			}
 
 			rectypeMenuItem.appendChild(rectypeList);
@@ -1008,6 +1008,57 @@ top.HEURIST.search = {
 				top.HEURIST.search.toggleRectypeFilter(menuItem, level, rt_ID);
 	},
 
+	/*
+	* Summary panel ---------------------------------------------
+	*/
+	showDatabaseSummary: function(){
+		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "db="+top.HEURIST.database.name : "");
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"search/databaseSummary.php?"+_db,{height:480, width:640});
+	},
+
+	searchByRecType: function(rt_ID, narrowcurrent){
+
+		var q = top.HEURIST.parameters["q"];
+		if(narrowcurrent && q){
+			if(q.indexOf("t:")<0){
+				q = q + " t:"+rt_ID;
+			}else{
+				return; //already filtered
+			}
+		}else{
+			q = "t:"+rt_ID;
+		}
+
+	 	document.getElementById("q").value = q;
+	 	top.HEURIST.search.submitSearchForm(true);
+	},
+
+
+	renderSummaryForLevel: function (level)
+	{
+		var resultsDiv =  $("#results-level" + level);
+		var summaryDiv =  $(".summaryDiv",resultsDiv);
+		if(summaryDiv.length > 0){
+			summaryDiv.remove();
+		}
+		resultsDiv =resultsDiv.get(0);
+
+		if(top.HEURIST.search.results){
+			var depthInfo = top.HEURIST.search.results.infoByDepth[level];
+			if(depthInfo)
+			{
+				var rtID;
+				for(rtID in depthInfo.rectypes) {
+					if(!top.HEURIST.util.isnull(rtID)){
+						var dd = top.HEURIST.search.renderSummary(rtID, depthInfo.rectypes[rtID].length, level);
+						resultsDiv.appendChild(dd);
+					}
+				}
+			}
+		}
+	},
+
+
 	renderSummary: function(rt_ID, cnt, level) {
 
 		var rectypeTitle = top.HEURIST.rectypes.names[parseInt(rt_ID)],
@@ -1024,19 +1075,22 @@ top.HEURIST.search = {
 				"<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
 			"</div>" +
 			"<div class='rectypeCount' title='Count of records'>"+ cnt +"</div>" +
-			"<div class='rectypeTitle' onclick='{top.HEURIST.search.filterByRecType("+level+","+rt_ID+");}'>"+
+			"<div class='rectypeTitle' onclick='{top.HEURIST.search.searchByRecType("+rt_ID+", true);}'>"+   //top.HEURIST.search.filterByRecType("+level+","+rt_ID+");}'>"+
 				rectypeTitle +
 				newSearchWindow +
 			"</div>";
 
 		var resultsDiv = document.createElement("div");
 		resultsDiv.className = 'summaryDiv';
-		resultsDiv.title = 'Click to filter the result by this record type';
+		resultsDiv.title = 'Click to search by this record type';
 		//resultsDiv.onclick = function(){ top.HEURIST.search.filterByRecType(level,rt_ID) };
 		resultsDiv.innerHTML = html;
 
 		return resultsDiv;
 	},
+	/*
+	* END Summary panel ---------------------------------------------
+	*/
 
 	displaySearchParameters: function() {
 		// Transfer query components to their form elements
@@ -1184,6 +1238,7 @@ top.HEURIST.search = {
 	},
 
 	clearResultRows: function() {
+
 		var resultsPerPage = top.HEURIST.search.resultsPerPage;
 		$("#results-level0 div.recordDiv").remove();
 		if (top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") ==="false"){
@@ -1719,6 +1774,7 @@ top.HEURIST.search = {
 
 		if (document.getElementById("page-nav"))
 			document.getElementById("page-nav").innerHTML = innerHTML;
+
 	},
 
 	gotoPage: function(pageNum) {
@@ -2738,7 +2794,15 @@ top.HEURIST.search = {
 				top.HEURIST.search.applyFilterAndLayout(null);
 			}else{
 				top.HEURIST.parameters["q"] = document.getElementById("q").value = q;
-				top.HEURIST.parameters["w"] = document.getElementById("w-input").value = __getParam("w");
+
+				var w = __getParam("w");
+				if(top.HEURIST.is_logged_in() && w.indexOf("bookmark")>=0){
+					w = "bookmark";
+				}else{
+					w = "all";
+				}
+
+				top.HEURIST.parameters["w"] = document.getElementById("w-input").value = w;
 				top.HEURIST.parameters['label'] = __getParam("label");
 				top.HEURIST.search.submitSearchForm(false);
 			}

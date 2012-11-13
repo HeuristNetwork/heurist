@@ -54,8 +54,8 @@
 		if (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE')){
 
 			//find record types that suits to annotation: image area + pointer
-			$query = "select distinct d1.rst_RecTypeID as id, d1.rst_DisplayName as name from defRecStructure d1, defRecStructure d2 where ".
-			"d1.rst_RecTypeID = d2.rst_RecTypeID ".
+			$query = "select distinct d1.rst_RecTypeID as id, rt.rty_Name as name from defRecTypes rt, defRecStructure d1, defRecStructure d2 where ".
+			"rt.rty_ID=d1.rst_RecTypeID and d1.rst_RecTypeID = d2.rst_RecTypeID ".
 			" and d1.rst_DetailTypeID=".DT_ANNOTATION_RANGE.
 			" and d2.rst_DetailTypeID=".DT_ANNOTATION_RESOURCE;
 			///"d2.rst_DetailTypeID in (select dty_ID from defDetailTypes where dty_Type=\"resource\")";
