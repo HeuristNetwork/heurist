@@ -708,6 +708,7 @@ function dropTempDB(redirect) {
 	if(!dropped) {
 		dropped = true;
 		processAction(0, "drop");
+		alert("Dropping temporal database");
 	}
 	if(redirect) {
 		window.location = "selectDBForImport.php";

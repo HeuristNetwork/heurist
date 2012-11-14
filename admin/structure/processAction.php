@@ -27,6 +27,9 @@ $error = false;
 $importLog = array();
 
 mysql_connection_db_insert($targetDBName);
+
+error_log(">>>>>".$targetDBName."    ".$_GET["action"]);
+
 switch($_GET["action"]) {
 	case "crosswalk":
 		crosswalk();

@@ -58,7 +58,7 @@ function check_title_mask2($mask, $rt, $checkempty) {
 		return $checkempty?'Mask must have at least one field to replace':'';	// no substitutions to make, therefore no errors
 
 	foreach ($matches[1] as $field_name) {
-		if ( (!$field_name) || $field_name == "ID" || $field_name == "Modified") continue;
+		if ( (!$field_name) || $field_name == "ID" || $field_name == "Modified" || $field_name == "RecTitle") continue;
 		$err = _title_mask__check_field_name($field_name, $rt);
 		if ($err) return $err;
 	}
@@ -252,6 +252,9 @@ function _title_mask__check_field_name($field_name, $rt)
 		foreach ($inner_rec_type as $rtID){
 			$rtid = intval($rtID);
 			if (!$rtid) continue;
+
+			if ($inner_field_name == "ID" || $inner_field_name == "Modified" || $inner_field_name == "RecTitle") continue;
+
 			$errStr = _title_mask__check_field_name($inner_field_name, $rtid);
 			if (!$errStr) return '';
 			$ret .= " ".$errStr;
@@ -259,7 +262,11 @@ function _title_mask__check_field_name($field_name, $rt)
 		return $ret;
 	}
 
-	return _title_mask__check_field_name($inner_field_name, $inner_rec_type);
+	if ($inner_field_name == "ID" || $inner_field_name == "Modified" || $inner_field_name == "RecTitle"){
+		return '';
+	}else{
+		return _title_mask__check_field_name($inner_field_name, $inner_rec_type);
+	}
 }
 
 
@@ -357,7 +364,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt)
 				$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
 			}else{
 				foreach ( $rt as $rtID) {
-					if (array_key_exists(strtolower($field_name),@$rdr[$rtID])){
+					if (@$rdr[$rtID] && array_key_exists(strtolower($field_name), $rdr[$rtID])){
 						$rdt_id = @$rdr[$rtID][strtolower($field_name)]['dty_ID'];
 						break;
 					}
