@@ -156,7 +156,7 @@ top.HEURIST.search = {
 				top.HEURIST.search.renderNavigation();
 				top.HEURIST.search.updateMapOrSmarty();
 			});
-			top.HEURIST.registerEvent(window, "load", function() {
+			top.HEURIST.registerEvent(window, "contentloaded", function() {
 				if(document.getElementById("viewer-frame")){
 					document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/index.html" +
 						(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
@@ -4698,6 +4698,7 @@ function removeCustomAlert() {
 	var viewerTabIndex = top.HEURIST.util.getDisplayPreference("viewerTab");
 
 	Event.onDOMReady(function() {
+window.console.log("in onDOMReady");
 
 		var leftWidth = top.HEURIST.util.getDisplayPreference("leftWidth");
 		var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
@@ -4737,16 +4738,24 @@ function removeCustomAlert() {
 		//
 		var setWidths = function() {
 			var dw = layout.getSizes().doc.w;
+			var dh = layout.getSizes().doc.h;
 			var leftPanelWidth = layout.getSizes().left.w;
 			var rightPanelWidth = layout.getSizes().right.w;
 			var centerPanelWidth = layout.getSizes().center.w;
 			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
+			if(dh == 0){ //need to reset hieght to match body area less heading
+				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("search").clientHeight - 60;
+				layout.set("height",dh);
+			}
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
+window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
 			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
 
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
-            var leftPos = (leftPanelWidth+5);
-            document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+			var leftPos = (leftPanelWidth+5);
+			if (document.getElementById("formSearch")){
+				document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+			}
 
 			if (centerPanelWidth <= 180) {
 				layout.getUnitByPosition('right').set("width",maxRightWidth);
@@ -4805,22 +4814,23 @@ function removeCustomAlert() {
 				navButton.style.width = "20px";
 				navButton.title = "Show Navigation Panel";
 
-                document.getElementById("formSearch").style.paddingLeft = "5px";
-               	document.getElementById("menuNavigation").style.display = 'block';
+				document.getElementById("formSearch").style.paddingLeft = "5px";
+				document.getElementById("menuNavigation").style.display = 'block';
 
 			}else{
 
 				layout.getUnitByPosition('left').expand();
 				navButton.className = navButton.className.replace(" closed", "");
 				navButton.title = "Hide Navigation Panel";
+window.console.log("in sidebarPanelStatus");
 
-                var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
+				var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
 				navButton.style.width = leftPos-1;
 
-                document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+				document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
 
-                if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){
-                	document.getElementById("menuNavigation").style.display = 'none';
+				if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){
+					document.getElementById("menuNavigation").style.display = 'none';
 				}
 			}
 		}
@@ -4962,7 +4972,7 @@ function removeCustomAlert() {
 				var ssel = "selectedIds=" + selectedRecIDs.join(",");
 				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 			}
-s
+
 		}else  if(currentTab===_TAB_MAP){ //map
 
 			var mapFrame3 = document.getElementById("map-frame3");

@@ -983,8 +983,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		//reread preferences
 		top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
 						'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
-									: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
-						'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+									: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:""));
 
 	},
 

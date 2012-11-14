@@ -522,7 +522,7 @@ definitions in the selected database which are not already in the current databa
 <button id="finish2" onClick="dropTempDB(true)" class="button">Back to databases</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 <input type="checkbox" id="strict" title="Check this for strict import of types!"><label for="strict">   Strict Import</label><br>
-<input type="checkbox" id="noRecursion" checked="checked" title="Check this to prohibit recursive import of rectypes."><label for="noRecursion">   Direct Record Type Import Only</label>
+<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."><label for="noRecursion">   Direct Record Type Import Only</label>
 <div ><p>Logs give a more detailed history of the actions taken to import structure. Click the links below to see the short version and long version respectively.</p></div>
 <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
 <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
@@ -538,7 +538,7 @@ var result = "";
 var importedRowID;
 var importPending = false;
 var strictImport = false;
-var noRecursion = true;
+var noRecursion = false;
 // Start an asynchronous call, sending the recordtypeID and action
 function processAction(rtyID, action, rectypeName) {
 	// Lock import, and set import icon to loading icon

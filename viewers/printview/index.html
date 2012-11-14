@@ -347,7 +347,7 @@
 				}
 			}
 
-			function onSelectAll(eventType, argList) {
+			function onSelectAll(eventType, argList) {// TODO  change this to showAll
 				function getNodeContents(elem, nodeName,index) {
 					if(!elem) return elem;
 					var nodes = elem.getElementsByTagName(nodeName);
@@ -359,7 +359,7 @@
 				//if page xml not loaded then load sync
 				if (parent.document.getElementById("p").className == "yui-hidden") {
 					return false;
-				}else if (eventType == "heurist-selectall"){
+				}else if (eventType == "heurist-selectall"){//should be show all
 					var tempXML,recordsNode;
 					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
@@ -437,9 +437,17 @@
 							FlatHMLQuery.maxDepth = maxDepth;
 						}
 						FlatHMLQuery.query = top.HEURIST.parameters['q'];
-					}else if(FlatHMLQuery.selectIDs != newSelectionIDs){
+					}else if(FlatHMLQuery.selectIDs != newSelectionIDs && xml.getElementsByTagName("hml") && xml.getElementsByTagName("hml").item(0).firstChild){
 						//replace xml selids node with new ids.
-						xml.getElementsByTagName("selectedIDs").item(0).firstChild.nodeValue = newSelectionIDs;
+						if (!xml.getElementsByTagName("selectedIDs").item(0)) {// no previous selected records so need to create node
+							var si = xml.createElement("selectedIDs");
+							var ds = xml.getElementsByTagName("dateStamp").item(0);
+							var h = xml.getElementsByTagName("hml").item(0);
+							si.appendChild(xml.createTextNode(newSelectionIDs));
+							h.insertBefore(si,ds);
+						}else{
+							xml.getElementsByTagName("selectedIDs").item(0).firstChild.nodeValue = newSelectionIDs;
+						}
 						var selIds = newSelectionIDs.split();
 						$("record[selected='yes']",$(xml)).attr("selected","no");
 						$("record[selected='no']",$(xml)).each(function(i,rec){
@@ -564,8 +572,10 @@
 					// code for Mozilla, Firefox, Opera, etc.
 					}else {
 						var xsltProcessor=new XSLTProcessor();// saw TODO change this transform a combined document for related results
+						xsltProcessor.reset();
 						xsltProcessor.importStylesheet(xsls[style]);
 						xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
+						delete xsltProcessor;
 					}
 				}
 				clearResult(resultDiv);

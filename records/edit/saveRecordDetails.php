@@ -231,7 +231,7 @@
 			$bibUpdates["rec_URL"] = $_POST["rec_url"];
 		}
 		$owner = $bib['rec_OwnerUGrpID'];
-		if ($owner == 0 && is_admin() || is_Admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
+		if (is_admin() || is_Admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
 			if (array_key_exists("rec_owner", $_POST)) {
 				$bibUpdates["rec_OwnerUGrpID"] = $_POST["rec_owner"];
 			}
@@ -310,6 +310,13 @@
 
 
 	function insertRecord() {
+		//set owner to passed value else to NEWREC default if defined else to user
+		$owner = @$_POST["owner"]?$_POST["owner"]:( defined("HEURIST_NEWREC_OWNER_ID") ? HEURIST_NEWREC_OWNER_ID : get_user_id());
+		$owner = ((@$_POST["owner"] || @$_POST["owner"] === '0') ? intval($_POST["owner"]) :(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID : get_user_id()));
+		// if non zero (everybody group, test if user is member, if not then set owner to user
+		if (intval($owner) != 0 && !in_array($owner,get_group_ids())) {
+			$owner = get_user_id();
+		}
 		// Try to insert anything in POST as new recDetails rows.
 		// We do this by creating a stub record, and then updating it.
 		mysql__insert("Records", array(
@@ -317,7 +324,7 @@
 				"rec_AddedByUGrpID" => get_user_id(),
 				"rec_RecTypeID" => intval(@$_POST["rectype"])? intval($_POST["rectype"]):RT_NOTE,
 				"rec_ScratchPad" => @$_POST["notes"] ? $_POST["notes"]:null,
-				"rec_OwnerUGrpID" => @$_POST["owner"]?$_POST["owner"]:(HEURIST_NEWREC_OWNER_ID ? HEURIST_NEWREC_OWNER_ID : '0'),
+				"rec_OwnerUGrpID" => $owner,
 				"rec_NonOwnerVisibility" => @$_POST["visibility"]?$_POST["visibility"]:(HEURIST_NEWREC_ACCESS ? HEURIST_NEWREC_ACCESS:'viewable'),
 				"rec_URL" => @$_POST["rec_url"]? $_POST["rec_url"] : ""));
 
