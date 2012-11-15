@@ -96,7 +96,7 @@
 				//	and simplifies management of saved searches
 				top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
 					if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
-						var preferMyBookmarks = top.HEURIST.displayPreferences.defaultMyBookmarksSearch;
+						var preferMyBookmarks = (top.HEURIST.displayPreferences.defaultMyBookmarksSearch !== "false");
 						if (preferMyBookmarks) {
 							document.body.className = "w-bookmark";
 							document.getElementById("w-input").value = "bookmark";
