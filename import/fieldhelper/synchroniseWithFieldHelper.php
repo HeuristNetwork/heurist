@@ -448,9 +448,6 @@ function update_counts(divid, processed, added, total) {
 									$details["t:".$key] = array("1"=>$new_md5);
 								}
 
-								/*****DEBUG****///error_log(">>>>>>details: ".print_r($details, true));
-
-
 								//add-update Heurist record
 								$out = saveRecord($recordId, $recordType,
 									$recordURL,
@@ -469,10 +466,6 @@ function update_counts(divid, processed, added, total) {
 									null, //comment
 									null //+comment
 								);
-
-
-								/*****DEBUG****///error_log(">>>>>>".print_r($out, true));
-
 
 								if (@$out['error']) {
 									print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";

@@ -31,6 +31,7 @@
 	$serverURL = $_REQUEST["serverURL"];
 	$dbReg = $_REQUEST["dbReg"];
 	$dbTitle = $_REQUEST["dbTitle"];
+	$dbVersion = @$_REQUEST["dbVer"];
 	$usrEmail = $_REQUEST["usrEmail"];
 	$usrPassword = $_REQUEST["usrPassword"];
 	$usrName = $_REQUEST["usrName"];
@@ -122,7 +123,13 @@
 
 			//Write the database title into the details, further data will be entered by the Heurist form
 			$res = mysql_query("insert into recDetails
-				(dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', '1', '$dbTitle')");
+				(dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', ".DT_NAME.", '$dbTitle')");
+
+			//Write db version as detail
+			if($dbVersion){
+				$update = "insert into recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', 335, '$dbVersion')";
+				$res = mysql_query($update);
+			}
 
 			// Write the record bookmark into the bookmarks table. This allos the user registering the database
 			// to see thir lsit of databases as My Bookmarks

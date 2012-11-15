@@ -1925,6 +1925,10 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 		var valueType = typeof(value);
 		switch (_variety) {
+			case HVariety.NUMERIC:
+
+			return !isNaN(Number(value));
+
 			case HVariety.LITERAL:
 			case HVariety.BLOCKTEXT:
 			case HVariety.BOOLEAN:
@@ -1965,6 +1969,7 @@ HAPI.DetailType = HDetailType;
 
 
 var HVariety = {
+	NUMERIC: "numeric",
 	LITERAL: "literal",
 	DATE: "date",
 	ENUMERATION: "enumeration",
@@ -3282,6 +3287,7 @@ var HeuristScholarDB = new HStorageManager();
 			variety = hDetailType? hDetailType.getVariety() : "literal";
 
 		switch (variety) {
+			case HVariety.NUMERIC:
 			case HVariety.LITERAL:
 			case HVariety.BOOLEAN:
 			case HVariety.BLOCKTEXT:

@@ -48,7 +48,8 @@ String.prototype.htmlEscape = function() {
 var _TAB_RECORDVIEW = 0,
 	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
-	_TAB_SPECIAL = 3;
+	_TAB_SPECIAL = 3,
+	_tabView = null;
 
 top.HEURIST.search = {
 	VERSION: "1",

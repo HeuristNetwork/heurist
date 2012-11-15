@@ -423,7 +423,8 @@
 		'DT_SHOW_IN_MAP_BG_LIST' => array(3,679),// DEPRICATED  show image layer or kml in map background list
 		'DT_ALTERNATE_NAME' => array(3,1009),
 		'DT_FULL_IMAG_URL' => array(70,603),	//TODO: remove from code
-		'DT_THUMB_IMAGE_URL' => array(70,606)//depricated
+		'DT_THUMB_IMAGE_URL' => array(70,606) //depricated
+
 	);//TODOD: add email magic numbers
 
 	foreach ($dtDefines as $str => $id) {

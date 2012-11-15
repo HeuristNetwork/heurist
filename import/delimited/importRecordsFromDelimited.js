@@ -1310,15 +1310,20 @@ FlexImport = (function () {
 
 		FlexImport.gotoStep(4);
 
-		$("#result-message").html('IMPORT SUCCESSFUL' +
-        '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
-		'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
-        '<p style="color:#ff0000;">WARNING: you will lose the record IDs as soon as you click STEP1 (START OVER), so save the data below to a file first<br/>&nbsp;</p>');
-
+        var rec, cntError = 0;
 		l = FlexImport.fields.length;
 		for (i = FlexImport.hasHeaderRow ? 1:0; i < l; ++i) {
-			recordID = FlexImport.lineRecordMap[i].getID();
+
 			line = [];
+
+			rec = FlexImport.lineRecordMap[i];
+			if(rec.hasError()){
+				cntError++;
+				line.push(rec.getError());  //'<span style="color:red">'++'</span>'
+			}else{
+				recordID = rec.getID();
+			}
+
 			k = FlexImport.fields[i].length;
 			for (j = 0; j < k; ++j) {
 				if (j === recordIDColumn) {
@@ -1328,6 +1333,20 @@ FlexImport = (function () {
 			}
 			$textarea.append(line.join() + "\n");
 		}
+
+		if(cntError>0){
+
+			$("#result-message").html('IMPORT UNSUCCESSFUL' +
+	        '<p/>'+cntError+' record'+((cntError>1)?'s are':' is')+' not imported. Refer to error messages on the begining of record lines');
+		}else{
+
+			$("#result-message").html('IMPORT SUCCESSFUL' +
+	        '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
+			'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
+	        '<p style="color:#ff0000;">WARNING: you will lose the record IDs as soon as you click STEP1 (START OVER), so save the data below to a file first<br/>&nbsp;</p>');
+		}
+
+
 	}
 	};
 

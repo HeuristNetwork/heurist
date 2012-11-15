@@ -154,6 +154,10 @@ while ($row = mysql_fetch_row($res)) {
 		case "urlinclude":
         $row[3] = "urlinclude";
 		break;
+		case "integer":
+		case "float":
+        $row[3] = "numeric";
+		break;
 	    default:
 		$row[3] = "literal";
 	}
