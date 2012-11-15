@@ -31,6 +31,13 @@
 		<link rel=stylesheet href="../../common/css/global.css" media="all">
 	</head>
 	<body class="popup">
+
+<script type="text/javascript">
+function update_counts(divid, processed, added, total) {
+	document.getElementById("progress"+divid).innerHTML = (total==0)?"": ("  Processed "+processed+" of "+total+". Added records: "+added);
+}
+</script>
+
 <?php
 	if (! is_admin()) {
 		print "<p>FieldHelper synchronisation requires you to be an adminstrator of the database owners group.</p></body></html>";
@@ -67,6 +74,7 @@
 	$rep_issues = null;
 	$currfile = null;
 	$mediaExts = null;
+	$progress_divid = 0;
 
 		mysql_connection_db_overwrite(DATABASE);
 		if(mysql_error()) {
@@ -176,6 +184,7 @@
 
 			$rep_counter = 0;
 			$rep_issues = "";
+			$progress_divid = 0;
 
 			doHarvest($dirs);
 
@@ -259,7 +268,7 @@
 		*/
 		function doHarvestInDir($dir) {
 
-			global $rep_issues, $fieldhelper_to_heurist_map, $mediaExts,
+			global $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
 			$geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
 
 			$rep_processed = 0;
@@ -267,7 +276,11 @@
 			$rep_ignored = 0;
 			$f_items = null; //reference to items element
 
-			print "<div><b>$dir</b></div>";
+			$progress_divid++;
+
+			print "<div><b>$dir</b><span id='progress$progress_divid'></span></div>";
+			ob_flush();
+			flush();
 
 			if(!is_writable($dir)){
 				//$rep_issues = "Folder ".$dir." is not writable. Check permissions";
@@ -313,6 +326,9 @@
 
 						$f_items = $f_gen;
 						$not_found = false;
+
+						$tot_files = count($f_gen->children());
+						$cnt_files = 0;
 
 						foreach ($f_gen->children() as $f_item){
 
@@ -434,6 +450,7 @@
 
 								/*****DEBUG****///error_log(">>>>>>details: ".print_r($details, true));
 
+
 								//add-update Heurist record
 								$out = saveRecord($recordId, $recordType,
 									$recordURL,
@@ -452,6 +469,7 @@
 									null, //comment
 									null //+comment
 								);
+
 
 								/*****DEBUG****///error_log(">>>>>>".print_r($out, true));
 
@@ -485,6 +503,14 @@
 							}else{
 								$rep_ignored++;
 							}
+
+							$cnt_files++;
+							if ($cnt_files % 5 == 0) {
+								print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$rep_processed.','.$tot_files.')</script>'."\n";
+								ob_flush();
+								flush();
+							}
+
 
 						}//for items
 					}//if has items
@@ -528,6 +554,10 @@ XML;
 			if($f_items==null){
 				$f_items = $fh_data->addChild("items");
 			}
+
+			$tot_files = count($all_files);
+			$cnt_files = 0;
+			$cnt_added = 0;
 
 			//for files in folder that are not specified in the directory
 			foreach ($all_files as $filename){
@@ -627,7 +657,20 @@ XML;
 						$f_item->addChild("filesize", filesize($filename));
 
 						$rep_processed_dir++;
+
+
+						$cnt_added++;
+
 					}//check ext
+
+					$cnt_files++;
+
+					if ($cnt_files % 5 == 0) {
+						print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.','.$tot_files.')</script>'."\n";
+						ob_flush();
+						flush();
+					}
+
 				}
 			}//for files in folder that are not specified in the directory
 
@@ -635,6 +678,9 @@ XML;
 			if($rep_processed_dir>0){
 				print "<div>$rep_processed_dir records created (new entries added to manifest)</div>";
 			}
+			print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.',0)</script>'."\n";
+			ob_flush();
+			flush();
 
 			if($rep_processed+$rep_processed_dir>0){
 				//save modified xml (with updated heurist_id tags
