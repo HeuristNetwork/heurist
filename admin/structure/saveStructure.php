@@ -596,7 +596,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if($rows == "1062"){
-				$ret =  "Record type with specified name already exists in the database, please use the existing record type";
+				$ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database Designer view > Record types";
 			}else if ($rows==0 || is_string($rows) ) {
 				$ret = "SQL error inserting data into table defRecTypes: ".$rows;
 			} else {
@@ -1389,7 +1389,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if($rows == "1062"){
-				$ret =  "Field type with specified name already exists in the database, please use the existing field type";
+				$ret =  "Field type with specified name already exists in the database, please use the existing field type.\nThe field may be hidden - turn it on through Database Designer view > Manage Field Types";
 			}else  if ($rows==0 || is_string($rows) ) {
 				$ret = "Error inserting data into defDetailTypes table: ".$rows;
 			} else {

@@ -1902,7 +1902,18 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 	if(needClear){
 		//find and remove previous selector
 		var parent = this.inputCell,
-				 i;
+				 i = 0;
+
+		var nodes = parent.childNodes;
+		while(i<nodes.length) {
+    		var ele = nodes[i];
+    		if(ele.nodeName == "BR"){
+				parent.removeChild(ele);
+			}else{
+				i++;
+			}
+		}
+
 		 for (i = 0; i < this.inputs.length; i++) {
 		 	parent.removeChild(this.inputs[i]); //this.inputs.shift()
 		 }
@@ -2027,7 +2038,14 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 
 		var newInput = this.recreateSelector(bdValue, false);
 
-		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link if admin
+		if(this.inputs.length>1){
+			var br = this.document.createElement("br");
+			this.inputCell.insertBefore(br, newInput);
+			br = this.document.createElement("br");
+			this.inputCell.insertBefore(br, newInput);
+		}
+
+		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link and if admin
 
 		this.createSpanLinkTerms(bdValue);
 };
