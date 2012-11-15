@@ -165,7 +165,7 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
-		top.HEURIST.search.renderSummaryForLevel(0);
+//		top.HEURIST.search.renderSummaryForLevel(0);
 
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
@@ -523,13 +523,13 @@ top.HEURIST.search = {
 										'<li><a href="#" class="two-col" title="View results as 2 column list" onClick="top.HEURIST.search.setResultStyle(\'two-col\','+level+');">2 columns</a></li>'+
 										'<li><a href="#" class="icons" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'icons\','+level+');">Icons</a></li>'+
 										'<li><a href="#" class="thumbnails" title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
-										'<li><a href="#" class="summary" title="View summary list grouped by type" onClick="top.HEURIST.search.setResultStyle(\'summary\','+level+');">Summary</a></li>'+
+//										'<li><a href="#" class="summary" title="View summary list grouped by type" onClick="top.HEURIST.search.setResultStyle(\'summary\','+level+');">Summary</a></li>'+
 									'</ul>';
 		filterMenu.appendChild(viewStyleMenu);
 		top.HEURIST.search.setResultStyle(style,level);
 
 
-		top.HEURIST.search.renderSummaryForLevel(level);
+//		top.HEURIST.search.renderSummaryForLevel(level);
 
 		//create rectype filter menu
 		if (levelRecTypes){
