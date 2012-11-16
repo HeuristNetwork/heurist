@@ -2205,7 +2205,7 @@ top.HEURIST.search = {
 			var recID = $(resultDiv).attr("recID");
 			if(parseInt(recID)>=0) {
 				$(resultDiv).removeClass("hilited");
-				$(".link"+recID,$("#results")).toggleClass("linkHilited");
+				$(".recordDiv.linkHilited",$("#results")).removeClass("linkHilited");
 			}
 		}
 	},
