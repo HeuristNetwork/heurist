@@ -317,8 +317,8 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 	padding:6px 0
 }
 .hidden {
-	visibility:hidden;
-	height: 0px;
+	/*visibility:hidden; height: 0px;*/
+	display:none;
 	padding:0px;
 }
 .togglepnl {

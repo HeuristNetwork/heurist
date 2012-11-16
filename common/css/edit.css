@@ -608,6 +608,7 @@ div.temporal-div input.temporal-button:hover {
 }
 .input-row div.input-header-cell, .input-row label {
 	width: 150px;
+	padding-top:5px;
 	padding-right: 10px;
 	text-align: right;
 	color: #6A7C99;

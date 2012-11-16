@@ -1203,7 +1203,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 	}
 
 	if (! @$parms['qq']  &&  ! preg_match('/&&|\\bAND\\b/i', @$parms['q'])) {
-		$query .= parse_query($search_type, $parms['q'], @$parms['s'], $wg_ids, $publicOnly);
+		$query .= parse_query($search_type, @$parms['q'], @$parms['s'], $wg_ids, $publicOnly);
 	} else {
 		// search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions! hot damn)
 		// basically for free!

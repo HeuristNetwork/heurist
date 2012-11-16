@@ -346,7 +346,7 @@ if (!top.Relationship) {
 		var optionalLink = this.document.createElement("a");
 		optionalLink.href = "#";
 		var optionalLinkImg = optionalLink.appendChild(document.createElement("img"));
-		optionalLink.appendChild(this.document.createTextNode("Optional Fields"));
+		optionalLink.appendChild(this.document.createTextNode("Optional"+(thisRef.manager.needAddToAggregation?" fields":"")));
 		optionalLink.style.textDecoration = "none";
 		optionalLink.style.background = "none";
 		optionalLink.title = "Optional Fields";

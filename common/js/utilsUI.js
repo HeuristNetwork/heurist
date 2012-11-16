@@ -398,7 +398,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 
 		top.HEURIST.registerEvent(titleDiv, "mousedown", function(e) {
-			if (e && e.target && e.target.id == "close") return;
+			if (e && e.target && (e.target.id == "close" || e.target.id == "help")) return;
 			top.HEURIST.util.startMove(e, positionDiv);
 		});
 
@@ -1335,7 +1335,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(!top.HEURIST.util.isnull(helpDiv))
         {
                 var alts_2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
-                var alts_1 = { "hide": "<span>Show Help</span>", "show": "<span>Hide Help</span>" };
+                var alts_1 = { "hide": "Show Help", "show": "Hide Help"}; //"<span>Show Help</span>", "show": "<span>Hide Help</span>" };
 
                	helpDiv.title = alts_2[helpStatus];
                	helpDiv.innerHTML = alts_1[helpStatus];
@@ -1735,7 +1735,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	getRectypeIconAndName: function(recTypeID)
 	{
 		if(recTypeID && top.HEURIST.rectypes && top.HEURIST.rectypes.names[recTypeID]){
-			return "<img src=\"../../common/images/16x16.gif\" "+
+			return "<img src=\""+top.HEURIST.basePath+"common/images/16x16.gif\" "+
 					"style=\"background-image: url('"+top.HEURIST.iconBaseURL+recTypeID+".png');\" /> "+top.HEURIST.rectypes.names[recTypeID];
 		}else{
 			return "";

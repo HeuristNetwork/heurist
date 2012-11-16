@@ -146,6 +146,10 @@ function initPage() {
 		this.changed = function(){};
 		URLInput.inputs[0].onblur = onChangeURL;
 
+		$(".input-header-cell").css({"min-width":"25px","width":25,"font-weight":"bold","color":"#354F75"});
+		$("input[type=file]").css({"border":"none !important"});
+		$("#rec_url").css({"min-width":"580px"});
+
 		/*
 		if(Hul.isempty(sSource)){
 			document.getElementById("cbSource").selectedIndex = 0;

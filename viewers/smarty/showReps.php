@@ -37,11 +37,13 @@ require_once('libs.inc.php');
 
 	$outputfile = null;
 	$isJSout = false;
-	$publishmode = 0;
+
 	$rtStructs = null;
 	$dtStructs = null;
 	$dtTerms3 = null;
-	$rps_recid = null;
+
+	$gparams = null;
+
 
 	if(array_key_exists("q", $_REQUEST) &&
 			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -56,7 +58,7 @@ require_once('libs.inc.php');
 */
 function executeSmartyTemplate($params){
 
-	global $smarty, $outputfile, $isJSout, $publishmode, $rtStructs, $dtStructs, $dtTerms, $rps_recid;
+	global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams;
 
 	mysql_connection_overwrite(DATABASE); //AO: mysql_connection_db_select - does not work since there is no access to stored procedures(getTemporalDateString) Steve uses in some query
 
@@ -70,7 +72,8 @@ function executeSmartyTemplate($params){
 	$isJSout	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
 	$outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
 	$publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
-	$rps_recid	 = (array_key_exists("rps_id", $params)) ? $params["rps_id"] :null;
+
+	$gparams = $params; //keep to use in other functions
 
 	if( !array_key_exists("limit", $params) ){ //not defined
 
@@ -206,10 +209,12 @@ function save_report_output($tpl_source, Smarty_Internal_Template $template)
 
 function save_report_output2($tpl_source){
 
-	global $outputfile, $isJSout, $publishmode, $rps_recid;
+	global $outputfile, $isJSout, $gparams;
 
 	$errors = null;
 	$res_file = null;
+
+	$publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
 
 	try{
 
@@ -275,19 +280,39 @@ function save_report_output2($tpl_source){
 </head>
 <body style="margin: 25px;">
 <h2>
-	The following file has been updated:  <?=$res_file?><br>
+	The following file has been updated:  <?=$res_file?></h2><br>
 <?php
-
+			$rps_recid = @$gparams['rps_id'];
 			if($rps_recid){
 
 				$link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
 ?>
-<p>You may view the content of report by click hyperlinks below:<br>
-HTML: <a href="<?=$link?>" target="_blank"><?=$link?></a><br>
-Javascript: <a href="<?=$link?>&mode=js" target="_blank"><?=$link?>&mode=js</a><br></p>
+<p style="font-size: 14px;">You may view the content of report by click hyperlinks below:<br />
+HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;"><?=$link?></a><br />
+Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bold;"><?=$link?>&mode=js</a><br />
 <?php
 			}
-			echo "</h2></body></html>";
+
+// code for insert of dynamic report output - duplication of functionality in repMenu.html
+			$surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".HEURIST_DBNAME.
+						"&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
+						"&publish=1&debug=0&template=".$gparams['template'];
+
+?><br /><br />
+	If you wish to publish the link to report that returns dynamic report output use the following code below. Copy to clipboard by hitting Ctrl-C or [Enter]
+	<br />
+	URL:<br />
+  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 60px;"
+    id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"><?=$surl?></textarea>
+
+   <br />
+   Javascript wrap:<br />
+  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 70%; height: 100px;"
+    id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);">
+<script type="text/javascript" src="<?=$surl?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?=$surl?>"></iframe></noscript>
+    </textarea>
+<?php
+			echo "</p></body></html>";
 
 		}
 	}

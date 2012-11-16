@@ -27,6 +27,8 @@
 		<script type="text/javascript" src="../../external/js/simple_js_viewer/script/extension/toolbar-ext.js"></script>
 		<link rel="stylesheet" type="text/css" href="../../external/js/simple_js_viewer/script/extension/toolbar-ext.css" />
 
+		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+
 		<style>
 			.input-header-cell {
 				vertical-align: middle;
@@ -49,10 +51,11 @@ if (window == top) {
 </script>
 
 <div style="overflow:hidden;">
-<div id="search" class="banner" style="top:0;height:105px;">
+<div id="search" class="banner" style="top:0;height:65px;">
 		<div style="width: 100%;" id="div_fileupload"></div>
 		<div style="width: 100%;" id="div_url"></div>
-		<div style="width: 100%; text-align: center;" id="div_type">
+
+		<div style="position: absolute; top:3px; right: 0px; text-align: right;" id="div_type">
 			Source:
 			<select id="cbSource">
 				<option>generic</option>
@@ -78,9 +81,10 @@ if (window == top) {
 		</div>
 </div>
 </div>
-<div id="preview" style="position:absolute;top:106px;bottom:0px;left:0px;right:0px;"><div class='wrap'><div id='errorMsg'><span>PREVIEW</span></div></div></div>
-
+<div id="preview" style="position:absolute;top:66px;bottom:0px;left:0px;right:0px;"><div class='wrap'><div id='errorMsg'><span>PREVIEW</span></div></div></div>
 <div id="image_digitizer_container" style="position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
+
+
 
   <script language="JavaScript">
   		top.HEURIST.registerEvent(window, "load", initPage);

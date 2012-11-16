@@ -56,7 +56,7 @@ function UserEditor() {
 		// reads parameters from GET request
 		if (location.search.length > 1) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-				_recID = top.HEURIST.parameters.recID;
+				_recID = Number(top.HEURIST.parameters.recID);
 				_groupID = top.HEURIST.parameters.groupID;
 				_isApprove = (top.HEURIST.is_admin() && top.HEURIST.parameters.approve=='1');
 
@@ -69,7 +69,7 @@ function UserEditor() {
 				}
 		}
 
-		if (_recID && Hul.isnull(_entity) ){
+		if (_recID>0 && Hul.isnull(_entity) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: User #"+_recID+"  not be found. Clicking 'save' button will create a new User.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined

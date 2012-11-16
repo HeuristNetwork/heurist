@@ -2165,6 +2165,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 				fileElt.className = "file-select";
 				fileElt.type = "file";
 				fileElt.style.height = 26;
+				fileElt.style.border = "none !important";
 
 			inputDiv.appendChild(fileElt);
 

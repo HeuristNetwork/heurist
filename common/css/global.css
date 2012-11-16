@@ -284,7 +284,7 @@ div.help-button span {
 	vertical-align: bottom;
 }
 div.help-button:hover {
-	color: #FFF;
+	color: #000;
 }
 div.resize-handle {
 	position: absolute;

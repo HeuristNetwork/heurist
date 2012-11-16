@@ -58,10 +58,15 @@ function ImageAnnotation(imageviewer, _recID) {
 		//_hightlighSelection(null);
 
 		edittoolbar.appendChild(_selRectypes);
+		edittoolbar.appendChild(document.createTextNode(' Add:'));
 		edittoolbar.appendChild(btnAnnotation);
+		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnRectangle);
+		edittoolbar.appendChild(document.createTextNode(' Select:'));
 		edittoolbar.appendChild(_selAnnotations);
+		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnEdit);
+		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnDelete);
 
 		lblInfo = document.createElement('label');
@@ -114,7 +119,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			for (k=0; k<_markers_div.length; k++){
 				mdiv  = _markers_div[k];
 				msize = _markers[k];
-				if(msize[2]==10 && msize[2]==10){ //marker
+				if(msize[2]==0 && msize[3]==0){ //marker
 					mdiv.style.width  = 10;
 					mdiv.style.height = 10;
 				}else{
@@ -132,7 +137,7 @@ function ImageAnnotation(imageviewer, _recID) {
 		for (k=0; k<_markers_div.length; k++){
 			mdiv  = _markers_div[k];
 			msize = _markers[k];
-			if(msize[2]==10 && msize[2]==10){ //marker
+			if(msize[2]==0 && msize[3]==0){ //marker
 				mdiv.style.left  = (msize[0]*czoom - 5 + Math.round(x)+'px');
 				mdiv.style.top = (msize[1]*czoom - 5 + Math.round(y)+'px');
 			}else{
@@ -164,6 +169,9 @@ function ImageAnnotation(imageviewer, _recID) {
 		d.style.borderWidth="1px";
 		d.style.borderColor="#ff0000";
 		d.style.borderStyle = "solid";
+		if(params[2]==0 && params[3]==0){
+				d.style.borderRadius = 6;
+		}
 		//d.style.backgroundColor = clr;
 		d.style.zIndex=999;
 		d.title = top.HEURIST.util.isempty(params[5])?params[4]:params[5];
@@ -174,7 +182,11 @@ function ImageAnnotation(imageviewer, _recID) {
 					var url = _markers[k][4];
 
 					if(url.indexOf('http')!=0){
-						url = "../../search/search.html?q=ids:"+_markers[k][6]+"&db="+_db;
+						if(_markers[k][6]>0){
+							url = "../../search/search.html?q=ids:"+_markers[k][6]+"&db="+_db;
+						}else{
+							return;
+						}
 					}
 
 					if(!top.HEURIST.util.isempty(url)){
@@ -206,6 +218,8 @@ function ImageAnnotation(imageviewer, _recID) {
 				while (_selAnnotations.length>0){
 						_selAnnotations.remove(0);
 				}
+				_selAnnotations.disabled = true;
+				top.HEURIST.util.addoption(_selAnnotations, 0, 'add marker or rectangle...');
 			}
 
 			if(top.HEURIST.util.isnull(context['records']) || context['resultCount']==0){
@@ -259,9 +273,12 @@ function ImageAnnotation(imageviewer, _recID) {
 				}
 			}//for
 
-			if(_selAnnotations && _selAnnotations.length>0){
-				_selAnnotations.selectedIndex = 0;
-				_hightlighSelection(null);
+			if(_selAnnotations && _selAnnotations.length>1){
+					_selAnnotations.disabled = false;
+					_selAnnotations.remove(0);
+					_selAnnotations.selectedIndex = 0;
+					_hightlighSelection(null);
+
 			}
 		}//end callback
 
@@ -330,15 +347,33 @@ function ImageAnnotation(imageviewer, _recID) {
 	//
 	function _addAnnotation(x, y, czoom, imgx, imgy){
 
-		if(_isModeAddPoint || _isModeAddRect==2){
+		if(_isModeAddPoint || _isModeAddRect==2){   //2- recctnagle
 			var dx = 0;//_isModeAddPoint?5/czoom:0;
-			_markers.push([Math.round(x)-dx, Math.round(y)-dx, 10, 10, "", "Annotation #"+_markers.length, 0]);
+			var sz =_isModeAddPoint?0:10;
+
+			_markers.push([Math.round(x)-dx, Math.round(y)-dx, 0, 0, "", "Annotation "+_markers.length, 0]);
 			var k = _markers.length-1;
-			var d1 = _createAnnotationDiv(k, "#ff0000", 1);
-			_imageviewer.frameElement.appendChild(d1);
-			_markers_div.push(d1);
+			var div = _createAnnotationDiv(k, "#ff0000", 1);
+
+			if(!_isModeAddPoint){
+				div.style.borderWidth = "0px";
+				div.style.borderStyle = "none";
+				div.style.borderRadius = 0;
+				div.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/cross-red.png)";
+				div.style.backgroundRepeat = "no-repeat";
+				div.style.backgroundPosition = "center left";
+			}
+
+
+			_imageviewer.frameElement.appendChild(div);
+			_markers_div.push(div);
+
+			if(_selAnnotations.disabled){
+				_selAnnotations.remove(0);
+			}
 
 			top.HEURIST.util.addoption(_selAnnotations, k, _markers[k][5]);
+			_selAnnotations.disabled = false;
 			_selAnnotations.selectedIndex = k;
 			_hightlighSelection(null);
 
@@ -347,12 +382,14 @@ function ImageAnnotation(imageviewer, _recID) {
 
 			if(!_isModeAddPoint) {
 				_isModeAddRect=1;
+			}else{
+				_editAnnotationRecord();
 			}
 
-		}else if (_isModeAddRect==1) {
+		}else if (_isModeAddRect==1) { //second point for rectangle
 			_isModeAddRect=0;
 
-			var d1 = _markers_div[_markers_div.length-1];
+			var div = _markers_div[_markers_div.length-1];
 			var marker = _markers[_markers_div.length-1];
 
 			if(x<marker[0]){
@@ -368,8 +405,15 @@ function ImageAnnotation(imageviewer, _recID) {
 				marker[3] = y-marker[1];
 			}
 
+			div.style.borderWidth = "3px";
+			div.style.borderStyle = "solid";
+			div.style.backgroundImage = null;
+
+
 			_setPosition(imgx, imgy, czoom);
 			_setDimension(czoom);
+
+			_editAnnotationRecord();
 		}
 
 		_isModeAddPoint = false;
@@ -379,6 +423,12 @@ function ImageAnnotation(imageviewer, _recID) {
 	//
 	//
 	function _delAnnotation(){
+
+		if(_selAnnotations.disabled)
+		{
+			return;
+		}
+
 		var ind = _selAnnotations.selectedIndex;
 
 		if(ind>=0 && ind<_markers_div.length){
@@ -393,6 +443,11 @@ function ImageAnnotation(imageviewer, _recID) {
 					_markers_div.splice(ind,1);
 					_markers.splice(ind,1);
 					_selAnnotations.remove(ind);
+
+					if(_selAnnotations.length==0){
+						_selAnnotations.disabled = true;
+						top.HEURIST.util.addoption(_selAnnotations, 0, 'add marker or rectangle...');
+					}
 				}else{
 					alert(context['error']);
 				}
@@ -415,6 +470,11 @@ function ImageAnnotation(imageviewer, _recID) {
 	}
 
 	function _editAnnotationRecord(){
+
+		if(_selAnnotations.disabled)
+		{
+			return;
+		}
 
 		var ind = _selAnnotations.selectedIndex;
 
@@ -458,7 +518,7 @@ function ImageAnnotation(imageviewer, _recID) {
 														_selAnnotations.options[_selAnnotations.selectedIndex].text = title;
 
 													} else {
-														alert("Annotation didn't save please try again");
+														alert("The annotation was not saved. The marker/rectangle will be removed unless you edit and save an annotation");
 													}
 												}
 									});

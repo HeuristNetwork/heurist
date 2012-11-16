@@ -292,7 +292,8 @@ function update_counts(divid, processed, added, total) {
 
 			$all_files = scandir($dir);
 
-			/*****DEBUG****///error_log(">>>>>>in dir: ".$manifest_file);
+			/*****DEBUG****///
+
 			if(file_exists($manifest_file)){
 
 				//read fieldhelpe.xml
@@ -347,49 +348,53 @@ function update_counts(divid, processed, added, total) {
 
 							foreach ($f_item->children() as $el){  //$key=>$value
 
-								$content = "$el";
+								$content = strval($el);// (string)$el;
 								$key = $el->getName();
+
+
 								$value = $content;
 								/*foreach ($el as $key=>$value2){
 								$value = $value2;
 								break;
 								}*/
+
 								if($key == "md5"){
 
 									$old_md5 = $value;
 
 								}else if(array_key_exists($key,
-											$fieldhelper_to_heurist_map)){
+											$fieldhelper_to_heurist_map) && $fieldhelper_to_heurist_map[$key]){
 
-										$key = $fieldhelper_to_heurist_map[$key];
+										$key2 = $fieldhelper_to_heurist_map[$key];
 
-										if($key=="file"){
+										if($key2=="file"){
+
 											$filename = $dir.$value;
 											$filename_base = $value;
 
-											$key = $fieldhelper_to_heurist_map['file_name'];
-											if($key>0){
-												$details["t:".$key] = array("1"=>$value);
+											$key3 = $fieldhelper_to_heurist_map['file_name'];
+											if($key3>0){
+												$details["t:".$key3] = array("1"=>$value);
 											}
-											$key = $fieldhelper_to_heurist_map['file_path'];
-											if($key>0){
-												$details["t:".$key] = array("1"=>$dir);
+											$key3 = $fieldhelper_to_heurist_map['file_path'];
+											if($key3>0){
+												$details["t:".$key3] = array("1"=>$dir);
 											}
 
-										}else if($key=="lat"){
+										}else if($key2=="lat"){
 
 											$lat = floatval($value);
 
-										}else if($key=="lon"){
+										}else if($key2=="lon"){
 
 											$lon = floatval($value);
 
-										}else if($key=="recordId"){
+										}else if($key2=="recordId"){
 											$recordId = $value;
 											$el_heuristid = $el;
-										}else if(intval($key)>0) {
+										}else if(intval($key2)>0) {
 											//add to details
-											$details["t:".$key] = array("1"=>$value);
+											$details["t:".$key2] = array("1"=>$value);
 										}// else field type not defined in this instance
 
 								}
@@ -543,6 +548,8 @@ XML;
 				$fh_data = simplexml_load_string($s_manifest);
 			}
 
+
+
 			// add new empty items element
 			if($f_items==null){
 				$f_items = $fh_data->addChild("items");
@@ -554,7 +561,7 @@ XML;
 
 			//for files in folder that are not specified in the directory
 			foreach ($all_files as $filename){
-				if(!($filename=="." || $filename==".." || is_dir($dir.$filename))){
+				if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
 					/*****DEBUG****///error_log("2>>>>".is_dir($dir.$filename)."  ".$filename);
 
