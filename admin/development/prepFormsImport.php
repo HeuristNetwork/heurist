@@ -58,6 +58,7 @@ if ($info->isDir()) {
 		if($fileinfo->isFile()){
 			echo parseImportForm($fileinfo->getFilename());
 		}
+//		break;
 	}
 }else{
 	echo "something is wrong";
@@ -113,12 +114,22 @@ function parseImportForm($fhmlFilename){
 //		if ("".$detail == "") continue;
 		$attr = $detail->attributes();
 		$dtyID = $detail->getName();
+//		error_log("dtyID ".print_r($dtyID,true));
 		$dtyID = preg_replace("/dt/","",$dtyID);
+//		error_log("dtyID ".print_r($dtyID,true));
 		$detailName = ($attr["name"] ? $attr["name"] : $detail->getName());
 		$detail = preg_replace("/\"/","",$detail);
 		$dbConceptPrefix = $dbID."-";
-		$dtBaseType = $dettypes[$dtyID][$di['dty_Type']];
-		$detail = preg_replace("/$dbConceptPrefix/","",$detail);
+//error_log("detailtype ".print_r($dettypes[intval($dtyID)],true));
+		$dtBaseType = $dettypes[intval($dtyID)]['commonFields'][$di['dty_Type']];
+//		error_log("basetype = ".print_r($dtBaseType,true));
+		if ($dtBaseType == "enum" || $dtBaseType == 'relation') {
+			$detail = preg_replace("/$dbConceptPrefix/","",$detail);
+		}else if ($dtBaseType == 'geo'){
+			preg_match_all("/\d+\.\d+/",$detail,$match);
+//error_log("match".print_r($match,true));
+			$detail = "POINT(".$match[0][1]." ".$match[0][0].")";
+		}
 //	error_log("attr = ".$attr["name"]);
 //		echo "".($attr["name"] ? $attr["name"] : $detail->getName()).": ". $detail."<br>";
 		array_push($header,$detailName);
