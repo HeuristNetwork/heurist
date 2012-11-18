@@ -179,7 +179,7 @@
 	selection_one [options]	Multiple choice question; only one answer can be selected.
 	select_multiple [options]	Multiple choice question; multiple answers can be selected.
 	note	Display a note on the screen, takes no input.
-	geopoint	Collect GPS coordinates.
+	geopoint	Collect GPS coordinates. LAT LONG ALT ACCUR
 	image	Take a photograph.
 	barcode	Scan a barcode, requires the barcode scanner app is installed.
 	date	Date input.
@@ -220,33 +220,75 @@
 	}
 
 	//
-	// Creates form and save it into FILESTORE/forms folder
+	// Creates form, save it into FILESTORE/forms folder and add it to the manifest lists
 	//
 	function createform($rt_id){
 
 		global $folder, $formsList, $xformsList;
 
-		// mappings
 
-		$dettypes = getAllDetailTypeStructures();
-		$dettypes = $dettypes['typedefs'];
-		$di = $dettypes['fieldNamesToIndex'];
-		$rectypes = getAllRectypeStructures();
-		$terms = getTerms();
-		$ti = $terms['fieldNamesToIndex'];
+		try{
+
+			list($form,$rtName,$rtConceptID,$rtDescription,$report) = buildform($rt_id);
+
+			if ($form){
+				$filename = preg_replace('/[^a-zA-Z0-9-_\.]/','', $rtName);//todo this is not international, need to strip only illegal filesys characters and perhaps trim spaces to single space
+				$fullfilename = $folder.$filename.".xml";
+
+				file_put_contents($fullfilename, $form);
+	//			chgrp($fullfilename,"acl");
+				//TODO: update formlist for this form.
+				$report = $report."$rtName Form Saved ok ($fullfilename)<br/>";
+				$xformEntry = "<xform>\n".
+								"<downloadUrl>http://heuristscholar.org/hayes/xforms/$filename.xml</downloadUrl>\n".
+								"<formID>$rtConceptID</formID>\n".
+								"<name>$rtName Record Form</name>\n".
+								"<descriptionText>$rtName Record as defined in the \"".HEURIST_DBNAME."\" database described as \"$rtDescription\" </descriptionText>\n".
+								"<majorMinorVersion>".date("Ymd")."</majorMinorVersion>\n".
+								"<version>".date("Ymd")."</version>\n".
+								"<hash>md5:".md5_file($fullfilename)."</hash>\n".
+							"</xform>\n";
+				$formEntry = "<form url=\"http://heuristscholar.org/hayes/xforms/$filename.xml\">$rtName</form>\n";
+			}
+		} catch (Exception $e) {
+			$report = $report.'Exception '.($e->getMessage());
+			$formEntry = $xformEntry = "";
+		}
+		$formsList .= ($formEntry?$formEntry:"");
+		$xformsList .= ($xformEntry?$xformEntry:"");
+		return "<h2>$rtName</h2>".$report."<br/>";
+	}
+
+	function buildform($rt_id){
+		// mappings and lookups - static so we only retrieve once per service call
+		static $dettypes, $di, $rectypes, $ri, $rid, $terms, $ti, $termLookup, $relnLookup;
+		if (!$dettypes || !$di){
+			$dettypes = getAllDetailTypeStructures();
+			$dettypes = $dettypes['typedefs'];
+			$di = $dettypes['fieldNamesToIndex'];
+		}
+		if (!$rectypes || !$ri || !$rid){
+			$rectypes = getAllRectypeStructures();
+			$ri = $rectypes['typedefs']['commonNamesToIndex'];
+			$rid = $rectypes['typedefs']['dtFieldNamesToIndex'];
+		}
+		if (!$terms || !$ti || !$termLookup || !$relnLookup){
+			$terms = getTerms();
+			$ti = $terms['fieldNamesToIndex'];
+			$termLookup = $terms['termsByDomainLookup']['enum'];
+			$relnLookup = $terms['termsByDomainLookup']['relation'];
+		}
 
 		if(!array_key_exists($rt_id, $rectypes['typedefs'])){
-			return "Rectype# $rt_id not found";
+			return array(null,null,null,null,"Rectype# $rt_id not found");
 		}
 
 		$report = "";
 
 		$rectype = $rectypes['typedefs'][$rt_id];
-		error_log("rectype is ".print_r($rectype,true));
-		$ri = $rectypes['typedefs']['commonNamesToIndex'];
-		$rid = $rectypes['typedefs']['dtFieldNamesToIndex'];
+//		error_log("rectype is ".print_r($rectype,true));
 		//record type info
-		$title = $rectypes['names'][$rt_id];
+		$rtName = $rectypes['names'][$rt_id];
 		//detail or field type info
 		$fieldTypeConceptIDIndex = $di['dty_ConceptID'];
 		$fieldTypeNameIndex = $di['dty_Name'];
@@ -259,237 +301,212 @@
 		$fieldTermHeaderListIndex = $rid['rst_TermIDTreeNonSelectableIDs'];
 		$fieldPtrRectypeIDsListIndex = $rid['rst_PtrFilteredIDs'];
 		$fieldMaxRepeatIndex = $rid['rst_MaxValues'];
-		$termLookup = $terms['termsByDomainLookup']['enum'];
-		$relnLookup = $terms['termsByDomainLookup']['relation'];
 
-		try{
-
-			$concept_id = $rectype['commonFields'] [$ri['rty_ConceptID']];
-			if(!$concept_id){
-				$concept_id = "0-".$rt_id;
-			}
-			$rtDescription = $rectype['commonFields'] [$ri['rty_Description']];
-
-			// output structure variables
-			$model = "<instance>\n".
-			"<fhml id=\"heuristscholar.org:$concept_id\" version=\"".date("Ymd")."\">\n".
-			"<database id=\"".HEURIST_DBID."\" urlBase=\"".HEURIST_URL_BASE."\">".HEURIST_DBNAME."</database>\n".
-			"<query depth=\"0\" db=\"".HEURIST_DBNAME."\" q=\"t:$rt_id\" />\n".
-			"<generatedBy userID=\"".get_user_id()."\">".get_user_name()."</generatedBy>\n".
-			"<createdBy/>\n".
-			"<deviceID/>\n".
-			"<createTime/>\n".
-			"<uuid/>\n".
-			"<records count=\"1\">\n".
-			"<record depth=\"0\">\n".
-			"<type>\n".
-			"<conceptID>$concept_id</conceptID>\n".
-			"<label>$title</label>\n".
-			"</type>\n".
-			"<nonce/>\n".
-			"<details>\n";
-			$bind ="<bind nodeset=\"createdBy\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"username\"/>\n".
-			"<bind nodeset=\"createTime\" type=\"dateTime\" jr:preload=\"timestamp\" jr:preloadParams=\"start\"/>\n".
-			"<bind nodeset=\"deviceID\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"deviceid\"/>\n".
-			"<bind nodeset=\"uuid\" type=\"string\" readonly=\"true()\" calculate=\"uuid()\"/>\n".
-			"<bind nodeset=\"records/record/nonce\" type=\"string\" readonly=\"true()\" calculate=\"concat(/fhml/deviceID,'|',/fhml/createTime,'|',/fhml/uuid)\"/>\n";
-
-			$body = "<h:body>\n".
-					"<group appearance=\"field-list\">\n";
-			$groupSeparator = "</group>\n".
-							"<group appearance=\"field-list\">\n";
-			//@todo - sort by rst_DisplayOrder
-			$fieldsLeft = count($rectype['dtFields']);
-			$atGroupStart = true; //init separator detection for repatables
-			foreach($rectype['dtFields'] as $dt_id => $rt_dt){
-
-				if($rt_dt[$rid['rst_NonOwnerVisibility']]=='hidden'){
-					continue;
-				}
-
-				--$fieldsLeft; // count down fields so we know when we hit the last one
-				$dettype = $dettypes[$dt_id]['commonFields']; //get detail type description
-				$baseType = $dettype[$fieldBaseTypeIndex];
-				$fieldTypeName = $dettype[$fieldTypeNameIndex];
-				$fieldName = $rt_dt[$fieldNameIndex];
-				$fieldtype = getFieldType($baseType);
-				$fieldMaxCount = $rt_dt[$fieldMaxRepeatIndex];
-				$isRepeatable = ($fieldMaxCount > 1 || $fieldMaxCount == NULL);
-
-				//skip any unsupport field types
-				if(!$fieldtype) {
-					$report = $report." $title.".$dettype[$fieldTypeNameIndex]." ignored since type ".$baseType." not supported<br/>";
-					continue; // not supported
-				}
-
-				if($fieldtype == "groupbreak" && $atGroupStart){//skip double separator, note that this includes separators before non supported types
-					continue;
-				}
-
-				if ($baseType == "resource"){
-					$rtIDs =  $dettype[$di['dty_PtrTargetRectypeIDs']];
-					if (!$rtIDs || $rtIDs == ""){//unconstrained pointers not supported
-						$report = $report." $title.".$dettype[$fieldTypeNameIndex]." ignored since unconstrained resource pointers are not supported<br/>";
-						continue;
-					}
-				}
-
-				$dt_conceptid = $dettype[$fieldTypeConceptIDIndex];
-				if(!$dt_conceptid){
-					$dt_conceptid = "0-".$dt_id;
-				}
-
-				$defaultValue = $rt_dt[$fieldDefaultValIndex];// load default value
-				//for controlled vocabs convert any local term ID to it's concept ID
-				if ( $baseType == "enum" && array_key_exists("$defaultValue",$termLookup)){
-					$termID = $termLookup[$defaultValue][$ti['trm_ConceptID']];
-					if($termID){
-						$defaultValue = $termID;
-					}else{
-						$defaultValue = HEURIST_DBID."-".$defaultValue;
-					}
-				} else if ( $baseType == "relation" && array_key_exists("$defaultValue",$relnLookup)){
-					$termID = $relnLookup[$defaultValue][$ti['trm_ConceptID']];
-					if($termID){
-						$defaultValue = $termID;
-					}else{
-						$defaultValue = HEURIST_DBID."-".$defaultValue;
-					}
-				}
-
-				if ($fieldtype != "groupbreak") {
-					$model = $model."<dt$dt_id conceptID=\"$dt_conceptid\" type=\"$fieldTypeName\" name=\"$fieldName\">".($defaultValue? htmlentities($defaultValue):"")."</dt".$dt_id.">\n";
-				}
-				if($rt_dt[$rid['rst_RequirementType']]=='required'){
-					$isrequired = 'required="true()"';
-				}else if($rt_dt[$rid['rst_RequirementType']]=='forbidden') {
-					$isrequired = 'readonly="true()"';
-				}else{
-					$isrequired = '';
-				}
-
-				$constraint = '';
-				/* @todo
-				if($rt_dt[$rid['rst_MinValues']]=='required'){
-				//constraint=". &gt; 10.51 and . &lt; 18.39" jr:constraintMsg="number must be between 10.51 and 18.39"
-				}
-				*/
-
-				// if repeatable vocab make it multi select. TODO: we should extend Heurist to include multi-select which is different than repeatable
-				if($fieldtype=="select1" && $isRepeatable){
-					$fieldtype = "select";
-					$isRepeatable = false;
-				}
-
-				$label = htmlentities($rt_dt[$fieldNameIndex]);
-				$hint = htmlentities($rt_dt[$fieldHelpTextIndex]);
-				$inputDefBody = "<label>$label</label>\n".
-				"<hint>$hint</hint>\n";
-				$xpathPrefix = "/fhml/records/record/details/";
-				$groupRepeatHdr =($atGroupStart ? "" : $groupSeparator).// if first element of group is repeatable skip groupSeparator
-				"<label>$label</label>\n".
-				"<repeat nodeset=\"/fhml/records/record/details/dt$dt_id\">\n";
-				$groupRepeatFtr ="</repeat>\n".
-							($fieldsLeft? $groupSeparator : "");
-				$atGroupStart = false;// past detection code so
-
-				if ($fieldtype != "groupbreak") {
-					$bind = $bind."<bind nodeset=\"records/record/details/dt$dt_id\" type=\"$fieldtype\" $isrequired $constraint/>\n";
-				}
-
-				if ($isRepeatable){
-					$body .= $groupRepeatHdr;
-				}
-
-				if($fieldtype=="select1" || $fieldtype=="select"){
-					if ($baseType == "resource"){
-						$body = $body."<$fieldtype appearance=\"minimal\" ref=\"".$xpathPrefix."dt".$dt_id."\">\n".
-										$inputDefBody.
-										createRecordLookup($rtIDs).
-										"</$fieldtype>\n";
-					}else{
-						$termIDTree =  $dettype[$di['dty_JsonTermIDTree']];
-						$disabledTermIDsList = $dettype[$di['dty_TermIDTreeNonSelectableIDs']];
-						$fieldLookup = ($baseType == "relation" ? $relnLookup : $termLookup);
-						$body = $body."<$fieldtype appearance=\"minimal\" ref=\"".$xpathPrefix."dt".$dt_id."\">\n".
-										$inputDefBody.
-										createTermSelect($termIDTree, $disabledTermIDsList, $fieldLookup, false, $ti).
-										"</$fieldtype>\n";
-					}
-				}else if($fieldtype=="binary"){
-					//todo check for sketch type
-					$isDrawing = false;
-					$appearance = $dt_id == DT_DRAWING ? "draw":"annotate";
-					$body = $body."<upload ref=\"".$xpathPrefix."dt$dt_id\" appearance=\"$appearance\"  mediatype=\"image/*\">\n".
-					$inputDefBody.
-					"</upload>\n";
-
-				}else if($fieldtype=="groupbreak"){// if we get to here we have a legitament sepearator so break
-					$body .= $groupSeparator;
-					$atGroupStart = true;
-				}else if ($dt_id == DT_COUNTER){//we have a counter field so let's launch the Inventory Counter
-					$body = $body."<input appearance=\"ex:faims.android.INVENTORYCOUNT\" ref=\"".$xpathPrefix."dt$dt_id\">\n".
-					$inputDefBody.
-					"</input>\n";
-				}else{  //all others and  $fieldtype=="geopoint"  as well
-					$body = $body."<input ref=\"".$xpathPrefix."dt$dt_id\">\n".
-					$inputDefBody.
-					"</input>\n";
-				}
-
-				if ($isRepeatable){
-					$body .= $groupRepeatFtr;
-					if ($fieldsLeft > 0) {
-						$atGroupStart = true;
-					}
-				}
-
-			}
-
-			$model = $model."</details>\n".
-			"</record>\n".
-			"</records>\n".
-			"</fhml>\n".
-			"</instance>\n";
-			$body = $body."</group>\n".
-							"</h:body>\n";
-
-			$out = "<?xml version=\"1.0\"?>\n".
-			"<h:html xmlns=\"http://www.w3.org/2002/forms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:jr=\"http://openrosa.org/javarosa\">\n".
-			"<h:head>\n".
-			"<h:title>$title</h:title>\n".
-			"<model>\n".
-			$model.$bind.
-			"</model>\n".
-			"</h:head>\n".
-			$body.
-			"</h:html>";
-
-			$filename = preg_replace('/[^a-zA-Z0-9-_\.]/','', $title);
-			$fullfilename = $folder.$filename.".xml";
-
-			file_put_contents($fullfilename, $out);
-//			chgrp($fullfilename,"acl");
-			//TODO: update formlist for this form.
-			$report = $report."$title Form Saved ok ($fullfilename)<br/>";
-			$xformEntry = "<xform>\n".
-							"<downloadUrl>http://heuristscholar.org/hayes/xforms/$filename.xml</downloadUrl>\n".
-							"<formID>$concept_id</formID>\n".
-							"<name>$title Record Form</name>\n".
-							"<descriptionText>$title Record as defined in the \"".HEURIST_DBNAME."\" database described as \"$rtDescription\" </descriptionText>\n".
-							"<majorMinorVersion>".date("Ymd")."</majorMinorVersion>\n".
-							"<version>".date("Ymd")."</version>\n".
-							"<hash>md5:".md5_file($fullfilename)."</hash>\n".
-						"</xform>\n";
-			$formEntry = "<form url=\"http://heuristscholar.org/hayes/xforms/$filename.xml\">$title</form>\n";
-
-		} catch (Exception $e) {
-			$report = $report.'Exception '.($e->getMessage());
-			$formEntry = $xformEntry = "";
+		$rtConceptID = $rectype['commonFields'] [$ri['rty_ConceptID']];
+		if(!$rtConceptID){
+			$rtConceptID = "0-".$rt_id;
 		}
-		$formsList .= $formEntry;
-		$xformsList .= $xformEntry;
-		return "<h2>$title</h2>".$report."<br/>";
+		$rtDescription = $rectype['commonFields'] [$ri['rty_Description']];
+
+		// output structure variables
+		$model = "<instance>\n".
+		"<fhml id=\"heuristscholar.org:$rtConceptID\" version=\"".date("Ymd")."\">\n".
+		"<database id=\"".HEURIST_DBID."\" urlBase=\"".HEURIST_URL_BASE."\">".HEURIST_DBNAME."</database>\n".
+		"<query depth=\"0\" db=\"".HEURIST_DBNAME."\" q=\"t:$rt_id\" />\n".
+		"<generatedBy userID=\"".get_user_id()."\">".get_user_name()."</generatedBy>\n".
+		"<createdBy/>\n".
+		"<deviceID/>\n".
+		"<createTime/>\n".
+		"<uuid/>\n".
+		"<records count=\"1\">\n".
+		"<record depth=\"0\">\n".
+		"<type>\n".
+		"<conceptID>$rtConceptID</conceptID>\n".
+		"<label>$rtName</label>\n".
+		"</type>\n".
+		"<nonce/>\n".
+		"<details>\n";
+		$bind ="<bind nodeset=\"createdBy\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"username\"/>\n".
+		"<bind nodeset=\"createTime\" type=\"dateTime\" jr:preload=\"timestamp\" jr:preloadParams=\"start\"/>\n".
+		"<bind nodeset=\"deviceID\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"deviceid\"/>\n".
+		"<bind nodeset=\"uuid\" type=\"string\" readonly=\"true()\" calculate=\"uuid()\"/>\n".
+		"<bind nodeset=\"records/record/nonce\" type=\"string\" readonly=\"true()\" calculate=\"concat(/fhml/deviceID,'|',/fhml/createTime,'|',/fhml/uuid)\"/>\n";
+
+		$body = "<h:body>\n".
+				"<group appearance=\"field-list\">\n";
+		$groupSeparator = "</group>\n".
+						"<group appearance=\"field-list\">\n";
+		//@todo - sort by rst_DisplayOrder
+		$fieldsLeft = count($rectype['dtFields']);
+		$atGroupStart = true; //init separator detection for repatables
+		foreach($rectype['dtFields'] as $dt_id => $rt_dt){
+
+			if($rt_dt[$rid['rst_NonOwnerVisibility']]=='hidden'){
+				continue;
+			}
+
+			--$fieldsLeft; // count down fields so we know when we hit the last one
+			$dettype = $dettypes[$dt_id]['commonFields']; //get detail type description
+			$baseType = $dettype[$fieldBaseTypeIndex];
+			$fieldTypeName = $dettype[$fieldTypeNameIndex];
+			$fieldName = $rt_dt[$fieldNameIndex];
+			$fieldtype = getFieldType($baseType);
+			$fieldMaxCount = $rt_dt[$fieldMaxRepeatIndex];
+			$isRepeatable = ($fieldMaxCount > 1 || $fieldMaxCount == NULL);
+
+			//skip any unsupport field types
+			if(!$fieldtype) {
+				$report = $report." $rtName.".$dettype[$fieldTypeNameIndex]." ignored since type ".$baseType." not supported<br/>";
+				continue; // not supported
+			}
+
+			if($fieldtype == "groupbreak" && $atGroupStart){//skip double separator, note that this includes separators before non supported types
+				continue;
+			}
+
+			if ($baseType == "resource"){
+				$rtIDs =  $dettype[$di['dty_PtrTargetRectypeIDs']];
+				if (!$rtIDs || $rtIDs == ""){//unconstrained pointers not supported
+					$report = $report." $rtName.".$dettype[$fieldTypeNameIndex]." ignored since unconstrained resource pointers are not supported<br/>";
+					continue;
+				}
+			}
+
+			$dt_conceptid = $dettype[$fieldTypeConceptIDIndex];
+			if(!$dt_conceptid){
+				$dt_conceptid = "0-".$dt_id;
+			}
+
+			$defaultValue = $rt_dt[$fieldDefaultValIndex];// load default value
+			//for controlled vocabs convert any local term ID to it's concept ID
+			if ( $baseType == "enum" && array_key_exists("$defaultValue",$termLookup)){
+				$termID = $termLookup[$defaultValue][$ti['trm_ConceptID']];
+				if($termID){
+					$defaultValue = $termID;
+				}else{
+					$defaultValue = HEURIST_DBID."-".$defaultValue;
+				}
+			} else if ( $baseType == "relation" && array_key_exists("$defaultValue",$relnLookup)){
+				$termID = $relnLookup[$defaultValue][$ti['trm_ConceptID']];
+				if($termID){
+					$defaultValue = $termID;
+				}else{
+					$defaultValue = HEURIST_DBID."-".$defaultValue;
+				}
+			}
+
+			if ($fieldtype != "groupbreak") {
+				$model = $model."<dt$dt_id conceptID=\"$dt_conceptid\" type=\"$fieldTypeName\" name=\"$fieldName\">".($defaultValue? htmlentities($defaultValue):"")."</dt".$dt_id.">\n";
+			}
+			if($rt_dt[$rid['rst_RequirementType']]=='required'){
+				$isrequired = 'required="true()"';
+			}else if($rt_dt[$rid['rst_RequirementType']]=='forbidden') {
+				$isrequired = 'readonly="true()"';
+			}else{
+				$isrequired = '';
+			}
+
+			$constraint = '';
+			/* @todo
+			if($rt_dt[$rid['rst_MinValues']]=='required'){
+			//constraint=". &gt; 10.51 and . &lt; 18.39" jr:constraintMsg="number must be between 10.51 and 18.39"
+			}
+			*/
+
+			// if repeatable vocab make it multi select. TODO: we should extend Heurist to include multi-select which is different than repeatable
+			if($fieldtype=="select1" && $isRepeatable){
+				$fieldtype = "select";
+				$isRepeatable = false;
+			}
+
+			$label = htmlentities($rt_dt[$fieldNameIndex]);
+			$hint = htmlentities($rt_dt[$fieldHelpTextIndex]);
+			$inputDefBody = "<label>$label</label>\n".
+			"<hint>$hint</hint>\n";
+			$xpathPrefix = "/fhml/records/record/details/";
+			$groupRepeatHdr =($atGroupStart ? "" : $groupSeparator).// if first element of group is repeatable skip groupSeparator
+			"<label>$label</label>\n".
+			"<repeat nodeset=\"/fhml/records/record/details/dt$dt_id\">\n";
+			$groupRepeatFtr ="</repeat>\n".
+						($fieldsLeft? $groupSeparator : "");
+			$atGroupStart = false;// past detection code so
+
+			if ($fieldtype != "groupbreak") {
+				$bind = $bind."<bind nodeset=\"records/record/details/dt$dt_id\" type=\"$fieldtype\" $isrequired $constraint/>\n";
+			}
+
+			if ($isRepeatable){
+				$body .= $groupRepeatHdr;
+			}
+
+			if($fieldtype=="select1" || $fieldtype=="select"){
+				if ($baseType == "resource"){
+					$body = $body."<$fieldtype appearance=\"minimal\" ref=\"".$xpathPrefix."dt".$dt_id."\">\n".
+									$inputDefBody.
+									createRecordLookup($rtIDs).
+									"</$fieldtype>\n";
+				}else{
+					$termIDTree =  $dettype[$di['dty_JsonTermIDTree']];
+					$disabledTermIDsList = $dettype[$di['dty_TermIDTreeNonSelectableIDs']];
+					$fieldLookup = ($baseType == "relation" ? $relnLookup : $termLookup);
+					$body = $body."<$fieldtype appearance=\"minimal\" ref=\"".$xpathPrefix."dt".$dt_id."\">\n".
+									$inputDefBody.
+									createTermSelect($termIDTree, $disabledTermIDsList, $fieldLookup, false, $ti).
+									"</$fieldtype>\n";
+				}
+			}else if($fieldtype=="binary"){
+				//todo check for sketch type
+				$isDrawing = false;
+				$appearance = $dt_id == DT_DRAWING ? "draw":"annotate";
+				$body = $body."<upload ref=\"".$xpathPrefix."dt$dt_id\" appearance=\"$appearance\"  mediatype=\"image/*\">\n".
+				$inputDefBody.
+				"</upload>\n";
+
+			}else if($fieldtype=="groupbreak"){// if we get to here we have a legitament sepearator so break
+				$body .= $groupSeparator;
+				$atGroupStart = true;
+			}else if ($dt_id == DT_COUNTER){//we have a counter field so let's launch the Inventory Counter
+				$body = $body."<input appearance=\"ex:faims.android.INVENTORYCOUNT\" ref=\"".$xpathPrefix."dt$dt_id\">\n".
+				$inputDefBody.
+				"</input>\n";
+			}else{  //all others and  $fieldtype=="geopoint"  as well
+				$body = $body."<input ref=\"".$xpathPrefix."dt$dt_id\">\n".
+				$inputDefBody.
+				"</input>\n";
+			}
+
+			if ($isRepeatable){
+				$body .= $groupRepeatFtr;
+				if ($fieldsLeft > 0) {
+					$atGroupStart = true;
+				}
+			}
+
+		}
+
+		$model = $model."</details>\n".
+		"</record>\n".
+		"</records>\n".
+		"</fhml>\n".
+		"</instance>\n";
+		$body = $body."</group>\n".
+						"</h:body>\n";
+
+		$form = "<?xml version=\"1.0\"?>\n".
+				"<h:html xmlns=\"http://www.w3.org/2002/forms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" ".
+						"xmlns:ev=\"http://www.w3.org/2001/xml-events\" ".
+						"xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" ".
+						"xmlns:jr=\"http://openrosa.org/javarosa\">\n".
+				"<h:head>\n".
+				"<h:title>$rtName</h:title>\n".
+				"<model>\n".
+				$model.$bind.
+				"</model>\n".
+				"</h:head>\n".
+				$body.
+				"</h:html>";
+
+		return array($form,$rtName,$rtConceptID,$rtDescription);
 	}
 
 	function createRecordLookup($rtIDs) {

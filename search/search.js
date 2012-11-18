@@ -4400,7 +4400,7 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
 			if(!top.HEURIST.util.isnull(_tabView)){
-				_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
+//				_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
 			}
 		}
 
