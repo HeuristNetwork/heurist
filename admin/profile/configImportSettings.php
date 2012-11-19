@@ -72,7 +72,7 @@ function _issel($val){
 
 	<style type="text/css">
 		#ignored_hyperlinks {
-				overflow: auto; background-color: #EEEEEE;
+				overflow: auto; background-color: #AAAAAA;
 				padding-left: 5px;
 				height: 260px;
 		}
@@ -110,15 +110,15 @@ function _issel($val){
 		</p>
 	</td>
 	<td>
+			Hyperlink text to ignore:<br />
+	 		<input type="text" name="new_hyp_text" value="" size="30">
+	 		<input type="submit" value="Add"> <br />
+
 			<b>Ignore the following hyperlink texts when importing bookmarks:</b><br /><br />
 			<div id="ignored_hyperlinks">
 				<?=$hyperlinks_ignored?>
 			</div>
 
-				Hyperlink text to ignore:<br />
-
-	 			<input type="text" name="new_hyp_text" value="" size="30">
-	 			<input type="submit" value="Add">
 	</td>
 	</tr>
 	</table>

@@ -58,11 +58,11 @@ function ImageAnnotation(imageviewer, _recID) {
 		//_hightlighSelection(null);
 
 		edittoolbar.appendChild(_selRectypes);
-		edittoolbar.appendChild(document.createTextNode(' Add:'));
+		edittoolbar.appendChild(document.createTextNode(' Add: '));
 		edittoolbar.appendChild(btnAnnotation);
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnRectangle);
-		edittoolbar.appendChild(document.createTextNode(' Select:'));
+		edittoolbar.appendChild(document.createTextNode(' Select: '));
 		edittoolbar.appendChild(_selAnnotations);
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnEdit);
