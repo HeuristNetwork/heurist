@@ -41,7 +41,7 @@ function ImageAnnotation(imageviewer, _recID) {
 		btnAnnotation.onclick = function(e){ _isModeAddRect = 0; _isModeAddPoint=true; };
 
 		var btnRectangle = document.createElement('button');
-		btnRectangle.innerHTML = "rect";
+		btnRectangle.innerHTML = "rectangle";
 		btnRectangle.onclick = function(e){ _isModeAddRect = 2; _isModeAddPoint=false; };
 
 		var btnEdit = document.createElement('button');

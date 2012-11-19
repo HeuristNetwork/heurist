@@ -65,9 +65,28 @@ if (@$_REQUEST['ulf_ID']){
 
 </head>
 
-<body class="popup">
+<body class="popup" onresize="onResize()">
 
 <script>
+
+	function onResize(){
+
+		var ele = document.getElementById("image_digitizer_container");
+		if(ele!=null){
+			var elep = document.getElementById("mediaviewer");
+			if (this.innerWidth<590) {
+				if(ele.style.height!='44px'){
+					ele.style.height = '44px';
+					elep.style.bottom = '44px';
+				}
+			}else{
+				if(ele.style.height!='22px'){
+					ele.style.height = '22px';
+					elep.style.bottom = '22px';
+				}
+			}
+		}
+	}
 
 	//find db parameter (similar in utilsLoad)
 	function parseParams(paramString) {
@@ -232,6 +251,7 @@ if(@$_REQUEST['annedit']=='yes'){
 ?>
 <script type="text/javascript">
 	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>);
+	onResize();
 </script>
 
 </body>

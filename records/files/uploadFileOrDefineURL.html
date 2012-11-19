@@ -37,7 +37,7 @@
 			}
 		</style>
 	</head>
-<body class="popup" style="overflow:hidden;">
+<body class="popup" style="overflow:hidden;" onresize="onResize()">
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/js/utilsUI.js"></script>
 <script src="uploadFileOrDefineURL.js"></script>
@@ -47,6 +47,24 @@
 // width="640" height="480"
 if (window == top) {
 	//top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+}
+function onResize(){
+
+	var ele = $("#image_digitizer_container");
+	if(ele.length>0){
+		var elep = $("#preview");
+		if(this.innerWidth<590){
+			if(ele.css('height')!='44px'){
+				ele.css('height','44px');
+				elep.css('bottom','44px');
+			}
+		}else{
+			if(ele.css('height')!='22px'){
+				ele.css('height','22px');
+				elep.css('bottom','22px');
+			}
+		}
+	}
 }
 </script>
 
