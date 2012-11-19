@@ -179,7 +179,7 @@ function initPage() {
 function isChanged(){
   if(_fileuploaded){
   		return true;
-  }else if (Hul.isempty(_filedata)){
+  }else if (Hul.isempty(_filedata) && Hul.isempty(curr_link)){ //was open and closed without any change
   		return false;
   }else{
   		var src = document.getElementById("cbSource").value;
