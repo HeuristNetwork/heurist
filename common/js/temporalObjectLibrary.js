@@ -916,6 +916,9 @@ var TDate = function (strDate) {
 					throw " TDate exception - invalid string supplied to setTimezone() - " + str;
 			} else {
 				_tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
+				if(_tzOffset && _tzOffset.length>0 && _tzOffset.indexOf(":")<0){
+					_tzOffset = _tzOffset+":00";
+				}
 			}
 		},
 

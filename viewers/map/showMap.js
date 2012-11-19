@@ -264,7 +264,7 @@ function ShowMap() {
 										var dt = temporal.getTDate('PDB');
 										if(!dt) dt = temporal.getTDate('TPQ');
 										if(!dt) dt = temporal.getTDate('DAT');
-										record.start = (dt)?dt.toString():"";
+										record.start = (dt)?dt.toString("yyyy-MM-ddTHH:mm:ssz"):"";
 										hastime = (record.start!=="");
 									}
 								}
@@ -274,7 +274,7 @@ function ShowMap() {
 										var dt = temporal.getTDate('PDE');
 										if(!dt) dt = temporal.getTDate('TAQ');
 										if(!dt) dt = temporal.getTDate('DAT');
-										record.end = (dt)?dt.toString():"";
+										record.end = (dt)?dt.toString("yyyy-MM-ddTHH:mm:ssz"):"";
 										hastime = (hastime ||(record.end!==""));
 									}
 								}
