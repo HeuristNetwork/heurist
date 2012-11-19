@@ -1,5 +1,18 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
+
+<!--
+ * index.html, Home page for the HeuristScholar.org project
+ * @copyright (C) 2005-2012 University of Sydney Arts eResearch
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist Academic Knowledge Management System
+ * @todo
+
+ Note: This file is only intended for use on the HeuristScholar.org server as a startign point for Heurist
+       The H3Sandpit database is a 'playspace' for new users on the HeuristScholar server 
+-->
+
 <head>
 	<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 	<title>Heurist Academic Collaborative Database (C) 2005 - 2010, University of Sydney</title>
@@ -32,12 +45,21 @@
 <div id='loginDiv'>
 <h1>Heurist Academic Knowledge Management System Version 3</h1>
 <p>Open Source collaborative web database software for recording and publishing research data integrated with web bookmarking, bibliographic functions, mapping and timelines.</p>
+
 <div class="separator_row"></div>
 <div class="options">
-	<div class="buttons"><button onclick="location.href='../'">Use Heurist public database</button></div>
-	<div class="description">A simple one minute registration allows you to try out Heurist on this shared 'sandpit' and, when you are ready, generate your own database(s) for real data.</div>
+    <div class="buttons"><button onclick="location.href='admin/ugrps/editUser.html?db=H3Sandpit'">Register as user</button></div>
+    <div class="description">A simple one minute registration allows you to use Heurist on this server.</div>
 </div>
-<div class="separator_row small"></div>
+<div class="options">
+    <div class="buttons"><button onclick="location.href='search/search.html?db=H3Sandpit'">Use Heurist public database</button></div>
+    <div class="description">A simple one minute registration (above) allows you to try out Heurist on this shared 'sandpit' and, when you are ready, generate your own database(s) for real data.</div>
+</div>
+<div class="options">
+    <div class="buttons"><button onclick="location.href='admin/setup/createNewDB.php?db=H3Sandpit'">Create your own database <br>(must register first)</button></div>
+    <div class="description">Create a fresh database. Subsequent databases can be created with New Database from within an existing database</div>
+</div>
+<div class="separator_row"></div>
 
 <!--
 <div class="options">
@@ -51,12 +73,13 @@
 	<div class="buttons"><button onclick="location.href='http://heuristscholar.org/heurist/help/tour.html'">Introductory tour</button></div>
 	<div class="description">A quick overview of Heurist's field of application and capabilities</div>
 </div>
-<div class="separator_row small"></div>
 
 <div class="options">
 	<div class="buttons"><button onclick="location.href='http://heuristscholar.org/help/'">Full documentation</button></div>
 	<div class="description">Comprehensive end-user documentation is contained in the online help system. The system is structured into sections at different technical levels. It covers every aspect of Heurist from understanding its domain of application and the way it structures data to advanced topics in writing new output formats.</div>
 </div>
+
+<!-- We might add these back once we've worked out where they live
 <div class="separator_row small"></div>
 
 <div class="options">
@@ -64,6 +87,7 @@
 	<div class="description">A Heurist search returning links to the websites of a selection of Heurist-based projects</div>
 </div>
 <div class="separator_row small"></div>
+-->
 
 <!-- Enable this once we have a project website with publications and other links
 <div class="options">
@@ -94,7 +118,7 @@
 
 <div class="options" >
 	<div class="buttons" style="text-align:right">Documentation:</div>
-	<div class="description">Ian Johnson, Ingrid Mason, Steven Hayes</div>
+	<div class="description">Ian Johnson, Vincent Sheehan, Steven Hayes</div>
 </div>
 
 </div>

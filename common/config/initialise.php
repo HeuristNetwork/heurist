@@ -494,7 +494,7 @@
 
 		if ($critical==1) { // bad connection to MySQL server
 
-			echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+			echo "<p>&nbsp;Heurist initialisation error<p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
 
 		}else if ($critical==2) { //database not defined or can not connect to it
 
@@ -511,8 +511,7 @@
 			$list = mysql__getdatabases();
 			if(count($list)>0){
 
-				// echo "<p>&nbsp;<h2>Heurist initialisation error</h2><p> $msg <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i>";
-				$msg2= "<p>&nbsp;<h2>Heurist initialisation error</h2><p>".$msg."<p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+				$msg2= "<p>&nbsp;Cannot open database<p><br><br>".$msg."<p><br><br><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
 				$msg2 = rawurlencode($msg2);
 
 				$redirect = HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=".$msg2;

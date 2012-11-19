@@ -95,11 +95,16 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 if (is_file($parentIni)){
 	include_once($parentIni);
 }
-$defaultRootFileUploadPath = "";
-// URL of 3d party website thumbnail service
+
+// $defaultRootFileUploadPath = ""; THIS IS REDUNDANT VERSION OF 37 LINES ABOVE
+
+// URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
+// appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a secirity block page
+// if the URL is passworded. The thumbnailign service is called automatically when web pages are bookmarked.
 $websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
 $websiteThumbnailUsername = "";
 $websiteThumbnailPassword = "";
 $websiteThumbnailXsize = 500;
 $websiteThumbnailYsize = 300;
+
 ?>
