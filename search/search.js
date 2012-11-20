@@ -2672,7 +2672,7 @@ top.HEURIST.search = {
 			}
 
 			window.location.href = top.HEURIST.basePath+
-                "search/search.html?q=t:"+code+"&label=Aggregation records (a root record to which a group of records point)&w=" +
+                "search/search.html?q=t:"+code+"&label=Aggregation records&w=" +
                 w + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")
 		}
 
@@ -3750,7 +3750,7 @@ top.HEURIST.search = {
 			}
 		}
 		*/
-		document.getElementById("collection-label").innerHTML = "Collected: " + top.HEURIST.search.collectCount;
+		document.getElementById("collection-label").innerHTML = "<strong>Collected: " + top.HEURIST.search.collectCount + "</strong>";
 	},
 
 	collectionSave :function ()

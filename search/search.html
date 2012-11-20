@@ -185,23 +185,14 @@
 									title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu">
+							
+							<div class="separator">PROFILE</div>
+
 							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
-
-							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup"
-								title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
-
+                            
 							<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" class="portrait" name="auto-popup"
 								title="Delete, combine, rename your personal tags">Manage tags</a></li>
-
-							<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup"
-								title="Find people with similar bookmarking patterns">Find similar users</a></li>
-
-							<li><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
-								title="List of groups you are member of">My User Groups</a></li>
-
-							<li><a href="../admin/ugrps/editUser.html" name="auto-popup"
-								title="User personal information">My User Info</a></li>
 
 							<li><a href="../admin/profile/manageReminders.php" name="auto-popup"
 								title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
@@ -209,98 +200,112 @@
                             <li><a href="../export/backup/exportMyDataPopup.php" name="auto-popup" class="small"
                                 title="Retreives and writes all the data in the database that you own or have bookmarked, including attached files, to a ZIP file">Export my data</a></li>
 
+							<div class="separator">ACCESS</div>
+
+							<li><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
+								title="List of groups you are member of">My User Groups</a></li>
+
+							<li style="padding-bottom: 10px"><a href="../admin/ugrps/editUser.html" name="auto-popup"
+								title="User personal information">My User Info</a></li>
+
+							<!--
 							<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;"
 								title="Click to send a bug report">Report bug</a></li>
-
-					<!-- TODO: Bookmarklet moved to the My Heurist > Profile popup, delete here when working there -->
-                        <script>
-							var bookmarkletname = top.HEURIST.VERSION;
-							var html = "<li><a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
-							+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
-							+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
-							+ "d=document;c=d.contentType;"
-							+ "if(c=='text/html'||!c){"
-							+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-							+ "s=d.createElement('script');s.type='text/javascript';"
-							+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
-							+ "d.getElementsByTagName('head')[0].appendChild(s);}"
-							+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
-							+ "window.setTimeout('w.focus()',200);}"
-							+ "})();\">&gt;&gt;"+database+"</a></li>"; //"+database+"
-							document.write(html);
-						</script>
-
+							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup"
+								title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
+                            <li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup"
+								title="Find people with similar bookmarking patterns">Find similar users</a></li>
+                            -->
+                            
 						</ul>
 					</li>
 
 					<li class="logged-in-only" style="width:60px;"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
+							
+							<div class="separator">DATABASE</div>
+
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait"
 								title="Navigate to and login to another Heurist database">
-								Select database</a></li>
-							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
-								title="Click to refresh the internal working memory of Heurist" >
-								Refresh memory</a></li>
-							<li><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags");}'
-								class='seperator'
-								title="Find bookmarked records which you have not tagged">
-								Bookmarked records with&nbsp;no&nbsp;tags</a></li>
-							<!-- --- sep --- -->
-							<div class="seperator">HARVEST</div>
-							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
-								title="Import web links from a browser bookmarks file or an html web page file">
-								Hyperlinks (webpage/bookmarks)</a></li>
-							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
-								title="Settings for web links importer">
-								Settings<br>(hyperlink harvester)</a></li>
-							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator'
-								title="Harvest email from a designated IMAP email server (set in configuration)">
-								Email from IMAP server</a></li>
-							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php"
-								onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
-								title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
-								FieldHelper manifests (XML)</a></li>
-							<!-- --- sep --- -->
+								Open (new window)</a></li>
+
 							<div class="separator">IMPORT</div>
 							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
 								title="Import data from delimited text for one record type at a time" target="_blank">
-								Import new records (CSV)</a></li>
+								CSV</a></li>
 							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html"
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
 								title="Update or add fields in existing records from delimited text" name="auto-popup">
-								Update records (CSV)</a></li>
+								CSV (update)</a></li>
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
 								title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimtied files)">
-								Geographic import (KML)</a></li>
+								KML</a></li>
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
 								title="Import bibliographic exchange format files">
-								Bibliographic import (EndNote)</a></li>
-							<!-- --- sep --- -->
+								Bibliography</a></li>														
+							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php"
+								onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
+								title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
+								Files in situ</a></li>
+							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator'
+								title="Harvest email from a designated IMAP email server (set in configuration)">
+								Email</a></li>
+							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
+								title="Import web links from a browser bookmarks file or an html web page file">
+								Hyperlinks</a></li>
+								
 							<div class="separator">EXPORT</div>
-							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
-							<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
+                           
+                            <li style="padding-left:15px;">Selection</li>
+                            
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
 								onClick="top.HEURIST.search.exportHML(false,false);">
-								Current selection (HML)</a></li>
-							<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
+								HML</a></li>
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
 								onClick="top.HEURIST.search.exportKML(false);">
-								Current selection (KML)</a></li>
-							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
+								KML</a></li>
+								
+							<li style="padding-left:15px;">Query</li>	
+								
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
 								onClick="top.HEURIST.search.exportHML(true,false);" >
-								Current query (HML)</a></li>
-							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
+								HML</a></li>
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
 								onClick="top.HEURIST.search.exportHML(true,true);" >
-								Current query + related (HML) </a></li>
-							<li class="admin-only"><a href="#"
+								HML w. related</a></li>
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate RSS feed current set of search results"
+									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main, '_blank')">
+								RSS</a></li>
+							<li style="padding-left:25px;"><a href="#" id=result-style-icons-link title="Generate Atom feed current set of search results"
+									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?feed=atom&amp;'+top.HEURIST.currentQuery_main, '_blank')">
+								Atom</a></li>
+								
+							<li style="padding-left:15px;">Filtered</li>
+								
+								<li class="admin-only" style="padding-left:25px;"><a href="#"
 								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
 								title="Export records as delimited text">
-								Filtered record dump (CSV)</a></li>
-							<li><a href="#" id=result-style-icons-link title="Generate RSS feed current set of search results"
-									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main, '_blank')">
-								Current query as RSS feed</a></li>
-							<li><a href="#" id=result-style-icons-link title="Generate Atom feed current set of search results"
-									onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?feed=atom&amp;'+top.HEURIST.currentQuery_main, '_blank')">
-								Current query as Atom feed</a></li>
+								CSV</a></li>
+
+							<div class="separator">MANAGE</div>
+                           
+							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
+								title="Click to refresh the internal working memory of Heurist" >
+								Refresh memory</a></li>
+							<li style="padding-bottom: 10px"><a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags");}'
+								class='seperator'
+								title="Find bookmarked records which you have not tagged">
+								Bookmarks w/out tags</a></li>
+							
+							
+							<!-- 							
+							<div class="seperator">HARVEST</div>
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
+								title="Settings for web links importer">
+								Settings<br>(hyperlink harvester)</a></li>
+							-->
+							
 						</ul>
 					</li>
 
@@ -327,12 +332,14 @@
                 	<a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;&gt;</b></a>
                 </div>
     			<form id="formSearch" style="display:inline-block;" onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
+
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
 <div style="position:relative">
 	<div class="searchInput" id="searchInput2"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
-						<div id="btnSimpleSearch" class="simplesearch" title="Click to show Assisted Search builder panel"></div>
+						<div id="btnSimpleSearch" class="simplesearch" title="Click to show Quick Search builder panel"></div>
 
+						<!-- Simple search (Quick search) popdown -->
 						<div id="simple-search" style="display: none;">
 							<div class="simple-search-row">
 								<label for="rectype-select">Record type:</label>
@@ -366,15 +373,18 @@
 								<a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
 								<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Go to <b>Advanced Search</b></a>
 							</div>
-						</div>
+						</div> 
+						<!-- Simple search (Quick search) popdown -->
+					
 					</div>
+
 					<div class="searchButtons button collapsed" id="searchButtons">
-						<div class="searchButtonsTrigger" onclick='$("#searchButtons").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
-						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
-						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
-						</div>
-					<!-- TODO: We need a better position for the Add New Record button. Needs to be separated from search button -->
-	<div id="add-record" >
+					<div class="searchButtonsTrigger" onclick='$("#searchButtons").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div> 
+					<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
+					<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
+					</div>
+										
+	<div id="add-record" style="padding-left: 100px;" >
 	<input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
 	</div>
 </div>
@@ -382,7 +392,7 @@
 			</div>
 
 			<div id="navButton" title="Hide Navigation Panel">Hide Navigation</div>
-			<div id="appPanelButton" title="Toggle search applications panel">Hide Applications</div>
+			<div id="appPanelButton" title="Toggle search applications panel">Hide Viewers</div>
 
 </div>
 
@@ -395,8 +405,11 @@
 			<div id=left-panel-content class="panel-main-content">
                 <div id=saved>
 
-					<div class=search-type onclick="{top.HEURIST.search.showDatabaseSummary();}">Database Summary</div>
-
+					<div style="padding-top:15px; padding-bottom:5px" id=database-summary>
+						<div class="sidebar-firstlevel hide"  style="padding-top:5px; padding-left:20px;" 
+							onclick="{top.HEURIST.search.showDatabaseSummary();}"><strong>Database Summary</strong></div>
+					</div>
+					
 					<div id=my-records-saved-searches class="sidebar-firstlevel hide">
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
@@ -513,57 +526,64 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 									<!-- li><a href="#">Collections</a></li -->
 								</ul>
 							</li>
-							<li><div>Search</div>
+							<li><div style="margin-top: 5px;"><strong>Search</strong></div>
 								<ul>
-									<li><a href="#" title="Assisted Search builder panel" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Assisted search</a></li>
-									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
-									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
+									<li style="padding-top: 10px"><a href="#" title="Quick Search panel provides assistance in building a search" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Quick search</a></li>
+									<li><a href="#" title="Advanced search function builds complex search strings through a form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
+									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Search help (syntax)</a></li>
+									<li>--------------------------</li>
 									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"
 												onClick="{top.HEURIST.search.savedSearchEdit(0); return false;}">Save search as ...</a></li>
 
-									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
-									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
+									<li>--------------------------</li>
+                                    <li style="padding-bottom: 10px"><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
 								</ul>
 							</li>
-							<li><div>Edit</div>
+							
+							<li><div style="margin-top: 5px;"><strong>Selected</strong></div>
 								<ul>
-									<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
+									<li style="padding-top: 10px"><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
+									<li>--------------------------</li>
 									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships" class="seperator">Relate to ...</a></li>
+									<li>--------------------------</li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags" class="seperator">Tag</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings" >Rate</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(null); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteRecords(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
+									<li>--------------------------</li>
+									<li style="padding-bottom: 10px"><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
 								</ul>
 							</li>
+							
 							<!-- </span><span class="collected-shown" style="display:inline"> -->
-							<li><div id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</div>
+							<li><div style="margin-top: 5px;" id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." ><strong>Collect&nbsp;&nbsp;</strong></div>
 								<ul>
-									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.collectionAdd();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
+									<li style="padding-top: 10px"><a class=collected-hidden href="#" onClick="top.HEURIST.search.collectionAdd();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
 									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.collectionDel(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
 									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection"
-											onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.collectionOnUpdate); document.getElementById("q").focus(); return false;'>Remove all</a></li>
-									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="top.HEURIST.search.collectionSave()">Save to...</a></li>
-									<li><a class=toolbar-large-icon-link-normal href="#" onClick="{top.HEURIST.search.executeQuery('?q=_COLLECTED_&amp;label=Collected');}" title="Show current set of records in collection" >Show</a></li>
+											onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.collectionOnUpdate); document.getElementById("q").focus(); return false;'>Clear</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="top.HEURIST.search.collectionSave()">Save collection as ...</a></li>
+									<li style="padding-bottom: 10px"><a class=toolbar-large-icon-link-normal href="#" onClick="{top.HEURIST.search.executeQuery('?q=_COLLECTED_&amp;label=Collected');}" title="Show current set of records in collection" >Show as search</a></li>
 								</ul>
 							</li>
-							<li><div>Share</div>
+							
+							<li><div style="margin-top: 5px;"><strong>Share</strong></div>
 								<ul>
-									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
+									<li style="padding-top: 10px"><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
+									<li style="padding-bottom: 10px"><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
 								</ul>
 							</li>
-							<li><div>Layout</div>
+							
+							<li><div style="margin-top: 5px;"><strong>Layout</strong></div>
 								<ul>
-									<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
+									<li style="padding-top: 10px"><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
 									<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
 									<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
 									<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
-									<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
-
+									<li>--------------------------</li>
 									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
 									also, provide this in the Advanced pulldown to render the current selection
 									-->
@@ -575,6 +595,9 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 										<ul id="menuSavedFiltersAndLayouts">
 										</ul>
 									</li>
+									<li>--------------------------</li>
+									<li style="padding-bottom: 10px"><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
+
 								</ul>
 							</li>
 						</ul>
