@@ -376,41 +376,34 @@
 	*/
 	function sendNewUserInfoEmail($recID){
 
-				//mysql_connection_overwrite(DATABASE);
-				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
-				$res = mysql_query($query);
-				while ($row = mysql_fetch_assoc($res)) {
+		//mysql_connection_overwrite(DATABASE);
+		$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
 
-					$ugr_Name = $row['ugr_Name'];
-					$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
-					$ugr_Organisation = $row['ugr_Organisation'];
-					$ugr_eMail = $row['ugr_eMail'];
+			$ugr_Name = $row['ugr_Name'];
+			$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
+			$ugr_Organisation = $row['ugr_Organisation'];
+			$ugr_eMail = $row['ugr_eMail'];
 
-					//create email text for admin
-					$email_text =
-"There is a Heurist user registration awaiting approval.
+			//create email text for admin
+			$email_text =
+			"There is a Heurist user registration awaiting approval.\n".
+			"The user details submitted are:\n".
+			"Database name: ".DATABASE."\n".
+			"Full name:    ".$ugr_FullName."\n".
+			"Email address: ".$ugr_eMail."\n".
+			"Organisation:  ".$ugr_Organisation."\n".
+			"Go to the address below to review further details and approve the registration:\n".
+			HEURIST_URL_BASE."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
-The user details submitted are:
+			$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
+				"From: root");
+			if (! $rv) {//TODO  SAW this should not fail silently
+				error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
+			}
 
-Database name: ".DATABASE."
-Full name:    ".$ugr_FullName."
-Email address: ".$ugr_eMail."
-Organisation:  ".$ugr_Organisation."
-
-Go to the address below to review further details and approve the registration:
-
-".HEURIST_URL_BASE."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users
-
-";
-//http://heuristscholar.org/h3-ao/admin/adminMenu.php?db=artem_delete1&recID=5&mode=users
-
-				$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
-								"From: root");
-				if (! $rv) {//TODO  SAW this should not fail silently
-								error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
-				}
-
-				}
+		}
 	}
 
 	/**
@@ -418,48 +411,48 @@ Go to the address below to review further details and approve the registration:
 	*/
 	function sendApprovalEmail($recID, $tmp_password){
 
-				//mysql_connection_overwrite(DATABASE);
-				$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
-				$res = mysql_query($query);
-				while ($row = mysql_fetch_assoc($res)) {
+		//mysql_connection_overwrite(DATABASE);
+		$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
 
-					$ugr_Name = $row['ugr_Name'];
-					$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
-					$ugr_Organisation = $row['ugr_Organisation'];
-					$ugr_eMail = $row['ugr_eMail'];
+			$ugr_Name = $row['ugr_Name'];
+			$ugr_FullName = $row['ugr_FirstName'].' '.$row['ugr_LastName'];
+			$ugr_Organisation = $row['ugr_Organisation'];
+			$ugr_eMail = $row['ugr_eMail'];
 
-					if($tmp_password!=null){
-						$email_text = "A new Heurist account has been created for you.";
-					}else{
-						$email_text = "Your Heurist account registration has been approved.";
-					}
+			if($tmp_password!=null){
+				$email_text = "A new Heurist account has been created for you.";
+			}else{
+				$email_text = "Your Heurist account registration has been approved.";
+			}                               
 
-$email_text = $email_text."
+			if (HEURIST_DBNAME == 'H3Sandpit') {
+				// If the registration was on the sandpit DB on main Heurist server, return to the project home page
+				// We don't bother to test for the Heurist server on the assumption it is very unlikely that anyone else
+				// will have or navigate to this database anywhere else
+				$email_text .= "<p>Please go to: ".HEURIST_URL_BASE."index.html with the username: " . $ugr_Name;
+			} else {
+				// on any other server you give them a pointer to the search page of that database
+				$email_text = $email_text."<p>Heurist database: ".HEURIST_DBNAME."\n".
+				"Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME. " with the username: " . $ugr_Name;
+			}
 
-Heurist database: ".HEURIST_DBNAME."
 
-Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
+			if($tmp_password!=null){
+				$email_text = $email_text." and password: ".$tmp_password.
+				" - To change your password go to My Profile -> My User Info in the top right menu";
+			}
 
-with the username: " . $ugr_Name;
+			$email_text = $email_text."</p><p>We recommend visiting the 'Take the Tour' section and also visiting the Help ".
+			"function, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
 
-					if($tmp_password!=null){
- $email_text = $email_text." and password: ".$tmp_password."
-
- To change your password go to My Profile -> My User Info in the top right menu";
-					}
-
- $email_text = $email_text."
-
-We recommend visiting the 'Take the Tour' section and
-also visiting the Help function, which provides comprehensive
-overviews and step-by-step instructions for using Heurist.";
-
-							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
-								"From: ".HEURIST_MAIL_TO_ADMIN."\r\nCc: ".HEURIST_MAIL_TO_ADMIN);
-							if (! $rv) {//TODO  SAW this should not fail silently
-								error_log("mail send failed: " . $ugr_eMail);
-							}
-				}
+			$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
+				"From: ".HEURIST_MAIL_TO_ADMIN."\r\nCc: ".HEURIST_MAIL_TO_ADMIN);
+			if (! $rv) {//TODO  SAW this should not fail silently
+				error_log("mail send failed: " . $ugr_eMail);
+			}
+		}
 	}
 
 	/**
