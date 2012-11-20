@@ -1938,9 +1938,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 	var	disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
 	var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-														(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
-															?top.HEURIST.terms.termsByDomainLookup['enum']
-															:top.HEURIST.terms.termsByDomainLookup.relation,
+														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
 														(bdValue && bdValue.value ? bdValue.value : null), (this.required!=="required"));
 
 	if(newInput.length>0){
@@ -1967,8 +1965,13 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 }
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
+
 	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+	var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
+	var isVocabulary = !isNaN(Number(sAllTerms));
+
 	var urlSpan = this.document.createElement("span");
 		urlSpan.style.paddingLeft = "1em";
 		urlSpan.style.color = "blue";
@@ -1977,7 +1980,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 	var editImg = urlSpan.appendChild(this.document.createElement("img"));
 		editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
 	urlSpan.appendChild(editImg);
-	urlSpan.appendChild(this.document.createTextNode("list"));
+	urlSpan.appendChild(this.document.createTextNode(isVocabulary?"add":"list"));
 
 	//var detailType = this.detailType;
 	//var recFieldRequirements = this.recFieldRequirements;
@@ -2015,7 +2018,29 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-		top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+		if(isVocabulary){
+
+			if(type!="enum"){
+				type="relation";
+			}
+
+			top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+				"admin/structure/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
+				{
+				"close-on-blur": false,
+				"no-resize": true,
+				height: 160,
+				width: 400,
+				callback: function(context) {
+					if(context=="ok") {
+						onSelecTermsUpdate(sAllTerms, "");
+					}
+				}
+			});
+
+
+		}else{
+			top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
 									"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
 									{//options
 									"close-on-blur": false,
@@ -2025,6 +2050,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 									callback: onSelecTermsUpdate
 									}
 								);
+		}
 	};
 
 	this.inputCell.insertBefore(urlSpan, this.promptDiv);

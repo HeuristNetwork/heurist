@@ -73,7 +73,7 @@ function init () {
 
 	relTypeSelect = Hul.createTermSelect(relTypeTerms,
 													(relTypeTermsDisabled || ""),
-													top.HEURIST.terms.termsByDomainLookup.relation,
+													"relation",
 													"IsPartOf");
 	relTypeSelectDiv.appendChild(relTypeSelect);
 
@@ -82,7 +82,7 @@ function init () {
 }
 
 function selectRelRecord() {
-	
+
 		Hul.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&deft="+
 							top.HEURIST.magicNumbers['RT_AGGREGATION']+"&db=" + database, {
 			callback: function(recID, recTitle) {

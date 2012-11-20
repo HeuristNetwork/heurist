@@ -221,7 +221,7 @@ if (!top.Relationship) {
 /* OLD WAY
 		this.relTypeSelect = top.HEURIST.util.createTermSelect(this.manager.relTerms,
 																	(this.manager.termHeadersList || ""),
-																	top.HEURIST.terms.termsByDomainLookup.relation,
+																	"relation",
 																	this.relationshipRec.relTermID);
 		this.relTypeSelect.style.marginLeft = '5px';
 		this.relTypeSelect.style.padding = '3px';

@@ -1821,7 +1821,7 @@ top.HEURIST.search = {
 				//create selector from typedef
 				var allTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']]),
 					disabledTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']]);
-				var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+				var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, 'enum', null);
 				if (enumSelector){
 					enumSelector.id = "simple-search-enum-selector";
 				}

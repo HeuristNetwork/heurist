@@ -212,6 +212,85 @@ function DetailTypeEditor() {
 	}
 
 	/**
+	* recreateTermsVocabSelector
+	* creates and fills selector with list of Vocabularies
+	*/
+	function _recreateTermsVocabSelector()  {
+
+			var prev = Dom.get("termsVocab");
+				prev.innerHTML = "";
+
+			var datatype = Dom.get("dty_Type").value;
+			var vocabId = Number(Dom.get("dty_JsonTermIDTree").value),
+				sel_index = -1;
+			if(isNaN(vocabId)){
+				vocabId = 0;
+			}
+
+			var dom = (datatype === "relmarker" || datatype === "relationtype")?"relation":"enum",
+				fi_label = top.HEURIST.terms.fieldNamesToIndex['trm_Label'];
+			var termID,
+				termName,
+				termTree = top.HEURIST.terms.treesByDomain[dom],
+				terms = top.HEURIST.terms.termsByDomainLookup[dom];
+
+			var el_sel = document.createElement("select");
+				el_sel.id = "selVocab";
+
+			for(termID in termTree) { // For every term in first levet of tree
+				if(!Hul.isnull(termID)){
+					termName = terms[termID][fi_label];
+					Hul.addoption(el_sel, termID, termName);
+					if(Number(termID)==vocabId){
+						sel_index = el_sel.length-1;
+					}
+				}
+			}
+
+			Hul.addoption(el_sel, 0, 'Individual selection (advanced)');
+			if(sel_index<0) {
+				sel_index = el_sel.length-1;
+			}
+			el_sel.selectedIndex = sel_index;
+
+			el_sel.onchange =  _changeVocabulary;
+			el_sel.style.maxWidth = '175px';
+			prev.appendChild(el_sel);
+
+			_changeVocabulary(null);
+	}
+
+	/**
+	*
+	*/
+	function _changeVocabulary(event){
+
+		var el_sel;
+
+		if(event){
+			el_sel = event.target;
+		}else{
+			el_sel = Dom.get("selVocab");
+		}
+
+		var	btn_addsel = Dom.get("btnAddSelTerm"),
+			editedTermTree = "";
+
+		if(el_sel.value > 0){ //individual selection
+			btn_addsel.value = "Add term";
+			editedTermTree = el_sel.value;
+		}else{
+			btn_addsel.value = "Select terms";
+		}
+
+		if(event){
+			Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+			Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
+			_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, "");
+		}
+	}
+
+	/**
 	* recreateTermsPreviewSelector
 	* creates and fills selector for Terms Tree if datatype is enum, relmarker, relationtype
 	* @param datatype an datatype
@@ -231,25 +310,17 @@ function DetailTypeEditor() {
 					//remove old combobox
 					var prev = Dom.get("termsPreview"),
 						i;
-					for (i = 1; i < prev.children.length; i++) {
-						prev.removeChild(prev.childNodes[1]);
+					//for (i = 1; i < prev.children.length; i++) {
+					while(prev.childNodes.length>1) {
+						if(prev.childNodes.length>0){
+							prev.removeChild(prev.childNodes[1]);
+						}
 					}
-					var el_sel;
-					// add new select (combobox)
-					if(datatype === "enum") {
-
-						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+					var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
 						el_sel.style.backgroundColor = "#cccccc";
 						el_sel.onchange =  _preventSel;
+						el_sel.style.maxWidth = '175px';
 						prev.appendChild(el_sel);
-
-					}
-					else if(datatype === "relmarker" || datatype === "relationtype") {
-						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
-						el_sel.style.backgroundColor = "#cccccc";
-						el_sel.onchange =  _preventSel;
-						prev.appendChild(el_sel);
-					}
 				}
 	}
 
@@ -300,28 +371,53 @@ function DetailTypeEditor() {
 	* listener of "Change vocabulary" button
 	* Shows a popup window where user can select terms to create a term tree as wanted
 	*/
-	function _onSelectTerms(){
+	function _onAddSelectTerms(){
 
 		var type = Dom.get("dty_Type").value;
 		var allTerms = Dom.get("dty_JsonTermIDTree").value;
 		var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 
-		Hul.popupURL(top, top.HEURIST.basePath +
-			"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
-			{
-			"close-on-blur": false,
-			"no-resize": true,
-			height: 500,
-			width: 750,
-			callback: function(editedTermTree, editedDisabledTerms) {
-				if(editedTermTree || editedDisabledTerms) {
-					//update hidden fields
-					Dom.get("dty_JsonTermIDTree").value = editedTermTree;
-					Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
-						_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
-				}
+		var el_sel = Dom.get("selVocab");
+		if(el_sel.value>0){ //add term to vocabulary
+
+			if(type!="enum"){
+				type="relation";
 			}
-		});
+
+			Hul.popupURL(top, top.HEURIST.basePath +
+				"admin/structure/editTermForm.php?domain="+type+"&parent="+el_sel.value+"&db="+_db,
+				{
+				"close-on-blur": false,
+				"no-resize": true,
+				height: 160,
+				width: 400,
+				callback: function(context) {
+					if(context=="ok") {
+						_recreateTermsPreviewSelector(type, allTerms, "");
+					}
+				}
+			});
+
+		}else{ //select terms (advanced)
+
+			Hul.popupURL(top, top.HEURIST.basePath +
+				"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
+				{
+				"close-on-blur": false,
+				"no-resize": true,
+				height: 500,
+				width: 750,
+				callback: function(editedTermTree, editedDisabledTerms) {
+					if(editedTermTree || editedDisabledTerms) {
+						//update hidden fields
+						Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+						Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+						_recreateTermsPreviewSelector(type, editedTermTree, editedDisabledTerms);
+					}
+				}
+			});
+
+		}
 
 	}
 
@@ -451,6 +547,7 @@ function DetailTypeEditor() {
 		_onChangeType(null);
 
 		// create preview for Terms Tree and record pointer
+		_recreateTermsVocabSelector();
 		_recreateTermsPreviewSelector(
 						_detailType[fi.dty_Type],
 						_detailType[fi.dty_JsonTermIDTree],
@@ -784,7 +881,7 @@ function DetailTypeEditor() {
 			/**
 			 *	handles change status event
 			 */
-			onSelectTerms : _onSelectTerms,
+			onAddSelectTerms : _onAddSelectTerms,
 
 			/**
 			 *	handles change status event

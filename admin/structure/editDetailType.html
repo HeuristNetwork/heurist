@@ -92,7 +92,8 @@
 	<div id="pnl_enum" class="input-row" style="display:block;">
 		<div class="input-header-cell">Vocabulary (terms):</div>
 		<div class="input-cell">
-		<input type="submit" value="Change vocabulary" id="btnSelTerms" onClick="window.detailTypeEditor.onSelectTerms()"/>
+		<span class="dtyValue" id="termsVocab"></span>
+		<input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:80px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/>
 		<span class="dtyValue" id="termsPreview"><span>preview:</span></span>
 		<div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
 		</div>
@@ -117,7 +118,7 @@
 		style="margin-left: 40px;"
 			onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
 	<div id="options" class="hidden" style="background-color:#ffffff;">
-		
+
 	<div class="input-row">
 		<div class="input-header-cell">Display group:</div>
 		<div class="input-cell"><select class="dtyValue" id="dty_DetailTypeGroupID"></select>
@@ -169,7 +170,7 @@
 	</div> <!-- optional div -->
 	</div>
 <br />
-	<div class="actionButtons"> 
+	<div class="actionButtons">
 		<input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
 		<input type="button" value="Save" onClick="window.detailTypeEditor.save();" />
 	</div>

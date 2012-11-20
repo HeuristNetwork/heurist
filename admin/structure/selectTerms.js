@@ -650,7 +650,7 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 
 		var el_sel = top.HEURIST.util.createTermSelect(termIDTree,
 													(disabledTermsList || ""),
-													termsByDomainLookup,
+													_datatype,
 													null);
 		el_sel.className = "previewList";
 		prev.appendChild(el_sel);

@@ -1892,20 +1892,11 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 							parent.removeChild(parent.childNodes[0]);
 						}
 
-						// add new select (combobox)
-						if(datatype === "enum") {
-							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], _defvalue, isdefselector);
-							el_sel.style.backgroundColor = bgcolor;
-							el_sel.onchange =  onchangehandler;
-							el_sel.className = "previewList";
-							parent.appendChild(el_sel);
-						}
-						else if(datatype === "relmarker" || datatype === "relationtype") {
-							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, _defvalue, isdefselector);
-							el_sel.style.backgroundColor = bgcolor;
-							el_sel.onchange =  onchangehandler;
-							parent.appendChild(el_sel);
-						}
+						el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
+						el_sel.style.backgroundColor = bgcolor;
+						el_sel.onchange =  onchangehandler;
+						el_sel.className = "previewList"; //was for enum only?
+						parent.appendChild(el_sel);
 					}//end __recreate
 
 					__recreate(parent1, _preventSel, "#cccccc", null, false);

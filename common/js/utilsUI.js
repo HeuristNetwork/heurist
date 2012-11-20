@@ -1432,11 +1432,20 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * @param defaultTermID id of term to show as selected, can be null
 * @return selObj an HTML select object node
 **/
-	createTermSelect: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID) { // Creates the preview
-		return top.HEURIST.util.createTermSelectExt(termIDTree, disabledTermIDsList, termLookup, defaultTermID, false); // Creates the preview
+	createTermSelect: function(termIDTree, disabledTermIDsList, datatype, defaultTermID) { // Creates the preview
+		return top.HEURIST.util.createTermSelectExt(termIDTree, disabledTermIDsList, datatype, defaultTermID, false); // Creates the preview
 	},
-	createTermSelectExt: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID, isAddFirstEmpty) { // Creates the preview
+	createTermSelectExt: function(termIDTree, disabledTermIDsList, datatype, defaultTermID, isAddFirstEmpty) { // Creates the preview
+
 		var selObj = document.createElement("select");
+
+		if(datatype === "relmarker" || datatype === "relationtype"){
+			datatype = "relation";
+		}else if(!(datatype=="enum" || datatype=="relation")){
+			return selObj;
+		}
+		var termLookup = top.HEURIST.terms.termsByDomainLookup[datatype];
+
 		var temp = ( top.HEURIST.util.isArray(disabledTermIDsList)   //instanceof(Array)
 						? disabledTermIDsList
 						: (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
@@ -1448,6 +1457,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		for (var id in temp) {
 			disabledTerms[temp[id]] = temp[id];
 		}
+
+		//this is vocabulary id - show list of all terms for this vocab
+		if(!isNaN(Number(termIDTree))){
+			var tree = top.HEURIST.terms.treesByDomain[datatype];
+			termIDTree = tree[termIDTree];
+		}
+
+
 		function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
 			var termID;
 			var localLookup = termLookupInner;

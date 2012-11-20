@@ -1014,7 +1014,7 @@ function EditTerms() {
 			allTerms = Hul.expandJsonStructure(allTerms);
 			disabledTerms = Hul.expandJsonStructure(disabledTerms);
 
-			el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup[_currentDomain], null);
+			el_sel = Hul.createTermSelect(allTerms, disabledTerms, _currentDomain, null);
 			el_sel.id = "selector"+dty_ID;
 			el_sel.style.backgroundColor = "#cccccc";
 			el_sel.width = 150;
