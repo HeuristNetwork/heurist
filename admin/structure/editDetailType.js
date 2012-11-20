@@ -215,12 +215,13 @@ function DetailTypeEditor() {
 	* recreateTermsVocabSelector
 	* creates and fills selector with list of Vocabularies
 	*/
-	function _recreateTermsVocabSelector()  {
+	function _recreateTermsVocabSelector(datatype)  {
 
 			var prev = Dom.get("termsVocab");
 				prev.innerHTML = "";
 
-			var datatype = Dom.get("dty_Type").value;
+			if(Hul.isempty(datatype)) return;
+
 			var vocabId = Number(Dom.get("dty_JsonTermIDTree").value),
 				sel_index = -1;
 			if(isNaN(vocabId)){
@@ -237,6 +238,8 @@ function DetailTypeEditor() {
 			var el_sel = document.createElement("select");
 				el_sel.id = "selVocab";
 
+			Hul.addoption(el_sel, -1, 'select...');
+
 			for(termID in termTree) { // For every term in first levet of tree
 				if(!Hul.isnull(termID)){
 					termName = terms[termID][fi_label];
@@ -249,12 +252,12 @@ function DetailTypeEditor() {
 
 			Hul.addoption(el_sel, 0, 'Individual selection (advanced)');
 			if(sel_index<0) {
-				sel_index = el_sel.length-1;
+				sel_index = (Dom.get("dty_JsonTermIDTree").value!="" && vocabId==0)?el_sel.length-1:0;
 			}
 			el_sel.selectedIndex = sel_index;
 
 			el_sel.onchange =  _changeVocabulary;
-			el_sel.style.maxWidth = '175px';
+			el_sel.style.maxWidth = '185px';
 			prev.appendChild(el_sel);
 
 			_changeVocabulary(null);
@@ -276,9 +279,13 @@ function DetailTypeEditor() {
 		var	btn_addsel = Dom.get("btnAddSelTerm"),
 			editedTermTree = "";
 
+		btn_addsel.disabled = false;
+
 		if(el_sel.value > 0){ //individual selection
-			btn_addsel.value = "Add term";
+			btn_addsel.value = "Add  term";
 			editedTermTree = el_sel.value;
+		}else if(el_sel.value < 0){
+			btn_addsel.disabled = true;
 		}else{
 			btn_addsel.value = "Select terms";
 		}
@@ -288,6 +295,7 @@ function DetailTypeEditor() {
 			Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
 			_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, "");
 		}
+
 	}
 
 	/**
@@ -319,7 +327,7 @@ function DetailTypeEditor() {
 					var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
 						el_sel.style.backgroundColor = "#cccccc";
 						el_sel.onchange =  _preventSel;
-						el_sel.style.maxWidth = '175px';
+						el_sel.style.maxWidth = '155px';
 						prev.appendChild(el_sel);
 				}
 	}
@@ -547,7 +555,8 @@ function DetailTypeEditor() {
 		_onChangeType(null);
 
 		// create preview for Terms Tree and record pointer
-		_recreateTermsVocabSelector();
+
+		_recreateTermsVocabSelector(_detailType[fi.dty_Type]);
 		_recreateTermsPreviewSelector(
 						_detailType[fi.dty_Type],
 						_detailType[fi.dty_JsonTermIDTree],
@@ -803,6 +812,7 @@ function DetailTypeEditor() {
 					Dom.get("dty_PtrTargetRectypeIDs").value = "";
 					Dom.get("dty_FieldSetRecTypeID").value = "";
 						that.keepType = el.value;
+						_recreateTermsVocabSelector(that.keepType);
 						_recreateTermsPreviewSelector(that.keepType, null, null);
 						_recreateRecTypesPreview(that.keepType, null);
 				}

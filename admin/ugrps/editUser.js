@@ -77,7 +77,7 @@ function UserEditor() {
 			_recID =  -1;
 			_entity = [-1,'user','','','','','','','','','','','','','y',''];
 
-			_isRegistration  = !top.HEURIST.is_logged_in();
+			_isRegistration  = (!top.HEURIST.is_logged_in() || window.parent == window);
 			if(_isRegistration){
 				$('#condition').removeClass('hidden');
 				$('#div-inpit-ugr_ID').addClass('hidden');

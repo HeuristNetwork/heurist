@@ -67,7 +67,7 @@ if (!is_admin()) {
 			$db = mysqli_connection_overwrite(DATABASE); //artem's
 
 			$res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $_REQUEST['parent']."-1",
-					array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'],$_REQUEST['parent'],$_REQUEST['status'],$_REQUEST['code']), null);
+					array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'],$_REQUEST['parent'],"open",$_REQUEST['code']), null);
 
 			if(is_numeric($res)){
 
@@ -88,20 +88,12 @@ if (!is_admin()) {
         	<input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
         	<input name="parent" value="<?=$_REQUEST['parent']?>" type="hidden" />
 
-			<div class="dtyField"><label class="dtyLabel">Display name:</label><input name="name" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input name="name" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px"/></div>
-            <div id="divStatus" class="dtyField"><label class="dtyLabel">Status:</label>
-                <select class="dtyValue" name="status" onChange="editTerms.onChangeStatus(event)">
-                    <option selected="selected">open</option>
-                    <option>pending</option>
-                    <option>approved</option>
-                    <!-- option>reserved</option -->
-                </select>
-            </div>
 
 			<div style="text-align: right; padding-top:8px;">
-					<input id="btnSave" type="submit" value="Save Changes"/>
+					<input id="btnSave" type="submit" value="Save"/>
 					<input id="btnCancel" type="button" value="Close" onClick="{window.close(<?=$ok?>)}" />
 			</div>
 
