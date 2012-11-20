@@ -847,11 +847,13 @@ if (!top.Relationship) {
 		a.href = "#";
 		a.style.padding = "3px 6px 3px 0px";
 
+		/* this really doesn't belong here - was intended to be in form title bar
 		addImg = a.appendChild(document.createElement("img"));
 		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
 		addImg.className = "add_records_img";
 		addImg.title = "Add relationship to Aggregation";
 		a.appendChild(document.createTextNode("Add to Aggregation"));
+		*/
 		a.style.textDecoration = "none";
 		a.onclick = function(rtypes,dtID) {	return function() {
 			var newRow = document.createElement("div");

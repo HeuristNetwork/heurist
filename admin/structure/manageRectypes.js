@@ -488,7 +488,7 @@ function RectypeManager() {
 					if(iUsage<1){
 						if(_needToSaveFirst()) { return; }
 
-						var value = confirm("Do you really want to delete record type#"+rectypeID+"'"+oRecord.getData('name')+"'?");
+						var value = confirm("Do you really want to delete record type # "+rectypeID+" '"+oRecord.getData('name')+"' ?");
 						if(value) {
 
 							function _updateAfterDelete(context) {

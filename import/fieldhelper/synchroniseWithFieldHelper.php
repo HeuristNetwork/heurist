@@ -34,7 +34,7 @@
 
 <script type="text/javascript">
 function update_counts(divid, processed, added, total) {
-	document.getElementById("progress"+divid).innerHTML = (total==0)?"": ("  Processed "+processed+" of "+total+". Added records: "+added);
+	document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "+processed+" of "+total+". Added records: "+added+"</div>");
 }
 </script>
 
@@ -81,14 +81,13 @@ function update_counts(divid, processed, added, total) {
 			die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
 		}
 
-		print "<h2>Heurist - FieldHelper synchronisation</h2>";
-		print "<h2>FOR  ADVANCED USERS ONLY</h2>";
-		print "This script reads FieldHelper XML manifest files from the folders (and their descendants) listed in the sysIdentification record ";
-		print "and writes the metadata as records into the current logged-in database, with pointers back to the files described by the manifest. ";
-		print "The current database can already contain data, new records are appended.";
-
-		print "<p> At this time, synchronisation is a one-shot, one way import, from FieldHelper to Heurist".
-		"<br>Later this function will do two-way synchronsiation";
+		print "<h2>Import Files On Disk / FieldHelepr Manifests</h2>";
+		print "<h2>ADVANCED USERS</h2>";
+		print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants) listed in Database > Advanced Properties<br>";
+		print "and writes the metadata as records in the current database, with pointers back to the files described by the manifests. <br>";
+		print "If no manifests exist, they are created (and can be read by FieldHelper). New files are added to the existing manifests.<br>&nbsp;<br>"; 
+		print "The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>";
+		print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by 'nobody'";
 		print "</p>";
 
 		$notfound = array();
@@ -98,7 +97,13 @@ function update_counts(divid, processed, added, total) {
 			}
 		}
 		if(count($notfound)>0){
-			print "<p style='color:red;'> There are not detail types in this instance of Heurist database for following manifest elements: ".implode(",",$notfound).". They will be ignored</p>";
+			print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".implode(", ",$notfound).
+				"</b><br>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
+				"<ul><li>Go to Designer View > Essentials > Import Structure<br>&nbsp;</li>".
+				"<li>Navigate to the H3CoreDefinitions database<br>&nbsp;</li>".
+				"<li>Check 'Show existing record types'</li>&nbsp;".
+				"<li>Check 'Click the download icon on the Digital Media Item'</li></ul>".
+				"You may proceed without this step, but these fields will not be imported</p>";
 		}
 
 		// ----FORM 1 - CHECK MEDIA FOLDERS --------------------------------------------------------------------------------
@@ -107,7 +112,8 @@ function update_counts(divid, processed, added, total) {
 
 			if(HEURIST_DBID==0){ //is not registered
 
-				print "<p style=\"color:red\">Database must be registered to use FieldHelper sync function</p>";
+				print "<p style=\"color:red\">Note: Database must be registered to use this function<br>".
+				"Register the database using Designer View > Database > Registration - only available to the database creator/owner (user #2)</p>";
 
 			}else{
 				// Find out which folders to parse for XML manifests
@@ -676,7 +682,7 @@ XML;
 
 
 			if($rep_processed_dir>0){
-				print "<div>$rep_processed_dir records created (new entries added to manifest)</div>";
+				print "<div style=\"color:green\">$rep_processed_dir records created (new entries added to manifest)</div>";
 			}
 			print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.',0)</script>'."\n";
 			ob_flush();

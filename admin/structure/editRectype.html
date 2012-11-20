@@ -56,6 +56,8 @@
 	var defaultGroupID = Hul.getUrlParameter('groupID',query);
 	var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
+    var db = (window.HEURIST.parameters["db"] || "");
+    
 </script>
 <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
 
@@ -132,7 +134,7 @@
 	</div>
 
 	<!-- OPTIONAL FIELDS -->
-	<div id="optional" class="togglepnl"><a
+	<div id="optional" class="togglepnl" style="margin-top: 20px; margin-bottom: 20px;"><a
 		style="margin-left: 40px;"
 			onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
 	<div id="options" class="hidden" style="background-color:#ffffff;">
@@ -185,6 +187,9 @@
 							  This is a useful way of providing some context for the content of the form</div>
 		</div>
 	 </div>
+	 
+	 <!-- This doesn't actually work, but is it really useful? I think not -->
+	 <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
 
 	<!-- HIDDEN  IJ REQ 2012-10-11 -->
 	<div class="input-row" style="display:none">
@@ -242,7 +247,6 @@
 	</div>
 
 	<div class="actionButtons">
-		<div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
 		<input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
 		<div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
 		<!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->

@@ -341,8 +341,8 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 						var cnt = _currentPairRecord.getData("count");
 						var swarn = (cnt==1)
-									? "'"+oRecord.getData("trm_label")+"' is the only term for current enity. Do you really want to delete entity pair at all?"
-									: "Do you really want to delete term '"+oRecord.getData("trm_label")+"'?";
+									? "'"+oRecord.getData("trm_label")+"' is the only term for the current entity. Do you really want to delete the entity pair completely?"
+									: "Do you really want to delete term '"+oRecord.getData("trm_label")+"' ?";
 
 						var value = confirm(swarn);
 						if(value) {

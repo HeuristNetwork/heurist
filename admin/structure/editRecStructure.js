@@ -537,7 +537,7 @@ function EditRecStructure() {
 								if(context[rty_ID]){
 									sWarn = "This field #"+dty_ID+" '"+dty_name+"' is utilized in this record type title mask. You have to edit title mask in Essentials > Record types / fields\n Still wish to delete this field?";
 								}else{
-									sWarn =  "Delete field #"+dty_ID+" '"+dty_name+"' from this record structure?";
+									sWarn =  "Delete field # "+dty_ID+" '"+dty_name+"' from this record structure?";
 								}
 
 								var r=confirm(sWarn);
