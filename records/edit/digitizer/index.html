@@ -32,7 +32,7 @@
 
 </head>
 
-<body id="body" width="780" height="550" style="margin: 5px; padding: 0; overflow:hidden;" onload="initmap('map_digitizer')">
+<body id="body" width="780" height="600" style="margin: 5px; padding: 0; overflow:hidden;" onload="initmap('map_digitizer')">
 
 <!-- TEMP for testing
 <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
@@ -44,15 +44,9 @@
 <div style="width:100%;">
     <div id="middlerow" style="float:left;">
 	    <form style="float:left;margin-right:5px" action="#" onsubmit="searchAddress(this.address.value); return false">
-		    <input type="text" style="border: 1px solid #000000;" size="50" name="address" value="Arts eResearch, Sydney University, NSW, Australia" />
-		    <input type="submit" value="Search" />
+		    <input type="text" style="border: 1px solid #000000;" size="40" name="address" value="Arts eResearch, University of Sydney" />
+		    <input type="submit" value="Find" />
 	    </form>
-
-        <form style="float:left;text-align:right;" action="#">
-	        <select id="over" style="width:120px; border:1px solid #000000;">
-	        <option>LngLat mousemove</option>
-	        <option selected="selected">LatLng mousemove</option>
-	        </select>
 
 			<label>Background:</label>
 			<select id="cbLayers" style="width:180px;display:inline-block;" onchange="loadLayer(event)"></select>
@@ -72,11 +66,13 @@
 
 <div id="buttonrow" style="width:135px;float:right">
 
-    <div class="topbutton">
-        <input type="button" onclick="clearMap();" value="Clear Map" style="width:130px;"/>
-    </div>
+	<form style="float:left;text-align:left;" action="#">
+	<select id="over" style="width:130px; margin-left: 5px; border:0px solid #000000;">
+		<option>Long, Lat</option>
+		<option selected="selected">Lat, Long</option>
+	</select>
 
-    <div class="topbutton">
+    <div class="topbutton" style="margin-top: 20px;">
         <select id="toolchoice" name="toolchoice" style="border:1px solid #000000;width:130px;" onchange="newToolID=parseInt(this.options[this.selectedIndex].value);setTool(newToolID);">
         <option selected="selected" value="5">Marker</option>
         <option value="1">Polyline</option>
@@ -86,14 +82,35 @@
         <!-- option value="6">Directions</option -->
         </select>
     </div>
+
+    <div class="topbutton">
+ 	   <input type="button" id="btnSave" disabled="disabled"
+	   		style="font-weight: bold;width:130px; color: black;" value="Save" onclick="closeWithValue();"/>
+    </div>
+
+    <div class="topbutton">  <!-- disabled="disabled"  -->
+ 	   <input type="button" id="btnSaveExtent" style="width:130px;" value="Remember view" onclick="keepExtent();"/>
+    </div>
+
     <div class="topbutton">
         <input type="button" id="btnDelLastPoint" onclick="deleteLastPoint();"
-        	value="Delete Last Point" style="width:130px;visibility:hidden;"/>
+        	value="Delete Last" style="width:130px;visibility:hidden;"/>
     </div>
+ 
     <div class="topbutton">
-        <input type="button" id="btnEditPoly" onclick="editlines();" value="Edit lines"
+        <input type="button" id="btnEditPoly" onclick="editlines();" value="Edit shape"
         	style="width:130px;visibility:hidden;"/>
     </div>
+ 
+    <div class="topbutton">
+        <input type="button" onclick="clearMap();" value="Clear Shape" style="width:130px;"/>
+    </div>
+
+   
+    <div> 
+    	&nbsp;
+    </div>
+    
     <div class="topbutton">
 
 <textarea id="coords1" cols="2" rows="2">
@@ -104,13 +121,6 @@ Click on the map. The code for the shape you create will be presented here.
     <div class="topbutton">
  	   <input type="button" id="btnSaveChanges" style="width:130px;" value="Apply coords" onclick="applyManualEntry();"
  	   			title="Type in coordinates into text area above and click this button to apply changes"/>
-    </div>
-    <div class="topbutton">  <!-- disabled="disabled"  -->
- 	   <input type="button" id="btnSaveExtent" style="width:130px;" value="Remember this view" onclick="keepExtent();"/>
-    </div>
-    <div class="topbutton">
- 	   <input type="button" id="btnSave" disabled="disabled"
-	   		style="font-weight: bold;width:130px;" value="Save" onclick="closeWithValue();"/>
     </div>
 
     <!-- this buttons not used -->

@@ -146,13 +146,13 @@ function polystyle() {
 	this.fill = "#0000FF";
 	this.width = 2;
 	this.lineopac = 0.8;
-	this.fillopac = 0.6;
+	this.fillopac = 0.1;
 }
 function linestyle() {
 	this.name = "Path";
 	this.kmlcolor = "FF0000FF";
 	this.color = "#FF0000";
-	this.width = 3;
+	this.width = 2;
 	this.lineopac = 1;
 }
 function circstyle() {
@@ -161,7 +161,7 @@ function circstyle() {
 	this.fill = "#0000FF";
 	this.width = 2;
 	this.lineopac = 0.8;
-	this.fillopac = 0.6;
+	this.fillopac = 0.1;
 }
 function markerstyleobject() {
 	this.name = "markerstyle";
@@ -1149,8 +1149,8 @@ function holecreator(){
 			preparePolyline();
 			gob('stepdiv').innerHTML = "Step 1";
 			gob('coords1').value = 'You may now draw the outer boundary. When finished, click Hole to move on to the next step.'
-			+' Remember, you do not have to let start and end meet.'
-			+' The API will close the shape in the finished polygon.';
+			+' You do not have to click back onto the start -'
+			+' the system will close the shape in the finished polygon.';
 		}
 	}
 	if(step == 2){
@@ -1163,7 +1163,7 @@ function holecreator(){
 		}
 		gob('stepdiv').innerHTML = "Step 2";
 		gob('coords1').value = 'You may now draw an inner boundary. Click Hole again to see the finished polygon. '+
-		'You may draw more than one hole: Click Next hole and draw before you click Hole.';
+		'You may draw more than one hole - click Next Hole and draw before you click Hole.';
 		if(anotherhole == true) {
 			// a hole has been drawn, another is about to be drawn
 			if(polyShape && polyPoints.length == 0) {
@@ -2453,6 +2453,6 @@ function keepExtent() {
 	var button = document.getElementById("btnSaveExtent");
 	button.value = "View saved";
 	button.style.color = "red";
-	setTimeout(function() { button.value = "Remember this view"; button.style.color = ""; }, 2000);
+	setTimeout(function() { button.value = "Remember view"; button.style.color = ""; }, 2000);
 }
 
