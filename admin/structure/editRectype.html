@@ -56,8 +56,8 @@
 	var defaultGroupID = Hul.getUrlParameter('groupID',query);
 	var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
-    var db = (window.HEURIST.parameters["db"] || "");
-    
+    var db = ((window.HEURIST.parameters && window.HEURIST.parameters["db"]) || "");
+
 </script>
 <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
 
@@ -187,7 +187,7 @@
 							  This is a useful way of providing some context for the content of the form</div>
 		</div>
 	 </div>
-	 
+
 	 <!-- This doesn't actually work, but is it really useful? I think not -->
 	 <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
 
@@ -297,6 +297,8 @@
 		if(supressEditStructure){
 			document.getElementById('btnSaveAndEditStructure').style.display = 'none';
 		}
+
+		setTimeout(function(){document.getElementById("rty_Name").focus();},1000);
 	}
 
 	/**

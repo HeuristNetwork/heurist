@@ -391,6 +391,7 @@ function EditRecStructure() {
 					'<input id="btnSave_'+rst_ID+'" type="button" value="Save" onclick="doExpliciteCollapse(event);" style="margin:0 10px;"/>'+
 					'<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
 					'</div></div>';
+
 				}
 			}
 			);
@@ -947,6 +948,7 @@ function EditRecStructure() {
 			//update min/max visibility
 			onReqtypeChange(Number(rst_ID));
 		}
+		Dom.get('ed'+rst_ID+'_rst_DisplayName').focus();
 
 
 		//If reserved, requirements can only be increased, nor can you change min or max values

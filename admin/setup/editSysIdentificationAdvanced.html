@@ -16,7 +16,7 @@
 <head>
 
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Database Properties</title>
+<title>Advanced Database Properties</title>
     <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
     <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
@@ -28,16 +28,23 @@
 <script>
 	// quite weird way - since it is not possibel (or unknown) how to treat t1000 in case of error
  	function showMessage(){
- 		if(document.getElementById('divErrors').innerHTML=="" && top.HEURIST.util.getUrlParameter('was', this.location.search)){
+ 		var is_processed = top.HEURIST.util.getUrlParameter('was', this.location.search);
+ 		if(document.getElementById('divErrors').innerHTML=="" && is_processed){
 			top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
 			setTimeout(function(){
 				top.HEURIST.util.closePopupLast();
 			}, 1000);
 		}
+
+		if([popup!]=='1'){
+			document.getElementById('headertitle').style.display = "none";
+			document.getElementById('btnBackToImport').style.visibility = "visible";
+		}
+
 	}
 </script>
 
-<div class="banner"><h2>Advanced Database Properties</h2></div>
+<div id="headertitle" class="banner"><h2>Advanced Database Properties</h2></div>
 
   <!--{PageHeader} -->
 
@@ -48,7 +55,7 @@
 
 [foreach SYSID sys]
 
-<form action="editSysIdentificationAdvanced.php?was=1&amp;db=[dbname!]" method="post">
+<form action="editSysIdentificationAdvanced.php?was=1&amp;db=[dbname!]&amp;popup=[popup!]" method="post">
 
 [update SYSID sysid_update]
 
@@ -118,7 +125,11 @@ If in doubt, leave as 'locktypetotype'</div>
 
 <p><span class="red">[errors]</span></p>
 
-<input type="submit" value="save">
+<input type="submit" value="save" />
+
+<input type="button" id="btnBackToImport" style="visibility: hidden;" value="Back to import"
+  onclick="{setTimeout(function () {window.location.href = '../../import/fieldhelper/synchroniseWithFieldHelper.php';}, 0);}"
+ />
 
 </form>
 

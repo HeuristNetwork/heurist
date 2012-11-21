@@ -88,7 +88,7 @@ if (!is_admin()) {
         	<input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
         	<input name="parent" value="<?=$_REQUEST['parent']?>" type="hidden" />
 
-			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input name="name" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px"/></div>
 
@@ -99,5 +99,8 @@ if (!is_admin()) {
 
 		</form>
 </div>
+<script type="text/javascript">
+		setTimeout(function(){document.getElementById("trmName").focus();},500);
+</script>
 </body>
 </html>

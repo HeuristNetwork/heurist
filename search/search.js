@@ -2468,8 +2468,8 @@ top.HEURIST.search = {
 
 			var innerHTML = "";
 
-			innerHTML += "<div class='saved-search'><a id='ss" + sid + "' href='#' " +
-					 'onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</a>";
+			innerHTML += "<div class='saved-search'><div id='ss" + sid + "' class='name' "+  //<a id='ss" + sid + "' href='#' " +
+					 'onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</div>";
 
 			innerHTML += '<div class="saved-search-edit"><img title="edit" src="' +top.HEURIST.basePath+'common/images/edit_pencil_9x11.gif" '+
 						'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
@@ -2762,7 +2762,7 @@ top.HEURIST.search = {
 		if(!top.HEURIST.util.isnull(tag)){
 			//var kwd = encodeURIComponent(tag);
 			var tagval = tag;
-			if(wg){
+			if(!top.HEURIST.util.isempty(wg)){
 				tagval = wg + '\\' + tagval;
 			}
 			top.HEURIST.search.executeQuery('?ver=1&w='+(wg?'all':'bookmark')+'&q=tag:"' +tagval+ '"&label=Tag "'+tag+'"');
@@ -4429,8 +4429,8 @@ top.HEURIST.search = {
 			for (i = 0; i < tags.length; ++i) {
 				//kwd = encodeURIComponent(tags[i]);
 				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(null,\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
-				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", null, tags[i]] } });
-				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", null, tags[i]] } });
+				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", "", tags[i]] } });
+				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", "", tags[i]] } });
 			}
 		}else{
 			innerHTML = "<li>No tags defined</li>";
@@ -5005,7 +5005,8 @@ window.console.log("in sidebarPanelStatus");
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
 
 	var onMenuClick = function (eventName, eventArgs, subscriptionArg){
-			var fname = subscriptionArg.shift();
-			var args = subscriptionArg;
-			top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, subscriptionArg);
+			var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
+			var fname = clonearr.shift();
+			var args = clonearr;
+			top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, args);
 	}

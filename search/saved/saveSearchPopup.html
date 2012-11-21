@@ -231,7 +231,13 @@
 	*/
 
 	function check(){
-		save();
+
+		if(top.HEURIST.util.isempty(document.getElementById("edName").value)){
+			document.getElementById("lblName").style.color = "red";
+			document.getElementById("edName").focus();
+		}else{
+			save();
+		}
 	}
 
 	/*
@@ -368,18 +374,13 @@
 
  <body class="popup" width="400" height="320">
 <!-- <div id="mainbody">-->
-	<div style="text-align: center;" id="divSaveMode">
-		<input id="rbS1" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS1" style="padding:3px;">Save Query</label>
-		<input id="rbS2" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS2" id="lblS2" style="padding:3px;">Save Filter Rules</label>
-		<input id="rbS3" type="radio" name="rbSaveMode" checked="true" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS3" style id="lblS3" style="padding:3px;">Save Both</label>
-	</div>
 
-	<label class="llab">Enter a name:</label>
+	<label class="llab" id="lblName">Enter a name:</label>
 	<input class="fld" type="text" id="edName">
 
   	<p>
 		<label class="llab">Layout style:</label>
-		<select class="fld" id="edLayout">
+		<select class="fld" id="edLayout" style="width:140px">
 			<option value="" selected>Status quo</option>
 			<option value=list>One column</option>
 			<option value=two-col>Two columns</option>
@@ -390,12 +391,6 @@
 		</select>
 	</p>
 
-  	<p>
-		<div><label class="llab">Edit directly:</label><input type="checkbox" onclick="{}"></div>
-		<div id="divQuery"><label class="llab">Query:</label><input class="fld" type="text" id="edQuery"></div>
-		<div><label class="llab">Filters:</label><input class="fld" type="text" id="edFilter"></div>
-	</p>
-
 	<p id="divSaveDestination">
 		<label class="llab">Add search to:</label>
 			<select class="fld" id="edSaveDestination">
@@ -404,16 +399,29 @@
 			</select>
 	</p>
 
-	<hr/>
-
-	<div style="float: right;">
-		<p id=warning-message></p>
-		<p id=message></p>
+	<div style="text-align: center;padding-bottom: 10px;" id="divSaveMode">
+		<input id="rbS1" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS1" style="padding:3px;">Save Query</label>
+		<input id="rbS2" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS2" id="lblS2" style="padding:3px;">Save Filter Rules</label>
+		<input id="rbS3" type="radio" name="rbSaveMode" checked style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS3" id="lblS3" style="padding:3px;">Save Both</label>
 		<input style="float:right" type=button value="Save" id="save" onClick="check();">
 	</div>
+	<!--
+	<p id=warning-message></p>
+	<p id=message></p>
+	-->
 
+	<hr/>
+
+
+		<div><strong>Advanced:</strong></div>
+		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" /></div>
+		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" /></div>
+
+
+<!--
 	<div id="coverall" style="display:none">
   			<div id="alertBox" ></div>
 	</div>
+-->
  </body>
 </html>

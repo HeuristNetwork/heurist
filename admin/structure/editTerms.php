@@ -108,7 +108,7 @@ if (!is_admin()) {
 		<div id="deleteMessage" style="display:none;width:500px;">
 			<h3 style="border-style: none;">Deleting Term</h3>
 		</div>
-		
+
 	    <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
         <div id="formEditor" style="display:none;width:500px;">
 			<h3 style="border-style: none;">Edit Selected Term</h3>
@@ -123,7 +123,7 @@ if (!is_admin()) {
 					<b>Term saved</b>
 				</div>
 			</div>
-			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="edName" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input id="edCode" style="width:80px"/></div>
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
@@ -200,7 +200,7 @@ if (!is_admin()) {
 		<div id="divMessage-text" style="text-align:left;width:280px;color:red;font-weight:bold;margin:10px;"></div>
 		<button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
 	</div>
-	
+
 
 	<script  type="text/javascript">
 

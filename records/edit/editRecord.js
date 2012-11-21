@@ -836,6 +836,7 @@ top.HEURIST.edit = {
 	fileInputUploaded: function(element, uploadsDiv, fileDetails) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
+
 		var closeButton = this.document.createElement("div");
 			closeButton.className = "close-button";
 			closeButton.onclick = function() { uploadsDiv.parentNode.removeChild(uploadsDiv); };
@@ -843,8 +844,8 @@ top.HEURIST.edit = {
 		uploadsDiv.innerHTML = "";
 		uploadsDiv.appendChild(closeButton);
 
-
 		if (fileDetails.error) {
+
 			// There was an error!  Display it.
 			element.input.replaceInput(element);
 			uploadsDiv.className = "error";
@@ -854,6 +855,7 @@ top.HEURIST.edit = {
 			uploadsDiv.appendChild(this.document.createElement("br"));
 			uploadsDiv.appendChild(this.document.createTextNode(fileDetails.error));
 		} else {
+			closeButton.style.display = "none";
 			// translate the HFile object back into something we can use here
 			var fileObj = {
 				id: fileDetails.file.getID(),
@@ -870,7 +872,7 @@ top.HEURIST.edit = {
 			uploadsDiv.appendChild(this.document.createElement("br"));
 			uploadsDiv.appendChild(this.document.createTextNode("File has been uploaded"));
 			//does not work top.HEURIST.util.autosizeContainer2(fname, uploadsDiv, "width");
-			setTimeout(function() { uploadsDiv.parentNode.removeChild(uploadsDiv); }, 2000);
+			setTimeout(function() { uploadsDiv.parentNode.removeChild(uploadsDiv); }, 500);
 
 			// update the BibDetailFileInput to show the file
 			element.input.replaceInput(element, { file: fileObj });
@@ -1941,6 +1943,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
 														(bdValue && bdValue.value ? bdValue.value : null), (this.required!=="required"));
 
+/* removed by Ian request 2012-11-21
 	if(newInput.length>0){
 		var tempSelected = newInput.selectedIndex;
 		newInput.innerHTML = '<option disabled="disabled" value="">Select '+ this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + '</option>'+newInput.innerHTML;
@@ -1950,7 +1953,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 			newInput.selectedIndex = tempSelected + 1;
 		}
 	}
-
+*/
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
 

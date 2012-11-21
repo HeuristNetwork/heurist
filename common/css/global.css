@@ -924,15 +924,7 @@ input[type="button"].add {
 	padding-top: 10px;
 	text-align: right;
 }
-.searchInput {
-	background: none repeat scroll 0 0 white;
-	border: 1px solid #999999;
-	border-radius: 15px 15px 15px 15px;
-	display: inline-block;
-	height: 22px;
-	margin: 3px 0 0;
-	padding: 0 3px;
-}
+
 body.is-not-admin *.admin-only {
 	display: none;
 }

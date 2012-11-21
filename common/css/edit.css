@@ -727,6 +727,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	cursor: pointer;
 	margin-left: 2px;
 	background-image: url('../images/cross.png');
+	background-repeat: no-repeat;
 }
 .file-resource-div.empty .delete-resource, .resource-div.empty .delete-resource, .resource-div.empty .edit-resource {
 	visibility: hidden;

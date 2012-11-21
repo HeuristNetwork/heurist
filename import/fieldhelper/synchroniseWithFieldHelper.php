@@ -85,7 +85,7 @@ function update_counts(divid, processed, added, total) {
 		print "<h2>ADVANCED USERS</h2>";
 		print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants) listed in Database > Advanced Properties<br>";
 		print "and writes the metadata as records in the current database, with pointers back to the files described by the manifests. <br>";
-		print "If no manifests exist, they are created (and can be read by FieldHelper). New files are added to the existing manifests.<br>&nbsp;<br>"; 
+		print "If no manifests exist, they are created (and can be read by FieldHelper). New files are added to the existing manifests.<br>&nbsp;<br>";
 		print "The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>";
 		print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by 'nobody'";
 		print "</p>";
@@ -141,7 +141,7 @@ function update_counts(divid, processed, added, total) {
 					print "<p><b>Folders to scan :</b> $mediaFolders<p>";
 					print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 				}
-				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>".
+				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
 				"<img src='../../common/images/external_link_16x16.gif'>Set media folders</a><p>";
 
 

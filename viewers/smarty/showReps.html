@@ -99,7 +99,7 @@
 </script>
 </head>
 
-<body class="yui-skin-sam">
+<body class="yui-skin-sam"  onresize="onResize()">
 <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
@@ -121,8 +121,8 @@
 				<option value="main">Query result</option>
 			</select>
 		</div>
-		<label style="width:100px">Select template:</label>
-		<select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;"></select>
+		<nobr><label style="width:100px;padding-left:5px;">Select template:</label>
+		<select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;margin-right:100px"></select></nobr>
 
 		<span id="recordCount"></span>
 
@@ -381,10 +381,16 @@ if(isInited){
 		window.showReps.setQueryMode(elem.value);
 	}
 
+	function onResize(){
+		window.showReps.onResize(this.innerWidth);
+	}
+
 	//
 	//  starts initialization on load completion of this window
 	function loadHandler(){
 		window.showReps = new ShowReps();
+
+		window.showReps.onResize(this.innerWidth);
 		//setupMCE();
 
 		//$('.linkadmin').css('display', 'block  !important');

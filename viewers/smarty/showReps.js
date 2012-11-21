@@ -46,6 +46,9 @@ function ShowReps() {
 		infoMessageBox,
 		_db;
 
+	var top_repcontainer = '30px';
+
+
 	var handleYes = function() {
 					_operationEditor(2);
 				    this.hide();
@@ -583,7 +586,7 @@ function ShowReps() {
 		_iseditor=iseditor;
 
 		Dom.get("toolbardiv").style.display = (iseditor) ?"none" :"block";
-		Dom.get("rep_container").style.top = (iseditor) ?"0px" :"30px";
+		Dom.get("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
 		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
 		var dim = Hul.innerDimensions(this);
@@ -1422,6 +1425,18 @@ function ShowReps() {
 		});
 	}
 
+	function _onResize(newwidth){
+
+		var newval = newwidth>490?'30px':'60px';
+
+		if(top_repcontainer!=newval){
+			top_repcontainer = newval;
+			if(!_iseditor){
+				Dom.get("rep_container").style.top = top_repcontainer;
+			}
+		}
+	}
+
 	//public members
 	var that = {
 
@@ -1536,6 +1551,10 @@ function ShowReps() {
 			originalFileName:  function (val){
 				_originalFileName = val;
 				//_setOrigName(val);
+			},
+
+			onResize: function(newwidth){
+				_onResize(newwidth);
 			},
 
 			getClass: function () {

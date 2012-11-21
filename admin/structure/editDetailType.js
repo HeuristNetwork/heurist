@@ -177,6 +177,8 @@ function DetailTypeEditor() {
 
 		//fills input with values from _detailType array
 		_fromArrayToUI();
+
+		setTimeout(function(){Dom.get("dty_Name").focus();},1000);
 	}
 
 	/**

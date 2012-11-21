@@ -39,6 +39,7 @@ $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
 $body->global_vars['dbname'] = HEURIST_DBNAME;
+$body->global_vars['popup'] = (@$_REQUEST['popup']?$_REQUEST['popup']:'0');
 $body->verify();
 if (@$_REQUEST['_submit']) {
 	$body->input_check();

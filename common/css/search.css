@@ -918,12 +918,25 @@ div.right_margin_info div.mini-tools a {
 }
 
 div.saved-search:hover > .saved-search-edit, div.search-type:hover > .saved-search-edit {
-	display: block;
+	display: inline-block;
 }
 .saved-search {
 	padding-left:20px;
 	height:15px;
 }
+.saved-search .name{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width:75%;
+	display:inline-block;
+ 	cursor: pointer;
+ 	color:#515151;
+}
+.saved-search .name:hover{
+	text-decoration:underline;
+}
+
 .saved-search-edit {
 	display: none;
 	cursor: pointer;
@@ -1986,6 +1999,16 @@ span[id|='selectedCount'] span{
 	margin:3px 0 0 6px;
 }*/
 
+.searchInput {
+	background: none repeat scroll 0 0 white;
+	border: 1px solid #999999;
+	border-radius: 3px 3px 3px 3px;
+	display: inline-block;
+	height: 18px;
+	margin: 6px 0 0;
+	padding: 0 3px;
+}
+
 div.searchInput > div.collapsed {
 	display: none !important;
 }
@@ -2012,13 +2035,13 @@ div.searchInput > .simplesearch.collapsed {
 	background-position: 50%;
 	background-repeat: no-repeat;
 	width: 19px;
-	height: 22px;
+	height: 18px;
 	overflow: hidden;
 	color: #AAA;
 	display: block;
 	position: absolute;
 	right: 5px;
-	top: 4px;
+	top: 7px;
 	border-left: 1px solid #CCC;
 }
 .simple-search-row {
