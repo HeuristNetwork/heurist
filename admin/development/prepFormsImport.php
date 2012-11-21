@@ -51,17 +51,36 @@ mysql_connection_db_select(DATABASE);
 $inputFormInstanceDir = @$_REQUEST['inputFilepath'];	// outName returns the hml direct.
 $inputFormResourceDir = @$_REQUEST['resourceFilepath'];	// outName returns the hml direct.
 //if no style given then try default, if default doesn't exist we our put raw xml
+$importData = array();
 $info = new SplFileInfo($inputFormInstanceDir);
 if ($info->isDir()) {
 	$iterator = new DirectoryIterator($inputFormInstanceDir);
 	foreach ($iterator as $fileinfo) {
 		if($fileinfo->isFile()){
-			echo parseImportForm($fileinfo->getFilename());
+			list($rtyName,$headers, $row) = parseImportForm($fileinfo->getFilename());
+			$rtyName = "".$rtyName;
+			if (!$rtyName) continue;
+			if (!array_key_exists($rtyName,$importData)){
+				$importData[$rtyName] = array();
+			}
+			array_push($importData[$rtyName],array($headers,$row));
 		}
 //		break;
 	}
 }else{
 	echo "something is wrong";
+}
+echo "<h2> Importing Forms </h2>";
+foreach($importData as $rtyName => $importForms){
+	echo "<br><b>".$rtyName."</b><br>";
+	$firstForm = true;
+	foreach ($importForms as $importForm) {
+		if ($firstForm){
+			echo "".$importForm[0]."<br>";
+			$firstForm = false;
+		}
+		echo "".$importForm[1]."<br>";
+	}
 }
 return;
 
@@ -91,8 +110,8 @@ function parseImportForm($fhmlFilename){
 	$fhmlDoc = simplexml_load_file($inputFormInstanceDir."/".$fhmlFilename);
 	$header = array();
 	$dataRow = array();
-	echo "<b>".$fhmlFilename."</b>"."<br>";
 	$recType = $fhmlDoc->xpath("/fhml/records/record/type/label");
+	echo "processing rectyp: ".$recType[0]." from ".$fhmlFilename."<br>";
 	// echo "rectyp: ".$recType[0]."<br>";
 	array_push($header,"rectype");
 	array_push($dataRow,$recType[0]);
@@ -117,11 +136,18 @@ function parseImportForm($fhmlFilename){
 //		error_log("dtyID ".print_r($dtyID,true));
 		$dtyID = preg_replace("/dt/","",$dtyID);
 //		error_log("dtyID ".print_r($dtyID,true));
-		$detailName = ($attr["name"] ? $attr["name"] : $detail->getName());
-		$detail = preg_replace("/\"/","",$detail);
-		$dbConceptPrefix = $dbID."-";
 //error_log("detailtype ".print_r($dettypes[intval($dtyID)],true));
 		$dtBaseType = $dettypes[intval($dtyID)]['commonFields'][$di['dty_Type']];
+		$detailName = ($attr["name"] ? $attr["name"] : $detail->getName());
+		if ($dtBaseType == "freetext" || $dtBaseType == "blocktext"){//text so enclose in quotes
+			if (preg_match("/\"/",$detail)){
+				$detail = preg_replace("/\"/","'",$detail); //strip any quotes for non string values
+			}
+			$detail = "\"".$detail."\"";
+		}else{
+			$detail = preg_replace("/\"/","",$detail); //strip any quotes for non string values
+		}
+		$dbConceptPrefix = $dbID."-";
 //		error_log("basetype = ".print_r($dtBaseType,true));
 		if ($dtBaseType == "enum" || $dtBaseType == 'relation') {
 			$detail = preg_replace("/$dbConceptPrefix/","",$detail);
@@ -133,8 +159,10 @@ function parseImportForm($fhmlFilename){
 //	error_log("attr = ".$attr["name"]);
 //		echo "".($attr["name"] ? $attr["name"] : $detail->getName()).": ". $detail."<br>";
 		array_push($header,$detailName);
-		if (("".$detail != "") && $inputFormResourceDir && ($detailName == "Photo" || $detailName == "Sketch")){
+		if (("".$detail != "") && $inputFormResourceDir && ($dtyID == DT_IMAGES || $dtyID == DT_DRAWING)){
 //			echo "has resource $inputFormResourceDir/$detail<br>";
+//error_log("Photo magic= ".DT_IMAGES."  dtyID= $dtyID");
+//error_log("Sketch magic= ".DT_DRAWING."  dtyID= $dtyID");
 			array_push($dataRow,$inputFormResourceDir."/".$detail);
 		}else{
 			array_push($dataRow,$detail);
@@ -143,12 +171,18 @@ function parseImportForm($fhmlFilename){
 //	echo  "scratchPad: ".$fhmlDoc->asXML()."<br><br>";
 	array_push($header,"scratchPad");
 	$fhmlDoc->addChild('filename', $fhmlFilename);
-	array_push($dataRow,$fhmlDoc->asXML());
-	echo join(",", $header);
-	echo "<br>";
-	echo join(",", $dataRow);
-	echo "<br>";
-	echo "<br>";
+	$fhml = $fhmlDoc->asXML();
+	$fhml = preg_replace("/^\<\?xml[^\?]+\?\>/","",$fhml);
+	$fhml = "\"".preg_replace("/\"/","'",$fhml)."\"\n";
+	array_push($dataRow,$fhml);
+	array_push($header,"importFilename");
+	array_push($dataRow,$fhmlFilename);
+//	echo join(",", $header);
+//	echo "<br>";
+//	echo join(",", $dataRow);
+//	echo "<br>";
+//	echo "<br>";
+	return array($recType[0], join(",",$header), join(",",$dataRow));
 }
 
 
