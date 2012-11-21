@@ -391,7 +391,8 @@ function DetailTypeManager() {
                 formatter: function(elLiner, oRecord, oColumn, oData) {
                 var str = oRecord.getData("usage");
                 var id = oRecord.getData("id");
-                elLiner.innerHTML = '<span class="count" onmouseover="detailTypeManager.showInfo('+id+', event)" onmouseout="detailTypeManager.hideInfo()"/>'+str+'</span>';
+                elLiner.innerHTML = '<span class="count" '+
+                'style="cursor:pointer;" onclick="detailTypeManager.showInfo('+id+', event)" onmouseout="detailTypeManager.hideInfo()"/>'+str+'</span>';
                 }},
             { key: "grp_id", label: "Show in group ...", sortable:false, width:90, className:'center',
                 formatter: YAHOO.widget.DataTable.formatDropdown,

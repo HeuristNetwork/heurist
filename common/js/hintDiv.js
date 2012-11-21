@@ -66,7 +66,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			//tooltip div mouse out
 			function __hideToolTip2() {
 				needHideTip = true;
-				hideTimer = window.setTimeout(_hideToolTip, 1000); //_hideToolTip();
+				hideTimer = window.setTimeout(_hideToolTip, 500); //_hideToolTip();
 			}
 			//tooltip div mouse over
 			function __clearHideTimer2() {

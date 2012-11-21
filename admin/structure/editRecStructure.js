@@ -245,7 +245,7 @@ function EditRecStructure() {
 				}
 			},
 			{
-				key:"dty_Name", label: "Based on template", width:100, sortable:false,
+				key:"dty_Name", label: "Based on template", width:100, sortable:false, hidden:true,
 				formatter: _hidevalueforseparator
 			},
 			{
@@ -884,7 +884,7 @@ function EditRecStructure() {
 					edt.parentNode.parentNode.style.display = "none";
 					Dom.setStyle(edt_def, "visibility", "visible");
 					var el = document.getElementById("termsDefault");
-					Dom.setStyle(el, "visibility", "hidden");
+					Dom.setStyle(el, "display", "none");
 				}
 
 			}else if(fieldnames[k] === "rst_PtrFilteredIDs"){
@@ -1297,6 +1297,30 @@ function EditRecStructure() {
 		}
 	}
 
+	/**
+	* returns true if there is at list on required field in structure
+	*/
+	function _checkForRequired(){
+
+
+			var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
+			var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+			var _dts = typedef.dtFields;
+
+			//only for this group and visible in UI
+			if(!Hul.isnull(_dts)){
+				var rst_ID;  //field type ID
+				for (rst_ID in _dts) {
+					var aval = _dts[rst_ID];
+					if(aval[fi.rst_RequirementType] === "required"){
+						return true;
+					}
+				}
+			}
+
+			return false;
+	}
+
 
 	//------------------- DRAG AND DROP ROUTINES
 
@@ -1589,6 +1613,14 @@ function EditRecStructure() {
 		},
 		onAddSeparator: function(){
 			_onAddSeparator();
+		},
+
+		closeWin:function(){
+			if(_checkForRequired()){
+		 		window.close(null);
+			}else{
+				alert("You should normally have at least one required field, often a name or title field");
+			}
 		},
 
 		getClass: function () {
