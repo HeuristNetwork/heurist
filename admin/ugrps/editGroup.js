@@ -204,7 +204,7 @@ function GroupEditor() {
 	*/
 	function _updateResult(context) {
 		if(!context) {
-			alert("An error occurred trying to contact the database");
+			Hul.showError(-1);
 		}else{
 			var error = false,
 				report = "",
@@ -214,7 +214,7 @@ function GroupEditor() {
 				if( !Hul.isnull(ind) ){
 					var item = context.result[ind];
 					if(isNaN(item)){
-						alert("An error occurred: " + item);
+						Hul.showError(item);
 						error = true;
 					}else{
 						_recID = Number(item);

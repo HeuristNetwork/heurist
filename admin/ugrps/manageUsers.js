@@ -617,9 +617,9 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 	*/
 	function _updateRole(context) {
 		if(Hul.isnull(context) || !context) {
-			alert("Server side error");
+			Hul.showError("Server side error");
 		}else if(context.error){
-				alert("An error occurred trying to change role: "+context.error);
+				Hul.showError("An error occurred trying to change role: "+context.error);
 		}else if(context.errors && context.errors.length>0){
 			var ind;
 			var rep = "";

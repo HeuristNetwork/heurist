@@ -1098,7 +1098,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var _updateHEURIST = function(context){
 
 					if(!context) {
-						alert("An error occurred trying to contact the database");
+						top.HEURIST.util.showError(-1);
 					} else {
 
 						top.HEURIST.rectypes = context.rectypes;
@@ -1594,6 +1594,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			for(var i in o) newO[i] = top.HEURIST.util.cloneObj(o[i]);
 			return newO;
 		}
+	},
+
+	showError: function(msg){
+		if(top.HEURIST.util.isempty(msg)){
+			msg = "An unknown error occurred. Please contact development team";
+		}else if (Number(msg)===-1){
+			msg = "An error occurred trying to contact the database";
+		}else if (msg.indexOf("error")<0){
+			msg = "An error occurred: " + msg;
+		}
+		alert(msg);
 	},
 
 

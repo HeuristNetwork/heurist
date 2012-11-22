@@ -133,6 +133,7 @@ function EditRecStructure() {
 						aval[fi.rst_DefaultValue],
 						aval[fi.rst_Status],
 						aval[fi.rst_NonOwnerVisibility],
+						aval[fi.rst_DisplayHelpText],
 						'']);
 					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
@@ -146,7 +147,7 @@ function EditRecStructure() {
 					"dty_Name",
 					"rst_DisplayName", "dty_Type", "rst_RequirementType",
 					"rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
-					"rst_NonOwnerVisibility", "rst_values"]
+					"rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values"]
 				}
 			});
 
@@ -183,7 +184,14 @@ function EditRecStructure() {
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
-				key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false },
+				key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = oData;
+					elLiner.title = "Base field type: "+oRecord.getData("dty_Name")+"\n\n"+
+					"Help: "+oRecord.getData("rst_DisplayHelpText")+"\n\n"+
+					"For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
+				}
+			},
 			{ key: "dty_Type", label: "Data Type", sortable:false, width:90,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("dty_Type");
@@ -1035,7 +1043,7 @@ function EditRecStructure() {
 
 			function _addNewSeparator(context) {
 				if(!context) {
-					alert("An error occurred trying to contact the database");
+					Hul.showError(-1);
 				}else{
 					var error = false,
 						report = "",
@@ -1045,7 +1053,7 @@ function EditRecStructure() {
 						if( !Hul.isnull(ind) ){
 							var item = context.result[ind];
 							if(isNaN(item)){
-								alert("An error occurred: " + item);
+								Hul.showError(item);
 								error = true;
 							}else{
 								ft_separator_id = ""+Math.abs(Number(item));

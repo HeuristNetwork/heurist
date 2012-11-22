@@ -570,7 +570,7 @@ function EditTerms() {
 			var _updateResult = function(context){
 
 					if(!context) {
-						alert("An error occurred trying to contact the database");
+							Hul.showError(-1);
 					} else {
 
 						var error = false,
@@ -582,7 +582,7 @@ function EditTerms() {
 						if(!Hul.isnull(ind)){
 							var item = context.result[ind];
 							if(isNaN(item)){
-								alert("An error occurred: " + item);
+								Hul.showError(item);
 								error = true;
 							}else{
 
@@ -1062,7 +1062,7 @@ function EditTerms() {
 
 				function _updateResult(context) {
 					if(!context) {
-						alert("An error occurred trying to contact the database");
+						Hul.showError(-1);
 					}else{
 
 						/* @todo move this to the separate function */
@@ -1075,7 +1075,7 @@ function EditTerms() {
 						if(!Hul.isnull(ind)){
 							var item = context.result[ind];
 							if(isNaN(item)){
-								alert("An error occurred: " + item);
+								Hul.showError(item);
 								error = true;
 							}else{
 								detailTypeID = Number(item);

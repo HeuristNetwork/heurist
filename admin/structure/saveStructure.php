@@ -1080,6 +1080,7 @@
 	function createRectypeGroups($columnNames, $rt) {
 		global $db, $rtgColumnNames;
 
+		$rtg_Name = null;
 		$ret = array();
 		if (count($columnNames)) {
 
@@ -1095,7 +1096,20 @@
 					$query = $query."?";
 					$parameters[0] = $parameters[0].$rtgColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
+
+					if($colName=='rtg_Name'){
+						$rtg_Name = $val;
+					}
 				}
+
+				if($rtg_Name){
+					$db->query("select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name'");
+					if ($db->affected_rows==1){
+						$ret['error'] = "There is already group with name '$rtg_Name'";
+						return $ret;
+					}
+				}
+
 
 				$query = "insert into defRecTypeGroups ($colNames) values ($query)";
 
@@ -1139,6 +1153,7 @@
 
 		$ret = array();
 		$query = "";
+		$rtg_Name = null;
 		if (count($columnNames)) {
 
 			$vals = $rt;
@@ -1154,9 +1169,22 @@
 
 					$parameters[0] = $parameters[0].$rtgColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
+
+					if($colName=='rtg_Name'){
+						$rtg_Name = $val;
+					}
 				}
 			}
 			//
+
+			if($rtg_Name){
+				$res = $db->query("select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name' and rtg_ID != $rtgID");
+				if ($db->affected_rows==1){
+					$ret['error'] = "There is already group with name '$rtg_Name'";
+					return $ret;
+				}
+			}
+
 
 			if($query!=""){
 				$query = "update defRecTypeGroups set ".$query." where rtg_ID = $rtgID";
@@ -1223,6 +1251,7 @@
 	function createDettypeGroups($columnNames, $rt) {
 		global $db, $dtgColumnNames;
 
+		$dtg_Name = null;
 		$ret = array();
 		if (count($columnNames)) {
 
@@ -1238,7 +1267,20 @@
 					$query = $query."?";
 					$parameters[0] = $parameters[0].$dtgColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
+
+					if($colName=='dtg_Name'){
+						$dtg_Name = $val;
+					}
 				}
+
+				if($dtg_Name){
+					$db->query("select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name'");
+					if ($db->affected_rows==1){
+						$ret['error'] = "There is already group with name '$dtg_Name'";
+						return $ret;
+					}
+				}
+
 
 				$query = "insert into defDetailTypeGroups ($colNames) values ($query)";
 
@@ -1281,6 +1323,7 @@
 		}
 
 		$ret = array();
+		$dtg_Name = null;
 		$query = "";
 		if (count($columnNames)) {
 
@@ -1297,9 +1340,22 @@
 
 					$parameters[0] = $parameters[0].$dtgColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
+
+					if($colName=='dtg_Name'){
+						$dtg_Name = $val;
+					}
 				}
 			}
 			//
+
+			if($dtg_Name){
+				$db->query("select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name' and dtg_ID!=$dtgID");
+				if ($db->affected_rows==1){
+					$ret['error'] = "There is already group with name '$dtg_Name'";
+					return $ret;
+				}
+			}
+
 
 			if($query!=""){
 				$query = "update defDetailTypeGroups set ".$query." where dtg_ID = $dtgID";

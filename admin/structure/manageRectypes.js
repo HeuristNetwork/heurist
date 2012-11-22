@@ -718,9 +718,8 @@ function RectypeManager() {
 		if(!Hul.isnull(ndt)){
 
 			//find parent tab
-			var i;
 			var tab = Dom.get('tabContainer'+grpID);
-			for (i = 0; i < tab.children.length; i++) {
+			while (tab.childNodes.length>0){
 				tab.removeChild(tab.childNodes[0]);
 			}
 			// need to refill the destionation table,
@@ -730,7 +729,7 @@ function RectypeManager() {
 			var currIndex = tabView.get('activeIndex');
 			if( (Number(tabIndex) === Number(currIndex)) && needRefresh)
 			{
-				initTabContent(tabView.getTab(tabIndex));
+				setTimeout(function(){initTabContent(tabView.getTab(tabIndex));},500);
 			}
 
 		}
@@ -759,7 +758,7 @@ function RectypeManager() {
 	//
 	function _updateResult(context) {
 		if(!context) {
-			alert("An error occurred trying to contact the database");
+			Hul.showError(-1);
 		}else{
 			var error = false,
 				report = "",
@@ -770,7 +769,7 @@ function RectypeManager() {
 			if(!Hul.isnull(ind)){
 				var item = context.result[ind];
 				if(isNaN(item)){
-					alert("An error occurred: " + item);
+					Hul.showError(item);
 					error = true;
 				}else{
 					recTypeID = Number(item);

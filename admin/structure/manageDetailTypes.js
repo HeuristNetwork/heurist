@@ -771,10 +771,10 @@ function DetailTypeManager() {
 
 				//find parent tab
 				var tab = Dom.get('tabContainer'+grpID);
-				var i;
-				for (i = 0; i < tab.children.length; i++) {
+				while (tab.childNodes.length>0){
 					tab.removeChild(tab.childNodes[0]);
 				}
+
 				// need to refill the destionation table,
 				// otherwise datasource is not updated
 				arrTables[tabIndex] = null; //.addRow(record.getData(), 0);
@@ -782,7 +782,7 @@ function DetailTypeManager() {
 				var currIndex = tabView.get('activeIndex');
 				if((Number(tabIndex) === Number(currIndex)) && needRefresh)
 				{
-					initTabContent(tabView.getTab(tabIndex));
+					setTimeout(function(){initTabContent(tabView.getTab(tabIndex));},500);
 				}
 
 			}
@@ -813,7 +813,7 @@ function DetailTypeManager() {
 	//
 	function _updateResult(context) {
 		if(!context) {
-			alert("An error occurred trying to contact the database");
+			Hul.showError(-1);
 		}else{
 			var error = false,
 				report = "",
@@ -824,7 +824,7 @@ function DetailTypeManager() {
 			if(!Hul.isnull(ind)){
 				var item = context.result[ind];
 				if(isNaN(item)){
-					alert("An error occurred: " + item);
+					Hul.showError(item);
 					error = true;
 				}else{
 					detailTypeID = Number(item);
@@ -1166,6 +1166,7 @@ function DetailTypeManager() {
 							myDTDrags[id].unreg();
 							delete myDTDrags[id];
 						}
+						top.HEURIST.detailTypes = context.detailTypes;
 
 						//remove tab from tab view and select 0 index
 						_groups.splice(ind, 1);
@@ -1174,7 +1175,6 @@ function DetailTypeManager() {
 
 						tabView.removeTab(tabView.getTab(ind));
 						tabView.set("activeIndex", 0);
-						top.HEURIST.detailTypes = context.detailTypes;
 						_cloneHEU = null;
 						_refreshAllTables();
 					}

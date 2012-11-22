@@ -11,6 +11,9 @@
  */
 var image_digitizer_container;
 
+//aliases
+var Hul = top.HEURIST.util;
+
 //
 // imageviewer - container to add annotations
 // _recID - search annotation for thios record
@@ -209,7 +212,7 @@ function ImageAnnotation(imageviewer, _recID) {
 		function _updateList(context){
 
 			if(!context) {
-				alert("An error occurred trying to contact the database");
+				Hul.showError(-1);
 				return;
 			}
 
@@ -296,7 +299,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			function _updateAnnList(context){
 
 				if(!context) {
-					alert("An error occurred trying to contact the database");
+					Hul.showError(-1);
 				}else{
 
 					var ind, k = 0, isAllowed = false;;
