@@ -7,7 +7,7 @@ if (typeof mxn.LatLonPoint == "function") {
 
 	RelBrowser.Mapping = {
 
-		map: null,
+		map: null,  //background map - gmap or other
 		tmap: null,
 		marker_1:null, marker_2:null, //for debug
 
@@ -168,10 +168,33 @@ if (typeof mxn.LatLonPoint == "function") {
 
 	},
 
+
+	keepMinDate:null,
+	keepMinDate:null,
+	keepMinNaxDate:true,
+
+	onWinResize:function(){
+		var M = RelBrowser.Mapping;
+		if(M.tmap && M.keepMinDate && M.keepMinDate){
+			M.keepMinNaxDate = false;
+			setTimeout(function (){
+				var tm = RelBrowser.Mapping.tmap;
+				var band = tm.timeline.getBand(0);
+				band.setMinVisibleDate(M.keepMinDate);
+				band.setMaxVisibleDate(M.keepMaxDate);// getCenterVisibleDate()
+				tm.timeline.layout();
+
+				//debug var ele = document.getElementById('lblBackground');
+				//debug ele.innerHTML = "Restored "+M.keepMinDate+" "+M.keepMaxDate;
+				M.keepMinNaxDate = true;
+			}, 1000);
+		}
+	},
+
 	/**
 	*
 	*/
-	renderTimelineZoom: function () {
+	renderTimelineZoom: function (tm) {
 
 		var $div = $("#divZoomOut");
 		if ($div.length > 0) { return; } //already defined
@@ -179,7 +202,10 @@ if (typeof mxn.LatLonPoint == "function") {
 		$div = $("#timeline-zoom");
 		if ($div.length < 1) { return; }
 
-		var zoom, x, M = RelBrowser.Mapping;
+		var M = RelBrowser.Mapping;
+		if(!tm) tm = M.tmap;
+
+		var zoom, x;
 
 		/*
 		* internal
@@ -252,6 +278,22 @@ if (typeof mxn.LatLonPoint == "function") {
 				zoom(false);
 			})
 			.appendTo($div);
+
+
+		//save last known interval to restore it on case of window resize
+		function __keepTimelineInterval(){
+			if(M.keepMinNaxDate){
+				var band = M.tmap.timeline.getBand(0);
+				M.keepMinDate = band.getMinVisibleDate();
+				M.keepMaxDate = band.getMaxVisibleDate();// getCenterVisibleDate()
+
+				//debug var ele = document.getElementById('lblBackground');
+				//debug ele.innerHTML = "keep "+M.keepMinDate;
+			}
+		}
+
+		tm.timeline.autoWidth = false;
+		tm.timeline.getBand(0).addOnScrollListener(	__keepTimelineInterval );
 	},
 
 	/**
@@ -400,7 +442,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				tm.timeline.layout();
 
 				// finally, draw the zoom control for timeline
-				M.renderTimelineZoom();
+				M.renderTimelineZoom(tm);
 
 				if(M.mapdata.count_mapobjects>0){
 				if (bounds) { //extent was defined as given parameter

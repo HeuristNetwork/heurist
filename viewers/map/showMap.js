@@ -369,6 +369,8 @@ function ShowMap() {
 			units: units
 		});
 		layout.render();
+
+		layout.on('resize', RelBrowser.Mapping.onWinResize);
 	}
 
 
