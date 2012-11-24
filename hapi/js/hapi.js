@@ -1878,11 +1878,28 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	var i;
 	if (enums && enums instanceof Array) {
 			// related values are given as well; enums is an array of string-string pairs
+			// enum(trmID,trmLabel,[invID, invLabel])
+			if (typeof top.HEURIST.terms != "undefined"){
+				ciIndex = top.HEURIST.terms.fieldNamesToIndex['trm_ConceptID'];
+				enumLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
+				relLookup = top.HEURIST.terms.termsByDomainLookup['relation'];
+			}
 			for (i=0; i < enums.length; ++i) {
 			_enums.push(enums[i][1]);
 			_enumsMap[("" + enums[i][1]).toLowerCase()] = enums[i][1];//id or string to enum
 			_enumsMap["" + enums[i][0]] = enums[i][1];
 			_termsMap[("" + enums[i][1]).toLowerCase()] = enums[i][0];//string to term id
+			if (variety === "enumeration" && enumLookup && enumLookup[enums[i][0]] && enumLookup[enums[i][0]][ciIndex].length > 0){
+				_termsMap[("" + enumLookup[enums[i][0]][ciIndex])] = enums[i][0];//conceptID to term id
+				_enumsMap[("" + enumLookup[enums[i][0]][ciIndex])] = enums[i][1];//conceptID to term id
+			}
+			if (variety === "relationtype" && relLookup && relLookup[enums[i][0]] && relLookup[enums[i][0]][ciIndex].length > 0){
+				_termsMap[("" + relLookup[enums[i][0]][ciIndex])] = enums[i][0];//conceptID to term id
+				_enumsMap[("" + relLookup[enums[i][0]][ciIndex])] = enums[i][1];//conceptID to term id
+			}
+			if (variety === "" && relLookup && relLookup[ciIndex] && relLookup[ciIndex].length > 0){
+				_termsMap[("" + relLookup[ciIndex])] = enums[i][0];//conceptID to term id
+			}
 			if (variety === "relationtype" && enums[i][2] && enums[i][3]){ // there is an inverse term
 				_relatedEnums[enums[i][0]] = enums[i][2];
 				_relatedEnums[enums[i][1]] = enums[i][3];

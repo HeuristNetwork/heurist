@@ -810,7 +810,11 @@ FlexImport = (function () {
 					if (!j) continue; // skip any undefined entries
 					var tempRecIDs = FlexImport.fields[i][j];
 					if (tempRecIDs) {
-						tempRecIDs = tempRecIDs.split(","); // split into array of ids with comma as delimiter
+						if (tempRecIDs.search("/"+this.valSep+"/")){
+							tempRecIDs = tempRecIDs.split(this.valSep);
+						}else{
+							tempRecIDs = tempRecIDs.split(","); // split into array of ids with comma as delimiter
+						}
 						if (refCols[j] == 1) { // non repeatable so just take the first value. FIXME add display warning
 							tempRecIDs = tempRecIDs.splice(0,1);
 						}
