@@ -21,6 +21,7 @@
   <title>Workgroup tags</title>
  </head>
  <body class="popup" width=700 height=600>
+  <script src="../../common/js/utilsUI.js"></script>
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
   <script src=usergroupTagEditorLibrary.js></script>
@@ -66,7 +67,7 @@
 
     <tr>
      <td>
-      <a href="../../admin/ugrps/editGroupTags.php" target="blank">Modify Tag Definitions (admins only) </a>
+      <a href="#" onclick="{editTags();return false;}">Modify Tag Definitions (admins only) </a>
       <div style="font-size: 11px; ">Reload edit form to see new tags</div>
      </td>
      <td></td>
@@ -110,8 +111,47 @@ function saveKeywords(add) {
 	window.close(add, ids);
 }
 
+function editTags(){
+
+	var url = "admin/ugrps/editGroupTags.php?popup=yes&db=";
+
+	var database = (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
+												: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"");
+
+	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + url + database,
+		{ callback:
+			function(tags) {
+
+				if (tags){
+
+					var _updateTags = function(context){
+
+							if(!context) {
+								alert("An error occurred trying to contact the database");
+							} else {
+								top.HEURIST.user.workgroupTags = context['workgroupTags'];
+								top.HEURIST.user.workgroupTagOrder = context['workgroupTagOrder'];
+
+								//recreate table
+								HEURIST.wgTagEditor.reloadTags();
+							}
+					}
+
+					var baseurl = top.HEURIST.basePath + "records/tags/reloadUsergroupTags.php";
+					var callback = _updateTags;
+					var params = "db="+database;
+					top.HEURIST.util.getJsonData(baseurl, callback, params);
+				}
+			}
+		});
+
+	return false;
+}
+
+
 </script>
-   </div>
 
  </body>
 </html>

@@ -168,44 +168,34 @@
 			}
 
 			/**
-			  use form actionHandler.php in i_action frame in parent search.html
+			  use form actionHandler.php via search.executeAction
 			*/
 			function save()
 			{
-				var action_fr = parent.document.getElementById("i_action").contentWindow;
-				var action_elt = action_fr.document.getElementById("action");
-				var ss_name_elt = action_fr.document.getElementById("svs_Name");
-				var ss_query_elt = action_fr.document.getElementById("svs_Query");
-				var ss_wgid_elt = action_fr.document.getElementById("svs_UGrpID");
-				var ss_id_elt = action_fr.document.getElementById("svs_ID");
-				var ss_kwds_elt = action_fr.document.getElementById("tagString");
-				var cmb_instance = action_fr.document.getElementById("db");
 
-				if (! action_fr  ||  ! action_elt  ||  ! ss_name_elt  ||  ! ss_query_elt  ||  ! ss_wgid_elt ||  ! ss_id_elt ||  ! ss_kwds_elt) {
-					alert("Problem contacting server - try again in a moment");
-					return;
-				}
+				var saction;
 
-				var rec_ids = top.HEURIST.search.collection.join(',');
+				var ss_name, ss_query, ss_wgid, ss_id, ss_kwds;
 
-				action_fr.document.getElementById("bib_ids").value = rec_ids;
+				var rec_ids = top.HEURIST.search.collection;
 
 				if($("#ssType2").attr('checked')){  //add to existing collection
 
+					saction = "save_search";
+
 					var elem = document.getElementById("collection-select");
-					action_elt.value = "save_search";
-					index = Number(elem.value);
+					var index = Number(elem.value);
 
 
-					if (isNaN(index) || index < 1) {
+					if (isNaN(index) || index < 0) {
 						alert("You must select the existing collection to add to.");
 						return;
 					}
 
 					var ss = top.HEURIST.user.savedSearches[index];
 
-					ss_id_elt.value = ss[2];
-					ss_name_elt.value = elem.options[elem.selectedIndex].text;
+					ss_id = ss[2];
+					ss_name = elem.options[elem.selectedIndex].text;
 
 					var m = ss[1].match(/ids:([^&]*)/);
 					var ex_rec_ids = m[1];
@@ -215,27 +205,27 @@
         									return index == $.inArray(el,array);
     									});
     				};
-					var arr = (ex_rec_ids+","+rec_ids).split(",");
+					var arr = (ex_rec_ids+","+rec_ids.join(',')).split(",");
 					arr = _unique(arr);
 
 					var q = ss[1].replace(/ids:([^&]*)/ , "ids:"+arr.join(","));
 
-					ss_query_elt.value = q;
+					ss_query = q;
 
 				}else if ($("#ssType1").attr('checked')) { // Create new collection
 
-					action_elt.value = "save_search";
-					ss_name_elt.value = document.getElementById("search-name").value;
-					ss_wgid_elt.value = document.getElementById("wg-select").value;
+					saction = "save_search";
+					ss_name = document.getElementById("search-name").value;
+					ss_wgid = document.getElementById("wg-select").value;
 
-					if (!ss_name_elt.value) {
+					if (!ss_name) {
 						alert("You must enter name for the saved-search before saying.");
 						return;
 					}
 
 
 					var query = new Array();
-					//ARTEM 2012-10-12 if (ss_wgid_elt.value > 0 ){
+					//ARTEM 2012-10-12 if (ss_wgid > 0 ){
 
 						var bkmk_only = document.getElementById("bookmark-check");
 
@@ -247,7 +237,7 @@
 							//ARTEM 2012-10-12 rec_ids = rec_ids + " user:" + top.HEURIST.get_user_id();
 						}
 					//}
-					query.push("q=ids:"+rec_ids);
+					query.push("q=ids:"+rec_ids.join(','));
 
 					for (var p in top.HEURIST.parameters) { //remove it at all????
 						if (p != "label" && p != "sid" && p != "db" && p != "w" && p != "q") {
@@ -259,36 +249,32 @@
 					if (result_style) {
 						query.push("view=" + result_style);
 					}
-					if (top.HEURIST.database.name){
-						cmb_instance.value = top.HEURIST.database.name;
-					}
 
-					ss_query_elt.value = "?" + query.join("&");
-
+					ss_query = "?" + query.join("&");
 
 				}else if (false){ //not used since 2012-02-13
 
-					action_elt.value = "bookmark_tag_and_ssearch";
-					ss_name_elt.value = document.getElementById("search-name").value;
-					if (!ss_name_elt.value) {
+					saction = "bookmark_tag_and_ssearch";
+					ss_name = document.getElementById("search-name").value;
+					if (!ss_name) {
 						alert("You must enter name for the saved-search before saying.");
 						return;
 					}
-					ss_wgid_elt.value = document.getElementById("wg-select").value;
-					ss_kwds_elt.value = $('#personal-tags').val();
+					ss_wgid = document.getElementById("wg-select").value;
+					ss_kwds = $('#personal-tags').val();
 					var kwdsRowTDs = $('#current-workgroup-tags td');
 					for (var i=0; i < kwdsRowTDs.length; i++) {
-						if (ss_kwds_elt.value) {
-							ss_kwds_elt.value += ',';
+						if (ss_kwds) {
+							ss_kwds += ',';
 						}
-						ss_kwds_elt.value += kwdsRowTDs[i++].innerHTML + '\\' + kwdsRowTDs[i].innerHTML;
+						ss_kwds += kwdsRowTDs[i++].innerHTML + '\\' + kwdsRowTDs[i].innerHTML;
 					}
 					var query = [];
-					if (!ss_kwds_elt.value) {
+					if (!ss_kwds) {
 						alert("You must enter or select at least one tag to save a search.");
 						return;
 					}else{
-						var tags = ss_kwds_elt.value.split(',');
+						var tags = ss_kwds.split(',');
 						var q = "";
 						for (var j=0; j < tags.length; j++) {
 							q += 'tag:"' + tags[j].replace(/^\s*/,'').replace(/\s*$/,'') + '" ';
@@ -300,17 +286,21 @@
 						query.push("view=" + $('#result-style-select').val());
 					}
 					query.push("w=" + $("input[name='w']:checked").val());
-					ss_query_elt.value = "?" + query.join("&");
+					ss_query = "?" + query.join("&");
 
 
 
 				}else{	//tag collections so they show up in an exisitng tag only saved search
-					action_elt.value = "bookmark_and_tag";
-					ss_kwds_elt.value = $('#search-tag-list').text().replace(/\s\|\s/,',');
+					saction = "bookmark_and_tag";
+					ss_kwds = $('#search-tag-list').text().replace(/\s\|\s/,',');
 				}
 
-				action_elt.form.submit();
-				setTimeout(function() { window.close(); }, 10);
+
+
+				var _data = {rec_ids:rec_ids, svs_Name:ss_name,  svs_Query:ss_query, svs_UGrpID:ss_wgid, svs_ID:ss_id, tagString:ss_kwds};
+
+				top.HEURIST.search.executeAction(saction, _data);
+				window.close();
 			}
 
 			//

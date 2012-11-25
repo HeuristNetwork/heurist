@@ -190,6 +190,7 @@ top.HEURIST.search = {
 		window.location.href = temp;
 	},
 
+	// not used
 	reloadFromParameters: function() {
 		var temp = top.HEURIST.basePath+"search/search.html?" +
 			("w=" + encodeURIComponent(top.HEURIST.parameters["w"])) + "&" +
@@ -2427,32 +2428,42 @@ top.HEURIST.search = {
 
 	},
 
-	addBookmark: function(e) {
-		if (! e) e = window.event;
-		var targ = null;
-		if (e.target) targ = e.target;
-		else if (e.srcElement) targ = e.srcElement;
-		if (targ.nodeType == 3) targ = targ.parentNode;
-		if (! targ) return;
-		var row = targ.parentNode;
-		if (! row.getAttribute("recID")) {
-			row = row.parentNode;
-		}
-		if (! row) return;
 
-		var action_fr = document.getElementById("i_action");
-		var bib_ids_elt = action_fr.contentWindow.document.getElementById("bib_ids");
-		var action_elt = action_fr.contentWindow.document.getElementById("action");
-		if (! bib_ids_elt  ||  ! action_elt) {
-			alert("Problem contacting server - try again in a moment");
-			action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
-				(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
-			return;
-		}
+	executeAction: function(action, _data){
 
-		bib_ids_elt.value = row.getAttribute("recID");
-		action_elt.value = "bookmark_reference";
-		action_elt.form.submit();
+			function _requestCallBack(context) {
+				if(!context) {
+					top.HEURIST.util.showError(-1);
+				}else{
+					if(context.problem){
+						top.HEURIST.util.showError(context.problem);
+					}else if(context.none){
+						alert(context.none);
+					}else if(context.execute){
+						var fname = context.execute.shift();
+						top.HEURIST.util.executeFunctionByName("top.HEURIST.search."+fname, window, context.execute);
+					}else if(context.ok){
+						if(confirm(context.ok+
+						"\n\nInformation changes will be visible on re-run the current search."+
+						"\nReloading will reset filters and selection."+
+						"\n\n'OK' to re-run, 'Cancel' to leave display as-is"))
+						{
+							top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main); //or reloadFromParameters
+						}
+					}
+				}
+			}
+
+			var _db = (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""));
+
+			var str = YAHOO.lang.JSON.stringify(_data);
+
+			var baseurl = top.HEURIST.baseURL + "search/actions/actionHandler.php";
+			var callback = _requestCallBack;
+			var params = "db="+_db+"&action="+action+"&data=" + encodeURIComponent(str);
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+
 	},
 
 	//
@@ -2896,7 +2907,14 @@ top.HEURIST.search = {
 
 	savedSearchEdit: function(sid){
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "db="+top.HEURIST.database.name : "");
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""));
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""),
+			{ callback: function(responce){
+
+
+
+
+			}}
+		);
 	},
 
 	launchAssistedSearch: function() {
@@ -3499,8 +3517,8 @@ top.HEURIST.search = {
 		var bkmkIDs_list = [];
 
 		if(recID || bkmkID){
-			if(recID) recIDs_list = [recID];
-			if(bkmkID) bkmkIDs_list = [bkmkID];
+			if(recID) recIDs_list = top.HEURIST.util.isArray(recID)?recID:[recID];
+			if(bkmkID) bkmkIDs_list = top.HEURIST.util.isArray(bkmkID)?bkmkID:[bkmkID];
 		}else{
 			recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 			bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
@@ -3517,35 +3535,25 @@ top.HEURIST.search = {
 			hasRecordsNotBkmkd = true;
 		}
 		top.HEURIST.util.popupURL(window,
-					top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.html?show-remove" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
-					{ callback: function(add, tags) {//options
-							if (! tags) {
-								if (reload) top.location.reload();
-								return;
-							}
+					top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.html?show-remove" +
+					(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
+					{ callback:
 
-							var action_fr = top.document.getElementById("i_action");
-							var action_elt = action_fr.contentWindow.document.getElementById('action');
-							var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
-							var bkmk_ids_elt = action_fr.contentWindow.document.getElementById('bkmk_ids');
-							var tagString_elt = action_fr.contentWindow.document.getElementById('tagString');
-							var reload_elt = action_fr.contentWindow.document.getElementById('reload');
-
-							if (! action_fr  ||  ! action_elt  ||  ! bkmk_ids_elt  ||  ! tagString_elt  ||  ! reload_elt) {
-								alert("Problem contacting server - try again in a moment");
-								if ( action_fr ) {
-									action_fr.src = "../search/actions/actionHandler.php";
+						function(add, tags) {//options
+							if (! tags) { //no tags added
+								if (reload) {
+									top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
+									//was  top.location.reload();
 								}
 								return;
 							}
 
-							action_elt.value = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
-							tagString_elt.value = tags;
-							bkmk_ids_elt.value = bkmkIDs_list.join(',');
-							bib_ids_elt.value = recIDs_list.join(',');
-							reload_elt.value = reload ? "1" : "";
+							var saction = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
 
-							action_elt.form.submit();
+							var _data = {bkmk_ids:bkmkIDs_list, rec_ids: recIDs_list, tagString:tags, reload:(reload ? "1" : "")};
+
+							top.HEURIST.search.executeAction(saction, _data);
+
 						}
 					}
 		);
@@ -3556,24 +3564,17 @@ top.HEURIST.search = {
 			alert("Select at least one record to add / remove workgroup tags");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/editUsergroupTagsPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""), { callback: function(add, wgTag_ids) {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/editUsergroupTagsPopup.html" +
+				(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""),
+				{ callback:
+		function(add, wgTag_ids) {
 			if (! wgTag_ids) return;
 
-			var action_fr = top.document.getElementById("i_action");
-			var action_elt = action_fr.contentWindow.document.getElementById('action');
-			var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
-			var wgTag_ids_elt = action_fr.contentWindow.document.getElementById('wgTag_ids');
+			var saction = (add ? "add" : "remove") + "_wgTags_by_id";
+			var _data = {rec_ids:recIDs_list, wgTag_ids:wgTag_ids};
 
-			if (! action_fr  ||  ! action_elt  ||  ! bib_ids_elt  ||  ! wgTag_ids_elt) {
-				alert("Problem contacting server - try again in a moment");
-				return;
-			}
+			top.HEURIST.search.executeAction( saction, _data );
 
-			action_elt.value = (add ? "add" : "remove") + "_wgTags_by_id";
-			wgTag_ids_elt.value = wgTag_ids.join(",");
-			bib_ids_elt.value = recIDs_list.join(',');
-
-			action_elt.form.submit();
 		} });
 	},
 
@@ -3593,11 +3594,15 @@ top.HEURIST.search = {
 		var url = top.HEURIST.basePath+ "search/actions/setRatingsPopup.php" +
 									(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 
-		var action_fr = document.getElementById("i_action");
-		var bkmk_ids_elt = action_fr.contentWindow.document.getElementById("bkmk_ids");
-		bkmk_ids_elt.value = bkmkIDs_list.join(',');
-
-		top.HEURIST.util.popupURL(window, url, {'no-resize': true, 'close-on-blur': true});
+		top.HEURIST.util.popupURL(window, url,
+		{  'no-resize': true, 'close-on-blur': true,
+		 	callback: function(value){
+				if(Number(value)>=0){
+					var _data = {bkmk_ids:bkmkIDs_list, ratings: value};
+					top.HEURIST.search.executeAction('set_ratings', _data);
+				}
+		 	}
+		});
 	},
 
 	setWorkgroupPopup: function() {
@@ -3607,25 +3612,13 @@ top.HEURIST.search = {
 			return;
 		}
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/permissions/setRecordOwnership.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""), {
-			callback: function(wg,viewable,hidden,pending) {
+			callback: function(wg, viewable, hidden, pending) {
 				if (wg === undefined) return;
 
-				var action_fr = top.document.getElementById("i_action");
-				var action_elt = action_fr.contentWindow.document.getElementById('action');
-				var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
-				var wg_elt = action_fr.contentWindow.document.getElementById('wg_id');
-				var vis_elt = action_fr.contentWindow.document.getElementById('vis');
-
-				if (! action_fr  ||  ! action_elt  ||  ! bib_ids_elt  ||  ! wg_elt  ||  ! vis_elt) {
-					alert("Problem contacting server - try again in a moment");
-					return;
-				}
-
-				action_elt.value = "set_wg_and_vis";
-				bib_ids_elt.value = recIDs_list.join(',');
-				wg_elt.value = wg;
-				vis_elt.value = hidden ? "hidden" : viewable ? "viewable" : pending ? "pending" : "public";
-				action_elt.form.submit();
+				var _data = {rec_ids: recIDs_list,
+							 wg_id  : wg,
+							 vis : (hidden ? "hidden" : viewable ? "viewable" : pending ? "pending" : "public") };
+				top.HEURIST.search.executeAction( "set_wg_and_vis", _data );
 			}
 		});
 	},
@@ -3647,6 +3640,22 @@ top.HEURIST.search = {
 				: ""));
 	},
 
+	addBookmark: function(e) {
+		if (! e) e = window.event;
+		var targ = null;
+		if (e.target) targ = e.target;
+		else if (e.srcElement) targ = e.srcElement;
+		if (targ.nodeType == 3) targ = targ.parentNode;
+		if (! targ) return;
+		var row = targ.parentNode;
+		if (! row.getAttribute("recID")) {
+			row = row.parentNode;
+		}
+		if (! row) return;
+
+		addBookmarks(row.getAttribute("recID"));
+	},
+
 	addBookmarks: function(recID) {
 
 		var recIDs_list = [];
@@ -3661,18 +3670,7 @@ top.HEURIST.search = {
 			return;
 		}
 
-		var action_fr = document.getElementById("i_action");
-		var bib_ids_elt = action_fr.contentWindow.document.getElementById("bib_ids");
-		var action_elt = action_fr.contentWindow.document.getElementById("action");
-		if (! bib_ids_elt  ||  ! action_elt) {
-			alert("Problem contacting server - try again in a moment");
-			action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
-			return;
-		}
-
-		bib_ids_elt.value = recIDs_list.join(",");
-		action_elt.value = "bookmark_reference";
-		action_elt.form.submit();
+		top.HEURIST.search.executeAction( "bookmark_reference", {rec_ids: recIDs_list} );
 	},
 
 	deleteBookmarks: function(bkmkID) {
@@ -3693,18 +3691,7 @@ top.HEURIST.search = {
 			if (! confirm("Do you want to delete " + bkmkIDs_list.length + " bookmarks?\n(this ONLY removes the bookmarks from your resources,\nit does not delete the bibliographic entries)")) return;
 		}
 
-		var action_fr = document.getElementById("i_action");
-		var bkmk_ids_elt = action_fr.contentWindow.document.getElementById("bkmk_ids");
-		var action_elt = action_fr.contentWindow.document.getElementById("action");
-		if (! bkmk_ids_elt  ||  ! action_elt) {
-			alert("Problem contacting server - try again in a moment");
-			action_fr.src = "actions/actionHandler.php" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
-			return;
-		}
-
-		bkmk_ids_elt.value = bkmkIDs_list.join(",");
-		action_elt.value = "delete_bookmark";
-		action_elt.form.submit();
+		top.HEURIST.search.executeAction( "delete_bookmark", {bkmk_ids: bkmkIDs_list} );
 	},
 
 	deleteRecords: function(recID) {

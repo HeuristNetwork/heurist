@@ -1909,7 +1909,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		var nodes = parent.childNodes;
 		while(i<nodes.length) {
     		var ele = nodes[i];
-    		if(ele.nodeName == "BR"){
+    		if(ele.className == "repeat-separator"){
 				parent.removeChild(ele);
 			}else{
 				i++;
@@ -2068,10 +2068,12 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 		var newInput = this.recreateSelector(bdValue, false);
 
 		if(this.inputs.length>1){
-			var br = this.document.createElement("br");
+			var br = this.document.createElement("div");
+			br.style.height = "3px";
+			br.className = "repeat-separator";
 			this.inputCell.insertBefore(br, newInput);
-			br = this.document.createElement("br");
-			this.inputCell.insertBefore(br, newInput);
+			//br = this.document.createElement("br");
+			//this.inputCell.insertBefore(br, newInput);
 		}
 
 		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link and if admin

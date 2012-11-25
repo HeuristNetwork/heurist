@@ -245,39 +245,25 @@
 	*/
 	function save()
 	{
-		var action_fr = parent.document.getElementById("i_action").contentWindow;
-		var action_elt = action_fr.document.getElementById("action");
-		var cmb_label_elt = action_fr.document.getElementById("svs_Name");
-		var cmb_url_elt = action_fr.document.getElementById("svs_Query");
-		var cmb_workgroup_elt = action_fr.document.getElementById("svs_UGrpID");
-		var cmb_id_elt = action_fr.document.getElementById("svs_ID");
-		var cmb_instance = action_fr.document.getElementById("db");
-		var publish_elt = action_fr.document.getElementById("publish");
-
-		if (! action_fr  ||  ! action_elt  ||  ! cmb_label_elt  ||  ! cmb_url_elt  ||  ! cmb_workgroup_elt) {
-			alert("Problem contacting server - try again in a moment");
-			return;
-		}
-
+		var cmb_label, cmb_url, cmb_workgroup, cmb_id;
 
 		/*ARTEM wtf
 		if (publish == "yes"){
-			publish_elt.value = "true";
+			publish = "true";
 		}
 		if (mode == "rename") {
-			cmb_id_elt.value = sId;
+			cmb_id = sId;
 		}
 		*/
 
-		action_elt.value = "save_search";
 
 		if(sId>0){
-			cmb_id_elt.value = sId;
-			cmb_workgroup_elt.value = wgId;
+			cmb_id = sId;
+			cmb_workgroup = wgId;
 		}else{
-			cmb_workgroup_elt.value = Number(document.getElementById("edSaveDestination").value);
+			cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
 		}
-		cmb_label_elt.value = document.getElementById("edName").value;
+		cmb_label = document.getElementById("edName").value;
 
 		var query = new Array();
 
@@ -285,12 +271,12 @@
 
 		if (!document.getElementById("rbS2").checked)
 		{
-			top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup_elt.value);
+			top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
 
 			var q = document.getElementById("edQuery").value;
 			//var w = params["w"]; //@todo - take from variable
 
-			if (cmb_workgroup_elt.value > 0 ){
+			if (cmb_workgroup > 0 ){
 
 				/* ARTEM - wtf
 				if (!bkmk_only.checked){
@@ -310,7 +296,7 @@
 			query.push("q="+q);
 			query.push("w="+sAllOrBookmarks);
 		}else{
-			cmb_workgroup_elt.value = 0; //for filters we save for current user only
+			cmb_workgroup = 0; //for filters we save for current user only
 		}
 
 		// -------- FILTERS --------------
@@ -339,14 +325,15 @@
 
 		// --------
 
-		if (top.HEURIST.database.name)
-			cmb_instance.value = top.HEURIST.database.name;
-
 		//save query
-		cmb_url_elt.value = "?" + query.join("&");
-		action_elt.form.submit();
+		cmb_url = "?" + query.join("&");
 
-		setTimeout(function() { window.close(); }, 10);
+
+		var saction = "save_search";
+		var _data = {svs_Name:cmb_label, svs_Query:cmb_url, svs_UGrpID:cmb_workgroup, svs_ID:cmb_id};
+
+		top.HEURIST.search.executeAction(saction, _data);
+		window.close();
 	}
 
   </script>

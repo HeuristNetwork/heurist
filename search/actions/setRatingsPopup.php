@@ -17,9 +17,6 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) return;
-
-mysql_connection_db_select(DATABASE);
-
 ?>
 <html>
 <head>
@@ -37,27 +34,7 @@ function set_ratings() {
     		break;
   		}
 	}
-
-	var action_fr = parent.document.getElementById('i_action').contentWindow;
-	var bkmk_ids_elt, action_elt, updateRatingElt;
-
-	if (action_fr){
-		bkmk_ids_elt = action_fr.document.getElementById('bkmk_ids');
-		action_elt = action_fr.document.getElementById('action');
-		updateRatingElt = action_fr.document.getElementById('rating');
-	}
-	if(! bkmk_ids_elt || ! updateRatingElt) {
-			alert('Problem contacting server - try again in a moment');
-			return;
-	}
-
-
-	updateRatingElt.value = value;
-	action_elt.value = 'set_ratings';
-
-	action_elt.form.submit();
-
-	setTimeout(function() { window.close(); }, 10);
+	window.close(value);
 }
 </script>
 <style>
