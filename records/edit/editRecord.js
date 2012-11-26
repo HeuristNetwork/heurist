@@ -1521,6 +1521,7 @@ top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.addInput = function(bdV
 		newInput.setAttribute("autocomplete", "off");
 		newInput.type = "text";
 		newInput.className = "in";
+		newInput.style.display = "block";
 		if (bdValue) newInput.value = bdValue.value;
 		this.addInputHelper.call(this, bdValue, newInput);
 };
@@ -1599,7 +1600,7 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput = function(bdV
 		textElt.setAttribute("autocomplete", "off");
 		textElt.name = newDiv.name;
 		textElt.value = bdValue? bdValue.value : "";
-		textElt.className = "in";
+		textElt.className = "in resource-date";
 		textElt.title = "Enter date";  //sw
 		textElt.style.width = newDiv.style.width;
 		newDiv.style.width = "";

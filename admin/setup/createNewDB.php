@@ -308,7 +308,7 @@
 			}
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
-				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
+				echo ("<p class='error'>Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
 				echo("\n\n");
 
 				if(is_array($output)){
@@ -317,8 +317,10 @@
 					$sqlErrorCode = split(" ", $output);
 					$isExists = (count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007");
 				}
-				if($isExists)
+				if($isExists){
 					echo "<strong>A database with that name already exists.</strong>";
+				}
+				echo "</p>";
 					$isCreateNew = true;
 				return false;
 			}
@@ -332,8 +334,8 @@
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
-				echo ("Error $res2 on MySQL exec: Unable to load blankDBStructure.sql into database $newname<br>");
-				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
+				echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load blankDBStructure.sql into database $newname<br>");
+				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br></p>");
 				echo($output2);
 				cleanupNewDB($newname);
 				return false;
@@ -344,8 +346,8 @@
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
-				echo ("Error $res2 on MySQL exec: Unable to load addReferentialConstraints.sql into database $newname<br>");
-				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
+				echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load addReferentialConstraints.sql into database $newname<br>");
+				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br></p>");
 				echo($output2);
 				cleanupNewDB($newname);
 				return false;
@@ -356,8 +358,8 @@
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
-				echo ("Error $res2 on MySQL exec: Unable to load addProceduresTriggers.sql for database $newname<br>");
-				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
+				echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load addProceduresTriggers.sql for database $newname<br>");
+				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br></p>");
 				echo($output2);
 				cleanupNewDB($newname);
 				return false;
@@ -371,8 +373,8 @@
 
 			// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 			if($errorCreatingTables) {
-				echo ("Error importing core definitions from ".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." for database $newname<br>");
-				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed");
+				echo ("<p class='error'>Error importing core definitions from ".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." for database $newname<br>");
+				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed</p>");
 				cleanupNewDB($newname);
 				return false;
 			}
@@ -497,8 +499,8 @@
 			echo "<p><strong>Admin username:</strong> ".$name."<br />";
 			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-			echo "<p>The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.</p>";
-			echo "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
+			echo "<p>You may wish to bookmark the database home page (search page): <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.</p>";
+			echo "<p><strong>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\">administration page</a></strong>, to configure your new database</p>";
 
 			// TODO: automatically redirect to the new database, maybe, in a new window
 

@@ -425,16 +425,16 @@
 				$email_text = "A new Heurist account has been created for you.";
 			}else{
 				$email_text = "Your Heurist account registration has been approved.";
-			}                               
+			}
 
 			if (HEURIST_DBNAME == 'H3Sandpit') {
 				// If the registration was on the sandpit DB on main Heurist server, return to the project home page
 				// We don't bother to test for the Heurist server on the assumption it is very unlikely that anyone else
 				// will have or navigate to this database anywhere else
-				$email_text .= "<p>Please go to: ".HEURIST_URL_BASE."index.html with the username: " . $ugr_Name;
+				$email_text .= "\n\nPlease go to: ".HEURIST_URL_BASE."index.html with the username: " . $ugr_Name;
 			} else {
 				// on any other server you give them a pointer to the search page of that database
-				$email_text = $email_text."<p>Heurist database: ".HEURIST_DBNAME."\n".
+				$email_text = $email_text."\n\nHeurist database: ".HEURIST_DBNAME."\n".
 				"Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME. " with the username: " . $ugr_Name;
 			}
 
@@ -444,7 +444,7 @@
 				" - To change your password go to My Profile -> My User Info in the top right menu";
 			}
 
-			$email_text = $email_text."</p><p>We recommend visiting the 'Take the Tour' section and also visiting the Help ".
+			$email_text = $email_text."\n\nWe recommend visiting the 'Take the Tour' section and also visiting the Help ".
 			"function, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
 
 			$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,

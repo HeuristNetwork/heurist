@@ -125,7 +125,7 @@
 			top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setVersion);
 
 			top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
-/*ART 2012-11-23
+/* ART 2012-11-23
 				var action_fr = document.getElementById("i_action");
 				action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
 				(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
@@ -164,8 +164,9 @@
 
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 
+<!-- removed by ART 2012-11-23
 		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
-		<!-- actionHandler.php is written to return a form by default or running javascript followed by reload the default-->
+		actionHandler.php is written to return a form by default or running javascript followed by reload the default-->
 
 
 <div id="masthead">
@@ -329,8 +330,8 @@
 
 			<!-- search and menu -->
 			<div id="searchpage-header" class="banner searchTable" style="border-bottom:1px solid #696969;">
-                <div class="logged-in-only" align="left" style="padding:10px;display:inline-block;" >
-                	<a href="#" id="link_admin" title="Administer database structure"><b>DESIGNER VIEW &nbsp;&gt;</b></a>
+                <div class="logged-in-only" align="left" style="padding:0px;display:inline-block;" >
+                	<button id="link_admin" title="Administer database structure" class="button"><b>DESIGNER VIEW</b></button>
                 </div>
     			<form id="formSearch" style="display:inline-block;" onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 
@@ -408,12 +409,18 @@
                 <div id=saved>
 
 					<div style="padding-top:15px; padding-bottom:5px" id=database-summary>
-						<div class="sidebar-firstlevel hide"  style="padding-top:5px; padding-left:20px;"
+						<div class="sidebar-firstlevel hide"  style="padding-top:5px; padding-left:20px;border: none;"
 							onclick="{top.HEURIST.search.showDatabaseSummary();}"><strong>Database Summary</strong></div>
 					</div>
 
 					<div id=my-records-saved-searches class="sidebar-firstlevel hide">
-						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
+						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks
+							<div class="saved-search-edit">
+								<a id="my-blog-link" target="_blank" href="#">
+									<img height="11" src="../common/images/blog-icon-box-rev-lightgrey16.png" />
+								</a>
+							</div>
+						</div>
 						<div class=content>
 							<div class=saved-search-subsubheading id="divFavLink">
 								<a href="#" onclick='{top.HEURIST.search.executeQuery("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"&amp;label=My Favourites");}'>My Favourites</a>
@@ -433,7 +440,7 @@
 								</li>
 							</ul> -->
 
-							<div class="saved-search-subsubheading"><a id="my-blog-link" target="_blank" href="#" class="external-link">My Blog</a></div>
+							<!-- div class="saved-search-subsubheading"><a id="my-blog-link" target="_blank" href="#" class="external-link">My Blog</a></div -->
 							<!-- Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
                             <div class=saved-search-subsubheading>Saved searches</div> -->
 							<div id=my-records-saved-searches-searches></div>
@@ -575,7 +582,7 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 
 							<li><div style="margin-top: 5px;font-weight: bold;">Share</div>
 								<ul>
-									<li style="padding-top: 10px"><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
+									<li style="padding-top: 10px"><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup / visibility</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
 									<li style="padding-bottom: 5px"><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
 								</ul>
@@ -736,7 +743,7 @@ top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/inputUrlInclude.js");	
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 
-$("#link_admin").attr('href', top.HEURIST.basePath+'admin/adminMenu.php?db='+database);
+$("#link_admin").click(function(){location.href = top.HEURIST.basePath+'admin/adminMenu.php?db='+database;});
 
 </script>
 <!-- hidden iFrame for printing -->

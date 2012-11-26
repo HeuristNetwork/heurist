@@ -752,7 +752,8 @@ div.right_margin_info div.mini-tools a {
 	background-color: none;
 	background-image:url(../images/heading_saved_search.png);
 	background-position:left top;
-	background-repeat:no-repeat;/*border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #BEC8D6;border-top:1px solid #FFFFFF;*/
+	background-repeat:no-repeat;
+	border-top: 1px solid rgba(106, 124, 153, .5);
 }
 .sidebar-firstlevel.hide {
 	background-image:url(../images/heading_saved_search-hidden.png);
@@ -786,15 +787,6 @@ div.right_margin_info div.mini-tools a {
 }
 #saved div.hide .content {
 	display: none;
-}
-/* hidden iframe for search actions*/
-#i_action {
-	width: 1px;
-	height: 1px;
-	left: 0;
-	top: 0;
-	position: absolute;
-	visibility: hidden;
 }
 #password {
 	bottom: 0;
@@ -920,10 +912,7 @@ div.right_margin_info div.mini-tools a {
 div.saved-search:hover > .saved-search-edit, div.search-type:hover > .saved-search-edit {
 	display: inline-block;
 }
-.saved-search {
-	padding-left:20px;
-	height:15px;
-}
+
 .saved-search .name{
 	white-space: nowrap;
 	overflow: hidden;
@@ -961,11 +950,10 @@ div.hide .saved-search-subheading {
 	margin-top:0;
 	padding-top:2px;
 }
-.saved-search-subsubheading {
+.saved-search, .saved-search-subsubheading {
 	padding: 1px 0px 1px 15px;
 	color: #6A7C99;
 	margin-top:5px;
-	;
 }
 .saved-search-subsubheading a {
 	text-decoration: none;

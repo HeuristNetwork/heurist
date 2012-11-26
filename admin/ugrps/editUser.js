@@ -70,7 +70,7 @@ function UserEditor() {
 		}
 
 		if (_recID>0 && Hul.isnull(_entity) ){
-			Dom.get("statusMsg").innerHTML = "<strong>Error: User #"+_recID+"  not be found. Clicking 'save' button will create a new User.</strong><br /><br />";
+			Dom.get("statusMsg").innerHTML = "<strong>Error: User #"+_recID+"  was not be found. This form will create a new user.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_entity)){

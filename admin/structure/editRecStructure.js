@@ -1131,6 +1131,8 @@ function EditRecStructure() {
 				if (_isNoWidth(dt_type))
 				{
 					def_width = 0;
+				}else if (dt_type === "blocktext"){
+					def_width = 80;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
 							dt_type === "calculated") {
 					def_width = 15;

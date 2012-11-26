@@ -174,7 +174,7 @@ function SelectDetailType() {
 								{ key: "name", label: "Field type name", sortable:true },
 								{ key: "order", label: "Order", hidden:true },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
-								{ key: "type", label: "Field type", sortable:true,
+								{ key: "type", label: "Data type", sortable:true,
 									formatter: function(elLiner, oRecord, oColumn, oData) {
 										var type = oRecord.getData("type");
 										elLiner.innerHTML = "<div style='width:80px'>"+top.HEURIST.detailTypes.lookups[type]+"</div>";

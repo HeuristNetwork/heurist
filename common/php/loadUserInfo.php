@@ -149,15 +149,16 @@ top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name())
 top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
 top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
 top.HEURIST.is_wgAdmin = function(wgID) {
-if (!top.HEURIST.workgroups || !top.HEURIST.workgroups[wgID]) return false;
-var usrID = top.HEURIST.get_user_id(),
-i,
-wgAdmins = top.HEURIST.workgroups[wgID];
+if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
+var usrID = top.HEURIST.get_user_id(), j, i;
+var wgroups = wgID?[wgID]:top.HEURIST.user.workgroups;
+for (j=0; j < wgroups.length; i++) {
+var wgAdmins = top.HEURIST.workgroups[wgroups[j]].admins;
 for (i=0; i < wgAdmins.length; i++) {
 if ( wgAdmins[i].id == usrID) return true;
 }
 return false;
-};
+}};
 
 <?php if (! is_admin()) { ?>
 	top.document.body.className += " is-not-admin";

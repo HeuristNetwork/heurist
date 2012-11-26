@@ -102,7 +102,7 @@ function hidePlayer(id) {
 
 	elem = document.getElementById('img'+id);
 	elem.parentNode.className = "thumb_image";
-	elem.style.display = 'block';
+	elem.style.display = 'inline-block';
 }
 
 

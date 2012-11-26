@@ -229,7 +229,7 @@ function cancelAdd(e) {
 
  </head>
 
-<body class="popup" width=500 height=480 style="font-size: 11px;">
+<body class="popup" width=500 height=520 style="font-size: 11px;">
 
 
 	<div border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
@@ -290,11 +290,6 @@ function cancelAdd(e) {
 			</div>
 
 			<div class="input-row workgroup">
-				<div class="input-header-cell">Workgroup tag:</div>
-				<div class="input-cell"><select name="tag" id="tag" style="width: 200px;"></select></div>
-			</div>
-
-			<div class="input-row workgroup">
 				<div class="input-header-cell">Outside this group record is:</div>
 				<div class="input-cell">
 					<select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
@@ -305,6 +300,12 @@ function cancelAdd(e) {
 					</select>
 				</div>
 			</div>
+
+			<div class="input-row workgroup">
+				<div class="input-header-cell">Workgroup tag:</div>
+				<div class="input-cell"><select name="tag" id="tag" style="width: 200px;"></select></div>
+			</div>
+
 		</div>
 	</div>
 	<div class="input-row">

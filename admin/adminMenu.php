@@ -109,12 +109,12 @@ if(array_key_exists('mode',$_REQUEST)){
 
 		<!-- sidebar -->
 		<div id="sidebar">
-			<div class="banner" style="padding-left:20px;border-bottom:1px solid #696969;">
-			          <a  href="../index.php?db=<?=HEURIST_DBNAME?>"
-             		title="Click the logo at top left of any Heurist page to return to the main search page"><b>USER VIEW &nbsp;&gt;</b></a>
+			<div class="banner" style="padding-left:20px;padding-top:4px;border-bottom:1px solid #696969;">
+                	<button id="link_admin" onclick="{location.href='../index.php?db=<?=HEURIST_DBNAME?>';}"
+                	title="Click to return to the main search page" class="button"><b>USER VIEW</b></button>
 			</div>
 
-			<div id="sidebar-inner">
+			<div id="sidebar-inner" style="padding-top: 25px;">
 				<!-- <div id="accordion">-->
 
                 <h3><a href="#">ESSENTIALS: </a>

@@ -526,7 +526,7 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 #version { color:#909090;font-size:10px;font-style:normal;font-weight:bold;height:11px;left:80px;line-height:10px;padding:0 3px;position:absolute;top:36px; }
 
 /****** search and button styling from search page *****/
-#q, #toolbar select, #query-input {border:0 solid #666666;height:22px;margin-right:-3px;}
+#toolbar select, #query-input {border:0 solid #666666;height:22px;margin-right:-3px;}
 #q {background-color:transparent}
 
 
@@ -663,9 +663,13 @@ input[type="radio"] {vertical-align: text-top;}
 .detailRowHeader span.link{text-transform: none; font-size: 9px;}
 
 .personPhoto {max-width: 150px;padding:0 16px 0 0;}
-.thumb_image {float:right;margin-right: 10px; clear:both; margin:5px; cursor: url(../images/zoom-in.png),pointer;}
-.thumb_image .download_link{text-align:right; padding-right:3px}
+.thumb_image {clear:both; margin:5px; cursor: url(../images/zoom-in.png),pointer;} /*float:right;margin-right: 10px; */
+/*.thumb_image .download_link{text-align:right; padding-right:3px}*/
 .fullSize {width:100%; padding:5px;text-align:center}
+
+div.thumbnail {
+	text-align: center;
+}
 div.thumbnail .fullSize img {width:auto; max-width:100%; cursor: url(../images/zoom-out.png),pointer;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
 img {border:0 none;vertical-align:middle;}
@@ -851,6 +855,11 @@ ul li ul div.separator {
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
 #tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator {border-top:1px solid #666;}
+
+.error{
+	font-size:14px;
+	color:#FF0000;
+}
 
 #errorMsg{
 	width:100%;
@@ -1045,4 +1054,10 @@ a.bare:hover{
 	text-align:left!important;
 	width:auto;
 	min-width:8em;
+}
+#menu_boomark.yuimenu .bd{
+	background:RGBA(50,50,50,0.7);
+}
+#menu_boomark.yuimenu .bd a:hover {
+	background:RGBA(150,150,150,1.0);
 }

@@ -2607,6 +2607,9 @@ top.HEURIST.search = {
 				innerHTML += '<div class="saved-search-edit">';
 				innerHTML += '<img height="11" title="info" src="'+top.HEURIST.basePath+'common/images/info.png" '+
 									'onclick="{top.HEURIST.search.workgroupInfoPopup(event, '+wg_ID+');}" onmouseout="{top.HEURIST.search.hidePopup();}">';
+				innerHTML += '&nbsp;<img height="11" src="'+ top.HEURIST.basePath+'common/images/blog-icon-box-rev-lightgrey16.png" '+
+									'onclick="{window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
+				//innerHTML += "<a target=\"_blank\" class='external-link' href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'></a>";
 				innerHTML += "</div></div>";
 
 				innerHTML += "<div class=content>";
@@ -2615,8 +2618,9 @@ top.HEURIST.search = {
                 // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
                 // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(wg_ID);return false;}'>Aggregations</a></div>";
 
-				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" class='external-link' href='" +
-									top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'>Blog</a></div>";
+				//innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" class='external-link' href='" +
+				//					top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'>Blog</a></div>";
+
 
 				var searches = top.HEURIST.user.workgroupSavedSearches[wg_ID];
 				if (searches  &&  searches.length) {

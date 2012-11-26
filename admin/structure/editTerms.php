@@ -123,35 +123,41 @@ if (!is_admin()) {
 					<b>Term saved</b>
 				</div>
 			</div>
-			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="edName" style="width:300px"/></div>
-			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
+			<div class="dtyField">
+				<div style="display:inline-block;"><label class="dtyLabel" style="color: red;">Display name:</label><input id="edName" style="width:160px"/></div>
+
+				<div style="float:right; text-align: right; width:140px;">
+					<input id="btnSave" type="button" value="Save" onClick="{editTerms.doSave()}" />
+					<div id='div_btnAddChild' style="text-align: right; display:inline-block;">
+						<input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
+					</div>
+				</div>
+			</div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input id="edCode" style="width:80px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
+
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
 				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
 				<input id="edInverseTermId" type="hidden"/>
 			</div>
-            <div id="divStatus" class="dtyField"><label class="dtyLabel">Status:</label>
-                <select class="dtyValue" id="trm_Status" onChange="editTerms.onChangeStatus(event)">
-                    <option selected="selected">open</option>
-                    <option>pending</option>
-                    <option>approved</option>
-                    <!-- option>reserved</option -->
-                </select>
-            </div>
 
-				<div style="text-align: right; padding-top:5;">
-					<div id='div_btnAddChild' style="text-align: right; display:inline-block;">
-					<input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
-					</div>
-					<input id="btnSave" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
-				</div>
 <!--
 				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>
 				<p>To add terms to fields, edit the field and click the [Vocabulary] button</p>
 -->
+			<div style="display:inline-block;">
 				<input id="btnImport" type="button" value="Import from file" onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
 				<input id="btnSetParent" type="button" value="Change Parent" title="Change the parent" onClick="{editTerms.selectParent()}"/>&nbsp;&nbsp;&nbsp;
 				<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
+			</div>
+	        <div id="divStatus" class="dtyField" style="float:right;width:130px;"><label>Status:</label>
+	                <select class="dtyValue" id="trm_Status" onChange="editTerms.onChangeStatus(event)">
+	                    <option selected="selected">open</option>
+	                    <option>pending</option>
+	                    <option>approved</option>
+	                    <!-- option>reserved</option -->
+	                </select>
+	        </div>
 
 			</div>
 

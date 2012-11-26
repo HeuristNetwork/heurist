@@ -351,7 +351,7 @@ function EditTerms() {
 				if(isExistingNode(node)){
 						Dom.get('div_btnAddChild').style.display = "inline-block";
 						Dom.get('btnDelete').value = "Delete Term";
-						Dom.get('btnSave').value = "Save changes";
+						Dom.get('btnSave').value = "Save";
 				}else{//new term
 						Dom.get('div_btnAddChild').style.display = "none";
 						Dom.get('btnDelete').value = "Cancel";

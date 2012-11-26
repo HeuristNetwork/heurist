@@ -514,7 +514,7 @@ div#notes {
 .relation.editable.reminder {margin:10px 0 0 0;}
 .relation.editable.reminder .resource-div.empty .file-resource-div.empty input{width:100% !important}
 .resource.optional {
-	background-color: rgba(255, 255, 255, 0.2);
+	background-color: rgba(0, 0, 255, 0.2);
 }
 .section-header-cell.optional {
 	color:#6A7C99;
@@ -664,6 +664,10 @@ input#tags, .input-cell .in, .resource-title, .in, .input-row input:not([type="s
 	margin:2px 0;
 	padding:3px;
 }
+.resource-title, .resource-date{
+	display:inline-block !important;
+}
+
 input#tags {
 	min-width :80ex;
 }

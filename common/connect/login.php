@@ -128,7 +128,7 @@ if (@$_REQUEST['logout']) {
 <script>
  if (window.parent != window) {
    <?php if (@$last_uri) { ?>
-   top.location = "login.php?db=<?=HEURIST_DBNAME?>&last_uri=<?=$last_uri?>";
+   top.location = "login.php?db=<?=HEURIST_DBNAME?>&last_uri=<?=urlencode($last_uri)?>";
    <?php } else { ?>
    top.location = window.location;
    <?php } ?>
@@ -173,10 +173,6 @@ if (@$_REQUEST['logout']) {
 	if (! is_logged_in()) {
 ?>
 
-<?php
-		if ($LOGIN_ERROR)
-			echo "<p style=\"margin-left: 100px; color: red;\">".$LOGIN_ERROR."</p>";
-?>
 <table cellpadding=3 id="login-table" border="0">
 	<tr class="input-row">
 	<td class="input-header-cell">Database name</td>
@@ -192,6 +188,13 @@ if (@$_REQUEST['logout']) {
 	<td class="input-header-cell">Username</td>
 	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in" onkeypress="onKeyPress(event)"><br/>email address by default</td>
 	</tr>
+
+<?php
+if ($LOGIN_ERROR){
+echo '<tr class="input-row"><td colspan="2"><p style="margin-left: 100px; color: red;">'.$LOGIN_ERROR.'</p></td></tr>';
+}
+?>
+
 
    <tr class="input-row">
     <td class="input-header-cell">Password</td>
