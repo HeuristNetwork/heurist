@@ -12,7 +12,7 @@
 -->
 <html>
 	<head>
-		<title>Rectype Delimited Export v 1.04 </title>
+		<title>Record type Delimited Export</title>
 
 		<!--
 		This HAPI tool is designed to export multiple details for a selected resource
@@ -36,6 +36,9 @@
 
 		<script src="exportDelimitedForRectype.js"></script>
 
+		<link href="../../common/css/global.css" type="text/css" rel="stylesheet">
+		<link href="../../common/css/edit.css" type="text/css" rel="stylesheet">
+
 		<style>
 			#csv-textarea {
 				width: 100%;
@@ -48,22 +51,62 @@
 			td select { width: 100px; }
 			td.error { color: red; }
 			#col-select-row td { border: none; padding: 1px 5px 5px 0px; vertical-align: top; }
+
+			.input-header-cell{
+				width:300px !important;
+			}
+			select {
+				width:200px;
+			}
 		</style>
-		<link href="../../common/css/global.css" type="text/css" rel="stylesheet">
-		<link href="../../common/css/admin.css" type="text/css" rel="stylesheet">
-		<link href="../../common/css/edit.css" type="text/css" rel="stylesheet">
+
 	</head>
 
 	<body class="popup" onload = "getRecTypes();">
-		<h2>Delimited data export</h2>
-		<p>This function exports data for specified fields of a selected record type in comma or tab separated format.<br>
-		An additional query string using normal Heurist query structure can be used to select a subset of the record type.</p>
-		<p>Due to the limitations of the delimited text format, only one record type can be exported at a time.</p>
-		<p id=info-p></p>
-		<p id=select-rec-type></p>
-		<div id=select-detail-type></div>
-		<div id="export-detail-map" style="padding-top:30px;"></div>
+		<!-- <h2>Delimited data export</h2 -->
+		<p>
+			This function exports data for specified fields of a selected record type in comma or tab separated format.<br />
+			An additional query string using normal Heurist query structure can be used to select a subset of the record type.<br />
+			Due to the limitations of the delimited text format, only one record type can be exported at a time.
+		</p>
+
+		<div style="padding-top:10px;width:600px">
+
+			<div class="input-row">
+				<label class="input-header-cell">Select record type</label>
+				<div class="input-cell" id="select-rec-type"></div>
+			</div>
+			<div class="input-row">
+				<label class="input-header-cell">Select fields to export</label>
+				<div class="input-cell" id="select-detail-type"><select size="4"></select></div>
+			</div>
+			<div class="input-row">
+				<label class="input-header-cell">Include internal field code in column preceding values</label>
+				<div class="input-cell" style="padding-top: 4px;"><input type="checkbox" id="dtIDsCheckbox" onchange="updateExportMap()" />  &nbsp;&nbsp;(used by Heurist 'field updater')</div>
+			</div>
+			<div class="input-row">
+				<label class="input-header-cell">Heurist query string (optional) - provides additional filtering)</label>
+				<div class="input-cell"><input type="text"  style="width:280px;" id="queryInput"/></div>
+			</div>
+			<div class="input-row">
+				<label class="input-header-cell">Use delimeter</label>
+				<div class="input-cell"><select style="width:80px" id="delimiterSelect"  onchange="refreshRecordData()"><option value=",">comma</option><option value="\t">tab</option></select></div>
+			</div>
+			<div class="input-row">
+				<label class="input-header-cell">Include field names as first output row</label>
+				<div class="input-cell" style="padding-top: 4px;"><input type="checkbox" id="includeFieldNamesCheckbox" onchange="refreshRecordData()"/></div>
+			</div>
+			<div class="input-row" style="text-align: center;">
+
+				<input type="button" onclick="getRecords()" value="generate delimited data"/>
+			</div>
+
+		</div>
+
+		<div id="export-detail-map" style="padding-top:10px;"></div>
+
 		<div id="results"></div>
+
 		<p id=records-p></p>
 	</body>
 </html>

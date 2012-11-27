@@ -10,18 +10,18 @@
 //global variables  Note: all globals are prefixed with g_ to make them identifiable
 //in the code
 
-var g_fields = [];											//pointer relations to import
-var g_recTypeSelect = null;							//Record Type Selection object
-var g_recDetailSelect = null;					//Detail Type Selection object
-var g_textDetailSelect = null;
-var g_text2DetailSelect = null;
+var g_fields = [];				//pointer relations to import
+var g_recTypeSelect = null;		//Record Type Selection object
+var g_recDetailSelect = null;	//Detail Type Selection object
+
 var g_delimiterSelect = null;
-var g_queryInput = null;
 var g_dtIDsCheckbox = null;
-var g_includeFieldNamesCheckbox = null;
+
 var g_detailTypes = [];
-var g_recType;
+var g_recType = null;
 var g_recTypeLoaded;
+
+
 var g_exportMap = [];
 var g_exportMapNames = [];
 var g_cols = [];
@@ -33,10 +33,16 @@ This function gets the record types from HAPI and loads them into a Select eleme
 */
 function getRecTypes() {
 	var e = document.getElementById("select-rec-type");
-	e.appendChild(document.createTextNode("Please select record type first: "));
+
+	removeChildren(e);
+
 	g_recTypeSelect = e.appendChild(document.createElement("select"));
 	// once a recordtype is selected show the detailTypes
-	g_recTypeSelect.onchange = function() { getDetailTypes() };
+	g_recTypeSelect.onchange = function() {
+			g_recType = null;
+			g_records = [];
+			getDetailTypes()
+	};
 	var opt = document.createElement("option");
 	opt.innerHTML = "record type...";
 	opt.disabled = true;
@@ -55,12 +61,10 @@ function getRecTypes() {
 This function reads in the Detail Types for the selected Record Type.
 */
 function getDetailTypes(){
+
 	var e = document.getElementById("select-detail-type");
 	//remove the old selection so we can recreate it
 	removeChildren(e);
-	removeChildren(document.getElementById("export-detail-map"));
-	g_textDetailSelect = document.createTextNode("Select fields to export: ");
-	e.appendChild(g_textDetailSelect);
 
 	//create a multi-selection list of Detail Types   FIXME -- Should handle the single-type case
 	g_recDetailSelect = e.appendChild(document.createElement("select"));
@@ -75,53 +79,7 @@ function getDetailTypes(){
 		addOpt(g_recDetailSelect, d, HDetailManager.getDetailNameForRecordType(g_recType, g_detailTypes[d]));
 	}
 
-	//spacer
-	e.appendChild(document.createElement("br"));
-
-    // output detail IDs as well?
-	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("Include internal field code in column preceding values? "));
-	g_dtIDsCheckbox = document.createElement("input");
-	g_dtIDsCheckbox.type = "checkbox";
-	g_dtIDsCheckbox.onchange = function(){ updateExportMap() };
-	e.appendChild(g_dtIDsCheckbox);
-	e.appendChild(document.createTextNode(" (used by Heurist 'field updater')"));
-
-	// add search string box
-	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("Heurist query string (optional) - provides additional filtering): "));
-	g_queryInput = document.createElement("input");
-	e.appendChild(g_queryInput);
-
-	//create selection for choosing the delimiter
-	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("Use delimeter:"));
-	g_delimiterSelect = e.appendChild(document.createElement("select"));
-	addOpt(g_delimiterSelect,",","comma"); //default
-	addOpt(g_delimiterSelect,"\t","tab");
-
-	// Include field names as header in first row
-	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("Include field names as first output row? "));
-	g_includeFieldNamesCheckbox = document.createElement("input");
-	g_includeFieldNamesCheckbox.type = "checkbox";
-	e.appendChild(g_includeFieldNamesCheckbox);
-
-
-	//spacer
-	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode(""));
-
-	//add button for getting the records
-	e.appendChild(document.createElement("br"));
-	g_text2DetailSelect = document.createTextNode("Select fields above, then: ");
-	e.appendChild(g_text2DetailSelect);
-	var button = e.appendChild(document.createElement("input"));
-	button.type = "button";
-	button.value = "generate delimited data";
-	button.onclick = function() { getRecords(); };
-
-
+	updateExportMap();
 }
 
 function addOpt(sel, val, text) {
@@ -133,16 +91,21 @@ function addOpt(sel, val, text) {
 
 function updateExportMap() {
 	//clean up for multiple re-entry
-	var e1 = document.getElementById("export-detail-map");
-	removeChildren(e1);
+	var el = document.getElementById("export-detail-map");
+	//remove the old selection so we can recreate it
+	removeChildren(el);
+
 	while (g_exportMap.length>0){
 		g_exportMap.pop();
 	}
 	g_exportMapNames = [];
 
 
+	g_dtIDsCheckbox = document.getElementById('dtIDsCheckbox');
+
+
 	//if multiple select then for each selected pointer create input field marking id with detailType id
-	var table = e1.appendChild(document.createElement("table"));
+	var table = el.appendChild(document.createElement("table"));
 	table.id = "export-map-table";
 	var tr = table.appendChild(document.createElement("tr"));
 	tr.id = "export-map-row";
@@ -150,6 +113,7 @@ function updateExportMap() {
 	td = tr.appendChild(document.createElement("td"));
 	td.innerHTML = "Record ID";
 	g_exportMapNames.push("Record ID");
+
 	var l = g_recDetailSelect.options.length;
 	for (var i = 0; i < l; ++i) {
 		if (g_recDetailSelect.options[i].selected) {
@@ -174,6 +138,8 @@ function updateExportMap() {
 */
 		}
 	}
+
+	refreshRecordData();
 }
 
 function removeChildren (e) {
@@ -188,13 +154,15 @@ function loadAllRecords(query, options, loader) {
 	var bulkLoader = new HLoader(
 		function(s, r, c) {	// onload
 			records.push.apply(records, r);
+			var elres = document.getElementById('results');
+
 			if (r.length < 100) {
 				// we've loaded all the records: invoke the loader's onload
-				document.getElementById('results').innerHTML = '<br><b>Loaded ' + records.length + ' of ' + c + ' records </b>(select below with Ctrl-A, copy and paste to file as required)</b>';
+				elres.innerHTML = '<br><b>Loaded ' + records.length + ' of ' + c + ' records </b>(select below with Ctrl-A, copy and paste to file as required)</b>';
 				loader.onload(baseSearch, records);
 			}
 			else {
-				document.getElementById('results').innerHTML = '<b>Loaded ' + records.length + ' of ' + c + ' records so far ...</b>';
+				elres.innerHTML = '<b>Loaded ' + records.length + ' of ' + c + ' records so far ...</b>';
 
 				// might be more records to load: do a search with an offset specified
 				var search = new HSearch(query + " offset:"+records.length, options);
@@ -207,8 +175,19 @@ function loadAllRecords(query, options, loader) {
 }
 
 function getRecords() {
-	if (!g_recType || (g_recType != g_recTypeLoaded)){
-		var myQuery = "type:" + g_recTypeSelect.value + " " + g_queryInput.value;
+
+	if(g_recType==null){
+		alert("Select record type first");
+		return;
+	}
+	if(g_exportMap.length<1){
+		alert("Select fields to export");
+		return;
+	}
+
+	if (!g_recType || (g_recType != g_recTypeLoaded))
+	{
+		var myQuery = "type:" + g_recTypeSelect.value + " " + document.getElementById("queryInput").value;
 
 		var loader = new HLoader(
 			function(s,r) {
@@ -235,13 +214,26 @@ function extractURL(urlinclude){
 	}
 }
 
+function refreshRecordData(){
+	showRecordData(g_records);
+}
+
 
 function showRecordData(hRecords) {
+
+
+	g_delimiterSelect = document.getElementById('delimiterSelect');
 	var strDelim = g_delimiterSelect.value;
 	var strRowTerm = "\n";
+
 	var e = document.getElementById("records-p");
 	//remove textarea for multiple exports
 	removeChildren(e);
+
+	if(g_exportMapNames.length<1 && hRecords.length<1){
+		return;
+	}
+
 	//create output area
 	var recDisplay = e.appendChild(document.createElement("textarea"));
 	recDisplay.id = "csv-textarea";
@@ -250,7 +242,7 @@ function showRecordData(hRecords) {
 	var dl;
 
 	// Generate header if required
-	if (g_includeFieldNamesCheckbox.checked) {
+	if (document.getElementById("includeFieldNamesCheckbox").checked) {
 
 		var k = g_exportMapNames.length,
 			line = "";
@@ -331,13 +323,15 @@ function showRecordData(hRecords) {
 }
 
 function csv_escape(str) {
-	if (! str) {
+	if (!str) {
 		return '';
 	}
-	if (g_delimiterSelect.value == "," && str.match(/[",\n\t]/)) {
-		return '"' + str.replace(/\n/g,"\\n").replace(/\t/g,"\\t").replace(/"/g, '""') + '"';
-	}else if (str.match(/[\n\t]/)) {
-		return str.replace(/\n/g,"\\n").replace(/\t/g,"\\t");
+	if(typeof(disabledTermIDsList) === "string"){
+		if (g_delimiterSelect.value == "," && str.match(/[",\n\t]/)) {
+			return '"' + str.replace(/\n/g,"\\n").replace(/\t/g,"\\t").replace(/"/g, '""') + '"';
+		}else if (str.match(/[\n\t]/)) {
+			return str.replace(/\n/g,"\\n").replace(/\t/g,"\\t");
+		}
 	}
 	return str;
 }
