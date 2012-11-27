@@ -208,10 +208,16 @@ if (!top.Relationship) {
 		td.style.display = "inline-block";
 
 		td = tr.appendChild(this.document.createElement("div"));
-		td.className = "input2-header-cell";
-		td.style.paddingLeft = '10px';
-		td.style.paddingRight = '10px';
-		td.appendChild(this.document.createTextNode("This record"));
+		td.style.display = "inline-block";
+		//td.className = "input2-header-cell";
+
+		if(thisRef.manager.needAddToAggregation){
+			td.style.paddingRight = '10px';
+			td.style.paddingLeft = '10px';
+			td.appendChild(this.document.createTextNode("This record"));
+		}else{
+			td.style.padding = '0px';
+		}
 
 
 		//var rfr = top.HEURIST.rectypes.typedefs[top.HEURIST.magicNumbers['RT_RELATION']]['dtFields'][top.HEURIST.magicNumbers['DT_RELATION_TYPE']];
@@ -288,9 +294,24 @@ if (!top.Relationship) {
 		this.relTypeSelect.id = "relationship-type";
 		this.relTypeSelect.name = "relationship-type";
 
+		function _nopadding(ele){
+			if(ele.childNodes){
+			for (var i=0; i < ele.childNodes.length; ++i) {
+				var child = ele.childNodes[i];
+				if(child.style){
+					child.style.paddingLeft = '0px';
+					//child.style.paddingRight = '0px';
+					_nopadding(child);
+				}
+			}
+			}
+		}
+		_nopadding(td);
+
+
 		fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']?
 																'' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:''),
-															"Related record",
+															(thisRef.manager.needAddToAggregation?"Related record":""),
 															"resource",
 															"",
 															null,
@@ -305,7 +326,8 @@ if (!top.Relationship) {
 
 		td = tr.appendChild(this.document.createElement("div"));
 		td.className = "input2-header-cell";
-		td.style.padding = "0px 10px 0px 10px ";
+		td.style.padding = "0px"; // 10px 0px 10px";
+		td.style.height = "22px";
 
 
 		var saveButton = this.document.createElement("input");
@@ -313,6 +335,7 @@ if (!top.Relationship) {
 		//saveButton.style.fontWeight = "bold";
 		//saveButton.style.fontSize = "2ex";
 		saveButton.style.marginRight = "10px";
+		saveButton.style.padding = "0px 3px";
 		saveButton.value = "Add";// relationship";
 		saveButton.onclick = function() { thisRef.save(); };
 
@@ -323,6 +346,8 @@ if (!top.Relationship) {
 			var cancelButton = this.document.createElement("input");
 			cancelButton.type = "button";
 			cancelButton.value = "Cancel";
+			cancelButton.style.padding = "0px 3px";
+
 			cancelButton.onclick = function() {
 
 				/* 2012-11-05

@@ -104,7 +104,7 @@
 
 	function delete_search(name, wg) {
 		top.HEURIST.util.getJsonData("deleteSavedSearch.php?wg="+wg+"&label="+escape(name), function(response) {
-			if (response.deleted) {
+			if (response && response.deleted) {
 				if (rows[wg]  &&  rows[wg][name]) {
 					document.getElementById("t").removeChild(rows[wg][name]);
 				}

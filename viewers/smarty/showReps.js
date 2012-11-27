@@ -68,7 +68,7 @@ function ShowReps() {
 		var sel = document.getElementById('selTemplates'),
 			option,
 			keepSelIndex = sel.selectedIndex,
-	 		_currentTemplate = top.HEURIST.util.getDisplayPreference("viewerCurrentTemplate");
+	 		_currentTemplate = Hul.getDisplayPreference("viewerCurrentTemplate");
 
 		//celear selection list
 		while (sel.length>0){
@@ -179,7 +179,7 @@ function ShowReps() {
 	function _reload_templates(){
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
 				var callback = _updateTemplatesList;
-				top.HEURIST.util.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+				Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
 	}
 
 	/**
@@ -233,13 +233,13 @@ function ShowReps() {
 					infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
 					infoMessageBox.show();
 
-				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+				Hul.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
 					_updateReps(obj);
 				}, squery);
 
 				}
-				//top.HEURIST.util.getJsonData(baseurl, callback, squery);
+				//Hul.getJsonData(baseurl, callback, squery);
 	}
 
 	//
@@ -262,6 +262,9 @@ function ShowReps() {
 
 		function __onGenerateTemplate(context){
 
+			if(Hul.isnull(context)){
+				return;
+			}
 			if(context===false || Hul.isnull(context['text'])){
 				alert('No template generated');
 				return;
@@ -335,7 +338,7 @@ function ShowReps() {
 				alert('Please select some records in search results');
 			}else{
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
-				top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
+				Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
 			}
 	}
 
@@ -383,8 +386,8 @@ function ShowReps() {
 
 			var squery = 'db='+_db+'&mode=get&template='+template_file;
 
-			top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-					var obj = top.HEURIST.util.evalJson(xhr.responseText);
+			Hul.sendRequest(baseurl, function(xhr) {
+					var obj = Hul.evalJson(xhr.responseText);
 					if (obj  &&  obj.error) {
 						alert(obj.error);
 					}else{
@@ -447,9 +450,9 @@ function ShowReps() {
 				var alwin;
 
 				function __onOperEnd(context){
-					if(context && context.error){
-						//do nothing alert(context.error);
-					}else{
+
+					if(!Hul.isnull(context))
+					{
 						var mode = context.ok;
 						//if(mode==="delete"){
 						if(modeRef===3){ //delete
@@ -477,7 +480,7 @@ function ShowReps() {
 					}
 				}
 
-				top.HEURIST.util.getJsonData(baseurl, __onOperEnd, squery);
+				Hul.getJsonData(baseurl, __onOperEnd, squery);
 			}
 		}
 
@@ -550,7 +553,7 @@ function ShowReps() {
 				infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
 				infoMessageBox.show();
 
-				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+				Hul.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
 					_updateReps(obj);
 				}, squery);
@@ -1390,7 +1393,7 @@ function ShowReps() {
 
 			var msg = "";
 
-			var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
+			var limit = parseInt(Hul.getDisplayPreference("report-output-limit"));
 			if (isNaN(limit)) limit = 1000; //def value for dispPreference
 
 			if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
@@ -1414,9 +1417,9 @@ function ShowReps() {
 
 		var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q+"&db="+_db;
 
-		var dim = top.HEURIST.util.innerDimensions(top);
+		var dim = Hul.innerDimensions(top);
 
-		top.HEURIST.util.popupURL(top, url,
+		Hul.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 480,
@@ -1465,7 +1468,7 @@ function ShowReps() {
 			setQueryMode: function(val){
 				var isChanged = _sQueryMode != val;
 				_sQueryMode = val;
-				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
+				Hul.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
 
 
 				if(document.getElementById('cbUseAllRecords1')){

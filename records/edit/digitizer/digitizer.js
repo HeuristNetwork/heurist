@@ -2364,61 +2364,66 @@ function _load_layers(mode) {
 */
 function _updateLayersList(context){
 
-		var ind,
-			elem = document.getElementById('cbLayers'),
-			s = "<option value='-1'>none</option>",
-			selIndex = -1;
-
-		systemAllLayers = context.layers;
+	if(!top.HEURIST.util.isnull(context)) {
 
 
-	for (ind in context.geoObjects) {
-		if(!top.HEURIST.util.isnull(ind))
-		{
-			geoobj = context.geoObjects[ind];
-			if(geoobj.type === "kmlfile"){
+			var ind,
+				elem = document.getElementById('cbLayers'),
+				s = "<option value='-1'>none</option>",
+				selIndex = -1;
 
-				var url = top.HEURIST.baseURL;
-				url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
-				geoobj.url = url;
-
-				systemAllLayers.push(geoobj);
-			}
-		}
-	}
+			systemAllLayers = context.layers;
 
 
-	for (ind in systemAllLayers) {
-		if(!top.HEURIST.util.isnull(ind))
-		{
-			if(top.HEURIST.util.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
-			{
+			for (ind in context.geoObjects) {
+				if(!top.HEURIST.util.isnull(ind))
+				{
+					geoobj = context.geoObjects[ind];
+					if(geoobj.type === "kmlfile"){
 
-				var sTitle = systemAllLayers[ind].title;
-				if(top.HEURIST.util.isempty(sTitle)){
-					sTitle = context.records[systemAllLayers[ind].rec_ID].title;
-				}
-				if(top.HEURIST.util.isempty(sTitle)){
-					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
-				}
+						var url = top.HEURIST.baseURL;
+						url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
+						geoobj.url = url;
 
-				s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
-
-				if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
-				systemAllLayers[ind].rec_ID === currentBackgroundLayer){
-					selIndex = ind;
+						systemAllLayers.push(geoobj);
+					}
 				}
 			}
-		}
-	}
 
-	elem.innerHTML = s;
 
-	if(selIndex>=0){
-		setTimeout(function() {
-			loadLayer2(selIndex);
-			elem.selectedIndex = Number(selIndex)+1;
-		}, 2000);
+			for (ind in systemAllLayers) {
+				if(!top.HEURIST.util.isnull(ind))
+				{
+					if(top.HEURIST.util.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
+					{
+
+						var sTitle = systemAllLayers[ind].title;
+						if(top.HEURIST.util.isempty(sTitle)){
+							sTitle = context.records[systemAllLayers[ind].rec_ID].title;
+						}
+						if(top.HEURIST.util.isempty(sTitle)){
+							sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
+						}
+
+						s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+
+						if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
+						systemAllLayers[ind].rec_ID === currentBackgroundLayer){
+							selIndex = ind;
+						}
+					}
+				}
+			}
+
+			elem.innerHTML = s;
+
+			if(selIndex>=0){
+				setTimeout(function() {
+					loadLayer2(selIndex);
+					elem.selectedIndex = Number(selIndex)+1;
+				}, 2000);
+			}
+
 	}
 }
 

@@ -2432,9 +2432,9 @@ top.HEURIST.search = {
 	executeAction: function(action, _data){
 
 			function _requestCallBack(context) {
-				if(!context) {
-					top.HEURIST.util.showError(-1);
-				}else{
+
+				if(!Hul.isnull(context)){
+
 					if(context.problem){
 						top.HEURIST.util.showError(context.problem);
 					}else if(context.none){
@@ -2892,7 +2892,7 @@ top.HEURIST.search = {
 		}
 		top.HEURIST.util.getJsonData(top.HEURIST.basePath+ "search/saved/deleteSavedSearch.php?id="+sid + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
 										 function(response) {
-			if (response.deleted && top.HEURIST.search) {
+			if (response && response.deleted && top.HEURIST.search) {
 
 					var wg = ss[3];
 					var savedSearches = wg>0 ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
@@ -2911,10 +2911,9 @@ top.HEURIST.search = {
 
 	savedSearchEdit: function(sid){
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "db="+top.HEURIST.database.name : "");
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""),
+		top.HEURIST.util.popupURL(window,
+				top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""),
 			{ callback: function(responce){
-
-
 
 
 			}}
@@ -3726,9 +3725,11 @@ top.HEURIST.search = {
 					("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))),
 					 function (results){
-						top.HEURIST.search.collectCount = results.count;
-						top.HEURIST.search.collection = results.ids;
-						top.HEURIST.search.renderCollectionUI();
+					 	 if(results){
+						 	top.HEURIST.search.collectCount = results.count;
+							top.HEURIST.search.collection = results.ids;
+							top.HEURIST.search.renderCollectionUI();
+						 }
 					});
 			return;
 		}
@@ -3757,15 +3758,19 @@ top.HEURIST.search = {
 	},
 
 	collectionOnUpdate: function(results) {
-		var refresh = false;
-		if (typeof results.count !== "undefined") {
-			if (top.HEURIST.search.collectCount != results.count) {
-				refresh = true;
+
+		if(!top.HEURIST.util.isnull(results)){
+
+			var refresh = false;
+			if (typeof results.count !== "undefined") {
+				if (top.HEURIST.search.collectCount != results.count) {
+					refresh = true;
+				}
+				top.HEURIST.search.collectCount = results.count;
 			}
-			top.HEURIST.search.collectCount = results.count;
+			top.HEURIST.search.collection = results.ids;
+			top.HEURIST.search.renderCollectionUI();
 		}
-		top.HEURIST.search.collection = results.ids;
-		top.HEURIST.search.renderCollectionUI();
 		/*if (top.HEURIST.parameters["q"].match(/_COLLECTED_/) && refresh) {
 			top.location.reload();
 		}*/
@@ -3802,9 +3807,13 @@ top.HEURIST.search = {
 			alert("Select at least one record to add to collection basket");
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php", top.HEURIST.search.collectionOnUpdate, "fetch=1&add=" + recIDs_list.join(",") +
-				("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))));
+		var _db = (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""));
+
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php",
+						top.HEURIST.search.collectionOnUpdate,
+						"fetch=1&add=" + recIDs_list.join(",") + "&db=" + _db );
+
 		top.HEURIST.search.deselectAll(true);
 		document.getElementById("collection-label").className += "show-changed";
 		//top.HEURIST.search.showCollectionChange(true);
@@ -3823,9 +3832,13 @@ top.HEURIST.search = {
 			alert("Select at least one record to remove from collection basket");
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php", top.HEURIST.search.collectionOnUpdate, "fetch=1&remove=" + recIDs_list.join(",") +
-				("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))));
+
+		var _db = (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""));
+
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php",
+				top.HEURIST.search.collectionOnUpdate,
+				"fetch=1&remove=" + recIDs_list.join(",") + "&db=" + _db);
 	},
 	/*
 	* END COOLECTION OF RECORDS =============================

@@ -290,6 +290,7 @@
 
 			// Create a new blank database
 		    $newDBName = trim($_POST['uname']).'_';
+
 		    if ($newDBName == '_') {$newDBName='';}; // don't double up underscore if no user prefix
 		    $newDBName = $newDBName . trim($_POST['dbname']);
 			$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
@@ -500,7 +501,7 @@
 			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
 			echo "<p>You may wish to bookmark the database home page (search page): <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.</p>";
-			echo "<p><strong>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\">administration page</a></strong>, to configure your new database</p>";
+			echo "<p><a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\" style='font-size:1.2em;font-weight:bold'>Go to Administration page</a>, to configure your new database</p>";
 
 			// TODO: automatically redirect to the new database, maybe, in a new window
 

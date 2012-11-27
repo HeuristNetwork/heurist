@@ -58,16 +58,17 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 				/**
 				* Result handler for search on server
 				*/
-				function __updateRecordsList(context) {
-					_records = context;
-					_initTable(_records);
+				function __updateRecordsList(context)
+				{
+					_records = Hul.isnull(context)?[]:context;
+					_initTable( _records );
 				};
 
 				var sfilter = "";
 
 				var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 				var params = "method=searchreports&db=" + _db + sfilter;
-				top.HEURIST.util.getJsonData(baseurl, __updateRecordsList, params);
+				Hul.getJsonData(baseurl, __updateRecordsList, params);
 	};
 
 
@@ -326,20 +327,18 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context))
+								{
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("Report schedule #"+recID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
-								} /*else {
-									// if error is property of context it will be shown by getJsonData
-									//alert("Deletion failed. "+context.error);
-								}*/
+								}
 							}
 
 							var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deletereport&db=" + _db + "&recID=" + recID;
-							top.HEURIST.util.getJsonData(baseurl, callback, params);
+							Hul.getJsonData(baseurl, callback, params);
 
 						}else{
 							//alert("Impossible to delete");

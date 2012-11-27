@@ -63,24 +63,26 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 		var arr = [],
 			group, grp_ID;
 
-		_workgroups = context.workgroups;
+		if(!Hul.isnull(context)){
 
-		for (grp_ID in _workgroups) {
-			if(!Hul.isnull(grp_ID) && grp_ID !== "length")
-			{
-				group = _workgroups[grp_ID];
+			_workgroups = context.workgroups;
 
-				arr.push([(_arr_selection.indexOf(grp_ID)>0),
-						group.name, //name
-						group.description, //descr
-						group.url, //url
-						null, //type
-						group.memberCount, //membercount
-						grp_ID
-						]);
+			for (grp_ID in _workgroups) {
+				if(!Hul.isnull(grp_ID) && grp_ID !== "length")
+				{
+					group = _workgroups[grp_ID];
+
+					arr.push([(_arr_selection.indexOf(grp_ID)>0),
+							group.name, //name
+							group.description, //descr
+							group.url, //url
+							null, //type
+							group.memberCount, //membercount
+							grp_ID
+							]);
+				}
 			}
 		}
-
 		_initTable(arr);
 	};
 
@@ -370,14 +372,12 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context))
+								{
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("Group #"+recID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
-								} /*else {
-									// if error is property of context it will be shown by getJsonData
-									//alert("Deletion failed. "+context.error);
-								}*/
+								}
 							}
 
 							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";

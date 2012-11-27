@@ -1977,14 +1977,14 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 	var isVocabulary = !isNaN(Number(sAllTerms));
 
 	var urlSpan = this.document.createElement("span");
-		urlSpan.style.paddingLeft = "1em";
+		//urlSpan.style.paddingLeft = "1em";
 		urlSpan.style.color = "blue";
 //		urlSpan.style['float'] = "right";
 		urlSpan.style.cursor = "pointer";
 	var editImg = urlSpan.appendChild(this.document.createElement("img"));
 		editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
 	urlSpan.appendChild(editImg);
-	urlSpan.appendChild(this.document.createTextNode(isVocabulary?"add":"list"));
+	urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
 	//var detailType = this.detailType;
 	//var recFieldRequirements = this.recFieldRequirements;

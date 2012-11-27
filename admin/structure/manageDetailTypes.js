@@ -491,16 +491,13 @@ function DetailTypeManager() {
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context)){
 									dt.deleteRow(oRecord.getId(), -1);
 									_deleted.push( dty_ID );
 									// alert is a pain alert("Field type #"+dty_ID+" was deleted");
 									top.HEURIST.detailTypes = context.detailTypes;
 									_cloneHEU = null;
-								} /*else {
-									// if error is property of context it will be shown by getJsonData
-									//alert("Deletion failed. "+context.error);
-								}*/
+								}
 							}
 
 							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -812,9 +809,9 @@ function DetailTypeManager() {
 	// after saving a bunch of field types
 	//
 	function _updateResult(context) {
-		if(!context) {
-			Hul.showError(-1);
-		}else{
+
+		if(!Hul.isnull(context)){
+
 			var error = false,
 				report = "",
 				ind;
@@ -1040,34 +1037,38 @@ function DetailTypeManager() {
 
 		//make this tab active
 		function _updateOnSaveGroup(context){
-			//for new - add new tab
-			if(!Hul.isnull(context['0'].error)){
-				alert(context['0'].error);
-			}else{
-				var ind;
-				top.HEURIST.detailTypes = context.detailTypes;
-				_cloneHEU = null;
 
-				if(Number(grpID)<0){
-
-					_refreshAllTables();
-
-					grpID = context['0'].result;
-					ind = _groups.length;
-					_addNewTab(ind, grpID, name, description);
-					dragDropEnable();
+			if(!Hul.isnull(context))
+			{
+				//for new - add new tab
+				if(!Hul.isnull(context['0'].error)){
+					Hul.showError(context['0']);
 				}else{
-					//update label
-					ind = _getIndexByGroupId(grpID);
-					if(ind>=0){
-						var tab = tabView.getTab(ind);
-						var el = tab._getLabelEl();
-						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
-						_groups[ind].text = name;
+					var ind;
+					top.HEURIST.detailTypes = context.detailTypes;
+					_cloneHEU = null;
+
+					if(Number(grpID)<0){
+
+						_refreshAllTables();
+
+						grpID = context['0'].result;
+						ind = _groups.length;
+						_addNewTab(ind, grpID, name, description);
+						dragDropEnable();
+					}else{
+						//update label
+						ind = _getIndexByGroupId(grpID);
+						if(ind>=0){
+							var tab = tabView.getTab(ind);
+							var el = tab._getLabelEl();
+							el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
+							_groups[ind].text = name;
+						}
+						_refreshAllTables();
 					}
-					_refreshAllTables();
+					tabView.set("activeIndex", ind);
 				}
-				tabView.set("activeIndex", ind);
 			}
 		}
 
@@ -1159,7 +1160,7 @@ function DetailTypeManager() {
 				var ind;
 				//
 				function _updateAfterDeleteGroup(context) {
-					if(Hul.isnull(context.error)){
+					if(!Hul.isnull(context)){
 
 						var id = _groups[ind].value;
 						if (myDTDrags[id]) {

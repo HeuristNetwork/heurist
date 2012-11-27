@@ -620,9 +620,9 @@
 
 	var updateResult = function(context) {
 		top.HEURIST.rectypes.saveStatus = context;
-		if(!context) {
-			alert("An error occurred trying to contact the database");
-		}else{
+
+		if(!Hul.isnull(context)) {
+
 			var error = false;
 			var report = "";
 

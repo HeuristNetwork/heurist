@@ -128,9 +128,8 @@ function editTags(){
 
 					var _updateTags = function(context){
 
-							if(!context) {
-								alert("An error occurred trying to contact the database");
-							} else {
+							if(!top.HEURIST.util.isnull(context)) {
+
 								top.HEURIST.user.workgroupTags = context['workgroupTags'];
 								top.HEURIST.user.workgroupTagOrder = context['workgroupTagOrder'];
 

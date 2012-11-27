@@ -68,17 +68,20 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	*/
 	var _updateUserList = function (context) {
 
+
 		var arr = [],
 			user, ind;
 
-
-		for (ind in context.userslist) {
-		if (!Hul.isnull(ind) )
+		if(!Hul.isnull(context))
 		{
-			user = context.userslist[ind];
-			user[0] = false; //_arr_selection.indexOf(ind)>=0;
-			arr.push(user);
-		}
+			for (ind in context.userslist) {
+				if (!Hul.isnull(ind) )
+				{
+					user = context.userslist[ind];
+					user[0] = false; //_arr_selection.indexOf(ind)>=0;
+					arr.push(user);
+				}
+			}
 		}
 
 		_initTable(arr);
@@ -517,15 +520,11 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context) || !context){
-									alert("Unknown error on server side");
-								}else if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context))
+								{
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("User #"+recID+" was deleted");
-								} /*else {
-									// if error is property of context it will be shown by getJsonData
-									//alert("Deletion failed. "+context.error);
-								}*/
+								}
 							}
 
 							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
@@ -580,7 +579,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 					var data = record.getData();
 
 					function __onUpdateRole(context){
-						if(_updateRole(context)){
+						if(!Hul.isnull(context)) {
 
 							infoMessageBox.setBody("Role has been changed");
 							infoMessageBox.show();
@@ -611,36 +610,11 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 	}//end of initialization =====================
 
-
-	/**
-	*
-	*/
-	function _updateRole(context) {
-		if(Hul.isnull(context) || !context) {
-			Hul.showError("Server side error");
-		}else if(context.error){
-				Hul.showError("An error occurred trying to change role: "+context.error);
-		}else if(context.errors && context.errors.length>0){
-			var ind;
-			var rep = "";
-			for (ind in context.errors){
-				if (!Hul.isnull(ind) ){
-					rep = rep + context.errors[ind]+" ";
-				}
-			}
-
-			alert(rep);
-		}else{
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	*
 	*/
 	function _updateRoles(context) {
-		if(_updateRole(context)){
+		if(!Hul.isnull(context)){
 			_updateFilter();
 		}
 	}
@@ -753,12 +727,14 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 	*
 	*/
 	var _updateGroupList = function (context) {
+		if(!Hul.isnull(context))
+		{
+			_workgroups = context.workgroups;
+			//_workgroupIDs = context.workgroupIDs;
 
-		_workgroups = context.workgroups;
-		//_workgroupIDs = context.workgroupIDs;
-
-		_handlerGroupSelector();
-		_initTable([]);
+			_handlerGroupSelector();
+			_initTable([]);
+		}
 	};
 
 	/**
@@ -981,7 +957,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 	/**
 	* show either selection or listing controls
-	*/2
+	*/
 	function _setMode(className, val)
 	{
 		$("."+className).toggleClass(val?"activated":"deactivated", true);

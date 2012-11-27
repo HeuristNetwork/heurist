@@ -569,9 +569,7 @@ function EditTerms() {
 
 			var _updateResult = function(context){
 
-					if(!context) {
-							Hul.showError(-1);
-					} else {
+					if(!Hul.isnull(context)){
 
 						var error = false,
 							report = "",
@@ -678,10 +676,8 @@ function EditTerms() {
 
 					function __updateAfterDelete(context) {
 
-							if(!context){
-								alert("Unknown server side error");
-							}
-							else if(Hul.isnull(context.error)){
+							if(!Hul.isnull(context)){
+
 								top.HEURIST.terms = context.terms;
 
 								_currTreeView.popNode(_currentNode);
@@ -856,7 +852,8 @@ function EditTerms() {
 	*  Add the list of imported terms
 	*/
 	function _import_complete(context){
-		if(context && !context.error) {
+		if(!Hul.isnull(context))
+		{
 			top.HEURIST.terms = context.terms;
 			var res = context.result,
 				ind,
@@ -1017,7 +1014,8 @@ function EditTerms() {
 			el_sel = Hul.createTermSelect(allTerms, disabledTerms, _currentDomain, null);
 			el_sel.id = "selector"+dty_ID;
 			el_sel.style.backgroundColor = "#cccccc";
-			el_sel.width = 150;
+			el_sel.width = 180;
+			el_sel.style.maxWidth = '180px';
 			el_sel.onchange =  _preventSel;
 			parentdiv.appendChild(el_sel);
 	}
@@ -1061,9 +1059,8 @@ function EditTerms() {
 				var str = YAHOO.lang.JSON.stringify(_oDetailType);
 
 				function _updateResult(context) {
-					if(!context) {
-						Hul.showError(-1);
-					}else{
+
+					if(!Hul.isnull(context)){
 
 						/* @todo move this to the separate function */
 						var error = false,

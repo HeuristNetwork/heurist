@@ -1013,9 +1013,8 @@ showEditWgTagsDialog: function(){
 
 			var _updateHAPI = function(context){
 
-					if(!context) {
-						alert("An error occurred trying to contact the database");
-					} else {
+					if(context)
+					{
 						HAPI_userData = context;
 						HWorkgroupTagManager.loadTags(HAPI_userData.workgroupTags || []); //refresh hapi object
 						$select = $(".select-wg-tags", this.$table);

@@ -98,28 +98,27 @@ function ReportScheduleEditor() {
 	*/
 	function _updateTemplatesList(context) {
 
+			var sel = document.getElementById('rps_Template'),
+				option,
+				keepSelIndex = sel.selectedIndex;
 
-		var sel = document.getElementById('rps_Template'),
-			option,
-			keepSelIndex = sel.selectedIndex;
+			//celear selection list
+			while (sel.length>0){
+					sel.remove(0);
+			}
 
-		//celear selection list
-		while (sel.length>0){
-				sel.remove(0);
-		}
+			if(!Hul.isnull(context) && context.length>0){
+				for (i in context){
+					if(i!==undefined){
+						Hul.addoption(sel, context[i].filename, context[i].name);
+					}
+				} // for
 
-		if(context && context.length>0){
-			for (i in context){
-				if(i!==undefined){
-					Hul.addoption(sel, context[i].filename, context[i].name);
-				}
-			} // for
+				sel.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
+			}
 
-			sel.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
-		}
-
-		//fills input with values from _entity array
-		_fromArrayToUI();
+			//fills input with values from _entity array
+			_fromArrayToUI();
 	}
 	/**
 	* loads list of templates
@@ -127,7 +126,7 @@ function ReportScheduleEditor() {
 	function _reload_templates(){
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
 				var callback = _updateTemplatesList;
-				top.HEURIST.util.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+				Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
 	}
 
 
@@ -217,9 +216,9 @@ function ReportScheduleEditor() {
 	* @param context - data from server
 	*/
 	function _updateResult(context) {
-		if(!context) {
-			Hul.showError(-1);
-		}else{
+
+		if(!Hul.isnull(context)){
+
 			var error = false,
 				report = "",
 				ind;
@@ -297,7 +296,7 @@ function ReportScheduleEditor() {
 			var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
 			var callback = _updateResult;
 			var params = "method=savereport&db=" + _db + "&data=" + encodeURIComponent(str);
-			top.HEURIST.util.getJsonData(baseurl, callback, params);
+			Hul.getJsonData(baseurl, callback, params);
 		} else {
 			window.close(null);
 		}

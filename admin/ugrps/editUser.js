@@ -271,9 +271,9 @@ function UserEditor() {
 	* @param context - data from server
 	*/
 	function _updateResult(context) {
-		if(!context) {
-			Hul.showError(-1);
-		}else{
+
+		if(!Hul.isnull(context)){
+
 			var error = false,
 				report = "",
 				ind;

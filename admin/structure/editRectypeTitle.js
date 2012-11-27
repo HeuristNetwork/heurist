@@ -52,6 +52,8 @@ function EditRectypeTitle() {
 
 	function _onGenerateVars(context){
 
+		if(!Hul.isnull(context))
+		{
 			if(context===false || Hul.isnull(context['vars'])){
 				alert('No variables generated');
 				return;
@@ -105,6 +107,7 @@ function EditRectypeTitle() {
 			} // for
 
 			sel.selectedIndex = 0;
+		}
 	}
 
 	//
@@ -386,7 +389,7 @@ function EditRectypeTitle() {
 						while(parent.indexOf('r.')==0){
 							parent = parent.substring(2);
 						}
-					
+
 						_text = _text + '['+parent + node.data.this_id+']';
 				}
 				return false;

@@ -1086,9 +1086,23 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 	getJsonData: function(url, callback, postData) {
 		top.HEURIST.util.sendRequest(url, function(xhr) {
+
 			var obj = top.HEURIST.util.evalJson(xhr.responseText);
-			if (obj  &&  obj.error) alert("utilsUI:getJsonData returned error: '" + obj.error + "'");
+			if(!obj) {
+				top.HEURIST.util.showError(-1);
+			}else if (obj.error) {
+				top.HEURIST.util.showError(obj.error);
+
+				obj = null;
+			}else if(obj.errors && obj.errors.length>0){
+				var rep = obj.errors.join(" ");
+				top.HEURIST.util.showError(rep);
+
+				obj = null;
+			}
+
 			if (callback) callback(obj);
+
 		}, postData);
 	},
 

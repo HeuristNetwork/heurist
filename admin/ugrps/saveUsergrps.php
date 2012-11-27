@@ -435,13 +435,13 @@
 			} else {
 				// on any other server you give them a pointer to the search page of that database
 				$email_text = $email_text."\n\nHeurist database: ".HEURIST_DBNAME."\n".
-				"Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME. " with the username: " . $ugr_Name;
+				"Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 			}
 
 
 			if($tmp_password!=null){
 				$email_text = $email_text." and password: ".$tmp_password.
-				" - To change your password go to My Profile -> My User Info in the top right menu";
+				"\n\nTo change your password go to My Profile -> My User Info in the top right menu";
 			}
 
 			$email_text = $email_text."\n\nWe recommend visiting the 'Take the Tour' section and also visiting the Help ".

@@ -223,8 +223,18 @@ if (@$_REQUEST['ulf_ID']){
 
 	getJsonData: function(url, callback, postData) {
 		HRST.util.sendRequest(url, function(xhr) {
+
 			var obj = HRST.util.evalJson(xhr.responseText);
-			if (obj  &&  obj.error) alert("utilsUI:getJsonData returned error: '" + obj.error + "'");
+			if(!obj) {
+				alert("Unknow error");
+			}else if (obj.error) {
+				alert(obj.error);
+				obj = null;
+			}else if(obj.errors && obj.errors.length>0){
+				var rep = obj.errors.join(" ");
+				alert(rep);
+				obj = null;
+			}
 			if (callback) callback(obj);
 		}, postData);
 	},

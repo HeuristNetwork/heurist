@@ -395,7 +395,7 @@ function EditRecStructure() {
 					'</div></div>'+
 
 					'<div style="text-align:right; margin:5	px 0">'+
-					'<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
+					'<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');" style="margin-right:30px;">'+
 					'<input id="btnSave_'+rst_ID+'" type="button" value="Save" onclick="doExpliciteCollapse(event);" style="margin:0 10px;"/>'+
 					'<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
 					'</div></div>';
@@ -515,9 +515,7 @@ function EditRecStructure() {
 				// result listener for delete operation
 				function __updateAfterDelete(context) {
 
-					if(!context){
-						alert("Unknown error on server in editRecStructure.js");
-					}else if(Hul.isnull(context.error)){
+					if(!Hul.isnull(context)){
 
 						_myDataTable.deleteRow(oRecord.getId(), -1);
 
@@ -538,7 +536,7 @@ function EditRecStructure() {
 
 						function _onCheckEntries(context)
 						{
-							if(Hul.isnull(context.error))
+							if(!Hul.isnull(context))
 							{
 								var dty_name = oRecord.getData('dty_Name');
 
@@ -1042,9 +1040,9 @@ function EditRecStructure() {
 
 
 			function _addNewSeparator(context) {
-				if(!context) {
-					Hul.showError(-1);
-				}else{
+
+				if(!Hul.isnull(context)){
+
 					var error = false,
 						report = "",
 						ind;
@@ -1284,11 +1282,9 @@ function EditRecStructure() {
 		if(!Hul.isnull(str)){
 			//DEBUG  alert(str);
 			var updateResult = function(context){
-				if(context){
+				if(!Hul.isnull(context)){
 					top.HEURIST.rectypes = context.rectypes;
 					top.HEURIST.detailTypes = context.detailTypes;
-				}else{
-					alert("Unknown error on server side");
 				}
 				_isServerOperationInProgress = false;
 			};
@@ -1504,6 +1500,7 @@ function EditRecStructure() {
 			Dom.setStyle(srcEl, "visibility", "hidden");
 			//proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
 			proxyEl.innerHTML = "";
+			proxyEl.style.cursor = "row-resize";
 
 			//var rst_ID = this.srcData.rst_ID
 			//_fromUItoArray(rst_ID); //before collapse save to UI
@@ -1996,8 +1993,8 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 520,
-			width: 640,
+			height: 680,
+			width: 700,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 

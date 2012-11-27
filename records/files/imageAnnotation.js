@@ -211,8 +211,7 @@ function ImageAnnotation(imageviewer, _recID) {
 		//load list of annotations
 		function _updateList(context){
 
-			if(!context) {
-				Hul.showError(-1);
+			if(Hul.isnull(context)){
 				return;
 			}
 
@@ -298,11 +297,9 @@ function ImageAnnotation(imageviewer, _recID) {
 
 			function _updateAnnList(context){
 
-				if(!context) {
-					Hul.showError(-1);
-				}else{
+				var ind, k = 0, isAllowed = false;;
 
-					var ind, k = 0, isAllowed = false;;
+				if(!Hul.isnull(context)){
 
 					for(ind in context)
 					{
@@ -440,7 +437,7 @@ function ImageAnnotation(imageviewer, _recID) {
 
         	function _afterDelete(context){
 
-        		if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['error'])){
+        		if(!top.HEURIST.util.isnull(context)){
 
 					div.parentNode.removeChild(div);
 					_markers_div.splice(ind,1);
@@ -451,8 +448,6 @@ function ImageAnnotation(imageviewer, _recID) {
 						_selAnnotations.disabled = true;
 						top.HEURIST.util.addoption(_selAnnotations, 0, 'add marker or rectangle...');
 					}
-				}else{
-					alert(context['error']);
 				}
 			}
 

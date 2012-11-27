@@ -349,9 +349,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context) || !context){
-									alert("Unknown error on server side");
-								}else if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context)){
 
 									if(cnt==1){
 										_deleteAtAll(true);
@@ -448,9 +446,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 
 							function _updateAfterSave(context) {
 
-								if(Hul.isnull(context) || !context){
-									alert("Unknown error on server side");
-								}else if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context)){
 
 									if(isFirst)
 									{

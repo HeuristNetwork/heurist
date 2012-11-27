@@ -166,9 +166,10 @@ function RectypeManager() {
 			label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
 			content:
 			('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
-			'<div style="float:right; display:inline-block; margin-bottom: 10px;"><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:&nbsp;&nbsp;</label>'+
-			'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
-			'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+			'<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:10px;">'+
+				'<label>Filter by name:&nbsp;&nbsp;</label>'+
+				'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+				'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
 			'</div>'+
 			'<div style="float:right; text-align:right">'+
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
@@ -179,7 +180,11 @@ function RectypeManager() {
 				'<input type="button" id="btnAddRecordType'+grpID+'" value="Define new record type / fields" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
-			'<div id="tabContainer'+grpID+'"></div></div>')
+			'<div id="tabContainer'+grpID+'"></div>'+
+				'<div style="float:right;padding-right:370px;">'+
+					'<input type="button" id="btnAddRecordType'+grpID+'2" value="Define new record type / fields" class="add"/>'+
+				'</div>'+
+			'</div>')
 
 		}), ind);
 
@@ -493,7 +498,7 @@ function RectypeManager() {
 
 							function _updateAfterDelete(context) {
 
-								if(Hul.isnull(context.error)){
+								if(!Hul.isnull(context)){
 									dt.deleteRow(oRecord.getId(), -1);
 									//  this alert is a pain alert("Record type #"+rectypeID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
@@ -757,9 +762,8 @@ function RectypeManager() {
 	// after saving a bunch of rec types
 	//
 	function _updateResult(context) {
-		if(!context) {
-			Hul.showError(-1);
-		}else{
+
+		if(!Hul.isnull(context)){
 			var error = false,
 				report = "",
 				ind;
@@ -790,7 +794,6 @@ function RectypeManager() {
 			top.HEURIST.rectypes = context.rectypes;
 			_cloneHEU = null;
 		}
-
 	}
 
 	/**
@@ -1120,34 +1123,38 @@ function RectypeManager() {
 		//make this tab active
 		function _updateOnSaveGroup(context){
 			//for new - add new tab
-			if(!Hul.isnull(context['0'].error)){
-				alert(context['0'].error);
-			}else{
-				var ind;
-				top.HEURIST.rectypes = context.rectypes;
-				_cloneHEU = null;
-
-				if(grpID<0){
-
-					_refreshAllTables();
-
-					grpID = context['0'].result;
-					ind = _groups.length;
-					_addNewTab(ind, grpID, name, description);
-					dragDropEnable();
+			if(!Hul.isnull(context))
+			{
+				//for new - add new tab
+				if(!Hul.isnull(context['0'].error)){
+					Hul.showError(context['0']);
 				}else{
-					//update label
-					for (ind in _groups){
-					if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
-						var tab = tabView.getTab(ind);
-						var el = tab._getLabelEl();
-						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
-						_groups[ind].text = name;
-						break;
-					}}
-					_refreshAllTables();
+					var ind;
+					top.HEURIST.rectypes = context.rectypes;
+					_cloneHEU = null;
+
+					if(grpID<0){
+
+						_refreshAllTables();
+
+						grpID = context['0'].result;
+						ind = _groups.length;
+						_addNewTab(ind, grpID, name, description);
+						dragDropEnable();
+					}else{
+						//update label
+						for (ind in _groups){
+						if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
+							var tab = tabView.getTab(ind);
+							var el = tab._getLabelEl();
+							el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
+							_groups[ind].text = name;
+							break;
+						}}
+						_refreshAllTables();
+					}
+					tabView.set("activeIndex", ind);
 				}
-				tabView.set("activeIndex", ind);
 			}
 		}
 
@@ -1237,7 +1244,7 @@ function RectypeManager() {
 				var ind;
 				//
 				function _updateAfterDeleteGroup(context) {
-					if(Hul.isnull(context.error)){
+					if(!Hul.isnull(context)){
 						//remove tab from tab view and select 0 index
 						var id = _groups[ind].value;
 						if (myDTDrags[id]) {
