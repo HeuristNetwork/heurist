@@ -501,7 +501,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 	</head>
-	<body style="font-size: 10px;overflow:auto;">
+	<body class="popup" style="font-size: 10px;overflow:auto;">
 
 		<?php
 			try{

@@ -30,7 +30,15 @@ if (!top.Relationship) {
 
 		this.tr = this.document.createElement("div");
 		this.tr.className = "relation";
-
+		
+		this.relSpan = this.tr.appendChild(this.document.createElement("div"))
+		this.relSpan.className = "relation-reltype-and-rec";
+		this.relSpan.appendChild(this.document.createTextNode(
+				relationshipRec.relTerm+" "+
+				(relationshipRec.relatedRec? relationshipRec.relatedRec.title : relationshipRec.title)));
+				
+				
+/*
 		this.relSpan = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.relSpan.parentNode.className = "rel";
 		this.relSpan.appendChild(this.document.createTextNode(relationshipRec.relTerm));
@@ -38,13 +46,11 @@ if (!top.Relationship) {
 		this.titleSpan = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.titleSpan.parentNode.className = "title";
 		this.titleSpan.appendChild(this.document.createTextNode((relationshipRec.relatedRec? relationshipRec.relatedRec.title : relationshipRec.title)));
-
-	//	this.ellipsesTd1 = this.tr.appendChild(this.document.createElement("td"));
-	//	this.ellipsesTd1.className = "ellipses";
-	//	this.ellipsesTd1.innerHTML = "&nbsp;...";
+*/
 
 		var deleteTd = this.tr.appendChild(this.document.createElement("div"));
 		deleteTd.className = "delete";
+		deleteTd.style.paddingLeft = '4px';
 		deleteTd.title = "Delete this relationship";
 		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
 		deleteTd.onclick = function() {
@@ -105,6 +111,8 @@ if (!top.Relationship) {
 				var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
 				var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:'');
 				if (newDetails) {
+					
+					thisRef.relSpan.innerHTML = "";
 					if (dtRelType && newDetails[dtRelType] && newDetails[dtRelType][0]) {
 						thisRef.relSpan.innerHTML = (newDetails[dtRelType][0]['enumValue'] ?
 														newDetails[dtRelType][0]['enumValue'] :
@@ -112,11 +120,12 @@ if (!top.Relationship) {
 															newDetails[dtRelType][0]['value']: "" ));
 					}
 					if (dtLinkPtr && newDetails[dtLinkPtr] && newDetails[dtLinkPtr][0]) {
-						thisRef.titleSpan.innerHTML = (newDetails[dtLinkPtr][0]['title'] ?
+						thisRef.relSpan.innerHTML += (newDetails[dtLinkPtr][0]['title'] ?
 														newDetails[dtLinkPtr][0]['title'] :
 														(newDetails[dtLinkPtr][0]['value'] ?
 															newDetails[dtLinkPtr][0]['value']: "" ));
 					}
+					
 				}
 			}
 		});

@@ -142,7 +142,7 @@ function update_counts(divid, processed, added, total) {
 					print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 				}
 				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
-				"<img src='../../common/images/external_link_16x16.gif'>Set media folders</a><p>";
+				"Set media folders</a><p>";
 
 
 				if (!($mediaFolders=="" || count($dirs) == 0)) {

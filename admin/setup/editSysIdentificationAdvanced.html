@@ -36,11 +36,19 @@
 			}, 1000);
 		}
 
-		if([popup!]=='1'){
+		if([popup!]=='1' || [popup!]=='2'){
 			document.getElementById('headertitle').style.display = "none";
 			document.getElementById('btnBackToImport').style.visibility = "visible";
 		}
 
+	}
+	
+	function backToImport() {
+		if([popup!]=='1'){
+			window.location.href = '../../import/fieldhelper/synchroniseWithFieldHelper.php';
+		}else{
+			window.location.href = '../../import/email/emailProcessingSetup.php';
+		}
 	}
 </script>
 
@@ -128,7 +136,7 @@ If in doubt, leave as 'locktypetotype'</div>
 <input type="submit" value="save" />
 
 <input type="button" id="btnBackToImport" style="visibility: hidden;" value="Back to import"
-  onclick="{setTimeout(function () {window.location.href = '../../import/fieldhelper/synchroniseWithFieldHelper.php';}, 0);}"
+  onclick="{setTimeout(backToImport, 0);}"
  />
 
 </form>

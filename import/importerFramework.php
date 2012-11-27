@@ -163,10 +163,9 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 
 <?php	} else { ?>
 <h2 style="display:inline">Import records</h2>
-<?php	} ?>
-    <div style="float:right"><a style="color: black; font-weight: normal;" href='<?=HEURIST_SITE_PATH?>import/interface/listRequiredElements.php' target=_new>tag definitions</a></div>
+<?php	} 
 
-<?php } else { ?>
+	  } else { ?>
    <div><h3>Synchronising Zotero records with Heurist</h3></div>
 <?php } ?>
   </div>
