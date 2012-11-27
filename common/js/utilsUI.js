@@ -1612,7 +1612,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 	showError: function(msg){
 		if(top.HEURIST.util.isempty(msg)){
-			msg = "An unknown error occurred. Please contact development team";
+			msg = "Incorrect responce from server. Please contact development team if it persists";
 		}else if (Number(msg)===-1){
 			msg = "An error occurred trying to contact the database";
 		}else if (msg.indexOf("error")<0){

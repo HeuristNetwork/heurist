@@ -211,8 +211,8 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				</div>
 				<!-- edit contols -->
 				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<?php if(array_key_exists('grpID', $_REQUEST)){?>
-						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
+					<?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
+						<input type="button" tabindex="13" id="btnBack1" value="Back to Groups" onClick="{backToGroup()};" />
 					<?php } ?>
 					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px;padding-left:2px">
 						<div id="pnlAdd1" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" /></div>
@@ -252,7 +252,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 				</div>
 				<!-- edit contols -->
 				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<?php if(array_key_exists('grpID', $_REQUEST)){?>
+					<?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
 						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
 					<?php } ?>
 					<div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">

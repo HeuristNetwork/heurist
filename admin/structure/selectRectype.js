@@ -96,6 +96,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 									if(datatype==="fieldsetmarker"){
 										var el = Dom.get('divFilterBySelection');
 										el.style.display = "none";
+										el = Dom.get('divFilterBySelectionLbl');
+										el.style.display = "none";
 										el = Dom.get('btnApply1');
 										el.style.display = "none";
 										el = Dom.get('btnApply2');
@@ -239,7 +241,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 			}},
 								{ key: "name", label: "<u>Name</u>", sortable:true },
 								{ key: "description", hidden:true, sortable:false},
-								{ key: "status", label: "<u>Status</u>", hidden:false, sortable:false },
+								{ key: "status", label: "<u>Status</u>", hidden:true, sortable:false },
 								{ key: "group",   hidden:true},
 								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="'+
@@ -395,6 +397,7 @@ oRecord.getData('description')+'"/>';}
 
 											//init listeners for filter controls
 							_initListeners();
+							_updateFilter();
 						}
 
 
@@ -478,6 +481,11 @@ oRecord.getData('description')+'"/>';}
 						var grpName = top.HEURIST.rectypes.groups[index].name;
 
 						Hul.addoption(filterByGroup, grpID, grpName);
+						
+						if(filterByGroup.length==2){
+							filterByGroup.selectedIndex = 1;
+							filterByGroup.value = grpID;
+						}						
 					}
 				} //for
 				filterByGroup.onchange = _updateFilter;
@@ -493,6 +501,7 @@ oRecord.getData('description')+'"/>';}
 							lblSelect1.innerHTML = "";
 							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilter();
+							return false;
 	}
 
 	/**

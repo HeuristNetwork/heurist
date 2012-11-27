@@ -187,7 +187,21 @@ function SelectDetailType() {
 										elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
 								{ key: "usage", label: "Usage", sortable:true, width:25, className:'center'},
 								{ key: "fieldset_rectypeid",   hidden:true},
-								{ key: "ptrtarget_rectypeids", label: "Pointer targets"}
+								{ key: "ptrtarget_rectypeids", label: "Pointer targets", 
+									formatter: function(elLiner, oRecord, oColumn, oData){
+										
+										var dttype = oRecord.getData('type');
+										var value;
+										if(dttype === "fieldsetmarker") {
+											value = oRecord.getData('fieldset_rectypeid');
+										} else {
+											value = oRecord.getData('ptrtarget_rectypeids');
+										}
+										textTip = _getRecPointers(dttype, value, false);
+										
+										elLiner.innerHTML = "<div class='truncate'>"+textTip+"</div>";
+						
+								}}
 								];
 
 								var myConfigs = {
@@ -261,7 +275,7 @@ function SelectDetailType() {
 
 								//4. init listeners for filter controls
 								_initListeners();
-
+								_updateFilter();
 
 		} //isnull(_myDataTable)
 		else{
@@ -324,7 +338,7 @@ function SelectDetailType() {
 								} else {
 									value = record.getData('ptrtarget_rectypeids');
 								}
-								textTip = _getRecPointers(dttype, value);
+								textTip = _getRecPointers(dttype, value, true);
 						}
 
 
@@ -355,24 +369,25 @@ function SelectDetailType() {
 	*
 	* @returns div for popup tooltip
 	*/
-	function _getRecPointers(type, value) {
+	function _getRecPointers(type, value, islist) {
 
 		var txt = "";
 		if(type === "relmarker" || type === "resource" || type === "fieldsetmarker")
 		{
-
+			var sep = "";
 			if(value) {
 					var arr = value.split(","),
 					ind, dtName;
 					for (ind=0; ind<arr.length; ind++) {
 						dtName = top.HEURIST.rectypes.names[arr[ind]];
-						txt = txt + "<li>"+dtName+"</li>";
+						txt = txt + (islist?"<li>":sep)+dtName+(islist?"</li>":"");
+						sep = ",";
 					} //for
 			}else{
 				txt = "";
 			}
 
-			if (txt.length > 0){
+			if (islist && (txt.length > 0)){
 				txt = "<p><ul>"+txt+"</ul></p>";
 			}
 		}
@@ -406,7 +421,7 @@ function SelectDetailType() {
 										}
 									}
 
-									lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> detail type"+((_arr_selection.length>1)?"s":"");
+									lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length>1)?"s":"");
 									lblSelect2.innerHTML = lblSelect1.innerHTML;
 	}
 
@@ -425,19 +440,12 @@ function SelectDetailType() {
 
 						dtg_ID = top.HEURIST.detailTypes.groups[index].id;
 						var grpName = top.HEURIST.detailTypes.groups[index].name;
-
-								var option = document.createElement("option");
-								option.text = grpName;
-								option.value = dtg_ID;
-								try
-								{
-									// for IE earlier than version 8
-									filterByGroup.add(option, filterByGroup.options[null]);
-								}
-								catch (e)
-								{
-									filterByGroup.add(option,null);
-								}
+						
+						Hul.addoption(filterByGroup, dtg_ID, grpName);
+						if(filterByGroup.length==2){
+							filterByGroup.selectedIndex = 1;
+							filterByGroup.value = dtg_ID;
+						}
 					}
 				} //for
 
@@ -453,6 +461,7 @@ function SelectDetailType() {
 							lblSelect1.innerHTML = "";
 							lblSelect2.innerHTML = "";
 							_updateFilter();
+							return false;
 	}
 
 	function _resetFilters(){

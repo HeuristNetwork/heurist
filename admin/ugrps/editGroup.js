@@ -128,10 +128,10 @@ function GroupEditor() {
 
 		if (_recID<0){
 			Dom.get("ugr_ID").innerHTML = 'to be generated';
-			document.title = "Create New Group";
+			document.title = "Create New Workgroup";
 		}else{
 			Dom.get("ugr_ID").innerHTML =  _recID;
-			document.title = "Group #: " + _recID+" '"+_entity[2]+"'";
+			document.title = "Workgroup #: " + _recID+" '"+_entity[2]+"'";
 
 			//var iusage = top.HEURIST.workgroups[_recID].memberCount;
 
@@ -300,9 +300,9 @@ function GroupEditor() {
 
 		var el = e.target;
 		if(!el.checked) {
-			var changeToReserved = confirm("If you change group to disabled," +
-											" you will no longer be able to change any "+
-											"fields of this group after you save it.\n\nAre you sure?");
+			var changeToReserved = confirm(
+"If you change group to disabled,\nyou will no longer be able to "+
+"change the fields in this workgroup\nuntil you re-enable the workgroup");
 			if(changeToReserved) {
 					_toggleAll(true, true);
 			} else {

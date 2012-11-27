@@ -108,32 +108,33 @@
 		<label class="dtyLabel required" for="ugr_Name">Standard name:</label>
 		<input id="ugr_Name" style="width:200;" maxlength="65" />
 		<div class="help prompt help1">
-			<label>The name the group should have</label>
+			<label>The display name for the group - keep it short (<20 characters)</label>
 		</div>
 	</div>
 	<div class="dtyField">
 		<label class="dtyLabel" for="ugr_LongName">Long name:</label>
 		<input id="ugr_LongName" style="width:200;" maxlength="128" />
 		<div class="help prompt help1">
-			<label>The name the group may have</label>
+			<label>An extended name for the group</label>
 		</div>
 	</div>
 	<div class="dtyField">
 		<label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description:</label>
 		<textarea cols="200" id="ugr_Description" rows="3" style="width:420;"></textarea>
 		<div class="help prompt help1">
-			<label>An description, describing the group</label>
+			<label>A description of the group</label>
 		</div>
 	</div>
 	<div class="dtyField">
 		<label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">URLs:</label>
 		<textarea cols="200" id="ugr_URLs" rows="3" style="width:420;"></textarea>
 		<div class="help prompt help1">
-			<label>References to webresources of this group</label>
+			<label>URLs for web sites that relate to teh group eg. owners’ web sites, separate with commas
+</label>
 		</div>
 	</div>
 
-	<div class="dtyField">
+	<div class="dtyField" style="display: none;">
 		<label class="dtyLabel" for="ugr_Type">Group type:</label>
 		<select class="dtyValue" id="ugr_Type" disabled="disabled">
 			<option selected="selected">workgroup</option>
@@ -147,7 +148,7 @@
 		<label class="dtyLabel" for="ugr_Enabled">Enabled:</label>
 		<input id="ugr_Enabled" type="checkbox"/>
 		<div class="help prompt help1">
-			<label>Whether this group is enabled</label>
+			<label>Uncheck this box to disable the group - disabled groups are eliminated from menus etc</label>
 		</div>
 	</div>
 

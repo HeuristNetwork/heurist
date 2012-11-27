@@ -65,11 +65,6 @@
 .yui-skin-sam .yui-dt-list td {
 	border-right:none; /* disable inner column border in list mode */
 }
-.labeldiv {
-	display: inline-block;
-	width: 60px;
-	text-align: right;
-}
 .yui-dt table {
 	width: 100%;
 }
@@ -79,6 +74,12 @@
 .input-row div.input-header-cell {width:100px}
 			#filtertoolbar .input-row div.input-header-cell {min-width:100px}
 			#filtertoolbar .input-row label {min-width:100px; width:100px}
+.truncate {
+	width: 100px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}			
 </style>
 </head>
 
@@ -109,13 +110,19 @@
         </div>
     </div>
 	<div class="input-row">
-		<div class="input-header-cell">
+		<div style="display:inline-block;" class="input-header-cell">
 			Show
 		</div>
-		<div class="input-cell">
+		<div style="display:inline-block;">
 			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
 			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
+			<a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
         </div>
+        
+	  <div  style="float:right;text-align:right;">
+	    <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New" onClick="{window.selectDetailType.onDefineNewType();}" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new field type." />
+	  </div>
+        
 	</div>
 </div>
 
@@ -123,14 +130,9 @@
 <div id="tb_top" style="height:30">
   <div style="display:inline-block;"> </div>
   <div style="float:right; text-align:right;padding-top:5px">
-    <label id="lblDefinenew1"></label>
-    <input type="button" style="margin:0 5px" value="Define New" onClick="{window.selectDetailType.onDefineNewType();}" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selection) before creating a new field type." />
-  </div>
-  <div style="float:right; text-align:right;padding-top:5px">
     <label id="lblSelect1"></label>
-    <!--<input type="button" id="btnClearSelection" value="clear selection" title="clear all"/>
-    <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
-    <input type="button" tabindex="11" value="Insert selection" onClick="onApply()" />
+    <!--  <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+    <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
   </div>
 
 </div>
@@ -157,7 +159,7 @@
   <div style="float:right; text-align:right;padding-top:5px">
     <label id="lblSelect2"></label>
     <!--<input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
-    <input type="button" tabindex="11" value="Insert selection" onClick="selectDetailType.apply();" />
+    <input type="button" tabindex="11" value="Insert selected" onClick="selectDetailType.apply();" />
   </div>
 </div>
 </body>

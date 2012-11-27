@@ -181,7 +181,7 @@ function RectypeManager() {
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div>'+
-				'<div style="float:right;padding-right:370px;">'+
+				'<div style="position:absolute;bottom:8px;right:375px;">'+
 					'<input type="button" id="btnAddRecordType'+grpID+'2" value="Define new record type / fields" class="add"/>'+
 				'</div>'+
 			'</div>')

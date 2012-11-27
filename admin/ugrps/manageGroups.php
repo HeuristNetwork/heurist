@@ -32,7 +32,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Manage Groups</title>
+		<title>Manage Workgroups</title>
 
 		<link rel=stylesheet href="../../common/css/global.css">
 
@@ -73,7 +73,7 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 	<body width="650" height="450" class="popup yui-skin-sam" style="overflow:auto;">
     <div>
 <?php if (!$isPopup) { ?>
-    	<div id="titleBanner" class="banner"><h2>Manage Groups</h2></div>
+    	<div id="titleBanner" class="banner"><h2>Manage Workgroups</h2></div>
 <?php } ?>
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>

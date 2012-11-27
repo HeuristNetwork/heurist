@@ -51,12 +51,25 @@
 			.row:hover {
 				background-color: #CCCCCC;
 			}
+			
+			table.tbcount{
+				border-width: 0 0 1px 1px;
+				border-spacing: 0;
+				border-collapse: collapse;
+				border-style: solid;
+			}			
+			.tbcount td, .tbcount th{
+				margin: 0;
+				padding: 4px;
+				border-width: 1px 1px 0 0;
+				border-style: solid;
+			}			
 		</style>
 	</head>
 	<body class="popup">
-		<table border="1" cellpadding="4" cellspacing="2" width="100%">
+		<table class="tbcount" cellpadding="4" cellspacing="1" width="100%">
 		 	<tr>
-				<th>ID</th><th>&nbsp;</th><th>Record type name</th><th>Records</th>
+				<th>ID</th><th>&nbsp;</th><th align='left' style="padding-left: 10px;">Record type</th><th>Count</th>
 			</tr>
 <?php
 	/*****DEBUG****///print("QUERY:".$query);
@@ -71,7 +84,7 @@
 
 		$img = "<img src='../common/images/16x16.gif' title='$rectypeTitle' ".$rectypeImg." class='rft' />";
 
-		echo "<tr class='row' onclick='{onrowclick($rt_ID)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td align='right'>".$row[1]."</td></tr>";
+		echo "<tr class='row' onclick='{onrowclick($rt_ID)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td align='center'>".$row[1]."</td></tr>";
 
 	}//end while
 ?>
