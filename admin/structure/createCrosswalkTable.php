@@ -83,7 +83,7 @@ var replaceRecTypeName = "";
 		array_push($rectypeGroups, array('id'=>$group["rtg_ID"], 'name' => $group["rtg_Name"]));
 	}
 
-	$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_Name");
+	$rectypes = mysql_query("select * from ".$tempDBName.".defRecTypes order by rty_RecTypeGroupID, rty_Name");
 	$approxMatches = array();
 	$tableRows = array();
 	// For every recordtype in the temp DB
@@ -225,11 +225,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 					var dup = oRecord.getData("matches");
 					if(dup<0){
-						elLiner.innerHTML = 'identical to '+Math.abs(dup)+' types';
+						elLiner.innerHTML = 'Same origin (x '+Math.abs(dup)+')';
 					}else if (isNaN(Number(dup))){
-						elLiner.innerHTML = 'identical: '+dup;
+						elLiner.innerHTML = dup+' has same origin';
 					}else if (dup>0){
-						elLiner.innerHTML = 'same name for: '+dup+' types';
+						elLiner.innerHTML = 'Duplicate name (x '+dup+')';
 					}else{
 						elLiner.innerHTML = '';
 					}
@@ -315,7 +315,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				rowsPerPage:50,
 				containers:['topPagination','bottomPagination']
 			}),
-			sortedBy: { key:'rectype' }
+			sortedBy: { key:'rtyRecTypeGroupID'}
 			}
 		);
 
@@ -487,6 +487,12 @@ function _hideToolTip(){
 		});
 	}
 }
+function directImportWarning(event){
+	if(!event.target.checked){
+		alert("Unchecking this box allows record types with constrained pointer fields to be imported even if the target record type is not in the database. This means that incomplete definitions may be imported");
+	}
+}
+
 </script>
 <link rel=stylesheet href="../../common/css/global.css">
 <link rel=stylesheet href="../../common/css/admin.css">
@@ -505,8 +511,13 @@ function _hideToolTip(){
 -->
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div>
-		<label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select>&nbsp;&nbsp;
-		<label for="inputFilterByExist">Show identical record types:&nbsp;</label><input id="inputFilterByExist" type="checkbox"/>
+		<div style="display:inline-block; vertical-align:top;padding-right:20px;"><label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select></div>
+		<div style="display:inline-block;">
+			<input id="inputFilterByExist" type="checkbox"/><label for="inputFilterByExist">&nbsp;&nbsp;Show record types with same original source</label><br />
+			<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."
+				onchange="directImportWarning(event)" checked><label for="noRecursion">&nbsp;&nbsp;Direct Record Types Import Only (without all related types - constrained pointers)</label><br />
+			<input type="checkbox" id="strict" title="Check this for strict import of types!" checked><label for="strict">&nbsp;&nbsp;Strict Import - only import if structure is entirely correct</label>
+		</div>
 	</div>
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
@@ -521,8 +532,7 @@ definitions in the selected database which are not already in the current databa
 <br>&nbsp;<br>
 <button id="finish2" onClick="dropTempDB(true)" class="button">Back to databases</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
-<input type="checkbox" id="strict" title="Check this for strict import of types!"><label for="strict">   Strict Import</label><br>
-<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."><label for="noRecursion">   Direct Record Type Import Only</label>
+
 <div ><p>Logs give a more detailed history of the actions taken to import structure. Click the links below to see the short version and long version respectively.</p></div>
 <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
 <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
