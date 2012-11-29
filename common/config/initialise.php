@@ -31,7 +31,14 @@
 	*/
 
 	//set up system path defines
-
+	/*
+	*NOTE: Strict adherence is required, DO NOT CHANGE NAMING or things WILL BREAK
+	* filesystems treat files and directories in the same name space and list.
+	* PHP file apis treat a directory with or without the trailing / the same
+	* to avoid problems we will always add the trailing / to the end of all defined dir or path
+	* All root are root directories and will also have a trailing / NOTE: HEURIST_DOCUMENT_ROOT to be migrated.
+	* All URL are to have full protocol
+	*/
 	define('HEURIST_VERSION',"3.1.0.150812");// need to change this in common/js/utilLoad.js
 
 	define('HEURIST_MIN_DBVERSION',"1.1.0");
@@ -81,7 +88,7 @@
 	define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix']? $_REQUEST['prefix'] : $dbPrefix)); //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
 	define('HEURIST_SYSTEM_DB', $dbPrefix."HeuristSystem");	// database which contains Heurist System level data - deprecated
 	define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/");	// Heurist Installation which contains reference structure definitions (registered DB # 3)
-	define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3-ao/");	//@todo: CHANGE TP h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
+	define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3-dev/");	//@todo: CHANGE TP h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 	define('HEURIST_SYS_GROUP_ID', 1);	// ID of Heurist System User Group which has special privileges - deprecated, although more generally group 1 on every database is the database owners group
 	/*****DEBUG****///error_log("in initialise dbHost = $dbHost");
 	//test db connect valid db
@@ -98,13 +105,16 @@
 		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
 	}
 
-	// upload path eg. /var/www/htdoCs/HEURIST_FILESTORE
+	// upload path eg. /var/www/htdocs/HEURIST_FILESTORE
 	if ($defaultRootFileUploadPath) {
-		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
-	} else {
-		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
+		testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
 	}
-
+	if (!defined('HEURIST_UPLOAD_ROOT')){
+		testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
+	}
+	if (!defined('HEURIST_UPLOAD_ROOT')){
+		error_log('No upload root defined that is a writable directory');
+	}
 	/*****DEBUG****/// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 
 	if (@$_REQUEST["db"]) {//if uri has DB then use it
@@ -183,27 +193,33 @@
 	$upload = @$sysValues['sys_UploadDirectory'];
 
 	if ($upload) {
-		if (preg_match("/\/$/",$upload)) {
-			$upload = preg_replace("/\/$/","",$upload);
+		if ($upload != "/" && !preg_match("/[^\/]\/$/",$upload)) {//check for trailing /
+			$upload .= "/";// append trailing /
 		}
-
-		define('HEURIST_UPLOAD_DIR', $upload); // upload must be a full path
-	} else {
-		define('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName.'/');
+		testDirWriteableAndDefine('HEURIST_UPLOAD_DIR', $upload); // upload must be a full path
+	}
+	if (!defined('HEURIST_UPLOAD_DIR')) {
+		testDirWriteableAndDefine('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName.'/');
+	}
+	if (!defined('HEURIST_UPLOAD_DIR')){
+		error_log('No upload directory defined that is a writable directory');
 	}
 
 	// icon path - note code now assumes that this is within the filestore for the database
 	define('HEURIST_ICON_DIRNAME',"rectype-icons/");
-	define('HEURIST_ICON_ROOT',HEURIST_UPLOAD_DIR); // eg /var/www/htdocs/HEURIST_FILESTORE
+	// not used removed 28/11/12 define('HEURIST_ICON_ROOT',HEURIST_UPLOAD_DIR); // eg /var/www/htdocs/HEURIST_FILESTORE
 	// to 14/11/11: HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/ so /var/www/htdocs/h3/common/images
-	define('HEURIST_ICON_DIR', HEURIST_ICON_ROOT.HEURIST_ICON_DIRNAME);
-
-	if (@$siteRelativeIconUploadBasePath) {
-		define('HEURIST_ICON_URL_BASE', $siteRelativeIconUploadBasePath);
-	} else {
-		define('HEURIST_ICON_URL_BASE', "/HEURIST_FILESTORE/".$dbName."/".HEURIST_ICON_DIRNAME); // uploaded-heurist-files to 14 Nov 2011
+	if (!testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_UPLOAD_DIR.HEURIST_ICON_DIRNAME)){
+		error_log("icon dir ".HEURIST_UPLOAD_DIR.HEURIST_ICON_DIRNAME." is not writable and might not exist");
 	}
 
+	if (@$siteRelativeIconUploadBasePath) {
+		testDirWriteableAndDefine('HEURIST_ICON_URL_BASE', $siteRelativeIconUploadBasePath,true);
+	}
+	if (!defined('HEURIST_ICON_URL_BASE')) {
+		testDirWriteableAndDefine('HEURIST_ICON_URL_BASE', "/HEURIST_FILESTORE/".$dbName."/".HEURIST_ICON_DIRNAME,true); // uploaded-heurist-files to 14 Nov 2011
+	}
+	// BUG : this code assumes that UPLOAD DIR is in the document root path. THIS IS NOT TRUE!!!!
 	define('HEURIST_THUMB_URL_BASE', 'http://'.HEURIST_HOST_NAME."/HEURIST_FILESTORE/".$dbName."/filethumbs/");
 	define('HEURIST_THUMB_DIR', HEURIST_UPLOAD_DIR."filethumbs/");
 
@@ -220,15 +236,18 @@
 
 	// smarty template path  - note code now assumes that this is within the fielstore for the database
 	define('HEURIST_SMARTY_TEMPLATES_DIRNAME',"smarty-templates/");
-	define('HEURIST_SMARTY_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
+//	define('HEURIST_SMARTY_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
 	// to 14/11/11: stored in codebase in viewers/smarty/templates
-	define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_SMARTY_TEMPLATES_ROOT.HEURIST_SMARTY_TEMPLATES_DIRNAME);
+	testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_UPLOAD_DIR.HEURIST_SMARTY_TEMPLATES_DIRNAME);
+	if (!defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+		error_log('No Smarty Template Directory defined that is a writable directory');
+	}
 
 	// xsl templates path  - note code now assumes that this is within the fielstore for the database
 	define('HEURIST_XSL_TEMPLATES_DIRNAME',"xsl-templates/");
-	define('HEURIST_XSL_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
+//	define('HEURIST_XSL_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
 	// to 14/11/11: stroed in codebase under viewers/publish/xsl
-	define('HEURIST_XSL_TEMPLATES_DIR', HEURIST_XSL_TEMPLATES_ROOT.HEURIST_XSL_TEMPLATES_DIRNAME);
+	define('HEURIST_XSL_TEMPLATES_DIR', HEURIST_UPLOAD_DIR.HEURIST_XSL_TEMPLATES_DIRNAME);
 
 	//define cocoon record explorer URL
 	if (file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."/viewers/relbrowser/".HEURIST_DBNAME)) {
@@ -282,8 +301,37 @@
 			HEURIST_DBNAME." has version # ". HEURIST_DBVERSION." - please update the schema of the database.");
 	}
 
-	define ('HEURIST_HML_PUBPATH', $sysValues['sys_hmlOutputDirectory']);
-	define ('HEURIST_HTML_PUBPATH', $sysValues['sys_htmlOutputDirectory']);
+	if ($sysValues['sys_hmlOutputDirectory']){
+		$path = $sysValues['sys_hmlOutputDirectory'];
+		if ($path != "/" && !preg_match("/[^\/]\/$/",$path)) {//check for trailing /
+			$path .= "/";// append trailing /
+		}
+		if (!testDirWriteableAndDefine('HEURIST_HML_PUBPATH', $path)){
+			error_log("HML directory $path is not a writable directory, trying default");
+		}
+	}
+	if (!defined('HEURIST_HML_PUBPATH')){
+		testDirWriteableAndDefine('HEURIST_HML_PUBPATH', HEURIST_UPLOAD_DIR."/hml-output/");
+	}
+	if (!defined('HEURIST_UPLOAD_DIR')){
+		error_log('No upload HML directory defined that is a writable directory');
+	}
+
+	if ($sysValues['sys_htmlOutputDirectory']){
+		$path = $sysValues['sys_htmlOutputDirectory'];
+		if ($path != "/" && !preg_match("/[^\/]\/$/",$path)) {//check for trailing /
+			$path .= "/";// append trailing /
+		}
+		if (!testDirWriteableAndDefine('HEURIST_HTML_PUBPATH', $path)){
+			error_log("HMTL directory $path is not a writable directory, trying default");
+		}
+	}
+	if (!defined('HEURIST_HTML_PUBPATH')){
+		testDirWriteableAndDefine('HEURIST_HTML_PUBPATH', HEURIST_UPLOAD_DIR."/hmtl-output/");
+	}
+	if (!defined('HEURIST_UPLOAD_DIR')){
+		error_log('No upload HTML directory defined that is a writable directory');
+	}
 
 
 	// set up email defines
@@ -486,6 +534,15 @@
 			}
 		}
 		return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID]: null);
+	}
+
+	function testDirWriteableAndDefine($defineName, $dir, $isDocrootRelative = false){
+		$info = new SplFileInfo(($isDocrootRelative? HEURIST_DOCUMENT_ROOT.$dir:$dir));
+		if ($info->isDir() && $info->isWritable()){
+			define ($defineName, $dir);
+			return true;
+		}
+		return false;
 	}
 
 	function returnErrorMsgPage($critical, $msg = null) {
