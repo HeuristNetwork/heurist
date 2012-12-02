@@ -2434,7 +2434,7 @@ top.HEURIST.search = {
 
 			function _requestCallBack(context) {
 
-				if(!Hul.isnull(context)){
+				if(!top.HEURIST.util.isnull(context)){
 
 					if(context.problem){
 						top.HEURIST.util.showError(context.problem);

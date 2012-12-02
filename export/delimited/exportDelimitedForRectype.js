@@ -261,15 +261,17 @@ function showRecordData(hRecords) {
 		var line = hRecords[i].getID()+ strDelim;
 		var k = g_exportMap.length;
 		for (var j = 0; j < k; ++j) {
+			var hDty = g_detailTypes[g_exportMap[j]];
+			var baseType = hDty.getVariety();
 			if (g_dtIDsCheckbox.checked) {
-				line += g_detailTypes[g_exportMap[j]].getID() + strDelim;
+				line += hDty.getID() + strDelim;
 			}
-			if ( HDetailManager.getDetailRepeatable(g_recType, g_detailTypes[g_exportMap[j]])){ //repeatable detail case
-				var details = hRecords[i].getDetails(g_detailTypes[g_exportMap[j]]);
+			if ( HDetailManager.getDetailRepeatable(g_recType, hDty)){ //repeatable detail case
+				var details = hRecords[i].getDetails(hDty);
 				if (!details[0]){  //null detail
 					line += strDelim;
 				}else {
-					if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.URLINCLUDE) {
+					if (baseType == HVariety.URLINCLUDE) {
 
 						var field = "";
 						dl = details.length;
@@ -279,17 +281,24 @@ function showRecordData(hRecords) {
 						line += csv_escape(field.slice(0,-1)) + strDelim;  // trim off last delimiter
 
 
-					}else if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //multi-valued reference detail
+					}else if (baseType == HVariety.REFERENCE) { //multi-valued reference detail
 						dl = details.length;
 						for(var d = 0; d < dl; ++d){ //Ver 2 will need to extract the value for the selected detail type
 							line += details[d].getID() +("|");
 						}
 						line = line.slice(0,-1) + strDelim;  // trim off last delimiter
-					}else if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.GEOGRAPHIC) { //geographic object
+					}else if (baseType == HVariety.GEOGRAPHIC) { //geographic object
 						var field = "";
 						dl = details.length;
 						for(var d = 0; d < dl; ++d){ //Ver 2 will need to extract the value for the selected detail type
 							field += details[d].getWKT() +("|");
+						}
+						line += csv_escape(field.slice(0,-1)) + strDelim;  // trim off last delimiter
+					}else if (baseType == HVariety.FILE) { //file
+						var field = "";
+						dl = details.length;
+						for(var d = 0; d < dl; ++d){ //Ver 2 will need to extract the value for the selected detail type
+							field += details[d].getURL() +("|");
 						}
 						line += csv_escape(field.slice(0,-1)) + strDelim;  // trim off last delimiter
 					}else{ // multi-valued non-reference case
@@ -297,23 +306,27 @@ function showRecordData(hRecords) {
 					}
 				}
 			}else{ // single valued cases
+				if (baseType == HVariety.URLINCLUDE) {
+						line += csv_escape(extractURL(hRecords[i].getDetail(hDty)))+strDelim;
 
-				if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.URLINCLUDE) {
-
-						line += csv_escape(extractURL(hRecords[i].getDetail(g_detailTypes[g_exportMap[j]])))+strDelim;
-
-				}else 	if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //reference case
-					var record = hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]);
+				}else if (baseType == HVariety.REFERENCE) { //reference case
+					var record = hRecords[i].getDetail(hDty);
 					if (record) {//reference  Ver 2 will need to extract the value for the selected detail type
 						line += record.getID()+strDelim;
 					}else{//null reference
 						line += strDelim;
 					}
-				}else if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.GEOGRAPHIC) { //geographic object
-					var geoDetail = hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]);
+				}else if (baseType == HVariety.GEOGRAPHIC) { //geographic object
+					var geoDetail = hRecords[i].getDetail(hDty);
 					line += (geoDetail ? csv_escape(geoDetail.getWKT()) : '') +strDelim;
+				}else if (baseType == HVariety.FILE) { //file
+					var fileDetail = hRecords[i].getDetail(hDty);
+					line += (fileDetail ? csv_escape(fileDetail.getURL()) : '') +strDelim;
+				}else if (baseType == HVariety.ENUMERATION || baseType == HVariety.RELATIONTYPE ) { //enum or relation
+					var termDetail = hRecords[i].getDetail(hDty);
+					line += (termDetail ? csv_escape(termDetail) : '') +strDelim;
 				}else{//non-reference case
-					line += csv_escape(hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]))+strDelim;
+					line += csv_escape(hRecords[i].getDetail(hDty))+strDelim;
 				}
 			}
 		}
