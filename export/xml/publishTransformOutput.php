@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 if (!is_logged_in()) {
 	return;
 }
-
+error_log("made it to here");
 mysql_connection_db_select(DATABASE);
 
 $transformID = @$_REQUEST['transID'] ? $_REQUEST['transID'] : null;
@@ -71,20 +71,24 @@ if ($transformID) {
 		}
 	}
 }
+//error_log("made it to here 2");
 
 //error_log("styleFilename - ".print_r($styleFilename,true));
 if (@$_REQUEST['inputFilename']){
 	if (preg_match("/http/",$_REQUEST['inputFilename'])) {
-		returnXMLErrorMsgPage("Remote inputs are not supported at this time '".$_REQUEST['inputFilename']."'");
-	}
-	$inputFilename = "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'];
-	if ( !file_exists($inputFilename)) {
-		returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
+//		returnXMLErrorMsgPage("Remote inputs are not supported at this time '".$_REQUEST['inputFilename']."'");
+		$inputFilename = $_REQUEST['inputFilename'];
+	}else{
+		$inputFilename = "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'];
+		if ( !file_exists($inputFilename)) {
+			returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
+		}
 	}
 }else if (@$_REQUEST['q']) {
-	$inputFilename = HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1".
+	$inputFilename = HEURIST_URL_BASE."export/xml/flathml.php?ver=1&f=1".
 								(@$_REQUEST['depth'] ? "&depth=".$_REQUEST['depth']:"").
 								(@$_REQUEST['hinclude'] ? "&hinclude=".$_REQUEST['hinclude']:"").
+								(@$_REQUEST['selids'] ? "&selids=".$_REQUEST['selids']:"").
 								"&w=all&q=".$_REQUEST['q']."&db=".HEURIST_DBNAME.
 								(@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
 								($outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :"");
@@ -94,6 +98,7 @@ if (@$_REQUEST['inputFilename']){
 		returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 	}
 }
+//error_log("input file name = $inputFilename");
 
 if (!$inputFilename ) {
 	returnXMLErrorMsgPage("cannot determine input file. Please sepecify 'inputFilename' or 'recID' or query 'q='");
@@ -107,6 +112,8 @@ if (@$_REQUEST['outputFilename']){
 }else if (@$_REQUEST['recID']){
 	$outputFilename = "".HEURIST_HTML_PUBPATH.HEURIST_DBID.$style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html";
 }
+//error_log("output file name = $outputFilename");
+
 
 $pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
 if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
@@ -115,6 +122,7 @@ if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
 							(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
 								(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
 }
+//error_log("output UIR = $outputURI");
 
 saveTransformOutput($inputFilename,$styleFilename,$outputFilename);
 
@@ -132,15 +140,18 @@ function saveTransformOutput($recHMLFilename, $styleFilename, $outputFilename){
 global $outputURI;
 	$recHmlDoc = new DOMDocument();
 	if (preg_match("/http/",$recHMLFilename)) {
-		$suc = $recHmlDoc ->loadXML( loadRemoteFile($recHMLFilename));
+		$suc = $recHmlDoc->loadXML( loadRemoteFile($recHMLFilename));
 	}else{
-		$suc = $recHmlDoc ->load($recHMLFilename);
+		$suc = $recHmlDoc->load($recHMLFilename);
 	}
 	if (!$suc){
 			returnXMLErrorMsgPage("Unable to load file $recHMLFilename");
 	}
 	$recHmlDoc->xinclude();//todo write code here to squash xincludes down to some limit.
 	if (!$styleFilename) {
+		if(!$outputFilename){
+			returnXMLErrorMsgPage("No transform filename or outputFilename provided for $recHMLFilename");
+		}
 		$cntByte = $recHmlDoc->saveHTMLFile($outputFilename);
 		if ($cntByte) {
 			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of untransformed file $recHMLFilename to $outputFilename");
@@ -150,12 +161,12 @@ global $outputURI;
 	}else{
 		$xslDoc = new DOMDocument();
 		if (preg_match("/http/",$styleFilename)) {
-			$suc = $xslDoc ->loadXML( loadRemoteFile($styleFilename));
+			$suc = $xslDoc->loadXML( loadRemoteFile($styleFilename));
 		}else{
-			$suc = $xslDoc ->load($styleFilename);
+			$suc = $xslDoc->load($styleFilename);
 		}
 		if (!$suc){
-				returnXMLErrorMsgPage("Unable to load file $styleFilename");
+				returnXMLErrorMsgPage("Unable to load XSLT transform file $styleFilename");
 		}
 	}
 	$xslProc = new XSLTProcessor();
@@ -166,13 +177,18 @@ global $outputURI;
 	$xslProc->setParameter('','dbID',HEURIST_DBID);
 	$xslProc->setParameter('','transform',$styleFilename);
 	$xslProc->setParameter('','standalone','1');
-	$cntByte = $xslProc->transformToURI($recHmlDoc,$outputFilename);
-	if ($cntByte) {
-		returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of $recHMLFilename transformed by  $styleFilename to $outputFilename".
-								($outputURI?" <a href=\"$outputURI\" target=\"_blank\">$outputURI</a>":
-								"Unable to determine URI for $outputFilename because is does not match website path!"));
+	if($outputFilename){
+		$cntByte = $xslProc->transformToURI($recHmlDoc,$outputFilename);
+		if ($cntByte) {
+			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of $recHMLFilename transformed by  $styleFilename to $outputFilename".
+									($outputURI?" <a href=\"$outputURI\" target=\"_blank\">$outputURI</a>":
+									"Unable to determine URI for $outputFilename because is does not match website path!"));
+		}else{
+			returnXMLErrorMsgPage("Unable to  transform and/or output file $recHMLFilename transformed by  $styleFilename to $outputFilename");
+		}
 	}else{
-		returnXMLErrorMsgPage("Unable to  transform and/or output file $recHMLFilename transformed by  $styleFilename to $outputFilename");
+//		$xmlString = $xslProc->transformToXML($recHmlDoc);
+		echo $xslProc->transformToXML($recHmlDoc);
 	}
 }
 
