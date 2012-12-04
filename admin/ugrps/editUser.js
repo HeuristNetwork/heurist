@@ -56,12 +56,14 @@ function UserEditor() {
 		// reads parameters from GET request
 		if (location.search.length > 1) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-				_recID = Number(top.HEURIST.parameters.recID);
+				_recID = top.HEURIST.parameters.recID;
 				_groupID = top.HEURIST.parameters.groupID;
 				_isApprove = (top.HEURIST.is_admin() && top.HEURIST.parameters.approve=='1');
 
 				if(Hul.isempty(_groupID) && Hul.isempty(_recID)){
 					_recID = top.HEURIST.get_user_id();
+				}else{
+					_recID = Number(_recID);
 				}
 
 				if(Number(_recID)>0){

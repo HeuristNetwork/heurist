@@ -100,7 +100,6 @@
 
 			if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('sourcedbname', $_REQUEST)){
 
-
 				print "<form name='selectdbtype' action='getRecordsFromDB.php' method='get'>";
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 				if(!$is_h2){
@@ -146,6 +145,7 @@
 			if(!$is_h2){
 				//verify user+password for source database
 				$usecurrentlogin = array_key_exists('samelogin', $_REQUEST) && $_REQUEST['samelogin']=='1';
+
 				if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
 					$username = get_user_username();
 					//take from database
@@ -161,13 +161,16 @@
 				} else {
 					$username = $_REQUEST['username'];
 					$password = $_REQUEST['password'];
-					$needcrypt = (array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2');
+					$needcrypt = true;//(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2');
 				}
 
 				mysql_connection_db_select($db_prefix.$sourcedbname);
 
 				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
-    			if ( ($user = mysql_fetch_assoc($res))  &&
+
+				$user = mysql_fetch_assoc($res);
+
+   				if ( $user  &&
 		 			$user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 			(($needcrypt && crypt($password, $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]) ||
 		 			 (!$needcrypt && $password == $user[USERS_PASSWORD_FIELD]))
@@ -178,8 +181,9 @@
 					$user_workgroups = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 		                              'ugl_UserID='.$user_id_insource.' and grp.ugr_Type != "User" order by ugl_GroupID');
 
-
 				}else{
+
+
 					header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
 					exit;
 				}

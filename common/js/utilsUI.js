@@ -771,6 +771,15 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				element.style.top = element.offsetTop + 'px';
 				element.style.bottom = '';
 			}
+			if(parseInt(element.style.left)<0){
+				element.style.left = '0px';
+			}
+			if(parseInt(element.style.top)<0){
+				element.style.top = '0px';
+			}/*else if (parseInt(element.style.top)+40 > top.document.body.scrollHeight){
+				element.style.top = (top.document.body.scrollHeight-40)+'px';
+			}*/
+
 			top.HEURIST.util.dragDetails.pos = { left: parseInt(element.style.left), top: parseInt(element.style.top) };
 		}
 		else {
@@ -789,6 +798,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (! moveDetails.reversed) {
 			var newLeft = (newXY.x - moveDetails.xy.x) + moveDetails.pos.left;
 			var newTop = (newXY.y - moveDetails.xy.y) + moveDetails.pos.top;
+
+			if(newLeft<0) {
+				newLeft = 0;
+			}
+			if(newTop<0) {
+				newTop = 0;;
+			}
 
 			moveDetails.element.style.left = newLeft + "px";
 			moveDetails.element.style.top = newTop + "px";
