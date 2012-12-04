@@ -82,9 +82,9 @@
 /*****DEBUG****///error_log(" Save dtl Post  ".print_r($_POST,true));
 
 	if ($updated) {
-		
+
 		updateRecTypeUsageCount(); //getRecordInfoLibrary
-		
+
 		// Update bib record data
 		// Update recDetails, rec_ScratchPad and rec_Title in (parent.parent).HEURIST.record
 		print "(";
@@ -139,7 +139,7 @@
 				continue;
 			}
 			if (count($_POST[$eltName]) == 0) {
-				// element was in POST but without content: values have been delete client-side (need to be deleted in DB so leave POST)
+				// element was in POST but without content: values have been deleted client-side (need to be deleted in DB so leave POST)
 				continue;
 			}
 
@@ -362,7 +362,7 @@
 		* process them (save them to disk) and commute their element values to the appropriate ulf_ID.
 		*/
 
-		if (! $_FILES) return;
+		if (! $_FILES) return; // this is likely deprecated since each file gets upload one at a time.
 		foreach ($_FILES as $eltName => $upload) {
 			/* check that $elt_name is a sane element name */
 			if (! preg_match('/^type:\\d+$/', $eltName)  ||  ! $_FILES[$eltName]  ||  count($_FILES[$eltName]) == 0) continue;

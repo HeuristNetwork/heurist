@@ -608,7 +608,7 @@ top.HEURIST.edit = {
 			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
 		}
 		if (!rfr) {
-			rfr = top.HEURIST.edit.createFakeFieldRequirement(dt);
+			rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,(fieldValues.length?fieldValues.length:null));
 		}
 
 		var newInput;
