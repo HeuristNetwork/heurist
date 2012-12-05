@@ -526,7 +526,8 @@
 				}
 
 				if (style == "Generic XML") {
-					var genXML = $("<xml>").append(xmlDoc.documentElement).html();
+					var ser = new XMLSerializer();
+					var genXML = ser.serializeToString( xmlDoc.documentElement.cloneNode());
 					xhtmlResultDoc = document.createTextNode(genXML);
 				}else{
 					if (!xsls[style]){
@@ -573,9 +574,18 @@
 					}else {
 						var xsltProcessor=new XSLTProcessor();// saw TODO change this transform a combined document for related results
 						xsltProcessor.reset();
-						xsltProcessor.importStylesheet(xsls[style]);
-						xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
-						delete xsltProcessor;
+						try{
+							xsltProcessor.importStylesheet(xsls[style]);
+							xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
+						}catch(e){
+							alert("There was an error with the '"+ style + "' transform. \n"+
+									"Please select a different transform. \n\n"+
+									"Error Message:\n\t"+e.message);
+							clearAndDisplayMessage("Please select a different transform above");
+							return;
+						}finally{
+							delete xsltProcessor;
+						}
 					}
 				}
 				clearResult(resultDiv);
