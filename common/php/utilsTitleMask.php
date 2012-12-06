@@ -582,8 +582,9 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id)
 						preg_match("/DAT=([^\|]+)/",$str,$dat);
 						$dat = (count($dat)>1 && $dat[1]) ? $dat[1] : null;
 						preg_match("/RNG=P(\d*)(Y|M|D)/",$str,$rng);
-						$units = $rng[2] ? ($rng[2]=="Y" ? "year" : $rng[2]=="M" ? "month" :$rng[2]=="D" ? "day" :""): "";
-						$rng = $rng && $rng[1] ? " ± " . $rng[1] . " " . $units . ($rng[1]>1 ? "s":""): "";
+//						error_log("title mask match rng - ".print_r($rng,true));
+						$units = ($rng[2] ? ($rng[2]=="Y" ? "year" : ($rng[2]=="M" ? "month" : ($rng[2]=="D" ? "day" :""))): "");
+						$rng = ($rng && $rng[1] ? " ± " . $rng[1] . " " . ($units ? $units . ($rng[1]>1 ? "s":""):""): "");
 						$str = "(" . $dat . $rng . ")";
 						break;
 					default:
