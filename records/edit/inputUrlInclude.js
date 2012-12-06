@@ -141,7 +141,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		//textElt.className = "in"; //"resource-title";
 		//textElt.style.width = 500;
 		textElt.onmouseover = function(e){
-			if(!top.HEURIST.util.isempty(textElt.value)){
+			if(top.HEURIST && !top.HEURIST.util.isempty(textElt.value)){
 				thumbDiv.style.display = "block";
 			}
 		}

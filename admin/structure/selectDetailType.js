@@ -185,11 +185,17 @@ function SelectDetailType() {
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
-								{ key: "usage", label: "Usage", sortable:true, width:25, className:'center'},
+					            { key: "usage", label: "Used in ...", sortable:true, className:'center',
+					                formatter: function(elLiner, oRecord, oColumn, oData) {
+					                var str = oRecord.getData("usage");
+					                var id = oRecord.getData("info");
+					                elLiner.innerHTML = '<span class="count" '+
+					                'style="cursor:pointer;" onclick="selectDetailType.showInfo('+id+',\'usage\', event)" onmouseout="selectDetailType.hideInfo()"/>'+str+'</span>';
+					                }},
 								{ key: "fieldset_rectypeid",   hidden:true},
-								{ key: "ptrtarget_rectypeids", label: "Pointer targets", 
+								{ key: "ptrtarget_rectypeids", label: "Pointer targets",
 									formatter: function(elLiner, oRecord, oColumn, oData){
-										
+
 										var dttype = oRecord.getData('type');
 										var value;
 										if(dttype === "fieldsetmarker") {
@@ -198,9 +204,9 @@ function SelectDetailType() {
 											value = oRecord.getData('ptrtarget_rectypeids');
 										}
 										textTip = _getRecPointers(dttype, value, false);
-										
+
 										elLiner.innerHTML = "<div class='truncate'>"+textTip+"</div>";
-						
+
 								}}
 								];
 
@@ -308,16 +314,24 @@ function SelectDetailType() {
 			record = _myDataTable.getRecord(target),
 			event = oArgs.event;
 
-		if(!isnull(column) && (column.key === 'ptrtarget_rectypeids' || column.key === 'usage')) {
+		if(!isnull(column) && (column.key === 'ptrtarget_rectypeids')){ // || column.key === 'usage')) {
 
-				var dty_ID = record.getData('info'),
-					newID = ((column.key === 'usage')?"u":"pt")+dty_ID;
+				var dty_ID = record.getData('info');
+
+
+				_showInfoToolTip2(dty_ID, column.key, event, record);
+		}
+	}
+
+	function _showInfoToolTip2(dty_ID, column, event, record) {
+
+				var	newID = ((column === 'usage')?"u":"pt")+dty_ID;
 
 				if(!Hul.isnull(dty_ID)){
 					if(currentTipId !== newID) {
 						currentTipId = newID;
 
-						if(column.key==="usage"){
+						if(column==="usage"){
 
 								//find all records that reference this type
 								var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
@@ -357,7 +371,8 @@ function SelectDetailType() {
 					currentTipId = '';
 					_rolloverInfo.close();
 				}
-		}
+
+				Hul.stopEvent(event);
 	}
 
 	/**
@@ -440,7 +455,7 @@ function SelectDetailType() {
 
 						dtg_ID = top.HEURIST.detailTypes.groups[index].id;
 						var grpName = top.HEURIST.detailTypes.groups[index].name;
-						
+
 						Hul.addoption(filterByGroup, dtg_ID, grpName);
 						if(filterByGroup.length==2){
 							filterByGroup.selectedIndex = 1;
@@ -547,6 +562,9 @@ function SelectDetailType() {
 				onDefineNewType: function(){
 					_onDefineNewType();
 				},
+
+				showInfo: function(dty_ID, newID, event){ _showInfoToolTip2(dty_ID, newID, event, null); },
+				hideInfo: function() {  currentTipId = ''; _rolloverInfo.hide();},
 
 				getClass: function () {
 					return _className;

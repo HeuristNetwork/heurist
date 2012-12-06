@@ -524,7 +524,7 @@ div.input-row div.input-cell div#relations-tbody div.relation{
 .relation-title a{color: #6A7C99;}
 
 /* for edit tab */
-.relation-reltype-and-rec {	
+.relation-reltype-and-rec {
 	max-width: 400px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -697,13 +697,13 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 }
 .resource-div.empty {
 	background-image: url("../images/blue-down-triangle.png");
-	background-position: 5 center;
+	background-position: 0 50%;
 	background-repeat: no-repeat;
 	display:block;
 }
 .file-resource-div.empty {
 	background-image: url("../images/icon_picture.png");
-	background-position: 5 center;
+	background-position: 0 50%;
 	background-repeat: no-repeat;
 	display:block;
 }
