@@ -107,6 +107,7 @@ top.HEURIST.search = {
 						top.HEURIST.search.clearRelatesRows();
 						top.HEURIST.search.renderNavigation();
 						top.HEURIST.search.updateRssFeedLink();
+						top.HEURIST.search.updateRecordView();
 						top.HEURIST.search.updateMapOrSmarty();
 			});
 		}
@@ -276,32 +277,6 @@ top.HEURIST.search = {
 
 	},
 
-	loadSearchParameters: function() {
-		var params = top.HEURIST.parameters;
-
-		// set search type
-		if (top.HEURIST.is_logged_in()  &&  params["w"] === "bookmark") {
-			params["w"] = "bookmark";
-		} else if (top.HEURIST.is_logged_in()  && params["w"] === "" &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
-			params["w"] = "bookmark";
-		} else {
-			params["w"] = "all";
-		}
-
-		if (! params["q"]) {
-			params["q"] = "";
-		}
-
-		// set search version
-		params["ver"] = top.HEURIST.search.VERSION;
-
-		if (params["view"]) {
-			top.HEURIST.search.setResultStyle(params["view"]);
-		}
-
-		if (! top.suppressAutoSearch) top.HEURIST.search.loadSearch();
-	},
-
 	applyFilterAndLayout: function(evt){
 
 									var i,layout,style,
@@ -309,6 +284,7 @@ top.HEURIST.search = {
 										maxDepth=0;
 										top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
 										top.HEURIST.search.loadLevelFilter(0);
+
 									if (top.HEURIST.parameters &&
 										(	top.HEURIST.parameters['rtfilters'] ||
 											top.HEURIST.parameters['ptrfilters'] ||
@@ -1527,6 +1503,7 @@ top.HEURIST.search = {
 //		top.HEURIST.search.addResultLevelLinks(0); // can't be done here since links aren't read in yet
 		top.HEURIST.search.loadLevelFilter(0);
 		top.HEURIST.search.filterRelated(0);
+		top.HEURIST.search.updateRecordView();
 		top.HEURIST.search.updateMapRelated();
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
@@ -2025,8 +2002,8 @@ top.HEURIST.search = {
 				}
 				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
 			}
-
 		}
+
 		top.HEURIST.search.updateMapOrSmarty();
 		/*else {
 			// Have to wait for the data to load
@@ -2384,23 +2361,6 @@ top.HEURIST.search = {
 			}
 		}
 
-		//send selectionChange event
-		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
-		var recordFrame = document.getElementById("record-view-frame");
-		if (!top.HEURIST.util.isnull(_tabView)){ // (typeof _tabView!=="undefined") && (_tabView!==null)) {
-			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
-			if(currentTab==_TAB_RECORDVIEW) {
-				if (!selectedRecIDs.length){
-					recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
-				}else{
-					recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
-					setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recID+
-									("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-									(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},50);
-				};
-			}
-		}
-
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
@@ -2408,6 +2368,7 @@ top.HEURIST.search = {
 
 		var viewerFrame = document.getElementById("viewer-frame");
 		if(viewerFrame){
+			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
 			var ssel = "selectedIds=" + selectedRecIDs.join(",");
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 		}
@@ -2423,6 +2384,8 @@ top.HEURIST.search = {
 		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
 */
 		top.HEURIST.search.setSelectedCount();
+
+		top.HEURIST.search.updateRecordView(recID);
 		top.HEURIST.search.updateMapOrSmarty();
 
 		return false;
@@ -3048,6 +3011,43 @@ top.HEURIST.search = {
 
 	},
 
+	//
+	//
+	//
+	updateRecordView: function(recID){
+		//send selectionChange event
+
+		var recordFrame = document.getElementById("record-view-frame");
+
+		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+		if (!selectedRecIDs.length){
+			top.HEURIST.currentRecordID = null;
+			top.HEURIST.currentRecordID_lastloaded = null;
+		}else if(recID!=null && top.HEURIST.currentRecordID != recID){
+			top.HEURIST.currentRecordID = recID;
+		}
+
+		if (recordFrame && !top.HEURIST.util.isnull(_tabView))
+		{
+			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+			if(currentTab==_TAB_RECORDVIEW) {
+
+				if (top.HEURIST.currentRecordID == null){
+					recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+				}else if (top.HEURIST.currentRecordID_lastloaded != top.HEURIST.currentRecordID){ //to prevent reload
+
+					top.HEURIST.currentRecordID_lastloaded = top.HEURIST.currentRecordID;
+
+					//var recID = selectedRecIDs[selectedRecIDs.length-1];
+					recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
+					setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+top.HEURIST.currentRecordID+
+									("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+									(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},50);
+				}
+			}
+		}
+	},
+
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
 	//
@@ -3056,7 +3056,7 @@ top.HEURIST.search = {
 	// couples this code to the application and is not maintainable in the long run.
 	updateMapOrSmarty: function(){
 
-
+/**/
 			var p = top.HEURIST.parameters,
 				query_string = "w=all",
 				query_string_sel = null,
@@ -3077,7 +3077,7 @@ top.HEURIST.search = {
 
 			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
 
-			top.HEURIST.currentQuery_main = query_string_main;
+			//ART 2012-12-06  top.HEURIST.currentQuery_main = query_string_main;
 
 
 			if (top.HEURIST.util.isnull(_tabView)) return;
@@ -3129,16 +3129,6 @@ top.HEURIST.search = {
 			}
 			top.HEURIST.currentQuery_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-			/*var currentSearchQuery = '';
-			var selmode = top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty");
-			if(selmode=="selected"){
-				currentSearchQuery = query_string_sel;
-			}else if(selmode=="all"){
-				currentSearchQuery = query_string_all;
-			}else{
-				currentSearchQuery = query_string_main;
-			}*/
-
 
 			top.HEURIST.currentQuery_sel = query_string_sel;
 
@@ -3148,7 +3138,6 @@ top.HEURIST.search = {
 				if(mapframe.src){ //do not reload map frame
 					var showMap = mapframe.contentWindow.showMap;
 					if(showMap){
-						//showMap.setQuery( query_string_all, query_string_sel, query_string_main);
 						showMap.processMap(); //reload
 					}else{
 						//alert('not inited 1');
@@ -3165,7 +3154,6 @@ top.HEURIST.search = {
 
 					var showReps = smartyFrame.contentWindow.showReps;
 					if(showReps){
-						///showReps.setQuery( query_string_all, query_string_sel, query_string_main);
 						showReps.processTemplate();
 					}else{
 						//alert('not inited 2');
@@ -3184,98 +3172,6 @@ top.HEURIST.search = {
 	updateMapRelated: function(){
 		top.HEURIST.search.updateMapOrSmarty();
 	},
-
-	/*outdated
-	mapSelected3: function() {
-
-			var p = top.HEURIST.parameters;
-			var query_string = 'ver='+(p['ver'] || "") +
-									'&w='+(p['w'] || "") +
-									'&stype='+(p['stype'] || "") +
-									'&db='+(p['db'] || "") +
-									'&limit='+top.HEURIST.search.resultsPerPage;
-
-			if(top.HEURIST.search.currentPage>0){
-				query_string = query_string + '&offset=' +
-					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
-			}
-
-			var mapframe = document.getElementById("map-frame3");
-			if(mapframe.src){ //do not reload map frame
-
-				var showMap = mapframe.contentWindow.showMap;
-				if(showMap){
-					var queryp = p["q"];
-					var query_string_all = (queryp) ?encodeURI(query_string + '&q=' + queryp) :null;
-
-					var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
-					if (recIDs.length >= 500) {// maximum number of records ids 500
-						alert("Selected record count is great than 500, mapping the first 500 records!");
-						recIDs = recIDs.slice(0,500);
-					}
-					var query_string_sel = query_string + '&q=ids:' + recIDs.join(",");
-
-					showMap.reload(query_string_all, encodeURI(query_string_sel));
-
-			 		top.HEURIST.search.currentMapSearch = (showMap.isUseAllRecords) ?query_string_all :query_string_sel;
-				}
-			}else{
-				//by default use all records
-				query_string = query_string + '&q=' + top.HEURIST.parameters["q"];
-			 	url = top.HEURIST.basePath+ "viewers/map/showMap.html?"+query_string;
-
-			 	top.HEURIST.search.currentMapSearch = query_string;
-
-				mapframe.src = url;
-			}
-	},*/
-
-	/*outdaated
-	//ARTEM
-	//listener of selection in search result - to refelect on smarty tab
-	smartySelected: function() {
-
-			var p = top.HEURIST.parameters;
-			var query_string = 'ver='+(p['ver'] || "") +
-						'&w='+(p['w'] || "") +
-						'&stype='+(p['stype'] || "") +
-						'&db='+(p['db'] || "") +
-						'&limit='+top.HEURIST.search.resultsPerPage;
-
-			if(top.HEURIST.search.currentPage>0){
-				query_string = query_string + '&offset=' +
-					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
-			}
-
-			var repframe = document.getElementById("smarty-frame");
-			if(repframe.src){ //do not reload  frame
-				var showReps = repframe.contentWindow.showReps;
-				if(showReps){
-
-					var queryp = p["q"];
-					var query_string_all = (queryp) ?encodeURI(query_string + '&q=' + queryp) :null;
-
-					var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
-					if (recIDs.length >= 500) {// maximum number of records ids 500 - it should never happen since max per page is 500
-						//alert("Selected record count is great than 500, reporting the first 500 records!");
-						recIDs = recIDs.slice(0,500);
-					}
-					var query_string_sel = query_string + '&q=ids:' + recIDs.join(",");
-
-					showReps.setQuery( query_string_all, encodeURI(query_string_sel));
-					showReps.processTemplate();
-				}
-			}else{
-				//by default use all records
-				if(top.HEURIST.parameters["q"]){
-					query_string = query_string + '&q=' + top.HEURIST.parameters["q"];
-				}else{
-					//query_string = "noquery";
-				}
-			 	url = top.HEURIST.basePath+ "viewers/smarty/showReps.html?"+query_string;
-				repframe.src = url;
-			}
-	},*/
 
 	selectAll: function() {
 		$("div.recordDiv:not(.filtered,.selected).lnk").each(function(i,recDiv) {
@@ -3421,8 +3317,6 @@ top.HEURIST.search = {
 
 		var viewerFrame = document.getElementById("viewer-frame");
 		if(viewerFrame){
-			var recordFrame = document.getElementById("record-view-frame");
-			recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";// saw BUG this code shoulw be part of the event response to selection change
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		}
 
@@ -3431,6 +3325,7 @@ top.HEURIST.search = {
 		mapFrame.src = "";
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");*/
 
+		top.HEURIST.search.updateRecordView(null);
 		if(fireEvent){
 			top.HEURIST.search.updateMapOrSmarty();
 		}
@@ -3734,15 +3629,7 @@ top.HEURIST.search = {
 					});
 			return;
 		}
-		/* ARTEM: TO REMOVE
-		if (top.HEURIST.search.collectCount > 0) {
-			if (top.HEURIST.parameters["q"]  &&  top.HEURIST.parameters["q"].match(/_COLLECTED_/)) {
-				$('.not-query-collected').removeClass('not-query-collected').addClass('query-collected');
-			} else {
-				$('.query-collected').removeClass('query-collected').addClass('not-query-collected');
-			}
-		}
-		*/
+
 		document.getElementById("collection-label").innerHTML = "<strong>Collected: " + top.HEURIST.search.collectCount + "</strong>";
 	},
 
@@ -4208,6 +4095,38 @@ top.HEURIST.search = {
 		top.HEURIST.search.popupLink(top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
+	//
+	// called only once on onDOMReady from setupSearchPage
+	//
+	loadSearchParameters: function() {
+		var params = top.HEURIST.parameters;
+
+		// set search type
+		if (top.HEURIST.is_logged_in()  &&  params["w"] === "bookmark") {
+			params["w"] = "bookmark";
+		} else if (top.HEURIST.is_logged_in()  && params["w"] === "" &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
+			params["w"] = "bookmark";
+		} else {
+			params["w"] = "all";
+		}
+
+		if (! params["q"]) {
+			params["q"] = "";
+		}
+
+		// set search version
+		params["ver"] = top.HEURIST.search.VERSION;
+
+		if (params["view"]) {
+			top.HEURIST.search.setResultStyle(params["view"]);
+		}
+
+		if (! top.suppressAutoSearch) top.HEURIST.search.loadSearch();
+	},
+
+	//
+	// called only once on onDOMReady
+	//
 	setupSearchPage: function() {
 		top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.search.renderSearchPage);
 		top.HEURIST.registerEvent(window, "resize", top.HEURIST.search.trimAllLinkTexts(0));
@@ -4970,7 +4889,11 @@ window.console.log("in sidebarPanelStatus");
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
 
-		if(currentTab===_TAB_SPECIAL){ //printview
+		if(currentTab===_TAB_RECORDVIEW){
+
+			top.HEURIST.search.updateRecordView(null);
+
+		}else if(currentTab===_TAB_SPECIAL){ //printview
 
 			var viewerFrame = document.getElementById("viewer-frame");
 			if(viewerFrame){

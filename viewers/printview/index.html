@@ -141,7 +141,7 @@
 							}
 						}
 						//set paging parameters to match
-						if (top.HEURIST.search.results.totalQueryResultRecordCount) totalRecordCount = top.HEURIST.search.results.totalQueryResultRecordCount;
+						if (top.HEURIST.search.results && top.HEURIST.search.results.totalQueryResultRecordCount) totalRecordCount = top.HEURIST.search.results.totalQueryResultRecordCount;
 						if (top.HEURIST.search.resultsPerPage) resultsPerPage = top.HEURIST.search.resultsPerPage;
 						pageCount = Math.ceil(totalRecordCount / resultsPerPage);
 						if (top.HEURIST.search.currentPage) currentPage = top.HEURIST.search.currentPage;

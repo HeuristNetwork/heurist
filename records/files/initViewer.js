@@ -102,7 +102,7 @@ strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d
 */
 function detectSourceAndType(link, extension){
 
-	var source = 'arbitrary';
+	var source = 'generic';
 	var type = 'unknown';
 
 	if(link){

@@ -1854,6 +1854,8 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	var _constrainedRecTypeID = null
 	var i;
 
+	if(!top.HEURIST) return null;
+
 	if (constraint) {
 		if (typeof constraint == "string") {
 			constraint = constraint.split(",");
@@ -1877,6 +1879,7 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 	var i;
 	if (enums && enums instanceof Array) {
+
 			// related values are given as well; enums is an array of string-string pairs
 			// enum(trmID,trmLabel,[invID, invLabel])
 			if (typeof top.HEURIST.terms != "undefined"){
