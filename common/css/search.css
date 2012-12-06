@@ -2142,38 +2142,36 @@ ul.menu li ul li a {
 ul.menu li ul li.checked a {
 	color:#CCC;
 }
-/* ARTEM
 .recordDiv {
 	display:none !important;
 }
-*/
-div.list > div.recordDiv.lnk {
-	display:block !important;
-}
+
 .recordDiv.lnk {
 	display:inline-block !important;
 }
-/*.is-not-logged-in #results-level0 {padding:15px 0}
-*/
-.summary .recordDiv{
-	display: none !important;
-}
-#results-level0 .recordDiv, #results-level1 .recordDiv, #results-level2 .recordDiv, #results-level3 .recordDiv {
-	display:inline-block;
-}
-#results-level0.list > div.recordDiv, #results-level1.list > div.recordDiv, #results-level2.list > div.recordDiv, #results-level3.list > div.recordDiv {
+div.list > div.recordDiv.lnk {
 	display:block !important;
 }
+/*.is-not-logged-in #results-level0 {padding:15px 0}
+*/
+
+#results-level0 .recordDiv{
+	display:inline-block !important;
+}
+#results-level0.list .recordDiv {
+	display:block !important;
+}
+#results-level0 .recordDiv.filtered {
+	display:none !important;
+}
+/*#results-level0.list > div.recordDiv, #results-level1.list > div.recordDiv.lnk, #results-level2.list > div.recordDiv, #results-level3.list > div.recordDiv {
+	display:block !important;
+}
+*/
 #results-level0.list > div.recordDiv.filtered, #results-level1.list > div.recordDiv.filtered, #results-level2.list > div.recordDiv.filtered, #results-level3.list > div.recordDiv.filtered {
 	display:none !important;
 }
-div.list > div.recordDiv {
-	display:block !important;
-}
 .recordDiv.filtered {
-	display:none !important;
-}
-#results-level0 .recordDiv.filtered {
 	display:none !important;
 }
 .filter ul li ul {

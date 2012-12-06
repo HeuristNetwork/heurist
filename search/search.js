@@ -167,7 +167,6 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
-//		top.HEURIST.search.renderSummaryForLevel(0);
 
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
@@ -278,89 +277,87 @@ top.HEURIST.search = {
 	},
 
 	applyFilterAndLayout: function(evt){
-
-									var i,layout,style,
-										maxFilterDepth=0,
-										maxDepth=0;
-										top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
-										top.HEURIST.search.loadLevelFilter(0);
-
-									if (top.HEURIST.parameters &&
-										(	top.HEURIST.parameters['rtfilters'] ||
-											top.HEURIST.parameters['ptrfilters'] ||
-											top.HEURIST.parameters['relfilters'] ||
-											(top.HEURIST.parameters['layout'] &&
-												top.HEURIST.parameters['layout'].indexOf('srch') != -1 ))) {
-											//calculate max depth of filters
-											if (top.HEURIST.parameters['layout'] &&
-												top.HEURIST.parameters['layout'].indexOf('srch:') != -1 ) {
-												//
-												layout = top.HEURIST.parameters['layout'].match(/srch:([^\|]+)/);
-												layout = layout[1].split("-");
-											}
-											var rtf = top.HEURIST.parameters['rtfilters'],
-												ptrf = top.HEURIST.parameters['ptrfilters'],
-												relf = top.HEURIST.parameters['relfilters'];
-											for (i=1; i<=3; i++) {
-												if (rtf && rtf.search('"' + i + '":') != -1 ||
-													ptrf && ptrf.search('"' + i + '":') != -1 ||
-													relf && relf.search('"' + i + '":') != -1) {
-														maxFilterDepth = i;
-													}
-											}
-											//expand to the the max defined by the filter or layout  or by the data
-											maxDepth = Math.min(Math.max((layout? layout.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
-											//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
-											if (layout) {
-												top.HEURIST.search.setResultStyle(layout[0][0],0);
-											}
-											top.HEURIST.search.filterRelated(0,true,true);
-											for (i=1; i<=maxDepth; i++) {
-												var depthInfo = top.HEURIST.search.results.infoByDepth[i];
-												//loadLevelFilter Menu
-												top.HEURIST.search.loadLevelFilter(i,(layout && layout[i] && layout[i][0] ? layout[i][0]: null));
-												//loadRelatedLevel results
-												top.HEURIST.search.loadRelatedLevel(i,true);
-												document.getElementById("showrelated" + i).className += " loaded";
-												//filterRelated results with noPush
-												top.HEURIST.search.filterRelated(i,true,true);
-												// expand level
-												if (!(layout && layout[i][1] && layout[i][1].toLowerCase() == "c")) {
-													$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
-													$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
-												}else{// make sure collapsed class is on parent
-													if (!$("#results-level"+i).hasClass('collapsed')){
-														$("#results-level"+i).addClass('collapsed');
-													};
-													$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
-												}
-											}
-											top.HEURIST.search.setSelectedCount();
-											if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
-												top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
-												top.HEURIST.search.loadLevelFilter(maxDepth+1);
-											}
-											//clear the filters
-											if (rtf) {
-												delete top.HEURIST.parameters['rtfilters'];
-											}
-											if (ptrf) {
-												delete top.HEURIST.parameters['ptrfilters'];
-											}
-											if (relf) {
-												delete top.HEURIST.parameters['relfilters'];
-											}
-											if (layout) {
-												delete top.HEURIST.parameters['layout'];
-											}
-										}else{
-											// if filters then load related to depth..
-											if (top.HEURIST.search.results.infoByDepth.length >1 &&
-													top.HEURIST.search.results.infoByDepth[1].count > 0) {
-												top.HEURIST.search.loadLevelFilter(1);
-											}
-											top.HEURIST.search.filterRelated(0);
-										}
+		var i,layout,style,
+			maxFilterDepth=0,
+			maxDepth=0;
+			top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
+			top.HEURIST.search.loadLevelFilter(0);
+		if (top.HEURIST.parameters &&
+			(	top.HEURIST.parameters['rtfilters'] ||
+				top.HEURIST.parameters['ptrfilters'] ||
+				top.HEURIST.parameters['relfilters'] ||
+				(top.HEURIST.parameters['layout'] &&
+					top.HEURIST.parameters['layout'].indexOf('srch') != -1 ))) {
+				//calculate max depth of filters
+				if (top.HEURIST.parameters['layout'] &&
+					top.HEURIST.parameters['layout'].indexOf('srch:') != -1 ) {
+					//
+					layout = top.HEURIST.parameters['layout'].match(/srch:([^\|]+)/);
+					layout = layout[1].split("-");
+				}
+				var rtf = top.HEURIST.parameters['rtfilters'],
+					ptrf = top.HEURIST.parameters['ptrfilters'],
+					relf = top.HEURIST.parameters['relfilters'];
+				for (i=1; i<=3; i++) {
+					if (rtf && rtf.search('"' + i + '":') != -1 ||
+						ptrf && ptrf.search('"' + i + '":') != -1 ||
+						relf && relf.search('"' + i + '":') != -1) {
+							maxFilterDepth = i;
+						}
+				}
+				//expand to the the max defined by the filter or layout  or by the data
+				maxDepth = Math.min(Math.max((layout? layout.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
+				//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
+				if (layout) {
+					top.HEURIST.search.setResultStyle(layout[0][0],0);
+				}
+				top.HEURIST.search.filterRelated(0,true,true);
+				for (i=1; i<=maxDepth; i++) {
+					var depthInfo = top.HEURIST.search.results.infoByDepth[i];
+					//loadLevelFilter Menu
+					top.HEURIST.search.loadLevelFilter(i,(layout && layout[i] && layout[i][0] ? layout[i][0]: null));
+					//loadRelatedLevel results
+					top.HEURIST.search.loadRelatedLevel(i,true);
+					document.getElementById("showrelated" + i).className += " loaded";
+					//filterRelated results with noPush
+					top.HEURIST.search.filterRelated(i,true,true);
+					// expand level
+					if (!(layout && layout[i][1] && layout[i][1].toLowerCase() == "c")) {
+						$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
+						$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
+					}else{// make sure collapsed class is on parent
+						if (!$("#results-level"+i).hasClass('collapsed')){
+							$("#results-level"+i).addClass('collapsed');
+						};
+						$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
+					}
+				}
+				top.HEURIST.search.setSelectedCount();
+				if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
+					top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
+					top.HEURIST.search.loadLevelFilter(maxDepth+1);
+				}
+				//clear the filters
+				if (rtf) {
+					delete top.HEURIST.parameters['rtfilters'];
+				}
+				if (ptrf) {
+					delete top.HEURIST.parameters['ptrfilters'];
+				}
+				if (relf) {
+					delete top.HEURIST.parameters['relfilters'];
+				}
+				if (layout) {
+					delete top.HEURIST.parameters['layout'];
+				}
+			}else{
+				// if filters then load related to depth..
+				if (top.HEURIST.search.results.infoByDepth.length >1 &&
+						top.HEURIST.search.results.infoByDepth[1].count > 0) {
+					top.HEURIST.search.loadLevelFilter(1);
+				}
+				top.HEURIST.search.filterRelated(0);
+			}
 	},
 
 	loadRelatedResults: function() {
@@ -507,7 +504,6 @@ top.HEURIST.search = {
 		top.HEURIST.search.setResultStyle(style,level);
 
 
-//		top.HEURIST.search.renderSummaryForLevel(level);
 
 		//create rectype filter menu
 		if (levelRecTypes){
@@ -1012,64 +1008,6 @@ top.HEURIST.search = {
 	 	top.HEURIST.search.submitSearchForm(true);
 	},
 
-
-	renderSummaryForLevel: function (level)
-	{
-		var resultsDiv =  $("#results-level" + level);
-		var summaryDiv =  $(".summaryDiv",resultsDiv);
-		if(summaryDiv.length > 0){
-			summaryDiv.remove();
-		}
-		resultsDiv =resultsDiv.get(0);
-
-		if(top.HEURIST.search.results){
-			var depthInfo = top.HEURIST.search.results.infoByDepth[level];
-			if(depthInfo)
-			{
-				var rtID;
-				for(rtID in depthInfo.rectypes) {
-					if(!top.HEURIST.util.isnull(rtID)){
-						var dd = top.HEURIST.search.renderSummary(rtID, depthInfo.rectypes[rtID].length, level);
-						resultsDiv.appendChild(dd);
-					}
-				}
-			}
-		}
-	},
-
-
-	renderSummary: function(rt_ID, cnt, level) {
-
-		var rectypeTitle = top.HEURIST.rectypes.names[parseInt(rt_ID)],
-			rectypeImg = "style='background-image:url("+ top.HEURIST.iconBaseURL + rt_ID + ".png)'";
-
-		var newSearchWindow = "";/*"<div><a href='"+top.HEURIST.basePath+"search/search.html?q=t:"+rt_ID+
-			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank' title='Open in new window' class='externalLink'></a></div>";*/
-
-		//var html = "<div class='summaryDiv' title='Click to filter the result by this record type' rectype='"+rt_ID+"' onclick='{"+
-				//"top.HEURIST.search.filterByRecType("+level+","+rt_ID+");}'>" +  "</div>";
-		var html =
-			"<div class=recordIcons>" +
-				"<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
-			"</div>" +
-			"<div class='rectypeCount' title='Count of records'>"+ cnt +"</div>" +
-			"<div class='rectypeTitle' onclick='{top.HEURIST.search.searchByRecType("+rt_ID+", true);}'>"+   //top.HEURIST.search.filterByRecType("+level+","+rt_ID+");}'>"+
-				rectypeTitle +
-				newSearchWindow +
-			"</div>";
-
-		var resultsDiv = document.createElement("div");
-		resultsDiv.className = 'summaryDiv';
-		resultsDiv.title = 'Click to search by this record type';
-		//resultsDiv.onclick = function(){ top.HEURIST.search.filterByRecType(level,rt_ID) };
-		resultsDiv.innerHTML = html;
-
-		return resultsDiv;
-	},
-	/*
-	* END Summary panel ---------------------------------------------
-	*/
 
 	displaySearchParameters: function() {
 		// Transfer query components to their form elements
