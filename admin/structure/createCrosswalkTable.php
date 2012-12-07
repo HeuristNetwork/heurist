@@ -110,10 +110,13 @@ var replaceRecTypeName = "";
 				while($approxRectype = mysql_fetch_assoc($approxMatchesRes)) {
 					$approxRty_Name = mysql_escape_string($approxRectype["rty_Name"]);
 					$approxRty_Description = mysql_escape_string($approxRectype["rty_Description"]);
-					if (!$approxMatches[$rectype["rty_ID"]]){
-						$approxMatches[$rectype["rty_ID"]] = array(array($approxRty_Name,$approxRty_Description));
-					}else{
-						array_push($approxMatches[$rectype["rty_ID"]],array($approxRty_Name,$approxRty_Description));
+					if(@$rectype["rty_ID"] && @$approxMatches[$rectype["rty_ID"]])
+					{
+						if (!$approxMatches[$rectype["rty_ID"]]){
+							$approxMatches[$rectype["rty_ID"]] = array(array($approxRty_Name,$approxRty_Description));
+						}else{
+							array_push($approxMatches[$rectype["rty_ID"]],array($approxRty_Name,$approxRty_Description));
+						}
 					}
 				}
 			}
@@ -644,6 +647,7 @@ function processAction(rtyID, action, rectypeName) {
 	} // end readystate callback
 
 	xmlhttp.open("GET","processAction.php?"+
+						"db=<?=HEURIST_DBNAME?>"+
 						"action="+action+
 						"&tempDBName="+tempDBName+
 						"&sourceDBName="+sourceDBName+
@@ -717,17 +721,23 @@ var dropped = false;
 function dropTempDB(redirect) {
 	if(!dropped) {
 		dropped = true;
-		processAction(0, "drop");
-		alert("Dropping temporal database");
-	}
-	if(redirect) {
-		window.location = "selectDBForImport.php";
-	} else {
-		if(result == "") {
-			// Annoying alert, you already know this: alert("Nothing was imported");
-		} else {
-			// potentially useful but very poorly formatted: alert(result);
-		}
+
+	top.HEURIST.util.popupURL(top, "structure/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+			"close-on-blur": false,
+			"no-resize": true,
+			height: 100,
+			width: 300,
+			callback: function(context) {
+
+				if(redirect) {
+					window.location = "<?=HEURIST_URL_BASE?>/admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+				}
+			}
+	});
+
+
+//		processAction(0, "drop");
+//		alert("Dropping temporal database");
 	}
 }
 </script>

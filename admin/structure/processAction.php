@@ -15,6 +15,12 @@
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
+
+if (! is_admin()) {
+	echo "Error: You do not have sufficient privileges for this action";
+	exit();
+}
+
 $targetDBName = @$_GET["importingTargetDBName"];
 $tempDBName = @$_GET["tempDBName"];
 $sourceDBName = @$_GET["sourceDBName"];
@@ -28,7 +34,6 @@ $importLog = array();
 
 mysql_connection_db_insert($targetDBName);
 
-error_log(">>>>>".$targetDBName."    ".$_GET["action"]);
 
 switch($_GET["action"]) {
 	case "crosswalk":
@@ -43,6 +48,7 @@ switch($_GET["action"]) {
 	default:
 		echo "Error: Unknown action received";
 }
+exit();
 
 function crosswalk() {
 /*	$res = mysql_query("insert into `defCrosswalk` (`crw_SourcedbID`, `crw_SourceCode`, `crw_DefType`, `crw_LocalCode`) values ('".$_GET["crwSourceDBID"]."','".$_GET["importRtyID"]."','rectype','".$_GET["crwLocalCode"]."')");
@@ -681,21 +687,33 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 
 // Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
+
+	echo "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
+
+	$res = true;
 	$tempDBName = $_GET["tempDBName"];
 	$isTempDB = strpos($tempDBName, "temp_");
 	if($isTempDB !== false) {
 		mysql_query("drop database ".$tempDBName);
 		if(!mysql_error()) {
 			echo "Temporary database was sucessfully deleted";
-			return true;
 		} else {
 			echo "Error: Something went wrong deleting the temporary database";
-			return false;
+			$res = false;
 		}
 	} else {
 		echo "Error: cannot delete a non-temporary database";
-		return false;
+		$res = false;
 	}
+
+	echo "</div>";
+
+	if($res){
+		echo "<script>setTimeout(function(){window.close();}, 1500);</script>";
+
+	}
+	echo "</body></html>";
+
 }
 ?>
 
