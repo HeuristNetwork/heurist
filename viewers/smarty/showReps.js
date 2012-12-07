@@ -581,7 +581,7 @@ function ShowReps() {
 			//find in parent
 			var restLayout = top.document.getElementById("resetPanels_Smarty"+(iseditor?"On":"Off"));
 			if(restLayout){
-				restLayout.click();
+				Hul.clickworkaround(restLayout);
 			}
 		}
 

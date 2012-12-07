@@ -2822,15 +2822,24 @@ top.HEURIST.search = {
 		);
 	},
 
-	launchAssistedSearch: function() {
-		$('#btnSimpleSearch').click();
+	launchAssistedSearch: function(event) {
+
+		top.HEURIST.util.stopEvent(event);
+
+		top.HEURIST.util.clickworkaround(document.getElementById("btnSimpleSearch"));
+
+		return false;
 	},
 	launchAdvancedSearch: function() {
+		top.HEURIST.util.stopEvent(event);
+
 		var q = document.getElementById("q").value;
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name : "");
 
 		var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?q=" + encodeURIComponent(q) + _db;
 		top.HEURIST.util.popupURL(window, url, { callback: top.HEURIST.search.advancedSearchCallback });
+
+		return false;
 	},
 	/*
 	* END SAVED SEARCHES =====================
@@ -4561,7 +4570,7 @@ function removeCustomAlert() {
 	var viewerTabIndex = top.HEURIST.util.getDisplayPreference("viewerTab");
 
 	Event.onDOMReady(function() {
-window.console.log("in onDOMReady");
+//DEBUG window.console.log("in onDOMReady");
 
 		var leftWidth = top.HEURIST.util.getDisplayPreference("leftWidth");
 		var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
@@ -4611,7 +4620,7 @@ window.console.log("in onDOMReady");
 				layout.set("height",dh);
 			}
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
-window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
+//DEBUG window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
 			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
 
 			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
@@ -4661,14 +4670,14 @@ window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+
 
 			if (!isFirst){
 				var status = (status=="open"?"closed":"open");
-				top.HEURIST.util.setDisplayPreference("sidebarPanel",status);
+				top.HEURIST.util.setDisplayPreference("sidebarPanel",status, null, null, true,true);
 			}
 
 			if (status == "closed"){
 
 				if (!isFirst){
 					var oldLeftPanelWidth = layout.getSizes().left.w;
-					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth);
+					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth, null, null, true, true);
 				}
 
 				layout.getUnitByPosition('left').collapse();
@@ -4685,7 +4694,7 @@ window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+
 				layout.getUnitByPosition('left').expand();
 				navButton.className = navButton.className.replace(" closed", "");
 				navButton.title = "Hide Navigation Panel";
-window.console.log("in sidebarPanelStatus");
+//DEBUG window.console.log("in sidebarPanelStatus");
 
 				var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
 				navButton.style.width = leftPos-1;
@@ -4718,16 +4727,16 @@ window.console.log("in sidebarPanelStatus");
 			Event.stopEvent(ev);
 			if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
 				var oldSearchWidth = layout.getSizes().center.w;
-					top.HEURIST.util.setDisplayPreference("oldSearchWidth", oldSearchWidth);
+					top.HEURIST.util.setDisplayPreference("oldSearchWidth", oldSearchWidth,null,null,true,true);
 				layout.getUnitByPosition('right').collapse();
-				top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
+				top.HEURIST.util.setDisplayPreference("applicationPanel","closed",null,null,true,true);
 				appPanelButton.className +=" closed";
 				//appPanelButton.style.width = "20px";
 				appPanelButton.title = "Show Applications";
 				layout.resize();
 			}else{
 				layout.getUnitByPosition('right').expand();
-				top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+				top.HEURIST.util.setDisplayPreference("applicationPanel","open",null,null,true,true);
 				appPanelButton.className = appPanelButton.className.replace(" closed", "");
 				appPanelButton.title = "Hide Applications";
 				layout.resize();
@@ -4738,34 +4747,34 @@ window.console.log("in sidebarPanelStatus");
 			Event.stopEvent(ev);
 
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open"){
-						navButton.click();
+						top.HEURIST.util.clickworkaround(navButton);
 					}
 					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-						appPanelButton.click();
+						top.HEURIST.util.clickworkaround(appPanelButton);
 					}
 
 					layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
-					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
+					top.HEURIST.util.setDisplayPreference("leftWidth", 180,null,null,true,true);
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
+					top.HEURIST.util.setDisplayPreference("searchWidth", 400,null,null,true,true);
 		});
 		Event.on('resetPanels_HideNav', 'click', function(ev) {
 			Event.stopEvent(ev);
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
-						navButton.click();
+						top.HEURIST.util.clickworkaround(navButton);
 					}
 
 					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-						appPanelButton.click();
+						top.HEURIST.util.clickworkaround(appPanelButton);
 					}
 
 					var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
 
 					layout.getUnitByPosition('right').set("width", topWindowDims.w*2/3);
 					layout.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", topWindowDims.w*2/3);
+					top.HEURIST.util.setDisplayPreference("searchWidth", topWindowDims.w*2/3,null,null,true,true);
 
 					/*layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
@@ -4786,11 +4795,11 @@ window.console.log("in sidebarPanelStatus");
 
 					//hide left panel
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
-						navButton.click();
+						top.HEURIST.util.clickworkaround(navButton);
 					}
 					//show right panel
 					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-						appPanelButton.click();
+						top.HEURIST.util.clickworkaround(appPanelButton);
 					}
 					var topWindowDims = top.HEURIST.util.innerDimensions(window.top);
 					layout.getUnitByPosition('right').set("width", topWindowDims.w-240);
@@ -4801,10 +4810,10 @@ window.console.log("in sidebarPanelStatus");
 			Event.stopEvent(ev);
 			if(keepLeftPanelWidth!=null){
 					if (keepLeftPanelWidth>0 &&  (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open")){
-						navButton.click();
+						top.HEURIST.util.clickworkaround(navButton);
 					}
 					if (keepRightPanelWidth==0 &&  (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open")){
-						appPanelButton.click();
+						top.HEURIST.util.clickworkaround(appPanelButton);
 					}else{
 						layout.getUnitByPosition('right').set("width", keepRightPanelWidth);
 					}
@@ -4825,7 +4834,7 @@ window.console.log("in sidebarPanelStatus");
 
 	var handleActiveTabChange = function(e) {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
-		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
+		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab,null,null,true,true);
 
 		if(currentTab===_TAB_RECORDVIEW){
 

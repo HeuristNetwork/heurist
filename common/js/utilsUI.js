@@ -953,11 +953,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 
-	setDisplayPreference: function(prefName, val, win, replacementRegExp,noframes,noclass) {
+	setDisplayPreference: function(prefName, val, win, replacementRegExp, noframes, noclass) {
 		// set display preference in all windows below win; save preferences too
 		// The third and fourth arguments are for recursion: don't use them externally.
 
-		if (! win) {
+		if ( top.HEURIST.util.isnull(win) ) {
 			// top-level stuff
 			replacementRegExp = new RegExp('$');
 
@@ -992,14 +992,16 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			for (var i=0; i < win.frames.length; ++i) {
 				try {
 					// some frames may be from another domain, e.g. addthis
-					top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp);
+					top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp, false, noclass);
 				} catch (e) { }
 			}
 		}
-		//reread preferences
-		top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
+		/* ARTEM reread preferences */
+		if ( top.HEURIST.util.isnull(win) ) {
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
 						'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
 									: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:""));
+		}
 
 	},
 
@@ -1823,6 +1825,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			if (e.stopPropagation) e.stopPropagation();
 		}
 		return e;
+	},
+
+	clickworkaround: function(ele)
+	{
+			if(navigator.userAgent.indexOf('Safari')>0){
+				var event = document.createEvent("HTMLEvents");
+				event.initEvent("click", true, true);
+				ele.dispatchEvent(event);
+			}else{
+				ele.click();
+			}
 	}
 
 };

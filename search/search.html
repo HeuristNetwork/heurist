@@ -539,8 +539,8 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 							</li>
 							<li><div style="margin-top: 5px;font-weight: bold;">Search</div>
 								<ul>
-									<li style="padding-top: 10px"><a href="#" title="Quick Search panel provides assistance in building a search" onClick="{top.HEURIST.util.stopEvent(event);$('#btnSimpleSearch').click(); return false;}">Quick search</a></li>
-									<li><a href="#" title="Advanced search function builds complex search strings through a form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
+									<li style="padding-top: 10px"><a href="#" title="Quick Search panel provides assistance in building a search" onClick="{top.HEURIST.search.launchAssistedSearch(event);}">Quick search</a></li>
+									<li><a href="#" title="Advanced search function builds complex search strings through a form-based interface" onClick="{top.HEURIST.search.launchAdvancedSearch(event);}">Advanced search</a></li>
 									<li class="separator"><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Search help (syntax)</a></li>
 									<li>--------------------------</li>
 									<li class="separator"><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members"

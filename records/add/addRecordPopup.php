@@ -58,7 +58,13 @@ $(document).ready(function() {
 			$("#add-link-tags").val(defaults[4]);
 		}
 		if(defaults[5]){
-			$("#restrict_elt").click();
+			if(navigator.userAgent.indexOf('Safari')>0){
+				var event = document.createEvent("HTMLEvents");
+				event.initEvent("click", true, true);
+				document.getElementById("restrict_elt").dispatchEvent(event);
+			}else{
+				$("#restrict_elt").click();
+			}
 		}
 		if(defaults[1]){
 			$("#rec_OwnerUGrpID").val(parseInt(defaults[1]));
