@@ -648,7 +648,7 @@ function processAction(rtyID, action, rectypeName) {
 
 	xmlhttp.open("GET","processAction.php?"+
 						"db=<?=HEURIST_DBNAME?>"+
-						"action="+action+
+						"&action="+action+
 						"&tempDBName="+tempDBName+
 						"&sourceDBName="+sourceDBName+
 						"&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+
