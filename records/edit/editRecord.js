@@ -1147,6 +1147,8 @@ top.HEURIST.edit = {
 		return newTextarea;
 	},
 
+	calendarViewer: null,
+	
 	makeDateButton: function(dateBox, doc) {
 		var buttonElt = doc.createElement("input");
 			buttonElt.type = "button";
@@ -1167,7 +1169,7 @@ top.HEURIST.edit = {
 						if(top.HEURIST.util.setDisplayPreference){
 								top.HEURIST.util.setDisplayPreference("record-edit-date", date);
 						}
-						calendarViewer.close();
+						top.HEURIST.edit.calendarViewer.close();
 					}
 				}
 
@@ -1176,7 +1178,7 @@ top.HEURIST.edit = {
 					if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
 						date = top.HEURIST.util.getDisplayPreference("record-edit-date");
 					}
-					calendarViewer.showAt([buttonElt.offsetLeft, buttonElt.offsetTop+120], date, callback); //offsetLeft-120
+					top.HEURIST.edit.calendarViewer.showAt([buttonElt.offsetLeft, buttonElt.offsetTop+120], date, callback); //offsetLeft-120
 				}
 
 		return buttonElt;
@@ -1278,7 +1280,13 @@ top.HEURIST.edit = {
 		buttonElt.onclick = function() {
 			var buttonPos = top.HEURIST.getPosition(buttonElt, true);
 			popupOptions.x = buttonPos.x + 8 - 380;
+			if(popupOptions.x<0){
+				popupOptions.x = 0;
+			}
 			popupOptions.y = buttonPos.y + 8 - 380;
+			if(popupOptions.y<0){
+				popupOptions.y = 0;
+			}
 
 			top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
 		}

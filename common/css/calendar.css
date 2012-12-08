@@ -9,7 +9,6 @@ body { font-family: sans-serif; overflow: hidden; margin: 0px;}
 #monthnav { width: 20px; height: 10px; }
 #yearnav { width: 20px; height: 10px; }
 
-#monthyearnav { width: 25px; }
 
 .cal_daysofweek { text-align: center; font-weight: bold; }
 .cal_days { text-align: center; cursor: pointer; }
@@ -20,3 +19,23 @@ body { font-family: sans-serif; overflow: hidden; margin: 0px;}
 .cal_day_today { background-color: cyan;} 
 
 #calendar-div { width: 100%; height: 100%;  background-color: #ddd;}
+
+#monthyearnav { width: 45px; }
+
+#monthyearnav div {
+	width:18px;
+	height:20px;
+	display:inline-block;
+}
+#arrow_ll {
+	background: transparent url(../images/calendar-ll-arrow.gif) scroll top center no-repeat;
+}
+#arrow_l {
+	background: transparent url(../images/calendar-l-arrow.gif) scroll top center no-repeat;
+}
+#arrow_rr {
+	background: transparent url(../images/calendar-rr-arrow.gif) scroll top center no-repeat;
+}
+#arrow_r {
+	background: transparent url(../images/calendar-r-arrow.gif) scroll top center no-repeat;
+}

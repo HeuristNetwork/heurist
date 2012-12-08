@@ -68,20 +68,19 @@ function getCalendarString(month, year) {
 	var prevYearURL = '*' + (year-1) + '/0' + (month+1) + '/01';
 	var nextYearURL = '*' + (year+1) + '/0' + (month+1) + '/01';
 
+//<img src="../../common/images/calendar-ll-arrow.gif">	
 
 	calString +=  '<table id="cal">';
 	calString +=   '<tr><td colspan="7" id="cal_header"><table border=0 cellpadding=2 cellspacing=0 width=100%><tr>' +
-			'<td id="monthyearnav"><nobr>' +
-				'<span onClick="init_calendar(\''+prevYearURL+'\')" title="Previous year"><img src="../../common/images/calendar-ll-arrow.gif"></span>' +
-				'<img src="../../common/images/calendar-5x10.gif">' +
-				'<span onClick="init_calendar(\''+prevMonthURL+'\')" title="Previous month"><img src="../../common/images/calendar-l-arrow.gif"></span>' +
-			'</nobr></td>' +
+			'<td id="monthyearnav">'+
+				'<div onClick="init_calendar(\''+prevYearURL+'\')" title="Previous year" id="arrow_ll"></div>' +
+				'<div onClick="init_calendar(\''+prevMonthURL+'\')" title="Previous year" id="arrow_l"></div>' +
+			'</td>' +
 			'<td id="cal_month">&nbsp;' + monthsInYear[month] + '&nbsp;' + year + '&nbsp;</td>' +
-			'<td id="monthyearnav" style="text-align: right;"><nobr>' +
-				'<span onClick="init_calendar(\''+nextMonthURL+'\')" title="Next month"><img src="../../common/images/calendar-r-arrow.gif"></span>' +
-				'<img src="../../common/images/calendar-5x10.gif">' +
-				'<span onClick="init_calendar(\''+nextYearURL+'\')" title="Next year"><img src="../../common/images/calendar-rr-arrow.gif"></span>' +
-			'</nobr></td>' +
+			'<td id="monthyearnav" style="text-align: right;">' +
+				'<div onClick="init_calendar(\''+nextMonthURL+'\')" title="Previous year" id="arrow_r"></div>' +
+				'<div onClick="init_calendar(\''+nextYearURL+'\')" title="Previous year" id="arrow_rr"></div>' +
+			'</td>' +
 				'</tr></table></td></tr>';
 	calString +=   '<tr class="cal_daysofweek"><td>S</td><td>M</td><td>T</td><td>W</td><td>T</td><td>F</td><td>S</td></tr>';
 

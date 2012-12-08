@@ -1002,7 +1002,13 @@ TDate.parse = function () {
 
 		//2 special cases
 		if("today"===str.toLowerCase()){
-			str = (new Date()).toDateString();
+			
+			var date = new Date();
+			var d = date.getDate();
+    		var m = date.getMonth()+1;
+    		var y = date.getFullYear();
+    		str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
+			//str = (new Date()).toDateString();
 		}else if("now"===str.toLowerCase()){
  			str = (new Date()).toString();
 		}

@@ -4509,59 +4509,6 @@ top.HEURIST.search = {
 
 top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 
-
-//fancy dialog boxes
-// constants to define the title of the alert and button text.
-var ALERT_BUTTON_TEXT = "OK";
-var args = "";
-// over-ride the alert method only if this a newer browser.
-// Older browser will see standard alerts
-if(document.getElementById) {
-	window.alert = function(txt) {
-		createCustomAlert(txt,args);
-		return true;
-	}
-}
-
-function createCustomAlert(txt,args) {
-	// shortcut reference to the document object
-	d = document;
-
-	// if the modalContainer object already exists in the DOM, bail out.
-	if(d.getElementById("modalContainer")) return;
-
-	// create the modalContainer div as a child of the BODY element
-	mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
-	mObj.id = "modalContainer";
-	 // make sure its as tall as it needs to be to overlay all the content on the page
-	mObj.className = "coverall";
-	mObj.style.zIndex = "100000";
-
-	// create the DIV that will be the alert
-	alertObj = mObj.appendChild(d.createElement("div"));
-	alertObj.id = "alertBox";
-
-	// create a paragraph element to contain the txt argument
-	msg = alertObj.appendChild(d.createElement("p"));
-	msg.innerHTML = txt;
-
-	// create an anchor element to use as the confirmation button.
-	btn = alertObj.appendChild(d.createElement("button"));
-	btn.id = "closeBtn";
-	btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
-	btn.href = "#";
-	// set up the onclick event to remove the alert when the anchor is clicked
-	btn.onclick = function() {
-		if (args = "map") _tabView.set('activeIndex', 0);
-		removeCustomAlert();
-		return ; }
-}
-
-// removes the custom alert from the DOM
-function removeCustomAlert() {
-	document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));return;
-}
-
 // layout
 
 	var Dom = YAHOO.util.Dom,

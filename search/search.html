@@ -29,10 +29,10 @@
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
+<!-- <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" /> -->
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script>
+<!-- <script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script> -->
 <!-- Combo-handled YUI CSS files: -->
 <!--<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
 --><link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/resize/assets/skins/sam/resize.css">
@@ -51,6 +51,7 @@
 <link rel="stylesheet" type="text/css" href="../external/js/sf/superfish.css" media="screen">
 <script type="text/javascript" src="../external/js/sf/superfish.js"></script>
 <script type="text/javascript" src="../external/js/sf/supersubs.js"></script>
+
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
@@ -740,8 +741,11 @@ rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.of
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 //removed by Ian's request 2012-11-21 top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
-top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
-top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/inputUrlInclude.js");				// edit-specific HEURIST functions
+top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");		// edit-specific HEURIST functions
+top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/inputUrlInclude.js");	// edit-specific HEURIST functions
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/temporalObjectLibrary.js");
+
+
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 

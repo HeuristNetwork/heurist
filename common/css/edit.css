@@ -131,10 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	max-width:90px;
 	overflow:hidden;
 }
-#workgroup-access {
-	padding-left: 20px;
-	background: transparent url(../images/public_icon-small.gif) scroll top left no-repeat;
-}
+
 #workgroup-editor {
 	width:320px !important;
 	height:270px !important;
