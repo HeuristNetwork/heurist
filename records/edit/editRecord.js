@@ -783,7 +783,7 @@ top.HEURIST.edit = {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
 		if (fileInput.value == "") return;
-
+/* Ian request 2012-12
 		if (!confirm("By uploading this file you certify that you have copyright rights" +
 			" to upload this file and to make it available on the web through the Heurist" +
 			" interface. Note that although records can be restricted to specified workgroups," +
@@ -792,7 +792,7 @@ top.HEURIST.edit = {
 			fileInput.value = "";
 			return;
 		}
-
+*/
 		if (! windowRef.HEURIST.uploadsDiv  ||  ! this.document.getElementById("uploads")) {
 			var uploadsDiv = windowRef.HEURIST.uploadsDiv = this.document.body.appendChild(this.document.createElement("div"));
 				uploadsDiv.id = "uploads";

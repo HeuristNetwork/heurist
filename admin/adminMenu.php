@@ -88,6 +88,8 @@ if(array_key_exists('mode',$_REQUEST)){
 				return false;
 			};
 		</script>
+		<!-- hapi required for image upload in bugreport -->
+  		<script src="../common/php/loadHAPI.php"></script>
 		<script>
 			var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db=<?=HEURIST_DBNAME?>';
 			window.history.pushState("object or string", "Title", location.pathname+'?db=<?=HEURIST_DBNAME?>');

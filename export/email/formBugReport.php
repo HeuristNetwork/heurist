@@ -75,8 +75,11 @@
 			function doUploadFile(event)
 			{
 				top.HEURIST.edit.uploadFileInput.call(window, event.target);
-			};
+			}
 
+			//need as callback after file upload
+			function changed() {
+			}			
 			//
 			var uploadCompleted = function(inputDiv, bdValue) {
 				//var thisRef = this;	// for great closure

@@ -205,7 +205,7 @@
 				$newBibDetail = $bdInputHandler->convertPostToMysql($val);
 				$newBibDetail["dtl_DetailTypeID"] = $bdType;
 				$newBibDetail["dtl_RecID"] = $recID;
-/*****DEBUG****/error_log("new detail ".print_r($newBibDetail,true));
+/*****DEBUG****///error_log("new detail ".print_r($newBibDetail,true));
 				array_push($bibDetailInserts, $newBibDetail);
 
 				unset($_POST[$eltName][$eltID]);	// remove data from post submission

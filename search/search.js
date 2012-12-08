@@ -2510,7 +2510,7 @@ top.HEURIST.search = {
 				innerHTML += '<img height="11" title="info" src="'+top.HEURIST.basePath+'common/images/info.png" '+
 									'onclick="{top.HEURIST.search.workgroupInfoPopup(event, '+wg_ID+');}" onmouseout="{top.HEURIST.search.hidePopup();}">';
 				innerHTML += '&nbsp;<img height="11" src="'+ top.HEURIST.basePath+'common/images/blog-icon-box-rev-lightgrey16.png" '+
-									'onclick="{window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
+									'onclick="{top.HEURIST.util.stopEvent(event); window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
 				//innerHTML += "<a target=\"_blank\" class='external-link' href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'></a>";
 				innerHTML += "</div></div>";
 

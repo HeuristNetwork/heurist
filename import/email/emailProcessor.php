@@ -81,7 +81,7 @@
 	$res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
 	if (!$res) returnErrorMsgPage2("Unable to retrieve incoming email address information from user's sysUGrps record, MySQL error: ".mysql_error());
 	$email = mysql_fetch_assoc($res);
-	if($email && $email['ugr_IncomingEmailAddresses']){
+	if($email && $email['ugr_IncomingEmailAddresses'] && $email['ugr_IncomingEmailAddresses']!="undefined"){
 		if($senders){
 			$senders = $senders.',';
 		}
@@ -364,13 +364,13 @@
 			}
 
 			$filename=$attachment->getFilename();
-				/*****DEBUG****/ error_log("AA11>>>".$filename);
+				/*****DEBUG****/ //error_log("AA11>>>".$filename);
 			if(!$filename){
 				$filename=$attachment->getName();
 			}
 			if($filename){
 
-				/*****DEBUG****/ error_log("AAAA>>>".$filename."     ".$attachment->getName());
+				/*****DEBUG****///error_log("AAAA>>>".$filename."     ".$attachment->getName());
 
 /*****DEBUG****/ //error_log("file arr >>>>>>".print_r($files_arr,true));				//find file name and related info if $files_arr
 				if($files_arr){
