@@ -34,7 +34,7 @@ $terms = getTerms();
 $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 array_push($wg_ids, 0);
 
-// if we get a record id tehn see if there is a personal bookmark for it.
+// if we get a record id then see if there is a personal bookmark for it.
  if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
 	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
 	if (mysql_num_rows($res)>0) {
@@ -280,14 +280,13 @@ function print_private_details($bib) {
 					"4"=>"****",
 					"5"=>"*****");
 
-	$rating_label = @$ratings[@$bkmk['bkm_Rating']?$bkmk['bkm_Rating']:"0"];
+	$rating_label = @$ratings[@$bib['bkm_Rating']?$bib['bkm_Rating']:"0"];
 	?>
 
 	<div class=detailRow>
 	<div class=detailType>Rating</div>
 	<div class=detail>
 	 <!-- <span class=label>Rating:</span> --> <?= $rating_label? $rating_label : 'none' ?>
-
 	</div>
 	</div>
 
