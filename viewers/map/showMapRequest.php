@@ -177,62 +177,14 @@ if(mysql_error()) {
 			}
 			else $bbox = null;
 
-			switch ($val[1]) {
-				case "p":
-				if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $val[2], $matches)) {
-					array_push($geoObjects, array("bibID" => $val[0], "type" => "point", "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]))));
-				} else continue;
-				break;
-
-				case "r":
-				if (preg_match("/POLYGON\\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[2], $matches)) {
-					array_push($geoObjects, array("bibID" => $val[0], "type" => "rect",
-					"geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), "x1" => floatval($matches[5]), "y1" => floatval($matches[6]), "bounds" => $bbox)));
-				} else continue;
-				break;
-
-				case "c":
-				if (preg_match("/LINESTRING\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $val[2], $matches)) {
-					array_push($geoObjects, array("bibID" => $val[0], "type" => "circle",
-					"geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), "radius" => floatval($matches[3] - $matches[1]), "bounds" => $bbox)));
-				} else continue;
-				break;
-
-				case "pl":
-				if (! preg_match("/POLYGON\\(\\((.+)\\)\\)/i", $val[2], $matches)) continue;
-				if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) continue;
-				$matches = $matches[0];
-
-				$points = array();
-				for ($j=0; $j < count($matches)-1; ++$j) {
-					preg_match("/(\\S+)\\s+(\\S+)(?:,|$)/", $matches[$j], $match_matches);
-					array_push($points, array("x" => floatval($match_matches[1]), "y" => floatval($match_matches[2])));
-				}
-				array_push($geoObjects, array("bibID" => $val[0], "type" => "polygon", "geo" => array("points" => $points, "bounds" => $bbox)));
-				break;
-
-				case "l":
-
-				if (! preg_match("/LINESTRING\\((.+)\\)/i", $val[2], $matches)) continue;
-				if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) continue;
-
-				$matches = $matches[0];
-
-				$points = array();
-				for ($j=0; $j < count($matches); ++$j) {
-					preg_match("/(\\S+)\\s+(\\S+)(?:,|$)/", $matches[$j], $match_matches);
-
-					array_push($points, array("x" => floatval($match_matches[1]), "y" => floatval($match_matches[2])));
-					//			array_push($points, array(floatval($match_matches[2]), floatval($match_matches[1])));
-					}
-				if (count($points) <= 1) continue;
-				array_push($geoObjects, array("bibID" => $val[0], "type" => "polyline", "geo" => array("points" => $points, "bounds" => $bbox)));
-
-				//		$encoding = dpEncode($points);
-				//		array_push($geoObjects, array("bibID" => $val[0], "type" => "path", "geo" => array("points" => $encoding[0], "levels" => $encoding[1], "bounds" => $bbox)));
-
+			$geoobj = parseValueFromDb($val[0], $val[1], $val[2], $bbox);
+			if($geoobj){
+				array_push($geoObjects, $geoobj);
+				$geoBibIDs[$val[0]] = $val[0];
 			}
-			$geoBibIDs[$val[0]] = $val[0];
+			
+
+			
 /*****DEBUG****///error_log("ADDED1:".is_string($val[0])."    ".$geoBibIDs[$val[0]]);
 /*****DEBUG****///error_log("1>>>>>>".$geoBibIDs[$val[0]]);
 /*****DEBUG****///error_log("2>>>>>>".$geoBibIDs["97025"]);
@@ -542,4 +494,73 @@ if(mysql_error()) {
 			return null;
 	}
 
+	/**
+	* parse value from database (asText)
+	* 
+	* @param mixed $recId
+	* @param mixed $type
+	* @param mixed $geovalue
+	*/
+	function parseValueFromDb($recId, $type, $geovalue, $bbox)
+	{
+			$val = array($recId, $type, $geovalue);
+			$res = null;
+			
+			switch ($val[1]) {
+				case "p":
+				if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $val[2], $matches)) {
+					$res = array("bibID" => $val[0], "type" => "point", "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2])));
+				}
+				break;
+
+				case "r":
+				if (preg_match("/POLYGON\\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[2], $matches)) {
+					$res = array("bibID" => $val[0], "type" => "rect",
+					"geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), "x1" => floatval($matches[5]), "y1" => floatval($matches[6]), "bounds" => $bbox));
+				}
+				break;
+
+				case "c":
+				if (preg_match("/LINESTRING\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $val[2], $matches)) {
+					$res = array("bibID" => $val[0], "type" => "circle",
+					"geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), "radius" => floatval($matches[3] - $matches[1]), "bounds" => $bbox));
+				}
+				break;
+
+				case "pl":
+				if (! preg_match("/POLYGON\\(\\((.+)\\)\\)/i", $val[2], $matches)) return null;
+				if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) return null;
+				$matches = $matches[0];
+
+				$points = array();
+				for ($j=0; $j < count($matches)-1; ++$j) {
+					preg_match("/(\\S+)\\s+(\\S+)(?:,|$)/", $matches[$j], $match_matches);
+					array_push($points, array("x" => floatval($match_matches[1]), "y" => floatval($match_matches[2])));
+				}
+				$res = array("bibID" => $val[0], "type" => "polygon", "geo" => array("points" => $points, "bounds" => $bbox));
+				break;
+
+				case "l":
+
+				if (! preg_match("/LINESTRING\\((.+)\\)/i", $val[2], $matches)) return null;
+				if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) return null;
+
+				$matches = $matches[0];
+
+				$points = array();
+				for ($j=0; $j < count($matches); ++$j) {
+					preg_match("/(\\S+)\\s+(\\S+)(?:,|$)/", $matches[$j], $match_matches);
+
+					array_push($points, array("x" => floatval($match_matches[1]), "y" => floatval($match_matches[2])));
+					//			array_push($points, array(floatval($match_matches[2]), floatval($match_matches[1])));
+					}
+				if (count($points) <= 1) continue;
+				$res = array("bibID" => $val[0], "type" => "polyline", "geo" => array("points" => $points, "bounds" => $bbox));
+
+				//		$encoding = dpEncode($points);
+				//		array_push($geoObjects, array("bibID" => $val[0], "type" => "path", "geo" => array("points" => $encoding[0], "levels" => $encoding[1], "bounds" => $bbox)));
+
+			}
+			return $res;
+	}	
 ?>

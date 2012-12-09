@@ -2479,7 +2479,11 @@ top.HEURIST.search = {
 			searchDiv = document.getElementById("menuSavedFiltersAndLayouts");
 			searchDiv.innerHTML = innerHTML_filters;
 
-			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db;
+			document.getElementById("my-blog-link").onclick = function(event){
+				top.HEURIST.util.stopEvent(event); 
+				window.open(top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db,'_blank');
+				return false;
+			}
 
 		}//wg=0
 

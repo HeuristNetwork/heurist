@@ -420,7 +420,7 @@ BlogEntry: function(record, parentElement, isNew) {
 									editLink.innerHTML = "Click to edit a location";
 									newDiv.className = "geo-div";
 									input.value = type+' '+value;
-									geoImg.onmouseover= function(e) { mapViewer.showAt(e, input.value); };
+									geoImg.onmouseover= function(e) { mapViewer.showAtStatic(e, null, input.value); }; //mapViewer.showAt(e, input.value); };
 								}
 							}
 					}

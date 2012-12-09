@@ -36,7 +36,7 @@ function MapViewer() {
 			initmap_viewer('map_viewer', geovalue); //from digitizer.js
 	}
 
-	function _showAtStatic(event, recid)
+	function _showAtStatic(event, recid, value)
 	{
 			hintDiv.showAt(event);
 
@@ -48,7 +48,15 @@ function MapViewer() {
 				mapImg.id = "map_static_image";
 			}
 			var d = new Date().getTime()
-			mapImg.src = top.HEURIST.basePath+"viewers/map/showMapUrl.php?width=300&height=300&q=ids:"+recid+"&db="+top.HEURIST.database.name+"&t="+d;
+			
+			var surl = top.HEURIST.basePath+"viewers/map/showMapUrl.php?width=300&height=300&db="+top.HEURIST.database.name+"&t="+d;
+			
+			if(value){
+				surl = surl + "&value="+encodeURIComponent(value);
+			}else{
+				surl = surl + "&q=ids:"+recid;
+			}
+			mapImg.src = surl;
 	}
 
 
@@ -58,8 +66,8 @@ function MapViewer() {
 		showAt: function(event, geovalue){
 			_showAt(event, geovalue);
 		},
-		showAtStatic: function(event, recid){
-			_showAtStatic(event, recid);
+		showAtStatic: function(event, recid, value){
+			_showAtStatic(event, recid, value);
 		},
 		hide: function(){
 			hintDiv.hide();

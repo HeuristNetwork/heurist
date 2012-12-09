@@ -1,9 +1,9 @@
 <?php
 
 	/**
-	* showMap.php
+	* showMapUrl.php
 	*
-	* search records and fills the structure to display on map
+	* return static google map image with feature either by record Id or by geovalue
 	*
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org
@@ -16,9 +16,25 @@
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
 
-	$mapobjects = getMapObjects($_REQUEST);
+	$mapobjects = null;
+	
+	if(@$_REQUEST['value'] && $_REQUEST['value']!='undefined'){
+		
+		$val = $_REQUEST['value'];
+		$type = substr($val,0,strpos($val,' '));
+		$geoval = substr($val,strpos($val,' ')+1);
 
-	if($mapobjects['cntWithGeo']>0){
+		$geoobj = parseValueFromDb(0, $type, $geoval, null);
+
+		if($geoobj){
+			$mapobjects = array("cntWithGeo"=>1, "geoObjects"=>array($geoobj) );
+		}
+		
+	}else{
+		$mapobjects = getMapObjects($_REQUEST);	
+	}
+
+	if($mapobjects && $mapobjects['cntWithGeo']>0){
 
 		if(@$_REQUEST['width'] && @$_REQUEST['height']){
 			$size = $_REQUEST['width']."x".$_REQUEST['height'];

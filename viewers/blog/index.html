@@ -23,18 +23,8 @@
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
 -->
 
-<script src="../../common/php/loadHAPI.php"></script>
-<script src="../../hapi/js/goi.js"></script>
-
-<script>
-	if (!(HCurrentUser && HCurrentUser.isLoggedIn())) {
-		window.location = HAPI.XHR.defaultURLPrefix + "common/connect/login.php" + (HAPI.database ? "?db="+HAPI.database : "");
-	}
-</script>
-
 <script src="../../records/comments/threadedComments.js"></script>
 <script src="../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-<script src="../../records/woot/woot.js"></script>
 
 
 <!--script src="http://yui.yahooapis.com/2.5.2/build/yahoo/yahoo-min.js"></script>
@@ -65,10 +55,26 @@
  <input id=yui-history-field type=hidden>
 
 <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-<script src="../../common/php/displayPreferences.php"></script>
-<script src="../../common/php/loadCommonInfo.php"></script>
-<script src="../../common/php/getMagicNumbers.php"></script>
-<script src=autocompleteBlogTags.js></script>
+<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+
+<script type="text/javascript" src="../../common/php/displayPreferences.php"></script>
+<script type="text/javascript" src="../../common/php/loadCommonInfo.php"></script>
+<script type="text/javascript" src="../../common/php/getMagicNumbers.php"></script>
+<script type="text/javascript" src=autocompleteBlogTags.js></script>
+
+<script type="text/javascript" src="../../common/php/loadHAPI.php"></script>
+<script type="text/javascript" src="../../hapi/js/goi.js"></script>
+<script type="text/javascript" src="../../records/woot/woot.js"></script>
+
+<script type="text/javascript" src="../../records/edit/digitizer/mapViewer.js"></script>
+
+<script>
+	if (!(HCurrentUser && HCurrentUser.isLoggedIn())) {
+		window.location = HAPI.XHR.defaultURLPrefix + "common/connect/login.php" + (HAPI.database ? "?db="+HAPI.database : "");
+	}
+</script>
+
+
 
 <script src="blog.js"></script>
 
@@ -261,8 +267,6 @@ function reload() {
 
 </script>
 
- <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
- <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
 <!--
 
