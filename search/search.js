@@ -211,17 +211,6 @@ top.HEURIST.search = {
 		if (top.HEURIST.parameters["label"] && (clearLabel==undefined || clearLabel)) {
 			delete top.HEURIST.parameters["label"];
 		}
-		/*
-		if (!$("#simple-search").hasClass("collapsed")) {
-			$("#simple-search").toggleClass("collapsed");
-			$("div.simplesearch").toggleClass("collapsed");
-
-		}
-		if (!$("#searchButtons").hasClass("collapsed")) {
-			$("#searchButtons").toggleClass("collapsed");
-			$("div.searchButtonsTrigger").toggleClass("collapsed");
-		}
-		*/
 		if($("#simple-search").is(':visible')){
 			$("#simple-search").fadeOut();
 			$("#btnSimpleSearch").toggleClass("collapsed");
@@ -276,24 +265,49 @@ top.HEURIST.search = {
 
 	},
 
+	parseLayoutParam: function(layoutString){
+		var layOuts = layoutString.split("|");
+		var i,
+			ret = {};
+		for (i =0; i<layOuts.length; i++) {
+			temp = layOuts[i].split(":");
+			switch (temp[0]) {
+				case "srch":
+					ret[temp[0]] = temp[1].split("-");
+					break;
+				case "app":
+					ret[temp[0]] = temp[1].split(",");
+					break;
+				default:
+					ret[temp[0]] = temp[1];
+			}
+		}
+		return ret;
+	},
+
 	applyFilterAndLayout: function(evt){
-		var i,layout,style,
+		var i,layoutSrch, layoutNav, layoutApp, layouts, style,
 			maxFilterDepth=0,
 			maxDepth=0;
 			top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
 			top.HEURIST.search.loadLevelFilter(0);
-		if (top.HEURIST.parameters &&
+		if (top.HEURIST.parameters && // if parameters for filetering and layout exist means we need to set the new layout/filtering
 			(	top.HEURIST.parameters['rtfilters'] ||
 				top.HEURIST.parameters['ptrfilters'] ||
 				top.HEURIST.parameters['relfilters'] ||
-				(top.HEURIST.parameters['layout'] &&
-					top.HEURIST.parameters['layout'].indexOf('srch') != -1 ))) {
+				top.HEURIST.parameters['layout'] )) {
 				//calculate max depth of filters
-				if (top.HEURIST.parameters['layout'] &&
-					top.HEURIST.parameters['layout'].indexOf('srch:') != -1 ) {
-					//
-					layout = top.HEURIST.parameters['layout'].match(/srch:([^\|]+)/);
-					layout = layout[1].split("-");
+				if (top.HEURIST.parameters['layout']) {
+					layouts = top.HEURIST.search.parseLayoutParam(top.HEURIST.parameters['layout']);
+					if (layouts['srch']) {
+						layoutSrch = layouts['srch'];
+					}
+					if (layouts['nav']) {
+						layoutNav = layouts['nav'];
+					}
+					if (layouts['app']) {
+						layoutApp = layouts['app'];
+					}
 				}
 				var rtf = top.HEURIST.parameters['rtfilters'],
 					ptrf = top.HEURIST.parameters['ptrfilters'],
@@ -305,39 +319,61 @@ top.HEURIST.search = {
 							maxFilterDepth = i;
 						}
 				}
-				//expand to the the max defined by the filter or layout  or by the data
-				maxDepth = Math.min(Math.max((layout? layout.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
-				//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
-				if (layout) {
-					top.HEURIST.search.setResultStyle(layout[0][0],0);
+				//adjust the nav panel
+				if (layoutNav) {//
+					if (layoutNav == "off"){//new layout collapses the nav panel
+						if(top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
+							layoutNavPanel(true);
+						}
+					}else if (!isNaN(layoutNav)){//new layout sets the width of the nav panel
+						layoutNavPanel(false,Number(layoutNav));
+					}
 				}
+				if (layoutApp) {//
+					if (layoutApp[0] == "off"){//new layout collapses the nav panel
+						if(top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
+							layoutAppPanel(true);
+						}
+					}else if (!isNaN(layoutApp[0])){//new layout sets the width of the nav panel
+						layoutAppPanel(false,Number(layoutApp[0]));
+					}
+				}
+				//expand to the the max defined by the filter or layout  or by the data
+				maxDepth = Math.min(Math.max((layoutSrch? layoutSrch.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
+				//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
+				if (layoutSrch) {// handle results level separately since there are no links above it.
+					top.HEURIST.search.setResultStyle(layoutSrch[0][0],0);
+				}
+				//filterRelated results with noPush for loevel 0
 				top.HEURIST.search.filterRelated(0,true,true);
 				for (i=1; i<=maxDepth; i++) {
 					var depthInfo = top.HEURIST.search.results.infoByDepth[i];
 					//loadLevelFilter Menu
-					top.HEURIST.search.loadLevelFilter(i,(layout && layout[i] && layout[i][0] ? layout[i][0]: null));
+					top.HEURIST.search.loadLevelFilter(i,(layoutSrch && layoutSrch[i] && layoutSrch[i][0] ? layoutSrch[i][0]: null));
 					//loadRelatedLevel results
 					top.HEURIST.search.loadRelatedLevel(i,true);
 					document.getElementById("showrelated" + i).className += " loaded";
 					//filterRelated results with noPush
 					top.HEURIST.search.filterRelated(i,true,true);
 					// expand level
-					if (!(layout && layout[i][1] && layout[i][1].toLowerCase() == "c")) {
+					if (!(layoutSrch && layoutSrch[i][1] && layoutSrch[i][1].toLowerCase() == "c")) { // no c following the view designator so expand
 						$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
 						$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
-					}else{// make sure collapsed class is on parent
-						if (!$("#results-level"+i).hasClass('collapsed')){
+					}else{ // collapse level
+						if (!$("#results-level"+i).hasClass('collapsed')){// make sure collapsed class is on parent
 							$("#results-level"+i).addClass('collapsed');
 						};
 						$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
 					}
 				}
 				top.HEURIST.search.setSelectedCount();
+				//if there is more depth releated records than showing
+				//then load the filters for the next level to show the user that they can load it
 				if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
 					top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
 					top.HEURIST.search.loadLevelFilter(maxDepth+1);
 				}
-				//clear the filters
+				//clear the filters parameters so they are calculated when next needed
 				if (rtf) {
 					delete top.HEURIST.parameters['rtfilters'];
 				}
@@ -1569,9 +1605,7 @@ top.HEURIST.search = {
 		for (;i<l; i++) {
 			resultsDiv = document.getElementById("results-level"+i);
 			if (resultsDiv) {
-				if(style!=='summary'){
-					top.HEURIST.util.setDisplayPreference("search-result-style"+ i, style, null,null,true,true);
-				}
+				top.HEURIST.util.setDisplayPreference("search-result-style"+ i, style, null,null,true,true);
 				resultsDiv.className = style + (i>0?" related-results":"") +
 										($(resultsDiv).hasClass("collapsed") ? " collapsed" : "");
 				$("li.view > ul > li", resultsDiv).removeClass("checked");
@@ -2099,7 +2133,6 @@ top.HEURIST.search = {
 		}else{
 			return null;  // no target so we can't do anything
 		}
-
 	},
 
 	resultItemMouseOver: function(e, targ) {
@@ -2521,8 +2554,8 @@ top.HEURIST.search = {
 				innerHTML += "<div class=content>";
 				// innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/usergroupHomepage.html?wg=" + wg_ID +(top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "")+ "'>Workgroup page</a></div>";
 
-                // 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
-                // innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(wg_ID);return false;}'>Aggregations</a></div>";
+				// 24/9/12: For the moment leave out aggregations here pending deciding if they are useful for each workgroup
+				// innerHTML += "<div class=saved-search-subsubheading><a href='#' onclick='{top.HEURIST.search.loadAggregations(wg_ID);return false;}'>Aggregations</a></div>";
 
 				//innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" class='external-link' href='" +
 				//					top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'>Blog</a></div>";
@@ -2531,7 +2564,7 @@ top.HEURIST.search = {
 				var searches = top.HEURIST.user.workgroupSavedSearches[wg_ID];
 				if (searches  &&  searches.length) {
 					// Remove heading and indent for cleaner, neater navigation - Ian 3/10/12
-                    // innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
+					// innerHTML += "<div class=saved-search-subsubheading>Saved searches (shared)</div>";
 					for (var j = 0; j < searches.length; ++j) {
 						innerHTML += printSavedSearch(searches[j]);
 						innerHTML_inmenu += printSavedSearchAsMenuItem(searches[j]);
@@ -2593,8 +2626,8 @@ top.HEURIST.search = {
 			}
 
 			window.location.href = top.HEURIST.basePath+
-                "search/search.html?q=t:"+code+"&label=Aggregation records&w=" +
-                w + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")
+				"search/search.html?q=t:"+code+"&label=Aggregation records&w=" +
+				w + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")
 		}
 
 	},
@@ -2760,7 +2793,7 @@ top.HEURIST.search = {
 							if(ss.length<4){
 								ss.push(_wgId);
 							}
-				   			break;
+							break;
 						}
 					}
 				}
@@ -2775,7 +2808,7 @@ top.HEURIST.search = {
 	savedSearchExecute: function(sid) {
 		var ss = top.HEURIST.search.savedSearchFind(sid);
 		if(!top.HEURIST.util.isnull(ss)){
-			top.HEURIST.search.executeQuery(ss[1]+'"&label='+ss[0]);
+			top.HEURIST.search.executeQuery(ss[1]+'&label='+ss[0]);
 		}
 		return false;
 	},
@@ -2967,10 +3000,9 @@ top.HEURIST.search = {
 	//
 	updateRecordView: function(recID){
 		//send selectionChange event
-
 		var recordFrame = document.getElementById("record-view-frame");
-
 		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+
 		if (!selectedRecIDs.length){
 			top.HEURIST.currentRecordID = null;
 			top.HEURIST.currentRecordID_lastloaded = null;
@@ -2978,17 +3010,13 @@ top.HEURIST.search = {
 			top.HEURIST.currentRecordID = recID;
 		}
 
-		if (recordFrame && !top.HEURIST.util.isnull(_tabView))
-		{
+		if (recordFrame && !top.HEURIST.util.isnull(_tabView)){
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 			if(currentTab==_TAB_RECORDVIEW) {
-
 				if (top.HEURIST.currentRecordID == null){
 					recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 				}else if (top.HEURIST.currentRecordID_lastloaded != top.HEURIST.currentRecordID){ //to prevent reload
-
 					top.HEURIST.currentRecordID_lastloaded = top.HEURIST.currentRecordID;
-
 					//var recID = selectedRecIDs[selectedRecIDs.length-1];
 					recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
 					setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+top.HEURIST.currentRecordID+
@@ -3466,8 +3494,10 @@ top.HEURIST.search = {
 				if (wg === undefined) return;
 
 				var _data = {rec_ids: recIDs_list,
-							 wg_id  : wg,
-							 vis : (hidden ? "hidden" : viewable ? "viewable" : pending ? "pending" : "public") };
+							wg_id  : wg,
+							vis : (hidden ? "hidden" :
+											viewable ? "viewable" :
+														pending ? "pending" : "public") };
 				top.HEURIST.search.executeAction( "set_wg_and_vis", _data );
 			}
 		});
@@ -3507,7 +3537,6 @@ top.HEURIST.search = {
 	},
 
 	addBookmarks: function(recID) {
-
 		var recIDs_list = [];
 		if(recID){
 			recIDs_list = [recID];
@@ -3524,7 +3553,6 @@ top.HEURIST.search = {
 	},
 
 	deleteBookmarks: function(bkmkID) {
-
 		var bkmkIDs_list = [];
 		if(bkmkID){
 			bkmkIDs_list = [bkmkID];
@@ -3545,8 +3573,8 @@ top.HEURIST.search = {
 	},
 
 	deleteRecords: function(recID) {
-
 		var recIDs_list = [];
+
 		if(recID){
 			recIDs_list = [recID];
 		}else{
@@ -3563,7 +3591,7 @@ top.HEURIST.search = {
 	},
 
 	/*
-	* COOLECTION OF RECORDS =============================
+	* COLLECTION OF RECORDS =============================
 	*/
 	renderCollectionUI: function() {
 		if (top.HEURIST.util.isnull(top.HEURIST.search.collectCount))
@@ -3580,26 +3608,26 @@ top.HEURIST.search = {
 					});
 			return;
 		}
-
 		document.getElementById("collection-label").innerHTML = "<strong>Collected: " + top.HEURIST.search.collectCount + "</strong>";
 	},
 
-	collectionSave :function ()
-	{
-				if (top.HEURIST.search.collectCount == 0) {
-					alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
-				}else{
-					top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html'+
-					("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))),{width:650, height:380});
-				}
-				return false;
+	collectionSave :function (){
+		if (top.HEURIST.search.collectCount == 0) {
+			alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
+		}else{
+			top.HEURIST.util.popupURL(window,
+										'saved/saveCollectionPopup.html'+
+											("?db=" +
+												(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+													(top.HEURIST.database && top.HEURIST.database.name ?
+														top.HEURIST.database.name : ""))),
+										{width:650, height:380});
+		}
+		return false;
 	},
 
 	collectionOnUpdate: function(results) {
-
 		if(!top.HEURIST.util.isnull(results)){
-
 			var refresh = false;
 			if (typeof results.count !== "undefined") {
 				if (top.HEURIST.search.collectCount != results.count) {
@@ -3610,9 +3638,6 @@ top.HEURIST.search = {
 			top.HEURIST.search.collection = results.ids;
 			top.HEURIST.search.renderCollectionUI();
 		}
-		/*if (top.HEURIST.parameters["q"].match(/_COLLECTED_/) && refresh) {
-			top.location.reload();
-		}*/
 		top.HEURIST.search.collChangeTimer = 0;
 	},
 
@@ -3770,6 +3795,20 @@ top.HEURIST.search = {
 			if ($(resultsDiv).hasClass('collapsed')) {
 				ret += "c";
 			}
+		}
+		// check navigation (left side) panel
+		if (top.HEURIST.displayPreferences.sidebarPanel == "closed") {
+			ret += "|nav:off";
+		}else{
+//			ret += "|nav:"+top.HEURIST.displayPreferences.leftWidth;
+			ret += "|nav:"+layout.getSizes().left.w;
+		}
+		// check application (right side) panel
+		if (top.HEURIST.displayPreferences.applicationPanel == "closed") {
+			ret += "|app:off";
+		}else{
+//			ret += "|app:"+top.HEURIST.displayPreferences.rightWidth;
+			ret += "|app:"+layout.getSizes().right.w;
 		}
 		return [maxLevel,ret];
 	},
@@ -4236,12 +4275,12 @@ top.HEURIST.search = {
 
 		//init menu
 		$("ul.sf-menu").supersubs({
-		            minWidth:    15,
-		            maxWidth:    57,
+				minWidth:    15,
+				maxWidth:    57,
 				extraWidth:  1
 		}).superfish().click(function(){
-                $(this).find("ul").hide();
-            });
+				$(this).find("ul").hide();
+			});
 
 
 		//close Assisted search in outside click
@@ -4433,21 +4472,21 @@ top.HEURIST.search = {
 
 		if(!document.getElementById("divAggLink1"))return; //Artem: if not-logged in the elements below are not created
 
-        var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
-        if(isShowAggregations=="false"){
-            document.getElementById("divAggLink1").style.display ="none";
-            document.getElementById("divAggLink2").style.display ="none";
-        }
+		var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
+		if(isShowAggregations=="false"){
+			document.getElementById("divAggLink1").style.display ="none";
+			document.getElementById("divAggLink2").style.display ="none";
+		}
 
-        var isShowMyBookmarks = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
-        if(isShowMyBookmarks=="false"){
-            document.getElementById("my-records-saved-searches").style.display ="none";
-        }
+		var isShowMyBookmarks = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
+		if(isShowMyBookmarks=="false"){
+			document.getElementById("my-records-saved-searches").style.display ="none";
+		}
 
-        var isShowFavouritesSearch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
-        if(isShowFavouritesSearch=="false"){
-            document.getElementById("divFavLink").style.display ="none";
-        }
+		var isShowFavouritesSearch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
+		if(isShowFavouritesSearch=="false"){
+			document.getElementById("divFavLink").style.display ="none";
+		}
 
 	},
 
@@ -4516,10 +4555,81 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 // layout
 
 	var Dom = YAHOO.util.Dom,
-		Event = YAHOO.util.Event;
+		Event = YAHOO.util.Event,
+		layout;
 
 	var viewerTabIndex = top.HEURIST.util.getDisplayPreference("viewerTab");
 
+// open/close sidebar panel
+function layoutNavPanel(isToggle,newWidth){
+	var status = top.HEURIST.util.getDisplayPreference("sidebarPanel");
+	var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
+	if (newWidth && !isNaN(newWidth)){
+		oldLeftWidth = (newWidth < 150) ? 150 : newWidth;
+		layout.getUnitByPosition('left').set("width",oldLeftWidth);
+	}
+	var navButton = document.getElementById("navButton");
+	if (isToggle){// skip toggle if first open to set previous preference
+		var status = (status=="open"?"closed":"open");
+	}else if(newWidth){
+		status = "open";
+	}
+	if (status == "closed"){
+		if (!isToggle){// capture the width for restarts
+			oldLeftWidth = layout.getSizes().left.w;
+		}
+		layout.getUnitByPosition('left').collapse();
+		navButton.className +=" closed";
+		navButton.style.width = "20px";
+		navButton.title = "Show Navigation Panel";
+		document.getElementById("formSearch").style.paddingLeft = "5px";
+		//display navigation as menu
+		document.getElementById("menuNavigation").style.display = 'block';
+	}else{
+		layout.getUnitByPosition('left').expand();
+		navButton.className = navButton.className.replace(" closed", "");
+		navButton.title = "Hide Navigation Panel";
+/*DEBUG*/// window.console.log("in sidebarPanelStatus");
+		var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
+		navButton.style.width = leftPos-1;
+		//adjust search form so it is above center (result) panel
+		document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+		if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){//hide navigation menu
+			document.getElementById("menuNavigation").style.display = 'none';
+		}
+	}
+	top.HEURIST.util.setDisplayPreference(["oldLeftWidth","sidebarPanel"], [oldLeftWidth,status], null, null, true, true);
+	layout.resize();
+}
+//top.HEURIST.layout.toggleNavPanel = toggleNavPanel;
+
+function layoutAppPanel(isToggle,newWidth){
+	var status = top.HEURIST.util.getDisplayPreference("applicationPanel");
+	var oldRightWidth = top.HEURIST.util.getDisplayPreference("oldRightWidth");
+	if ( newWidth && !isNaN(newWidth)){
+		oldRightWidth = (newWidth < 150) ? 150 : newWidth;
+		layout.getUnitByPosition('right').set("width",oldRightWidth);
+	}
+	if (isToggle){// skip toggle if first open to set previous preference
+		var status = (status=="open"?"closed":"open");
+	}
+	if (status == "closed"){
+		if (!isToggle){// capture the width for restarts
+			oldRightWidth = layout.getSizes().right.w;
+		}
+		layout.getUnitByPosition('right').collapse();
+		appPanelButton.className +=" closed";
+		//appPanelButton.style.width = "20px";
+		appPanelButton.title = "Show Applications";
+	}else{
+		layout.getUnitByPosition('right').expand();
+		appPanelButton.className = appPanelButton.className.replace(" closed", "");
+		appPanelButton.title = "Hide Applications";
+	}
+	top.HEURIST.util.setDisplayPreference(["oldRightWidth","applicationPanel"], [oldRightWidth,status], null, null, true, true);
+	layout.resize();
+}
+//top.HEURIST.layout.toggleAppPanel = toggleAppPanel;
 	Event.onDOMReady(function() {
 //DEBUG window.console.log("in onDOMReady");
 
@@ -4531,24 +4641,24 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 			leftWidth = oldLeftWidth;
 		};
 		var appPanelStatus = top.HEURIST.util.getDisplayPreference("applicationPanel");
-		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
-		var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
-		if (!searchWidth || !oldSearchWidth) {
-			searchWidth = 400;
+		var rightWidth = top.HEURIST.util.getDisplayPreference("rightWidth");
+		var oldRightWidth = top.HEURIST.util.getDisplayPreference("oldRightWidth");
+		if (!rightWidth || !oldRightWidth) {
+			rightWidth = 400;
 		}else if (appPanelStatus != "open"){
-			searchWidth = oldSearchWidth;
+			rightWidth = oldRightWidth;
 		};
 		var appPanelButton = document.getElementById("appPanelButton");
 		var navButton = document.getElementById("navButton");
 		var searchTable = document.getElementById("search");
 
-		var layout = new YAHOO.widget.Layout('searchpage-mainbody',{
+		layout = new YAHOO.widget.Layout('searchpage-mainbody',{
 			units: [
 				//{ position: 'top', height: 95, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 20, resize: false, body: 'footer', gutter: '0', collapse: false },
 				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150, maxWidth:300},
 				{ position: 'center', body: 'page', gutter: '0', minWidth: 350, scroll: null, zIndex: 2},
-				{ position: 'right', width: searchWidth, resize: true, useShim: true, body: 'page-right', gutter:'0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150},
+				{ position: 'right', width: rightWidth, resize: true, useShim: true, body: 'page-right', gutter:'0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150},
 			]
 		});
 
@@ -4570,32 +4680,30 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("search").clientHeight - 60;
 				layout.set("height",dh);
 			}
-			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
-//DEBUG window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
-			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
+			/*DEBUG*///window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
 
-			//IJ place DBadmin here!!!  searchTable.style.paddingLeft = (leftPanelWidth+5);
+			//Adjust search form padding to make room for Designer View button
 			var leftPos = (leftPanelWidth+5);
 			if (document.getElementById("formSearch")){
-				document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
+				document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-115;
 			}
 
 			if (centerPanelWidth <= 180) {
 				layout.getUnitByPosition('right').set("width",maxRightWidth);
-				top.HEURIST.util.setDisplayPreference("searchWidth", maxRightWidth);
+				rightPanelWidth = maxRightWidth;
 			}
 			var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style0");
 			var twocollink = document.getElementById("result-style-twoCol");
 			if (centerPanelWidth < 180 && currentStyle == "two-col") {
-					 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
-					 };
-				if (centerPanelWidth > 180) {
-					 twocollink.className = twocollink.className.replace(" disabled","");
-					 document.getElementById("results-level0").className = currentStyle;
-					 };
-				if (centerPanelWidth < 180 && twocollink.className !== " disabled") {
-					 twocollink.className += " disabled";
-					 };
+				document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
+			};
+			if (centerPanelWidth > 180) {
+				twocollink.className = twocollink.className.replace(" disabled","");
+				document.getElementById("results-level0").className = currentStyle;
+			};
+			if (centerPanelWidth < 180 && twocollink.className !== " disabled") {
+				twocollink.className += " disabled";
+			};
 
 			var ele = document.getElementById('result-container');
 			var newtop = '20px';
@@ -4605,6 +4713,7 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 				newtop = '40px';
 			}
 			ele.style.top = newtop;
+			top.HEURIST.util.setDisplayPreference(["leftWidth","rightWidth"], [leftPanelWidth, rightPanelWidth]);
 
 		};
 
@@ -4614,51 +4723,8 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 		YAHOO.util.Event.addListener(window, "resize", setWidths);
 
 
-		// open/close sidebar panel
-		function __sidebarPanelStatus(isFirst)
-		{
-			var status = top.HEURIST.util.getDisplayPreference("sidebarPanel");
 
-			if (!isFirst){
-				var status = (status=="open"?"closed":"open");
-				top.HEURIST.util.setDisplayPreference("sidebarPanel",status, null, null, true,true);
-			}
-
-			if (status == "closed"){
-
-				if (!isFirst){
-					var oldLeftPanelWidth = layout.getSizes().left.w;
-					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth, null, null, true, true);
-				}
-
-				layout.getUnitByPosition('left').collapse();
-
-				navButton.className +=" closed";
-				navButton.style.width = "20px";
-				navButton.title = "Show Navigation Panel";
-
-				document.getElementById("formSearch").style.paddingLeft = "5px";
-				document.getElementById("menuNavigation").style.display = 'block';
-
-			}else{
-
-				layout.getUnitByPosition('left').expand();
-				navButton.className = navButton.className.replace(" closed", "");
-				navButton.title = "Hide Navigation Panel";
-//DEBUG window.console.log("in sidebarPanelStatus");
-
-				var leftPos = Number(top.HEURIST.util.getDisplayPreference("leftWidth"));
-				navButton.style.width = leftPos-1;
-
-				document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
-
-				if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){
-					document.getElementById("menuNavigation").style.display = 'none';
-				}
-			}
-		}
-
-		__sidebarPanelStatus(true);
+		layoutNavPanel(false,null);
 
 		if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
 					layout.getUnitByPosition('right').collapse();
@@ -4670,29 +4736,12 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 
 		Event.on('navButton', 'click', function(ev) {
 			Event.stopEvent(ev);
-			__sidebarPanelStatus(false);
-
-			layout.resize();
+			layoutNavPanel(true,null);
 		});
+
 		Event.on('appPanelButton', 'click', function(ev) {
 			Event.stopEvent(ev);
-			if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
-				var oldSearchWidth = layout.getSizes().center.w;
-					top.HEURIST.util.setDisplayPreference("oldSearchWidth", oldSearchWidth,null,null,true,true);
-				layout.getUnitByPosition('right').collapse();
-				top.HEURIST.util.setDisplayPreference("applicationPanel","closed",null,null,true,true);
-				appPanelButton.className +=" closed";
-				//appPanelButton.style.width = "20px";
-				appPanelButton.title = "Show Applications";
-				layout.resize();
-			}else{
-				layout.getUnitByPosition('right').expand();
-				top.HEURIST.util.setDisplayPreference("applicationPanel","open",null,null,true,true);
-				appPanelButton.className = appPanelButton.className.replace(" closed", "");
-				appPanelButton.title = "Hide Applications";
-				layout.resize();
-			}
-
+			layoutAppPanel(true,null);
 		});
 		Event.on('resetPanels', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -4709,7 +4758,7 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 					top.HEURIST.util.setDisplayPreference("leftWidth", 180,null,null,true,true);
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", 400,null,null,true,true);
+					top.HEURIST.util.setDisplayPreference("rightWidth", 400,null,null,true,true);
 		});
 		Event.on('resetPanels_HideNav', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -4725,14 +4774,14 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 
 					layout.getUnitByPosition('right').set("width", topWindowDims.w*2/3);
 					layout.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", topWindowDims.w*2/3,null,null,true,true);
+					top.HEURIST.util.setDisplayPreference("rightWidth", topWindowDims.w*2/3,null,null,true,true);
 
 					/*layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
 					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
 					layout.getUnitByPosition('right').set("width", 400);
 					layout.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
+					top.HEURIST.util.setDisplayPreference("rightWidth", 400);
 					*/
 		});
 
@@ -4820,7 +4869,7 @@ top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 		}
 
 	};
-	_tabView.addListener('activeTabChange', handleActiveTabChange);
+//	_tabView.addListener('activeTabChange', handleActiveTabChange);
 	_tabView.getTab(viewerTabIndex);
 	//if (viewerTabIndex == _TAB_MAP){top.HEURIST.search.mapSelected()} //initialises map
 	/*

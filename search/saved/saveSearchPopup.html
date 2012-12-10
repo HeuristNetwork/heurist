@@ -301,7 +301,7 @@
 
 		// -------- FILTERS --------------
 
-		if (!document.getElementById("rbS1").checked) {
+		if (!document.getElementById("rbS1").checked && document.getElementById("edFilter").value != "") {
 			query.push(document.getElementById("edFilter").value);
 		}
 

@@ -956,28 +956,38 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	setDisplayPreference: function(prefName, val, win, replacementRegExp, noframes, noclass) {
 		// set display preference in all windows below win; save preferences too
 		// The third and fourth arguments are for recursion: don't use them externally.
-
-		if ( top.HEURIST.util.isnull(win) ) {
+		var prefs , vals, i,
+			prefString = "";
+		if ( top.HEURIST.util.isnull(win) ) { //SAW ARE there any nested calls????
 			// top-level stuff
-			replacementRegExp = new RegExp('$');
+//			replacementRegExp = new RegExp('$');
 
 			if (! top.HEURIST.displayPreferences) {	// hmm ... displayPreferences.php didn't load
 								// we can wing it for now
 				top.HEURIST.displayPreferences = {};
 			}
-			if (top.HEURIST.displayPreferences[prefName]) {
-				if (top.HEURIST.displayPreferences[prefName] == val) {
-					return;	// we already have that value
-				} else {
-					replacementRegExp = new RegExp('(^|\\s+)'+ prefName + '-' + top.HEURIST.displayPreferences[prefName] + '(\\s+|$)|^$');
+			if (typeof prefName == "string"){//single pref variable call convert to array for code below
+				prefs = [prefName];
+				vals = [val];
+			}else{
+				prefs = prefName;
+				vals = val;
+			}
+			for (i=0; i<prefs.length; i++){
+				if (top.HEURIST.displayPreferences[prefs[i]] && top.HEURIST.displayPreferences[prefs[i]] == vals[i]) {
+						continue;	// we already have that value
+				}else{
+					prefString += '&' + encodeURIComponent(prefs[i]) + '=' + encodeURIComponent(vals[i]);
 				}
 			}
-			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
-									'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
-												: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
-									'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
+//			top.HEURIST.displayPreferences[prefName] = val;
+			if (prefString){
+				top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
+										'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
+													: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
+										prefString);
+			}
 			win = top;
 		}
 		if (!noclass && ! (val+"").match(/\s/)) {
@@ -996,12 +1006,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				} catch (e) { }
 			}
 		}
-		/* ARTEM reread preferences */
+		/* ARTEM reread preferences SAW easier to just return structure on set.
 		if ( top.HEURIST.util.isnull(win) ) {
 			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
 						'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
 									: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:""));
-		}
+		}*/
 
 	},
 
@@ -1808,9 +1818,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		args = args[0];
 		var namespaces = functionName.split(".");
 		var func = namespaces.pop();
-
-		for(var i = 0; i < namespaces.length; i++) {
-			context = context[namespaces[i]];
+		for(var i = 0; i < namespaces.length; ++i) {
+			if (i<namespaces.length) {
+				context = context[namespaces[i]];
+			}
 		}
 		return context[func].apply(this, args);
 	},
