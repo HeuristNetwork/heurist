@@ -50,6 +50,7 @@ if (@$_REQUEST["inclGeo"]) {
 var HeuristInstance = "<?= addslashes($instance) ?>";
 var HeuristBaseURL = "<?= addslashes(HEURIST_BASE_URL) ?>";
 var HeuristSitePath = "<?= addslashes(HEURIST_SITE_PATH) ?>";
+var HeuristIconURL = "<?= addslashes(HEURIST_ICON_URL_BASE) ?>";
 /* Load the necessary JS files from <?= HAPI_HOME ?> */
 (function() {
  <?php

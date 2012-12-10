@@ -713,6 +713,8 @@ HAPI.WOOT.GUI = function() {
 				theme_advanced_toolbar_location: "top",
 				theme_advanced_toolbar_align: "left",
 
+				relative_urls : false,
+
 				height: "400",	// saw TODO calculate from text length/line count
 
 				hidden_input: 0,

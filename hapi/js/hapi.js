@@ -3693,7 +3693,7 @@ var HeuristScholarDB = new HStorageManager();
 			//				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
-			newForm.action = baseURL + "hapi/php/dispatcher.php?method=saveFile"  //saw FIXME: add instance code.
+			newForm.action = baseURL + "hapi/php/dispatcher.php?method=saveFile"+  //saw FIXME: add instance code.
 									"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) //+
 									/* &key=" + encodeURIComponent(HAPI.key)) : "saveFile")*/;
 
@@ -3958,5 +3958,7 @@ HAPI.importSymbols = function(from, to) {
 };
 
 if (window["HeuristApiKey"]) { HAPI.setKey(HeuristApiKey, "" + window["HeuristInstance"], "" + window["HeuristBaseURL"]); }
+if (HeuristIconURL) HAPI.HeuristIconURL = HeuristIconURL;
+if (HeuristBaseURL && !HAPI.HeuristBaseURL) HAPI.HeuristBaseURL = HeuristBaseURL;
 if (top.HEURIST && top.HEURIST.fireEvent) top.HEURIST.fireEvent(top, "heurist-HAPI-loaded");
 
