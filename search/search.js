@@ -48,9 +48,13 @@ String.prototype.htmlEscape = function() {
 var _TAB_RECORDVIEW = 0,
 	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
-	_TAB_SPECIAL = 3,
+	_TAB_TRANSFORM = 3,
 	_tabView = null;
 
+var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
+						'map':1,'Map':1,'map view':1,'Map View':1,
+						'report':2,'Report':2,'report view':2,'Report View':2,
+						'transform':3,'Transform':3,'transform view':3,'Transform View':3};
 top.HEURIST.search = {
 	VERSION: "1",
 
@@ -336,6 +340,10 @@ top.HEURIST.search = {
 						}
 					}else if (!isNaN(layoutApp[0])){//new layout sets the width of the nav panel
 						layoutAppPanel(false,Number(layoutApp[0]));
+						if (layoutApp.length>1 && layoutApp[1] && appnameToTabIDMap[layoutApp[1]]){
+							tabID = appnameToTabIDMap[layoutApp[1]];
+							_tabView.selectTab(tabID);
+						}
 					}
 				}
 				//expand to the the max defined by the filter or layout  or by the data
@@ -3804,7 +3812,7 @@ top.HEURIST.search = {
 			ret += "|app:off";
 		}else{
 //			ret += "|app:"+top.HEURIST.displayPreferences.rightWidth;
-			ret += "|app:"+layout.getSizes().right.w;
+			ret += "|app:"+layout.getSizes().right.w+","+_tabView.get('activeTab').getAttributeConfig('label').value;
 		}
 		return [maxLevel,ret];
 	},
@@ -4258,7 +4266,7 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
 			if(!top.HEURIST.util.isnull(_tabView)){
-//				_tabView.removeTab(_tabView.getTab(_TAB_SPECIAL));
+//				_tabView.removeTab(_tabView.getTab(_TAB_TRANSFORM));
 			}
 		}
 
@@ -4785,7 +4793,7 @@ function layoutAppPanel(isToggle,newWidth){
 
 			top.HEURIST.search.updateRecordView(null);
 
-		}else if(currentTab===_TAB_SPECIAL){ //printview
+		}else if(currentTab===_TAB_TRANSFORM){ //transform
 
 			var viewerFrame = document.getElementById("viewer-frame");
 			if(viewerFrame){

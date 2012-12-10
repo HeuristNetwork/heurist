@@ -448,7 +448,7 @@
 						}else{
 							xml.getElementsByTagName("selectedIDs").item(0).firstChild.nodeValue = newSelectionIDs;
 						}
-						var selIds = newSelectionIDs.split();
+						var selIds = newSelectionIDs.split(",");
 						$("record[selected='yes']",$(xml)).attr("selected","no");
 						$("record[selected='no']",$(xml)).each(function(i,rec){
 																var recID = $(rec).children("id").text();
@@ -456,7 +456,7 @@
 															})
 					}
 					FlatHMLQuery.selectIDs = newSelectionIDs;
-					selectedIds = newSelectionIDs.split();
+					selectedIds = newSelectionIDs.split(",");
 					displayResultDoc(curStyle,xml);
 /*
 					var selDivs = $('div[class~=selected]');
