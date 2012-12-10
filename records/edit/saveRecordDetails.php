@@ -152,12 +152,13 @@
 
 				$val = @$_POST[$eltName][$eltID];
 				if (! $bdInputHandler->inputOK($val)) {
-/*****DEBUG****///error_log(" in saveRecord details value check error  $eltName,  $eltID, ".print_r($val,true));
+/*****DEBUG****///error_log(" in saveRecord update details value check error  $eltName,  $eltID, ".print_r($val,true));
 					continue;	// faulty input ... ignore
 				}
 
 				$bdID = substr($eltID, 3);	// everything after "bd:"
 				$toadd = $bdInputHandler->convertPostToMysql($val);
+/*****DEBUG****///error_log(" in saveRecord update details value converted from $val to $toadd");
 				if ($toadd==null) continue;
 
 				$bibDetailUpdates[$bdID] = $toadd;
@@ -200,7 +201,10 @@
 			$bdType = substr($eltName, 5);
 			$bdInputHandler = getInputHandlerForType($bdType);
 			foreach ($bds as $eltID => $val) {
-				if (! $bdInputHandler->inputOK($val)) continue;	// faulty input ... ignore
+				if (! $bdInputHandler->inputOK($val)) {
+/*****DEBUG****///error_log(" in saveRecord insert details value check error for $eltName,  $eltID, ".print_r($val,true));
+					continue;	// faulty input ... ignore
+				}
 
 				$newBibDetail = $bdInputHandler->convertPostToMysql($val);
 				$newBibDetail["dtl_DetailTypeID"] = $bdType;
@@ -521,8 +525,38 @@
 		}
 	}
 	class BibDetailDropdownInput extends BibDetailInput {
+		static $labelToID = null;
+		function convertPostToMysql($postVal) {
+			//SAW  TODO: need to validate that the term is valid for given dtyID also need to accept concept ids
+			/*  query for concept id  to local id lookup
+			select trm_Label, concat(convert(if(trm_OriginatingDBID is null,
+												(SELECT sys_dbRegisteredID FROM sysIdentificationlimit 1),
+												trm_OriginatingDBID),
+											char),
+									"-",
+									convert(if(trm_IDInOriginatingDB is null,
+												trm_ID,
+												trm_IDInOriginatingDB),
+											char)) as trm_ConceptID
+			from defTerms;
+			*/
+			if (! @$labelToID) {
+				$labelToID = mysql__select_assoc("defTerms", "trm_Label", "trm_ID", "1");
+			}
+			if(is_numeric($postVal)){//termID validate it exist TODO check valid for this type, need to pass type id
+				return array("dtl_Value" => $postVal);
+			}else{  //convert label to  trm_ID
+				return array("dtl_Value" => $labelToID[$postVal]);
+			}
+		}
 		function inputOK($postVal) {
-			return preg_match("/\\S/", $postVal);	// has non space characters
+			if (! @$labelToID) {
+				$labelToID = mysql__select_assoc("defTerms", "trm_Label", "trm_ID", "1");
+			}
+/*****DEBUG****///error_log("postvalue = ".print_r($postVal,true));
+			return ((is_numeric($postVal) &&
+						mysql_num_rows(mysql_query("select trm_ID from defTerms where trm_ID = ".intVal($postVal)))>0) ||
+						array_key_exists($postVal,$labelToID));
 		}
 	}
 	class BibDetailFileInput extends BibDetailInput {
