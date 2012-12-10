@@ -181,6 +181,7 @@ class Query {
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
 /*****DEBUG****///error_log("query obj  - ".print_r($this,true));
+		array_push($this->workgroups,0); // be sure to include the generic everybody workgroup
 		$where_clause = '('.((is_logged_in() && !$this->isPublicOnly) ?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
 							((is_logged_in() && !$this->isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
 							((!empty($this->workgroups) && !$this->isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
