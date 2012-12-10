@@ -27,16 +27,16 @@ if (! is_logged_in()) {
 
 $label = @$_REQUEST["label"];
 $wg = intval(@$_REQUEST["wg"]);
-$id = intval(@$_REQUEST["id"]);
+$ssid = intval(@$_REQUEST["ssid"]);
 
-if($label && $id){
+if($label && $ssid){
 	jsonError("missing argument (id or label) for saved search deletion");
 }
 
 mysql_connection_db_overwrite(DATABASE);
 
-if($id>0){
-	mysql_query("delete from usrSavedSearches where svs_ID=$id");
+if($ssid>0){
+	mysql_query("delete from usrSavedSearches where svs_ID=$ssid");
 }else if ($wg > 0) { //OLD WAY
 	mysql_query("delete from usrSavedSearches where svs_Name='$label' and svs_UGrpID=$wg");
 } else {

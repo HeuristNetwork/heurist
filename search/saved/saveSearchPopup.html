@@ -1,403 +1,403 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
- <head>
-  <link rel=stylesheet href="../../common/css/global.css">
-  <link rel=stylesheet href="../../common/css/search.css">
-  <title>Save search query, filter and layout</title>
-  <script>
-  	var qparams = window.location.search;
+	<head>
+		<link rel=stylesheet href="../../common/css/global.css">
+		<link rel=stylesheet href="../../common/css/search.css">
+		<title>Save search query, filter and layout</title>
+		<script>
+			var qparams = window.location.search;
 
-  	var sId = Number(top.HEURIST.util.getUrlParameter("sid", qparams)),
-  		wgId = 0,
-  		sLabel = "",
-  		sQuery = "",
-  		sAllOrBookmarks = "all",
-  		sFilter = "",
-  		sLayout = top.HEURIST.search.getLayoutString(), //current layout
-		rtFilter,
-		relFilter,
-		ptrFilter;
+			var ssid = Number(top.HEURIST.util.getUrlParameter("ssid", qparams)),
+			wgId = 0,
+			sLabel = "",
+			sQuery = "",
+			sAllOrBookmarks = "all",
+			sFilter = "",
+			sLayout = top.HEURIST.search.getLayoutString(), //current layout
+			rtFilter,
+			relFilter,
+			ptrFilter;
 
-  	if(sId>0){
-		//load values from  top.HEURIST.user.savedSearches
-		//find it by ID
-		var ss = top.HEURIST.search.savedSearchFind(sId);
+			if(ssid>0){
+				//load values from  top.HEURIST.user.savedSearches
+				//find it by ID
+				var ss = top.HEURIST.search.savedSearchFind(ssid);
 
-		if(ss===null){
-			//not found - show warning??
-		}else{
-			wgId = Number(ss[3]);
-			sLabel = ss[0];
-			sQuery = top.HEURIST.util.getUrlParameter("q", ss[1]);
-			sAllOrBookmarks = top.HEURIST.util.getUrlParameter("w", ss[1]);
-			// or it may taken from
-			if(top.HEURIST.util.isempty(sAllOrBookmarks)){
-				sAllOrBookmarks = (ss[4] == 1)?"all":"bookmark";
-			}
-			sLayout = getParams2("view", ss[1]);
-			if(!sLayout){
-				sLayout = getParams2("layout", ss[1]);
-			}
+				if(ss===null){
+					//not found - show warning??
+				}else{
+					wgId = Number(ss[3]);
+					sLabel = ss[0];
+					sQuery = top.HEURIST.util.getUrlParameter("q", ss[1]);
+					sAllOrBookmarks = top.HEURIST.util.getUrlParameter("w", ss[1]);
+					// or it may taken from
+					if(top.HEURIST.util.isempty(sAllOrBookmarks)){
+						sAllOrBookmarks = (ss[4] == 1)?"all":"bookmark";
+					}
+					sLayout = getParams2("view", ss[1]);
+					if(!sLayout){
+						sLayout = getParams2("layout", ss[1]);
+					}
 
-			//extract filters from query
-			rtFilter = getParams2("rtfilters", ss[1]);
-			relFilter = getParams2("relfilters", ss[1]);
-			ptrFilter = getParams2("ptrfilters", ss[1]);
-		}
+					//extract filters from query
+					rtFilter = getParams2("rtfilters", ss[1]);
+					relFilter = getParams2("relfilters", ss[1]);
+					ptrFilter = getParams2("ptrfilters", ss[1]);
+				}
 
-	}else{
-		//load values from current search query
-		sLabel = "";//decodeURIComponent(top.HEURIST.parameters["label"]);
-		sQuery = top.HEURIST.parameters["q"];
-		sAllOrBookmarks = top.HEURIST.parameters["w"];
-		if(top.HEURIST.util.isempty(sAllOrBookmarks)){
-			sAllOrBookmarks = "all";
-		}
-
-		rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
-		relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
-		ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-
-		// ARTEM wtf?
-		// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
-		if (!sQuery) {
-			sQuery = decodeURIComponent(top.HEURIST.util.getUrlParameter("q", qparams));
-		}
-		if ( !sQuery || sQuery.search(/_COLLECTED_/) !== -1) {
-			if (!sQuery) {
-				alert("There is no search string to save. Please enter a search and then save.");
-				setTimeout(function() { window.close(); }, 100);
 			}else{
-				setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'saveCollectionPopup.html');},100);
-			}
-		}
-	}
+				//load values from current search query
+				sLabel = "";//decodeURIComponent(top.HEURIST.parameters["label"]);
+				sQuery = top.HEURIST.parameters["q"];
+				sAllOrBookmarks = top.HEURIST.parameters["w"];
+				if(top.HEURIST.util.isempty(sAllOrBookmarks)){
+					sAllOrBookmarks = "all";
+				}
 
-	var f = new Array();
-	function _push(val){
-		if(top.HEURIST.util.isArray(val) && val.length>0){
-			if(!top.HEURIST.util.isempty(val[1])){
-				 f.push(val[1]);
-			}
-		} else if(!top.HEURIST.util.isempty(val)){
-			f.push(val);
-		}
-	}
-	_push(rtFilter);
-	_push(relFilter);
-	_push(ptrFilter);
-	sFilter = f.join("&");
+				rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
+				relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
+				ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
 
-
-	var publish = top.HEURIST.util.getUrlParameter("publish", qparams);  //ARTEM wtf?
-
-
-	/*
-	*
-	*/
-	function getParams2(name, query){
-		var res = top.HEURIST.util.getUrlParameter(name, query)
-		if(res){ res = name+"="+res; }
-		return res;
-	}
-
-	/**
-	* Assigns values to UI controls
-	*/
-	top.HEURIST.registerEvent(window, "load", function() {
-
-/* ARTEM wtf?
-		if (publish == "yes"){
-			document.getElementById("warning-message").innerHTML = "<b>Your search has not yet been saved</b>";
-			document.getElementById("save").value = "Save & publish";
-		}
-		if (mode == "rename") {
-			//this is for editing
-		}
-*/
-
-  		if(sId>0){ //editing
-			document.getElementById("divSaveDestination").style.visibility = "hidden";
-
-			if(!sQuery){ //query not defined - filter only
-				document.getElementById("divSaveMode").style.visibility = "hidden";
-				document.getElementById("divQuery").style.display = "none";
-				document.getElementById("rbS2").checked = true;
-			}else{
-				document.getElementById("lblS2").innerHTML = "";
-				document.getElementById("rbS2").style.display = "none";
-				document.getElementById("rbS1").checked = (sFilter=="");
-				document.getElementById("rbS3").checked = (sFilter!="");
-				document.getElementById("lblS3").innerHTML = "Save Query and Filter";
-			}
-
-
-		}else{
-			//fill save destination select
-
-			var iHTML,
-				selval = top.HEURIST.util.getDisplayPreference("savedSearchDest"), //value by default
-				selIndex = 0;
-
-			var ele = document.getElementById("edSaveDestination");
-
-			var optElem = document.createElement("option");
-			optElem.value = "";
-			optElem.innerHTML = (sAllOrBookmarks === "all") ?  '"All records" saved searches' : '"My bookmarks" saved searches';
-			ele.replaceChild(optElem, ele.firstElementChild );
-
-			//list of all workgroups
-			for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
-				var wg = top.HEURIST.user.workgroups[i];
-				iHTML += "<option value=\"" + wg + "\">" + top.HEURIST.workgroups[wg].name + "</option>";
-				if(selval==wg){
-					selIndex =  i + 1;
+				// ARTEM wtf?
+				// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
+				if (!sQuery) {
+					sQuery = decodeURIComponent(top.HEURIST.util.getUrlParameter("q", qparams));
+				}
+				if ( !sQuery || sQuery.search(/_COLLECTED_/) !== -1) {
+					if (!sQuery) {
+						alert("There is no search string to save. Please enter a search and then save.");
+						setTimeout(function() { window.close(); }, 100);
+					}else{
+						setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'saveCollectionPopup.html');},100);
+					}
 				}
 			}
-			document.getElementById("wg-options").innerHTML += iHTML;
 
-			ele.selectedIndex = selIndex; //value by default
-		}
+			var f = new Array();
+			function _push(val){
+				if(top.HEURIST.util.isArray(val) && val.length>0){
+					if(!top.HEURIST.util.isempty(val[1])){
+						f.push(val[1]);
+					}
+				} else if(!top.HEURIST.util.isempty(val)){
+					f.push(val);
+				}
+			}
+			_push(rtFilter);
+			_push(relFilter);
+			_push(ptrFilter);
+			sFilter = f.join("&");
 
-		document.getElementById("edName").value = sLabel;
-		document.getElementById("edQuery").value = sQuery;
-		document.getElementById("edFilter").value = sFilter;
 
-		setTimeout(function() { document.getElementById('edName').focus() }, 10);
-	});
+			var publish = top.HEURIST.util.getUrlParameter("publish", qparams);  //ARTEM wtf?
 
-	/*
-	* Save mode for new one
-	*/
-	function setSaveMode(){
-		var saveFiltersOnly = document.getElementById("rbS2").checked;
-		document.getElementById("divSaveDestination").style.visibility = saveFiltersOnly?"hidden":"visible";
-	}
 
-	/*
-	* Check unique name within group of saved searches
-	*/
-	/*
-	function check_old() {
-		var wg = document.getElementById("edSaveDestination").value;
-		if (wg) {
+			/*
+			*
+			*/
+			function getParams2(name, query){
+				var res = top.HEURIST.util.getUrlParameter(name, query)
+				if(res){ res = name+"="+res; }
+				return res;
+			}
+
+			/**
+			* Assigns values to UI controls
+			*/
+			top.HEURIST.registerEvent(window, "load", function() {
+
+					/* ARTEM wtf?
+					if (publish == "yes"){
+					document.getElementById("warning-message").innerHTML = "<b>Your search has not yet been saved</b>";
+					document.getElementById("save").value = "Save & publish";
+					}
+					if (mode == "rename") {
+					//this is for editing
+					}
+					*/
+
+					if(ssid>0){ //editing
+						document.getElementById("divSaveDestination").style.visibility = "hidden";
+
+						if(!sQuery){ //query not defined - filter only
+							document.getElementById("divSaveMode").style.visibility = "hidden";
+							document.getElementById("divQuery").style.display = "none";
+							document.getElementById("rbS2").checked = true;
+						}else{
+							document.getElementById("lblS2").innerHTML = "";
+							document.getElementById("rbS2").style.display = "none";
+							document.getElementById("rbS1").checked = (sFilter=="");
+							document.getElementById("rbS3").checked = (sFilter!="");
+							document.getElementById("lblS3").innerHTML = "Save Query and Filter";
+						}
+
+
+					}else{
+						//fill save destination select
+
+						var iHTML,
+						selval = top.HEURIST.util.getDisplayPreference("savedSearchDest"), //value by default
+						selIndex = 0;
+
+						var ele = document.getElementById("edSaveDestination");
+
+						var optElem = document.createElement("option");
+						optElem.value = "";
+						optElem.innerHTML = (sAllOrBookmarks === "all") ?  '"All records" saved searches' : '"My bookmarks" saved searches';
+						ele.replaceChild(optElem, ele.firstElementChild );
+
+						//list of all workgroups
+						for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
+							var wg = top.HEURIST.user.workgroups[i];
+							iHTML += "<option value=\"" + wg + "\">" + top.HEURIST.workgroups[wg].name + "</option>";
+							if(selval==wg){
+								selIndex =  i + 1;
+							}
+						}
+						document.getElementById("wg-options").innerHTML += iHTML;
+
+						ele.selectedIndex = selIndex; //value by default
+					}
+
+					document.getElementById("edName").value = sLabel;
+					document.getElementById("edQuery").value = sQuery;
+					document.getElementById("edFilter").value = sFilter;
+
+					setTimeout(function() { document.getElementById('edName').focus() }, 10);
+			});
+
+			/*
+			* Save mode for new one
+			*/
+			function setSaveMode(){
+				var saveFiltersOnly = document.getElementById("rbS2").checked;
+				document.getElementById("divSaveDestination").style.visibility = saveFiltersOnly?"hidden":"visible";
+			}
+
+			/*
+			* Check unique name within group of saved searches
+			*/
+			/*
+			function check_old() {
+			var wg = document.getElementById("edSaveDestination").value;
+			if (wg) {
 			top.HEURIST.json.loadWorkgroupDetails(wg, checkCallback);
-		} else {
+			} else {
 			checkCallback();
-		}
-	}
+			}
+			}
 
-	function checkCallback() {
-		var wg = document.getElementById("edSaveDestination").value;
-		var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches; //top.HEURIST.workgroups[wg].savedSearches
+			function checkCallback() {
+			var wg = document.getElementById("edSaveDestination").value;
+			var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches; //top.HEURIST.workgroups[wg].savedSearches
 
-		var val = document.getElementById("edName").value;
+			var val = document.getElementById("edName").value;
 			val = val.replace(/'|"/g, "");
-		if (val == "") {
+			if (val == "") {
 			document.getElementById("edName").value = "";
 			document.getElementById("message").innerHTML = "Enter a name";
 			return;
-		}
+			}
 
-		if (savedSearches  &&  savedSearches.length) {
+			if (savedSearches  &&  savedSearches.length) {
 			for (var i = 0; i < savedSearches.length; ++i) {
-				if (val == savedSearches[i][0]) {
-					document.getElementById("coverall").style.display = "block";
-					document.getElementById("alertBox").innerHTML =
-					  "<p>A search with that name already exists.  "
-					  + "Do you want to overwrite it?</p>"
-					  + "<input type=hidden id=edName value=\""+val+"\">"
-					  + "<input type=hidden id=edSaveDestination value=\""+wg+"\">";
-					document.getElementById("alertBox").innerHTML += (wg > 0 ? "This is a <b>workgroup saved search</b>. Other workgroup members will be affected.": "");
-					document.getElementById("alertBox").innerHTML += "<input type=button value=overwrite onclick=save()>"
-					  + "<input type=button value=cancel onclick=window.close()>";
-					return;
+			if (val == savedSearches[i][0]) {
+			document.getElementById("coverall").style.display = "block";
+			document.getElementById("alertBox").innerHTML =
+			"<p>A search with that name already exists.  "
+			+ "Do you want to overwrite it?</p>"
+			+ "<input type=hidden id=edName value=\""+val+"\">"
+			+ "<input type=hidden id=edSaveDestination value=\""+wg+"\">";
+			document.getElementById("alertBox").innerHTML += (wg > 0 ? "This is a <b>workgroup saved search</b>. Other workgroup members will be affected.": "");
+			document.getElementById("alertBox").innerHTML += "<input type=button value=overwrite onclick=save()>"
+			+ "<input type=button value=cancel onclick=window.close()>";
+			return;
+			}
+			}
+			}
+			save();
+			}
+			*/
+
+			function check(){
+
+				if(top.HEURIST.util.isempty(document.getElementById("edName").value)){
+					document.getElementById("lblName").style.color = "red";
+					document.getElementById("edName").focus();
+				}else{
+					save();
 				}
 			}
-		}
-		save();
-	}
-	*/
 
-	function check(){
+			/*
+			*
+			*/
+			function save()
+			{
+				var cmb_label, cmb_url, cmb_workgroup, cmb_id;
 
-		if(top.HEURIST.util.isempty(document.getElementById("edName").value)){
-			document.getElementById("lblName").style.color = "red";
-			document.getElementById("edName").focus();
-		}else{
-			save();
-		}
-	}
-
-	/*
-	*
-	*/
-	function save()
-	{
-		var cmb_label, cmb_url, cmb_workgroup, cmb_id;
-
-		/*ARTEM wtf
-		if (publish == "yes"){
-			publish = "true";
-		}
-		if (mode == "rename") {
-			cmb_id = sId;
-		}
-		*/
-
-
-		if(sId>0){
-			cmb_id = sId;
-			cmb_workgroup = wgId;
-		}else{
-			cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
-		}
-		cmb_label = document.getElementById("edName").value;
-
-		var query = new Array();
-
-		// -------- SEARCH QUERY --------------
-
-		if (!document.getElementById("rbS2").checked)
-		{
-			top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
-
-			var q = document.getElementById("edQuery").value;
-			//var w = params["w"]; //@todo - take from variable
-
-			if (cmb_workgroup > 0 ){
-
-				/* ARTEM - wtf
-				if (!bkmk_only.checked){
-					//for workgroup searches overwrite with all records search
-					top.HEURIST.parameters["w"] = "all";
-				} else {
-					top.HEURIST.parameters["w"] = "bookmark";
-					top.HEURIST.parameters["q"] = top.HEURIST.parameters["q"] + " user:" + top.HEURIST.get_user_id();
+				/*ARTEM wtf
+				if (publish == "yes"){
+				publish = "true";
+				}
+				if (mode == "rename") {
+				cmb_id = ssid;
 				}
 				*/
 
-				//for workgroups - search in bookmarks only
-				//ARTEM????? sAllOrBookmarks = "bookmark";
-				//wtf???? q = q + " user:" + top.HEURIST.get_user_id();
-			}
 
-			query.push("q="+q);
-			query.push("w="+sAllOrBookmarks);
-		}else{
-			cmb_workgroup = 0; //for filters we save for current user only
-		}
-
-		// -------- FILTERS --------------
-
-		if (!document.getElementById("rbS1").checked && document.getElementById("edFilter").value != "") {
-			query.push(document.getElementById("edFilter").value);
-		}
-
-		// -------- LAYOUT --------------
-
-		var result_style = document.getElementById("edLayout").value;
-		if (result_style) {
-			if (result_style == "layout") {
-				if ( sLayout && sLayout[1] && sLayout[1].length > 0) {
-					query.push(sLayout[1])
+				if(ssid>0){
+					cmb_id = ssid;
+					cmb_workgroup = wgId;
 				}else{
-					query.push("layout=srch:l");
+					cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
 				}
-			} else {
-				query.push("view=" + result_style);
+				cmb_label = document.getElementById("edName").value;
+
+				var query = new Array();
+
+				// -------- SEARCH QUERY --------------
+
+				if (!document.getElementById("rbS2").checked)
+					{
+					top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
+
+					var q = document.getElementById("edQuery").value;
+					//var w = params["w"]; //@todo - take from variable
+
+					if (cmb_workgroup > 0 ){
+
+						/* ARTEM - wtf
+						if (!bkmk_only.checked){
+						//for workgroup searches overwrite with all records search
+						top.HEURIST.parameters["w"] = "all";
+						} else {
+						top.HEURIST.parameters["w"] = "bookmark";
+						top.HEURIST.parameters["q"] = top.HEURIST.parameters["q"] + " user:" + top.HEURIST.get_user_id();
+						}
+						*/
+
+						//for workgroups - search in bookmarks only
+						//ARTEM????? sAllOrBookmarks = "bookmark";
+						//wtf???? q = q + " user:" + top.HEURIST.get_user_id();
+					}
+
+					query.push("q="+q);
+					query.push("w="+sAllOrBookmarks);
+				}else{
+					cmb_workgroup = 0; //for filters we save for current user only
+				}
+
+				// -------- FILTERS --------------
+
+				if (!document.getElementById("rbS1").checked && document.getElementById("edFilter").value != "") {
+					query.push(document.getElementById("edFilter").value);
+				}
+
+				// -------- LAYOUT --------------
+
+				var result_style = document.getElementById("edLayout").value;
+				if (result_style) {
+					if (result_style == "layout") {
+						if ( sLayout && sLayout[1] && sLayout[1].length > 0) {
+							query.push(sLayout[1])
+						}else{
+							query.push("layout=srch:l");
+						}
+					} else {
+						query.push("view=" + result_style);
+					}
+				}else if(ssid>0 && sLayout){ //take previous value
+					//
+					query.push(sLayout);
+				}
+
+				// --------
+
+				//save query
+				cmb_url = "?" + query.join("&");
+
+
+				var saction = "save_search";
+				var _data = {svs_Name:cmb_label, svs_Query:cmb_url, svs_UGrpID:cmb_workgroup, svs_ID:cmb_id};
+
+				top.HEURIST.search.executeAction(saction, _data);
+				window.close();
 			}
-		}else if(sId>0 && sLayout){ //take previous value
-			//
-			query.push(sLayout);
-		}
 
-		// --------
+		</script>
+		<style>
+			#message { color: red; }
+			#warning-message { color: #990000; }
+			input, select{ margin-top: 5px;}
 
-		//save query
-		cmb_url = "?" + query.join("&");
+			#save {font-weight: bold;}
+			#coverall {background-color:RGBA(255,255,255,0.5);}
 
+			.llab{
+				width:80px;
+				text-align:right;
+				display:inline-block;
+			}
+			.fld{
+				width:270px;
+				height: 17px;
+				margin-left: 5px;
+			}
 
-		var saction = "save_search";
-		var _data = {svs_Name:cmb_label, svs_Query:cmb_url, svs_UGrpID:cmb_workgroup, svs_ID:cmb_id};
+		</style>
+	</head>
 
-		top.HEURIST.search.executeAction(saction, _data);
-		window.close();
-	}
+	<body class="popup" width="400" height="320">
+		<!-- <div id="mainbody">-->
 
-  </script>
-  <style>
-    #message { color: red; }
-	#warning-message { color: #990000; }
-	input, select{ margin-top: 5px;}
+		<label class="llab" id="lblName">Enter a name:</label>
+		<input class="fld" type="text" id="edName">
 
-	#save {font-weight: bold;}
-	#coverall {background-color:RGBA(255,255,255,0.5);}
+		<p>
+			<label class="llab">Layout style:</label>
+			<select class="fld" id="edLayout" style="width:140px">
+				<option value="" selected>Status quo</option>
+				<option value=list>One column</option>
+				<option value=two-col>Two columns</option>
+				<option value=thumbs>Thumbnails</option>
+				<option value=icons>Icons</option>
+				<option value=layout>Save Current Layout</option>
+				<option value=blog disabled>Blog</option>
+			</select>
+		</p>
 
-	.llab{
-		width:80px;
-		text-align:right;
-		display:inline-block;
-	}
-	.fld{
-		width:270px;
-		height: 17px;
-		margin-left: 5px;
-	}
-
-  </style>
- </head>
-
- <body class="popup" width="400" height="320">
-<!-- <div id="mainbody">-->
-
-	<label class="llab" id="lblName">Enter a name:</label>
-	<input class="fld" type="text" id="edName">
-
-  	<p>
-		<label class="llab">Layout style:</label>
-		<select class="fld" id="edLayout" style="width:140px">
-			<option value="" selected>Status quo</option>
-			<option value=list>One column</option>
-			<option value=two-col>Two columns</option>
-			<option value=thumbs>Thumbnails</option>
-			<option value=icons>Icons</option>
-			<option value=layout>Save Current Layout</option>
-			<option value=blog disabled>Blog</option>
-		</select>
-	</p>
-
-	<p id="divSaveDestination">
-		<label class="llab">Add search to:</label>
+		<p id="divSaveDestination">
+			<label class="llab">Add search to:</label>
 			<select class="fld" id="edSaveDestination">
 				<option value="">personal saved searches</option>
 				<optgroup label="workgroup saved searches" id="wg-options"></optgroup>
 			</select>
-	</p>
+		</p>
 
-	<div style="text-align: center;padding-bottom: 10px;" id="divSaveMode">
-		<input id="rbS1" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS1" style="padding:3px;">Save Query</label>
-		<input id="rbS2" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS2" id="lblS2" style="padding:3px;">Save Filter Rules</label>
-		<input id="rbS3" type="radio" name="rbSaveMode" checked style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS3" id="lblS3" style="padding:3px;">Save Both</label>
-		<input style="float:right" type=button value="Save" id="save" onClick="check();">
-	</div>
-	<!--
-	<p id=warning-message></p>
-	<p id=message></p>
-	-->
+		<div style="text-align: center;padding-bottom: 10px;" id="divSaveMode">
+			<input id="rbS1" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS1" style="padding:3px;">Save Query</label>
+			<input id="rbS2" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS2" id="lblS2" style="padding:3px;">Save Filter Rules</label>
+			<input id="rbS3" type="radio" name="rbSaveMode" checked style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbS3" id="lblS3" style="padding:3px;">Save Both</label>
+			<input style="float:right" type=button value="Save" id="save" onClick="check();">
+		</div>
+		<!--
+		<p id=warning-message></p>
+		<p id=message></p>
+		-->
 
-	<hr/>
+		<hr/>
 
 
 		<div><strong>Advanced:</strong></div>
@@ -405,10 +405,10 @@
 		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" /></div>
 
 
-<!--
-	<div id="coverall" style="display:none">
-  			<div id="alertBox" ></div>
-	</div>
--->
- </body>
+		<!--
+		<div id="coverall" style="display:none">
+		<div id="alertBox" ></div>
+		</div>
+		-->
+	</body>
 </html>

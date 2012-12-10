@@ -2512,11 +2512,7 @@ top.HEURIST.search = {
 			searchDiv = document.getElementById("menuSavedFiltersAndLayouts");
 			searchDiv.innerHTML = innerHTML_filters;
 
-			document.getElementById("my-blog-link").onclick = function(event){
-				top.HEURIST.util.stopEvent(event); 
-				window.open(top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db,'_blank');
-				return false;
-			}
+			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db;
 
 		}//wg=0
 
@@ -2547,7 +2543,7 @@ top.HEURIST.search = {
 				innerHTML += '<img height="11" title="info" src="'+top.HEURIST.basePath+'common/images/info.png" '+
 									'onclick="{top.HEURIST.search.workgroupInfoPopup(event, '+wg_ID+');}" onmouseout="{top.HEURIST.search.hidePopup();}">';
 				innerHTML += '&nbsp;<img height="11" src="'+ top.HEURIST.basePath+'common/images/blog-icon-box-rev-lightgrey16.png" '+
-									'onclick="{top.HEURIST.util.stopEvent(event); window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
+									'onclick="{window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
 				//innerHTML += "<a target=\"_blank\" class='external-link' href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'></a>";
 				innerHTML += "</div></div>";
 
@@ -2770,14 +2766,14 @@ top.HEURIST.search = {
 	/*
 	* SAVED SEARCHES =====================
 	*/
-	savedSearchFind: function(sId) {
+	savedSearchFind: function(ssid) {
 
-		sId = Number(sId);
+		ssid = Number(ssid);
 
 		var i, _wgId, ss = null;
 		//list of all workgroups
 		for (i = 0; i < top.HEURIST.user.savedSearches.length; ++i) {
-			if(Number(top.HEURIST.user.savedSearches[i][2]) === sId){
+			if(Number(top.HEURIST.user.savedSearches[i][2]) === ssid){
 				ss = top.HEURIST.user.savedSearches[i];
 				ss[3] = 0;
 				break;
@@ -2788,7 +2784,7 @@ top.HEURIST.search = {
 				if(_wgId){
 					var wg = top.HEURIST.user.workgroupSavedSearches[_wgId];
 					for (i = 0; i < wg.length; ++i) {
-						if(Number(wg[i][2]) === sId){
+						if(Number(wg[i][2]) === ssid){
 							ss = wg[i];
 							if(ss.length<4){
 								ss.push(_wgId);
@@ -2805,8 +2801,8 @@ top.HEURIST.search = {
 	//
 	// Execute the saved search by ID
 	//
-	savedSearchExecute: function(sid) {
-		var ss = top.HEURIST.search.savedSearchFind(sid);
+	savedSearchExecute: function(ssid) {
+		var ss = top.HEURIST.search.savedSearchFind(ssid);
 		if(!top.HEURIST.util.isnull(ss)){
 			top.HEURIST.search.executeQuery(ss[1]+'&label='+ss[0]);
 		}
@@ -2817,19 +2813,19 @@ top.HEURIST.search = {
 	//
 	// remove saved search on server side and in UI and HEURIST.savedSearches
 	//
-	savedSearchDelete: function(sid) {
+	savedSearchDelete: function(ssid) {
 
-		var ss = top.HEURIST.search.savedSearchFind(sid);
+		var ss = top.HEURIST.search.savedSearchFind(ssid);
 
 		if(ss===null){
-			alert("Can't find saved search with ID#"+sid);
+			alert("Can't find saved search with ID#"+ssid);
 			return;
 		}else if (ss[3] > 0 ){
 			if (!confirm("Are you sure you wish to delete this saved search?\n" + "This will affect other workgroup members.")) {
 		 		return;
 			}
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+ "search/saved/deleteSavedSearch.php?id="+sid + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+ "search/saved/deleteSavedSearch.php?ssid="+ssid + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
 										 function(response) {
 			if (response && response.deleted && top.HEURIST.search) {
 
@@ -2837,7 +2833,7 @@ top.HEURIST.search = {
 					var savedSearches = wg>0 ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
 					var i = 0;
 					while (i < savedSearches.length) {
-							if (Number(savedSearches[i][2])  == sid){
+							if (Number(savedSearches[i][2])  == ssid){
 								break;
 							}
 							++i;
@@ -2848,10 +2844,10 @@ top.HEURIST.search = {
 		});
 	},
 
-	savedSearchEdit: function(sid){
+	savedSearchEdit: function(ssid){
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "db="+top.HEURIST.database.name : "");
 		top.HEURIST.util.popupURL(window,
-				top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(sid>0?"&sid="+sid :""),
+				top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(ssid>0?"&ssid="+ssid :""),
 			{ callback: function(responce){
 
 
@@ -4137,58 +4133,6 @@ top.HEURIST.search = {
 		}
 	},
 
-/* Depricated
-	buildPublishLinks: function() {
-		var p = top.HEURIST.parameters;
-		var args = [];
-		if (p['ver']) args.push('ver='+p['ver']);
-		if (p['w']) args.push('w='+p['w']);
-		if (p['stype']) args.push('stype='+p['stype']);
-		if (p['q']) args.push('q='+escape(p['q']));
-		var query_string = args.join('&');
-
-//		if (top.HEURIST.database.name === "") {
-			var im_container = document.getElementById("publish-image-placeholder");
-			var a = document.createElement("a");
-				a.className = "logged-in-only";
-				a.title = "Publish the current search results as formatted output which can be printed, saved or generated (live) in a web page";
-				a.href = "#";
-			a.onclick = function() {
-				if (top.HEURIST.parameters["label"] && top.HEURIST.parameters["sid"]) {
-					window.open(top.HEURIST.basePath+ "viewers/publish/publisher.php?pub_id=" + top.HEURIST.parameters["sid"] + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
-				} else {
-					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/saveSearchPopup.html?publish=yes' + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
-				}
-				return false;
-			}
-			a.appendChild(document.createTextNode("Publish"));
-			//im_container.appendChild(a);
-	},
-
-	showPublishPopup: function() {
-		var div, a, p, popup, param = top.HEURIST.parameters;
-		if (param['pub']  &&  param['sid']) {
-			setTimeout('window.open("'+top.HEURIST.basePath+'viewers/publish/publisher.php?pub_id=' + param["sid"]+'");',0);
-			return;
-			div = document.createElement('div');
-			div.style.padding = '0 10px';
-			p = div.appendChild(document.createElement('p'));
-			p.innerHTML = 'The current search has been saved.';
-			p = div.appendChild(document.createElement('p'));
-			p.innerHTML = 'Click below to continue to the publishing wizard.';
-			p = div.appendChild(document.createElement('p'));
-			a = p.appendChild(document.createElement('a'));
-			a.href = top.HEURIST.basePath+ 'viewers/publish/publisher.php?pub_id=' + param['sid'] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
-			a.target = '_blank';
-			a.onclick = function() {
-				top.HEURIST.util.closePopup(popup.id);
-				return true;
-			}
-			a.innerHTML = "Continue to publishing wizard";
-			popup = top.HEURIST.util.popupElement(top, div, { width: '350', height: '150' });
-		}
-	},
-*/
 
 /* @todo - repalce superfish to YUI menu
 	oSearchMenuBar:null,
@@ -4551,6 +4495,7 @@ top.HEURIST.search = {
 };
 
 top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
+
 
 // layout
 

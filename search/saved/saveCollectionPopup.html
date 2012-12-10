@@ -49,15 +49,14 @@
 
 			//
 			function parseOnlyCollections(searches) {
-				var res = [];
-
-				for (var i =0; i < searches.length; i++) {
+				var res = [],
+				i;
+				for (i =0; i < searches.length; i++) {
 					var ss = searches[i];
-					if (!ss[1]) {
+					if (!ss[1]) {//skip saved searches that have no query string
 						continue;
 					}
-					//TEST if(i==38){alert('!!!');}
-					var q = ss[1].match(/[\?&]q=([^&]*)/);
+					var q = ss[1].match(/[\?&]q=([^&]*)/); // or where the query string is empty
 					if (!q || !q[1]) {
 						continue;
 					}
@@ -67,7 +66,7 @@
 					var preds = q.match(/\S+[:=](?:'[^']+'|"[^"]+"|\S+)|[^:='"\s]+/g);	//create an array of all predicates including stand alone words
 					if(preds){
 						for (var j =0; j < preds.length; j++) {
-							if(preds[j].indexOf('ids:')===0){
+							if(preds[j].indexOf('ids:')===0){//if query begins with ids: then we say its a collection
 								res.push([ss[0], i]); //name and index in top.HEURIST.user.savedSearches
 								break;
 							}
@@ -82,7 +81,7 @@
 			*/
 			function init() {
 
-				//collections
+				//fill in existing collection saved searchs
 				var ss = parseOnlyCollections(top.HEURIST.user.savedSearches);
 				var iHTML = '<option value="" selected disabled>select ...</option>';
 				if (ss.length>0) {
@@ -94,10 +93,9 @@
 				}
 				document.getElementById("collection-select").innerHTML = iHTML;
 
-
+				// fill in tag only save searches
 				iHTML = '<option value="" selected disabled>select ...</option>';
-
-				var ss = parseTagOnlySearches(top.HEURIST.user.savedSearches);
+				ss = parseTagOnlySearches(top.HEURIST.user.savedSearches);
 				if (ss.length) {
 					iHTML += '<optgroup label="Personal saved searches" id="my-searches">';
 					for (var i = 0; i < ss.length; i++) {
@@ -105,6 +103,7 @@
 					}
 					iHTML += "</optgroup>";
 				}
+				//fill in worgroup selector
 				for ( i = 0; i < top.HEURIST.user.workgroups.length; i++) {
 					var wg = top.HEURIST.user.workgroups[i];
 					if (!top.HEURIST.user.workgroupSavedSearches[wg]) {
