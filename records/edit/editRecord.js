@@ -224,10 +224,14 @@ top.HEURIST.edit = {
 	},
 
 	userCanEdit: function() {
-		if (top.HEURIST.user && window.HEURIST.edit.record) {
-			if (!window.HEURIST.edit.record.workgroupID || //no owner
-				top.HEURIST.user.workgroups.indexOf(parseInt(window.HEURIST.edit.record.workgroupID)) != -1 || // user in owner group
-				window.HEURIST.edit.record.workgroupID == top.HEURIST.get_user_id()) // user is owner
+		if (top.HEURIST.user.isInWorkgroup(parseInt(window.HEURIST.edit.record.workgroupID))){ // user is owner
+				return true;
+		}
+		return false;
+	},
+
+	userCanChangeAccess: function() {
+		if (top.HEURIST.is_wgAdmin(parseInt(window.HEURIST.edit.record.workgroupID))){
 				return true;
 		}
 		return false;
@@ -273,16 +277,15 @@ top.HEURIST.edit = {
 				document.getElementById('workgroup-div').style.display = "inline-block";
 			}
 			if (document.getElementById('workgroup-edit')) {
-				if (top.HEURIST.edit.userCanEdit()){
+				top.HEURIST.edit.setAllInputsReadOnly(!top.HEURIST.edit.userCanEdit());
+				if (top.HEURIST.edit.userCanChangeAccess()){
 					document.getElementById('workgroup-edit').onclick = openWorkgroupChanger;
 					document.getElementById('workgroup-edit').title = "Restrict access by workgroup";
 					document.getElementById('wg-edit-img').src = "../../common/images/edit-pencil.png"
-					top.HEURIST.edit.setAllInputsReadOnly(false);
 				}else{
 					document.getElementById('workgroup-edit').onclick = null;
 					document.getElementById('workgroup-edit').title = "Access denied";
 					document.getElementById('wg-edit-img').src = "../../common/images/edit-pencil-no.png"
-					top.HEURIST.edit.setAllInputsReadOnly(true);
 				}
 			}
 		}
@@ -1148,7 +1151,7 @@ top.HEURIST.edit = {
 	},
 
 	calendarViewer: null,
-	
+
 	makeDateButton: function(dateBox, doc) {
 		var buttonElt = doc.createElement("input");
 			buttonElt.type = "button";

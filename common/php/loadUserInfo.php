@@ -92,7 +92,8 @@
 		if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
 			$query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
 
-			/*****DEBUG****///error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
+/*****DEBUG****///error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
+/*****DEBUG****///error_log("session data".print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'],true));
 			$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
 			print join(", ", $workgroups);
 		}
@@ -117,10 +118,12 @@
 	?>;
 
 
-	top.HEURIST.user.isInWorkgroup = function(wg_id) {
+	top.HEURIST.user.isInWorkgroup = function(wgID) {
+	var usrID = top.HEURIST.get_user_id();
+	if (wgID == 0 || usrID == wgID) return true;
 	if (! top.HEURIST.user.workgroups) return false;
 	for (var i in top.HEURIST.user.workgroups) {
-	if (wg_id == top.HEURIST.user.workgroups[i]) return true;
+	if (wgID == top.HEURIST.user.workgroups[i]) return true;
 	}
 	return false;
 	};
@@ -149,8 +152,9 @@ top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name())
 top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
 top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
 top.HEURIST.is_wgAdmin = function(wgID) {
-if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
 var usrID = top.HEURIST.get_user_id(), j, i;
+if (wgID == 0 || usrID == wgID) return true;
+if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
 var wgroups = wgID?[wgID]:top.HEURIST.user.workgroups;
 for (j=0; j < wgroups.length; i++) {
 var wgAdmins = top.HEURIST.workgroups[wgroups[j]].admins;
