@@ -130,35 +130,38 @@
 
 		$res = mysql_query($squery);
 		$row = mysql_fetch_row($res);
-		$records[$bibID]["recID"] = $bibID;
-		$records[$bibID]["rectype"] = $row[7];
-		$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
-		$records[$bibID]["url"] = $row[2]; //($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
-		//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
-		$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
+		if($row)
+		{
+			$records[$bibID]["recID"] = $bibID;
+			$records[$bibID]["rectype"] = $row[7];
+			$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
+			$records[$bibID]["url"] = $row[2]; //($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
+			//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
+			$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
 
-		$thumb_url = getThumbnailURL($bibID); //function from uploadFile.php
-		if($thumb_url==""){  //if thumb not defined - use rectype default thumb
-			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
-		}
+			$thumb_url = getThumbnailURL($bibID); //function from uploadFile.php
+			if($thumb_url==""){  //if thumb not defined - use rectype default thumb
+				$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
+			}
 
-		$records[$bibID]["thumb_url"] = $thumb_url;
+			$records[$bibID]["thumb_url"] = $thumb_url;
 
-		if($row[4] && is_numeric($row[4]) && ! in_array($row[4],$imageLayers)){ //DT_MAP_IMAGE_LAYER_REFERENCE
-			array_push($imageLayers, $row[4]);
-		}
-		$kml_path =  getKmlFilePath($row[3]); //DT_FILE_RESOURCE
-//*****DEBUG****//error_log(">>>>>>".$row[3]."=".$kml_path);
-// removed by SAW as DT_KML_FILE changed from a file base type to blocktext
-//		if($kml_path==null){
-//			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE
-//			}
-		if($kml_path!=null){
-			array_push($geoObjects, array("bibID" => $bibID, "type" => "kmlfile", "fileid" => $kml_path, "title" => $row[8], "isbackground"=>$row[9]));
-			$geoBibIDs[$bibID] = $bibID;
-		}else if ($row[5]) { //DT_KML dtl_value contains KML		saw TODO: modify to check that text is valid KML.
-			array_push($geoObjects, array("bibID" => $bibID, "type" => "kml", "recid" => $bibID, "title" => $row[8]));
-			$geoBibIDs[$bibID] = $bibID;
+			if($row[4] && is_numeric($row[4]) && ! in_array($row[4],$imageLayers)){ //DT_MAP_IMAGE_LAYER_REFERENCE
+				array_push($imageLayers, $row[4]);
+			}
+			$kml_path =  getKmlFilePath($row[3]); //DT_FILE_RESOURCE
+	//*****DEBUG****//error_log(">>>>>>".$row[3]."=".$kml_path);
+	// removed by SAW as DT_KML_FILE changed from a file base type to blocktext
+	//		if($kml_path==null){
+	//			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE
+	//			}
+			if($kml_path!=null){
+				array_push($geoObjects, array("bibID" => $bibID, "type" => "kmlfile", "fileid" => $kml_path, "title" => $row[8], "isbackground"=>$row[9]));
+				$geoBibIDs[$bibID] = $bibID;
+			}else if ($row[5]) { //DT_KML dtl_value contains KML		saw TODO: modify to check that text is valid KML.
+				array_push($geoObjects, array("bibID" => $bibID, "type" => "kml", "recid" => $bibID, "title" => $row[8]));
+				$geoBibIDs[$bibID] = $bibID;
+			}
 		}
 	}//for
 
@@ -182,9 +185,9 @@ if(mysql_error()) {
 				array_push($geoObjects, $geoobj);
 				$geoBibIDs[$val[0]] = $val[0];
 			}
-			
 
-			
+
+
 /*****DEBUG****///error_log("ADDED1:".is_string($val[0])."    ".$geoBibIDs[$val[0]]);
 /*****DEBUG****///error_log("1>>>>>>".$geoBibIDs[$val[0]]);
 /*****DEBUG****///error_log("2>>>>>>".$geoBibIDs["97025"]);
@@ -496,7 +499,7 @@ if(mysql_error()) {
 
 	/**
 	* parse value from database (asText)
-	* 
+	*
 	* @param mixed $recId
 	* @param mixed $type
 	* @param mixed $geovalue
@@ -505,7 +508,7 @@ if(mysql_error()) {
 	{
 			$val = array($recId, $type, $geovalue);
 			$res = null;
-			
+
 			switch ($val[1]) {
 				case "p":
 				if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $val[2], $matches)) {
@@ -562,5 +565,5 @@ if(mysql_error()) {
 
 			}
 			return $res;
-	}	
+	}
 ?>

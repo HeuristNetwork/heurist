@@ -14,15 +14,8 @@ require_once(dirname(__FILE__)."/../config/initialise.php");
 if (! defined('COOKIE_VERSION'))
 	define('COOKIE_VERSION', 1);		// increment to force re-login when required
 
-if (@$_COOKIE['heurist-sessionid']) {
-	session_id($_COOKIE['heurist-sessionid']);
-} else {
-	session_id(sha1(rand()));
-	setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_HOST_NAME);
-}
 
-session_cache_limiter('none');
-session_start();
+startMySession();
 
 if (_is_logged_in()) {
 /*****DEBUG****///error_log("in applyCred with valid login");
@@ -173,6 +166,7 @@ function jump_sessions() {
 }
 
 /**
+* used in login and after memebrship changes in admin/saveUsergrps
 * @param mixed $user_id
 */
 function reloadUserGroups($user_id){
@@ -191,6 +185,69 @@ function reloadUserGroups($user_id){
 		return $groups;
 }
 
+/**
+*
+*/
+function startMySession(){
 
+	if (@$_COOKIE['heurist-sessionid']) {
+		session_id($_COOKIE['heurist-sessionid']);
+	} else {
+		session_id(sha1(rand()));
+		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_HOST_NAME);
+	}
+
+	session_cache_limiter('none');
+	session_start();
+}
+
+/**
+* put your comment there...
+*
+*
+* @param mixed $user_id
+*/
+function updateSessionForUser($user_id, $key, $value){
+
+if(is_admin()){
+
+	if(get_user_id()==$user_id){
+
+		session_start();
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$key] = $value;
+
+	}else{
+
+		$path = realpath(session_save_path());
+		$files = array_diff(scandir($path), array('.', '..'));
+		foreach ($files as $file)
+		{
+				try{
+					$content = file_get_contents($path . '/' . $file);
+
+					if(strlen($content)>0){
+						session_id(substr($file,5));
+						session_start();
+						if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id'] == $user_id) {
+
+							$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$key] = $value;
+							$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$key.'_updated'] = 1;
+
+							session_write_close();
+    						break;
+						}
+						session_write_close();
+					}
+				}catch(Exception $e){
+				}
+		}
+
+		//back to my session
+		startMySession();
+
+	}
+}
+
+}
 
 ?>

@@ -556,7 +556,9 @@
 					$ret['error'] = "db error deleting of Group $recID from sysUGrps - ".$rows;
 				} else {
 					$ret['result'] = $recID;
-					updateSessionInfo();
+
+					$groups = reloadUserGroups(get_user_id());
+					updateSessionForUser(get_user_id(), 'user_access', $groups);
 				}
 			}
 		}
@@ -626,10 +628,10 @@
 		}
 
 		if(is_numeric($recIds)){
-			$arr = array();
-			$arr[0] = $recIds;
+			$arrUsers = array();
+			$arrUsers[0] = $recIds;
 		}else{
-			$arr = split(",", $recIds);
+			$arrUsers = split(",", $recIds);
 		}
 
 		$is_myself_affected = false;
@@ -641,7 +643,7 @@
 			$ret['results'] = array();
 			$ret['errors'] = array();
 
-			foreach ($arr as $userID) {
+			foreach ($arrUsers as $userID) {
 
 				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
 
@@ -667,7 +669,7 @@
 			$ret['errors'] = array();
 			$ret['results'] = array();
 
-			foreach ($arr as $userID) {
+			foreach ($arrUsers as $userID) {
 
 				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
 
@@ -698,7 +700,7 @@
 
 			$resIDs = "";
 
-			foreach ($arr as $userID) {
+			foreach ($arrUsers as $userID) {
 
 				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
 
@@ -733,9 +735,15 @@
 
 		}
 
-		if($is_myself_affected){
-			updateSessionInfo();
+
+		//update group info for affected users
+		foreach ($arrUsers as $userID) {
+				$groups = reloadUserGroups($userID);
+				updateSessionForUser($userID, 'user_access', $groups);
 		}
+		//if($is_myself_affected){
+		//	updateSessionInfo();
+		//}
 
 		return $ret;
 	}
@@ -867,34 +875,5 @@
 			return $refs;
 		}
 		return $arr;
-	}
-
-	/**
-	*
-	*
-	*/
-	function updateSessionInfo(){
-/*
-		$query = 'select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
-		' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
-		' and '.USER_GROUPS_USER_ID_FIELD.'="'.get_user_id().'"';
-
-		$groups = array();
-
-		$res = mysql_query($query);
-		while ($row = mysql_fetch_assoc($res)) {
-			if ($row[USER_GROUPS_ROLE_FIELD])
-				$groups[$row[GROUPS_ID_FIELD]] = $row[USER_GROUPS_ROLE_FIELD];
-			else
-				$groups[$row[GROUPS_ID_FIELD]] = 'member';
-		}
-		$groups[get_user_id()] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this
-*/
-		$groups = reloadUserGroups(get_user_id());
-		session_start();
-		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
-
-		/*****DEBUG****///error_log("PREFIX=".HEURIST_SESSION_DB_PREFIX."   UPDATE GROUPS!!!!!!! ".print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'], true));
-
 	}
 ?>

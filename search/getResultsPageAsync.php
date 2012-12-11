@@ -115,6 +115,13 @@ if (mysql_error()) {
 
 session_start();
 
+//update top.HEURIST.user.workgroups
+$isNeedUpdateWorkgroups = false;
+if(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access_updated']==1){
+	$isNeedUpdateWorkgroups = true;
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access_updated']);
+}
+
 if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
 	$sid = dechex(rand());
 // set up search context for use with edit records prev next
@@ -141,6 +148,18 @@ $resDepth = 0; // the result records depth with respect to the query
   <!--link rel=alternate type="application/rss+xml" title=RSS href="<?= rss_url() ?>" id=rss_rel-->
 
   <script type="text/javascript">
+
+<?php if($isNeedUpdateWorkgroups){ ?>
+top.HEURIST.user.workgroups = [<?php
+		if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
+			$query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
+
+			/*****DEBUG****///error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
+			$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
+			print join(", ", $workgroups);
+		}
+?> ];
+<?php } ?>
 
 
 /* prevent JS errors when inspecting the page explicitly */

@@ -9,6 +9,9 @@
  * @todo
  **/
 
+
+// ARTEM - used in viewRecord.php only
+
 ?>
 
 <?php

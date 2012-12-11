@@ -30,7 +30,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 
 $terms = getTerms();
 
-// get a list of workgroups the user belongs to.
+// get a list of workgroups the user belongs to. - ARTEM - NOT USED
 $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 array_push($wg_ids, 0);
 
@@ -208,9 +208,9 @@ function print_header_line($bib) {
 //
 ?>
 
-<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class="normal"
+<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
 	onClick="return sane_link_opener(this);"
-	target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
+	target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
 </div>
 
 <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>"><h2 style="text-transform:none; line-height:16px"><?= $bib['rec_Title'] ?></h2>
@@ -541,10 +541,12 @@ function print_private_details($bib) {
 
 function print_other_tags($bib) {
 ?>
-<div class=detailRow>
-	<div class=detailType>Tags</div>
-	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
-</div></div>
+<div class="detailRow">
+	<div class="detailType">Tags</div>
+	<div class="detail">
+		<a target="_new" href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a>
+	</div>
+</div>
 <?php
 }
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
