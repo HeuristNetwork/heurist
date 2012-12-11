@@ -117,23 +117,14 @@
 	?>;
 
 
-<<<<<<< Updated upstream:common/php/loadUserInfo.php
 	top.HEURIST.user.isInWorkgroup = function(wgID) {
-	var usrID = top.HEURIST.get_user_id();
-	if (wgID == 0 || usrID == wgID) return true;
-	if (! top.HEURIST.user.workgroups) return false;
-	for (var i in top.HEURIST.user.workgroups) {
-	if (wgID == top.HEURIST.user.workgroups[i]) return true;
-	}
-	return false;
-=======
-	top.HEURIST.user.isInWorkgroup = function(wg_id) {
+		var usrID = top.HEURIST.get_user_id();
+		if (wgID == 0 || usrID == wgID) return true;
 		if (! top.HEURIST.user.workgroups) return false;
 		for (var i in top.HEURIST.user.workgroups) {
-			if (wg_id == top.HEURIST.user.workgroups[i]) return true;
+			if (wgID == top.HEURIST.user.workgroups[i]) return true;
 		}
 		return false;
->>>>>>> Stashed changes:common/php/loadUserInfo.php
 	};
 
 	<?php
@@ -160,7 +151,6 @@ top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name())
 top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
 top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
 top.HEURIST.is_wgAdmin = function(wgID) {
-<<<<<<< Updated upstream:common/php/loadUserInfo.php
 var usrID = top.HEURIST.get_user_id(), j, i;
 if (wgID == 0 || usrID == wgID) return true;
 if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
@@ -172,19 +162,6 @@ if ( wgAdmins[i].id == usrID) return true;
 }
 return false;
 }};
-=======
-	if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
-	var usrID = top.HEURIST.get_user_id(), j, i;
-	var wgroups = wgID?[wgID]:top.HEURIST.user.workgroups;
-	for (j=0; j < wgroups.length; i++) {
-		var wgAdmins = top.HEURIST.workgroups[wgroups[j]].admins;
-		for (i=0; i < wgAdmins.length; i++) {
-			if ( wgAdmins[i].id == usrID) return true;
-		}
-		return false;
-	}
-};
->>>>>>> Stashed changes:common/php/loadUserInfo.php
 
 <?php if (! is_admin()) { ?>
 	top.document.body.className += " is-not-admin";
