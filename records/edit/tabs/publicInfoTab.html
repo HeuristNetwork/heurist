@@ -17,16 +17,16 @@
 
 <link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
 <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
-<script type="text/javascript" src="../../../common/js/hintDiv.js"></script> 
-  
+<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+
  </head>
  <body class="editTab" onLoad="onshow();">
   <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
   <script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
-  
+
 <script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 <script type="text/javascript" src="../../../common/js/calendar.js"></script>
-  
+
 <script>
 		top.HEURIST.edit.calendarViewer = calendarViewer;
 
@@ -83,7 +83,7 @@ function setWorkgroupProperties(wg, wgVis) {
 		wgElement.id = "rec_owner";
 		document.forms[0].appendChild(wgElement);
 	}
-	wgElement.value = wg? wg : "";
+	wgElement.value = wg >= 0 ? wg : "";
 
 	var wgVisElement = document.getElementById("rec_visibility");
 	if (! wgVisElement) {

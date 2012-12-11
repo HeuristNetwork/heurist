@@ -36,20 +36,20 @@
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
--- 
+--
 -- Host: localhost
 -- Generation Time: Oct 19, 2012 at 12:14 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
--- 
+--
 -- Database: 'hdb_H3CoreDefinitions'
--- 
+--
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'Records'
--- 
+--
 
 CREATE TABLE Records (
   rec_ID int(10) unsigned NOT NULL auto_increment COMMENT 'The primary record ID, also called, historically, bib_id',
@@ -81,9 +81,9 @@ CREATE TABLE Records (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defCalcFunctions'
--- 
+--
 
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
@@ -95,9 +95,9 @@ CREATE TABLE defCalcFunctions (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defCrosswalk'
--- 
+--
 
 CREATE TABLE defCrosswalk (
   crw_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key',
@@ -112,9 +112,9 @@ CREATE TABLE defCrosswalk (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defDetailTypeGroups'
--- 
+--
 
 CREATE TABLE defDetailTypeGroups (
   dtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Primary ID - Code for detail type groups',
@@ -127,9 +127,9 @@ CREATE TABLE defDetailTypeGroups (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defDetailTypes'
--- 
+--
 
 CREATE TABLE defDetailTypes (
   dty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Code for the detail type (field) - may vary between Heurist DBs',
@@ -161,9 +161,9 @@ CREATE TABLE defDetailTypes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defFileExtToMimetype'
--- 
+--
 
 CREATE TABLE defFileExtToMimetype (
   fxm_Extension varchar(10) NOT NULL COMMENT 'The file extension, indicates mimetype, icon and some beahviours',
@@ -178,9 +178,9 @@ CREATE TABLE defFileExtToMimetype (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defLanguages'
--- 
+--
 
 CREATE TABLE defLanguages (
   lng_NISOZ3953 char(3) NOT NULL COMMENT 'Three character NISO Z39.53 language code',
@@ -193,9 +193,9 @@ CREATE TABLE defLanguages (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defOntologies'
--- 
+--
 
 CREATE TABLE defOntologies (
   ont_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Ontology code, primary key',
@@ -216,9 +216,9 @@ CREATE TABLE defOntologies (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecStructure'
--- 
+--
 
 CREATE TABLE defRecStructure (
   rst_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key for the record structures table',
@@ -254,9 +254,9 @@ CREATE TABLE defRecStructure (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecTypeGroups'
--- 
+--
 
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
@@ -271,9 +271,9 @@ CREATE TABLE defRecTypeGroups (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecTypes'
--- 
+--
 
 CREATE TABLE defRecTypes (
   rty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record type code, widely used to reference record types, primary key',
@@ -306,9 +306,9 @@ CREATE TABLE defRecTypes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRelationshipConstraints'
--- 
+--
 
 CREATE TABLE defRelationshipConstraints (
   rcs_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
@@ -332,9 +332,9 @@ CREATE TABLE defRelationshipConstraints (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defTerms'
--- 
+--
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
@@ -362,9 +362,9 @@ CREATE TABLE defTerms (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defTranslations'
--- 
+--
 
 CREATE TABLE defTranslations (
   trn_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
@@ -380,9 +380,9 @@ CREATE TABLE defTranslations (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defURLPrefixes'
--- 
+--
 
 CREATE TABLE defURLPrefixes (
   urp_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'ID which will be stored as proxy for the URL prefix',
@@ -394,9 +394,9 @@ CREATE TABLE defURLPrefixes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recDetails'
--- 
+--
 
 CREATE TABLE recDetails (
   dtl_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key for record detail (field) values table',
@@ -418,9 +418,9 @@ CREATE TABLE recDetails (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recForwarding'
--- 
+--
 
 CREATE TABLE recForwarding (
   rfw_OldRecID int(10) unsigned NOT NULL COMMENT 'The deleted record which will be redirected to another',
@@ -431,9 +431,9 @@ CREATE TABLE recForwarding (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recRelationshipsCache'
--- 
+--
 
 CREATE TABLE recRelationshipsCache (
   rrc_RecID int(10) unsigned NOT NULL COMMENT 'Record ID of a relationships record linking source and target records',
@@ -446,9 +446,9 @@ CREATE TABLE recRelationshipsCache (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recSimilarButNotDupes'
--- 
+--
 
 CREATE TABLE recSimilarButNotDupes (
   snd_SimRecsList varchar(16000) NOT NULL COMMENT 'A comma separated list of record IDs which are similar but not identical',
@@ -457,9 +457,9 @@ CREATE TABLE recSimilarButNotDupes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recThreadedComments'
--- 
+--
 
 CREATE TABLE recThreadedComments (
   cmt_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Comment ID, primary key for comments',
@@ -478,9 +478,9 @@ CREATE TABLE recThreadedComments (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'recUploadedFiles'
--- 
+--
 
 CREATE TABLE recUploadedFiles (
   ulf_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'A unique numeric file ID used as filename to store the data on disk and should be different ids if shared',
@@ -508,9 +508,9 @@ CREATE TABLE recUploadedFiles (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysArchive'
--- 
+--
 
 CREATE TABLE sysArchive (
   arc_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of archive table',
@@ -528,9 +528,9 @@ CREATE TABLE sysArchive (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysDBNameCache'
--- 
+--
 
 CREATE TABLE sysDBNameCache (
   dnc_ID int(10) unsigned NOT NULL COMMENT 'Heurist DB ID for a registered Heurist database',
@@ -542,9 +542,9 @@ CREATE TABLE sysDBNameCache (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysDocumentation'
--- 
+--
 
 CREATE TABLE sysDocumentation (
   doc_id tinyint(3) unsigned NOT NULL auto_increment,
@@ -554,9 +554,9 @@ CREATE TABLE sysDocumentation (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysIdentification'
--- 
+--
 
 CREATE TABLE sysIdentification (
   sys_ID tinyint(1) unsigned NOT NULL default '1' COMMENT 'Only 1 record should exist in this table',
@@ -584,7 +584,7 @@ CREATE TABLE sysIdentification (
   sys_UploadDirectory varchar(128) default NULL COMMENT 'Absolute directory path for uploaded files (blank = use default from installation)',
   sys_hmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write hml representation of published records, default to hml within upload directory',
   sys_htmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write html representation of published records, default to html within upload directory',
-  sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '1' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
+  sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
   sys_NewRecAccess enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Default visibility for new records - allow override per user',
   sys_SetPublicToPendingOnEdit tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
@@ -596,9 +596,9 @@ CREATE TABLE sysIdentification (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysLocks'
--- 
+--
 
 CREATE TABLE sysLocks (
   lck_Action enum('buildcrosswalks','editdefinitions','errorscan','buildtempdb') NOT NULL COMMENT 'Type of action being carried out',
@@ -609,9 +609,9 @@ CREATE TABLE sysLocks (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysTableLastUpdated'
--- 
+--
 
 CREATE TABLE sysTableLastUpdated (
   tlu_TableName varchar(40) NOT NULL COMMENT 'Name of table for which we are recording time of last update',
@@ -622,9 +622,9 @@ CREATE TABLE sysTableLastUpdated (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysUGrps'
--- 
+--
 
 CREATE TABLE sysUGrps (
   ugr_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'User or group ID, used wherever a user or group is to be identified',
@@ -659,9 +659,9 @@ CREATE TABLE sysUGrps (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'sysUsrGrpLinks'
--- 
+--
 
 CREATE TABLE sysUsrGrpLinks (
   ugl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for user-to-group membership',
@@ -675,9 +675,9 @@ CREATE TABLE sysUsrGrpLinks (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrBookmarks'
--- 
+--
 
 CREATE TABLE usrBookmarks (
   bkm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, ID for bookmarks',
@@ -697,9 +697,9 @@ CREATE TABLE usrBookmarks (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrHyperlinkFilters'
--- 
+--
 
 CREATE TABLE usrHyperlinkFilters (
   hyf_String varchar(63) NOT NULL COMMENT 'Hyperlink string to be ignored when encountered in hyperlink import',
@@ -710,9 +710,9 @@ CREATE TABLE usrHyperlinkFilters (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrRecTagLinks'
--- 
+--
 
 CREATE TABLE usrRecTagLinks (
   rtl_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary link table key, one tag linked to one record',
@@ -727,9 +727,9 @@ CREATE TABLE usrRecTagLinks (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrRecentRecords'
--- 
+--
 
 CREATE TABLE usrRecentRecords (
   rre_UGrpID smallint(5) unsigned default NULL COMMENT 'ID of user who used the record',
@@ -741,9 +741,9 @@ CREATE TABLE usrRecentRecords (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrReminders'
--- 
+--
 
 CREATE TABLE usrReminders (
   rem_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique reminder ID',
@@ -766,9 +766,9 @@ CREATE TABLE usrReminders (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrRemindersBlockList'
--- 
+--
 
 CREATE TABLE usrRemindersBlockList (
   rbl_RemID mediumint(8) unsigned NOT NULL COMMENT 'Reminder ID to be blocked',
@@ -779,9 +779,9 @@ CREATE TABLE usrRemindersBlockList (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrReportSchedule'
--- 
+--
 
 CREATE TABLE usrReportSchedule (
   rps_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary ID of a report output update specification',
@@ -801,9 +801,9 @@ CREATE TABLE usrReportSchedule (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrSavedSearches'
--- 
+--
 
 CREATE TABLE usrSavedSearches (
   svs_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Saved search ID, used in publishing, primary key',
@@ -819,9 +819,9 @@ CREATE TABLE usrSavedSearches (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'usrTags'
--- 
+--
 
 CREATE TABLE usrTags (
   tag_ID mediumint(8) unsigned NOT NULL auto_increment,
@@ -838,9 +838,9 @@ CREATE TABLE usrTags (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'woot_ChunkPermissions'
--- 
+--
 
 CREATE TABLE woot_ChunkPermissions (
   wprm_ChunkID int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
@@ -854,9 +854,9 @@ CREATE TABLE woot_ChunkPermissions (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'woot_Chunks'
--- 
+--
 
 CREATE TABLE woot_Chunks (
   chunk_ID int(11) NOT NULL auto_increment COMMENT 'Primary ID for a version of the text chunks making up a woot entry (page)',
@@ -877,9 +877,9 @@ CREATE TABLE woot_Chunks (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'woot_RecPermissions'
--- 
+--
 
 CREATE TABLE woot_RecPermissions (
   wrprm_WootID int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
@@ -893,9 +893,9 @@ CREATE TABLE woot_RecPermissions (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'woots'
--- 
+--
 
 CREATE TABLE woots (
   woot_ID int(11) NOT NULL auto_increment COMMENT 'Primary ID of a woot record/entry/page',

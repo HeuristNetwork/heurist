@@ -36,7 +36,7 @@
 		<link rel=stylesheet href="../../common/css/edit.css">
 
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-<script type="text/javascript" src="../../common/js/hintDiv.js"></script> 
+<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 
 <!-- for mapviewer roolover -->
 <!-- scripts for dynamic map popup
@@ -60,7 +60,7 @@
 		<script src="../../common/php/loadUserInfo.php"></script>
 
 		<script src="../../records/edit/digitizer/mapViewer.js"></script>
-		
+
 		<script>
 			top.HEURIST.whenLoaded("obj-user", function() {
 				if (!top.HEURIST.baseURL) {
@@ -244,15 +244,16 @@
 				while (wgVal.childNodes.length) {
 					wgVal.removeChild(wgVal.lastChild);
 				}
-				wgVal.options[0] = new Option("Anybody (no restriction)", "");
+				var recOwnerID = top.HEURIST.edit.record.workgroupID;
+				wgVal.options[0] = new Option("Everyone (no restriction)", "0");
 				wgVal.options[1] = new Option(top.HEURIST.get_user_name(), top.HEURIST.get_user_id());
-				wgVal.selectedIndex = 0;
+				wgVal.selectedIndex = recOwnerID == top.HEURIST.get_user_id() ? 1:0;
 				for (var i=0; i < top.HEURIST.user.workgroups.length; ++i) {
 					var wgID = top.HEURIST.user.workgroups[i];
 					var wgName = top.HEURIST.workgroups[wgID].name;
 					wgVal.options[i+2] = new Option(wgName, wgID);
 
-					if (wgName == top.HEURIST.edit.record.workgroup){
+					if (wgID == recOwnerID){
 						wgVal.selectedIndex = i+2;
 					}
 				}
@@ -271,8 +272,9 @@
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
 					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : (document.getElementById("non-wg-view").checked?"viewable" : (document.getElementById("non-wg-pending").checked?"pending" : "public"));
-					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.visibility != wgVisValue) {
-						top.HEURIST.edit.record.workgroup = wgValue? (wgValue == top.HEURIST.get_user_id() ? top.HEURIST.get_user_name() : top.HEURIST.workgroups[wgValue].name) : null;
+					if (top.HEURIST.edit.record.workgroupID != wgValue  ||  top.HEURIST.edit.record.visibility != wgVisValue) {
+						top.HEURIST.edit.record.workgroupID = wgValue;
+						top.HEURIST.edit.record.workgroup = wgValue > 0 ? (wgValue == top.HEURIST.get_user_id() ? top.HEURIST.get_user_name() : top.HEURIST.workgroups[wgValue].name) : "";
 						top.HEURIST.edit.record.visibility = wgVisValue;
 
 						top.HEURIST.edit.modules["public"].frame.contentWindow.setWorkgroupProperties(wgValue, wgVisValue);

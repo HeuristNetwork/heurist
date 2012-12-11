@@ -155,7 +155,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 		$props['rating'] = $row['rating'];
 	}
 	$props["quickNotes"] = @$row["notes"]? $row["notes"] : "";
-	if ($row['workgroupID']) {
+	if ($row['workgroupID']!=null) {
 		$props['workgroupID'] = $row['workgroupID'];
 		$props['workgroup'] = $row['workgroupID']== get_user_id()? $row['name']:$row['workgroup'];
 	}
