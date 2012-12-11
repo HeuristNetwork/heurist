@@ -259,7 +259,7 @@ function DetailTypeEditor() {
 			el_sel.selectedIndex = sel_index;
 
 			el_sel.onchange =  _changeVocabulary;
-			el_sel.style.maxWidth = '185px';
+			el_sel.style.maxWidth = '165px';
 			prev.appendChild(el_sel);
 
 			_changeVocabulary(null);
@@ -279,17 +279,22 @@ function DetailTypeEditor() {
 		}
 
 		var	btn_addsel = Dom.get("btnAddSelTerm"),
-			editedTermTree = "";
+			editedTermTree = "",
+			divAddVocab = Dom.get("divAddVocab");
 
 		btn_addsel.disabled = false;
 
 		if(el_sel.value > 0){ //individual selection
 			btn_addsel.value = "Add  term";
 			editedTermTree = el_sel.value;
+			divAddVocab.style.display = "inline-block";
 		}else if(el_sel.value < 0){
 			btn_addsel.disabled = true;
+			btn_addsel.value = "";
+			divAddVocab.style.display = "inline-block";
 		}else{
 			btn_addsel.value = "Select terms";
+			divAddVocab.style.display = "none";
 		}
 
 		if(event){
@@ -381,29 +386,37 @@ function DetailTypeEditor() {
 	* listener of "Change vocabulary" button
 	* Shows a popup window where user can select terms to create a term tree as wanted
 	*/
-	function _onAddSelectTerms(){
+	function _onAddSelectTerms(is_add_vocab){
 
 		var type = Dom.get("dty_Type").value;
 		var allTerms = Dom.get("dty_JsonTermIDTree").value;
 		var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 
 		var el_sel = Dom.get("selVocab");
-		if(el_sel.value>0){ //add term to vocabulary
+		if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
 
 			if(type!="enum"){
 				type="relation";
 			}
 
 			Hul.popupURL(top, top.HEURIST.basePath +
-				"admin/structure/editTermForm.php?domain="+type+"&parent="+el_sel.value+"&db="+_db,
+				"admin/structure/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
 				{
 				"close-on-blur": false,
 				"no-resize": true,
 				height: 160,
 				width: 400,
 				callback: function(context) {
-					if(context=="ok") {
-						_recreateTermsPreviewSelector(type, allTerms, "");
+					if(context!="") {
+
+						if(context=="ok"){
+							_recreateTermsPreviewSelector(type, allTerms, "");
+						}else{ //after add new vocab
+							Dom.get("dty_JsonTermIDTree").value =  context;
+							Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
+							_recreateTermsVocabSelector(type);
+							_recreateTermsPreviewSelector(type, null, null);
+						}
 					}
 				}
 			});
@@ -892,7 +905,9 @@ function DetailTypeEditor() {
 			/**
 			 *	handles change status event
 			 */
-			onAddSelectTerms : _onAddSelectTerms,
+			onAddSelectTerms : function() { _onAddSelectTerms(false); },
+
+			onAddVocabulary : function() { _onAddSelectTerms(true); },
 
 			/**
 			 *	handles change status event

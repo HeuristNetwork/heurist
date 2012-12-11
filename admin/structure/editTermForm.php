@@ -25,11 +25,13 @@ if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to modify database structure</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
     return;
 }
+
+$parent_id = @$_REQUEST['parent'];
 ?>
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Heurist - Add term</title>
+<title>Heurist - Add <?=($parent_id==0?"vocabulary":"term")?></title>
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
@@ -52,11 +54,11 @@ if (!is_admin()) {
 <body class="popup">
 <?php
 
-	$ok = "";
+	$return_res = "";
 
 	if(@$_REQUEST['domain']==null){
 		echo "Terms domain is not defined";
-	}else if(@$_REQUEST['parent']==null){
+	}else if($parent_id==null){
 		echo "Parent vocabulary is not defined";
 	}else if(@$_REQUEST['process']=="action"){
 
@@ -66,14 +68,14 @@ if (!is_admin()) {
 
 			$db = mysqli_connection_overwrite(DATABASE); //artem's
 
-			$res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $_REQUEST['parent']."-1",
-					array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'],$_REQUEST['parent'],"open",$_REQUEST['code']), null);
+			$res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
+					array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), null);
 
 			if(is_numeric($res)){
 
 				echo "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>";
 				echo "<div style='color:green'>New term has been added successfully</div>";
-				$ok = "'ok'";
+				$return_res = ($parent_id==0)?$res:"'ok'";
 			}else{
 				echo "<div style='color:green'>".$res."</div>"; //error
 			}
@@ -94,7 +96,7 @@ if (!is_admin()) {
 
 			<div style="text-align: right; padding-top:8px;">
 					<input id="btnSave" type="submit" value="Save"/>
-					<input id="btnCancel" type="button" value="Close" onClick="{window.close(<?=$ok?>)}" />
+					<input id="btnCancel" type="button" value="Close" onClick="{window.close(<?=$return_res?>)}" />
 			</div>
 
 		</form>
