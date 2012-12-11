@@ -247,6 +247,54 @@ top.HEURIST.search = {
 			lbl.title = params['q'];
 		}
 
+		var msg = "";
+
+		var m = params["q"] ? params["q"].match(/sortby:(-?)(.)/) : null;
+		if (m && m.length>1) {
+
+			var sdest = " (" + (m[1] === "-" ? "descending" : "ascending") + "). ";
+
+			if(m[2] === "a") {
+				if (params["w"] === "bookmark") {
+					msg = "Records sorted by date of bookmarking"
+						+  sdest
+						+ "To sort by date of record addition, use 'all records' search";
+				} else {
+					msg = "Records sorted by date of record addition"
+						+ sdest
+						+ "To sort by date of bookmarking, use 'my bookmarks' search";
+				}
+			}else if(m[2] === "m") {
+				if (params["w"] === "bookmark") {
+					msg = "Records sorted by date of modification of Private info"
+						+ sdest
+						+ "To sort by date of modification of Public info, use 'All records' search";
+				} else {
+					msg = "Records sorted by date of modification of Public info"
+						+ sdest
+						+ "To sort by date of modification of Private info, use 'my bookmarks' search";
+				}
+			}else if(m[2] === "p") {
+					msg = "Records sorted by popularity" + sdest;
+			}else if(m[2] === "r") {
+					msg = "Records sorted by rating" + sdest;
+			}else if(m[2] === "u") {
+					msg = "Records sorted by URL" + sdest;
+			}else if(m[2] === "t") {
+					msg = "Records sorted by title" + sdest;
+			}else if(m[2] === "rt") {
+					msg = "Records sorted by record type" + sdest;
+			}
+		}
+		if(msg==""){
+			document.getElementById("results-message").style.display = "none";
+		}else{
+			document.getElementById("results-message").innerHTML = msg;
+			document.getElementById("results-message").style.display = "block";
+		}
+
+
+
 		top.HEURIST.currentQuery_main = ("w=" + encodeURIComponent(params["w"])) + "&" +
 			("stype=" + (params["stype"] ? encodeURIComponent(params["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
@@ -1101,36 +1149,6 @@ top.HEURIST.search = {
 		if (params["description"]) {
 			document.getElementById("search-description").innerHTML = params["description"];
 			document.getElementById("search-description").style.display = "block";
-		}
-
-		var msg = "";
-
-		var m = params["q"] ? params["q"].match(/sortby:(-?)(.)/) : null;
-		if (m && m[2] === "a") {
-			if (params["w"] === "bookmark") {
-				msg = "Records sorted by date of bookmarking ("
-					+ (m[1] === "-" ? "descending" : "ascending") + "). "
-					+ "To sort by date of record addition, use 'all records' search";
-			} else {
-				msg = "Records sorted by date of record addition ("
-					+ (m[1] === "-" ? "descending" : "ascending") + "). "
-					+ "To sort by date of bookmarking, use 'my bookmarks' search";
-			}
-			document.getElementById("results-message").innerHTML = msg;
-			document.getElementById("results-message").style.display = "block";
-		}
-		if (m && m[2] === "m") {
-			if (params["w"] === "bookmark") {
-				msg = "Records sorted by date of modification of Private info ("
-					+ (m[1] === "-" ? "descending" : "ascending") + "). "
-					+ "To sort by date of modification of Public info, use 'All records' search";
-			} else {
-				msg = "Records sorted by date of modification of Public info ("
-					+ (m[1] === "-" ? "descending" : "ascending") + "). "
-					+ "To sort by date of modification of Private info, use 'my bookmarks' search";
-			}
-			document.getElementById("results-message").innerHTML = msg;
-			document.getElementById("results-message").style.display = "block";
 		}
 	},
 
