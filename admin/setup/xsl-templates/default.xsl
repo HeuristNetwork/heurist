@@ -62,16 +62,18 @@
 		</div>
 
 	<!-- THUMBNAILS  -->
-		<xsl:if test="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224' or @conceptID='70-606']">
+		<xsl:if test="detail[@conceptID='2-38' or @conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224' or @conceptID='70-606']">
 			<div class="thumbnail">
-					<xsl:element name="img">
-					<xsl:if test="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']">
-						<xsl:attribute name="src"><xsl:value-of select="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']/file/thumbURL"/></xsl:attribute>
-					</xsl:if>
-					<xsl:if test="detail[@conceptID='70-606']">
+				<xsl:element name="img">
+				<xsl:choose>
+					<xsl:when test="detail[@conceptID='2-38' or @conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@conceptID='2-38' or @conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']/file/thumbURL"/></xsl:attribute>
+					</xsl:when>
+					<xsl:when test="detail[@conceptID='70-606']">
 						<xsl:attribute name="src"><xsl:value-of select="detail[@conceptID='70-606']"/></xsl:attribute>
-					</xsl:if>
-					</xsl:element>
+					</xsl:when>
+				</xsl:choose>
+				</xsl:element>
 			</div>
 		</xsl:if>
 
