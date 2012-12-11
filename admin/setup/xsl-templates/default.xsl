@@ -141,7 +141,7 @@
 		  <xsl:for-each select="detail">
 
 			<!--act on the first in document order-->
-			<xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@conceptID= '2-16']">
+		  	<xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@isRecordPointer= 'true']">
 	<div class="detailRow">
 		<div class="detailType">
 				  <xsl:choose>
@@ -155,17 +155,10 @@
 				</div>
 				<div class="detail">
 			  <!--revisit all-->
-			  <xsl:for-each select="$pointer[@id=current()/@id]">
-			  <xsl:choose>
-				<xsl:when test="self::node()[@conceptID='2-15']">
-				  <xsl:apply-templates select="." mode="creator"/>
-				</xsl:when>
-				<xsl:otherwise>
-				<xsl:value-of select="record/title"/>
-				</xsl:otherwise>
-			  </xsl:choose>
+				<xsl:for-each select="/hml/records/record[id=$pointer[@id=current()/@id]/text()]">
+					<xsl:value-of select="./title"/>
 				<br/>
-			  </xsl:for-each>
+			  	</xsl:for-each>
 				</div>
 			  </div>
 			</xsl:if>
@@ -177,8 +170,7 @@
 	<xsl:for-each select="relationship">
 
 	  <!--act on the first in document order-->
-	  <xsl:if test="generate-id(.)=
-		generate-id($relation[@type=current()/@type][1])">
+	  <xsl:if test="generate-id(.)= generate-id($relation[@type=current()/@type][1])">
 	<div class="detailRow">
 		<div class="detailType">
 			<xsl:value-of select="@type"/>
