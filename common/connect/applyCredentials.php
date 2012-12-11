@@ -81,6 +81,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 //				return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin';
 //				break;
 			case 'group':
+				if ($ug == 0 || $ug == get_user_id()) return true;
 				if ($ug > 0)
 					return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][$ug] == 'admin';
 				return false;

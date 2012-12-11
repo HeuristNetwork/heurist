@@ -235,7 +235,7 @@
 			$bibUpdates["rec_URL"] = $_POST["rec_url"];
 		}
 		$owner = $bib['rec_OwnerUGrpID'];
-		if (is_admin() || is_Admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
+		if (is_admin() || is_admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
 			if (array_key_exists("rec_owner", $_POST)) {
 				$bibUpdates["rec_OwnerUGrpID"] = $_POST["rec_owner"];
 			}
