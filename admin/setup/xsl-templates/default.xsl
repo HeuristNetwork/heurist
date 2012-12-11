@@ -53,7 +53,7 @@
 <!-- main template -->
 <xsl:template match="/hml/records/record">
 
-	
+
 	<div id="{id}" class="record L{@depth}">
 		<div class="headerRow">
 			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
@@ -62,14 +62,14 @@
 		</div>
 
 	<!-- THUMBNAILS  -->
-		<xsl:if test="detail[@id=222 or @id=223 or @id=224 or @id=606]">
+		<xsl:if test="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224' or @conceptID='70-606']">
 			<div class="thumbnail">
 					<xsl:element name="img">
-					<xsl:if test="detail[@id= 222 or @id= 223 or @id= 224]">
-						<xsl:attribute name="src"><xsl:value-of select="detail[@id= 222 or @id= 223 or  @id= 224]/file/thumbURL"/></xsl:attribute>
+					<xsl:if test="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@conceptID='2-39' or @conceptID='3-222' or @conceptID='3-223' or @conceptID='3-224']/file/thumbURL"/></xsl:attribute>
 					</xsl:if>
-					<xsl:if test="detail[@id=606]">
-						<xsl:attribute name="src"><xsl:value-of select="detail[@id= 606]"/></xsl:attribute>
+					<xsl:if test="detail[@conceptID='70-606']">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@conceptID='70-606']"/></xsl:attribute>
 					</xsl:if>
 					</xsl:element>
 			</div>
@@ -81,9 +81,9 @@
 		<!--walk through the variable-->
 		<xsl:for-each select="detail">
 			<!--act on the first in document order-->
-			<xsl:if test="generate-id(.)= generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
+			<xsl:if test="generate-id(.)= generate-id($details[@id=current()/@id][1]) and self::node()[@conceptID!= '2-16']">
 				<div class="detailRow">
-					<xsl:if test="self::node()[@id!= 223]">
+					<xsl:if test="self::node()[@conceptID != '3-223']">
 						<div class="detailType">
 							<xsl:choose>
 								<xsl:when test="@name !=''">
@@ -104,33 +104,27 @@
 									<!-- <xsl:value-of select="./record/type"/>: -->
 									<a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/record/id}&amp;db=' + database;"> <xsl:value-of select="./record/title"/> </a>
 								</xsl:when>
-								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id!=178 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
+								<xsl:when test="self::node()[@conceptID!= '3-222' and @conceptID!= '2-38' and @conceptID!='2-10' and @conceptID!='2-11' and @conceptID != '3-223' and @conceptID != '3-62' and @conceptID != '2-17' and @conceptID != '3-224']">
 									<xsl:value-of select="."/>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:if test="self::node()[@id= 177]">
+									<xsl:if test="self::node()[@conceptID= '2-10']">
 										<xsl:call-template name="start-date"></xsl:call-template>
 									</xsl:if>
-									<xsl:if test="self::node()[@id= 178]">
+									<xsl:if test="self::node()[@conceptID= '2-11']">
 										<xsl:call-template name="end-date"></xsl:call-template>
 									</xsl:if>
-									<xsl:if test="self::node()[@id= 231 or @id=221]">
+									<xsl:if test="self::node()[@conceptID= '3-222' or @conceptID= '3-223' or @conceptID= '3-224' or @conceptID= '3-62' or @conceptID='2-38']">
 										<xsl:call-template name="file">
 											<xsl:with-param name="id"><xsl:value-of select="@id"/></xsl:with-param>
 										</xsl:call-template>
 									</xsl:if>
-									<xsl:if test="self::node()[@id= 268 or @id=304]">
+									<xsl:if test="self::node()[@conceptID= '2-17']">
 										<xsl:call-template name="url">
 											<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
 											<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
 										</xsl:call-template>
 									</xsl:if>
-									<xsl:if test="self::node()[@id= 256]">
-										<xsl:call-template name="url">
-											<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
-											<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
-										</xsl:call-template>
-								</xsl:if>
 								</xsl:otherwise>
 							</xsl:choose><br/>
 							</xsl:for-each>
@@ -145,7 +139,7 @@
 		  <xsl:for-each select="detail">
 
 			<!--act on the first in document order-->
-			<xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
+			<xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@conceptID= '2-16']">
 	<div class="detailRow">
 		<div class="detailType">
 				  <xsl:choose>
@@ -161,7 +155,7 @@
 			  <!--revisit all-->
 			  <xsl:for-each select="$pointer[@id=current()/@id]">
 			  <xsl:choose>
-				<xsl:when test="self::node()[@id=158]">
+				<xsl:when test="self::node()[@conceptID='2-15']">
 				  <xsl:apply-templates select="." mode="creator"/>
 				</xsl:when>
 				<xsl:otherwise>
@@ -228,7 +222,7 @@
 	</xsl:if>
 	</div>
 
-	<!-- related records div 
+	<!-- related records div
 	<div class="related-records"><div class="show-related" onClick="displayRelatedRecords({id},this.parentNode)">Show related records</div>
 	</div>-->
 
@@ -266,7 +260,7 @@
 	</xsl:if>
   </xsl:template>
 
-  <xsl:template name="start-date" match="detail[@id=177]">
+  <xsl:template name="start-date" match="detail[@conceptID='2-10']">
 		<xsl:choose>
 			<xsl:when test="temporal[@type='Simple Date']/date/raw">
 				<xsl:value-of select="temporal/date/raw"/>
@@ -283,7 +277,7 @@
 		</xsl:choose>
   </xsl:template>
 
-    <xsl:template name="end-date" match="detail[@id=178]">
+    <xsl:template name="end-date" match="detail[@conceptID='2-11']">
 		<xsl:choose>
 			<xsl:when test="temporal[@type='Simple Date']/date/raw">
 				<xsl:value-of select="temporal/date/raw"/>

@@ -58,6 +58,13 @@
 				var styleSelectElt = document.getElementById("transform_select");
 				styleSelectElt.options[0] = new Option("Select a style...", "");
 				styleSelectElt.options[0].disabled = true;
+				var localStyleName;
+				for (localStyleName in styles){
+					styleSelectElt.appendChild( new Option(styles[localStyleName][0],localStyleName));
+					if (localStyleName == s) {
+						styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
+					}
+				}
 				for (var grpIndex in top.HEURIST.transforms.groupOrder) {
 					var grpName = top.HEURIST.transforms.groupOrder[grpIndex];
 					var firstInGroup = true;
