@@ -9,44 +9,41 @@
  * @todo
  **/
 
-?>
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-<?php
+$error = null;
+$title = '';
+$url = @$_REQUEST['url'];
 
-if (! $_REQUEST['url']  ||  (! intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) return;
-$_REQUEST['url'] = str_replace(' ', '+', $_REQUEST['url']);
+if (! is_logged_in()) {
+	$error = "You must be logged in";
+}else if ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
+	$error = "URL is not defined";
+}else{
 
-$ch = curl_init($_REQUEST['url']);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-if (defined("HEURIST_HTTP_PROXY")) {
-	curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-}
-curl_setopt($ch, CURLOPT_RANGE, '0-10000');	// just look at the first 10kb for a title
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+	$url = str_replace(' ', '+', $url);
 
-$data = curl_exec($ch);
-$error = curl_error($ch);
-$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-if (intval($code) >= 400) $error = 'URL could not be retrieved';
+	$data = loadRemoteURLContentWithRange($url, "0-10000");
 
-if (! $error) {
-	preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
-	if ($matches) $title = preg_replace('/\s+/', ' ', $matches[1]);
+	if ($data){
 
-	if (! $title) {
-		$type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-		if (preg_match('!^image/!i', $type)) {
-			preg_match('!.*/(.*)!', $_REQUEST['url'], $matches);
-			$title = 'Image - ' . $matches[1];
+		preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
+		if ($matches) $title = preg_replace('/\s+/', ' ', $matches[1]);
+
+		if (! $title) {
+			//type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+			//if (preg_match('!^image/!i', $type)) {
+			//	preg_match('!.*/(.*)!', $_REQUEST['url'], $matches);
+			//	$title = 'Image - ' . $matches[1];
+			//}
 		}
+
+
+	}else{
+		$error = 'URL could not be retrieved';
 	}
-
-} else {
-	$title = '';
 }
-
-curl_close($ch);
-
 ?>
 <html>
 <head>
@@ -71,10 +68,13 @@ function setTitle() {
 
 	if (title) lockedTitleElt.value = title;
 
-	if (! '<?= addslashes($error) ?>')
+	if (! '<?= addslashes($error) ?>'){
 		lockedLookupElt.value = 'Revert';
-	else
+		lockedLookupElt.title = "Revert title";
+	}else{
 		lockedLookupElt.value = 'URL error';
+		lockedLookupElt.title = "";
+	}
 
 	lockedLookupElt.disabled = false;
 	lockedTitleElt.disabled = false;
@@ -86,8 +86,8 @@ function setTitle() {
 </head>
 
 <body style="border: 0px; margin: 0px; padding: 0px;"
-      <?php if ($error) { ?>onLoad="alert('<?= htmlspecialchars($error) ?>'); setTitle();"
-      <?php } else if ($title) { ?>onLoad="setTitle();" <?php } ?>>
+      <?php if ($error) { ?> onLoad='alert("<?= htmlspecialchars($error) ?>");'
+      <?php } else if ($title) { ?> onLoad="setTitle();" <?php } ?>>
 </body>
 
 </html>

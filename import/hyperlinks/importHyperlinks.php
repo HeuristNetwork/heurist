@@ -9,36 +9,36 @@
  * @todo
  **/
 
-?>
 
-<?php
 /* not suited to t-1000 */
 
 define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
-require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
+//require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
-
 mysql_connection_db_overwrite(DATABASE);
 
 $nextmode = 'inputselect';
 
 if (@$_REQUEST['shortcut']) {
+
 	$_REQUEST['mode'] = 'Analyse';
 	$_REQUEST['source'] = 'url';
 	$_REQUEST['url'] = $_REQUEST['shortcut'];
+
 }
 
-if (@$_REQUEST['old_srcname'])
+if (@$_REQUEST['old_srcname']){
 	$srcname = $_REQUEST['old_srcname'];
+}
 
 
 if (@$_REQUEST['mode'] == 'Analyse') {
@@ -184,12 +184,13 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 
 $disambiguate_bib_ids = array();
-if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags'])  &&  @$_REQUEST['links']) {
+if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags'])  &&  @$_REQUEST['links'])
+{
 	$bkmk_insert_count = 0;
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) continue;
 
-		$rec_id = biblio_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], @$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL, @$_REQUEST['rec_ID'][$linkno]);
+		$rec_id = biblio_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), @$_REQUEST['rec_ID'][$linkno]);
 		if (is_array($rec_id)  and  $rec_id) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_bib_ids[$_REQUEST['link'][$linkno]] = $rec_id;
@@ -197,20 +198,27 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		}
 		if (! @$rec_id) continue;	/* malformed URL */
 
-		if (@$_REQUEST['adding_tags']) {
+		if (@$_REQUEST['adding_tags'] == 1) {
 			$kwd = @$_REQUEST['wgTags'];
 		} else {
 			$kwd = @$_REQUEST['kwd'][$linkno];
 		}
 
-		if (bookmark_insert(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], $kwd, $rec_id))
+
+error_log(">>>>".$kwd);
+
+		if (bookmark_insert(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], $kwd, $rec_id)){
 			++$bkmk_insert_count;
+		}
 	}
 
-	if (@$bkmk_insert_count == 1)
+error_log(">>>>".$bkmk_insert_count);
+
+	if (@$bkmk_insert_count == 1){
 		$success = 'Added one bookmark';
-	else if (@$bkmk_insert_count > 1)
+	}else if (@$bkmk_insert_count > 1){
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
+	}
 }
 
 
@@ -218,8 +226,9 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 if (@$urls) {
 	$bkmk_urls = mysql__select_assoc('usrBookmarks left join Records on rec_ID = bkm_recID', 'rec_URL', '1', 'bkm_UGrpID='.get_user_id());
 	$ignore = array();
-	foreach ($urls as $url => $title)
+	foreach ($urls as $url => $title){
 		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
+	}
 }
 
 ?>
@@ -234,57 +243,21 @@ if (@$urls) {
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
+		.words {color: #6A7C99;}
 	</style>
 </head>
 
-
-
-<script src="getTitleFromURL.js"></script>
 <script src="importHyperlinks.js"></script>
 
 <body class="popup" width=600 height=400 style="margin:10px;">
 
+<!--
 <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>
+-->
 
-<script type="text/javascript">
-<!--
-
-function checkAll() {
-	var i = 1;
-	while (document.getElementsByName('link['+i+']').length) {
-		var e = document.getElementById('flag'+i);
-		if (e) {
-			e.checked = true;
-			var t = document.getElementById('t'+i).value;
-			var n = document.getElementById('n'+i).value;
-			if (n.length > t.length) {
-				var e2 = document.getElementById('un'+i);
-				if (e2) e2.checked = true;
-			}
-		}
-		i++;
-	}
-}
-function unCheckAll() {
-	var i = 1;
-	while (document.getElementsByName('link['+i+']').length) {
-		var e = document.getElementById('flag'+i);
-		if (e) {
-			e.checked = false;
-			e2 = document.getElementById('un'+i);
-			if (e2) e2.checked = false;
-		}
-		i++;
-	}
-}
-
-//-->
-</script>
-
-
-
+<?php //this frame is needed for title lookup ?>
 <iframe style="display: none;" name="grabber"></iframe>
 
 <form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
@@ -356,7 +329,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
  <div class="input-row"><?= $error ?></div>
 <?php		} ?>
 <?php		if (@$success) {	?>
- <div class="input-row"><?= htmlspecialchars($success) ?></div>
+ <div class="input-row" style="color:#00ff00"><?= htmlspecialchars($success) ?></div>
 <?php		} ?>
 <?php		if (@$disambiguate_bib_ids) { ?>
  <div class="input-row">
@@ -372,7 +345,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_tags_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;" onClick="{doBookmark('<?=HEURIST_DBNAME?>');}">
  </div>
 
 
@@ -389,7 +362,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
 				$ignore[$url] = 1;
 			}
 
-			print '<div class="input-row"><td colspan="7">&nbsp;</div></div>' . "\n";
+			print '<div class="input-row">&nbsp;</div>' . "\n";
 		}
 
 		$linkno = 0;
@@ -423,7 +396,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 	 * If there are a number of similar URLs, return a list of their bib_ids.
 	 */
 
-	// saw FIXME thsi should be
+	// saw FIXME this should be
 	$res = mysql_query('select rec_ID from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 	if (mysql_num_rows($res) > 0) {
 		$bib = mysql_fetch_assoc($res);
@@ -471,15 +444,17 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		//add title input-cell
 		mysql__insert('recDetails', array(
 			'dtl_RecID' => $rec_id,
-			'dtl_DetailTypeID' => 160,//MAGIC NUMBER
+			'dtl_DetailTypeID' => DT_NAME,
 			'dtl_Value' => $title
 		));
 		//add notes input-cell
-		mysql__insert('recDetails', array(
-			'dtl_RecID' => $rec_id,
-			'dtl_DetailTypeID' => 191,//MAGIC NUMBER
-			'dtl_Value' => $notes
-		));
+		if($notes){
+			mysql__insert('recDetails', array(
+				'dtl_RecID' => $rec_id,
+				'dtl_DetailTypeID' => DT_EXTENDED_DESCRIPTION,
+				'dtl_Value' => $notes
+			));
+		}
 		return $rec_id;
 	}
 
@@ -511,7 +486,7 @@ function bookmark_insert($url, $title, $tags, $rec_id) {
 
 //		$kwd_string = '';
 		foreach ($input_tags as $tag) {
-			if ($all_tags[strtolower(trim($tag))]) {
+			if ( @$all_tags[strtolower(trim($tag))] ) {
 				array_push($tag_ids, $all_tags[strtolower(trim($tag))]);
 //				if ($kwd_string) $kwd_string .= ',';
 //				$kwd_string .= trim($kwd);
@@ -552,7 +527,8 @@ function print_link($url, $title) {
 		<input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
 
   		&nbsp;&#91;<a href="<?= $url ?>" target="_blank"><span class="button">Visit</span></a>&#93;&nbsp;
-		<input type="button" style="padding-top: 2px;height:23px !important;" name="lookup[<?= $linkno ?>]" value="Lookup" onClick="if (value == 'Lookup') { lookupTitle(this); } else { var e1 = document.getElementById('t<?= $linkno ?>'); var e2 = document.getElementById('at<?= $linkno ?>'); var tmp = e1.value; e1.value = e2.value; e2.value = tmp; }" id="lu<?= $linkno ?>">
+		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?= $linkno ?>]" value="Lookup" title="Lookup title from URL"
+			onClick="{lookup_revert(this, <?= $linkno ?>);}" id="lu<?= $linkno ?>">
 		<input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>">
 </div>
 
@@ -560,34 +536,36 @@ function print_link($url, $title) {
   <a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a>
 </div>
 <div class="input-row" style="padding-left: 60px;">
-	<div style="display:inline-block;">
-		<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox"><label>&nbsp;
+	<div style="display:inline-block;width:30px;vertical-align: middle;">
+		<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox" title="Use Notes">
+      	<input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
+	  </div>
+      <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?>
+      </div>
+      <small class="words">
 <?php
 	if (@$_REQUEST['notes'][$linkno])
 		$word_count = str_word_count($_REQUEST['notes'][$linkno]);
 	else
 		$word_count = str_word_count($notes[$url]);
 	if ($word_count == 1) {
-		print '<small>1 word</small>';
+		print '1 word';
 	} else if ($word_count > 1) {
-		print "<small>$word_count words</small>";
+		print "$word_count words";
 	}
-?></label>
-      	<input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
-	  </div>
-      <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?></div>
+?></small>
 </div>
 
 <?php
 	if (@$disambiguate_bib_ids[$url]) {
 ?>
- <div class="input-row">
-  <div class="input-header-cell">
-     <label>
-      <input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onClick="selectExistingLink(<?= $linkno ?>);">
-      <b>New (add this URL to the database)</b>
-     </label>
-   </div>
+<div class="input-row">
+	<div style="text-align: left;width:100%;">
+		<label>
+			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onClick="selectExistingLink(<?= $linkno ?>);">
+			<b>New (add this URL to the database)</b>
+		</label>
+	</div>
 
 <?php
 		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $disambiguate_bib_ids[$url]) . ')');
@@ -598,28 +576,27 @@ function print_link($url, $title) {
 		foreach ($disambiguate_bib_ids[$url] as $rec_id) {
 			$row = $all_bibs[$rec_id];
 ?>
-   <div>
-    <label>
-     <input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
-     <?= htmlspecialchars($row['rec_Title']) ?>
-    </label><br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
-			if (strlen($row['rec_URL']) < 100)
-				print (common_substring($row['rec_URL'], $url));
-			else
-				print (common_substring(substr($row['rec_URL'], 0, 90) . '...', $url));
-    ?></a>
-   </div>
+	<div style="text-align: left;width:100%;">
+		<label>
+			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
+			<?= htmlspecialchars($row['rec_Title']) ?>
+		</label><br>
+		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
+				if (strlen($row['rec_URL']) < 100)
+					print (common_substring($row['rec_URL'], $url));
+				else
+					print (common_substring(substr($row['rec_URL'], 0, 90) . '...', $url));
+		?></a>
+	</div>
 
 <?php
 		}
 ?>
   </div>
- </div>
 <?php
 	}
 ?>
- <div class="input-row"><td>&nbsp;</div></div>
+ <div class="input-row">&nbsp;</div>
 <?php
 }
 

@@ -660,7 +660,7 @@ div.right_margin_info div.mini-tools a {
 	margin: 10px;
 	text-align:left;
 	margin: 20px 10px;
-	top: 20px;
+	top: 80px;
 	position: absolute;
 }
 #search-status.loading #loading-search-status {
@@ -673,7 +673,7 @@ div.right_margin_info div.mini-tools a {
 #search-status.noresult #noresult-search-status {
 	display: block;
 	margin: 20px 10px;
-	top: 20px;
+	top: 80px;
 	position: absolute;
 	width:100%;
 	text-align:left;
@@ -2261,6 +2261,7 @@ div.recorddiv:hover > #recordID {
  	clear:both;
  	background: none repeat scroll 0 0 #DCDFE6 !important;
  	overflow:auto;
+
 }
 #active-label {
 	/*background: none repeat scroll 0 0 #DCDFE6 !important;*/
@@ -2269,8 +2270,7 @@ div.recorddiv:hover > #recordID {
 	font-weight: bold;
 	height: 22px;
 	line-height: 23px;
-	margin-left: 0;
-	margin-right: 0;
+	max-width:90%;
 	padding-left: 10px;
 	text-align: left !important;
 	text-transform: uppercase;

@@ -40,15 +40,26 @@ if (@$_REQUEST['submitted']) {  //reload with new word limit
 mysql_connection_db_overwrite(DATABASE);
 
 if (@$_REQUEST['new_hyp_text']) {
-		//add new filter text if not found
-		$res = mysql_query('select count(*) from usrHyperlinkFilters
-		                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
-		                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
-		$row = mysql_fetch_array($res);
-		if ($row[0] == 0) {
-			mysql__insert('usrHyperlinkFilters',
-			             array('hyf_String' => @$_REQUEST['new_hyp_text'],
-			                   'hyf_UGrpID' => get_user_id()));
+
+		if (@$_REQUEST['isdelete']==1) {
+			//remove filter text if found
+			$res = mysql_query('delete from usrHyperlinkFilters
+			                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
+			                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+
+		}else{
+
+			//add new filter text if not found
+			$res = mysql_query('select count(*) from usrHyperlinkFilters
+			                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
+			                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+			$row = mysql_fetch_array($res);
+			if ($row[0] == 0) {
+				mysql__insert('usrHyperlinkFilters',
+				             array('hyf_String' => @$_REQUEST['new_hyp_text'],
+				                   'hyf_UGrpID' => get_user_id()));
+			}
+
 		}
 }
 
@@ -82,6 +93,15 @@ function _issel($val){
 
 <body class="popup" width=600 height=450>
 
+<script type="text/javascript">
+
+function onDeleteSubmit(){
+ document.getElementById("isdelete").value = 1;
+ document.forms[0].submit();
+}
+
+</script>
+
 <h2>Bookmark import settings</h2>
 
 <form method="post">
@@ -112,7 +132,9 @@ function _issel($val){
 	<td>
 			Hyperlink text to ignore:<br />
 	 		<input type="text" name="new_hyp_text" value="" size="30">
-	 		<input type="submit" value="Add"> <br />
+	 		<input type="hidden" id="isdelete" name="isdelete" value="0">
+	 		<input type="submit" value="Add">
+	 		<input type="button" value="Remove" onclick="onDeleteSubmit()"> <br />
 
 			<b>Ignore the following hyperlink texts when importing bookmarks:</b><br /><br />
 			<div id="ignored_hyperlinks">
