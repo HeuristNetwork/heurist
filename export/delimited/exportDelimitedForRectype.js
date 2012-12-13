@@ -247,10 +247,11 @@ function showRecordData(hRecords) {
 		var k = g_exportMapNames.length,
 			line = "";
 		for (var j = 0; j < k; j++) {
-			line += (g_exportMapNames[j]+strDelim);
-			if (g_dtIDsCheckbox.checked) {
-				line += g_detailTypes[j].getID() + strDelim;
+			if (g_dtIDsCheckbox.checked && j>0) {
+				var hDty = g_detailTypes[g_exportMap[j-1]];
+				line += hDty.getID() + strDelim;
 			}
+			line += (g_exportMapNames[j]+strDelim);
 		}
 		lines = line.slice(0,-1) + strRowTerm;
 	}
