@@ -17,6 +17,7 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
 	//require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 
@@ -472,7 +473,7 @@
 			return $ret;
 		}
 
-		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID limit 1";
+		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID and rec_FlagTemporary=0 limit 1";
 
 		$rows = execSQL($db, $query, null, true);
 
@@ -486,6 +487,13 @@
 			if($checkLastAdmin!=null){
 				$ret['error'] = $checkLastAdmin;
 				return;
+			}
+
+			//delete temporary records
+			$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID and rec_FlagTemporary=1";
+			$res = mysql_query($query);
+			while ($row = mysql_fetch_row($res)) {
+				deleteRecord($row[0]);
 			}
 
 			//delete references from user-group link table
@@ -525,7 +533,7 @@
 			return $ret;
 		}
 
-		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID limit 1";
+		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID  and rec_FlagTemporary=0 limit 1";
 		$rows = execSQL($db, $query, null, true);
 
 		if (is_string($rows) ) {
@@ -543,6 +551,13 @@
 			$ret['error'] = "Error. Deleting Group ($recID) with existing Users not allowed";
 			}else{
 			}*/
+
+			//delete temporary records
+			$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID and rec_FlagTemporary=1";
+			$res = mysql_query($query);
+			while ($row = mysql_fetch_row($res)) {
+				deleteRecord($row[0]);
+			}
 
 			$query = "delete from sysUsrGrpLinks where ugl_GroupID=$recID";
 			$rows = execSQL($db, $query, null, true);

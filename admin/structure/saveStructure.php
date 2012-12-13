@@ -17,6 +17,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
+	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -629,19 +630,27 @@
 	function deleteRecType($rtyID) {
 
 		$ret = array();
-		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID limit 1";
+		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
 		$res = mysql_query($query);
 		if (mysql_error()) {
 			$ret['error'] = "SQL error finding records of type $rtyID in the Records table: ".mysql_error();
 		} else {
 			$recCount = mysql_num_rows($res);
 			if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
-				$ret['error'] = "You cannot delete record type $rtyID as it has $recCount existing data records";
+				$ret['error'] = "You cannot delete record type $rtyID as it has existing data records";  //$recCount
 				$ret['recIDs'] = array();
 				while ($row = mysql_fetch_row($res)) {
 					array_push($ret['recIDs'], $row[0]);
 				}
 			} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
+
+				//delete temporary records
+				$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
+				$res = mysql_query($query);
+				while ($row = mysql_fetch_row($res)) {
+					deleteRecord($row[0]);
+				}
+
 				$query = "delete from defRecTypes where rty_ID = $rtyID";
 				$res = mysql_query($query);
 				if (mysql_error()) {
