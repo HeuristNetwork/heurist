@@ -65,9 +65,21 @@
 							in <select id="t" name="t" style="width: 90%;" onChange="document.forms[0].submit('record-search-type')"></select>
 						</td>
 						<td style="width: 80px; padding: 0 5px;">
-							<div class=radio><nobr><label for=r-all><input type=radio name=r id=r-all value=all onChange="document.forms[0].submit('r-all')"> all records</label></nobr></div>
-							<div class=radio><nobr><label for=r-recent-search><input type=radio name=r id=r-recent-search value=recent-search onChange="document.forms[0].submit('r-recent-search')"> recently selected</label></nobr></div>
-							<div class=radio><nobr><label for=r-recent><input type=radio name=r id=r-recent value=recent onChange="document.forms[0].submit('r-recent')"> recently added</label></nobr></div>
+							<div class="radio" style="white-space:nowrap;">
+								<label for=r-all>
+									<input type=radio name=r id=r-all value=all onChange="document.forms[0].submit('r-all')"> all records
+								</label>
+							</div>
+							<div class="radio" style="white-space:nowrap;">
+								<label for=r-recent-search>
+									<input type=radio name=r id=r-recent-search value=recent-search onChange="document.forms[0].submit('r-recent-search')"> recently selected
+								</label>
+							</div>
+							<div class="radio" style="white-space:nowrap;">
+								<label for=r-recent>
+									<input type=radio name=r id=r-recent value=recent onChange="document.forms[0].submit('r-recent')"> recently added
+								</label>
+							</div>
 						</td>
 					</tr>
 					<tr>

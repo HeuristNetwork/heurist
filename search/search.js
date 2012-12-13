@@ -2604,11 +2604,11 @@ top.HEURIST.search = {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
 
-						innerHTML += '<nobr><a href="#" onclick="{top.HEURIST.search.executeQueryByTag(\''+top.HEURIST.workgroups[wg_ID].name+'\',\''+tags[j]+'\');}">'+ tags[j] + '</a></nobr>';
+						innerHTML += '<a href="#" style="white-space:nowrap;" onclick="{top.HEURIST.search.executeQueryByTag(\''+top.HEURIST.workgroups[wg_ID].name+'\',\''+tags[j]+'\');}">'+ tags[j] + '</a>';
 						/* old way
-						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" +
+						innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" +
 						top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + '\"'+
-						_db + "'>" + tags[j] + "</a></nobr>";
+						_db + "'>" + tags[j] + "</a>";
 						*/
 					}
 				}

@@ -635,7 +635,7 @@ div.record:hover {background-color: #A4B4CB;cursor: pointer;}
 #results .record .id { padding-right: 2ex; float: left; text-align: right; width: 7ex;color:#666 }
 #results .record .title { padding: 0 2ex; margin: 0;}
 
-.radio *, #t, #t * { font-size: 11px; line-height: 15px;  vertical-align: middle; }
+.radio *, #t, #t * { font-size: 11px; line-height: 15px;  vertical-align: middle;}
 
 input { padding: 0; margin: 0; }
 

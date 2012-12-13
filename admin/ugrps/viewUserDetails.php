@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -64,7 +60,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$tags .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$tags .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'"><nobr>'.$row['tag_Text'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
+	$tags .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
 }
 $tags .= "</span>\n";
 ?>
@@ -82,7 +78,7 @@ $tags .= "</span>\n";
 
 <table border="0" cellpadding="0" cellspacing="4" width="100%" style="background-color: black; color: white;">
  <tr>
-  <td><nobr><b>User Profile</b></nobr></td>
+  <td nowrap><b>User Profile</b></td>
   <td width="100%"></td>
  </tr>
 </table>

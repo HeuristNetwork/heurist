@@ -94,9 +94,9 @@ if ($tags) {
 	$kwd_list = '';
 	foreach ($tags as $tag => $count) {
 		$kwd_list .= ' <tr>';
-		$kwd_list .= '  <td style="vertical-align: top;"><nobr><a target=_top href="'.HEURIST_SITE_PATH.'search/search.html?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
+		$kwd_list .= '  <td style="vertical-align: top;white-space:nowrap;"><a target=_top href="'.HEURIST_SITE_PATH.'search/search.html?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
 											. (in_array($tag, $my_kwds) ? '<b>'.htmlspecialchars($tag).'</b>' : htmlspecialchars($tag))
-											. "</a>&nbsp;</nobr></td>\n";
+											. "</a>&nbsp;</td>\n";
 
 		$kwd_list .= "  <td>\n";
 		$res = mysql_query('select usr.ugr_ID, concat(usr.ugr_FirstName," ",usr.ugr_LastName) as bkmk_user
@@ -114,7 +114,9 @@ if ($tags) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].
+									'" style="white-space:nowrap;" title="View user profile for '.
+									$row['bkmk_user'].'">'.$row['bkmk_user']."</a>&nbsp;\n";
 		}
 		if ($i > 3) {
 			$kwd_list .= '   </span>'."\n";
@@ -153,7 +155,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'" style="white-space:nowrap;">'.$row['bkmk_user']."</a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

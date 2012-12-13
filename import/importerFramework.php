@@ -163,7 +163,7 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 
 <?php	} else { ?>
 <h2 style="display:inline">Import records</h2>
-<?php	} 
+<?php	}
 
 	  } else { ?>
    <div><h3>Synchronising Zotero records with Heurist</h3></div>
@@ -859,7 +859,7 @@ function mode_crosswalking() {
 	if ($non_out_entries) {
 		if ($no_rectype_entries) { ?>
      <tr>
-      <td style="color: red;">Unallocated record type:<br><nobr>(will not be imported)</nobr></td>
+      <td style="color: red;white-space:nowrap;">Unallocated record type:<br />(will not be imported)</td>
       <td><?= count($no_rectype_entries) ?></td>
       <td><a target="_errors" href="interface/downloadRecsWithoutType.php/<?= htmlspecialchars($import_id) ?>-no_rectype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
       <td></td>
@@ -867,7 +867,7 @@ function mode_crosswalking() {
 <?php 		}
 		if ($data_error_entries) { ?>
      <tr>
-      <td style="color: red;">Data errors:<br><nobr>(will not be imported)</nobr></td>
+      <td style="color: red;white-space:nowrap;">Data errors:<br />(will not be imported)</td>
       <td><?= count($data_error_entries) ?></td>
       <td><a target="_errors" href="interface/downloadRecsWithErrors.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a></td>
      </tr>
@@ -892,10 +892,9 @@ function mode_crosswalking() {
    <p style="margin-left: 15px;">
     <p>Specify tags to add to all imported records:</p>
 
-     <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
-       <nobr>Add:</nobr>
-        <nobr><a href="#" target="_ignore" onClick="add_tag('Favourites'); return false;">Favourites</a></nobr>&nbsp;
-        <nobr><a href="#" target="_ignore" onClick="add_tag('To Read'); return false;">To Read</a></nobr>&nbsp;
+     <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;white-space:nowrap;">
+       Add: <a href="#" target="_ignore" onClick="add_tag('Favourites'); return false;">Favourites</a>&nbsp;
+        <a href="#" target="_ignore" onClick="add_tag('To Read'); return false;">To Read</a>&nbsp;
       </div>
        <?php
 	$top_tags = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID',
@@ -903,12 +902,12 @@ function mode_crosswalking() {
 	                                    'tag_UGrpID='.get_user_id().' group by tag_ID order by count desc limit 5');
 	if ($top_tags) {
 ?>
-      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
-       <nobr>Top:</nobr>
+      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;white-space:nowrap;">
+       Top:&nbsp;
 <?php
 		foreach ($top_tags as $tag) {
 			$tag = htmlspecialchars($tag);
-?>      <nobr><a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
+?>      	<a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a>&nbsp; <?php
 		}
 ?>
       </div>
@@ -922,12 +921,12 @@ function mode_crosswalking() {
 	                                    'tag_UGrpID='.get_user_id().' order by rtl_ID desc limit 5');
 	if ($recent_tags) {
 ?>
-      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px; padding-bottom: 5px;">
-       <nobr>Recent:</nobr>
+      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px; padding-bottom: 5px;white-space:nowrap;">
+       	Recent:
 <?php
 		foreach ($recent_tags as $tag) {
 			$tag = htmlspecialchars($tag);
-?>      <nobr><a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
+?>      	<a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a>&nbsp; <?php
 		}
 ?>
       </div>
@@ -966,8 +965,8 @@ function add_tag(tag) {
 	$res = mysql_query('select tag_ID, grp.ugr_Name, tag_Text from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp where tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID=' . get_user_id() . ' order by grp.ugr_Name, tag_Text');
 	if (mysql_num_rows($res) > 0) {
 ?>
-    <div style="margin-top: 1ex; margin-left: 10ex;">
-     <nobr>Workgroup tag:</nobr>
+    <div style="margin-top: 1ex; margin-left: 10ex;white-space:nowrap;">
+     Workgroup tag:
      <select name="workgroup_tag">
       <option selected></option>
 <?php		while ($row = mysql_fetch_assoc($res)) {	//saw TODO: add option grouping by workgroup and remove groupname\ ?>
@@ -2125,7 +2124,7 @@ function print_disambiguation_options(&$entry) {
 		$title_with_deltas = levenshtein_delta(strip_tags($bib['rec_Title']), strip_tags($ambig_entry->getTitle()));
 ?>
     <tr>
-     <td style="text-align: right;"><nobr><?= $bib['rec_ID'] ?></nobr>&nbsp;</td>
+     <td style="text-align: right;white-space:nowrap;"><?= $bib['rec_ID'] ?>&nbsp;</td>
      <td><input type="radio" name="ambig[<?= $nonce ?>]" value="<?= $bib['rec_ID'] ?>" class="radio" <?= $is_first? "checked" : "" ?> id=<?= $bib['rec_ID'] . '-' . $nonce ?>>
      <td><label for=<?= $bib['rec_ID'] . '-' . $nonce ?>><b title="<?= htmlspecialchars($bib['rec_Title']) ?>"><?= $title_with_deltas ?></b></label></td>
     </tr>

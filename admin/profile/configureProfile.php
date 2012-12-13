@@ -223,12 +223,12 @@ $foreach_kwd = $foreach_kwd_js = '';
 while ($row = mysql_fetch_row($res)) {
 	$foreach_kwd .=
 '<tr>
- <td><nobr>
+ <td nowrap>
   <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
   <img src="'.HEURIST_URL_BASE.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
   <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
- </nobr></td>
- <td><nobr>' . $row[2] . '</nobr></td>
+ </td>
+ <td nowrap>' . $row[2] . '</td>
  <td class="u-cell">
   <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
  </td>
