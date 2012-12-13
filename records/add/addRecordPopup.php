@@ -178,6 +178,14 @@ function add_note(e) {
 		}
 	}
 
+	rt = parseInt(document.getElementById('rectype_elt').value);
+	//Since 2012-12-13 Ian asked to disable it again! if (! rt) rt = <?=RT_NOTE?> ;  //added ian 19/9/08 to re-enable notes as default
+	if(rt<1){
+		alert('Please select record type');
+		return;
+	}
+
+
 	if (tags) {
 		extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags; // warning! code assumes that &tag= is at the end of string
 	}
@@ -190,8 +198,6 @@ function add_note(e) {
 	// added to pass on the title if the user got here from add.php? ... &t=  we just pass it back around
 	extra_parms += '<?= @$_REQUEST['t'] ? '&t='.$_REQUEST['t'] : '' ?>';
 
-		rt = parseInt(document.getElementById('rectype_elt').value);
-		if (! rt) rt = <?=RT_NOTE?> ;  //added ian 19/9/08 to re-enable notes as default
 
 	if (document.getElementById('defaults_elt').checked) {
 		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
@@ -261,8 +267,9 @@ function cancelAdd(e) {
 							$section = $row["rtg_Name"];
 							print '<optgroup label="' . htmlspecialchars($section) . '">';
 						}
+						//Since 2012-12-13 Ian asked to disable it again! <?= $row["rty_Name"]=="Notes" ? 'selected':'' ?>
 				?>
-			<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>" <?= $row["rty_Name"]=="Notes" ? 'selected':'' ?> ><?= htmlspecialchars($row["rty_Name"]) ?></option>
+			<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>" ><?= htmlspecialchars($row["rty_Name"]) ?></option>
 				<?php
 					}
 				?>

@@ -218,6 +218,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				newIframe.frameBorder = 0;
 				//newIframe.style.display = "none";
 				newIframe.style.visibility = "hidden";
+
 				newIframe.close = function() {
 					var newArgs = [ newIframe.HEURIST_WINDOW_ID ];
 
@@ -283,6 +284,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					positionDiv.style.visibility = "visible";
 
 					top.HEURIST.util.finishLoadingPopup();
+
+					newIframe.contentWindow.alert = function(txt) {
+						createCustomAlert(txt,args);
+						return true;
+					}
 
 					//newIframe.style.display = "block";
 					newIframe.style.visibility = "visible";
