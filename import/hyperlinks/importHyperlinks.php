@@ -16,7 +16,10 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 //require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+
 require_once(dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
+require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
+
 //require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
@@ -183,42 +186,57 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 }
 
 
-$disambiguate_bib_ids = array();
+$disambiguate_rec_ids = array();
 if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags'])  &&  @$_REQUEST['links'])
 {
-	$bkmk_insert_count = 0;
+
+	$record_tobebookmarked = array();
+
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) continue;
 
-		$rec_id = biblio_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), @$_REQUEST['rec_ID'][$linkno]);
+		$rec_id = records_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), @$_REQUEST['rec_ID'][$linkno]);
 		if (is_array($rec_id)  and  $rec_id) {
 			// no exact match, just a list of nearby matches; get the user to select one
-			$disambiguate_bib_ids[$_REQUEST['link'][$linkno]] = $rec_id;
+			$disambiguate_rec_ids[$_REQUEST['link'][$linkno]] = $rec_id;
 			continue;
 		}
 		if (! @$rec_id) continue;	/* malformed URL */
 
-		if (@$_REQUEST['adding_tags'] == 1) {
-			$kwd = @$_REQUEST['wgTags'];
-		} else {
-			$kwd = @$_REQUEST['kwd'][$linkno];
-		}
-
-
-error_log(">>>>".$kwd);
-
-		if (bookmark_insert(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], $kwd, $rec_id)){
-			++$bkmk_insert_count;
-		}
+		array_push($record_tobebookmarked, $rec_id);
 	}
 
-error_log(">>>>".$bkmk_insert_count);
+	if (@$_REQUEST['adding_tags'] == 1) {
+		$kwd = @$_REQUEST['wgTags'];
+	} else {
+		$kwd = @$_REQUEST['kwd'][$linkno];
+	}
 
+	//method to add bookmarks and tags
+	$data = array();
+	$data['rec_ids'] = $record_tobebookmarked;
+	$data['tagString'] = $kwd;
+
+	$res = bookmark_and_tag_record_ids($data);
+	if(@$res['ok']){
+		$success = $res['ok'];
+	}else if (@$res['none']){
+		$success = $res['none'];
+	}else{
+		$error = $res['problem'];
+	}
+
+	/*
+	$bkmk_insert_count = 0;
+	if (bookmark_insert(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], $kwd, $rec_id)){
+		++$bkmk_insert_count;
+	}
 	if (@$bkmk_insert_count == 1){
 		$success = 'Added one bookmark';
 	}else if (@$bkmk_insert_count > 1){
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
 	}
+	*/
 }
 
 
@@ -244,6 +262,8 @@ if (@$urls) {
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
 		.words {color: #6A7C99;}
+		.similar_bm{text-align: left;width:100%;}
+		.similar_bm label{text-align: left;}
 	</style>
 </head>
 
@@ -329,11 +349,11 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
  <div class="input-row"><?= $error ?></div>
 <?php		} ?>
 <?php		if (@$success) {	?>
- <div class="input-row" style="color:#00ff00"><?= htmlspecialchars($success) ?></div>
+ <div class="input-row" style="color:#0000ff;font-weight:bold;"><?= htmlspecialchars($success) ?></div>
 <?php		} ?>
-<?php		if (@$disambiguate_bib_ids) { ?>
+<?php		if (@$disambiguate_rec_ids) { ?>
  <div class="input-row">
-  <b><?= (count($disambiguate_bib_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
+  <b><?= (count($disambiguate_rec_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
   similar to record(s) already in the database.</b><br>
   The similar records are shown below: please select the appropriate page, or add a new URL to the database.<br>
   Then click on "Bookmark checked links" again.
@@ -352,11 +372,11 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
 
 <?php
 /* do two passes: first print any that need disambiguation, then do the rest */
-		if (@$disambiguate_bib_ids) {
+		if (@$disambiguate_rec_ids) {
 			$linkno = 0;
 			foreach (@$urls as $url => $title) {
 				++$linkno;
-				if (! @$disambiguate_bib_ids[$url]) continue;
+				if (! @$disambiguate_rec_ids[$url]) continue;
 
 				print_link($url, $title);
 				$ignore[$url] = 1;
@@ -387,13 +407,13 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
 <?php
 /* ----- END OF OUTPUT ----- */
 
-function biblio_check($url, $title, $notes, $user_bib_id) {
+function records_check($url, $title, $notes, $user_rec_id) {
 	/*
 	 * Look for a Records record corresponding to the given record;
-	 * user_bib_id is the user's preference if there isn't an exact match.
+	 * user_rec_id is the user's preference if there isn't an exact match.
 	 * Insert one if it doesn't already exist;
 	 * return the rec_ID, or 0 on failure.
-	 * If there are a number of similar URLs, return a list of their bib_ids.
+	 * If there are a number of similar URLs, return a list of their rec_ids.
 	 */
 
 	// saw FIXME this should be
@@ -403,17 +423,17 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		return $bib['rec_ID'];
 	}
 
-	if ($user_bib_id > 0) {
-		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_bib_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+	if ($user_rec_id > 0) {
+		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_rec_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
 			$bib = mysql_fetch_assoc($res);
 			return $bib['rec_ID'];
 		}
 
-	} else if (! $user_bib_id) {
+	} else if (! $user_rec_id) {
 
-		$bib_ids = similar_urls($url);
-		if ($bib_ids) return $bib_ids;
+		$rec_ids = similar_urls($url);
+		if ($rec_ids) return $rec_ids;
 /*
 		$par_url = preg_replace('/[?].*'.'/', '', $url);
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it
@@ -421,10 +441,10 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 
 		$res = mysql_query('select rec_ID from Records where rec_URL like "'.addslashes($par_url).'%" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
-			$bib_ids = array();
+			$rec_ids = array();
 			while ($row = mysql_fetch_row($res))
-				array_push($bib_ids, $row[0]);
-			return $bib_ids;
+				array_push($rec_ids, $row[0]);
+			return $rec_ids;
 		}
 */
 	}
@@ -461,12 +481,13 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 	return 0;
 }
 
-function bookmark_insert($url, $title, $tags, $rec_id) {
-	/*
+/*  ARTEM : Now we use common function from actionMethods.php
+
 	 * Insert a new bookmark with the relevant input-cells;
 	 * return true on success,
 	 * return false on failure, or if the Records record is already bookmarked by this user.
-	 */
+
+function bookmark_insert($url, $title, $tags, $rec_id) {
 
 	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.addslashes($rec_id).'"
 	                                              and bkm_UGrpID="'.get_user_id().'"');
@@ -477,7 +498,8 @@ function bookmark_insert($url, $title, $tags, $rec_id) {
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => get_user_id()))) {
+		'bkm_UGrpID' => get_user_id())))
+	{
 		$bkm_ID = mysql_insert_id();
 		// find the tag ids for each tag.
 		$all_tags = mysql__select_assoc('usrTags', 'lower(tag_Text)', 'tag_ID', 'tag_UGrpID='.get_user_id());
@@ -493,6 +515,9 @@ function bookmark_insert($url, $title, $tags, $rec_id) {
 			}
 		}
 
+
+error_log(">>>>".print_r($tag_ids,true));
+
 //		mysql_query('delete from usrRecTagLinks where kwl_pers_id='.$bkm_ID);
 		if ($tag_ids) {
 			$insert_stmt = '';
@@ -507,8 +532,12 @@ function bookmark_insert($url, $title, $tags, $rec_id) {
 		}
 
 		return 1;
-	} else return 0;
+	} else {
+		return 0;
+	}
 }
+*/
+
 
 function my_htmlspecialchars_decode($str) {
 	return str_replace(array('&nbsp;', '&amp;', '&quot;', '&lt;', '&gt;', '&copy;'), array(' ', '&', '"', '<', '>', '(c)'), $str);
@@ -516,7 +545,7 @@ function my_htmlspecialchars_decode($str) {
 
 function print_link($url, $title) {
 	global $linkno;
-	global $disambiguate_bib_ids;
+	global $disambiguate_rec_ids;
 	global $notes;
 
 ?>
@@ -557,10 +586,10 @@ function print_link($url, $title) {
 </div>
 
 <?php
-	if (@$disambiguate_bib_ids[$url]) {
+	if (@$disambiguate_rec_ids[$url]) {
 ?>
 <div class="input-row">
-	<div style="text-align: left;width:100%;">
+	<div class="similar_bm">
 		<label>
 			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onClick="selectExistingLink(<?= $linkno ?>);">
 			<b>New (add this URL to the database)</b>
@@ -568,15 +597,15 @@ function print_link($url, $title) {
 	</div>
 
 <?php
-		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $disambiguate_bib_ids[$url]) . ')');
+		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $disambiguate_rec_ids[$url]) . ')');
 		$all_bibs = array();
 		while ($row = mysql_fetch_assoc($res))
 			$all_bibs[$row['rec_ID']] = $row;
 
-		foreach ($disambiguate_bib_ids[$url] as $rec_id) {
+		foreach ($disambiguate_rec_ids[$url] as $rec_id) {
 			$row = $all_bibs[$rec_id];
 ?>
-	<div style="text-align: left;width:100%;">
+	<div class="similar_bm">
 		<label>
 			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
 			<?= htmlspecialchars($row['rec_Title']) ?>
