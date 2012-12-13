@@ -1786,6 +1786,12 @@ top.HEURIST.search = {
 		var fld = $("#field-select").val();
 		var dtID = fld.match(/f\:(\d+)\:/);
 		var isEnum = false;
+
+		//if enum selector exist remove it
+		if ($("#simple-search-enum-selector").length>0) {
+			$("#simple-search-enum-selector").remove();
+		}
+
 		if (dtID && dtID.length>1){
 			dtID=dtID[1];
 
@@ -1813,11 +1819,6 @@ top.HEURIST.search = {
 
 		if(!isEnum){
 				//reset to standard freetext input field
-				//if enum selector exist remove it
-
-				if ($("#simple-search-enum-selector").length>0) {
-					$("#simple-search-enum-selector").remove();
-				}
 				//untagging the div shows the regular input field
 				$("#field-select").parent().removeClass('enum');
 		}
