@@ -716,7 +716,7 @@ function getAllRectypeConstraint() {
 }
 
 // returns array list of all terms under a given term
-function getTermOffspringList($termID) {
+function getTermOffspringList($termID, $recurse = true) {
 	$offspring = array();
 	if ($termID) {
 		$res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
@@ -724,7 +724,7 @@ function getTermOffspringList($termID) {
 			while ($row = mysql_fetch_assoc($res)) { // for each child node
 				$subTermID = $row['trm_ID'];
 				array_push($offspring,$subTermID);
-				if ($row['trm_ChildCount'] > 0) {
+				if ($row['trm_ChildCount'] > 0 && $recurse) {
 					$offspring = array_merge($offspring, getTermOffspringList($subTermID));
 				}
 			}

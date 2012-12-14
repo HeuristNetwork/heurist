@@ -359,6 +359,13 @@
 
 		$termIDTree = preg_replace("/[\}\{\:\"]/","",$termIDTree);
 		$termIDTree = explode(",", $termIDTree);
+		if (count($termIDTree) == 1) { //term set parent term, so expand to direct children
+			$childTerms = getTermOffspringList($termIDTree[0],false);
+			if (count($childTerms) > 0) {
+				$termIDTree = $childTerms;
+			}
+		}
+
 		$disabledTerms =  explode(",", $disabledTermIDsList);
 
 		foreach($termIDTree as $index => $idTerm ) {

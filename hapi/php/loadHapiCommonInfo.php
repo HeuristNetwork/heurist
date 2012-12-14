@@ -83,7 +83,12 @@ while ($row = mysql_fetch_row($res)) {
 		}else{
 			preg_match_all("/\d+/",$row[6],$matches);
 			$trmIDs = $matches[0];
-			if ($row[7]){
+			if (count($trmIDs) == 1) { //term set parent term, so expand to direct children
+				$childTerms = getTermOffspringList($trmIDs[0],false);
+				if (count($childTerms) > 0) {
+					$trmIDs = $childTerms;
+				}
+			}else if ($row[7]){
 				preg_match_all("/\d+/",$row[7],$hdrTermIDs);
 				if ($hdrTermIDs[0] && is_array($hdrTermIDs[0])) {
 					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
@@ -93,7 +98,7 @@ while ($row = mysql_fetch_row($res)) {
 			$trmIDs = join(",",$trmIDs);
 //			error_log("$trmCnt enum terms for $row[1] ====>".print_r($trmIDs,true));
 			if ($trmIDs) {
-				$resTerm = mysql_query("select trm_ID,trm_Label from defTerms ".
+				$resTerm = mysql_query("select trm_ID,trm_Label from defTerms ".//test to see that all terms are in this domain
 										"where trm_ID in ($trmIDs) and trm_Domain = 'enum'");
 				if (mysql_num_rows($resTerm) != $trmCnt){
 //					error_log("".mysql_num_rows($resTerm)." enum terms found for $row[1] ");
@@ -115,7 +120,12 @@ while ($row = mysql_fetch_row($res)) {
 		}else{
 			preg_match_all("/\d+/",$row[6],$matches);
 			$trmIDs = $matches[0];
-			if ($row[7]){
+			if (count($trmIDs) == 1) { //term set parent term, so expand to direct children
+				$childTerms = getTermOffspringList($trmIDs[0],false);
+				if (count($childTerms) > 0) {
+					$trmIDs = $childTerms;
+				}
+			}else if ($row[7]){
 				preg_match_all("/\d+/",$row[7],$hdrTermIDs);
 				if ($hdrTermIDs[0] && is_array($hdrTermIDs[0])) {
 					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
