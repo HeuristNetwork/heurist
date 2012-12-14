@@ -644,6 +644,8 @@ function RectypeManager() {
 				var grpID = tabView.getTab(currentTabIndex).get('id');
 				_onAddEditRecordType(0, grpID);
 			};
+			var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'2');
+			btnAddRecordType2.onclick = btnAddRecordType.onclick;
 			/*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
 			btnAddFieldType.onclick = function (e) {
 				var currentTabIndex = tabView.get('activeIndex');

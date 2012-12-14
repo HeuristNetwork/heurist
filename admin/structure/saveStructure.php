@@ -18,6 +18,8 @@
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
+	require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
+
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -608,6 +610,10 @@
 					addDefaultFieldForNewRecordType($rtyID);
 					//create canonical title mask
 					updateCanonicalTitleMask($rtyID, $titleMask);
+
+					//create icon and thumbnail
+					getRectypeIconURL($rtyID);
+					getRectypeThumbURL($rtyID);
 				}
 			}
 

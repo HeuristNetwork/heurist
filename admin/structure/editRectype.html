@@ -67,23 +67,20 @@
 	<div class="input-row">
 		<div class="input-header-cell" style="vertical-align: baseline;"><h2 style="line-height: 14px;">Id:</h2></div>
 		<div class="input-cell">
-			<h2 style="line-height: 14px;display: inline-block;"><span class="recTypeName" id="rty_ID"></span>
-			&nbsp;&nbsp;&nbsp;
-				<img id="infoImage" src="../../common/images/info.png"
+			<h2 style="line-height: 14px;display: inline-block; margin-right: 20px;"><span class="recTypeName" id="rty_ID"></span></h2>
+			<img id="infoImage" src="../../common/images/info.png"
 							onmouseover="_showInfoToolTip(event)"
 							onmouseout="hideInfo()"
 							style="display: inline-block;"/>
-				&nbsp;&nbsp;&nbsp;
-			<div style="display: inline-block;" id="div_rty_ConceptID"></div>
-		</h2>
+			<div style="margin-left: 20px;display: inline-block;font-weight: bold;" id="div_rty_ConceptID"></div>
 		</div>
 	</div>
-	<div class="input-row">
+	<div class="input-row" id="divIconAndThumb">
 		<div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~75x75):</div>
 		<div class="input-cell" style="vertical-align: middle;">
-			<div id="rectypeThumb" class="rectypeThumb"></div>
-			<div class="input-header-cell" style="vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
-			<div id="rectypeIcon" class="rectypeIcon" style="margin: 10px 0;vertical-align: middle;"></div>
+			<div id="rectypeThumb" style="display:inline-block;" ></div>
+			<div class="input-header-cell" style="display:inline-block;vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
+			<div id="rectypeIcon" style="display:inline-block;margin: 10px 0;vertical-align: middle;"></div>
 		</div>
 	</div>
 
@@ -334,9 +331,10 @@
 		document.getElementById("infoImage").style.display = "none";
 		document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
 		document.getElementById("rty_ShowInLists").checked = true;
-			  document.getElementById("rty_ShowURLOnEditForm").checked = false;
-			  document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
+		document.getElementById("rty_ShowURLOnEditForm").checked = false;
+		document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
 		document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
+		document.getElementById("divIconAndThumb").style.display = "none";
 
 		getGroups();
 		// Set group from URL
@@ -353,10 +351,7 @@
 				curtimestamp = d.getMilliseconds();
 			document.getElementById("rty_ID").innerHTML = rectypeID;
 			try {
-				// 27/7/11 Was lookiogn for non-existant icon edit file. Ian changed path
-				// to ../../admin/structure/uploadRectypeIcon.php and added ?rt_id="+rectypeID+
-				// Now finds the file but returns blank page. admin/structure/uploadRectypeIcon.php?rt_id=42 also loads blank page
-				// so it looks like this file needs updating to new structures
+
 				document.getElementById("rectypeIcon").innerHTML =
 				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
 				"<img id=\"imgIcon\" src=\""+
@@ -371,7 +366,6 @@
 
 			} catch(e) {
 				alert(e);
-/* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>"; */
 			}
 			var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
