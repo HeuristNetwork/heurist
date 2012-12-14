@@ -84,7 +84,7 @@ function SelectDetailType() {
 			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = top.HEURIST.parameters.rty_ID;
-			document.title = "Insert fields -> " + top.HEURIST.rectypes.names[rty_ID];
+			document.title = "Insert fields to " + top.HEURIST.rectypes.names[rty_ID];
 		}
 
 		//////////////////// create data table
@@ -300,8 +300,15 @@ function SelectDetailType() {
 					_updateFilter();
 
 		}
+		_showSelectCount();
 	}//end of initialization ==============================
 
+	function _showSelectCount(){
+				lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length>1)?"s":"");
+				if(!Hul.isnull(lblSelect2)) {
+					lblSelect2.innerHTML = lblSelect1.innerHTML;
+				}
+	}	
 	/**
 	* Show popup div with information about field types
 	*/
@@ -438,8 +445,7 @@ function SelectDetailType() {
 										}
 									}
 
-									lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length>1)?"s":"");
-									lblSelect2.innerHTML = lblSelect1.innerHTML;
+									_showSelectCount();
 	}
 
 	/**

@@ -104,21 +104,29 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										el.style.display = "none";
 									}
 				}
+				
+				
+				_dtyID = dtyID;
+				_reinit_table();
 
+	}
+	
+	function _reinit_table()
+	{				
 				//////////////////// create data table
 				var arr = [];
 				var rty_ID;
 				var rectype;
 				lblSelect1 = Dom.get('lblSelect1');
 
-				_dtyID = dtyID;
+				
 
 				var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
 				if(_isFilterMode){
 
 
-					if(Hul.isnull(dtyID)){
+					if(Hul.isnull(_dtyID)){
 						lblSelect1.innerHTML = "ERROR: Detailtype was not found";
 						return;
 					}else{
@@ -126,7 +134,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 					}
 
 					//get datatype by id
-					var recsPtr = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs];
+					var recsPtr = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs];
 					if(Hul.isempty(recsPtr)){
 						_arr_selection = [];
 					}else{
@@ -157,7 +165,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 						return;
 					}
 
-					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+					datatype = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
 
 						Dom.get('filtertoolbar').style.display = 'none';
 
@@ -187,7 +195,6 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 						_showSelectCount();
 				}
-
 
 				if(Hul.isnull(_myDataTable)){
 
@@ -546,8 +553,14 @@ oRecord.getData('description')+'"/>';}
 						//refresh the local heurist
 						top.HEURIST.rectypes = context.rectypes;
 
+
+						var _rtyID = Number(context.result[0]);
+						if(!isNaN(_rtyID)){
+							_arr_selection.push(""+Math.abs(_rtyID));
+						}
+						
 						//new field type to be added - refresh list
-						_init();
+						_reinit_table();
 					}
 				}
 			});
