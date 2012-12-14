@@ -395,8 +395,10 @@ function SelectDetailType() {
 					ind, dtName;
 					for (ind=0; ind<arr.length; ind++) {
 						dtName = top.HEURIST.rectypes.names[arr[ind]];
-						txt = txt + (islist?"<li>":sep)+dtName+(islist?"</li>":"");
-						sep = ",";
+						if(!Hul.isnull(dtName)){
+							txt = txt + (islist?"<li>":sep)+dtName+(islist?"</li>":"");
+							sep = ",";
+						}
 					} //for
 			}else{
 				txt = "";

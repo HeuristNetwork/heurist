@@ -102,6 +102,7 @@
 
 			// check for type constraints
 			var rectype = window.HEURIST.parameters["t"];
+			var rtName;
 			if (rectype) {
 				var rectypes = {};
 				var recTypeName = "";
@@ -110,14 +111,20 @@
 					for (var i=0; i<temp.length; i++) {
 						if (temp[i].search(/\D/) == -1) {
 							rectypes[temp[i]] = 1;// add entry to lookup as 1 for truthy
-							recTypeName += top.HEURIST.rectypes.names[temp[i]].toLowerCase() + ",";
+							rtName = top.HEURIST.rectypes.names[temp[i]];
+							if(!top.HEURIST.util.isnull(rtName)){
+								recTypeName += rtName.toLowerCase() + ",";
+							}
 						}
 					}
 					recTypeName = recTypeName.slice(0,-1); // remove the last comma
 					delete temp;
 				}else if (rectype.search(/\D/) == -1 && rectype.search(/\d/) != -1) {
 					rectypes[rectype] = 1;// add entry to lookup as 1 for truthy
-					recTypeName = top.HEURIST.rectypes.names[rectype].toLowerCase();
+					rtName = top.HEURIST.rectypes.names[rectype];
+					if(!top.HEURIST.util.isnull(rtName)){
+						recTypeName = rtName.toLowerCase();
+					}
 				}else{
 					rectypes = null;
 				}
@@ -334,7 +341,9 @@
 						for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
 							var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
 							var name = top.HEURIST.rectypes.names[recTypeID];
-							tElt.appendChild(new Option(name, recTypeID));
+							if(!top.HEURIST.util.isnull(name)){
+								tElt.appendChild(new Option(name, recTypeID));
+							}
 						}
 					}
 					if (tElt.rectypes){
@@ -344,14 +353,17 @@
 					var isNotFound = true;
 					for (var rectypeID in rectypes) {
 						var name = top.HEURIST.rectypes.names[rectypeID];
-						tElt.appendChild( new Option(name, rectypeID));
-						if (rectypeID == initialType) {// select inital type
-							tElt.selectedIndex = tElt.options.length-1;
+						if(!top.HEURIST.util.isnull(name))
+						{
+							tElt.appendChild( new Option(name, rectypeID));
+							if (rectypeID == initialType) {// select inital type
+								tElt.selectedIndex = tElt.options.length-1;
+							}
+							if(rectypeID == lastSearchType){
+								isNotFound = false;
+							}
+							rectypeIDList.push(rectypeID);
 						}
-						if(rectypeID == lastSearchType){
-							isNotFound = false;
-						}
-						rectypeIDList.push(rectypeID);
 					}
 					if(isNotFound){
 						lastSearchType = null;

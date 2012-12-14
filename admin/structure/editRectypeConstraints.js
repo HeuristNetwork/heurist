@@ -96,13 +96,16 @@ function ConstraintManager() {
 							var tname = (target_rec_ID=='any')?target_rec_ID: top.HEURIST.rectypes.names[target_rec_ID];
 							if(target_rec_ID=='any')  { target_rec_ID = 0; }
 
-							arr.push([Number(rec_ID),
-									sname,
-									Number(target_rec_ID),
-									tname,
-									terms.length,
-									terms,
-									hasAny ]);
+							if(!Hul.isnull(sname) && !Hul.isnull(tname))
+							{
+								arr.push([Number(rec_ID),
+										sname,
+										Number(target_rec_ID),
+										tname,
+										terms.length,
+										terms,
+										hasAny ]);
+							}
 						}
 					}
 				}

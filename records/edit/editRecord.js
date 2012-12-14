@@ -415,6 +415,12 @@ top.HEURIST.edit = {
 			document.getElementById("popup-saved").style.display = "block";
 			setTimeout(function() {
 				document.getElementById("popup-saved").style.display = "none";
+
+				if(caller_id_element && opener && opener.updateFromChild){
+				 	opener.updateFromChild(caller_id_element, top.HEURIST.edit.record.title);
+				}
+
+
 				top.HEURIST.edit.doSaveAction(false);
 			}, 1000);
 		}, 0);
@@ -1715,6 +1721,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		textElt.title = "Click here to search for a record, or drag-and-drop a search value";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "resource-title";
+		textElt.id = "title_"+(new Date()).getTime();
 		textElt.style.width = "" + (parseInt(newDiv.style.width)-5) +"ex";
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
@@ -1731,8 +1738,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		top.HEURIST.util.autoSize(textElt, {});
 
 		top.HEURIST.registerEvent(textElt, "click", function() { if (! newDiv.readOnly) thisRef.chooseResource(newDiv); });
-		top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
-		top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
+		//top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
+		//top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
+
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
 		hiddenElt.name = newDiv.name;
 		hiddenElt.value = hiddenElt.defaultValue = bdValue? bdValue.value : "0";
@@ -1758,7 +1766,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
 			if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value +
+				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
 									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
 			}
 //				top.HEURIST.util.popupURL(window,

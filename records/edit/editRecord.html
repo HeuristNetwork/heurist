@@ -90,6 +90,10 @@
 		<script src="editRecord.js"></script>
 		<script src="inputUrlInclude.js"></script>
 		<script>
+
+			var caller_id_element = top.HEURIST.parameters["caller"]? top.HEURIST.parameters["caller"] :
+							(window.location.search.match(/caller=(\d+).*$/)? window.location.search.match(/caller=(\d+).*$/)[1] : "");
+
 			var bibID =(top.HEURIST.parameters["recID"]? top.HEURIST.parameters["recID"] :
 							(window.location.search.match(/recID=(\d+).*$/)? window.location.search.match(/recID=(\d+).*$/)[1] : ""));
 			var dbname = top.HEURIST.getQueryVar("db");
@@ -111,6 +115,24 @@
 			if ( queryStr) {
 				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr);
 			}
+
+			//
+			// reresh element after edit resource record in another window
+			//
+			function updateFromChild( ele_id_toupdate, value){
+				//alert(ele_id_toupdate+" ,  "+value);
+				var afrm = document.getElementsByTagName("iframe");
+				var i=0, cnt = afrm?afrm.length:0;
+				for (;i<cnt;i++){
+					var d = afrm[i].contentDocument;
+					var ele = d.getElementById(ele_id_toupdate);
+					if(ele){
+						ele.value = value;
+						break;
+					}
+				}
+			}
+
 		</script>
 		<script>
 			top.HEURIST.whenLoaded([recordEvent,"edit-html"], function() {

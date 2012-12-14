@@ -356,19 +356,29 @@ function DetailTypeEditor() {
 
 		if(value) {
 				var arr = value.split(","),
-				ind, dtName;
+					newvalue = "",
+					ind, dtName;
 				for (ind in arr) {
 					var ind2 = Number(arr[Number(ind)]);
 					if(!isNaN(ind2)){
 						dtName = top.HEURIST.rectypes.names[ind2];
-					if(!txt) {
-						txt = dtName;
-					}else{
-						txt += ", " + dtName;
-					}
+						if(!Hul.isnull(dtName)){
+							if (!txt) {
+								newvalue = ind2;
+								txt = dtName;
+							}else{
+								newvalue += "," + ind2;
+								txt += ", " + dtName;
+							}
+						}
 					}
 				} //for
-		}else{
+
+				if(value!=newvalue){ //some records may be deleted - remove them from list
+					_setRecordsPointerValue(newvalue);
+				}
+		}
+		if(txt==""){
 			txt = "unconstrained";
 		}
 		if (!Hul.isnull(txt) && txt.length > 40){
@@ -483,18 +493,24 @@ function DetailTypeEditor() {
 				width: 440,
 				callback: function(recordTypesSelected) {
 					if(!Hul.isnull(recordTypesSelected)) {
-						if(type === "fieldsetmarker") { // Change comma seperated list to right format
-							Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
-						} else {
-							Dom.get("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
-						}
-
+							_setRecordsPointerValue(recordTypesSelected);
 							_recreateRecTypesPreview(type, recordTypesSelected);
 					}
 				}
 			});
 		}
 	}
+
+	function _setRecordsPointerValue(recordTypesSelected)
+	{
+		var type = Dom.get("dty_Type").value;
+		if(type === "fieldsetmarker") { // Change comma seperated list to right format
+			Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
+		} else {
+			Dom.get("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
+		}
+	}
+
 
 	/**
 	* Initialization of group selector

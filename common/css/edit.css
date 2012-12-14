@@ -712,10 +712,11 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	display: block;
 	padding: 0;
 }
-.input-cell .resource-div .file-resource-div .edit-resource {
+.input-cell .resource-div .file-resource-div,  .edit-resource {
 	cursor: pointer;
 	position: relative;/* left: 383px; */
 }
+
 .input-cell .resource-div .file-resource-div, .delete-resource{
 	cursor: pointer;
 	margin-left: 2px;
