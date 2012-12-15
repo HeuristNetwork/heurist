@@ -1516,9 +1516,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
 			var termID;
 			var localLookup = termLookupInner;
+			var termName,
+				termCode,
+				arrterm = [];
+			
 			for(termID in termSubTree) { // For every term in 'term'
-				var termName = "",
-					termCode = "";
+				termName = "";
+				termCode = "";
 
 				if(localLookup[termID]){
 				 	termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
@@ -1531,6 +1535,22 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 
 				if(top.HEURIST.util.isempty(termName)) continue;
+				
+				arrterm.push([termID, termName, termCode]);
+			}
+			
+			//sort by name
+			arrterm.sort(function (a,b){
+				return a[1]<b[1]?-1:1;
+			});
+			
+			var i=0, cnt= arrterm.length;	
+			for(;i<cnt;i++) { // For every term in 'term'
+			
+				termID = arrterm[i][0];
+				termName = arrterm[i][1];
+				termCode = arrterm[i][2];
+			
 				if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
 					//for non mozilla add manual indent
 					var a = new Array(depth*2);
@@ -1540,8 +1560,6 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				var isDisabled = (disabledTerms[termID]? true:false);
 				var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
 				var isHeader   = ((disabledTerms[termID]? true:false) && hasChildren);
-
-
 
 				//in FF optgroup is allowed on first level only - otherwise it is invisible
 
@@ -1555,7 +1573,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 						selObj.appendChild(new_optgroup);
 					}else{
 						optgroup.appendChild(new_optgroup);
-				}
+					}
 
 					//A dept of 8 (depth starts at 0) is maximum, to keep it organised
 					createSubTreeOptions( new_optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID)
