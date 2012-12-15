@@ -2604,7 +2604,7 @@ top.HEURIST.search = {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
 
-						innerHTML += '<a href="#" style="white-space:nowrap;" onclick="{top.HEURIST.search.executeQueryByTag(\''+top.HEURIST.workgroups[wg_ID].name+'\',\''+tags[j]+'\');}">'+ tags[j] + '</a>';
+						innerHTML += '<a href="#" style="padding-left:18px;white-space:nowrap;" onclick="{top.HEURIST.search.executeQueryByTag(\''+top.HEURIST.workgroups[wg_ID].name+'\',\''+tags[j]+'\');}">'+ tags[j] + '</a><br />';
 						/* old way
 						innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" +
 						top.HEURIST.workgroups[wg_ID].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + '\"'+
@@ -4642,6 +4642,11 @@ function layoutAppPanel(isToggle,newWidth){
 		//
 		//
 		var setWidths = function() {
+			
+			if(!(document.getElementsByTagName("body") && document.getElementById("search"))){
+				return;
+			}
+			
 			var dw = layout.getSizes().doc.w;
 			var dh = layout.getSizes().doc.h;
 			var leftPanelWidth = layout.getSizes().left.w;

@@ -262,19 +262,23 @@ if (@$urls) {
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
 		.words {color: #6A7C99;}
-		.similar_bm{text-align: left;width:100%;}
+		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
 	</style>
 </head>
 
-<script src="importHyperlinks.js"></script>
 
 <body class="popup" width=600 height=400 style="margin:10px;">
 
-<!--
 <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/js/utilsUI.js"></script>
+<script type="text/javascript">
+	top.HEURIST.baseURL="<?=HEURIST_SITE_PATH?>";
+</script>
+<script src="importHyperlinks.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>
+<!--
 -->
 
 <?php //this frame is needed for title lookup ?>
@@ -590,10 +594,10 @@ function print_link($url, $title) {
 ?>
 <div class="input-row">
 	<div class="similar_bm">
-		<label>
-			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onClick="selectExistingLink(<?= $linkno ?>);">
+		<span>
+			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" checked="checked" onClick="selectExistingLink(<?= $linkno ?>);">
 			<b>New (add this URL to the database)</b>
-		</label>
+		</span>
 	</div>
 
 <?php
@@ -606,16 +610,16 @@ function print_link($url, $title) {
 			$row = $all_bibs[$rec_id];
 ?>
 	<div class="similar_bm">
-		<label>
+		<span>
 			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
 			<?= htmlspecialchars($row['rec_Title']) ?>
-		</label><br>
+		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
 				if (strlen($row['rec_URL']) < 100)
 					print (common_substring($row['rec_URL'], $url));
 				else
 					print (common_substring(substr($row['rec_URL'], 0, 90) . '...', $url));
-		?></a>
+		?></a><br>
 	</div>
 
 <?php

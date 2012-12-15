@@ -136,7 +136,7 @@ function lookupTitle(button) {
 //
 function doBookmark(dbname){
 
-   top.HEURIST.util.popupURL(window, '../records/tags/addTagsPopup.html?db='+dbname,
+   top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+'records/tags/addTagsPopup.html?db='+dbname,
    				{ callback: function(tags) {
    							document.getElementById('wgTags').value = tags;
    							document.getElementById('adding_tags_elt').value = 1;
