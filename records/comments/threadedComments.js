@@ -30,7 +30,7 @@ var CommentManager = function(elem, record) {
 
 		this.topLevelComment = { document: document, id: 0, div: this.commentsDiv };
 			comments[0] = this.topLevelComment;
-
+			
 		this.commentButton = document.createElement("a");
 		this.commentButton.className = "add-comment-link";
 		this.commentButton.href = "#";
@@ -288,7 +288,9 @@ EditableComment.prototype.save = function() {
 			newComment = new Comment(thisRef.parentComment, thisRef.hComment);
 			if (thisRef.comment) {
 				// replace this new comment where the old one was
-				thisRef.div.parentNode.replaceChild(newComment.div, thisRef.div);
+				//thisRef.div.parentNode.replaceChild(newComment.div, thisRef.div);
+				thisRef.div.replaceChild(newComment.div.children[0], thisRef.div.children[0]);
+				newComment.div = thisRef.div;
 			} else {
 				// won't happen any more
 				thisRef.div.parentNode.removeChild(thisRef.div);

@@ -694,12 +694,15 @@
 
 			// do a sanity check first: does this reply make sense?
 			$parentTest = $parentID? "cmt_ID=$parentID" : "cmt_ID is null";
+			
 			if (! mysql__select_array("Records left join recThreadedComments on rec_ID=cmt_RecID and $parentTest", "rec_ID", "rec_ID=$recordID and $parentTest")) {
 				array_push($newIDs, array("error" => "invalid parent comments"));
 				continue;
 			}
 
-			if (! $parentID) { $parentId = NULL; }
+			if (!$parentID || intval($parentID)===0) { 
+				$parentID = null; 
+			}
 
 			mysql__insert("recThreadedComments", array("cmt_Text" => $addition["text"], "cmt_Added" => date('Y-m-d H:i:s'), "cmt_OwnerUGrpID" => get_user_id(),
 					"cmt_ParentCmtID" => $parentID, "cmt_RecID" => $recordID));

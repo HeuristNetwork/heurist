@@ -2539,7 +2539,12 @@ top.HEURIST.search = {
 			searchDiv = document.getElementById("menuSavedFiltersAndLayouts");
 			searchDiv.innerHTML = innerHTML_filters;
 
-			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db;
+			document.getElementById("my-blog-link").onclick = function(event){
+					top.HEURIST.util.stopEvent(event);
+					window.open(top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db,'_blank');
+					return false;
+			};
+			//href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db;
 
 		}//wg=0
 
@@ -2570,7 +2575,7 @@ top.HEURIST.search = {
 				innerHTML += '<img height="11" title="info" src="'+top.HEURIST.basePath+'common/images/info.png" '+
 									'onclick="{top.HEURIST.search.workgroupInfoPopup(event, '+wg_ID+');}" onmouseout="{top.HEURIST.search.hidePopup();}">';
 				innerHTML += '&nbsp;<img height="11" src="'+ top.HEURIST.basePath+'common/images/blog-icon-box-rev-lightgrey16.png" '+
-									'onclick="{window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
+									'onclick="{top.HEURIST.util.stopEvent(event);window.open(\''+top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +'\',\'_blank\');return false;}">';
 				//innerHTML += "<a target=\"_blank\" class='external-link' href='" +top.HEURIST.basePath+ "viewers/blog/index.html?g=" + wg_ID + _db2 +"'></a>";
 				innerHTML += "</div></div>";
 
