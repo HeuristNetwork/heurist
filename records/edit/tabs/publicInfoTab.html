@@ -11,24 +11,24 @@
 
 -->
 <html>
- <head>
-  <link rel=stylesheet href="../../../common/css/global.css">
-  <link rel=stylesheet href="../../../common/css/edit.css">
+<head>
+	<link rel=stylesheet href="../../../common/css/global.css">
+	<link rel=stylesheet href="../../../common/css/edit.css">
 
-<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
-<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
-<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
+	<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
- </head>
- <body class="editTab" onLoad="onshow();">
-  <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-  <script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
+</head>
+<body class="editTab" onLoad="onshow();">
 
-<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
-<script type="text/javascript" src="../../../common/js/calendar.js"></script>
+	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+	<script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
+
+	<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
+	<script type="text/javascript" src="../../../common/js/calendar.js"></script>
 
 <script>
-		top.HEURIST.edit.calendarViewer = calendarViewer;
 
 		document.write('<form method=post enctype="multipart/form-data"'+
 				' onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"' +
@@ -43,8 +43,9 @@
 <script>
 function onshow() {
 	// Invoked when this frame is made visible.
-	// Find the first required input and focus it.
+	top.HEURIST.edit.calendarViewer = calendarViewer;
 
+	// Find the first required input and focus it.
 	var inputs = window.HEURIST.inputs || [];
 
 	var firstInput = null, firstRequiredInput = null, firstEmptyRequiredInput = null;

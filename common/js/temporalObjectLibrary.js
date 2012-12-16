@@ -1685,4 +1685,82 @@ var TDuration = function (strDuration) {
 	return that;
 }
 
+function isTemporal(str) {
 
+	var res = false;
+	
+	if (str && str.search(/\|VER/) != -1) {	//we have a temporal
+		res = true;
+
+		if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
+			
+		}else if (str.search(/TYP=s/) != -1 ) {
+			if (str.match(/DAT=([^\|]+)/)) {
+				if (str.search(/COM=[^\|]+/) == -1) {
+					res = false;
+				}
+			}else if (str.search(/COM=[^\|]+/) != -1) {
+				res = false;
+			}
+		}
+	}
+	return res;
+}
+
+/**
+* 
+*/
+function temporalToHumanReadableString(inputStr) {
+			var str = inputStr;
+//			disableCtrls(false);&nbsp;
+
+			if (str && str.search(/\|VER/) != -1) {	//we have a temporal
+//				dateBox.strTemporal = str;
+//				disableCtrls(true);
+				if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
+					str = str.match(/SRT=([^\|]+)/)[1];
+				}else if (str.search(/TYP=s/) != -1 ) {
+					if (str.match(/DAT=([^\|]+)/)) {
+						if (str.search(/COM=[^\|]+/) == -1) {
+//							disableCtrls(false);
+						}
+						str = str.match(/DAT=([^\|]+)/)[1];
+					}else if (str.search(/COM=[^\|]+/) != -1) {
+						str = str.match(/COM=([^\|]+)/)[1];
+//						disableCtrls(false);
+					}
+				}else if (str.search(/TYP=c/) != -1 ) { //c14 date
+					var bce = str.match(/BCE=([^\|]+)/);
+						bce = bce ? bce[1]: null;
+					var c14 = str.match(/BPD=([^\|]+)/);
+						c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
+					var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
+					suff += bce ? " BCE" : " BP";
+					var dvp = str.match(/DVP=P(\d+)Y/);
+						dvp = dvp ? dvp[1]: null;
+					var dev = str.match(/DEV=P(\d+)Y/);
+						dev = dev ? " ±" + dev[1] + " yr" + (dev[1]>1?"s":""):(dvp ? " +" + dvp + " yr" + (dvp>1?"s":""):" + ??");
+					var dvn = str.match(/DVN=P(\d+)Y/);
+						dev += dvp ? (dvn[1] ? " -" + dvn[1] + " yr" + (dvn[1]>1?"s":""): " - ??") : "";
+						str = c14 + dev + suff;
+				}else if (str.search(/TYP=p/) != -1 ) {// probable date
+					var tpq = str.match(/TPQ=([^\|]+)/);
+						tpq = tpq ? tpq[1]: null;
+					var taq = str.match(/TAQ=([^\|]+)/);
+						taq = taq ? taq[1]: null;
+					var pdb = str.match(/PDB=([^\|]+)/);
+						pdb = pdb ? pdb[1]: (tpq ? tpq:"");
+					var pde = str.match(/PDE=([^\|]+)/);
+						pde = pde ? pde[1]: (taq ? taq:"");
+						str = pdb + " – " + pde;
+				}else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
+					var dat = str.match(/DAT=([^\|]+)/);
+						dat = dat ? dat[1]: "";
+					var rng = str.match(/RNG=P(\d*)(Y|M|D)/);
+					var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
+						rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
+						str = dat + rng;
+				}
+			}
+			return str;
+}

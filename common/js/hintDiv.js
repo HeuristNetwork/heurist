@@ -44,7 +44,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 
 			popup_div.css({
 				'position':'absolute',
-				'z-index':'9999',
+				'z-index':'2147483647',
 				'left':'-9999px',
 				'top':'0px',
 				'background-color':'RGBA(0,0,0,0.75)',

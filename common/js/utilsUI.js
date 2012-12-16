@@ -1937,7 +1937,7 @@ function createCustomAlert(txt,args) {
 	mObj.id = "modalContainer";
 	 // make sure its as tall as it needs to be to overlay all the content on the page
 	mObj.className = "coverall";
-	mObj.style.zIndex = 2147483647;// "100000";
+	mObj.style.zIndex = 2147483647;// "max";
 
 	// create the DIV that will be the alert
 	alertObj = mObj.appendChild(d.createElement("div"));

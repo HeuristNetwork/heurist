@@ -35,18 +35,27 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	-->
-	<head>
-  <link rel=stylesheet href="../../../common/css/global.css">
-  <link rel=stylesheet href="../../../common/css/edit.css">
+<head>
+	<link rel=stylesheet href="../../../common/css/global.css">
+	<link rel=stylesheet href="../../../common/css/edit.css">
+	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
+	<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
-	</head>
-	<body class="editTab" onload="onshow()">
+</head>
+<body class="editTab">
 		<script src="../../../common/js/utilsLoad.js"></script>
 		<script src="../relationshipsObjectLibrary.js"></script>
 		<script src="../../../common/php/displayPreferences.php"></script>
 
+		<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
+		<script type="text/javascript" src="../../../common/js/calendar.js"></script>
+		
 		<script>
+		
 			function onshow() {
+				top.HEURIST.edit.calendarViewer = calendarViewer;
+				
 				var elt = document.getElementById("relationship-type");
 				setTimeout(function() {
 					try {

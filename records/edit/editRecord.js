@@ -1171,6 +1171,8 @@ top.HEURIST.edit = {
 				{
 					if (date) {
 						dateBox.value = date;
+						dateBox.style.width = '14ex';				
+
 						dateBox.strTemporal = "";
 						dateBox.disabled = false;
 						dateBox.disabledStrictly = false;
@@ -1209,7 +1211,7 @@ top.HEURIST.edit = {
 			dateBox.dateButton.disabled = value;
 			dateBox.dateButton.disabledStrictly = value;
 		}
-
+/* AO: moved to temoralObjectLibrary.js
 		function decodeValue (inputStr) {
 			var str = inputStr;
 			disableCtrls(false);
@@ -1263,19 +1265,32 @@ top.HEURIST.edit = {
 				}
 			}
 			return str;
-		}
+		}*/
 		dateBox.initVal = dateBox.value;
 		if (dateBox.value) {
-			dateBox.value = decodeValue(dateBox.value);
+			disableCtrls(isTemporal(dateBox.value));
+			
+			if (dateBox.value.search(/\|VER/) != -1){
+				dateBox.strTemporal = dateBox.value;
+			}else{
+				dateBox.strTemporal = "";
+			}
+			dateBox.value = temporalToHumanReadableString(dateBox.value);
 		}
+		dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';				
+		
 		var popupOptions = {
 			callback: function(str) {
 				if(str!==undefined){
-					dateBox.strTemporal = str;
-					if( dateBox.strTemporal != dateBox.value) {
+					
+					disableCtrls(isTemporal(str));
+					
+					if( dateBox.strTemporal != str) {
 						windowRef.changed();
 					}
-					dateBox.value = decodeValue(str);
+					dateBox.strTemporal = str;
+					dateBox.value = temporalToHumanReadableString(str);
+					dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';				
 					if( dateBox.strTemporal != dateBox.value) {
 						buttonElt.title = "Edit temporal " + dateBox.strTemporal;
 					}

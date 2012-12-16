@@ -1,5 +1,7 @@
 /*
- * filename, brief description, date of creation, by whom
+ * relationshipsObjectLibrary.js
+ * 
+ * brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -72,9 +74,9 @@ if (!top.Relationship) {
 		this.datesTd = optionalTd.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 		this.datesTd.parentNode.className = "dates";
 		if (relationshipRec.startDate) {
-			this.datesTd.appendChild(this.document.createTextNode(relationshipRec.startDate));
+			this.datesTd.appendChild(this.document.createTextNode(temporalToHumanReadableString(relationshipRec.startDate)));
 			if (relationshipRec.endDate) {
-				this.datesTd.appendChild(this.document.createTextNode(" - " + relationshipRec.endDate));
+				this.datesTd.appendChild(this.document.createTextNode(" - " + temporalToHumanReadableString(relationshipRec.endDate)));
 			}
 		}
 
