@@ -186,7 +186,7 @@
 	 </div>
 
 	 <!-- This doesn't actually work, but is it really useful? I think not -->
-	 <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1"/>&nbsp;Add fields by default&nbsp;&nbsp;</div>
+	 <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1" />&nbsp;<label for="definit">Add fields by default</label></div>
 
 	<!-- HIDDEN  IJ REQ 2012-10-11 -->
 	<div class="input-row" style="display:none">
@@ -594,7 +594,7 @@
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
 			var params = "method=saveRT&db="+db+"&definit="+
-				document.getElementById("definit").value+
+				(document.getElementById("definit").checked?1:0)+
 				"&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
 

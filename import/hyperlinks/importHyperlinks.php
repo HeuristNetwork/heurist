@@ -456,7 +456,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
 	//insert the main record
 	if (mysql__insert('Records', array(
-		'rec_RecTypeID' => 1,
+		'rec_RecTypeID' => RT_INTERNET_BOOKMARK,
 		'rec_URL' => $url,
 		'rec_Added' => date('Y-m-d H:i:s'),
 		'rec_Modified' => date('Y-m-d H:i:s'),

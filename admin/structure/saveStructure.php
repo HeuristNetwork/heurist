@@ -610,11 +610,10 @@
 					addDefaultFieldForNewRecordType($rtyID);
 					//create canonical title mask
 					updateCanonicalTitleMask($rtyID, $titleMask);
-
-					//create icon and thumbnail
-					getRectypeIconURL($rtyID);
-					getRectypeThumbURL($rtyID);
 				}
+				//create icon and thumbnail
+				getRectypeIconURL($rtyID);
+				getRectypeThumbURL($rtyID);
 			}
 
 		}
