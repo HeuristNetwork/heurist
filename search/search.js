@@ -4647,11 +4647,11 @@ function layoutAppPanel(isToggle,newWidth){
 		//
 		//
 		var setWidths = function() {
-			
-			if(!(document.getElementsByTagName("body") && document.getElementById("search"))){
+
+			if(!document.getElementsByTagName("body")){
 				return;
 			}
-			
+
 			var dw = layout.getSizes().doc.w;
 			var dh = layout.getSizes().doc.h;
 			var leftPanelWidth = layout.getSizes().left.w;
@@ -4659,7 +4659,8 @@ function layoutAppPanel(isToggle,newWidth){
 			var centerPanelWidth = layout.getSizes().center.w;
 			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
 			if(dh == 0){ //need to reset hieght to match body area less heading
-				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("search").clientHeight - 60;
+				//document.getElementById("search").clientHeight
+				dh = document.getElementsByTagName("body")[0].clientHeight - 60;
 				layout.set("height",dh);
 			}
 			/*DEBUG*///window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
@@ -4689,9 +4690,10 @@ function layoutAppPanel(isToggle,newWidth){
 
 			var ele = document.getElementById('result-container');
 			var newtop = '20px';
-			if (centerPanelWidth<200){
+			var navmenu = (document.getElementById("menuNavigation").style.display != 'none')?40:0;
+			if (centerPanelWidth<200+navmenu){
 				newtop = '60px';
-			}else if (centerPanelWidth<380){
+			}else if (centerPanelWidth<380+navmenu){
 				newtop = '40px';
 			}
 			ele.style.top = newtop;

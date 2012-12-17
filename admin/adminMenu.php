@@ -189,7 +189,7 @@ if (is_admin()) {
 							title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
 						<li><a href="#" onClick="loadContent('describe/getDBStructureAsXForms.php?db=<?=HEURIST_DBNAME?>')"
 							title="Save the record types as XForms">Structure (XForms)</a></li>
-						<li><a href="#" onClick="loadContent('setup/editMimetypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/manageMimetypes.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define the relationship between file extensions and mime type">Mime types</a></li>
 						<li class="seperator"></li>
 					</ul>

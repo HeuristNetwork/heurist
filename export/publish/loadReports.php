@@ -14,9 +14,7 @@
 define("SAVE_URI", "disabled");
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-
+//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -69,7 +67,6 @@ if (! is_logged_in()) {
 		}
 
 		print json_format($records);
-		exit();
 
 	}else if($metod=="getreport"){ //-----------------
 
@@ -104,7 +101,6 @@ if (! is_logged_in()) {
 
 		print "top.HEURIST.reports = " . json_format($records) . ";\n";
 		print "\n";
-		exit();
 
 	}else if($metod=="savereport"){ //-----------------
 
@@ -129,7 +125,6 @@ if (! is_logged_in()) {
 		}
 		print json_format($rv);
 
-
 	}else if($metod=="deletereport"){
 
 
@@ -147,6 +142,8 @@ if (! is_logged_in()) {
 		print json_format($rv);
 
 	}
+
+exit();
 
 	/**
 	* @return 0 - ok,  1 - template file missed, 2 - output folder does not exist, 2 - file does not exist
@@ -267,7 +264,7 @@ if (! is_logged_in()) {
 
 				if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper $type# $recID in updateUserGroup - ".$rows; //$msqli->error;
+					$ret = "error $oper in updateReportSchedule - ".$rows; //$msqli->error;
 				} else {
 					if($isInsert){
 						$recID = $db->insert_id;
@@ -287,84 +284,9 @@ if (! is_logged_in()) {
 
 
 		if ($ret==null){
-			$ret = "no data supplied for updating $type - $recID";
+			$ret = "no data supplied for updating report - $recID";
 		}
 
 		return $ret;
-	}
-
-	//ARTEM uses mysqli
-	/* @todo - similar in saveUsergrps - unite
-	$sql = Statement to execute;
-	$parameters = array of type and values of the parameters (if any)
-	$close = true to close $stmt (in inserts) false to return an array with the values;
-	*/
-	function execSQL($mysqli, $sql, $params, $close){
-
-		$result;
-
-		if($params==null || count($params)<1){
-
-			if($result = $mysqli->query($sql)){
-				if($close){
-					$result = $mysqli->affected_rows;
-				}
-			}else{
-				$result = $mysqli->error;
-				if($result == ""){
-		   			$result = $mysqli->affected_rows;
-				}else{
-					error_log(">>>Error=".$mysqli->error);
-				}
-			}
-
-		}else{ //prepared query
-
-		   $stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
-		   call_user_func_array(array($stmt, 'bind_param'), refValues($params));
-
-		   $stmt->execute();
-
-		   if($close){
-			$result = $mysqli->error;
-			if($result == ""){
-		   		$result = $mysqli->affected_rows;
-			}else{
-				error_log(">>>Error=".$mysqli->error);
-			}
-		   } else {
-		   		$meta = $stmt->result_metadata();
-
-				while ( $field = $meta->fetch_field() ) {
-					$parameters[] = &$row[$field->name];
-				}
-
-				call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
-
-			   	while ( $stmt->fetch() ) {
-					$x = array();
-					foreach( $row as $key => $val ) {
-							$x[$key] = $val;
-						}
-					$results[] = $x;
-				}
-
-				$result = $results;
-			}
-
-		   	$stmt->close();
-		}
-		   	return  $result;
-	}
-
-	function refValues($arr){
-		if (strnatcmp(phpversion(),'5.3') >= 0) //Reference is required for PHP 5.3+
-		{
-			$refs = array();
-			foreach($arr as $key => $value)
-					$refs[$key] = &$arr[$key];
-			return $refs;
-        }
-		return $arr;
 	}
 ?>

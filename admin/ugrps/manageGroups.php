@@ -60,7 +60,6 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 		<!-- END PAGINATOR -->
 
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 		<style>
 <?php if ($isPopup) { ?>
@@ -98,8 +97,8 @@ Show:&nbsp;&nbsp;&nbsp;<input type="radio" id="inputFilterByMembership1" name="i
 <input type="radio" id="inputFilterByMembership3" name="inputFilterByMembership" value="admin">&nbsp;Admin. only&nbsp;
 <input type="radio" id="inputFilterByMembership4" name="inputFilterByMembership" value="member">&nbsp;Member only&nbsp;&nbsp;
 				</div>
-				<div style="display: inline-block;">
-				<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:</label>
+				<div style="display: inline-block;padding-left:40px">
+				<label>Filter by name:</label>
 				<input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;padding-left: 20px;" value=""/>
 				</div>
 <!--
