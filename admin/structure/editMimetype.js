@@ -135,7 +135,7 @@ function MimetypeEditor() {
 				}
 				if(Hul.isempty(el.value) && (fname==='fxm_Extension' || fname==='fxm_MimeType')) {
 					if(isShowWarn) {
-						alert(fname+" is mandatory field");
+						alert( (fname==='fxm_Extension'?'Extension':'Mime Type')+" is mandatory field");
 					}
 					el.focus();
 					_updatedFields = [];

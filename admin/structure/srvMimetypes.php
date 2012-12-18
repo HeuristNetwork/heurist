@@ -183,6 +183,7 @@ exit();
 			$query = "";
 			$fieldNames = "";
 			$parameters = array("");
+			$parameters2 = array("");
 			$fieldNames = join(",",$colNames);
 
 			foreach ($colNames as $colName) {
@@ -197,6 +198,8 @@ exit();
 					if($isInsert){
 							if($colName == "fxm_Extension"){
 								$recID = $val;
+								$parameters2[0] = $defFileExtToMimetype[$colName]; //take datatype from array
+								array_push($parameters2, $val);
 							}
 							$query = $query."?";
 					}else{
@@ -209,8 +212,20 @@ exit();
 				}
 			}//for columns
 
+				
+					//check for duplication
+			/*if($isInsert){
+					$querydup = "select fxm_Extension from defFileExtToMimetype where fxm_Extension=?";
+					$rows = execSQL($db, $querydup, $parameters2, false);
+					if(is_array(@rows)){
+						$ret = "error insert duplicate extension";
+						$query = "";
+					}
+			}*/
+			
 			if($query!=""){
 				if($isInsert){
+				
 					$query = "insert into defFileExtToMimetype (".$fieldNames.") values (".$query.")";
 				}else{
 					$query = "update defFileExtToMimetype set ".$query." where fxm_Extension = '$recID'";
@@ -220,7 +235,7 @@ exit();
 
 				if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper in updateMimetypes - ".$rows; //$msqli->error;
+					$ret = "Error $oper for Mime types - ".$rows; //$msqli->error;
 				} else {
 					if($isInsert){
 						//$recID = $db->insert_id;

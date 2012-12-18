@@ -241,7 +241,7 @@ function MimetypeManager() {
 								if(!Hul.isnull(context))
 								{
 									dt.deleteRow(oRecord.getId(), -1);
-									alert("Mime type "+recID+" was deleted");
+									alert("Mime type for extension "+recID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
 								}
 							}

@@ -1667,7 +1667,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			msg = "Incorrect responce from server. Please contact development team if it persists";
 		}else if (Number(msg)===-1){
 			msg = "An error occurred trying to contact the database";
-		}else if (msg.indexOf("error")<0){
+		}else if (msg.toLowerCase().indexOf("error")<0){
 			msg = "An error occurred: " + msg;
 		}
 		alert(msg);
