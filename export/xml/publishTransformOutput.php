@@ -153,7 +153,7 @@ global $outputURI;
 			returnXMLErrorMsgPage("No transform filename or outputFilename provided for $recHMLFilename");
 		}
 		$cntByte = $recHmlDoc->saveHTMLFile($outputFilename);
-		if ($cntByte) {
+		if ($cntByte>0) {
 			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of untransformed file $recHMLFilename to $outputFilename");
 		}else{
 			returnXMLErrorMsgPage("Unable to output untransformed file $recHMLFilename to $outputFilename");
@@ -179,7 +179,7 @@ global $outputURI;
 	$xslProc->setParameter('','standalone','1');
 	if($outputFilename){
 		$cntByte = $xslProc->transformToURI($recHmlDoc,$outputFilename);
-		if ($cntByte) {
+		if ($cntByte > 0) {
 			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of $recHMLFilename transformed by  $styleFilename to $outputFilename".
 									($outputURI?" <a href=\"$outputURI\" target=\"_blank\">$outputURI</a>":
 									"Unable to determine URI for $outputFilename because is does not match website path!"));

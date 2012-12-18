@@ -53,9 +53,8 @@
 
 	// calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
 	$installDir = preg_replace("/\/(".HEURIST_TOP_DIRS.")\/.*/","",@$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
-
 	if($installDir == @$_SERVER["SCRIPT_NAME"]) {	// no top directories in this URI must be a root level script file or blank
-		$installDir = preg_replace("/\/index.php/","",@$_SERVER["SCRIPT_NAME"]);// strip away the "/index.php" if it's there
+		$installDir = preg_replace("/\/[^\/]*$/","",@$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
 	}
 	if($installDir != @$_SERVER["SCRIPT_NAME"]) {	// this should be the path difference between document root and heurist code root
 		define('INSTALL_DIR', $installDir);	//the subdir of the server's document directory where heurist is installed
@@ -121,24 +120,19 @@
 		$dbName = $_REQUEST["db"];
 	}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_db)) {//else check refer
 		$dbName = $refer_db[1];
+	}else if (defined("HEURIST_DEFAULT_DBNAME")) {//if enter at site root  index.php and default is set use it
+		$dbName = HEURIST_DEFAULT_DBNAME;
 	}
 
 	if (!@$dbName) {
 
-		/* NO MORE DEFAULT DATABASE!!!
-		else if (defined("HEURIST_DEFAULT_DBNAME")) {//if enter at site root  index.php and default is set use it
-				$dbName = HEURIST_DEFAULT_DBNAME;
-		}*/
-
 		define('HEURIST_DBNAME', '');
-
 		if(defined("NO_DB_ALLOWED")){ //for createNewDB.php and selectDatabase.php
-				return;
+			return;
 		}else {
-				//Ambiguous database name, or no database name supplied
-				returnErrorMsgPage(2);
+			//Ambiguous database name, or no database name supplied
+			returnErrorMsgPage(2);
 		}
-
 	}
 
 	define('HEURIST_DBNAME', $dbName);
@@ -556,6 +550,7 @@
 		}else if ($critical==2) { //database not defined or can not connect to it
 
 			$redirect = HEURIST_BASE_URL."common/connect/selectDatabase.php";
+			error_log("redirectURL = ".print_r($redirect,true));
 			if($msg){
 				$redirect .= "?msg=".rawurlencode($msg);
 			}

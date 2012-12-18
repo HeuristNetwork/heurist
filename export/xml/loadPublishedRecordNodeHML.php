@@ -52,7 +52,7 @@ $recID = @$_REQUEST['recID'] ? $_REQUEST['recID'] : null;
 
 $res = mysql_query("select * from Records where rec_ID = $recID");
 if (!$recID || !mysql_num_rows($res)){
-	returnXMLErrorMsgPage(" No record ID ");
+	returnXMLErrorMsgPage(" Non-existent record ID ($recID)");
 }
 $row = mysql_fetch_assoc($res);
 $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
