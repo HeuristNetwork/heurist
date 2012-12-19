@@ -98,7 +98,7 @@ var JSTraceProfiler = function(){
         },
 
         showOutput : function(){
-            var info = "", i=0, len = _metrics.length, curLevel=0, indent = "", outputText="Profile overhead per logged entry = " + _overhead + "\n",
+            var info = "", i=0,j, len = _metrics.length, curLevel=0, indent = "", outputText="Profile overhead per logged entry = " + _overhead + "\n",
                 message = "", metric = null, entryStack = [],  lastBSTime = _metrics[0].time, enrtyMet = null, lastMetricTime = _metrics[0].time;
             for (;i<len;i++){
                 metric = _metrics[i];
@@ -106,36 +106,36 @@ var JSTraceProfiler = function(){
                 switch (mType){
                     case 'B':
                     case 'S':
-                        message = "T=" + (mType == 'B'? "Start ":"Stop ") + "L=" + metric.level + "  N= " + metric.name  + " elapsed time=" + (metric.time - lastBSTime) + "  M= " + (metric.text ? metric.text:"");
+                        message =  metric.name  + "   T=" + (mType == 'B'? "Start ":"Stop ") + "L=" + metric.level + " elapsed time=" + (metric.time - lastBSTime) + "  M= " + (metric.text ? metric.text:"");
                         lastBSTime = lastMetricTime = metric.time;
                         break;
                     case 'E':
-                        message = "T=Entry " +"L=" + metric.level + "  N= " + metric.name + " LM elapsed time=" + (metric.time - lastMetricTime) + "  M= " + (metric.text ? metric.text:"") ;
+                        message = metric.name + "   T=Entry " +"L=" + metric.level + " before Func time=" + (metric.time - lastMetricTime) + "  M= " + (metric.text ? metric.text:"") ;
                         entryStack.push(metric);
                         lastMetricTime = metric.time;
                         break;
                     case 'X':
                         entryMet = entryStack.pop();
-                        message = "T=Exit ";
+                        message = metric.name  + "   T=Exit ";
                         if (!entryMet) {
                             message += "Error misalligned exit for " + metric.name + "\n" ;  //name mismatch error
                         }else{
-                            if (metric.name != entryMet.name) message += "Error Name Mismatch= " + entryMet.name + " and " + metric.name ;  //name mismatch error
-                            if (metric.level != entryMet.level) message += "Error Level Mismatch= " + entryMet.level + " and " + metric.level ; // level mismatch error
-                            message += " L=" + metric.level + "  N= " + metric.name  + " FUNC elapsed time=" + (metric.time - entryMet.time) + "  M= " + (metric.text ? metric.text:"");
+                            if (metric.name != entryMet.name) message += "Error Name Mismatch= " + entryMet.name + " and " + metric.name + " ";  //name mismatch error
+                            if (metric.level != entryMet.level) message += "Error Level Mismatch= " + entryMet.level + " and " + metric.level + " "; // level mismatch error
+                            message += "L=" + metric.level + " FUNC elapsed time=" + (metric.time - entryMet.time) + "  M= " + (metric.text ? metric.text:"");
                         }
                         lastMetricTime = metric.time;
                         break;
                     case 'M':
-                        message = "T=Mark " +"L=" + metric.level + "  N= " + metric.name + " LM elapsed time=" + (metric.time - lastMetricTime) + "  M= " +(metric.text ? metric.text:"") ;
-                        lastMetricTime = metric.time;
+                        message = metric.name + "   T=Mark " +"L=" + metric.level +" from entry marker time=" + (metric.time - lastMetricTime) + "  M= " +(metric.text ? metric.text:"") ;
                         break;
                     case 'C':
                     case 'R':
                     default:
-                        message = "T=" + (mType == 'C'? "Construct ": mType == 'R' ? "Restart" :"Unknown ") +"L=" + metric.level + "  N= " + metric.name  + " time=" + metric.time + "  M= " +(metric.text ? metric.text:"");
+                        message = metric.name  + "   T=" + (mType == 'C'? "Construct ": mType == 'R' ? "Restart" :"Unknown ") +"L=" + metric.level +" time=" + metric.time + "  M= " +(metric.text ? metric.text:"");
                         lastMetricTime = metric.time;
                 }
+                for (j=0;j<metric.level;j++){outputText += "\t";}
                 outputText += message + "\n";
 
             }
