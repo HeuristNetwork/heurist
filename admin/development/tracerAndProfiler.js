@@ -14,6 +14,7 @@ var JSTraceProfiler = function(){
     _outputTextArea = null;
     _maxMetrics = 2000;
     _overhead = 0;
+    _displayEl = null;
 
     var that = {
         calcOverhead : function(){
@@ -55,7 +56,7 @@ var JSTraceProfiler = function(){
 
         setOutput : function(element){ _outputTextArea = element; },
 
-        createOutputPanel : function(element){
+        createOutputPanel : function(ctrlBarEl,dispEl){
             //create control bar  - show Profile output, clearMetrics with text entry,  startProfile with text entry, stopProfile with text entry,
             //                      addMark - with 2 text entry fields, incrementProfileLevel - with 2 text entry fields, decrementProfileLevel - with 2 text entry fields,
             this.showButton = document.createElement("input");
@@ -66,7 +67,15 @@ var JSTraceProfiler = function(){
             this.showButton.style.display = "block";
             var thisRef = this;
             this.showButton.onclick = function() { thisRef.showOutput(); };
-            element.appendChild(this.showButton);
+            ctrlBarEl.appendChild(this.showButton);
+            this.hideButton = document.createElement("input");
+            this.hideButton.type = "button";
+            this.hideButton.value = "Hide";
+            this.hideButton.style.fontWeight = "bold";
+            this.hideButton.style.marginBottom = "1em";
+            this.hideButton.style.display = "block";
+            this.hideButton.onclick = function() { thisRef.hideOutput(); };
+            ctrlBarEl.appendChild(this.hideButton);
             this.clearButton = document.createElement("input");
             this.clearButton.type = "button";
             this.clearButton.value = "Clear";
@@ -74,13 +83,14 @@ var JSTraceProfiler = function(){
             this.clearButton.style.marginBottom = "1em";
             this.clearButton.style.display = "inline";
             this.clearButton.onclick = function() { thisRef.clearMetrics("clear button pressed"); };
-            element.appendChild(this.clearButton);
+            ctrlBarEl.appendChild(this.clearButton);
             //create text area for output
             _outputTextArea = window.document.createElement("textarea");
             _outputTextArea.style.height ="100%";
             _outputTextArea.style.width ="100%";
             _outputTextArea.style.display = "block";
-            element.appendChild(_outputTextArea);
+            dispEl.appendChild(_outputTextArea);
+            _displayEl = dispEl;
         },
 
         clearMetrics : function(strMsg){
@@ -112,7 +122,7 @@ var JSTraceProfiler = function(){
                         }else{
                             if (metric.name != entryMet.name) message += "Error Name Mismatch= " + entryMet.name + " and " + metric.name ;  //name mismatch error
                             if (metric.level != entryMet.level) message += "Error Level Mismatch= " + entryMet.level + " and " + metric.level ; // level mismatch error
-                            message += " L=" + metric.level + "  N= " + metric.name  + " function elapsed time=" + (metric.time - entryMet.time) + "  M= " + (metric.text ? metric.text:"");
+                            message += " L=" + metric.level + "  N= " + metric.name  + " FUNC elapsed time=" + (metric.time - entryMet.time) + "  M= " + (metric.text ? metric.text:"");
                         }
                         lastMetricTime = metric.time;
                         break;
@@ -132,10 +142,11 @@ var JSTraceProfiler = function(){
 
             if (window.navigator.appName.match(/Microsoft/))_outputTextArea.innerText =  outputText;
             else _outputTextArea.innerHTML = outputText;
+            _displayEl.style.display = "block";
         },
 
         hideOutput : function(){
-            _outputTextArea.style.display = "none";
+            _displayEl.style.display = "none";
         }
     }
     return that;
