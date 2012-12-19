@@ -19,7 +19,7 @@ if (! document.body) {
 if (! top.HEURIST) {
 	var installDir = top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	top.HEURIST = {
-	VERSION: "3.1.0",
+	VERSION: "3.1.0 RC1",
 
 		basePath: installDir,
 	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
@@ -275,7 +275,8 @@ if (! top.HEURIST) {
 		else
 			runner();
 	},
- 	invokeOnloadSubscribers: function() {
+
+	invokeOnloadSubscribers: function() {
 		// IE7 doesn't appear to finalise layout until *after* the load has finished.
 		// By firing our onload subscribers out-of-band from the usual onload mechanism,
 		// we can avoid some layout problems to do with the autosize.

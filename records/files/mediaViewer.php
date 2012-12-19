@@ -124,7 +124,7 @@ if (@$_REQUEST['ulf_ID']){
 	var installDir = window.location.protocol+"//"+window.location.host+
 		window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	var HRST = {
-		VERSION: "build 3.1.0.240112",
+		VERSION: "<?=HEURIST_VERSION?>",
 		parameters: params,
 		baseURL: '',
 		basePath: installDir,

@@ -39,7 +39,7 @@
 	* All root are root directories and will also have a trailing / NOTE: HEURIST_DOCUMENT_ROOT to be migrated.
 	* All URL are to have full protocol
 	*/
-	define('HEURIST_VERSION',"3.1.0.150812");// need to change this in common/js/utilLoad.js
+	define('HEURIST_VERSION',"3.1.0 RC1");// need to change this in common/js/utilLoad.js
 
 	define('HEURIST_MIN_DBVERSION',"1.1.0");
 
