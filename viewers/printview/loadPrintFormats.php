@@ -83,7 +83,7 @@
 
 					//if not empty, read in the styles
 					if ($out[0] && $name[0]){
-						$arr_outputs[$out[0]] = array($name[0],$filePath);
+						$arr_outputs[$name[0]] = array($out[0],$filePath);
 					}
 				}
 

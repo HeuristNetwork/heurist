@@ -55,6 +55,11 @@ var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
 						'map':1,'Map':1,'map view':1,'Map View':1,
 						'report':2,'Report':2,'report view':2,'Report View':2,
 						'transform':3,'Transform':3,'transform view':3,'Transform View':3};
+
+var tabIDToAppnameMap = ['record','map','report','transform'];
+
+var appInterface = {};
+
 top.HEURIST.search = {
 	VERSION: "1",
 
@@ -337,6 +342,29 @@ top.HEURIST.search = {
 		return ret;
 	},
 
+	getAppState: function(appID){
+		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
+		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
+		if(typeof appWin == "object" && appWin.initted && typeof appWin.getState == "function"){
+			return appWin.getState.call(appWin);
+		}
+		return null;
+	},
+
+	setAppState: function(appID,strState,cnt){
+		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
+		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
+		if(typeof appWin == "object" && appWin.initted && typeof appWin.setState == "function"){
+			appWin.setState.call(appWin,strState);
+		}else if (cnt<5){
+			setTimeout(function(){top.HEURIST.search.setAppState(appID, strState, ++cnt)},1000);
+		}
+	},
+
+	appRegisterInterface:function(appID,appObj) {
+		appInterface[appID]= appObj;
+	},
+
 	applyFilterAndLayout: function(evt){
 		var i,layoutSrch, layoutNav, layoutApp, layouts, style,
 			maxFilterDepth=0,
@@ -351,14 +379,21 @@ top.HEURIST.search = {
 				//calculate max depth of filters
 				if (top.HEURIST.parameters['layout']) {
 					layouts = top.HEURIST.search.parseLayoutParam(top.HEURIST.parameters['layout']);
-					if (layouts['srch']) {
-						layoutSrch = layouts['srch'];
-					}
-					if (layouts['nav']) {
-						layoutNav = layouts['nav'];
-					}
-					if (layouts['app']) {
-						layoutApp = layouts['app'];
+					var layoutID;
+					for (layoutID in layouts){
+						switch (layoutID){
+							case 'srch':
+								layoutSrch = layouts['srch'];
+								break;
+							case 'nav':
+								layoutNav = layouts['nav'];
+								break;
+							case 'app':
+								layoutApp = layouts['app'];
+								break;
+							default:
+								top.HEURIST.search.setAppState(layoutID, layouts[layoutID],0);
+						}
 					}
 				}
 				var rtf = top.HEURIST.parameters['rtfilters'],
@@ -423,7 +458,7 @@ top.HEURIST.search = {
 					}
 				}
 				top.HEURIST.search.setSelectedCount();
-				//if there is more depth releated records than showing
+				//if there is more depth related records than showing
 				//then load the filters for the next level to show the user that they can load it
 				if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
 					top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
@@ -3837,6 +3872,9 @@ top.HEURIST.search = {
 		}else{
 //			ret += "|app:"+top.HEURIST.displayPreferences.rightWidth;
 			ret += "|app:"+layout.getSizes().right.w+","+_tabView.get('activeTab').getAttributeConfig('label').value;
+			var appID = tabIDToAppnameMap[_tabView.get("activeIndex")];
+			var appState = top.HEURIST.search.getAppState(appID);
+			ret += appState ? "|"+appID+":"+appState : "";
 		}
 		return [maxLevel,ret];
 	},
@@ -4648,7 +4686,7 @@ function layoutAppPanel(isToggle,newWidth){
 		//
 		var setWidths = function() {
 
-			if(!document.getElementsByTagName("body")){
+			if(!(document.getElementsByTagName("body") && document.getElementById("search"))){
 				return;
 			}
 
@@ -4659,8 +4697,7 @@ function layoutAppPanel(isToggle,newWidth){
 			var centerPanelWidth = layout.getSizes().center.w;
 			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
 			if(dh == 0){ //need to reset hieght to match body area less heading
-				//document.getElementById("search").clientHeight
-				dh = document.getElementsByTagName("body")[0].clientHeight - 60;
+				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("search").clientHeight - 60;
 				layout.set("height",dh);
 			}
 			/*DEBUG*///window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
@@ -4690,10 +4727,9 @@ function layoutAppPanel(isToggle,newWidth){
 
 			var ele = document.getElementById('result-container');
 			var newtop = '20px';
-			var navmenu = (document.getElementById("menuNavigation").style.display != 'none')?40:0;
-			if (centerPanelWidth<200+navmenu){
+			if (centerPanelWidth<200){
 				newtop = '60px';
-			}else if (centerPanelWidth<380+navmenu){
+			}else if (centerPanelWidth<380){
 				newtop = '40px';
 			}
 			ele.style.top = newtop;

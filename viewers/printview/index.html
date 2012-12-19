@@ -60,7 +60,7 @@
 				styleSelectElt.options[0].disabled = true;
 				var localStyleName;
 				for (localStyleName in styles){
-					styleSelectElt.appendChild( new Option(styles[localStyleName][0],localStyleName));
+					styleSelectElt.appendChild( new Option(localStyleName,styles[localStyleName][0]));
 					if (localStyleName == s) {
 						styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
 					}
@@ -97,11 +97,12 @@
 			var query;
 			var aquery;
 			var loadingPage;
+			var initted = false;
 			var loadCount;	// to restict the number of pages that are loaded. Some queries gives all records.
 			var maxLoadPages = 10;
 			var curStyle = top.HEURIST.util.getDisplayPreference("defaultPrintView"); //saved default stylesheet
 			if (!top.HEURIST.transforms.nameLookup[curStyle]){
-				curStyle = "default";
+				curStyle = "Default view";
 			}
 			var curQueryURL;
 			var currentPage = 1;
@@ -119,7 +120,7 @@
 				// style
 					if (location.search.match(/style=([^&=#]*)/)) {
 						var temp = location.search.match(/style=([^&=#]*)/)[1];
-						if (top.HEURIST.transforms.nameLookup[temp] || temp == "Generic XML") { //check if there is a template for this style
+						if (top.HEURIST.transforms.nameLookup[temp] || styles[temp] || temp == "Default view") { //check if there is a template for this style
 							curStyle = temp;
 							top.HEURIST.util.setDisplayPreference("defaultPrintView",temp);
 						}
@@ -134,9 +135,9 @@
 						selectedIds = top.HEURIST.search.getSelectedRecIDs().get();
 					}
 				//query
-					query = location.search.replace(/&?selectedIds=([0-9,]*)/,"");
-					query = query.replace(/&?style=[^&=#]*/,"");
-					query = query.replace(/\?&/,"?");
+					query = location.search.replace(/&?selectedIds=([0-9,]*)/,"");//strip off selected
+					query = query.replace(/&?style=[^&=#]*/,"");//strip off style
+					query = query.replace(/\?&/,"?");//if only a ? then remove it
 					var q = query.match(/q=([^&=#]*)/);
 					if (!q && top.HEURIST.parameters['q']){ //no query passed in so build one from HEURIST.params
 						query = "?";
@@ -165,19 +166,19 @@
 						}
 					}
 
-					if (query && query.search("db")== -1){
+					if (query && query.search("db")== -1){//add teh db name if it's not there
 						query += "&db=" + database;
 					}
-					if (query && query.search("a=")== -1){
-						query += "&a=1";
-					}
-					if (query && query.search("f=")== -1){
+//					if (query && query.search("a=")== -1){
+//						query += "&a=1";
+//					}
+					if (query && query.search("f=")== -1){//make sure we get a fresh read of the data
 						query += "&f=1";
 					}
-					if (query && query.search("stub=")== -1){
+					if (query && query.search("stub=")== -1){//add stubs
 						query += "&stub=1";
 					}
-					if (query && query.search("woot=")== -1){
+					if (query && query.search("woot=")== -1){//add woot
 						query += "&woot=1";
 					}
 				}
@@ -189,13 +190,43 @@
 					top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
 					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
 					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
+//					top.HEURIST.registerEvent(this,"heurist-changestate",onChangeState);
 				}
+//				top.HEURIST.search.appRegisterInterface("transform", this);
+
 				if(!selectedIds || selectedIds.length == 0){
 					clearAndDisplayMessage("No Records Selected from Search Results");
 				}else{
 
 				}
 			}
+
+			function getState(){
+				return "style="+curStyle;
+			}
+
+			function setState(stateString){
+//				alert("setting state "+ stateString);
+				if (typeof stateString == "string" && stateString.search(/=/) > -1){
+					var stateVars = stateString.split(","),
+						styleID,
+						i,optIndex;
+					for (i =0; i<stateVars.length; i++) {
+						temp = stateVars[i].split("=");
+						if (temp.length > 1 && typeof temp[0] == "string" && temp[0] == "style" && typeof temp[1] == "string" &&
+								$("#transform_select > option[textContent="+temp[1]+"]").length > 0){
+							curStyle = temp[1];
+							$("#transform_select").children("option").each(function(i,obj){
+																				if (obj.textContent == curStyle){
+																					optIndex = i;
+																				}
+							});
+							$("#transform_select").attr("selectedIndex",optIndex);
+						}
+					}
+				}
+			}
+
 
 			var relatedRecListXSL;
 
@@ -248,68 +279,6 @@
 					showRelatedLink.innerHTML = "Hide related records";
 					}
 				}
-
-			// this function takes the same search but attemps an asynchronous load of the entire result set
-			function asyncLoadSearchPages(){
-				if (!loadCount || loadCount <=0) return; //nothing to load
-				//find next page to load
-				loadingPage = null;
-				for (var i=1; i <= pageCount; i++){
-					if (!pageXMLs[i]) {
-						loadingPage = i;
-						break;
-					}
-				}
-				if (!loadingPage) { // we are done loading
-					loadCount = 0;
-					return;
-				}
-				//set query limits
-				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (loadingPage-1)*resultsPerPage);
-				var url = hBase + "export/xml/flathml.php"+aquery;
-				var errorMsg = "Error loading " + url + " using XMLHttpRequest";
-				try {
-					aReq = new XMLHttpRequest();
-				} catch (trymicrosoft) {
-					try {
-						aReq = new ActiveXObject("Msxml2.XMLHTTP");
-					} catch (othermicrosoft) {
-						try {
-							aReq = new ActiveXObject("Microsoft.XMLHTTP");
-						} catch (failed) {
-							aReq = false;
-						}
-					}
-				}
-				if (aReq) {
-					try{
-						aReq.open("GET", url, true);
-						aReq.onreadystatechange = updateXMLPages;
-						aReq.send("");
-					}catch(e){
-						alert(errorMsg + " Hint : " + e);
-					}
-				}else{
-					alert("Your browser doesn'tsupport asynch loading. Unable to view complete content.");
-				}
-			}
-
-			function updateXMLPages(){
-				if (aReq.readyState == 4) {
-					if (aReq.status == 404) {
-						alert("Request for full record results failed - URL not found - likely the server is temporarily out of service");
-					} else if (aReq.status != 200) {
-						//alert("Error: loading page "+ loadingPage +" status code is " + aReq.status + " please contact the system administrator.");
-					}else{
-						pageXMLs[loadingPage] = aReq.responseXML;
-						if (currentPage == loadingPage){
-							displayResultPage(curStyle,curPage);
-						}
-						loadCount -= 1;
-						asyncLoadSearchPages(); // try and load the next page
-					}
-				}
-			}
 
 			function objFromArr(arr)
 			{
@@ -519,13 +488,17 @@
 				}else if (top.HEURIST.transforms.byID[transformID]) {
 					curStyle = top.HEURIST.transforms.byID[transformID].label;
 				}else{
-					curStyle = "default";
+					curStyle = "Default view";
 				}
 				top.HEURIST.util.setDisplayPreference("defaultPrintView",curStyle);
 				displayResultDoc(curStyle,xml);
 			}
 
 			function displayResultDoc(style,xmlDoc){
+				if (style == null || style == "") {
+					clearAndDisplayMessage("Please select a transform template");
+					return;
+				}
 				var resultDiv =document.getElementById("displayResult");
 				var xhtmlResultDoc = "";
 				function clearResult(resultDiv) {
@@ -543,7 +516,7 @@
 							var uri = encodeURIComponent(top.HEURIST.transforms.byID[transID].uri);
 							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + uri);
 						}else{
-							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + style);
+							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + styles[style][0]);
 						}
 					}
 					if (!xsls[style]) {
@@ -759,6 +732,7 @@
 									});
 
 			}
+			$(document).ready(function(){initted =true;});
 		</script>
 
 	</head>
