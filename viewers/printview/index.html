@@ -374,14 +374,11 @@
 					selectedIds = [];
 					displayResultPage(curStyle,0);
 				}
-top.JSTraceProfiler.exit("onSelectAll"," normal exit");//REMOVE TEST ONLY
 			}
 
 			var FlatHMLQuery = {'filter':"",'query':"",'maxDepth':0,'selectIDs':""};
 			function onSelectionChange(eventType, argList) {
-top.JSTraceProfiler.entry("onSelectionChange",eventType+" in printview/index.html");//REMOVE TEST ONLY
 				if (parent.document.getElementById("p").className == "yui-hidden") { //if tab not current ignore event
-top.JSTraceProfiler.exit("onSelectionChange"," tab hidden exit");//REMOVE TEST ONLY
 					return false;
 				}else if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
 																// if a level is not loaded then load synch
