@@ -129,7 +129,9 @@ top.HEURIST.search = {
 
 	searchResultsNotify: function(newResults, startIndex) {
 
-		if(!top.HEURIST.search.results) return;
+		if(!top.HEURIST.search.results) {
+			return;
+		}
 
 		var rt,rec, recID;
 		for (var i=0; i < newResults.records.length; ++i) {// save the new results
@@ -150,7 +152,9 @@ top.HEURIST.search = {
 
 		newResults.records = [];	//clear results
 
-		if(!top.HEURIST.search.results) return;
+		if(!top.HEURIST.search.results) {
+			return;
+		}
 
 		var loadedRecCount = top.HEURIST.search.results.infoByDepth[0].count;
 		// check if we've fully loaded the page we were expecting to render
@@ -319,7 +323,6 @@ top.HEURIST.search = {
 		iframeElt.src = top.HEURIST.basePath+"search/getResultsPageAsync.php?" + top.HEURIST.currentQuery_main;
 
 		document.body.appendChild(iframeElt);
-
 	},
 
 	parseLayoutParam: function(layoutString){
@@ -351,14 +354,19 @@ top.HEURIST.search = {
 		return null;
 	},
 
-	setAppState: function(appID,strState,cnt){
+	setAppState: function(appID,strState){
 		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
 		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
 		if(typeof appWin == "object" && appWin.initted && typeof appWin.setState == "function"){
 			appWin.setState.call(appWin,strState);
-		}else if (cnt<5){
-			setTimeout(function(){top.HEURIST.search.setAppState(appID, strState, ++cnt)},1000);
+		}else {
+			strEvent = "heurist-"+tabIDToAppnameMap[appnameToTabIDMap[appID]] +"-app-ready";
+			top.HEURIST.registerEvent(window, strEvent,function(eventType, argList){
+					top.HEURIST.search.setAppState(appID, strState);
+					top.HEURIST.deregisterEvent(window,strEvent);
+			});
 		}
+
 	},
 
 	appRegisterInterface:function(appID,appObj) {
@@ -366,7 +374,8 @@ top.HEURIST.search = {
 	},
 
 	applyFilterAndLayout: function(evt){
-		var i,layoutSrch, layoutNav, layoutApp, layouts, style,
+
+		var i,layoutSrch, layoutNav, layoutApp, layouts, style, activeApp
 			maxFilterDepth=0,
 			maxDepth=0;
 			top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
@@ -375,6 +384,7 @@ top.HEURIST.search = {
 			(	top.HEURIST.parameters['rtfilters'] ||
 				top.HEURIST.parameters['ptrfilters'] ||
 				top.HEURIST.parameters['relfilters'] ||
+				top.HEURIST.parameters['selids'] ||
 				top.HEURIST.parameters['layout'] )) {
 				//calculate max depth of filters
 				if (top.HEURIST.parameters['layout']) {
@@ -392,7 +402,7 @@ top.HEURIST.search = {
 								layoutApp = layouts['app'];
 								break;
 							default:
-								top.HEURIST.search.setAppState(layoutID, layouts[layoutID],0);
+								top.HEURIST.search.setAppState(layoutID, layouts[layoutID]);
 						}
 					}
 				}
@@ -426,16 +436,17 @@ top.HEURIST.search = {
 						if (layoutApp.length>1 && layoutApp[1] && appnameToTabIDMap[layoutApp[1]]){
 							tabID = appnameToTabIDMap[layoutApp[1]];
 							_tabView.selectTab(tabID);
+							activeApp = tabIDToAppnameMap[tabID];
 						}
 					}
 				}
 				//expand to the the max defined by the filter or layout  or by the data
 				maxDepth = Math.min(Math.max((layoutSrch? layoutSrch.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
 				//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
-				if (layoutSrch) {// handle results level separately since there are no links above it.
+				if (layoutSrch) {// handle results level 0 separately since there are no links above it.
 					top.HEURIST.search.setResultStyle(layoutSrch[0][0],0);
 				}
-				//filterRelated results with noPush for loevel 0
+				//filterRelated results with noPush for level 0
 				top.HEURIST.search.filterRelated(0,true,true);
 				for (i=1; i<=maxDepth; i++) {
 					var depthInfo = top.HEURIST.search.results.infoByDepth[i];
@@ -457,6 +468,31 @@ top.HEURIST.search = {
 						$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
 					}
 				}
+				//if selids passed in then we need to set the selection.
+				if (top.HEURIST.parameters['selids']){
+					var selIDs = top.HEURIST.util.expandJsonStructure(top.HEURIST.parameters['selids']);
+					if (selIDs){
+						var lvl,j,recID;
+						for (lvl in selIDs){
+							for (j=0; j<selIDs[lvl].length; j++){
+								recID = selIDs[lvl][j];
+								top.HEURIST.search.toggleResultItemSelect(recID,null,lvl);
+							}
+						}
+					}
+					if (!activeApp){
+						activeApp = tabIDToAppnameMap[_tabView.get("activeIndex")];
+					}
+					strEvent = "heurist-"+activeApp+ (layouts[activeApp] ? "-app-state-set" :"-app-ready");
+					top.HEURIST.registerEvent(window, strEvent,function(eventType, argList){
+							var viewerFrame = document.getElementById("viewer-frame");
+							if(viewerFrame){
+								var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+								var ssel = "selectedIds=" + selectedRecIDs.join(",");
+								top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+							}
+					});
+				}
 				top.HEURIST.search.setSelectedCount();
 				//if there is more depth related records than showing
 				//then load the filters for the next level to show the user that they can load it
@@ -477,8 +513,7 @@ top.HEURIST.search = {
 				if (layout) {
 					delete top.HEURIST.parameters['layout'];
 				}
-			}else{
-				// if filters then load related to depth..
+			}else{// no layouts or filters or selids to suggest openTo level so just show results and level1 Filter header
 				if (top.HEURIST.search.results.infoByDepth.length >1 &&
 						top.HEURIST.search.results.infoByDepth[1].count > 0) {
 					top.HEURIST.search.loadLevelFilter(1);
@@ -1918,7 +1953,7 @@ top.HEURIST.search = {
 		}
 	},
 
-	_initSortBySelector:function(){
+	initSortBySelector:function(){
 		var sortbyValSelect = document.getElementById("sortby-select");
 		sortbyValSelect.onchange = null;
 		var keepVal = sortbyValSelect.value;
@@ -1939,7 +1974,7 @@ top.HEURIST.search = {
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
 
-		var keepVal = top.HEURIST.search._initSortBySelector();
+		var keepVal = top.HEURIST.search.initSortBySelector();
 		var sortbyValSelect = document.getElementById("sortby-select");
 
 		// rectypes displayed in Groups by group display order then by display order within group
@@ -1982,7 +2017,7 @@ top.HEURIST.search = {
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
 
-		var keepVal = top.HEURIST.search._initSortBySelector();
+		var keepVal = top.HEURIST.search.initSortBySelector();
 		var sortbyValSelect = document.getElementById("sortby-select");
 		var grp = document.createElement("optgroup");
 		grp.label = top.HEURIST.rectypes.names[rt]+' fields';
@@ -2079,7 +2114,7 @@ top.HEURIST.search = {
 	selectedRecordDivs: [],
 
 	toggleResultItemSelect: function(recID,resultDiv,level) {
-		if (typeof level === "undefined") {
+		if (typeof level === "undefined") {//default to level 0
 			level = 0;
 		}
 		if (top.HEURIST.search.selectedRecordDivs[level] && top.HEURIST.search.selectedRecordDivs[level][recID] &&
@@ -2093,10 +2128,10 @@ top.HEURIST.search = {
 //			while ($(resultDiv).hasClass("relateSelected")){
 //				$(resultDiv).removeClass("relateSelected");
 //			}
-			if (top.HEURIST.util.getDisplayPreference("autoSelectRelated") != "true"){
+			if (top.HEURIST.util.getDisplayPreference("autoSelectRelated") != "true"){// if not autoselect then mark linkselect
 				$(".link"+recID,$("#results")).addClass("linkSelected");
 			}else{// mark all related records
-				//for each related record mark as relateSelected and add them into the selected array
+				//for each related record not selected mark as relateSelected and add them into the selected array
 				$(".link"+recID+":not(.selected)",$("#results")).each(function(){
 					var div = $(this);
 					var relRecID = div.attr("recid");
@@ -2281,7 +2316,7 @@ top.HEURIST.search = {
 
 			oMenu.cfg.setProperty("context",
 					[e.target, "bl", "bl"]);
-    		oMenu.show();
+			oMenu.show();
 		}
 	},
 
@@ -3001,10 +3036,16 @@ top.HEURIST.search = {
 				alert("Selected record count is great than 500, opening the first 500 records!");
 				recIDs = recIDs.slice(0,500);
 			}
+			var strLayout = top.HEURIST.search.getLayoutString();
+			if (strLayout.length > 1) {
+				strLayout = "&" + strLayout[1];
+			}else{
+				strLayout = "";
+			}
 			var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
 				recIDs.join(",") +
 				'&stype='+(p['stype'] || "") +
-				'&db='+(p['db'] || "");
+				'&db='+(p['db'] || "") + strLayout;
 			window.open(top.HEURIST.basePath+'search/search.html'+query_string,"_blank");
 	},
 	//old map version

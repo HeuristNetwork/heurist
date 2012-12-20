@@ -199,6 +199,7 @@
 				}else{
 
 				}
+				top.HEURIST.fireEvent(top,"heurist-transform-app-ready");
 			}
 
 			function getState(){
@@ -225,6 +226,7 @@
 						}
 					}
 				}
+				top.HEURIST.fireEvent(top,"heurist-transform-app-state-set");
 			}
 
 
@@ -256,7 +258,9 @@
 					var xmlRecDepth1 = loadXMLDocFromFile(top.HEURIST.baseURL+
 										"export/xml/flathml.php?q=ids:"+recID+"&depth=1&woot=1"+
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:""));
-					if (!xmlRecDepth1) return;
+					if (!xmlRecDepth1) {
+						return;
+					}
 					if (!relatedRecListXSL) {
 						relatedRecListXSL = loadXMLDocFromFile("xsl/relatedRecList.xsl");
 					}
