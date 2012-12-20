@@ -449,6 +449,9 @@ top.HEURIST.search = {
 				top.HEURIST.search.filterRelated(0,true,true);
 				for (i=1; i<=maxDepth; i++) {
 					var depthInfo = top.HEURIST.search.results.infoByDepth[i];
+					if (depthInfo.count == 0) {
+						break;
+					}
 					//loadLevelFilter Menu
 					top.HEURIST.search.loadLevelFilter(i,(layoutSrch && layoutSrch[i] && layoutSrch[i][0] ? layoutSrch[i][0]: null));
 					//loadRelatedLevel results
@@ -2829,8 +2832,7 @@ top.HEURIST.search = {
 	//
 	executeQuery: function(squery) {
 
-		if(!top.HEURIST.util.isempty(squery))
-		{
+		if(!top.HEURIST.util.isempty(squery)) {
 			function __getParam(name){
 				var result = top.HEURIST.util.getUrlParameter(name, squery);
 				if( result == null ) {
@@ -2844,6 +2846,7 @@ top.HEURIST.search = {
 			top.HEURIST.parameters['ptrfilters'] = __getParam("ptrfilters");
 			top.HEURIST.parameters['relfilters'] = __getParam("relfilters");
 			top.HEURIST.parameters['layout'] = __getParam("layout");
+			top.HEURIST.parameters['selids'] = __getParam("selids");
 
 			var q = __getParam("q");
 			if(top.HEURIST.util.isempty(q)){
