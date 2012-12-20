@@ -355,18 +355,18 @@ top.HEURIST.search = {
 	},
 
 	setAppState: function(appID,strState){
+		function setAppStateHandler(eventType, argList){
+					top.HEURIST.search.setAppState(appID, strState);
+					top.HEURIST.deregisterEvent(window,strEvent,setAppStateHandler);
+				};
 		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
 		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
-		if(typeof appWin == "object" && appWin.initted && typeof appWin.setState == "function"){
+		if(typeof appWin == "object"&& appWin.initted && typeof appWin.setState == "function"){
 			appWin.setState.call(appWin,strState);
-		}else {
+		}else{
 			strEvent = "heurist-"+tabIDToAppnameMap[appnameToTabIDMap[appID]] +"-app-ready";
-			top.HEURIST.registerEvent(window, strEvent,function(eventType, argList){
-					top.HEURIST.search.setAppState(appID, strState);
-					top.HEURIST.deregisterEvent(window,strEvent);
-			});
+			top.HEURIST.registerEvent(window, strEvent,setAppStateHandler);
 		}
-
 	},
 
 	appRegisterInterface:function(appID,appObj) {
@@ -374,7 +374,6 @@ top.HEURIST.search = {
 	},
 
 	applyFilterAndLayout: function(evt){
-
 		var i,layoutSrch, layoutNav, layoutApp, layouts, style, activeApp
 			maxFilterDepth=0,
 			maxDepth=0;
@@ -402,7 +401,7 @@ top.HEURIST.search = {
 								layoutApp = layouts['app'];
 								break;
 							default:
-								top.HEURIST.search.setAppState(layoutID, layouts[layoutID]);
+								setTimeout(function(){top.HEURIST.search.setAppState(layoutID, layouts[layoutID]);},50);
 						}
 					}
 				}
@@ -472,6 +471,7 @@ top.HEURIST.search = {
 				if (top.HEURIST.parameters['selids']){
 					var selIDs = top.HEURIST.util.expandJsonStructure(top.HEURIST.parameters['selids']);
 					if (selIDs){
+						top.HEURIST.search.deselectAll(false);
 						var lvl,j,recID;
 						for (lvl in selIDs){
 							for (j=0; j<selIDs[lvl].length; j++){
@@ -480,19 +480,19 @@ top.HEURIST.search = {
 							}
 						}
 					}
-					if (!activeApp){
-						activeApp = tabIDToAppnameMap[_tabView.get("activeIndex")];
-					}
-					strEvent = "heurist-"+activeApp+ (layouts[activeApp] ? "-app-state-set" :"-app-ready");
-					top.HEURIST.registerEvent(window, strEvent,function(eventType, argList){
-							var viewerFrame = document.getElementById("viewer-frame");
-							if(viewerFrame){
-								var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
-								var ssel = "selectedIds=" + selectedRecIDs.join(",");
-								top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-							}
-					});
 				}
+				if (!activeApp){
+					activeApp = tabIDToAppnameMap[_tabView.get("activeIndex")];
+				}
+				strEvent = "heurist-"+activeApp+ (layouts && layouts[activeApp] ? "-app-state-set" :"-app-ready");
+				top.HEURIST.registerEvent(window, strEvent,function(eventType, argList){
+						var viewerFrame = document.getElementById("viewer-frame");
+						if(viewerFrame){
+							var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+							var ssel = "selectedIds=" + selectedRecIDs.join(",");
+							top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+						}
+					});
 				top.HEURIST.search.setSelectedCount();
 				//if there is more depth related records than showing
 				//then load the filters for the next level to show the user that they can load it
@@ -512,6 +512,9 @@ top.HEURIST.search = {
 				}
 				if (layout) {
 					delete top.HEURIST.parameters['layout'];
+				}
+				if (selIDs) {
+					delete top.HEURIST.parameters['selids'];
 				}
 			}else{// no layouts or filters or selids to suggest openTo level so just show results and level1 Filter header
 				if (top.HEURIST.search.results.infoByDepth.length >1 &&
@@ -2188,11 +2191,11 @@ top.HEURIST.search = {
 					}
 				});
 			}
-			for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
-				if (top.HEURIST.search.selectedRecordIds[level][i] == recID) {
-					top.HEURIST.search.selectedRecordIds[level].splice(i,1);
-					return true; // signal that we remove the id from selected ids
-				}
+		}
+		for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
+			if (top.HEURIST.search.selectedRecordIds[level][i] == recID) {
+				top.HEURIST.search.selectedRecordIds[level].splice(i,1);
+				return true; // signal that we remove the id from selected ids
 			}
 		}
 		return false;
@@ -3388,7 +3391,7 @@ top.HEURIST.search = {
 
 	deselectAll: function(fireEvent) {
 //		_tabView.set('activeIndex', 0); //set printView tab before deselecting to avoid mapping error
-		if (!top.HEURIST.search.selectedRecordIds || top.HEURIST.search.selectedRecordIds.length == 0) return false;
+		if (!top.HEURIST || !top.HEURIST.search || !top.HEURIST.search.selectedRecordIds || top.HEURIST.search.selectedRecordIds.length == 0) return false;
 		var level = 0;
 		for (level; level < top.HEURIST.search.selectedRecordIds.length; level++) {
 			while (top.HEURIST.search.selectedRecordIds[level] && top.HEURIST.search.selectedRecordIds[level].length != 0 ) {
@@ -3399,7 +3402,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.setSelectedCount();
 
 		var viewerFrame = document.getElementById("viewer-frame");
-		if(viewerFrame){
+		if(fireEvent && viewerFrame){
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		}
 
