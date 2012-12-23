@@ -312,7 +312,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 						newIframe.contentWindow.popupOpener = parentWindow;	// make a persistent reference to the popup opener
 						newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
 
-						top.HEURIST.util.setHelpDiv(helpDiv);
+						top.HEURIST.util.setHelpDiv(helpDiv,null);
 					} catch (e) { }	// might get cross-domain woes
 				});
 
@@ -959,35 +959,47 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 
-	setDisplayPreference: function(prefName, val, win, replacementRegExp, noframes, noclass) {
+	setDisplayPreference: function(prefName, value, win, replacementRegExps, noframes, noclass) {
 		// set display preference in all windows below win; save preferences too
 		// The third and fourth arguments are for recursion: don't use them externally.
-		var prefs , vals, i,
+		var prefs , vals, i,prefChngs = [], newVals = []
 			prefString = "";
+		if (typeof prefName == "string"){//single pref variable call convert to array for code below
+			prefs = [prefName];
+			vals = [value];
+		}else{
+			prefs = prefName;
+			vals = value;
+		}
+
 		if ( top.HEURIST.util.isnull(win) ) { //SAW ARE there any nested calls????
 			// top-level stuff
-//			replacementRegExp = new RegExp('$');
+			replacementRegExps = [];
 
 			if (! top.HEURIST.displayPreferences) {	// hmm ... displayPreferences.php didn't load
 								// we can wing it for now
 				top.HEURIST.displayPreferences = {};
 			}
-			if (typeof prefName == "string"){//single pref variable call convert to array for code below
-				prefs = [prefName];
-				vals = [val];
-			}else{
-				prefs = prefName;
-				vals = val;
-			}
+
 			for (i=0; i<prefs.length; i++){
 				if (top.HEURIST.displayPreferences[prefs[i]] && top.HEURIST.displayPreferences[prefs[i]] == vals[i]) {
+					if (top.document.body.className.search(prefs[i])== -1){//if it's not already in the class list
+						prefChngs.push(prefs[i]);
+						newVals.push(vals[i]);
+						replacementRegExps.push(new RegExp('$'));
+					}else{
 						continue;	// we already have that value
+					}
 				}else{
 					prefString += '&' + encodeURIComponent(prefs[i]) + '=' + encodeURIComponent(vals[i]);
+					prefChngs.push(prefs[i]);
+					newVals.push(vals[i]);
+					replacementRegExps.push(new RegExp('(^|\\s+)'+ prefs[i] + '-' + top.HEURIST.displayPreferences[prefs[i]] + '(\\s+|$)|^$'));
+					top.HEURIST.displayPreferences[prefs[i]] = vals[i];
 				}
 			}
-
-//			top.HEURIST.displayPreferences[prefName] = val;
+			prefs = prefChngs;
+			vals = newVals;
 			if (prefString){
 				top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
 										'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
@@ -996,19 +1008,24 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			}
 			win = top;
 		}
-		if (!noclass && ! (val+"").match(/\s/)) {
-			if (win.document.body.className.search(prefName)== -1){
-				win.document.body.className = win.document.body.className + ' '+prefName+'-'+val+' ';
-			}else{
-				win.document.body.className = win.document.body.className.replace(replacementRegExp, ' '+prefName+'-'+val+' ');
+
+		if (!noclass){
+			for (i=0; i<prefs.length; i++){
+				if (!(vals[i]+"").match(/\s/)) {//if pref value is not blank
+					if (win.document.body.className.search(prefs[i])== -1){//if it's not already in the class list
+						win.document.body.className = win.document.body.className + ' '+prefs[i]+'-'+vals[i]+' ';
+					}else{
+						win.document.body.className = win.document.body.className.replace(replacementRegExps[i], ' '+prefs[i]+'-'+vals[i]+' ');
+					}
+				}
 			}
 		}
 
-		if (!noframes) {
+		if (!noframes && prefs.length) {
 			for (var i=0; i < win.frames.length; ++i) {
 				try {
 					// some frames may be from another domain, e.g. addthis
-					top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp, false, noclass);
+					top.HEURIST.util.setDisplayPreference(prefs, vals, win.frames[i], replacementRegExps, false, noclass);
 				} catch (e) { }
 			}
 		}
@@ -1373,41 +1390,34 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		return otherMatches;
 	},
 
-    setHelpDiv: function(helpDiv){
+	setHelpDiv: function(helpDiv, helpStatus){
 
-        var helpStatus = (top.HEURIST.displayPreferences)?top.HEURIST.util.getDisplayPreference("help"):null;
-        if(top.HEURIST.util.isempty(helpStatus)){
-			helpStatus = "show";
+		if (!helpStatus) {
+			helpStatus = (top.HEURIST.displayPreferences && top.HEURIST.util.getDisplayPreference("help"))?top.HEURIST.util.getDisplayPreference("help"):"show";
 		}
 
-        if(!top.HEURIST.util.isnull(helpDiv))
-        {
-                var alts_2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
-                var alts_1 = { "hide": "Show Help", "show": "Hide Help"}; //"<span>Show Help</span>", "show": "<span>Hide Help</span>" };
+		if(!top.HEURIST.util.isnull(helpDiv))
+			{
+			var alts_2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
+			var alts_1 = { "hide": "Show Help", "show": "Hide Help"}; //"<span>Show Help</span>", "show": "<span>Hide Help</span>" };
 
-               	helpDiv.title = alts_2[helpStatus];
-               	helpDiv.innerHTML = alts_1[helpStatus];
-        }
+			helpDiv.title = alts_2[helpStatus];
+			helpDiv.innerHTML = alts_1[helpStatus];
+		}
 
 		//init class for body element
-		top.HEURIST.displayPreferences["help"] =  helpStatus=="show"?"hide":"show";
 		top.HEURIST.util.setDisplayPreference("help", helpStatus);
-    },
+	},
 
 	helpToggler: function(helpDiv) {
-		var u = top.HEURIST.util;
-		var helpStatus = u.getDisplayPreference("help");
+		var helpStatus = top.HEURIST.util.getDisplayPreference("help");
 
 		if (helpStatus === "hide") {
-			top.HEURIST.displayPreferences["help"] =  "show";
-			//u.setDisplayPreference("help", "show");
+			helpStatus =  "show";
+		}else {
+			helpStatus =  "hide";
 		}
-		else {
-			top.HEURIST.displayPreferences["help"] =  "hide";
-			//u.setDisplayPreference("help", "hide");
-		}
-
-        u.setHelpDiv(helpDiv);
+		top.HEURIST.util.setHelpDiv(helpDiv,helpStatus);
 	},
 
 	countObjElements: function(obj) {
@@ -1519,7 +1529,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var termName,
 				termCode,
 				arrterm = [];
-			
+
 			for(termID in termSubTree) { // For every term in 'term'
 				termName = "";
 				termCode = "";
@@ -1535,22 +1545,22 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 
 				if(top.HEURIST.util.isempty(termName)) continue;
-				
+
 				arrterm.push([termID, termName, termCode]);
 			}
-			
+
 			//sort by name
 			arrterm.sort(function (a,b){
 				return a[1]<b[1]?-1:1;
 			});
-			
-			var i=0, cnt= arrterm.length;	
+
+			var i=0, cnt= arrterm.length;
 			for(;i<cnt;i++) { // For every term in 'term'
-			
+
 				termID = arrterm[i][0];
 				termName = arrterm[i][1];
 				termCode = arrterm[i][2];
-			
+
 				if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
 					//for non mozilla add manual indent
 					var a = new Array(depth*2);

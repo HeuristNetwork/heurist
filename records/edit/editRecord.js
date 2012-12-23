@@ -112,7 +112,7 @@ top.HEURIST.edit = {
 					newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
 
 					var helpLink = top.document.getElementById("help-link");
-      				top.HEURIST.util.setHelpDiv(helpLink);
+					top.HEURIST.util.setHelpDiv(helpLink,null);
 				} catch (e) { }
 			});
 
@@ -1171,7 +1171,7 @@ top.HEURIST.edit = {
 				{
 					if (date) {
 						dateBox.value = date;
-						dateBox.style.width = '14ex';				
+						dateBox.style.width = '14ex';
 
 						dateBox.strTemporal = "";
 						dateBox.disabled = false;
@@ -1269,7 +1269,7 @@ top.HEURIST.edit = {
 		dateBox.initVal = dateBox.value;
 		if (dateBox.value) {
 			disableCtrls(isTemporal(dateBox.value));
-			
+
 			if (dateBox.value.search(/\|VER/) != -1){
 				dateBox.strTemporal = dateBox.value;
 			}else{
@@ -1277,20 +1277,20 @@ top.HEURIST.edit = {
 			}
 			dateBox.value = temporalToHumanReadableString(dateBox.value);
 		}
-		dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';				
-		
+		dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
+
 		var popupOptions = {
 			callback: function(str) {
 				if(str!==undefined){
-					
+
 					disableCtrls(isTemporal(str));
-					
+
 					if( dateBox.strTemporal != str) {
 						windowRef.changed();
 					}
 					dateBox.strTemporal = str;
 					dateBox.value = temporalToHumanReadableString(str);
-					dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';				
+					dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
 					if( dateBox.strTemporal != dateBox.value) {
 						buttonElt.title = "Edit temporal " + dateBox.strTemporal;
 					}
@@ -1820,9 +1820,9 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 			if (bibID) element.input.setResource(element, bibID, bibTitle);
 			thisRef.choosing = false;
 			setTimeout(function() { element.textElt.focus(); }, 100);
-            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"));
+			top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 		},
-        height: (window.innerHeight<700?window.innerHeight-40:660)
+		height: (window.innerHeight<700?window.innerHeight-40:660)
 	} );
 };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.clearResource = function(element) { this.setResource(element, 0, ""); };
