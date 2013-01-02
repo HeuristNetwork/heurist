@@ -42,24 +42,22 @@
 
 		var q_elt = document.getElementById('q');
 
-		var snippet;
-
-/*		if (elt.name == 'sortby') {
-			var repeat_elt = document.getElementById('sortby_multiple');
-			var repeat_elt_label = document.getElementById('sortby_multiple_label');
-			if (elt.options[elt.selectedIndex].value.substr(0, 2) == 'f:') {
-				repeat_elt.disabled = false;
-				// repeat_elt_label.innerHTML = 'Ignore duplicate ' + elt.options[elt.selectedIndex].text + ' fields';
-				repeat_elt_label.style.color = 'black';
-			} else {
-				repeat_elt.disabled = true;
-				repeat_elt.checked = false;
-				// repeat_elt_label.innerHTML = 'Ignore duplicate detail fields';
-				repeat_elt_label.style.color = 'gray';
-			}
+		if(elt.name == 'wgtag'){
+			elt = document.getElementById('tag');
 		}
-*/
-		if (elt.name === "type") {
+
+		var snippet,
+			eltname = elt.name,
+			eltvalue = elt.value;
+
+		if(eltname == 'tag'){
+			var elt2 = document.getElementById('wgtag')
+			if(elt2.selectedIndex>0){
+				var tag = elt2.value;
+				if (tag.indexOf(' ')) tag = '"' + tag + '"';
+				eltvalue = eltvalue + ' ' + tag;
+			}
+		}else if (eltname === "type") {
 			// update the list of record-type-specific bib-detail-types
 			var typeOptgroup = document.getElementById("rectype-specific-fields");
 			var typeSelect = document.getElementById("fieldtype");
@@ -97,15 +95,16 @@
 		}
 
 
-		if (elt.value) {
-			if (elt.name == 'field') {
+		if (eltvalue) {
+
+			if (eltname == 'field') {
 				var ft_elt = document.getElementById('fieldtype');
 				if (ft_elt.selectedIndex == 0)
-				snippet = HQuery.makeQuerySnippet('all', elt.value);
+					snippet = HQuery.makeQuerySnippet('all', eltvalue);
 				else
-				snippet = HQuery.makeQuerySnippet('field:'+ft_elt.options[ft_elt.selectedIndex].value, elt.value);
+					snippet = HQuery.makeQuerySnippet('field:'+ft_elt.options[ft_elt.selectedIndex].value, eltvalue);
 
-			} else if (elt.name == 'fieldtype') {
+			} else if (eltname == 'fieldtype') {
 				var field_elt = document.getElementById('field');
 				if (field_elt.value == '') return;
 				if (elt.selectedIndex == 0)
@@ -113,27 +112,27 @@
 				else
 				snippet = HQuery.makeQuerySnippet('field:'+elt.options[elt.selectedIndex].value, field_elt.value);
 
-			} else if (elt.name == 'sortby') {
-//				if (elt.value.match(/^f:|^field:/)) {
-//					var sortby_field = document.getElementById('ascdesc').value + elt.value + (document.getElementById('sortby_multiple').checked? '' : ':m');
-//					snippet = HQuery.makeQuerySnippet(elt.name, sortby_field);
+			} else if (eltname == 'sortby') {
+//				if (eltvalue.match(/^f:|^field:/)) {
+//					var sortby_field = document.getElementById('ascdesc').value + eltvalue + (document.getElementById('sortby_multiple').checked? '' : ':m');
+//					snippet = HQuery.makeQuerySnippet(eltname, sortby_field);
 //				} else {
-					snippet = HQuery.makeQuerySnippet(elt.name, document.getElementById('ascdesc').value + elt.value);
+					snippet = HQuery.makeQuerySnippet(eltname, document.getElementById('ascdesc').value + eltvalue);
 //				}
 
 			} else {
-				snippet = HQuery.makeQuerySnippet(elt.name, elt.value);
+				snippet = HQuery.makeQuerySnippet(eltname, eltvalue);
 			}
 		} else {
 			snippet = '';
 		}
 
-		if (snippet == last_vals[elt.name]  &&  q_elt.value.indexOf(snippet) >= 0) return;
+		if (snippet == last_vals[eltname]  &&  q_elt.value.indexOf(snippet) >= 0) return;
 
 		var new_q_val;
-		if (last_vals[elt.name]  &&  elt.name != 'fieldtype') {
+		if (last_vals[eltname]  &&  eltname != 'fieldtype') {
 			// attempt to replace the existing value for this field with the new value
-			new_q_val = (' '+q_elt.value).replace(last_vals[elt.name], snippet);
+			new_q_val = (' '+q_elt.value).replace(last_vals[eltname], snippet);
 
 			// if we couldn't find the existing value, then just concatenate the snippet
 			if (new_q_val == (' '+q_elt.value)) { new_q_val = q_elt.value + ' ' + snippet; }
@@ -160,8 +159,8 @@
 			new_q_val = new_q_val.replace(snippet, 'AND '+snippet);
 		}
 
-		last_vals[elt.name] = snippet;
-		if (elt.name == 'fieldtype') last_vals['field'] = '';
+		last_vals[eltname] = snippet;
+		if (eltname == 'fieldtype') last_vals['field'] = '';
 		q_elt.value = new_q_val.replace(/^\s*AND\b|\bAND\s*$|\bAND\s+(?=AND\b)/g, '').replace(/^\s+|\s+$/g, '');
 	}
 
@@ -288,20 +287,10 @@
 		return true;
 	}
 
-
-	function add_tag(tag) {
-		if (tag.indexOf(' ')) tag = '"' + tag + '"';
-
-		var q_elt = document.getElementById('q');
-		if (q_elt.value) q_elt.value += ' ';
-		q_elt.value += 'tag:' + tag;
-	}
-
-
 	var filterTimeout = 0;
 	function invoke_refilter() {
 		if (filterTimeout) clearTimeout(filterTimeout);
-		filterTimeout = setTimeout(refilter_usernames, 50);
+		filterTimeout = setTimeout(refilter_usernames, 250);
 	}
 
 	function refilter_usernames() {
@@ -327,7 +316,7 @@
 
 		var num_matches = 0;
 		var first_match = 0;
-		for (var i=1; i < all_user_elt.options.length; ++i) {
+		for (var i=0; i < all_user_elt.options.length; ++i) {
 			if (all_user_elt.options[i].text.toLowerCase().indexOf(user_search_val) >= 0) {
 				user_elt.options[user_elt.options.length] = new Option('\xA0'+all_user_elt.options[i].text, all_user_elt.options[i].value);
 				++num_matches;
@@ -539,8 +528,8 @@
 				if (mysql_num_rows($res) > 0) {
 				?>
 				<span style="padding-left:28px;">or</span>
-				<select id="wgtag" onChange="if (selectedIndex) add_tag(options[selectedIndex].value);" style="width: 200px;">
-					<option value="" selected disabled>(select...)</option>
+				<select id="wgtag" name="wgtag" onChange="update(this);" onKeyPress="return keypress(event);" style="width: 200px;">
+					<option value="" selected>(select...)</option>
 					<?php		while ($row = mysql_fetch_row($res)) {	?>
 						<option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
 						<?php		}	?>
@@ -551,7 +540,7 @@
 				<?php
 					}
 			?>
-			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('tag');" class="button" title="Add to Search">Add</button>
+			<button type="button" style="visibility:visible; float: right;" onClick="{add_to_search('tag');}" class="button" title="Add to Search">Add</button>
 		</div>
 
 		<div class="advanced-search-row">
@@ -619,7 +608,9 @@
 			</select>
 			<select name="users_all" id="users_all" style="display: none;">
 				<?php
-					$res = mysql_query('select '.USERS_ID_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_TABLE.' left join '.USER_GROUPS_TABLE.' on '.USER_GROUPS_USER_ID_FIELD.'='.USERS_ID_FIELD.' where '.USERS_ACTIVE_FIELD.' = "Y" and '.USER_GROUPS_GROUP_ID_FIELD.'=2 order by fullname');
+					$query = 'select '.USERS_ID_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_TABLE.
+					' where '.USERS_ACTIVE_FIELD.' = "Y" and '.GROUPS_TYPE_FIELD.'="user" order by fullname';
+					$res = mysql_query($query);
 					while ($row = mysql_fetch_row($res)) {
 						print '<option value="&quot;'.htmlspecialchars($row[1]).'&quot;">'.htmlspecialchars($row[1]).'</option>'."\n";
 					}
