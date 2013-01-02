@@ -5,6 +5,7 @@
     width:130px;
     height:290px;
     font-size:0.8em;
+    border:1px solid #000000;
 }
 #presenter {
     opacity:0.7;

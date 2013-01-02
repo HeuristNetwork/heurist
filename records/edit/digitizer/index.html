@@ -32,14 +32,10 @@
 
 </head>
 
-<body id="body" width="780" height="600" style="margin: 5px; padding: 0; overflow:hidden;" onload="initmap('map_digitizer')">
+<body id="body" width="780" height="600" class="popup" style="margin: 5px; padding: 0; overflow:hidden;" onload="initmap('map_digitizer')">
 
-<!-- TEMP for testing
-<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
 <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 <script src="../../../common/php/displayPreferences.php"></script>
-<script src="../../../common/php/loadCommonInfo.php"></script>
--->
 
 <div style="width:100%;">
     <div id="middlerow" style="float:left;">
@@ -49,16 +45,16 @@
 	    </form>
 
 			<label>Background:</label>
-			<select id="cbLayers" style="width:180px;display:inline-block;" onchange="loadLayer(event)"></select>
+			<select id="cbLayers" style="border:1px solid #000000;width:180px;display:inline-block;" onchange="loadLayer(event)"></select>
 
 
 	        <div style="display:none;">
-	        <input type="button" onclick="mapcenter();" value="Mapcenter"/>
-	        <input type="text" style="width:140px; border: 1px solid #000000;" id="centerofmap" />
-	        Zoom level:
-	        <input type="text" size="5" name="myzoom" id="myzoom" value="12" style="width:15px; border: 1px solid #000000;" />
+	        	<input type="button" onclick="mapcenter();" value="Mapcenter"/>
+	        	<input type="text" style="width:140px; border: 1px solid #000000;" id="centerofmap" />
+	        	Zoom level:
+	        	<input type="text" size="5" name="myzoom" id="myzoom" value="12" style="width:15px; border: 1px solid #000000;" />
 	        </div>
-        </form>
+
     </div>
 </div>
 
@@ -66,8 +62,7 @@
 
 <div id="buttonrow" style="width:135px;float:right">
 
-	<form style="float:left;text-align:left;" action="#">
-	<select id="over" style="width:130px; margin-left: 5px; border:0px solid #000000;">
+	<select id="over" style="width:130px; margin-left: 5px; border:1px solid #000000;">
 		<option>Long, Lat</option>
 		<option selected="selected">Lat, Long</option>
 	</select>
@@ -96,21 +91,21 @@
         <input type="button" id="btnDelLastPoint" onclick="deleteLastPoint();"
         	value="Delete Last" style="width:130px;visibility:hidden;"/>
     </div>
- 
+
     <div class="topbutton">
         <input type="button" id="btnEditPoly" onclick="editlines();" value="Edit shape"
         	style="width:130px;visibility:hidden;"/>
     </div>
- 
+
     <div class="topbutton">
         <input type="button" onclick="clearMap();" value="Clear Shape" style="width:130px;"/>
     </div>
 
-   
-    <div> 
+
+    <div>
     	&nbsp;
     </div>
-    
+
     <div class="topbutton">
 
 <textarea id="coords1" cols="2" rows="2">
@@ -121,6 +116,9 @@ Click on the map. The code for the shape you create will be presented here.
     <div class="topbutton">
  	   <input type="button" id="btnSaveChanges" style="width:130px;" value="Apply coords" onclick="applyManualEntry();"
  	   			title="Type in coordinates into text area above and click this button to apply changes"/>
+    </div>
+    <div class="help prompt" style="padding:4px;">
+    	Click to mark, press and drag to move map
     </div>
 
     <!-- this buttons not used -->
