@@ -20,7 +20,7 @@ var g_dtIDsCheckbox = null;
 var g_detailTypes = [];
 var g_recType = null;
 var g_recTypeLoaded;
-
+var g_usedQuery = null;
 
 var g_exportMap = [];
 var g_exportMapNames = [];
@@ -185,9 +185,10 @@ function getRecords() {
 		return;
 	}
 
-	if (!g_recType || (g_recType != g_recTypeLoaded))
+	if (!g_recType || (g_recType != g_recTypeLoaded) || (document.getElementById("queryInput").value!=g_usedQuery))
 	{
-		var myQuery = "type:" + g_recTypeSelect.value + " " + document.getElementById("queryInput").value;
+		g_usedQuery = document.getElementById("queryInput").value;
+		var myQuery = "type:" + g_recTypeSelect.value + " " + g_usedQuery;
 
 		var loader = new HLoader(
 			function(s,r) {
@@ -214,21 +215,32 @@ function extractURL(urlinclude){
 	}
 }
 
+//remove textarea for multiple exports
+function clearOutput(){
+	if(document.getElementById("queryInput").value!=g_usedQuery){
+		var e = document.getElementById("records-p");
+		removeChildren(e);
+		var elres = document.getElementById('results');
+		elres.innerHTML = "";
+	}
+}
+
 function refreshRecordData(){
+	//var recDisplay = e.appendChild(document.createElement("textarea"));
 	showRecordData(g_records);
 }
 
 
 function showRecordData(hRecords) {
 
-
 	g_delimiterSelect = document.getElementById('delimiterSelect');
 	var strDelim = g_delimiterSelect.value;
 	var strRowTerm = "\n";
 
 	var e = document.getElementById("records-p");
-	//remove textarea for multiple exports
 	removeChildren(e);
+
+	var e = document.getElementById("records-p");
 
 	if(g_exportMapNames.length<1 && hRecords.length<1){
 		return;
