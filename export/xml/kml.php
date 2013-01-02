@@ -13,6 +13,7 @@ require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
@@ -72,7 +73,7 @@ if(!$islist){
 print "<?xml version='1.0' encoding='UTF-8'?>\n";
 print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
 print '<Document>';
-print '<name>Export from Heurist</name>';
+print '<name>Export from Heurist 3</name>';
 
 /*
 2. create new KML output that contains placemarks created from WKT and links to heurist's uploaded kml files
@@ -80,13 +81,20 @@ print '<name>Export from Heurist</name>';
 if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
 		// for wkt
-		$squery = "select rec_ID, rec_URL, rec_Title, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo ";
-		$ourwhere = " and (dtl_RecID=rec_ID) and (dtl_Geo is not null ".(defined('DT_KML')?" or dtl_DetailTypeID=".DT_KML:"").")";
+		$squery = "select rec_ID, rec_URL, rec_Title, d0.dtl_DetailTypeID, d0.dtl_Value, if(d0.dtl_Geo is null, null, asText(d0.dtl_Geo)) as dtl_Geo, ".
+					"d1.dtl_Value as Date0, d2.dtl_Value as DateStart, d3.dtl_Value as DateEnd ";
+		$ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".(defined('DT_KML')?" or d0.dtl_DetailTypeID=".DT_KML:"").")";
+
+		$detTable =
+		" left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".(defined('DT_DATE')?DT_DATE:"0").
+		" left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".(defined('DT_START_DATE')?DT_START_DATE:"0").
+		" left join recDetails d3 on d3.dtl_RecID=rec_ID and d3.dtl_DetailTypeID=".(defined('DT_END_DATE')?DT_END_DATE:"0").
+		", recDetails d0";
 
 		//for kml
 		$squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
 		$ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").(defined('DT_FILE_RESOURCE')?" or (dtl_DetailTypeID = ".DT_FILE_RESOURCE." AND ulf_MimeExt='kml'))":")");
-		$detTable = "recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
+		$detTable2 = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
 		$isSearchKml = defined('DT_KML_FILE') || defined('DT_FILE_RESOURCE');
 
@@ -103,25 +111,23 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 					$limit = 1000; //default limit in dispPreferences
 			}
 
-			$squery = prepareQuery($squery, $search_type, "recDetails", $ourwhere, $limit);
+			$squery = prepareQuery($squery, $search_type, $detTable, $ourwhere, $limit);
 			if($isSearchKml){
-				$squery2 = prepareQuery($squery2, $search_type, $detTable, $ourwhere2, $limit);
+				$squery2 = prepareQuery($squery2, $search_type, $detTable2, $ourwhere2, $limit);
 			}
 
 
 		}else{
-			$squery = $squery." from Records, recDetails where rec_ID=".$_REQUEST["id"].$ourwhere;
-			$squery2 = $squery2." from Records,".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere2;
+			$squery = $squery." from Records ".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere;
+			$squery2 = $squery2." from Records ".$detTable2." where rec_ID=".$_REQUEST["id"].$ourwhere2;
 		}
 
-/*****DEBUG****///
-error_log("1.>>>>".$squery);
+/*****DEBUG****///error_log("1.>>>>".$squery);
 
 		$res = mysql_query($squery);
 		$wkt_reccount = mysql_num_rows($res);
 
-/*****DEBUG****///
-error_log("2.>>>>".$wkt_reccount);
+/*****DEBUG****///error_log("2.>>>>".$wkt_reccount);
 
 /*****DEBUG****///error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
 		if($isSearchKml){
@@ -145,6 +151,25 @@ error_log("2.>>>>".$wkt_reccount);
 						$kml = $geom->out('kml');
 						if($kml){
 							print '<Placemark>';
+
+							//timestap or timespan
+							if($row[6] || $row[7] || $row[8]){
+								$d1 = temporalToSimple($row[6]);
+								$d2 = temporalToSimple($row[7]); //start
+								$d3 = temporalToSimple($row[8]); //end date
+								if($d1 || ($d2 && $d3==null)){
+									if($d1==null){
+										 $d1 = $d2;
+									}
+										print "<TimeStamp><when>".$d1."</when></TimeStamp>";
+
+								}else{
+									if($d2 && $d3){
+  										print "<TimeSpan><begin>".$d2."</begin><end>".$d3."</end></TimeSpan>";
+									}
+								}
+							}
+
 							print '<name>'.$row[2].'</name>';
 							if($row[1]){
   								print '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
@@ -198,7 +223,7 @@ function prepareQuery($squery, $search_type, $detailsTable, $where, $limit)
 			}
 
 			//$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
-			$squery = preg_replace('/ where /', ", ".$detailsTable." where ", $squery, 1);
+			$squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
 
 			//add our where clause and limit
 			$squery = $squery.$where." limit ".$limit;

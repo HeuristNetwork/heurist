@@ -104,4 +104,47 @@ function convertDurationToDelta($value,$prefix = "") {
 	}
 }
 
+/**
+* simplify temporal to simple date
+*
+* @param mixed $value
+*/
+function temporalToSimple($value){
+		if ($value && strpos($value,"|")!==false) {// temporal encoded date
+			$value2 = $value;
+			$tDate = array();
+			$props = explode("|",substr_replace($value2,"",0,1)); // remove first verticle bar and create array
+			foreach ($props as $prop) {//create an assoc array
+				list($tag, $val) = explode("=",$prop);
+				$tDate[$tag] = $val;
+			}
+			switch ($tDate["TYP"]){
+				case 's'://simple
+				case 'f'://fuzzy
+					if (@$tDate['DAT']){
+						$value = $tDate['DAT'];
+					}else{
+						$value = null;
+					}
+					break;
+				case 'c'://carbon
+					$value = null;
+					break;
+				case 'p'://probability range
+					if (@$tDate['PDB'] && @$tDate['PDE']){
+						$value = "".$tDate['PDB'];
+					}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
+						$value = "".$tDate['TPQ'];
+					}else{
+						$value = null;
+					}
+					break;
+			}
+		}
+		if($value && strlen($value)>10 && strpos($value," ")==10){
+				$value = substr_replace($value,"T",10,1);
+		}
+		return $value;
+}
+
 ?>
