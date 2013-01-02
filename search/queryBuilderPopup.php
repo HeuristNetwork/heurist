@@ -432,7 +432,7 @@
 		<div class="advanced-search-row" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 			<b>Search&nbsp;string</b>
 			<div class="searchInput" style="position:relative; display:inline-block;">
-				<input id=q name=q type=text style="width:600;">
+				<input id=q name=q type=text style="width:600;border: none;">
 			</div>
 			<button id="btnSearch" type="button" onClick="do_search();" class="button">Search</button>
 
@@ -526,7 +526,6 @@
 					<?php
 						}
 				?>
-				</optgroup>
 			</select>
 
 			<button type="button" style="visibility:visible; float: right;" onClick="add_to_search('type');" class="button" title="Add to Search">Add</button>

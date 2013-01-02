@@ -2972,7 +2972,7 @@ top.HEURIST.search = {
 
 		return false;
 	},
-	launchAdvancedSearch: function() {
+	launchAdvancedSearch: function(event) {
 		top.HEURIST.util.stopEvent(event);
 
 		var q = document.getElementById("q").value;
