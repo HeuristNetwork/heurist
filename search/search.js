@@ -2852,6 +2852,7 @@ top.HEURIST.search = {
 			if(top.HEURIST.util.isempty(q)){
 				top.HEURIST.search.applyFilterAndLayout(null);
 			}else{
+				q = decodeURIComponent(q);
 				top.HEURIST.parameters["q"] = document.getElementById("q").value = q;
 
 				var w = __getParam("w");
@@ -3511,6 +3512,9 @@ top.HEURIST.search = {
 			recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 			bkmkIDs_list = top.HEURIST.search.getSelectedBkmIDs().get();
 		}
+		if(recIDs_list.length == 1){
+			recID = recIDs_list[0];
+		}
 
 
 		var hasRecordsNotBkmkd = false;
@@ -3523,8 +3527,9 @@ top.HEURIST.search = {
 			hasRecordsNotBkmkd = true;
 		}
 		top.HEURIST.util.popupURL(window,
-					top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.html?show-remove" +
-					(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
+					top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.php?show-remove" +
+					(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "") +
+					(recID?"&recid="+recID:""),
 					{ callback:
 
 						function(add, tags) {//options

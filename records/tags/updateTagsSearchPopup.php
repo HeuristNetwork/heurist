@@ -1,7 +1,10 @@
-<!--
+<?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * updateTagsSearchPopup.php
+ *
+ * used in search.js to add or remove tags for given list of records.
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -9,7 +12,23 @@
  * @todo
  **/
 
--->
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+
+$tags = null;
+
+//error_log(">>>>>".$_REQUEST['recid']);
+
+if(@$_REQUEST['recid']){
+
+	$rec_ID = $_REQUEST['recid'];
+
+	$tags = mysql__select_array('usrRecTagLinks, usrTags',
+									'tag_Text',
+									"rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = ".
+									get_user_id()." order by rtl_Order");
+}
+?>
 <html>
   <head>
   <link rel=stylesheet href="../../common/css/autocomplete.css">
@@ -25,22 +44,42 @@
    </style>
   </head>
   <body class="popup" width=450 height=260>
-<script src="../../common/js/utilsLoad.js"></script> 
-<script src="../../common/php/displayPreferences.php"></script> 
+<script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/displayPreferences.php"></script>
 <script src="autocompleteTags.js"></script>
 
 <div id="no-tags" style="display: none;">
     <div class="prompt" style="font-weight: bold; padding: 1em; border: 1px solid black; margin: 1em 1em 0 1em;"> You don't have any personal tags set for this record.  Tags are optional, but useful. </div>
 </div>
 <div>
-    <div class="prompt"> Type as many tags as you like, separated by commas.<BR>
-    Tags may contain spaces.<BR>
+    <div class="help prompt"> Type as many tags as you like, separated by commas.<br/>
+    Tags may contain spaces.<br/>
     New tags are added automatically and are specific to each user. </div>
 </div>
+<?php
+	if($tags && count($tags)>0){
+?>
+    <div class="input-row" style="color: #6A7C99;font-weight:bold;">
+        <h3>Tags:&nbsp&nbsp</h3>
+
+        <!--<div class="input-header-cell"><h3>Tags</h3></div>
+        <div class="input-cell" id="divCurrentTags"></div>-->
+<?php
+			for ($i=0; $i < count($tags); ++$i) {
+				$tag = $tags[$i];
+				if ($i > 0) print ',&nbsp;';
+				print htmlspecialchars($tags[$i]);
+			}
+?>
+
+    </div>
+<?php
+	}
+?>
 <form onSubmit="window.close(true, $('#tags').val()); return false;">
-    <div class="input-row" style="margin:20px 0">
-        <div class="input-header-cell"><h2>Tags</h2></div>
-        <div class="input-cell">
+    <div class="input-row">
+        <div class="input-header-cell"><strong>Tags to add or remove</strong></div>
+        <div class="input-cell" style="min-width:250px">
         	<input id="tags" name="tagString" type="text">
         	<!--<input type="button" value="Save" style="display:none">-->
         </div>
@@ -48,7 +87,7 @@
 </form>
 <div id="top-tags-cell">
 	<span class="prompt">Top:</span>
-        <a href="#" class="add-tag-link" onClick="addTag('Favourites'); return false;">Favourites</a> <a href="#" class="add-tag-link" onClick="addTag('To Read'); return false;">To Read</a> | </div>
+        <a href="#" class="add-tag-link" onClick="addTag('Favourites'); return false;">Favourites</a> <a href="#" class="add-tag-link" onClick="addTag('To Read'); return false;">To Read</a> |
 </div>
 <div id="recent-tags-cell">
     	<span class="prompt">Recent:</span>
@@ -61,11 +100,11 @@
 	<input type=button value="add tags" id=add-button>
     <input type=button value="remove tags" id=remove-button>
 </div>
-    
+
 <script>
 if (location.search.match(/no-tags/))	// only show the no-tags row if requested
 	document.getElementById("no-tags").style.display = "";
-</script> 
+</script>
 
 <script>
 

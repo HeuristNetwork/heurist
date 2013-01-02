@@ -98,7 +98,7 @@ if ($tags) {
 											. (in_array($tag, $my_kwds) ? '<b>'.htmlspecialchars($tag).'</b>' : htmlspecialchars($tag))
 											. "</a>&nbsp;</td>\n";
 
-		$kwd_list .= "  <td>\n";
+		$kwd_list .= "  <td style=\"vertical-align: top;\">\n";
 		$res = mysql_query('select usr.ugr_ID, concat(usr.ugr_FirstName," ",usr.ugr_LastName) as bkmk_user
 							from usrBookmarks
 							left join usrRecTagLinks on bkm_RecID=rtl_RecID
