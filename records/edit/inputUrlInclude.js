@@ -262,6 +262,11 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 				}
 
 			}
+			var helpDiv = document.getElementById("help-link");
+			if(helpDiv) {
+				top.HEURIST.util.setHelpDiv(helpDiv,null);
+			}
+
 			return true; //prevent close
 
 

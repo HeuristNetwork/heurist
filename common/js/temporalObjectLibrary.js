@@ -1002,7 +1002,7 @@ TDate.parse = function () {
 
 		//2 special cases
 		if("today"===str.toLowerCase()){
-			
+
 			var date = new Date();
 			var d = date.getDate();
     		var m = date.getMonth()+1;
@@ -1688,16 +1688,17 @@ var TDuration = function (strDuration) {
 function isTemporal(str) {
 
 	var res = false;
-	
+
 	if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 		res = true;
 
 		if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
-			
+
 		}else if (str.search(/TYP=s/) != -1 ) {
 			if (str.match(/DAT=([^\|]+)/)) {
 				if (str.search(/COM=[^\|]+/) == -1) {
-					res = false;
+					var dt = str.match(/DAT=([^\|]+)/)[1];
+					res = (dt.length!=10);
 				}
 			}else if (str.search(/COM=[^\|]+/) != -1) {
 				res = false;
@@ -1708,7 +1709,7 @@ function isTemporal(str) {
 }
 
 /**
-* 
+*
 */
 function temporalToHumanReadableString(inputStr) {
 			var str = inputStr;

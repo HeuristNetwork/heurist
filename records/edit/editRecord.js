@@ -365,6 +365,8 @@ top.HEURIST.edit = {
 						personalWindow.document.getElementById("tags").value = tags;
 						top.HEURIST.edit.changed("personal");
 					}
+					top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+
 					setTimeout(function() { top.HEURIST.edit.save(); }, 0);
 					} });
 				return;
@@ -1189,7 +1191,7 @@ top.HEURIST.edit = {
 					if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
 						date = top.HEURIST.util.getDisplayPreference("record-edit-date");
 					}
-					top.HEURIST.edit.calendarViewer.showAt([buttonElt.offsetLeft, buttonElt.offsetTop+120], date, callback); //offsetLeft-120
+					top.HEURIST.edit.calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback); //offsetLeft-120
 				}
 
 		return buttonElt;
@@ -1295,6 +1297,7 @@ top.HEURIST.edit = {
 						buttonElt.title = "Edit temporal " + dateBox.strTemporal;
 					}
 				}
+				top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 			},
 			width: "700",
 			height: "500"
@@ -2051,6 +2054,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 						_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
 					*/
 				}
+				top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 		}
 
 
@@ -2073,6 +2077,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 					if(context=="ok") {
 						onSelecTermsUpdate(sAllTerms, "");
 					}
+					top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 				}
 			});
 
@@ -2427,27 +2432,20 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
 				return;
 			}
-/*
-			HAPI.PJ.store("gigitiser_geo_object", input.value, {
-				callback: function(_, _, response) {
-					top.HEURIST.util.popupURL(
-						windowRef,
-						"gigitiser/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
-						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
-					);
-				}
-			});
-*/
+
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 					height: 550,
 					width: 780,
 					callback: function(_, _, response) {
+
+					var sURL = top.HEURIST.basePath+"/records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
 					top.HEURIST.util.popupURL(
 						windowRef,
-						top.HEURIST.basePath+"/records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),
+						sURL,
 						{ callback: function(type, value)
 								{
 									thisRef.setGeo(newDiv, value? (type+" "+value) : "");
+									top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 								}
 						}
 					);

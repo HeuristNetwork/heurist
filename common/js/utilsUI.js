@@ -1004,8 +1004,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					top.HEURIST.displayPreferences[prefs[i]] = vals[i];
 				}
 			}
-			prefs = prefChngs;
-			vals = newVals;
+			//ART prefs = prefChngs;
+			//ART vals = newVals;
 			if (prefString){
 				top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
 										'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
@@ -1396,6 +1396,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		return otherMatches;
 	},
 
+	/**
+	* set the label for help div, save preference and update class for body element
+	*/
 	setHelpDiv: function(helpDiv, helpStatus){
 
 		if (!helpStatus) {
@@ -1711,6 +1714,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		return [posx, posy];
 	},
+
+ 	getOffset: function(obj) {
+
+			var x = y = 0;
+			while (obj) {
+				x += obj.offsetLeft;
+				y += obj.offsetTop;
+				obj = obj.offsetParent;
+			}
+			return [x, y];
+ 	},
 
 	/**
 	* Adjusts the position of div to prevent it out of border

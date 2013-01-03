@@ -373,7 +373,7 @@
 					date = top.HEURIST.util.getDisplayPreference("record-edit-date");
 				}
 
-				calendarViewer.showAt([buttonElt.offsetLeft-120, buttonElt.offsetTop], date, callback);
+				calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback);
 			}
 
 			function setPDBtoTPQ () {

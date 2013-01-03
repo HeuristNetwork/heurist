@@ -720,7 +720,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 .input-cell .resource-div .file-resource-div, .delete-resource{
 	cursor: pointer;
 	margin-left: 2px;
-	background-image: url('../images/cross.png');
+	background-image: url('../images/cross-grey.png');
 	background-repeat: no-repeat;
 }
 .file-resource-div.empty .delete-resource, .resource-div.empty .delete-resource, .resource-div.empty .edit-resource {
@@ -768,7 +768,7 @@ td.input-cell.readonly img.edit-resource {
 	vertical-align: middle;
 	border: 0;
 	cursor: pointer;
-	background-image: url(../images/cross.png);
+	background-image: url(../images/cross-grey.png);
 }
 .input-cell .geo-div {
 	display: block;
