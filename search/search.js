@@ -3700,9 +3700,22 @@ top.HEURIST.search = {
 			alert("Select at least one record to delete");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "actions/deleteRecordsPopup.php?ids="+recIDs_list.join(",")+
-					("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))));
+		top.HEURIST.util.popupURL(window, "actions/deleteRecordsPopup.php?db="+ //			ids="+recIDs_list.join(",")+
+					(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")),
+					{
+						onpopupload: function(frame){
+							var ele = frame.contentDocument.getElementById("ids");
+							ele.value = recIDs_list.join(",");
+							frame.contentDocument.forms[0].submit();
+						},
+						callback: function(context) {
+							if (context==="reload") { //no tags added
+								top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
+							}
+						}
+					}
+						);
 	},
 
 	/*

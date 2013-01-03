@@ -143,6 +143,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		 *   "close-on-blur": true   ... close the window if the user clicks outside it
 		 *   width / height          ... pixel sizes for the width and height of the window
 		 *   x / y                   ... pixel positions left and top for the window (resp. right and bottom if they are negative)
+		 *   onpopupload: finction() .. a function to call on popup load complete
 		 */
 
 		if (! options) options = {};
@@ -313,6 +314,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 						newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
 
 						top.HEURIST.util.setHelpDiv(helpDiv,null);
+
+						if(options["onpopupload"]){
+							options["onpopupload"].apply(parentWindow, [newIframe]);
+						}
+
 					} catch (e) { }	// might get cross-domain woes
 				});
 
