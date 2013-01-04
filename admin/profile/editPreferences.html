@@ -27,6 +27,9 @@
 
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
+
+	var mybkm, agg, navi, favsrch;
+
 	function showPreferences() {
 		document.getElementById("results-per-page").value
 			= top.HEURIST.util.getDisplayPreference("results-per-page");
@@ -45,7 +48,7 @@
 		var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
 		document.getElementById("defaultMyBookmarksSearch").checked
 			= (bkm==='true');
-        var mybkm = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
+        mybkm = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
         document.getElementById("showMyBookmarks").checked = (mybkm!=='false');
 		var asr = top.HEURIST.util.getDisplayPreference("autoSelectRelated"); // auto select related records (one level for now)
 		document.getElementById("autoSelectRelated").checked
@@ -57,13 +60,13 @@
         var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
         document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
 
-        var agg = top.HEURIST.util.getDisplayPreference("showAggregations");
+        agg = top.HEURIST.util.getDisplayPreference("showAggregations");
         document.getElementById("showAggregations").checked = (agg!=='false');
 
-        var navi = top.HEURIST.util.getDisplayPreference("showNavMenuAlways");
+        navi = top.HEURIST.util.getDisplayPreference("showNavMenuAlways");
         document.getElementById("showNavMenuAlways").checked = (navi!=='false');
 
-        var favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
+        favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
         document.getElementById("showFavouritesSearch").checked = (favsrch!=='false');
 
 		var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
@@ -75,19 +78,18 @@
 	}
 
 	function save() {
+		var reload_nav = false;
+		var reload_menu = false;
+
 		var rpp = parseInt(document.getElementById("results-per-page").value);
 		var def = document.getElementById("defaultSearch").value;
 		var fav = document.getElementById("favourites").value;
 		var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
 		var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
 		var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
-        var mybkm = (document.getElementById("showMyBookmarks").checked)?'true':'false';
 		var asr = (document.getElementById("autoSelectRelated").checked)?'true':'false';
 		var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
         var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
-        var agg = (document.getElementById("showAggregations").checked)?'true':'false';
-        var navi = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
-        var favsrch = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
         var showquery = (document.getElementById("showSearchQueryInBrowser").checked)?'true':'false';
 
 
@@ -107,8 +109,45 @@
 			}
 		}
 
+		var new_val = (document.getElementById("showMyBookmarks").checked)?'true':'false';
+        if(mybkm != new_val){
+        	reload_nav = true;
+        	mybkm = new_val;
+		}
+        new_val = (document.getElementById("showAggregations").checked)?'true':'false';
+        if(agg != new_val){
+        	reload_nav = true;
+        	agg = new_val;
+		}
+        new_val = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
+        if(navi != new_val){
+        	reload_menu = true;
+        	navi = new_val;
+		}
+        new_val = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
+        if(favsrch != new_val){
+        	reload_nav = true;
+        	favsrch = new_val;
+		}
 
-		top.HEURIST.util.setDisplayPreference("results-per-page", rpp);
+		top.HEURIST.util.setDisplayPreference(["results-per-page",
+		"defaultSearch",
+		"favourites",
+		"loadRelatedOnSearch",
+		"defaultRecentPointerSearch",
+		"defaultMyBookmarksSearch",
+		"showMyBookmarks",
+		"autoSelectRelated",
+		"autoDeselectOtherLevels",
+		"tagging-popup",
+		"showAggregations",
+		"showNavMenuAlways",
+		"showFavouritesSearch",
+		"report-output-limit",
+		"searchQueryInBrowser"],
+		[rpp,def,fav,rel,rec,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery]);
+
+		/*
 		top.HEURIST.util.setDisplayPreference("defaultSearch", def);
 		top.HEURIST.util.setDisplayPreference("favourites", fav);
 		top.HEURIST.util.setDisplayPreference("loadRelatedOnSearch", rel);
@@ -123,6 +162,18 @@
         top.HEURIST.util.setDisplayPreference("showFavouritesSearch", favsrch);
         top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
         top.HEURIST.util.setDisplayPreference("searchQueryInBrowser", showquery);
+        */
+
+		//update underlaying search UI
+		if(top.HEURIST.search){
+			if(reload_nav){
+				top.HEURIST.search.show_hideItemsInNavigation();
+			}
+			if(reload_menu){
+				top.HEURIST.search.show_hideNavigationMenu();
+			}
+
+		}
 		window.close();
 	}
   </script>

@@ -512,11 +512,11 @@ img a:link {border: none;}
 #home-link a:hover {text-decoration:none;text-shadow:0 0px 0px rgba(0, 0, 0, 0.5);}
 #message, #message a {font-size:21px;font-weight: bold;color: #FFFF98;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);}
 #message a {color: #DDFFFF;}
-a#dbSearch-link div#dbname {font-size:14px;font-weight:bold;color: #FFF;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);text-transform: none;font-style: italic;left:221px;position:absolute;top:20px; background-image:url(../images/b_database.png); background-repeat:no-repeat; background-position: 2px  50%; padding:4px 2px 2px 26px}
-a#dbSearch-link div#dbname span {text-transform: uppercase; color:#DBDFE6}
-a#dbSearch-link div#dbname a {font-size:14px;color: #FFF;}
-a#dbSearch-link div#dbname:hover, a#dbsearch-link:hover {text-decoration:none;}
-a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,100,100,0.6);
+a#dbSearch-link #dbname{font-size:14px;font-weight:bold;color: #FFF;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);text-transform: none;font-style: italic;left:221px;position:absolute;top:20px; background-image:url(../images/b_database.png); background-repeat:no-repeat; background-position: 2px  50%; padding:4px 2px 2px 26px}
+a#dbSearch-link #dbname span {text-transform: uppercase; color:#DBDFE6}
+a#dbSearch-link #dbname a {font-size:14px;color: #FFF;}
+a#dbSearch-link #dbname:hover, a#dbsearch-link:hover {text-decoration:none;}
+a#dbSearch-link #dbname:hover {padding-right:10px; background-color:RGBA(100,100,100,0.6);
 	-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;
 	-webkit-box-shadow:inset  0 1px 3px #666;-moz-box-shadow:inset  0 1px 3px #666;box-shadow:inset  0 1px 3px #666;
 	background-image:url(../images/b_databasePressed.png);}
@@ -855,6 +855,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 ul li ul div.separator {
 	padding:5px;
 	border-top:1px solid #666;
+	color:#ffffff;
 }
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 

@@ -171,11 +171,13 @@
 
 
 <div id="masthead">
-			<a id=home-link><div id=logo title="Click the database logo at top left of any Heurist page to return to your Favourites"></div></a>
+			<a id=home-link><span id=logo title="Click the database logo at top left of any Heurist page to return to your Favourites"></span></a>
 
 			<div id=version></div>
 			<!-- database name -->
-			<a id=dbSearch-link><div id=dbname ></div></a>
+
+			<a id="dbSearch-link"><span id="dbname"></span></a>
+
 			<!-- message of the day -->
 			<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve White, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br>
 			<font style="font-size:11px;">Credits</font></a> </div>
@@ -189,7 +191,7 @@
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu">
 
-							<div class="separator">PROFILE</div>
+							<li><div class="separator">PROFILE</div></li>
 
 							<li><a href="../admin/profile/editPreferences.html" class="portrait" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
@@ -203,7 +205,7 @@
 							<li><a href="../export/backup/exportMyDataPopup.php" name="auto-popup" class="small"
 									title="Retreives and writes all the data in the database that you own or have bookmarked, including attached files, to a ZIP file">Export my data</a></li>
 
-							<div class="separator">ACCESS</div>
+							<li><div class="separator">ACCESS</div></li>
 
 							<li><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
 								title="List of groups you are member of">My User Groups</a></li>
@@ -226,13 +228,13 @@
 					<li class="logged-in-only" style="width:60px;"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
 
-							<div class="separator">DATABASE</div>
+							<li><div class="separator">DATABASE</div></li>
 
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait"
 								title="Navigate to and login to another Heurist database">
 								Open (new window)</a></li>
 
-							<div class="separator">IMPORT</div>
+							<li><div class="separator">IMPORT</div></li>
 							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
 								title="Import data from delimited text for one record type at a time" target="_blank">
@@ -258,7 +260,7 @@
 								title="Import web links from a browser bookmarks file or an html web page file">
 								Hyperlinks</a></li>
 
-							<div class="separator">EXPORT</div>
+							<li><div class="separator">EXPORT</div></li>
 
 							<li style="padding-left:15px;">Selection</li>
 
@@ -291,7 +293,7 @@
 								title="Export records as delimited text">
 								CSV</a></li>
 
-							<div class="separator">MANAGE</div>
+							<li><div class="separator">MANAGE</div></li>
 
 							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
 								title="Click to refresh the internal working memory of Heurist" >

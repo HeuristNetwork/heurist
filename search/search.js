@@ -4554,23 +4554,35 @@ top.HEURIST.search = {
 
 		if(!document.getElementById("divAggLink1"))return; //Artem: if not-logged in the elements below are not created
 
-		var isShowAggregations = top.HEURIST.util.getDisplayPreference("showAggregations");
-		if(isShowAggregations=="false"){
-			document.getElementById("divAggLink1").style.display ="none";
-			document.getElementById("divAggLink2").style.display ="none";
-		}
-
-		var isShowMyBookmarks = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
-		if(isShowMyBookmarks=="false"){
-			document.getElementById("my-records-saved-searches").style.display ="none";
-		}
-
-		var isShowFavouritesSearch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
-		if(isShowFavouritesSearch=="false"){
-			document.getElementById("divFavLink").style.display ="none";
-		}
+		top.HEURIST.search.show_hideItemsInNavigation();
 
 	},
+
+	show_hideItemsInNavigation: function() {
+		var isShowAggregations = (top.HEURIST.util.getDisplayPreference("showAggregations")=="true");
+		document.getElementById("divAggLink1").style.display = (isShowAggregations)?"block":"none";
+		document.getElementById("divAggLink2").style.display = (isShowAggregations)?"block":"none";
+
+		var isShowMyBookmarks = (top.HEURIST.util.getDisplayPreference("showMyBookmarks")=="true");
+		document.getElementById("my-records-saved-searches").style.display = (isShowMyBookmarks)?"block":"none";
+
+		var isShowFavouritesSearch = (top.HEURIST.util.getDisplayPreference("showFavouritesSearch")=="true");
+		document.getElementById("divFavLink").style.display = (isShowFavouritesSearch)?"block":"none";
+
+	},
+
+	show_hideNavigationMenu: function(){
+		var status = top.HEURIST.util.getDisplayPreference("sidebarPanel");
+		if (status == "closed"){
+			//display navigation as menu
+			document.getElementById("menuNavigation").style.display = 'block';
+		}else{
+			if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){//hide navigation menu
+				document.getElementById("menuNavigation").style.display = 'none';
+			}
+		}
+	},
+
 
 	_rolloverInfo:null,
 
@@ -4666,8 +4678,6 @@ function layoutNavPanel(isToggle,newWidth){
 		navButton.style.width = "20px";
 		navButton.title = "Show Navigation Panel";
 		document.getElementById("formSearch").style.paddingLeft = "5px";
-		//display navigation as menu
-		document.getElementById("menuNavigation").style.display = 'block';
 	}else{
 		layout.getUnitByPosition('left').expand();
 		navButton.className = navButton.className.replace(" closed", "");
@@ -4677,11 +4687,9 @@ function layoutNavPanel(isToggle,newWidth){
 		navButton.style.width = leftPos-1;
 		//adjust search form so it is above center (result) panel
 		document.getElementById("formSearch").style.paddingLeft = (leftPos<120)?5:leftPos-120;
-		if(top.HEURIST.util.getDisplayPreference("showNavMenuAlways")=="false"){//hide navigation menu
-			document.getElementById("menuNavigation").style.display = 'none';
-		}
 	}
 	top.HEURIST.util.setDisplayPreference(["oldLeftWidth","sidebarPanel"], [oldLeftWidth,status], null, null, true, true);
+	top.HEURIST.search.show_hideNavigationMenu();
 	layout.resize();
 }
 //top.HEURIST.layout.toggleNavPanel = toggleNavPanel;
