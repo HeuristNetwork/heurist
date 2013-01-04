@@ -23,14 +23,14 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 			switch ($tDate["TYP"]){
 				case 's'://simple
 					if (@$tDate['DAT']){
-						$value = $tDate['DAT'];
+						$value = removeLeadingYearZeroes($tDate['DAT']);
 					}else{
 						$value = "unknown temporal format";
 					}
 					break;
 				case 'f'://fuzzy
 					if (@$tDate['DAT']){
-						$value = $tDate['DAT'] .
+						$value = removeLeadingYearZeroes($tDate['DAT']) .
 									($tDate['RNG']? ' ' . convertDurationToDelta($tDate['RNG'],'±'):"");
 					}else{
 						$value = "unknown fuzzy temporal format";
@@ -50,9 +50,9 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 					break;
 				case 'p'://probability range
 					if (@$tDate['PDB'] && @$tDate['PDE']){
-						$value = "" . $tDate['PDB']." - ". $tDate['PDE'];
+						$value = "" . removeLeadingYearZeroes($tDate['PDB'])." - ". removeLeadingYearZeroes($tDate['PDE']);
 					}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
-						$value = "" . $tDate['TPQ']." - ". $tDate['TAQ'];
+						$value = "" . removeLeadingYearZeroes($tDate['TPQ'])." - ". removeLeadingYearZeroes($tDate['TAQ']);
 					}else{
 						$value = "unknown probability range temporal format";
 					}
@@ -61,6 +61,8 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 			if($showoriginal_temporal){
 				$value .= " [ $value2 ]";
 			}
+		}else{
+			$value = removeLeadingYearZeroes($value);
 		}
 
 		return $value;
@@ -69,19 +71,83 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 //
 //
 //
-function convertDurationToDelta($value,$prefix = "") {
-	if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
-		$date = @$matches[1];
-		$time = @$matches[2];
+function removeLeadingYearZeroes($value){
+
+	$date = parseDateTime($value);
+
+	if($date){
+
+		$res = "";
+		$isbce = false;
+
+		if(@$date['year']){
+
+			$isbce= ($date['year']<0);
+
+			/*$res = intval($res);
+			if($res==0 || $isbce){
+				$isbce = true;
+				$res = abs($res + 1);
+			}*/
+			$res = "".abs($date['year']);
+		}
+		if(@$date['month']){
+			$res = $res."-".$date['month'];
+		}
+		if(@$date['day']){
+			$res = $res."-".$date['day'];
+		}
+		if(@$date['hour']){
+			$res = $res." ".$date['hour'];
+		}
+		if(@$date['minute']){
+			$res = $res.":".$date['minute'];
+		}
+		if(@$date['second']){
+			$res = $res.":".$date['second'];
+		}
+		if($isbce){
+			$res = $res." BCE";
+		}
+		return $res;
+	}else{
+		return $value;
+	}
+}
+
+//
+//
+//
+function parseDateTime($value) {
+	$isbce= (strpos($value,"-")===0);
+	if($isbce){
+		$value = substr($value,1);
+	}
+
+	//if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
+
+	if($value && strlen($value)>10 && strpos($value,"T")>0){
+		$matches = explode("T",$value);
+	}else if($value && strlen($value)>10 && strpos($value," ")>0){
+		$matches = explode(" ",$value);
+	}else{
+		$matches = array();
+		$matches[0] = $value;
+	}
+
+		$date = @$matches[0];
+		$time = @$matches[1];
+		$res = array();
+
 		if ($date) {
 			if (preg_match('/[YMD]/',$date)){ //char separated version 6Y5M8D
 				preg_match('/(?:(\d+)Y)?(?:(\d|0\d|1[012])M)?(?:(0?[1-9]|[12]\d|3[01])D)?/',$date,$matches);
 			}else{ //delimited version  0004-12-06
 				preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/',$date,$matches);
 			}
-			if (@$matches[1]) $year = intval($matches[1]);
-			if (@$matches[2]) $month = intval($matches[2]);
-			if (@$matches[3]) $day = intval($matches[3]);
+			if (@$matches[1]) $res['year'] = intval($matches[1])*($isbce?-1:1);
+			if (@$matches[2]) $res['month'] = intval($matches[2]);
+			if (@$matches[3]) $res['day'] = intval($matches[3]);
 		}
 		if ($time) {
 			if (preg_match('/[HMS]/',$time)){ //char separated version 6H5M8S
@@ -89,23 +155,30 @@ function convertDurationToDelta($value,$prefix = "") {
 			}else{ //delimited version  23:59:59
 				preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
 			}
-			if (@$matches[1]) $hour = intval($matches[1]);
-			if (@$matches[2]) $minute = intval($matches[2]);
-			if (@$matches[3]) $second = intval($matches[3]);
+			if (@$matches[1]) $res['hour'] = intval($matches[1]);
+			if (@$matches[2]) $res['minute'] = intval($matches[2]);
+			if (@$matches[3]) $res['second'] = intval($matches[3]);
 		}
-		return (@$year ? "$prefix" + $year + "year(s)" :
-				@$month ? "$prefix" + $month + "month(s)" :
-				@$day ? "$prefix" + $day + "day(s)" :
-				@$hour ? "$prefix" + $hour + "hour(s)" :
-				@$minute ? "$prefix" + $minute + "minute(s)" :
-				@$second ? "$prefix" + $second + "second(s)" :
+
+		return count($res)?$res:null;
+}
+function convertDurationToDelta($value,$prefix = "") {
+	$date = parseDateTime($value);
+	if ($date) { // valid ISO Duration split into date and time
+
+		return (@$date['year'] ? "$prefix".$date['year'] :
+				@$date['month'] ? "$prefix".$date['month'] :
+				@$date['day'] ? "$prefix".$date['day'] :
+				@$date['hour'] ? "$prefix".$date['hour'] :
+				@$date['minute'] ? "$prefix".$date['minute'] :
+				@$date['second'] ? "$prefix".$date['second'] :
 				"");
 
 	}
 }
 
 /**
-* simplify temporal to simple date
+* simplify temporal to simple date (for kml export)
 *
 * @param mixed $value
 */
@@ -141,6 +214,7 @@ function temporalToSimple($value){
 					break;
 			}
 		}
+		//ART - @todo rewrite - it is ugly!!!
 		if($value && strlen($value)>10 && strpos($value," ")==10){
 				$value = substr_replace($value,"T",10,1);
 		}

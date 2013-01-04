@@ -43,6 +43,7 @@
  * Various other utility functions starting with _title_mask__ may be ignored and are unlikely to invade your namespaces.
  */
 
+require_once('Temporal.php');
 
 //mysql_connection_db_select(DATABASE);
 
@@ -542,6 +543,9 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id)
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = '1 geographic object';
 		} else if ($rdt_type == 'date') {	/* handle date objects specially */
 			$str = trim($rd['dtl_Value']);
+
+			$str = temporalToHumanReadableString($str);
+/*
 			if (strlen($str) > 0 && preg_match("/\|VER/",$str)) { // we have a temporal
 				preg_match("/TYP=([s|p|c|f|d])/",$str,$typ);
 				switch  ($typ[1]) {
@@ -561,7 +565,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id)
 						$pdb = (count($pdb)>1 && $pdb[1]) ? $pdb[1] :($tpq ? $tpq:"");
 						preg_match("/PDE=([^\|]+)/",$str,$pde);
 						$pde = (count($pde)>1 && $pde[1]) ? $pde[1] :($taq ? $taq:"");
-						$str = "(" . $pdb . " – " . $pde . ")";
+						$str = $pdb . " – " . $pde;
 						break;
 					case 'c': //c14 date
 						preg_match("/BCE=([^\|]+)/",$str,$bce);
@@ -585,13 +589,13 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id)
 //						error_log("title mask match rng - ".print_r($rng,true));
 						$units = ($rng[2] ? ($rng[2]=="Y" ? "year" : ($rng[2]=="M" ? "month" : ($rng[2]=="D" ? "day" :""))): "");
 						$rng = ($rng && $rng[1] ? " ± " . $rng[1] . " " . ($units ? $units . ($rng[1]>1 ? "s":""):""): "");
-						$str = "(" . $dat . $rng . ")";
+						$str = $dat . $rng;
 						break;
 					default:
 						$str = "temporal encoded time";
 				}
 			}
-
+*/
 			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] .=', ' . $str;
 			else

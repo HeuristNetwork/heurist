@@ -659,7 +659,9 @@ top.HEURIST.search = {
 
 		// create  view Style menu
 		var viewStyleMenu = document.createElement("li");
-		viewStyleMenu.className = "view";
+		if(level>0) {
+			viewStyleMenu.className = "view-for-related";
+		}
 		viewStyleMenu.innerHTML = '<span>View</span>'+
 									'<ul>'+
 										'<li><a href="#" class="list" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'list\','+level+');">1 column</a></li>'+
@@ -675,6 +677,7 @@ top.HEURIST.search = {
 
 		//create rectype filter menu
 		if (levelRecTypes){
+
 			var j;
 			var rtNames = $.map(levelRecTypes, function(recIDs,rtID) {
 								return (top.HEURIST.rectypes.names[rtID] ? "" + top.HEURIST.rectypes.names[rtID] + ":" + rtID : null);

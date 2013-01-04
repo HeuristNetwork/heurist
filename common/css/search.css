@@ -1872,6 +1872,10 @@ div.recorddiv:hover {
 	position:absolute;
 	right:0;
 }
+.view-for-related ul{
+	position:absolute;
+	left:0;
+}
 .filter ul.menu li, .filter ul.menu li a {
 	color: #999;
 }

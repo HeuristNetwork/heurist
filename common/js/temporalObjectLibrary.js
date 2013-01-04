@@ -1698,7 +1698,7 @@ function isTemporal(str) {
 			if (str.match(/DAT=([^\|]+)/)) {
 				if (str.search(/COM=[^\|]+/) == -1) {
 					var dt = str.match(/DAT=([^\|]+)/)[1];
-					res = (dt.length!=10);
+					res = (dt.length>10);
 				}
 			}else if (str.search(/COM=[^\|]+/) != -1) {
 				res = false;

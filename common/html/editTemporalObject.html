@@ -674,7 +674,12 @@
 							return _tabView;
 						},
 						close : function () {
-							_updateTemporalFromUI(that.curTemporal);
+							try{
+								_updateTemporalFromUI(that.curTemporal);
+							}catch(e) {	// save string in COM field and keep an empty simple date temporal
+								alert(e);
+								return;
+							}
 							var validity = Temporal.checkValidity(that.curTemporal);
 							if (validity[0]) {  // valid temporal
 								if (validity[2]) { //some extra code fields, so remove them
