@@ -23,6 +23,7 @@ FlexImport = (function () {
 	fields: [],
 	lineHashes: {},
 	columnCount: 0,
+	quote: '"',
 	hasHeaderRow: false,
 	recTypeSelect: null,
 	recTypeSelectSavedMapping: null,
@@ -133,41 +134,41 @@ FlexImport = (function () {
 		FlexImport.showProgress();
 		setTimeout(function() {
 
-		if (this.quote == "'") {
-			lineRegex = new RegExp(terminator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
-			fieldRegex = new RegExp(separator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
-		} else {
-			lineRegex = new RegExp(terminator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
-			fieldRegex = new RegExp(separator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
-		}
-		doubleQuoteRegex = new RegExp(this.quote + this.quote, "g");
-
-		var lines = txt.split(lineRegex);
-		var i, l = lines.length, k = 0;
-		for (i = 0; i < l; ++i) {
-			if (lines[i].length > 0) {
-				FlexImport.fields[k] = lines[i].split(fieldRegex);
-				for (var j = 0; j < FlexImport.fields[k].length; ++j) {
-					FlexImport.fields[k][j] = FlexImport.fields[k][j].replace(doubleQuoteRegex, this.quote);
-					FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
-				}
-				k++;
+			if (FlexImport.quote == "'") {
+				lineRegex = new RegExp(terminator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
+				fieldRegex = new RegExp(separator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
+			} else {
+				lineRegex = new RegExp(terminator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
+				fieldRegex = new RegExp(separator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
 			}
-		}
-		//we have parsed the input so remove the textarea
-		$("#csv-entry-div").remove();
+			doubleQuoteRegex = new RegExp(FlexImport.quote + FlexImport.quote, "g");
 
-		$("#info-p").html(
-			"Found <b>" + (this.hasHeaderRow ? FlexImport.fields.length - 1:FlexImport.fields.length) + "</b> rows of data," +
-			" in <b>" + FlexImport.fields[0].length + "</b> columns."
-		);
-//"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over / import more</b></a>"
+			var lines = txt.split(lineRegex);
+			var i, l = lines.length, k = 0;
+			for (i = 0; i < l; ++i) {
+				if (lines[i].length > 0) {
+					FlexImport.fields[k] = lines[i].split(fieldRegex);
+					for (var j = 0; j < FlexImport.fields[k].length; ++j) {
+						FlexImport.fields[k][j] = FlexImport.fields[k][j].replace(doubleQuoteRegex, FlexImport.quote);
+						FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
+					}
+					k++;
+				}
+			}
+			//we have parsed the input so remove the textarea
+			$("#csv-entry-div").remove();
 
-		FlexImport.createRecTypeOptions();
+			$("#info-p").html(
+				"Found <b>" + (FlexImport.hasHeaderRow ? FlexImport.fields.length - 1:FlexImport.fields.length) + "</b> rows of data," +
+				" in <b>" + FlexImport.fields[0].length + "</b> columns."
+			);
+	//"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over / import more</b></a>"
 
-		FlexImport.loadSavedMappings();
+			FlexImport.createRecTypeOptions();
 
-		FlexImport.gotoStep(2);
+			FlexImport.loadSavedMappings();
+
+			FlexImport.gotoStep(2);
 		},200);
 	},
 
@@ -383,7 +384,7 @@ FlexImport = (function () {
 		var tbody = table.appendChild(document.createElement("tbody"));
 		//create header row if supplied
 		var headerRow = null;
-		if (this.hasHeaderRow){
+		if (FlexImport.hasHeaderRow){
 			headerRow = FlexImport.fields[0];
 			tr = tbody.appendChild(document.createElement("tr"));
 			tr.id = "col-header-row";
@@ -456,7 +457,7 @@ FlexImport = (function () {
 			FlexImport.colSelectors[i] = sel;
 			var columnName = "";
 			// if the user supplied a header row and there is a collumn heading for the current column
-			if (this.hasHeaderRow && headerRow && headerRow[i]){
+			if (FlexImport.hasHeaderRow && headerRow && headerRow[i]){
 				columnName = headerRow[i].toLowerCase();
 				columnName = columnName.replace(/^\s*/,"");
 				columnName = columnName.replace(/\s*$/,"");
@@ -557,7 +558,7 @@ FlexImport = (function () {
 		}
 
 		// create rest of table filling it with the csv analysed data
-		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
+		for (var i = FlexImport.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
 			if(top.HEURIST.util.isnull(inputRow)) {
 				inputRow = "";
@@ -573,13 +574,13 @@ FlexImport = (function () {
 				}
 			}
 			td = tr.appendChild(document.createElement("td"));
-			td.innerHTML = i + (this.hasHeaderRow?0:1); //row number
+			td.innerHTML = i + (FlexImport.hasHeaderRow?0:1); //row number
 			//for each column
 			for (var j = 0; j < FlexImport.columnCount; ++j) {
 				td = tr.appendChild(document.createElement("td"));
 				if (inputRow.length > j) {
 					//strip quotes if necessary
-					re = new RegExp ("^\\s*" + this.quote + "(.*)" +this.quote +"\\s*$");
+					re = new RegExp ("^\\s*" + FlexImport.quote + "(.*)" +FlexImport.quote +"\\s*$");
 					if (inputRow[j].toString().match(re)) {
 						inputRow[j] = inputRow[j].toString().match(re)[1];
 					}
@@ -636,7 +637,7 @@ FlexImport = (function () {
 				if(eS[j]){
 					tr = tbody.appendChild(document.createElement("tr"));
 					td = tr.appendChild(document.createElement("td"));
-					td.innerHTML = (this.hasHeaderRow)?headerRow[j]:("column "+j); //name of column with wrong values
+					td.innerHTML = (FlexImport.hasHeaderRow)?headerRow[j]:("column "+j); //name of column with wrong values
 
 					td = tr.appendChild(document.createElement("td"));
 					td.style.width = 220;
