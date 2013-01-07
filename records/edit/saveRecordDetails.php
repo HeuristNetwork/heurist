@@ -314,9 +314,31 @@
 
 
 	function insertRecord() {
+
+		$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+		if ($addRecDefaults){
+			if ($addRecDefaults[1]){
+				$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+			}
+			if ($addRecDefaults[2]){
+				$userDefaultVisibility = $addRecDefaults[2];
+			}
+		}
+		$usrID = get_user_id();
+
 		//set owner to passed value else to NEWREC default if defined else to user
-		$owner = @$_POST["owner"]?$_POST["owner"]:( defined("HEURIST_NEWREC_OWNER_ID") ? HEURIST_NEWREC_OWNER_ID : get_user_id());
-		$owner = ((@$_POST["owner"] || @$_POST["owner"] === '0') ? intval($_POST["owner"]) :(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID : get_user_id()));
+		//ART $owner = @$_POST["owner"]?$_POST["owner"]:( defined("HEURIST_NEWREC_OWNER_ID") ? HEURIST_NEWREC_OWNER_ID : get_user_id());
+		//ART $owner = ((@$_POST["owner"] || @$_POST["owner"] === '0') ? intval($_POST["owner"]) :(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID : get_user_id()));
+
+		$owner = (intval(@$_POST['rec_owner'])?intval($_POST['rec_owner']):
+												(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+												(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID))));
+
+		$nonownervisibility = (@$_POST['rec_visibility']?(strtolower($_POST['rec_visibility'])):
+															(@$userDefaultVisibility ? $userDefaultVisibility :
+																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable')));
+
+
 		// if non zero (everybody group, test if user is member, if not then set owner to user
 		if (intval($owner) != 0 && !in_array($owner,get_group_ids())) {
 			$owner = get_user_id();
@@ -329,11 +351,21 @@
 				"rec_RecTypeID" => intval(@$_POST["rectype"])? intval($_POST["rectype"]):RT_NOTE,
 				"rec_ScratchPad" => @$_POST["notes"] ? $_POST["notes"]:null,
 				"rec_OwnerUGrpID" => $owner,
-				"rec_NonOwnerVisibility" => @$_POST["visibility"]?$_POST["visibility"]:(HEURIST_NEWREC_ACCESS ? HEURIST_NEWREC_ACCESS:'viewable'),
+				"rec_NonOwnerVisibility" => $nonownervisibility,
 				"rec_URL" => @$_POST["rec_url"]? $_POST["rec_url"] : ""));
 
 		$_REQUEST["recID"] = $recID = mysql_insert_id();
 		if($recID){
+
+			if ($usrID) {
+				mysql__insert('usrBookmarks', array(
+					'bkm_recID' => $recID,
+					'bkm_Added' => date('Y-m-d H:i:s'),
+					'bkm_Modified' => date('Y-m-d H:i:s'),
+					'bkm_UGrpID' => $usrID
+				));
+			}
+
 			updateRecord($recID);
 			return true;
 		}else{
