@@ -146,7 +146,7 @@
 			if (!$recID) {
 				$rv['error'] = "invalid or not ID sent with deleteGroup method call to saveUsergrps.php";
 			}else if( intval($recID)==2 ){
-				$rv['error'] = "Can't delete system group 'Database Owners'";
+				$rv['error'] = "Can't delete system group 'Database Managers'";
 			}else{
 				$rv = deleteGroup($recID);
 			}

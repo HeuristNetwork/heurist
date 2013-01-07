@@ -40,7 +40,7 @@ function update_counts(divid, processed, added, total) {
 
 <?php
 	if (! is_admin()) {
-		print "<p>FieldHelper synchronisation requires you to be an adminstrator of the database owners group.</p></body></html>";
+		print "<p>FieldHelper synchronisation requires you to be an adminstrator of the Database Managers group.</p></body></html>";
 		return;
 	}
 

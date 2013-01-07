@@ -958,7 +958,7 @@ INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
 
 -- The owners of the database - always group 1
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
- VALUES (1,'Database owners',
+ VALUES (1,'Database Managers',
  'Group 1 owns databases by default. DO NOT DELETE.',
  'This workgroup contains the administrators of the database. The first user (user #2) has special status as the master user. They cannot be deleted',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','y','db','owners');

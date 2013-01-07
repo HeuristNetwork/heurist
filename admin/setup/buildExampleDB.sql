@@ -1202,7 +1202,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `sysUGrps` WRITE;
 /*!40000 ALTER TABLE `sysUGrps` DISABLE KEYS */;
-INSERT INTO `sysUGrps` VALUES (0,'workgroup','Everyone','Group 0 represents all logged in users. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','every','user',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:05:14'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:05:13'),(2,'user','guest','Guest User and Owner/Adminstrator',NULL,'b1oUCBYVkfUxQ','guest@null','Guest','User','None','None','','','','... ','y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:08:09');
+INSERT INTO `sysUGrps` VALUES (0,'workgroup','Everyone','Group 0 represents all logged in users. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','every','user',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:05:14'),(1,'workgroup','Database Managers','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:05:13'),(2,'user','guest','Guest User and Owner/Adminstrator',NULL,'b1oUCBYVkfUxQ','guest@null','Guest','User','None','None','','','','... ','y',NULL,3,0,0,NULL,NULL,NULL,0,'2011-10-12 09:08:09');
 /*!40000 ALTER TABLE `sysUGrps` ENABLE KEYS */;
 UNLOCK TABLES;
 

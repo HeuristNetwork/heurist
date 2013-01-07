@@ -121,9 +121,9 @@
 					print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb into the current database</b>".
 						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 				} else {
-/* IJ: 19-Sep-12 Don't make imported users members of the database owners group - too risky.
+/* IJ: 19-Sep-12 Don't make imported users members of the Database Managers group - too risky.
 					$newUserID =  mysql_insert_id();
-					$query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')"; // adds to 1 = 'database owners' as 'member'
+					$query1="INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID) VALUES ($newUserID,'1')"; // adds to 1 = 'Database Managers' as 'member'
 					// todo: should really offer choice of existing user groups to add the user to, as well as their role
 					$res1 = mysql_query($query1);
 					$err=mysql_error();
@@ -132,7 +132,7 @@
 						print "<p><b>Sorry, Unable to allocate the new user to a group - please set maually</b>".
 							"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 					} else {
-					print "<p><b>New user allocated as a member of the 'database owners' group (# 1) - edit group allocation as required".
+					print "<p><b>New user allocated as a member of the 'Database Managers' group (# 1) - edit group allocation as required".
 						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 					}

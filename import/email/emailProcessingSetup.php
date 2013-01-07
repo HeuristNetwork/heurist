@@ -61,12 +61,12 @@ if(!is_admin()){
    specific email addresses (set in each user's profile). The emails are dissected
    and used to create Heurist records owned by that user.
    The email server must support IMAP.</p>
-   
-  
+
+
 <p><a href="../../admin/setup/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>&popup=2">
 	   Configure connection to IMAP mail server</a> (per-database)</p>
 
-<p>This function allows a member of the Database Owners of a Heurist database to set up an email
+<p>This function allows a member of the Database Managers of a Heurist database to set up an email
    account to which users of the database can forward emails they receive or copy
    emails that they send, in order to have them archived in the Heurist database.</p>
 <p><a href="#" onClick="_editUser(<?=get_user_id()?>); return false;"> <img src="../../common/images/external_link_16x16.gif"/>

@@ -33,7 +33,7 @@
 
 	// Look up current user email from sysUGrps table in the current database (the one being registered)
 	// Registering user must be a real user so that there is an email address and password to attach to the registration record.
-	// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better
+	// which rules out using the Database Managers group. Since other users will be unable to login and edit this record, it's better
 	// to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
 	$res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
 	if(mysql_num_rows($res) == 0) {
