@@ -1,6 +1,6 @@
 /*
  * relationshipsObjectLibrary.js
- * 
+ *
  * brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -35,9 +35,11 @@ if (!top.Relationship) {
 
 		this.relSpan = this.tr.appendChild(this.document.createElement("div"))
 		this.relSpan.className = "relation-reltype-and-rec";
+
 		this.relSpan.appendChild(this.document.createTextNode(
-				relationshipRec.relTerm+" "+
-				(relationshipRec.relatedRec? relationshipRec.relatedRec.title : relationshipRec.title)));
+				((relationshipRec.role == "Primary") ?relationshipRec.relTerm :relationshipRec.relInvTerm) + " "+
+				(relationshipRec.relatedRec? relationshipRec.relatedRec.title : relationshipRec.title) ));
+
 
 
 /*
@@ -67,7 +69,9 @@ if (!top.Relationship) {
 		editTd.className = "edit";
 		editTd.title = "Edit this relationship";
 		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
-		editTd.onclick = function() { thisRef.edit(); };
+		editTd.onclick = function() {
+			thisRef.edit();
+		};
 
 		var optionalTd = this.tr.appendChild(this.document.createElement("div"));
 
@@ -105,15 +109,35 @@ if (!top.Relationship) {
 	*/
 	top.Relationship.prototype.edit = function() {
 		var thisRef = this;
+		var _db =  (top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:""));
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
-			"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
+			"&db="+_db,
 		{	width: 940,
 		 	height: 640,
 			callback: function(newRecTitle, newDetails) {
+
+				if (newDetails) {
+
+					var sURL  = top.HEURIST.basePath + "common/php/loadRecordData.php";
+
+					top.HEURIST.util.getJsonData(sURL,
+						function(responce){
+							if(responce){
+								thisRef.manager.relatedRecords = responce.relationshipRecs;
+								thisRef.relationshipRec = responce.relationshipRecs[thisRef.relationshipRec.relnID];
+
+								thisRef.relSpan.innerHTML =
+									((thisRef.relationshipRec.role == "Primary") ?thisRef.relationshipRec.relTerm :thisRef.relationshipRec.relInvTerm) + " "+
+										(thisRef.relationshipRec.relatedRec? thisRef.relationshipRec.relatedRec.title : thisRef.relationshipRec.title);
+							}
+						},
+						"db="+_db+"&recID="+thisRef.manager.recID+"&action=getrelated");
+				}
+
+				/*
 				var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
 				var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_TARGET_RESOURCE']:'');
 				if (newDetails) {
-
 					thisRef.relSpan.innerHTML = "";
 					if (dtRelType && newDetails[dtRelType] && newDetails[dtRelType][0]) {
 						thisRef.relSpan.innerHTML = (newDetails[dtRelType][0]['enumValue'] ?
@@ -127,8 +151,8 @@ if (!top.Relationship) {
 														(newDetails[dtLinkPtr][0]['value'] ?
 															newDetails[dtLinkPtr][0]['value']: "" ));
 					}
-
 				}
+				*/
 			}
 		});
 		return false;

@@ -9,9 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
 /*<!--  loadRecordDate.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
@@ -50,14 +47,28 @@ if (! defined("SAVE_URI")) {
  * just output the .record object definition
  */
 
-if (! defined("JSON_RESPONSE")) {
+if (!defined("JSON_RESPONSE")) {
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-	require_once("dbMySqlWrappers.php");
+	//require_once("dbMySqlWrappers.php");
 	require_once("getRecordInfoLibrary.php");
 	if (! is_logged_in()) return;
 
 	header('Content-type: text/javascript');
 }
+
+mysql_connection_db_select(DATABASE);
+list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
+/*****DEBUG****///error_log("rec_id ".print_r($rec_id,true));
+
+if(@$_REQUEST["action"]=="getrelated"){
+
+	if ($rec_id) {
+		$related = getAllRelatedRecords($rec_id);
+		print json_format($related);
+	}
+
+}else{
+
 preg_match("/^.*\/([^\/\.]+)/",$_SERVER['HTTP_REFERER'],$matches);
 $refer = $matches[1];
 $isPopup = false;
@@ -65,9 +76,6 @@ if ($refer == "formEditRecordPopup") {
 	$isPopup = true;
 }
 /*****DEBUG****///error_log(print_r($_SERVER,true));
-mysql_connection_db_select(DATABASE);
-list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
-/*****DEBUG****///error_log("rec_id ".print_r($rec_id,true));
 
 if (! $rec_id) {
 	// record does not exist
@@ -96,24 +104,28 @@ if (! $rec_id) {
 	}
 }
 
+if (! defined("JSON_RESPONSE")) {
+		if ($isPopup) {
 ?>
+if (! window.HEURIST) window.HEURIST = {};
+if (! window.HEURIST.edit) window.HEURIST.edit = {};
+window.HEURIST.edit.record = <?= json_format($record) ?>;
+if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record-loaded");
+<?php
 
-<?php if (! defined("JSON_RESPONSE")) {
-		if ($isPopup) {?>
+		} else {
+
+?>
 if (! window.HEURIST) window.HEURIST = {};
 if (! window.HEURIST.edit) window.HEURIST.edit = {};
 window.HEURIST.edit.record = <?= json_format($record) ?>;
 if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record-loaded");
-<?php } else { ?>
-if (! window.HEURIST) window.HEURIST = {};
-if (! window.HEURIST.edit) window.HEURIST.edit = {};
-window.HEURIST.edit.record = <?= json_format($record) ?>;
-if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record-loaded");
-<?php }
-	} else { ?>
-<?= json_format($record) ?>
-<?php }
+<?php
+		}
+
+	} else {
+		print json_format($record);
+	}
 /***** END OF OUTPUT *****/
-
-
+}
 ?>
