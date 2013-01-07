@@ -1922,6 +1922,32 @@ top.HEURIST.search = {
 		e = top.HEURIST.util.stopEvent(e);
 	},
 
+	showAddNewRecordDialogue: function(event){
+		top.HEURIST.util.stopEvent(event);
+
+		var _db = (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""));
+
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php?db='+_db,
+		{
+			callback:function(responce){
+
+				var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+				top.HEURIST.util.getJsonData(
+					sURL,
+					function(responce){
+						if(responce){
+							top.HEURIST.rectypes.usageCount = responce;
+							top.HEURIST.search.createUsedRectypeSelector(true);
+						}
+					},
+					"db="+_db+"&action=usageCount");
+			}
+		});
+
+		return false;
+	},
+
 	createUsedRectypeSelector: function (useIDs) {
 		var rectypes = top.HEURIST.rectypes;
 		var rectypeValSelect = document.getElementById("rectype-select");
@@ -1953,8 +1979,8 @@ top.HEURIST.search = {
 					}
 					var name = rectypes.names[recTypeID];
 					var value =  "t:" + (useIDs ? recTypeID : '"'+name+'"');
-					var opt = new Option(name,value);
-					$(opt).attr("rectype",recTypeID);
+					var opt = new Option(name, value);
+					$(opt).attr("rectype", recTypeID);
 					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
 					rectypeValSelect.appendChild(opt);
 				}
@@ -3707,13 +3733,13 @@ top.HEURIST.search = {
 					(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")),
 					{
-						onpopupload: function(frame){
+						onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
 							var ele = frame.contentDocument.getElementById("ids");
 							ele.value = recIDs_list.join(",");
 							frame.contentDocument.forms[0].submit();
 						},
 						callback: function(context) {
-							if (context==="reload") { //no tags added
+							if (context==="reload") { //something was deleted
 								top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
 							}
 						}

@@ -22,7 +22,7 @@ ini_set("zlib.output_compression_level", 5);
 
 
 require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
-require_once("dbMySqlWrappers.php");
+//require_once("dbMySqlWrappers.php");
 require_once("getRecordInfoLibrary.php");
 
 mysql_connection_db_select(DATABASE);
@@ -30,10 +30,13 @@ mysql_connection_db_select(DATABASE);
 header("Content-type: text/javascript");
 
 $rv = array();
-$rv['rectypes'] = getAllRectypeStructures(false);
-$rv['detailTypes'] = getAllDetailTypeStructures(false);
-$rv['terms'] = getTerms(false);
-
+if(@$_REQUEST['action']=='usageCount'){
+	$rv = getRecTypeUsageCount();
+}else{
+	$rv['rectypes'] = getAllRectypeStructures(false);
+	$rv['detailTypes'] = getAllDetailTypeStructures(false);
+	$rv['terms'] = getTerms(false);
+}
 print json_format($rv, true);
 
 ob_end_flush();

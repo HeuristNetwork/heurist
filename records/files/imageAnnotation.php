@@ -17,7 +17,7 @@
 
 	require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
-	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	//mysql_connection_db_select(DATABASE);
@@ -117,6 +117,7 @@
 		if( array_key_exists("error", $res) ){
 			mysql_query("rollback");
 		}else{
+			updateRecTypeUsageCount();
 			mysql_query("commit");
 		}
 

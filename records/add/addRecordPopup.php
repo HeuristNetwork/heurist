@@ -154,7 +154,7 @@ function compute_args() {
 	return '';
 }
 
-function add_note(e) {
+function addRecord(e) {
 	if (! e) e = window.event;
 
 	var extra_parms = '',
@@ -267,13 +267,13 @@ function cancelAdd(e) {
 							$section = $row["rtg_Name"];
 							print '<optgroup label="' . htmlspecialchars($section) . '">';
 						}
-						//Since 2012-12-13 Ian asked to disable it again! <?= $row["rty_Name"]=="Notes" ? 'selected':'' ?>
+						//Since 2012-12-13 Ian asked to disable it again! <?= $row["rty_Name"]=="Notes" ? 'selected':''
 				?>
 			<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>" ><?= htmlspecialchars($row["rty_Name"]) ?></option>
 				<?php
-					}
+					}//while
+					if ($section) print "</optgroup>\n";
 				?>
-		</optgroup>
 		</select>
 		</div>
 	</div>
@@ -347,12 +347,11 @@ function cancelAdd(e) {
 				</div>
 			</div>
 		</div>
-		</div>
 	</div>
 
 
 	<div class="actionButtons">
-		<input type="button" class="add" style="float:none;" value="Add Record" onClick="add_note(event);">
+		<input type="button" class="add" style="float:none;" value="Add Record" onClick="addRecord(event);">
 		<input type="button" value="Cancel" onClick="cancelAdd(event);" id="note_cancel">
 	</div
 

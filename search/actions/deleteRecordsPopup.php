@@ -15,8 +15,9 @@
 define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -58,9 +59,10 @@ mysql_connection_db_overwrite(DATABASE);
 		$processed_count = 0;
 ?>
 <script type="text/javascript">
-function update_counts(processed, relations, bookmarks, errors)
+function update_counts(processed, deleted, relations, bookmarks, errors)
 {
 	document.getElementById('processed_count').innerHTML = processed;
+	document.getElementById('deleted').innerHTML = deleted;
 	document.getElementById('relations').innerHTML = relations;
 	document.getElementById('bookmarks').innerHTML = bookmarks;
 	document.getElementById('errors').innerHTML = errors;
@@ -72,6 +74,7 @@ function update_counts(processed, relations, bookmarks, errors)
 
 print '<div><span id=total_count>'.$total_cnt.'</span> records in total to be deleted</div>';
 print '<div><span id=processed_count>0</span> processed so far  <span id=percent>0</span>%</div>';
+print '<div><span id=deleted>0</span> deleted</div>';
 print '<div><span id=relations>0</span> relationships</div>';
 print '<div><span id=bookmarks>0</span> associated bookmarks</div>';
 print '<div><span id=errors>0</span> errors</div>';
@@ -101,13 +104,18 @@ print '<div><span id=errors>0</span> errors</div>';
 			$processed_count++;
 
 			if ($rec_id % 10 == 0) {
-				print '<script type="text/javascript">update_counts('.$processed_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
+				print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
 				ob_flush();
 				flush();
 			}
 		}
 
-		print '<script type="text/javascript">update_counts('.$processed_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
+		print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
+
+		if($recs_count>0){
+			$rtUsage = updateRecTypeUsageCount();
+			print '<script type="text/javascript">top.HEURIST.rectypes.usageCount = '.json_format($rtUsage).';if(top.HEURIST.search){top.HEURIST.search.createUsedRectypeSelector(true);};</script>'."\n";
+		}
 
 		//print '<p><b>' . $recs_count . '</b> records, <b>' . $rels_count . '</b> relationships and <b>' . $bkmk_count . '</b> associated bookmarks deleted</p>';
 
@@ -115,7 +123,7 @@ print '<div><span id=errors>0</span> errors</div>';
 			print '<p color="#ff0000"><b>Errors</b></p><p>'.implode("<br>",$errors).'</p>';
 		}
 
-		print '<br/><input type="button" value="close" onclick="window.close(\'reload\');">';
+		print '<br/><input type="button" value="close" onclick="window.close('.($recs_count>0?'\'reload\'':'').');">';
 
 	} else {
 ?>
