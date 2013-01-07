@@ -964,10 +964,10 @@ div.reminder-table in.input, div.reminder-table select {
 	border:none
 }
 div.input-cell fieldset.reminder .reminder-table input[type="radio"], div.input-cell fieldset .reminder-table input[type="radio"] {
-	vertical-align: bottom;
 	margin: 0 5px 0 20px;
 	height:auto
 }
+
 .reminder-table [type="button"] {
 	margin-right: 10px;
 }

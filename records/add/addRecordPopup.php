@@ -285,7 +285,7 @@ function cancelAdd(e) {
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">
 			<div class="input-row workgroup">
-				<div class="input-header-cell">Owner group (or self)</div>
+				<div class="input-header-cell">Record owner</div>
 				<div class="input-cell">
 					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onChange="buildworkgroupTagselect(options[selectedIndex].value)">
 						<option value="0" disabled selected>(select group)</option>

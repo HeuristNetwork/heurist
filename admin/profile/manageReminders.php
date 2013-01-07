@@ -53,6 +53,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
    <div class=headline>Reminders</div>
 
    <form>
+    <input type=hidden name="db" value="<?= HEURIST_DBNAME?>">
     <label for=show-future>
      <input type=radio name=show value=future id=show-future <?= $future ? "checked" : "" ?> onchange="form.submit();">
      Show future reminders only
@@ -65,6 +66,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
    </form>
 
    <form method=post>
+    <input type=hidden name="db" value="<?= HEURIST_DBNAME?>">
     <input type=hidden name=rem_ID id=rem_id_input>
     <input type=hidden name=action id=action_input>
    </form>
