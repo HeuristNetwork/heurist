@@ -134,7 +134,7 @@
 		" -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {
-			mysql_query("DROP DATABASE IF EXISTS `" . $tempDBName . "`");
+			unlockDatabase();
 			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing createDefinitionTablesOnly.sql)");
 		}
 	}
@@ -178,10 +178,7 @@
 
 		if (!$data || substr($data, 0, 6) == "unable") {
 
-			mysql_connection_db_insert(DATABASE); // Use logged into DB
-			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
-			//unlock
-			mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
+			unlockDatabase();
 			die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline");
 		}
 	} // getting data from source database for import of definitions to an existing database
@@ -208,9 +205,7 @@
 			echo "<p><strong>The source database $source_db_name ($sourceDBVersion[0]) is a different major/minor version from the current ".DATABASE." database (Vsn ".HEURIST_DBVERSION.
 			")</strong><p>One or other database will need updating to the same major/minor version #";
 			//unlock
-			mysql_connection_db_insert(DATABASE); // Use logged into DB
-			mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
-			mysql_query("DROP DATABASE IF EXIST `" . $tempDBName . "`"); // Delete temp database
+			unlockDatabase();
 			exit();
 		}
 	}
@@ -302,7 +297,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defRectypes
-		} // processRecTypes
+	} // processRecTypes
 
 
 	function processDetailTypes($dataSet) {
@@ -316,7 +311,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defDetailTypes
-		} // processDetailTypes
+	} // processDetailTypes
 
 
 
@@ -331,7 +326,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defRecStructure
-		} // processRecStructure
+	} // processRecStructure
 
 
 
@@ -350,9 +345,7 @@
 			$query = "SET FOREIGN_KEY_CHECKS = 1;";
 			mysql_query($query);
 		} // END Imported first set of data to temp table: defTerms
-		} // processTerms
-
-
+	} // processTerms
 
 	function processOntologies($dataSet) {
 		global $errorCreatingTables;
@@ -365,7 +358,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defOntologies
-		} // processOntologies
+	} // processOntologies
 
 
 
@@ -380,7 +373,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defRelationshipConstraints
-		} // processRelationshipConstraints
+	} // processRelationshipConstraints
 
 
 
@@ -395,7 +388,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defFileExtToMimetype
-		} //processFileExtToMimetype
+	} //processFileExtToMimetype
 
 
 
@@ -410,7 +403,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defRecTypeGroups
-		} // processRectypeGroups
+	} // processRectypeGroups
 
 
 
@@ -425,9 +418,7 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defDetailTypeGroups
-		} // processDetailTypeGroups
-
-
+	} // processDetailTypeGroups
 
 	function processTranslations($dataSet) {
 		global $errorCreatingTables;
@@ -440,7 +431,15 @@
 				$errorCreatingTables = TRUE;
 			}
 		} // END Imported first set of data to temp table: defTranslations
-		} // processTranslations
+	} // processTranslations
+
+	function unlockDatabase($isdroptemp=true) {
+		if($isdroptemp && $tempDBName){
+			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
+		}
+		mysql_connection_db_insert(DATABASE); // Use logged into DB
+		$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
+	}
 
 
 	// Done inserting data into all tables in temp database (or actual database if new database).
@@ -455,14 +454,10 @@
 			echo "<br /><strong>An error occurred trying to insert the downloaded data into the temporary database.</strong><br />";
 		}
 		echo "This may be due to a database version mismatch, please advise the Heurist development team<br>";
-		mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`"); // Delete temp database or incomplete new database
+		unlockDatabase();
 		return;
 	} else if(!$isNewDB){ // do crosswalking for exisitn database, no action for new database
 		require_once("createCrosswalkTable.php"); // offer user choice of fields to import
-		//		mysql_query("DROP DATABASE `" . $tempDBName . "`");
-		// TODO: Replace this line with centralised locking methodology
-		mysql_connection_db_insert(DATABASE); // Use logged into DB
-		$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
+		unlockDatabase(false);
 	}
-
 ?>

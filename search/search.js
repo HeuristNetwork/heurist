@@ -4788,7 +4788,7 @@ function layoutAppPanel(isToggle,newWidth){
 		//
 		var setWidths = function() {
 
-			if(!(document.getElementsByTagName("body") && document.getElementById("search"))){
+			if(!(document.getElementsByTagName("body") && document.getElementById("searchpage-mainbody"))){
 				return;
 			}
 
@@ -4799,7 +4799,7 @@ function layoutAppPanel(isToggle,newWidth){
 			var centerPanelWidth = layout.getSizes().center.w;
 			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
 			if(dh == 0){ //need to reset hieght to match body area less heading
-				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("search").clientHeight - 60;
+				dh = document.getElementsByTagName("body")[0].clientHeight - document.getElementById("searchpage-mainbody").clientHeight - 60;
 				layout.set("height",dh);
 			}
 			/*DEBUG*///window.console.log("in setWidths dW="+dw+" dH="+dh+" lW="+leftPanelWidth+" cW="+centerPanelWidth+" rW="+rightPanelWidth);
@@ -4815,6 +4815,8 @@ function layoutAppPanel(isToggle,newWidth){
 				rightPanelWidth = maxRightWidth;
 			}
 			var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style0");
+
+			//disable 2 col view for certain width of central pane
 			var twocollink = document.getElementById("result-style-twoCol");
 			if (centerPanelWidth < 180 && currentStyle == "two-col") {
 				document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
@@ -4827,6 +4829,7 @@ function layoutAppPanel(isToggle,newWidth){
 				twocollink.className += " disabled";
 			};
 
+			//menu container
 			var ele = document.getElementById('result-container');
 			var newtop = '20px';
 			if (centerPanelWidth<200){
@@ -4835,6 +4838,7 @@ function layoutAppPanel(isToggle,newWidth){
 				newtop = '40px';
 			}
 			ele.style.top = newtop;
+
 			top.HEURIST.util.setDisplayPreference(["leftWidth","rightWidth"], [leftPanelWidth, rightPanelWidth]);
 
 		};
