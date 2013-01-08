@@ -61,6 +61,14 @@
 		$geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
 		$geekMail->subject('Bug report or feature request: '.$bug_title[0]);
 
+		//keep new line
+		$bug_descr = $_POST["type:".DT_BUG_REPORT_DESCRIPTION];
+		if($bug_descr){
+			$bug_descr = str_replace("\n","&#13;",$bug_descr);
+			$_POST["type:".DT_BUG_REPORT_DESCRIPTION] = $bug_descr;
+		}
+
+
 		$key_steps = "type:".DT_BUG_REPORT_STEPS;
 		$repro_steps = $_POST[$key_steps];
 		/*****DEBUG****///error_log("steps  >>>>  ".print_r($repro_steps,true));
@@ -218,7 +226,8 @@
 	}
 
 	// converts _POST array into string
-	//$message = json_format($_POST);
+	//$message = json_format($_POST);error_log(">>>>>".print_r($arr, true));
+
 	$message =  json_encode($arr);
 
 	/*****DEBUG****/// DEBUG error_log(">>>> ".$message);

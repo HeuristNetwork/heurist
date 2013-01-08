@@ -23,7 +23,7 @@
 	set_time_limit(0);
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
@@ -124,7 +124,6 @@
 		$description=str_replace("\r\n", "\n", $description);
 		$description=str_replace("\r", "\n", $description);
 		*/
-
 		/*****DEBUG****///error_log(">>>desc:".$description);
 
 		$description=str_replace("\r\n", "", $description);
@@ -133,7 +132,7 @@
 		$arr = json_decode($description, true);
 
 
-		/*****DEBUG****///error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
+		/*****DEBUG****///error_log("arr=>>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 
 		// assume all id (rtID, dtID, trmID and ontID) are all concept ids (dbID - ID)
 		// get rectype concept id and  convert to local id or notes
@@ -189,7 +188,10 @@
 
 					/*****DEBUG****///error_log(">>>> ".$newkey."  dettype=".$typeid);
 
+					$value=str_replace("&#13;", "\n", $value);
+
 					if($newkey){
+
 						$arrnew["type:".$newkey] = $value;
 						if($newkey == DT_FILE_RESOURCE){
 							$key_file = "type:".$newkey;
@@ -239,6 +241,12 @@
 				}
 			}
 
+
+			/*$bug_descr = $arrnew["type:".DT_BUG_REPORT_DESCRIPTION];
+			if($bug_descr){
+				$bug_descr = str_replace("<br>","\n",$bug_descr);
+				$arrnew["type:".DT_BUG_REPORT_DESCRIPTION] = $bug_descr;
+			}*/
 
 			/*****DEBUG****///error_log(">>>>ARRAY=".print_r($arrnew, true));
 

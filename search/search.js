@@ -4271,7 +4271,17 @@ top.HEURIST.search = {
 			top.HEURIST.search.setResultStyle(params["view"]);
 		}
 
-		if (! top.suppressAutoSearch) top.HEURIST.search.loadSearch();
+		if (!top.suppressAutoSearch){
+			top.HEURIST.search.loadSearch();
+		}else{
+			top.HEURIST.currentQuery_main = ("w=" + encodeURIComponent(params["w"])) + "&" +
+			("stype=" + (params["stype"] ? encodeURIComponent(params["stype"]) : "")) + "&" +
+			("ver=" + top.HEURIST.search.VERSION) + "&" +
+			("q=" + encodeURIComponent(params["q"]))+
+			("&db=" + (params['db'] ? params['db'] :
+					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
+		}
+
 	},
 
 	//
@@ -4767,7 +4777,6 @@ function layoutAppPanel(isToggle,newWidth){
 		};
 		var appPanelButton = document.getElementById("appPanelButton");
 		var navButton = document.getElementById("navButton");
-		var searchTable = document.getElementById("search");
 
 		layout = new YAHOO.widget.Layout('searchpage-mainbody',{
 			units: [

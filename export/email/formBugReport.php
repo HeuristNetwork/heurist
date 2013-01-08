@@ -1,8 +1,9 @@
 <?php
 	/**
-	* formBugReport.html
+	* formBugReport.php
 	*
 	* form to enter info about bug, on submit it send this info as rectype 68-216 to h3dev
+	* invoked from formEmailRecordPopup.html
 	*
 	* 2011/06/07
 	* @author: Artem Osmakov
@@ -79,7 +80,7 @@
 
 			//need as callback after file upload
 			function changed() {
-			}			
+			}
 			//
 			var uploadCompleted = function(inputDiv, bdValue) {
 				//var thisRef = this;	// for great closure

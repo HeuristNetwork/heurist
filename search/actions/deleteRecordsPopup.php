@@ -97,8 +97,8 @@ print '<div><span id=errors>0</span> errors</div>';
 				mysql_query("commit");
 
 				$recs_count++;
-				$rels_count += $res["bkmk_count"];
-				$bkmk_count += $res["rel_count"];
+				$bkmk_count += $res["bkmk_count"];
+				$rels_count += $res["rel_count"];
 			}
 
 			$processed_count++;
