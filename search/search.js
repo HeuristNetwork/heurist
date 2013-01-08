@@ -3773,7 +3773,7 @@ top.HEURIST.search = {
 			alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
 		}else{
 			top.HEURIST.util.popupURL(window,
-										'saved/saveCollectionPopup.html'+
+										top.HEURIST.baseURL+'search/saved/saveCollectionPopup.html'+
 											("?db=" +
 												(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 													(top.HEURIST.database && top.HEURIST.database.name ?

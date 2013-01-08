@@ -79,7 +79,12 @@
 						alert("There is no search string to save. Please enter a search and then save.");
 						setTimeout(function() { window.close(); }, 100);
 					}else{
-						setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'saveCollectionPopup.html');},100);
+
+						setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, top.HEURIST.baseURL+'search/saved/saveCollectionPopup.html?db='+
+												(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+													(top.HEURIST.database && top.HEURIST.database.name ?
+														top.HEURIST.database.name : "")), {width:650, height:380}
+																						  );},100);
 					}
 				}
 			}
