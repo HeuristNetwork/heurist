@@ -41,7 +41,7 @@
 
 	/* ARTEM
 	if (!is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}*/
 
@@ -59,7 +59,7 @@
 		print "<html><head><link rel=stylesheet href='../../common/css/global.css'>
 		</head><body><div class=wrap><div id=errorMsg>
 		<span>You must be an administrator to get structure elements from another database</span><p>
-		<a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+		<a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
 		" target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
@@ -119,7 +119,7 @@
 		if (($res && mysql_num_rows($res)>0)) { // SQL OK and there is a lock record
 			// error log says “supplied argument is not a valid MySQL result resources
 			echo "Definitions are already being modified or SQL failure on lock check.";
-			header('Location: ' . BASE_PATH . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
+			header('Location: ' . HEURIST_BASE_URL . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
 			die("Definitions are already being modified.<p> If this is not the case, you will need to remove the locks on the database.<br>Use Utilities > Clear database locks (administrators only)");
 		} // detect lock and shuffle out
 

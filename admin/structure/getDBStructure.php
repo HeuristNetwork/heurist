@@ -2,7 +2,7 @@
 
 /* getDBStructure.php - returns database definitions (rectypes, details etc.)
  *						as SQL statements ready for INSERT processing
- * 
+ *
  * Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -314,7 +314,7 @@
 	if (!$includeUgrps) {return;}
 
 	if (! is_admin()) {
-		print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
 		return;
 	}
 	// ------------------------------------------------------------------------------------------

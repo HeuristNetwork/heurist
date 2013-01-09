@@ -345,7 +345,7 @@ function bookmark_tag_and_save_search($data) {
 	} else {
 		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');'.
 					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');'.
-					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/saved/manageCollection.php?clear&db='.HEURIST_DBNAME.'", top.HEURIST.search.addRemoveCollectionCB);'.
+					'top.HEURIST.util.getJsonData("'. HEURIST_BASE_URL.'search/saved/manageCollection.php?clear&db='.HEURIST_DBNAME.'", top.HEURIST.search.addRemoveCollectionCB);'.
 					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['svs_Name'].'\" saved. '. $message.'\');' .
 					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
 	}

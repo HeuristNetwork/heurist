@@ -28,7 +28,7 @@
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 
@@ -47,7 +47,7 @@
 
 	mysql_connection_db_overwrite(DATABASE);
 
-	/*****DEBUG****///error_log(HEURIST_DBNAME."         ".HEURIST_URL_BASE.'            '.DATABASE);
+	/*****DEBUG****///error_log(HEURIST_DBNAME."         ".HEURIST_BASE_URL.'            '.DATABASE);
 
 	// get mail server options from database
 	$res = mysql_query('select * from sysIdentification');

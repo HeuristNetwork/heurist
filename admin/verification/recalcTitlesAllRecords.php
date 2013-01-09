@@ -19,14 +19,14 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 	if (! is_logged_in()) {
-		header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?db=".HEURIST_DBNAME);
+		header("Location: " . HEURIST_BASE_URL . "common/connect/login.php?db=".HEURIST_DBNAME);
 		return;
 	}
 
 	if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
     "<div id=errorMsg><span>You must be an adminstrator of the owner's group to rebuild titles</span>".
-    "<p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+    "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
     " target='_top'>Log out</a></p></div></div></body></html>";
     return;
 	}
@@ -148,7 +148,7 @@ foreach ($recs as $rec_id => $rec) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
-	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();
@@ -197,10 +197,10 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
 }
 if(count($blanks)>0){
-	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
 }
 
 ob_flush();

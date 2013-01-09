@@ -428,7 +428,7 @@
 			<div style="width: 100%; text-align: center; padding-top: 4px;">Build search using fields below, or edit the search string directly. <a href="#" onClick="clear_fields(); return false;">Clear search string</a></div>
 		</div>
 		<div style="padding-left: 30px; color: #666;border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
-			<p>See also <a href="#" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.</p>
+			<p>See also <a href="#" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_BASE_URL?>help/advanced_search.html'); return false;">help for advanced search</a>.</p>
 			<div>Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
 				To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
 				<b>latitude:10 longitude:100</b><br>
@@ -618,7 +618,7 @@
 			</select>
 			<button type="button" style="visibility:visible; float:right;" onClick="add_to_search('user');" class="button" title="Add to Search">Add</button>
 			<!--
-			<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
+			<img src=<?=HEURIST_BASE_URL?>common/images/leftarrow.gif>
 			<span style="color: green;">Type name to find users</span>
 			-->
 		</div>

@@ -1117,7 +1117,7 @@ function getTransformsByOwnerGroup() {
 
 		$transforms["nameLookup"][$row['lbl']] = $recID;
 		$transforms["byID"][$recID] = array("label" => $row['lbl'],
-														"uri" => (@$row['uri']? $row['uri'] : (@$row['fileID'] ? HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID'] : null)),
+														"uri" => (@$row['uri']? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID'] : null)),
 														"type" => $row['typ'],
 														"trans" => (@$row['trans']?$row['trans']:null));
 	}
@@ -1175,7 +1175,7 @@ function getToolsByTransform() {
 		$recID = $row['rec_ID'];
 		$tools["byId"][$recID] = array("name" => $row['name'],
 														"recID" => $row['rec_ID'],
-														"img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_URL_BASE."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID']) : null)),
+														"img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_BASE_URL."records/files/downloadFile.php?db=".HEURIST_DBNAME."&ulf_ID=".$row['fileID']) : null)),
 														"colour" => $row['colour'],
 														"dt" => $row['dt'],
 														"rt" => $row['rt'],

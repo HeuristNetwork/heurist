@@ -14,7 +14,7 @@
 
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to delete a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to delete a database</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 
@@ -22,7 +22,7 @@
 
 	if ($dbname=='H3ExampleDB') {// we require a valid DB incase the user deletes all DBs
 				print "<p>Deleteion of H3ExampleDB is not supported through this interface.".
-					"<p><a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=H3ExampleDB' >Return to Heurist</a>";
+					"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=H3ExampleDB' >Return to Heurist</a>";
 					return;
 	}
 
@@ -74,11 +74,11 @@
 				print "Database <b>$dbname</b> has been deleted";
 				print "<p>Associated files stored in upload subdirectories<b>$uploadPath</b> have ben moved to ".HEURIST_UPLOAD_ROOT."deleted_databases.".
 				"<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.".
-				"<p><a href='".HEURIST_URL_BASE."?db=H3ExampleDB' >Return to Heurist</a>";
+				"<p><a href='".HEURIST_BASE_URL."?db=H3ExampleDB' >Return to Heurist</a>";
 			}
 		} else { // didn't request properly
 			print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database $dbname was not deleted. ".
-			"<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
+			"<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a>";
 		}
 	}
 

@@ -268,7 +268,7 @@ function print_result($row) {
 }
 
 function rss_url() {
-	return HEURIST_URL_BASE.'export/feeds/searchRSS.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
+	return HEURIST_BASE_URL.'export/feeds/searchRSS.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
 }
 
 ?>

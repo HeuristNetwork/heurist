@@ -16,12 +16,12 @@
 	//require_once(dirname(__FILE__).'/../../admin/ugrps/saveUsergrpsFs.php');
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to import user</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to import user</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 
@@ -119,7 +119,7 @@
 				if ($err) {
 					print "<p>MySQL returns: ".$err;
 					print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb into the current database</b>".
-						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 				} else {
 /* IJ: 19-Sep-12 Don't make imported users members of the Database Managers group - too risky.
 					$newUserID =  mysql_insert_id();
@@ -130,15 +130,15 @@
 					if (!$res1) {
 						print "<p>MySQL returns: ".$err;
 						print "<p><b>Sorry, Unable to allocate the new user to a group - please set maually</b>".
-							"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+							"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 					} else {
 					print "<p><b>New user allocated as a member of the 'Database Managers' group (# 1) - edit group allocation as required".
-						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 					}
 */
 					print "<p><b>New user allocated as not a member of any group. Edit group allocation as required".
-						"<p><a href=".HEURIST_URL_BASE."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 				}
 			}

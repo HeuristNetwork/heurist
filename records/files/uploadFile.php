@@ -648,12 +648,12 @@
 				$res["thumbURL"] = HEURIST_THUMB_URL_BASE.$thumbnail_file;
 			}else{
 				$res["thumbURL"] =
-				HEURIST_URL_BASE."common/php/resizeImage.php?".
+				HEURIST_BASE_URL."common/php/resizeImage.php?".
 				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 			}
 
 
-			$downloadURL = HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+			$downloadURL = HEURIST_BASE_URL."records/files/downloadFile.php/".$origName."?".
 			(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 
 			if($res["remoteURL"]!=null || $res["prefsource"]=="external") {

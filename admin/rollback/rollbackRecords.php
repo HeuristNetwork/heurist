@@ -51,7 +51,7 @@ require_once("rollbackRecordsFuncs.php");
 
 // User must be system administrator or admin of the owners group for this database
 if (!is_admin()) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to rollback the database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to rollback the database</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 	return;
 }
 
@@ -70,7 +70,7 @@ if ($rollback) {
 	$s = $n != 1 ? "s" : "";
 	$state = $date ? "state as of $date" : "previous version";
 	print "<p>$n record$s rolled back to $state</p>";
-	print '<p><a href="'.HEURIST_URL_BASE.'search/search.html?q=ids:' . $ids . '">View updated records</a></p>';
+	print '<p><a href="'.HEURIST_BASE_URL.'search/search.html?q=ids:' . $ids . '">View updated records</a></p>';
 } else {
 	$rollbacks = getRecordRollbacks(split(",", $ids), $date);
 	showRollbacks($rollbacks);
@@ -202,7 +202,7 @@ function getCurrentValString ($val) {
 			return 'geo: ' . $val["geo"]["type"] . ': [' . substr($val["geo"]["wkt"], 0, 30) . ' ... ]';
 		}
 		else if (array_key_exists("id", $val)) {
-			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?recID=' . $val["id"] . '&amp;instance='.HEURIST_INSTANCE.'">' . $val["title"] . '</a>';
+			return '=> [' . $val["id"] . '] <a href="'.HEURIST_BASE_URL.'records/view/viewRecord.php?recID=' . $val["id"] . '&amp;instance='.HEURIST_INSTANCE.'">' . $val["title"] . '</a>';
 		}
 	} else {
 		return $val;

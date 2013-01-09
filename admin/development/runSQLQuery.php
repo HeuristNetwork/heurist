@@ -22,12 +22,12 @@
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (!is_logged_in()) {
-	    header('Location: ' . HEURIST_URL_BASE . 'login.php?db='.HEURIST_DBNAME);
+	    header('Location: ' . HEURIST_BASE_URL . 'login.php?db='.HEURIST_DBNAME);
 	    return;
         }
 
 if (! is_admin()) {
-    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
+    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
     return;
 }
 
@@ -96,13 +96,13 @@ function print_row($row) {
       switch ($_REQUEST['f']) {  // select the output formatting
 
       case 'ibblank': // Internet bookmark and blank URL
-        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
+        print "<a href='".HEURIST_BASE_URL."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
         print " :  ";print $row[rec_Title];print " [ ";
         print "<a href=http://www.google.com/search?q=$row[rec_Title]>Google</a>";
         print " ]<br>";
         break;
       case 'garbage': // Garbage in the URL
-        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
+        print "<a href='".HEURIST_BASE_URL."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
         print " :  $row[rec_Title] <br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         print "url: $row[rec_URL]";print "<br>";
@@ -113,14 +113,14 @@ function print_row($row) {
         print "<p>"; print $row[cnt]; print ": ";
         print "$row[rec_Title]<br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_URL]'>$row[rec_URL]</a>";
+        print "url: <a href='".HEURIST_BASE_URL."?q=url:$row[rec_URL]'>$row[rec_URL]</a>";
         print "<a href=http://www.google.com/search?q=url:$row[rec_URL]>Google</a>";
                 break;
       case 'alldupe': // Duplicate URL with another record (all record types)
         print "<p>"; print $row[cnt]; print ": ";
         print $row[rec_Title]; print "<br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_URL]'>$row[rec_URL]</a> [ ";
+        print "url: <a href='".HEURIST_BASE_URL."?q=url:$row[rec_URL]'>$row[rec_URL]</a> [ ";
         print "<a href=http://www.google.com/search?q=url:$row[rec_URL]>Google</a> ]";
                break;
       } // end Switch

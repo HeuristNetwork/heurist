@@ -13,7 +13,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	// Requires admin user, access to definitions though get_definitions is open
 	if (! is_admin()) {
-		 print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		 print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -192,7 +192,7 @@ echo "var tableData = ".json_format($tableRows,true). ";\n\n";
 echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
 echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
-echo 'var URLBase = "'.HEURIST_URL_BASE.'";'. "\n";
+echo 'var URLBase = "'.HEURIST_BASE_URL.'";'. "\n";
 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
@@ -730,7 +730,7 @@ function dropTempDB(redirect) {
 			callback: function(context) {
 
 				if(redirect) {
-					window.location = "<?=HEURIST_URL_BASE?>/admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+					window.location = "<?=HEURIST_BASE_URL?>/admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
 				}
 			}
 	});

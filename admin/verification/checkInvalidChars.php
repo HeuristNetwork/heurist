@@ -39,7 +39,7 @@ $prevInvalidRecId = 0;
 foreach ($textDetails as $textDetail) {
 	if (! check($textDetail['dtl_Value'])){
 		if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-			print "<tr><td style='padding-top:16px'><a target=_blank href='".HEURIST_URL_BASE."records/edit/editRecord.html?recID=".
+			print "<tr><td style='padding-top:16px'><a target=_blank href='".HEURIST_BASE_URL."records/edit/editRecord.html?recID=".
 					$textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'>Record ID:" . $textDetail['dtl_RecID']. "</a></td></tr>\n";
 			$prevInvalidRecId = $textDetail['dtl_RecID'];
 		}

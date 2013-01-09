@@ -95,7 +95,7 @@ function buildworkgroupTagselect(wgID,keyword) {
 
 
 function update_link() {
-	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
+	var base = "<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -208,7 +208,7 @@ function addRecord(e) {
 	}
 
 
-	window.open('<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
+	window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
 
 }
 

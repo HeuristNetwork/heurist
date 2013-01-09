@@ -50,6 +50,21 @@
 	define('HEURIST_DOCUMENT_ROOT',@$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/htdocs
 
 	define('HEURIST_CURRENT_URL',curPageURL());
+	/**
+	* returns full url for current page
+	*/
+	function curPageURL() {
+		$pageURL = 'http';
+		if (array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+
+		$pageURL .= "://";
+		if ($_SERVER["SERVER_PORT"] != "80") {
+			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		} else {
+			$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+		}
+		return $pageURL;
+	}
 
 	// calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
 	$installDir = preg_replace("/\/(".HEURIST_TOP_DIRS.")\/.*/","",@$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
@@ -65,8 +80,6 @@
 
 	define('HEURIST_SITE_PATH',INSTALL_DIR == ''? '/' : INSTALL_DIR.'/'); // eg. /h3-ij/
 	define('HEURIST_BASE_URL','http://'.HEURIST_HOST_NAME.HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3-ij/
-	// change HEURIST_URL_BASE to HEURIST_BASE_URL
-	define('HEURIST_URL_BASE', HEURIST_BASE_URL);
 
 	//set up database server connection defines
 	if ($dbHost) {
@@ -257,11 +270,6 @@
 	define('HEURIST_INSTANCE_PREFIX',HEURIST_SESSION_DB_PREFIX);
 	// change HOST  HOST_BASE  to  HEURIST_HOST_NAME
 	define('HOST',HEURIST_HOST_NAME);
-	define('HOST_BASE',HEURIST_HOST_NAME);
-
-	// change HEURIST_URL_BASE to HEURIST_BASE_URL
-	//moved up define('HEURIST_URL_BASE',HEURIST_BASE_URL);
-	$heuristURLBase=HEURIST_URL_BASE;
 
 	if ($sysValues['sys_AllowRegistration']){
 		define ('HEURIST_ALLOW_REGISTRATION', 1);
@@ -583,20 +591,5 @@
 	}
 
 
-	/**
-	* returns full url for current page
-	*/
-	function curPageURL() {
-		$pageURL = 'http';
-		if (array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
-
-		$pageURL .= "://";
-		if ($_SERVER["SERVER_PORT"] != "80") {
-			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
-		} else {
-			$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
-		}
-		return $pageURL;
-	}
 
 ?>

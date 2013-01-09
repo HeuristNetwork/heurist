@@ -13,13 +13,13 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (!is_logged_in()) {
-	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: '.HEURIST_BASE_URL.'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
 mysql_connection_db_overwrite(DATABASE);
 
-$refurl = HEURIST_URL_BASE."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
+$refurl = HEURIST_BASE_URL."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
 
 $sortby = (array_key_exists('sort',$_REQUEST) && $_REQUEST['sort'] == 'alpha' ? 'alpha' : 'freq');
 $ugr_ID = $_REQUEST['Id'];
@@ -60,7 +60,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$tags .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$tags .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
+	$tags .= '<a target="_top" href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
 }
 $tags .= "</span>\n";
 ?>

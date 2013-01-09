@@ -33,7 +33,7 @@ if($isAtom){
 ?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/">
 	<title>HEURIST Search results</title>
-	<link href="<?=htmlspecialchars(HEURIST_URL_BASE)?>"/>
+	<link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>"/>
 	<subtitle><?=$explanation?></subtitle>
 	<updated><?=date("r")?></updated>
 	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
@@ -44,8 +44,8 @@ if($isAtom){
 	</author>
 	<entry>
 		<title>HEURIST home</title>
-		<link href="<?=htmlspecialchars(HEURIST_URL_BASE)?>search/search.html?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
-		<id><?=htmlspecialchars(HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME)?></id>
+		<link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>search/search.html?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
+		<id><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME)?></id>
 		<published><?=date("r")?></published>
 		<summary>HEURIST home page (search)</summary>
 	</entry>
@@ -57,7 +57,7 @@ if($isAtom){
 <rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
 	<title>HEURIST Search results</title>
-	<link><?=htmlspecialchars(HEURIST_URL_BASE)?></link>
+	<link><?=htmlspecialchars(HEURIST_BASE_URL)?></link>
 	<description><?=$explanation?></description>
 	<language>en-gb</language>
 	<pubDate><?=date("r")?></pubDate>
@@ -69,8 +69,8 @@ if($isAtom){
 	<title>HEURIST home</title>
 	<description>HEURIST home page (search)</description>
 	<pubDate><?=date("r")?></pubDate>
-	<link><?=htmlspecialchars(HEURIST_URL_BASE."search/search.html?".$_SERVER['QUERY_STRING'])?></link>
-	<guid isPermaLink="false"><?=htmlspecialchars(HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME)?></guid>
+	<link><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?".$_SERVER['QUERY_STRING'])?></link>
+	<guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME)?></guid>
 </item>
 <?php
 }
@@ -122,9 +122,9 @@ if($isAtom){
 	$thubURL = getThumbnailURL($row[0]);
 
 
-	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	$uid = HEURIST_URL_BASE."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	//HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
+	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+	$uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+	//HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
 	//$uid = $uniq_id;
 	$uniq_id++;
 

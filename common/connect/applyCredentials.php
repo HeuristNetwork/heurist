@@ -26,7 +26,7 @@ if (_is_logged_in()) {
 	}
 	// update cookie expiry time
 	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive']) {
-		$rv = setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HOST_BASE);
+		$rv = setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HEURIST_SERVER_NAME);
 	}
 //	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
 //		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
@@ -34,10 +34,6 @@ if (_is_logged_in()) {
 
 }
 session_write_close();
-
-if (! defined('BASE_PATH')  &&  defined('HEURIST_URL_BASE')) {
-	define('BASE_PATH', HEURIST_URL_BASE);
-}
 
 function is_cookie_current_version() {
 	return (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] == COOKIE_VERSION);

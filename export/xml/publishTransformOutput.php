@@ -85,7 +85,7 @@ if (@$_REQUEST['inputFilename']){
 		}
 	}
 }else if (@$_REQUEST['q']) {
-	$inputFilename = HEURIST_URL_BASE."export/xml/flathml.php?ver=1&f=1".
+	$inputFilename = HEURIST_BASE_URL."export/xml/flathml.php?ver=1&f=1".
 								(@$_REQUEST['depth'] ? "&depth=".$_REQUEST['depth']:"").
 								(@$_REQUEST['hinclude'] ? "&hinclude=".$_REQUEST['hinclude']:"").
 								(@$_REQUEST['selids'] ? "&selids=".$_REQUEST['selids']:"").
@@ -172,7 +172,7 @@ global $outputURI;
 	$xslProc = new XSLTProcessor();
 	$xslProc->importStylesheet($xslDoc);
 // set up common parameters for stylesheets.
-	$xslProc->setParameter('','hbaseURL',HEURIST_URL_BASE);
+	$xslProc->setParameter('','hbaseURL',HEURIST_BASE_URL);
 	$xslProc->setParameter('','dbName',HEURIST_DBNAME);
 	$xslProc->setParameter('','dbID',HEURIST_DBID);
 	$xslProc->setParameter('','transform',$styleFilename);

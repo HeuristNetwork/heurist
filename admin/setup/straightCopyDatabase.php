@@ -12,12 +12,12 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to clone a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to clone a database</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 
@@ -193,8 +193,8 @@
 		echo "<h2>New database '$targetdbname' created successfully</h2>";
 
 		print "<p>New upload directory ".HEURIST_UPLOAD_ROOT."$targetdbname</p>";
-		print "<p>The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$targetdbname."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$targetdbname."</a>.</p>";
-		print "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$targetdbname."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
+		print "<p>The search page for this database is: <a href=\"".HEURIST_BASE_URL."?db=".$targetdbname."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$targetdbname."</a>.</p>";
+		print "<p>Please click here: <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
 
 		print "</body></html>";
 		exit;

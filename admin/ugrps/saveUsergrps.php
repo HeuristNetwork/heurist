@@ -67,7 +67,7 @@
 
 	if (!is_logged_in() && @$_REQUEST['method'] != "saveUser") {
 		//ARTEM
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	header('Content-type: text/javascript');
@@ -396,7 +396,7 @@
 			"Email address: ".$ugr_eMail."\n".
 			"Organisation:  ".$ugr_Organisation."\n".
 			"Go to the address below to review further details and approve the registration:\n".
-			HEURIST_URL_BASE."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+			HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
 			$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
 				"From: root");
@@ -432,11 +432,11 @@
 				// If the registration was on the sandpit DB on main Heurist server, return to the project home page
 				// We don't bother to test for the Heurist server on the assumption it is very unlikely that anyone else
 				// will have or navigate to this database anywhere else
-				$email_text .= "\n\nPlease go to: ".HEURIST_URL_BASE."index.html with the username: " . $ugr_Name;
+				$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
 			} else {
 				// on any other server you give them a pointer to the search page of that database
 				$email_text = $email_text."\n\nHeurist database: ".HEURIST_DBNAME."\n".
-				"Login at: ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+				"Login at: ".HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 			}
 
 

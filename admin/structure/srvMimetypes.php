@@ -29,7 +29,7 @@
 	}
 
 	if (!is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 
@@ -212,7 +212,7 @@ exit();
 				}
 			}//for columns
 
-				
+
 					//check for duplication
 			/*if($isInsert){
 					$querydup = "select fxm_Extension from defFileExtToMimetype where fxm_Extension=?";
@@ -222,10 +222,10 @@ exit();
 						$query = "";
 					}
 			}*/
-			
+
 			if($query!=""){
 				if($isInsert){
-				
+
 					$query = "insert into defFileExtToMimetype (".$fieldNames.") values (".$query.")";
 				}else{
 					$query = "update defFileExtToMimetype set ".$query." where fxm_Extension = '$recID'";

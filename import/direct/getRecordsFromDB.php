@@ -20,11 +20,11 @@
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	if (! is_admin()) {
-		print "<html><body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<html><body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
 		return;
 	}
 ?>
@@ -184,7 +184,7 @@
 				}else{
 
 
-					header('Location: ' . HEURIST_URL_BASE . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
+					header('Location: ' . HEURIST_BASE_URL . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
 					exit;
 				}
 				mysql_connection_db_overwrite(DATABASE);

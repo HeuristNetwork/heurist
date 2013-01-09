@@ -22,7 +22,7 @@
 		$q = "db=".HEURIST_DBNAME;
 	}
 
-		header('Location: '.HEURIST_URL_BASE.'search/search.html?'.$q);
+		header('Location: '.HEURIST_BASE_URL.'search/search.html?'.$q);
 
 
 ?>

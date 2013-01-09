@@ -19,7 +19,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) {
-	header('Location: ' . BASE_PATH);
+	header('Location: ' . HEURIST_BASE_URL);
 	return;
 }
 
@@ -101,7 +101,7 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 		print '<ul>';
 		$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
 		while ($tag = mysql_fetch_assoc($res)) {
-			$searchlink = HEURIST_URL_BASE.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
+			$searchlink = HEURIST_BASE_URL.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
 			if ($tag['tgi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
 ?>

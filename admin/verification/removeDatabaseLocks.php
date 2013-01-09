@@ -20,7 +20,7 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
     if (! is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
     }
 
@@ -38,14 +38,14 @@
     if (!$res) {
         die('<p>Invalid query, please report to developers: '.$query.'  Error: '.mysql_error());
     }
-    
+
     if (mysql_affected_rows()==0) {
         print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
         <h2> There were no database locks to remove</h2>";
     }
     else {
         print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-        <h2>Database locks have been removed </h2>";   
+        <h2>Database locks have been removed </h2>";
     }
 
     print "</body>";

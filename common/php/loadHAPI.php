@@ -53,21 +53,8 @@ if (@$_REQUEST["db"]) {
 */
 require_once(dirname(__FILE__)."/../config/initialise.php");
 require_once("dbMySqlWrappers.php");
-/*
-mysql_connection_select("hapi");
-$query = "SELECT hl_key
-            FROM hapi_locations
-           WHERE hl_instance = '" . HEURIST_DBNAME . "'
-             AND hl_location = 'http://" . HOST . "/'";
-$res = mysql_query($query);
-$row = mysql_fetch_assoc($res);
-if (! $row) {
-	print "Failed to load hapi. No key found for database = '".HEURIST_DBNAME."  and uri = http:/".HOST."/";
-	exit;
-}
-$key = $row["hl_key"];
-*/
+
 ?>
 
-document.write("<" + "scr" +"ipt src=\"<?=HEURIST_URL_BASE?>hapi/hapiLoader.php?db=<?= HEURIST_DBNAME ?><?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
+document.write("<" + "scr" +"ipt src=\"<?=HEURIST_BASE_URL?>hapi/hapiLoader.php?db=<?= HEURIST_DBNAME ?><?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
 

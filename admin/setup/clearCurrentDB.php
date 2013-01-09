@@ -15,7 +15,7 @@
 
     // User must be system administrator or admin of the owners group for this database
     if (!is_admin()) {
-        print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to clear a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+        print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to clear a database</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
         return;
     }
 
@@ -195,16 +195,16 @@
                 }
                 if ($res2 != 0 ) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
-                    print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
+                    print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a>";
                 } else {
                     print "<h2>Record data, bookmarks and tags have been deleted from <b>$dbname</b></h2>";
-                    print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
+                    print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a>";
                 }
             }
         }
         else { // didn't request properly
             print "<p><h2>Request disallowed</h2>** FAILED **<p/>&nbsp;<p/>Incorrect challenge words entered. Data was note deleted from $dbname ".
-            "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
+            "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a>";
         }
     }
 

@@ -29,18 +29,11 @@ $last_uri = urldecode(@$_REQUEST['last_uri']);
 if (! $last_uri) {
 	if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
 		$last_uri = $_SERVER['HTTP_REFERER'];
-	}else if (defined('HEURIST_URL_BASE')) {
-		$last_uri = HEURIST_URL_BASE;
+	}else if (defined('HEURIST_BASE_URL')) {
+		$last_uri = HEURIST_BASE_URL;
 	}
 }
 
-if (! defined('BASE_PATH')) {
-	if (defined('HOST')) {
-		define('BASE_PATH', 'http://'.HOST."/");	//default assume document directory is root for heurist
-	}else{
-		define('BASE_PATH', '');
-	}
-}
 
 mysql_connection_db_select(USERS_DATABASE);
 
@@ -52,7 +45,6 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
     if ( ($user = mysql_fetch_assoc($res))  &&
 		 $user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD] ) {
-//		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
 /*****DEBUG****///error_log("in login  after crypt check");
 
 		$groups = reloadUserGroups($user[USERS_ID_FIELD]);
@@ -75,7 +67,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 			$time = time() + 7*24*60*60;
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
 		}
-		setcookie('heurist-sessionid', session_id(), $time, '/', HOST_BASE);
+		setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
 
 		/* bookkeeping */
 		mysql_connection_db_overwrite(USERS_DATABASE);
@@ -262,7 +254,7 @@ echo '<tr class="input-row"><td colspan="2"><p style="margin-left: 100px; color:
 <tr><td>
 <p>You are currently logged-in as <b><?= get_user_name() ?> (<?= get_user_username() ?>)</b></p>
 
-<p><b><a href="<?=HEURIST_URL_BASE?>">Heurist home</a></b></p>
+<p><b><a href="<?=HEURIST_BASE_URL?>">Heurist home</a></b></p>
 
 <?php
 		if ($last_uri)

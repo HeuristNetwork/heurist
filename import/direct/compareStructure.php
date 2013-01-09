@@ -20,13 +20,13 @@
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	if (! is_admin()) {
 		print "<html>";
 		//print "<header><style type='text/css'>.rtheader {width:300px; background-color: #d8da3d;}</style></header>";
-		print "<body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
 		return;
 	}
 ?>

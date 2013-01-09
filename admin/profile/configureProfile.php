@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -225,14 +225,14 @@ while ($row = mysql_fetch_row($res)) {
 '<tr>
  <td nowrap>
   <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-  <img src="'.HEURIST_URL_BASE.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
+  <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
   <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
  </td>
  <td nowrap>' . $row[2] . '</td>
  <td class="u-cell">
   <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
  </td>
- <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
+ <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
  <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
 </tr>';
 

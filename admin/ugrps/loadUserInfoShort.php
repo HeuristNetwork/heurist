@@ -20,7 +20,7 @@
 
 	header('Content-type: text/javascript');
 
-	print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
+	print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_BASE_URL) . ";\n";
 ?>
 
 	top.HEURIST.is_logged_in = function() { return <?= intval(is_logged_in()) ?> > 0; };

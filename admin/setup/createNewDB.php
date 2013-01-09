@@ -16,7 +16,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	if (!is_logged_in() && HEURIST_DBNAME!="") {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
 		return;
 	}
 
@@ -500,8 +500,8 @@
 			echo "<p><strong>Admin username:</strong> ".$name."<br />";
 			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-			echo "<p>You may wish to bookmark the database home page (search page): <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.</p>";
-			echo "<p><a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\" style='font-size:1.2em;font-weight:bold'>Go to Administration page</a>, to configure your new database</p>";
+			echo "<p>You may wish to bookmark the database home page (search page): <a href=\"".HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$newDBName."</a>.</p>";
+			echo "<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\" style='font-size:1.2em;font-weight:bold'>Go to Administration page</a>, to configure your new database</p>";
 
 			// TODO: automatically redirect to the new database, maybe, in a new window
 

@@ -20,7 +20,7 @@ require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
 	return;
 }
 mysql_connection_db_overwrite(DATABASE);

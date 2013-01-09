@@ -103,12 +103,12 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 }
 */
 /*****DEBUG****///error_log(print_r($auth, 1));
-$baseURL = HEURIST_URL_BASE;
+$baseURL = HEURIST_BASE_URL;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);
 
-/*****DEBUG****///error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
+/*****DEBUG****///error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_BASE_URL);
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";

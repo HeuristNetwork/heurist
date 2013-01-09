@@ -19,7 +19,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once('findReplacedRecord.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
         return;
 }
 
@@ -51,7 +51,7 @@ if (@$_REQUEST['bkmk_id']) {
 
 require_once(dirname(__FILE__).'/testPermissions.php');
 if (! canViewRecord($rec_id)) {
-	header('Location: ' . BASE_PATH . 'common/html/msgAccessDenied.html?'.$rec_id);
+	header('Location: ' . HEURIST_BASE_URL . 'common/html/msgAccessDenied.html?'.$rec_id);
 	return;
 }
 

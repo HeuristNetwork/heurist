@@ -20,7 +20,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	//header('Content-type: text/html; charset=utf-8');
 	return;
 }
