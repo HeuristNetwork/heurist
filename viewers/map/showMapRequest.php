@@ -291,6 +291,9 @@ if(mysql_error()) {
 					}
 				}
 			}
+			if(!$rec['max_zoom']){
+				$rec['max_zoom'] = 19;
+			}
 
 			array_push($layers, $rec);
 		}

@@ -18,7 +18,7 @@
 
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/saveStructure.php');
 
 if (!is_admin()) {
