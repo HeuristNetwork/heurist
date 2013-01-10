@@ -80,7 +80,7 @@
 		"searchQueryInBrowser" => "false",
 
 		"favourites" => "Favourites", // standard spelling for default search
-		"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
+		"loadRelatedOnSearch" => "true", // by default load related records, can be set in Preferences dialogue
 		"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
 		"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
 		"showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
@@ -115,7 +115,7 @@
 //	if ($writeMode) return;	// suppress normal output
 
 ?>
-//document.domain = "<?= HEURIST_HOST_NAME ?>";
+//document.domain = "<?= HEURIST_SERVER_NAME ?>";
 if (! document.body) {
 // Document manipulation becomes much harder if we can't access the body.
 throw document.location.href + ": include displayPreferences.php in the body, not the head";

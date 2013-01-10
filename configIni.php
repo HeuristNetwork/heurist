@@ -14,6 +14,11 @@
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
 // in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 
+// [server]
+// enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
+// for example $serverName = "heuristscholar.org";  Be sure to include teh port if not port 80
+$serverName = null; // override default taken from request header SERVER_NAME
+
 // [database]
 // enter the host name or IP address of your MySQL server, blank --> localhost
 // for example $dbHost = "heuristscholar.org";  will cause the code to use mysql on the server at heuristscholar.org
@@ -55,10 +60,10 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // The default root pathname of a directory where Heurist can store uploaded
 // files eg. images, pdfs. PHP must be able to create subdirectories of this directory
 // for each Heurist database and write files within them.
-// For instance, if you would like to upload to /var/www/myUploadDir then use
-// $defaultRootFileUploadPath = "/var/www/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
+// For instance, if you would like to upload to a dbdir under /var/www/myUploadDir then use
+// $defaultRootFileUploadPath = "/var/www/myUploadDir/";
 // Then, when running Heurist with db=main, uploaded files will be loaded into /var/www/myUploadDir/main/
-// defaults to root document directory/HEURIST_FILESTORE/dbname
+// defaults DocRoot/HEURIST_FILESTORE/dbname
 $defaultRootFileUploadPath = ""; // recommended
 
 // The Document root  relative pathname of a directory where Heurist can store uploaded

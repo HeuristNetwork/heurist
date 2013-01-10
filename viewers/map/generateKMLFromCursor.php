@@ -248,7 +248,7 @@ class KMLBuilder {
 
 	function _addPoint($elem, $record, $x, $y) {
 		$point = $elem->addChild("Point");
-		$point->Style->IconStyle->Icon['href'] = HEURIST_ICON_DIR.HEURIST_DBID."-".$record->rec_RecTypeID.'.png';
+		$point->Style->IconStyle->Icon['href'] = HEURIST_ICON_DIR.HEURIST_DBID."-".$record->rec_RecTypeID.'.png';//TODO: Ask Artem if DBID is a bug
 		$point->Style->IconStyle->Icon['w'] = '26';
 		$point->Style->IconStyle->Icon['h'] = '26';
 		$point->coordinates = round($x, 5) . ',' . round($y, 5) . ',0';

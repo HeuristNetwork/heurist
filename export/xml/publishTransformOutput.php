@@ -74,17 +74,18 @@ if ($transformID) {
 //error_log("made it to here 2");
 
 //error_log("styleFilename - ".print_r($styleFilename,true));
-if (@$_REQUEST['inputFilename']){
+if (@$_REQUEST['inputFilename']){// get a saved XML file
+	//if URI then treat as remote
 	if (preg_match("/http/",$_REQUEST['inputFilename'])) {
 //		returnXMLErrorMsgPage("Remote inputs are not supported at this time '".$_REQUEST['inputFilename']."'");
 		$inputFilename = $_REQUEST['inputFilename'];
-	}else{
+	}else{//local filename so assume in HML publication directory
 		$inputFilename = "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'];
 		if ( !file_exists($inputFilename)) {
 			returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 		}
 	}
-}else if (@$_REQUEST['q']) {
+}else if (@$_REQUEST['q']) {//get input file from service call for query.
 	$inputFilename = HEURIST_BASE_URL."export/xml/flathml.php?ver=1&f=1".
 								(@$_REQUEST['depth'] ? "&depth=".$_REQUEST['depth']:"").
 								(@$_REQUEST['hinclude'] ? "&hinclude=".$_REQUEST['hinclude']:"").
@@ -92,7 +93,7 @@ if (@$_REQUEST['inputFilename']){
 								"&w=all&q=".$_REQUEST['q']."&db=".HEURIST_DBNAME.
 								(@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
 								($outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :"");
-}else if (@$_REQUEST['recID']){
+}else if (@$_REQUEST['recID']){//recID so assume that the file has been prepublished to the HML Publish directory
 	$inputFilename = "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$_REQUEST['recID'].".hml";
 	if ( !file_exists($inputFilename)) {
 		returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
@@ -104,20 +105,20 @@ if (!$inputFilename ) {
 	returnXMLErrorMsgPage("cannot determine input file. Please sepecify 'inputFilename' or 'recID' or query 'q='");
 }
 
-if (@$_REQUEST['outputFilename']){
+if (@$_REQUEST['outputFilename']){//filename supplied so use it
 	if (preg_match("/http/",$_REQUEST['outputFilename'])) {
 		returnXMLErrorMsgPage("Remote outputs are not supported at this time '".$_REQUEST['outputFilename']."'");
 	}
 	$outputFilename = "".HEURIST_HTML_PUBPATH.$_REQUEST['outputFilename'];
-}else if (@$_REQUEST['recID']){
+}else if (@$_REQUEST['recID']){//recID so use naming algorythm
 	$outputFilename = "".HEURIST_HTML_PUBPATH.HEURIST_DBID.$style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html";
 }
 //error_log("output file name = $outputFilename");
 
-
+//caclulate URI to output.
 $pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
 if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
-	$outputURI = 'http://'.HEURIST_HOST_NAME.
+	$outputURI = 'http://'.HEURIST_SERVER_NAME.
 						( $pos !== false ? substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)) : HEURIST_HTML_PUBPATH).
 							(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
 								(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));

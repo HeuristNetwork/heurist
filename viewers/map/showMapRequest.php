@@ -137,11 +137,11 @@
 			$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
 			$records[$bibID]["url"] = $row[2]; //($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
 			//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
-			$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
+			$records[$bibID]["icon_url"] = HEURIST_ICON_SITE_PATH . $row[7] . ".png";;
 
 			$thumb_url = getThumbnailURL($bibID); //function from uploadFile.php
 			if($thumb_url==""){  //if thumb not defined - use rectype default thumb
-				$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
+				$thumb_url = HEURIST_ICON_SITE_PATH.	"thumb/th_" . $row[7] . ".png";
 			}
 
 			$records[$bibID]["thumb_url"] = $thumb_url;

@@ -51,19 +51,19 @@
 			.row:hover {
 				background-color: #CCCCCC;
 			}
-			
+
 			table.tbcount{
 				border-width: 0 0 1px 1px;
 				border-spacing: 0;
 				border-collapse: collapse;
 				border-style: solid;
-			}			
+			}
 			.tbcount td, .tbcount th{
 				margin: 0;
 				padding: 4px;
 				border-width: 1px 1px 0 0;
 				border-style: solid;
-			}			
+			}
 		</style>
 	</head>
 	<body class="popup">
@@ -80,7 +80,7 @@
 
 		$rt_ID = $row[0];
 		$rectypeTitle = $rtStructs['names'][$rt_ID];
-		$rectypeImg = "style='background-image:url(".HEURIST_ICON_URL_BASE.$rt_ID.".png)'";
+		$rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
 
 		$img = "<img src='../common/images/16x16.gif' title='$rectypeTitle' ".$rectypeImg." class='rft' />";
 

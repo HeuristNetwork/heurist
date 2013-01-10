@@ -1,37 +1,44 @@
 <?php
-
+/*
+ * Copyright (C) 2005-2013 University of Sydney
+ *
+ * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.gnu.org/licenses/gpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
+ * brief description of file
+ *
+ * @author		!!!by whom  if more than one add another on a separate line
+ * @copyright 	(C) 2005-2013 University of Sydney
+ * @link 		http://Sydney.edu.au/Heurist/about.html
+ * @version		3.1.0
+ * @license 	http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @package 	Heurist academic knowledge management system
+ * @subpackage	!!!subpackagename for file such as Administration, Search, Edit, Application, Library
+ */
 ?>
 
 <?php
-
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
-
-if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
+require_once (dirname(__FILE__) . '/../../common/t1000/t1000.php');
+if (!is_logged_in()) {
+	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
 	return;
 }
-
 mysql_connection_db_select(DATABASE);
-
 $template = file_get_contents('listRectypeDescriptions.html');
 //$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
-
 $body = new BodyScope($lexer);
 $body->global_vars['dbname'] = HEURIST_DBNAME;
-$body->global_vars['iconURL'] = HEURIST_ICON_URL_BASE;
-
+$body->global_vars['iconURL'] = HEURIST_ICON_SITE_PATH;
 $body->verify();
 $body->render();
-
 ?>

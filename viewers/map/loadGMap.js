@@ -263,7 +263,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 				url += "common/php/resize_image.php?db=" + top.HEURIST.database.name + "&amp;file_id=" + Records[0]['thumb_file_id'];
 			}else {
 				//get recType image
-				url += top.HEURIST.iconDir + "map-icons/map_" + recType + ".png";
+				url += top.HEURIST.iconDir + "map-icons/map_" + recType + ".png";//TODO:  ask Artem if this is a bug. Shouldn't this be site relative?
 			}
 			return url;
 		}

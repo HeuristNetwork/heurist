@@ -217,7 +217,7 @@ function print_header_line($bib) {
 	<div id=footer>
 
         <h3>
-        	<div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL_BASE.$bib['rty_ID'].".png)'"?> >
+        	<div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_SITE_PATH.$bib['rty_ID'].".png)'"?> >
         		<?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."]" ?>
         	</div>
         </h3>
@@ -645,7 +645,7 @@ global $relRT;
 		print '<div class=detailRow>';
 		print '<div class=detailType>Linked from</div>';
 		print '<div class=detail>';
-		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL_BASE.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_SITE_PATH.'common/images/16x16.gif">&nbsp;';
+		print '<img class="rft" style="background-image:url('.HEURIST_ICON_SITE_PATH.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_SITE_PATH.'common/images/16x16.gif">&nbsp;';
 		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}

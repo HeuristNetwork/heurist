@@ -423,7 +423,7 @@
 			$warnings = 0;
 
 			// Create a default upload directory for uploaded files eg multimedia, images etc.
-			$uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
+			$uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;//TODO: This locks us into upload path. This is teh place for DB override.
 			$cmdline = "mkdir -p -m a=rwx ".$uploadPath;
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.

@@ -183,7 +183,7 @@ function handle_notification() {
 	if (count($bib_ids) == 1) $email_subject .= ' (one reference)';
 	else $email_subject .= ' (' . count($bib_ids) . ' references)';
 
-	$email_headers = 'From: ' . get_user_name() . ' <no-reply@'.HEURIST_HOST_NAME.'>';
+	$email_headers = 'From: ' . get_user_name() . ' <no-reply@'.HEURIST_SERVER_NAME.'>';
 	if ($user_email) {
 		$email_headers .= "\r\nCc: " . get_user_name() . ' <' . $user_email . '>';
 		$email_headers .= "\r\nReply-To: " . get_user_name() . ' <' . $user_email . '>';

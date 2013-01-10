@@ -191,7 +191,7 @@ function startMySession(){
 		session_id($_COOKIE['heurist-sessionid']);
 	} else {
 		session_id(sha1(rand()));
-		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_HOST_NAME);
+		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_SERVER_NAME);
 	}
 
 	session_cache_limiter('none');

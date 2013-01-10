@@ -47,6 +47,7 @@ if (!is_logged_in()) {
 mysql_connection_db_select(DATABASE);
 
 // set parameter defaults
+//input must be relative to HML publish directory
 $inputFilename = (@$_REQUEST['inputFilename'] ? "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'] :
 					(@$_REQUEST['recID'] ? "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml":
 						null));	// outName returns the hml direct.
@@ -58,7 +59,7 @@ $outputFilename = (@$_REQUEST['outputFilename'] ? "".HEURIST_HTML_PUBPATH.$_REQU
 
 $pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
 if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
-	$outputURI = 'http://'.HEURIST_HOST_NAME.
+	$outputURI = 'http://'.HEURIST_SERVER_NAME.
 						( $pos !== false ? substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)) : HEURIST_HTML_PUBPATH).
 						(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
 							(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));

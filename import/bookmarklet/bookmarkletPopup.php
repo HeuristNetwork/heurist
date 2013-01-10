@@ -18,7 +18,7 @@ w: 370,
 h: 240,
 
 uriBase: "<?= HEURIST_BASE_URL ?>",
-uriHost: "http://<?= HEURIST_HOST_NAME ?>/",
+uriHost: "http://<?= HEURIST_SERVER_NAME ?>/",
 database:"<?=HEURIST_DBNAME?>",
 init: function () {
 	// toggle display if our div is already present in the DOM
@@ -168,7 +168,7 @@ render: function() {
 		td.style.height = "30px";
 
 	} else { // Page has never been bookmarked in this database
-        
+
         // Add the page as the default type, Web page / Internet bookmark
 		tr = t.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
@@ -198,7 +198,7 @@ render: function() {
             if (r) Heurist.bookmark(r);
         };
         td.appendChild(button);
-		
+
 		tr = t.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
 		td.colSpan = "2";

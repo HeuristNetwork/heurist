@@ -20,12 +20,15 @@
 
 	define("SAVE_URI", "disabled");
 	if (is_dir(HEURIST_UPLOAD_DIR)) {
-		define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
+		if (is_dir(HEURIST_UPLOAD_DIR.'xsl-templates')) {
+			define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
+		} else if (is_dir(HEURIST_UPLOAD_DIR.'xsl')) {
+			define('DIR', HEURIST_UPLOAD_DIR.'xsl');
+		}
 	}else if(is_dir('xsl-templates')) {
 		define('DIR', 'xsl-templates');
 	}else if(is_dir('xsl')) {
 		define('DIR', 'xsl');
-	}else{
 	}
 	// using ob_gzhandler makes this stuff up on IE6-
 

@@ -29,7 +29,7 @@
 
 	$dim = ($mode==0)?16:75; // appropriate sizes for icons and thumbnails
 
-	$image_dir = /* HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.*/ HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
+	$image_dir = HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
 	$image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
 
 /*****DEBUG****///error_log("image directory / image url: ".$image_dir."  /  ".$image_url);

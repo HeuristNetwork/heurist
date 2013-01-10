@@ -28,8 +28,12 @@
 		header('Content-type: text/xml; charset=utf-8');
 		echo $contents;
 		return;
-	}else if (is_dir(HEURIST_UPLOAD_DIR) && is_dir(HEURIST_UPLOAD_DIR.'xsl-templates')) {
-		define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
+	}else if (is_dir(HEURIST_UPLOAD_DIR)) {
+		if (is_dir(HEURIST_UPLOAD_DIR.'xsl-templates')) {
+			define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
+		} else if (is_dir(HEURIST_UPLOAD_DIR.'xsl')) {
+			define('DIR', HEURIST_UPLOAD_DIR.'xsl');
+		}
 	}else if(is_dir('xsl-templates')) {
 		define('DIR', 'xsl-templates');
 	}else if(is_dir('xsl')) {

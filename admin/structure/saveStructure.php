@@ -662,7 +662,7 @@
 					$ret['error'] = "SQL error deleting record type $rtyID from defRecTypes table: ".mysql_error();
 				} else {
 
-					$icon_filename = HEURIST_ICON_DIR.$rtyID.".png";
+					$icon_filename = HEURIST_ICON_DIR.$rtyID.".png"; //BUG what about thumb??
 					if(file_exists($icon_filename)){
 						unlink($icon_filename);
 					}

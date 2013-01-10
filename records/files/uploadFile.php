@@ -299,7 +299,7 @@
 		$type = 'unknown';
 
 		//1. detect source
-		if(strpos($url, 'http://'.HEURIST_HOST_NAME) ==0 && strpos($url, 'records/files/downloadFile.php') >=0){
+		if(strpos($url, 'http://'.HEURIST_SERVER_NAME) ==0 && strpos($url, 'records/files/downloadFile.php') >=0){
 			$source = 'heurist';
 		}else if(strpos($url,'http://www.flickr.com')==0){
 			$source = 'flickr';
@@ -645,7 +645,7 @@
 
 			$thumbnail_file = "ulf_".$res["nonce"].".png";
 			if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-				$res["thumbURL"] = HEURIST_THUMB_URL_BASE.$thumbnail_file;
+				$res["thumbURL"] = HEURIST_THUMB_BASE_URL.$thumbnail_file;
 			}else{
 				$res["thumbURL"] =
 				HEURIST_BASE_URL."common/php/resizeImage.php?".
@@ -756,7 +756,7 @@
 
 				$thumbnail_file = "ulf_".$file['ulf_ObfuscatedFileID'].".png";
 				if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-					$thumb_url = HEURIST_THUMB_URL_BASE.$thumbnail_file;
+					$thumb_url = HEURIST_THUMB_BASE_URL.$thumbnail_file;
 				}else{
 					$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
 				}
