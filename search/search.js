@@ -2982,13 +2982,11 @@ top.HEURIST.search = {
 		});
 	},
 
-	savedSearchEdit: function(ssid){
+	savedSearchEdit: function(ssid){// TODO ssid 0 new search H=250 if layout H=160  if  SS  H= 180  W =400
 		var _db = (top.HEURIST.database && top.HEURIST.database.name ? "db="+top.HEURIST.database.name : "");
 		top.HEURIST.util.popupURL(window,
 				top.HEURIST.basePath+"search/saved/saveSearchPopup.html?"+_db+(ssid>0?"&ssid="+ssid :""),
 			{ callback: function(responce){
-
-
 			}}
 		);
 	},
