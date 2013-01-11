@@ -330,20 +330,8 @@
 
 				// -------- LAYOUT --------------
 
-				var result_style = document.getElementById("slctLayout").value;
-				if (result_style) {
-					if (result_style == "layout") {
-						if ( sLayout && sLayout.length > 0) {
-							query.push(sLayout);
-						}else{
-							query.push("layout=srch:l");
-						}
-					} else if (result_style != "") {
-						query.push("layout=srch:" + result_style);
-					}
-				}else if(ssid>0 && sLayout){ //take previous value
-					//
-					query.push(sLayout);
+				if (document.getElementById("edLayout").value != "") {
+					query.push(document.getElementById("edLayout").value);
 				}
 
 				// --------
