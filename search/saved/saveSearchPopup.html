@@ -25,6 +25,7 @@
 				sAllOrBookmarks = "all",
 				sFilter = "",
 				sLayout = top.HEURIST.search.getLayoutString(), //current layout
+				sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
 				rtFilter,
 				relFilter,
 				ptrFilter;
@@ -47,6 +48,7 @@
 					if(top.HEURIST.util.isempty(sAllOrBookmarks)){
 						sAllOrBookmarks = (ss[4] == 1)?"all":"bookmark";
 					}
+					sSelids = getParams2("selids", ss[1]);
 					sLayout = getParams2("layout", ss[1]);
 
 					//extract filters from query
@@ -67,7 +69,6 @@
 				rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
 				relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
 				ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-
 				if (!sQuery) {
 					sQuery = top.HEURIST.util.getUrlParameter("q", qparams);
 					if (sQuery) {
@@ -141,11 +142,15 @@
 
 						if(!sQuery){ //query not defined so saved filtered layout- filter & Layout only
 							document.getElementById("divQuery").style.display = "none";
+							document.getElementById("divSelids").style.display = "none";
 							document.getElementById("rbSaveFilterLayout").checked = true;
 							//todo set height 160
 						}else{ //Saved search show only fields editable
 							//save any and all changes
 							document.getElementById("rbSaveAll").checked = true;
+							if (sSelids){
+								document.getElementById("cbSelids").checked = true;
+							}
 							//todo set height 180
 						}
 					}else{
@@ -179,6 +184,7 @@
 					document.getElementById("edQuery").value = sQuery;
 					document.getElementById("edFilter").value = sFilter;
 					document.getElementById("edLayout").value = sLayout;
+					document.getElementById("edSelids").value = sSelids;
 
 					setTimeout(function() { document.getElementById('edName').focus() }, 10);
 			});
@@ -325,13 +331,19 @@
 				// -------- FILTERS --------------
 
 				if (!document.getElementById("rbSaveQuery").checked && document.getElementById("edFilter").value != "") {
-					query.push(document.getElementById("edFilter").value);
+					query.push(document.getElementById("edFilter").value);//TODO: validate format
 				}
 
 				// -------- LAYOUT --------------
 
-				if (document.getElementById("edLayout").value != "") {
-					query.push(document.getElementById("edLayout").value);
+				if (!document.getElementById("rbSaveQuery").checked && document.getElementById("edLayout").value != "") {
+					query.push(document.getElementById("edLayout").value);//TODO: validate format
+				}
+
+				// -------- Selids --------------
+
+				if (document.getElementById("cbSelids").checked && document.getElementById("edSelids").value != "") {
+					query.push(document.getElementById("edSelids").value);//TODO: validate format
 				}
 
 				// --------
@@ -414,6 +426,7 @@
 		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" /></div>
 		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" /></div>
 		<div><label class="llab">Layout:</label> <input class="fld" type="text" id="edLayout" /></div>
+		<div id="divSelids"><label class="llab" >Selids :</label> <input class="fld" type="text" id="edSelids"/> <input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;">&nbsp;<label for="cbSelids" id="lblCB1" >Save Selids</label></div>
 
 
 		<!--

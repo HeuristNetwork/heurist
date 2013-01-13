@@ -302,13 +302,16 @@ top.HEURIST.search = {
 			document.getElementById("results-message").style.display = "block";
 		}
 
-
-
 		top.HEURIST.currentQuery_main = ("w=" + encodeURIComponent(params["w"])) + "&" +
-			("stype=" + (params["stype"] ? encodeURIComponent(params["stype"]) : "")) + "&" +
+			((params["stype"] ? "stype=" + encodeURIComponent(params["stype"]) + "&" : "")) +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
-			("q=" + encodeURIComponent(params["q"]))+
-			("&db=" + (params['db'] ? params['db'] :
+			("q=" + encodeURIComponent(params["q"]))+ "&" +
+			((params["layout"] ? "layout=" + encodeURIComponent(params["layout"]) + "&" : "")) +
+			((params["rtfilters"] ? "rtfilters=" + encodeURIComponent(params["rtfilters"]) + "&" : "")) +
+			((params["prtfilters"] ? "prtfilters=" + encodeURIComponent(params["prtfilters"]) + "&" : "")) +
+			((params["relfilters"] ? "relfilters=" + encodeURIComponent(params["relfilters"]) + "&" : "")) +
+			((params["selids"] ? "selids=" + encodeURIComponent(params["selids"]) + "&" : "")) +
+			("db=" + (params['db'] ? params['db'] :
 					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
 
 		if(top.HEURIST.util.getDisplayPreference("searchQueryInBrowser") == "true"){
@@ -323,6 +326,28 @@ top.HEURIST.search = {
 		iframeElt.src = top.HEURIST.basePath+"search/getResultsPageAsync.php?" + top.HEURIST.currentQuery_main;
 
 		document.body.appendChild(iframeElt);
+	},
+
+	updateBrowserHistory: function(){
+		var params = top.HEURIST.parameters;
+		var sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
+			sLayout = top.HEURIST.search.getLayoutString()[1],
+			rtFilter = top.HEURIST.search.getPushDownFilter("rectype")[1],
+			relFilter = top.HEURIST.search.getPushDownFilter("reltype")[1],
+			ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype")[1];
+		top.HEURIST.currentQuery_main = ("w=" + encodeURIComponent(params["w"])) + "&" +
+			((params["stype"] ? "stype=" + encodeURIComponent(params["stype"]) + "&" : "")) +
+			("ver=" + top.HEURIST.search.VERSION) + "&" +
+			("q=" + encodeURIComponent(params["q"]))+ "&" +
+			((sLayout ? sLayout + "&" : "")) +
+			((rtFilter ? rtFilter + "&" : "")) +
+			((relFilter ? relFilter + "&" : "")) +
+			((ptrFilter ? ptrFilter + "&" : "")) +
+			((sSelids ? sSelids + "&" : "")) +
+			("db=" + (params['db'] ? params['db'] :
+					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
+
+			window.history.pushState("object or string", "Title", location.pathname+'?'+ top.HEURIST.currentQuery_main);
 	},
 
 	parseLayoutParam: function(layoutString){
