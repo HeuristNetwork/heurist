@@ -11,10 +11,10 @@
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
- */
+*/
 /**
  * rectypeXFormLibrary contains the functions which translate a heurist rectype definition info an XForm xml document
- * following the ODK Collect Forms guidelines.
+ * following the ODK Collect xForms guidelines.
  *
  * @author		Stephen White	<stephen.white@sydney.edu.au>
  * @author		Artem Osmakov	<artem.osmakov@sydney.edu.au>
@@ -25,11 +25,16 @@
  * @package 	Heurist academic knowledge management system
  * @subpackage	XForms
  */
-
+/**
+* Function list:
+* - getXFormTypeFromBaseType()
+* - buildform()
+* - createRecordLookup()
+* - createTermSelect()
+*/
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
-
 /*
 	http://opendatakit.org/help/form-design/xlsform/
 
@@ -52,16 +57,13 @@ require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 	Note: teh 'appearance " attribute can be used to launch intents that can be serviced by
 	arbritrary android applications - it's assumed that the app returns the correct type
 */
-
 /**
-* simple description
-* @global       type description of global variable usage in a function
-* @param        string [$sDetailBasetype] description
-* @return       type description
-* @link         http://opendatakit.org/help/form-design/xlsform/
-* @see          name of another element (function or object) used in this function
-*/
-function getFieldType($sDetailBasetype) {
+ * mapping function that maps Heurist base types into XForm ui types.
+ * @param        string [$sDetailBasetype] base type of HERUIST detail
+ * @return       string HEURIST extened  ODK and javaRosa XForm type mapped to input
+ * @link         http://opendatakit.org/help/form-design/xlsform/
+ */
+function getXFormTypeFromBaseType($sDetailBasetype) {
 	switch ($sDetailBasetype) {
 		case "blocktext":
 			return "string";
@@ -90,14 +92,19 @@ function getFieldType($sDetailBasetype) {
 	}
 }
 /**
-* simple description
-* detailed desription
-* @global       type description of global variable usage in a function
-* @param        type [$varname] description
-* @return       type description
-* @link         URL
-* @see          name of another element (function or object) used in this function
-*/
+ * main form generation code
+ * detailed desription
+ * @staticvar    array $dettypes array detail type definitions for this database
+ * @staticvar    object $di field name to index mapping for detail type definition
+ * @staticvar    array $rectypes array record type structure definitions for this database
+ * @staticvar    object $ri field name to index mapping for record field structure definition
+ * @staticvar    object $ti field name to index mapping for term definition
+ * @staticvar    array $termLookup array term structure definitions for the enumerations in this database
+ * @staticvar    array $relnLookup array term structure definitions for the relationships in this database
+ * @param        integer [$rt_id] the rectype locally unique identifier
+ * @return       object an array of strings representing form, rtName, rtConceptID, rtDescription, and report on success
+ * @see          getXFormTypeFromBaseType, createRecordLookup, createTermSelect, getAllDetailTypeStructures, getAllRectypeStructures, getTerms
+ */
 function buildform($rt_id) {
 	// mappings and lookups - static so we only retrieve once per service call
 	static $dettypes, $di, $rectypes, $ri, $rid, $terms, $ti, $termLookup, $relnLookup;
@@ -160,7 +167,7 @@ function buildform($rt_id) {
 		$baseType = $dettype[$fieldBaseTypeIndex];
 		$fieldTypeName = $dettype[$fieldTypeNameIndex];
 		$fieldName = $rt_dt[$fieldNameIndex];
-		$fieldtype = getFieldType($baseType);
+		$fieldtype = getXFormTypeFromBaseType($baseType);
 		$fieldMaxCount = $rt_dt[$fieldMaxRepeatIndex];
 		$isRepeatable = ($fieldMaxCount > 1 || $fieldMaxCount == NULL);
 		//skip any unsupport field types
@@ -270,14 +277,14 @@ function buildform($rt_id) {
 	return array($form, $rtName, $rtConceptID, $rtDescription, $report);
 }
 /**
-* simple description
-* detailed desription
-* @global       type description of global variable usage in a function
-* @param        type [$varname] description
-* @return       type description
-* @link         URL
-* @see          name of another element (function or object) used in this function
-*/
+ * creates an xForms select lookup list using the rectitles and heurist record ids
+ *
+ * given a list of recType IDs this function create a select list of Record Titles (alphabetical order)
+ * with HEURIST record ids as the lookup value.
+ * @param        array [$rtIDs] array of record Type identifiers for which a resource pointer is constrained to.
+ * @return       string formatted as a XForm select lookup item list
+ * @todo         need to accept a filter for reducing the recordset, currently you get all records of every type in teh input list
+ */
 function createRecordLookup($rtIDs) {
 	$emptyLookup = "<item>\n" . "<label>\"no records found for rectypes '$rtIDs'\"</label>\n" . "<value>0</value>\n" . "</item>\n";
 	$recs = mysql__select_assoc("Records", "rec_ID", "rec_Title", "rec_RecTypeID in ($rtIDs) order by rec_Title");
@@ -292,25 +299,20 @@ function createRecordLookup($rtIDs) {
 	}
 	return $ret;
 }
-/*
- * @param termIDTree an array tree of term ids
- * @param disabledTermIDsList a comma separated list of term ids to be markered as headers, can be empty
- * @param termLookup a lookup array of term names
- * @param defaultTermID id of term to show as selected, can be null
-*/
 /**
-* simple description
-* detailed desription
-* @global       type description of global variable usage in a function
-* @param        type [$varname] description
-* @return       type description
-* @link         URL
-* @see          name of another element (function or object) used in this function
-*/
-function createTermSelect($termIDTree, $disabledTermIDsList, $termLocalLookup, $isAddFirstEmpty, $ti) {
-	//global $ti; //terms field index
+ * creates an xForm item list for the set of terms passed in.
+ *
+ * @param        string $termIDTree json string representing the tree of term ids for this term field
+ * @param        string $disabledTermIDsList a comma separated list of term ids to be markered as headers, can be empty
+ * @param        $termLocalLookup a lookup array of term structures
+ * @param        object $ti term structure field name to index mapping for term definition
+ * @return       string representing an xForm select item list
+ * @see          getTermOffspringList
+ * @todo         expand this function to xForm cascaded selects auto completion select
+ */
+function createTermSelect($termIDTree, $disabledTermIDsList, $termLocalLookup, $ti) {
 	$res = "";
-	$termIDTree = preg_replace("/[\}\{\:\"]/", "", $termIDTree);
+	$termIDTree = preg_replace("/[\}\{\:\"]/", "", $termIDTree); //remove unused structure characters
 	$termIDTree = explode(",", $termIDTree);
 	if (count($termIDTree) == 1) { //term set parent term, so expand to direct children
 		$childTerms = getTermOffspringList($termIDTree[0], false);
@@ -318,6 +320,7 @@ function createTermSelect($termIDTree, $disabledTermIDsList, $termLocalLookup, $
 			$termIDTree = $childTerms;
 		}
 	}
+	// sort($termIDTree);
 	$disabledTerms = explode(",", $disabledTermIDsList);
 	foreach ($termIDTree as $index => $idTerm) {
 		if (array_key_exists($idTerm, $disabledTerms)) {
@@ -336,84 +339,5 @@ function createTermSelect($termIDTree, $disabledTermIDsList, $termLocalLookup, $
 	}
 	return $res;
 }
-/**
-* simple description
-* detailed desription
-* @global       type description of global variable usage in a function
-* @param        type [$varname] description
-* @return       type description
-* @link         URL
-* @see          name of another element (function or object) used in this function
-*/
-function createTermSelectList($termIDTree, $disabledTermIDsList, $termLookup, $isAddFirstEmpty, $ti) {
-	//global $ti; //terms field index
-	$res = "";
-	$termIDTree = json_decode($termIDTree);
-	$disabledTerms = explode(",", $disabledTermIDsList);
-	if ($isAddFirstEmpty) {
-		$res = "<item>
-			<label>&nbsp</label>
-			<value></value>
-			</item>";
-	}
-	$res = $res . createSubTreeOptions(null, 0, $termIDTree, $termLookup, $ti);
-	return $res;
-}
-/**
-* simple description
-* detailed desription
-* @global       type description of global variable usage in a function
-* @param        type [$varname] description
-* @return       type description
-* @link         URL
-* @see          name of another element (function or object) used in this function
-*/
-function createSubTreeOptions($optgroup, $depth, $termSubTree, $localLookup, $ti) {
-	$res2 = "";
-	foreach ($termSubTree as $termID => $subTermTree) {
-		if (array_key_exists($termID, $localLookup)) {
-			$termName = $localLookup[$termID][$ti['trm_Label']];
-			$termCode = $localLookup[$termID][$ti['trm_ConceptID']];
-			if (!$termCode) {
-				$termCode = HEURIST_DBID . "-" . $termID;
-			}
-		} else {
-			continue;
-		}
-		/* @todo
-			if(isNotFirefox && depth>1){
-			//for non mozilla add manual indent
-			var a = new Array(depth*2);
-			termName = a.join('. ') + termName;
-			}
-		*/
-		$isDisabled = (!$disabledTerms || array_key_exists($termID, $disabledTerms));
-		$hasChildren = count((array)$subTermTree) > 0;
-		$isHeader = $isDisabled && $hasChildren;
-		if ($isHeader) { // header term behaves like an option group
-			/* CHOICE is not supported in JavaRosa
-				var new_optgroup = document.createElement("optgroup");
-				new_optgroup.label = termName;
-
-				if(optgroup==null){
-				selObj.appendChild(new_optgroup);
-				}else{
-				optgroup.appendChild(new_optgroup);
-				}*/
-			//A dept of 8 (depth starts at 0) is maximum, to keep it organised
-			$res2 = $res2 . createSubTreeOptions(null, (($depth < 7) ? $depth + 1 : $depth), $subTermTree, $localLookup, $ti);
-		} else {
-			if (!$isDisabled) {
-				$res2 = $res2 . "<item>\n" . "<label>\".$termName.\"</label>\n" . "<value>\".$termCode.\"</value>\n" . "</item>\n";
-			}
-			//second and more levels terms
-			if ($hasChildren) {
-				// A depth of 8 (depth starts at 0) is the max indentation, to keep it organised
-				$res2 = $res2 . createSubTreeOptions($optgroup, (($depth < 7) ? $depth + 1 : $depth), $subTermTree, $localLookup, $ti);
-			}
-		}
-	}
-	return $res2;
-} //end function
 
 ?>

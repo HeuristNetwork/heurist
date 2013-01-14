@@ -11,27 +11,25 @@
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
- */
+*/
 /**
  * getDBStructureAsforms.php - writeout a manifest of created form definition using
  * Heurist database definitions (rectypes, details etc.) for uses in ODK Collect Android app
  * ready for use in mobile app - primarily intended for NeCTAR FAIMS project
  *
- * @author		Stephen White	<stephen.white@sydney.edu.au>
- * @author		Artem Osmakov	<artem.osmakov@sydney.edu.au>
- * @copyright 	(C) 2005-2013 University of Sydney
- * @link 		http://Sydney.edu.au/Heurist/about.html
- * @version		3.1.0
- * @license 	http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @package 	Heurist academic knowledge management system
- * @subpackage	XForms
+ * @author      Artem Osmakov	<artem.osmakov@sydney.edu.au>
+ * @author      Stephen White	<stephen.white@sydney.edu.au>
+ * @copyright   (C) 2005-2013 University of Sydney
+ * @link        http://Sydney.edu.au/Heurist/about.html
+ * @version     3.1.0
+ * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @package     Heurist academic knowledge management system
+ * @subpackage  XForms
  */
-
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 require_once (dirname(__FILE__) . '/../../admin/describe/rectypeXFormLibrary.php');
-
 // Deals with all the database connections stuff
 mysql_connection_db_select(DATABASE);
 if (mysql_error()) {
@@ -78,7 +76,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 								txt += ", " + dtName;
 							}
 						}
-					} //for
+					} //for loop
 				}
 
 				document.getElementById("form1").style.display = top.HEURIST.util.isempty(txt)?"none":"block";
@@ -165,17 +163,12 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 </html>
 <?php
 return;
-//
-//
-//
+
 /**
-* Creates form, save it into FILESTORE/forms folder and adds an entry to the manifest lists
-* @param        integer [$rtyID] description
-* @return       string report about success or failure of the forms creation
-* @link         URL
-* @see          name of another element (function or object) used in this function
-* @throws       list of exceptions thrown in this code
-*/
+ * Creates form, save it into FILESTORE/forms folder and adds an entry to the manifest lists
+ * @param        integer [$rtyID] description
+ * @return       string report about success or failure of the forms creation
+ */
 function createform($rtyID) {
 	global $folder, $formsList, $xformsList;
 	try {
