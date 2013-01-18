@@ -200,7 +200,8 @@ $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not out
 $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ?  $_REQUEST['hinclude'] : 99;	//default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ?  true : false;	//default to not output xinclude format for related records
 $OUTPUT_STUBS = @$_REQUEST['stub'] == '1'? true : false;	//default to not output stubs
-$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
+$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == -1? false :
+							(@$_REQUEST['fc']  && is_numeric($_REQUEST['fc'])? $_REQUEST['fc'] :0));	// default to expand xml file content
 //TODO: supress loopback by default unless there is a filter.
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1? true :false);
@@ -977,7 +978,7 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 					if (@$file['thumbURL']) {
 						makeTag('thumbURL', null, $file['thumbURL']);
 					}
-					if ($INCLUDE_FILE_CONTENT) {
+					if ($INCLUDE_FILE_CONTENT !== false && $INCLUDE_FILE_CONTENT >= $depth) {
 						makeFileContentNode($file);
 					}
 				closeTag('file');

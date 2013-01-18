@@ -137,7 +137,6 @@ $GEO_TYPES = array(
 	'p' => 'point'
 );
 
-$MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 1;
 if(@$_REQUEST['sid']) {
 	$QSID = $_REQUEST['sid'];//session query id passed in so used session cached version, pore man's progressive query
 }
@@ -183,6 +182,9 @@ if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 	}
 }
 
+$MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) :
+			min((count(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS)))>0?
+				max(array_merge(array_keys($PTRTYPE_FILTERS),array_keys($RELTYPE_FILTERS),array_keys($RECTYPE_FILTERS)))+1:1),3));	// default to only one level
 
 //----------------------------------------------------------------------------//
 //  Authentication
@@ -598,6 +600,12 @@ function buildFilteredGraphStructure($rec_ids, &$recSet, $depth = 0) {
 //echo "depth = $depth  relfilter = ". print_r($relfilter,true)."\n<br/>";
 		if (!@$recSet['infoByDepth'][$depth]) {
 			$recSet['infoByDepth'][$depth] = array('recIDs'=>array(),'rectypes'=>array());
+		}
+		if ($rtfilter || $ptrfilter || $relfilter) {
+			if (!@$recSet['infoByDepth'][$depth]['filters']) $recSet['infoByDepth'][$depth]['filters'] = array();
+			if ($rtfilter) $recSet['infoByDepth'][$depth]['filters']['rtfilter'] = $rtfilter;
+			if ($ptrfilter) $recSet['infoByDepth'][$depth]['filters']['ptrfilter'] = $ptrfilter;
+			if ($relfilter) $recSet['infoByDepth'][$depth]['filters']['relfilter'] = $relfilter;
 		}
 		$p_rec_ids = findPointers($rec_ids,$recSet, $depth, $rtfilter, $ptrfilter);
 //echo "depth = $depth  new ptr recID = ". json_format($p_rec_ids)."\n";

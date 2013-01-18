@@ -481,7 +481,9 @@ top.HEURIST.search = {
 					top.HEURIST.search.loadLevelFilter(i,(layoutSrch && layoutSrch[i] && layoutSrch[i][0] ? layoutSrch[i][0]: null));
 					//loadRelatedLevel results
 					top.HEURIST.search.loadRelatedLevel(i,true);
-					document.getElementById("showrelated" + i).className += " loaded";
+					if (!$("#showrelated" + i).hasClass("loaded")){
+						$("#showrelated" + i).addClass("loaded");
+					}
 					//filterRelated results with noPush
 					top.HEURIST.search.filterRelated(i,true,true);
 					// expand level
@@ -527,6 +529,9 @@ top.HEURIST.search = {
 				if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
 					top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
 					top.HEURIST.search.loadLevelFilter(maxDepth+1);
+				} else if (maxDepth < 3){
+					// need to show filter with link to expand the search using existing filtering.
+					top.HEURIST.search.loadExpandSearchFilter(maxDepth+1);
 				}
 				//clear the filters parameters so they are calculated when next needed
 				if (rtf) {
@@ -546,7 +551,7 @@ top.HEURIST.search = {
 				}
 			}else{// no layouts or filters or selids to suggest openTo level so just show results and level1 Filter header
 				if (top.HEURIST.search.results.infoByDepth.length >1 &&
-						top.HEURIST.search.results.infoByDepth[1].count > 0) {
+						top.HEURIST.search.results.infoByDepth[1].count > 0) {//TODO ?? check this against preference
 					top.HEURIST.search.loadLevelFilter(1);
 				}
 				top.HEURIST.search.filterRelated(0);
@@ -555,14 +560,36 @@ top.HEURIST.search = {
 
 	loadRelatedResults: function() {
 		var params = top.HEURIST.parameters;
+		var maxDepth = (params['layout'] ? top.HEURIST.search.parseLayoutParam(params['layout'])['srch'].length-1:1);
+		if (params["rtfilters"]){
+			keys = params["rtfilters"].match(/\d(?=":)/g);
+			while (key = keys.shift()){
+				maxDepth = Math.max(maxDepth,key);
+			}
+		}
+		if (params["prtfilters"]){
+			keys = params["prtfilters"].match(/\d(?=":)/g);
+			while (key = keys.shift()){
+				maxDepth = Math.max(maxDepth,key);
+			}
+		}
+		if (params["relfilters"]){
+			keys = params["relfilters"].match(/\d(?=":)/g);
+			while (key = keys.shift()){
+				maxDepth = Math.max(maxDepth,key);
+			}
+		}
 		var URL = top.HEURIST.basePath+"search/getRelatedResultSet.php?" +
 			("w=" + (params["w"] ? encodeURIComponent(params["w"]) : "all")) +
 			(params["stype"] ? "&stype=" +encodeURIComponent(params["stype"]) : "") +
+			(params["rtfilters"] ? "&rtfilters=" +encodeURIComponent(params["rtfilters"]) : "") +
+			(params["prtfilters"] ? "&prtfilters=" +encodeURIComponent(params["prtfilters"]) : "") +
+			(params["relfilters"] ? "&relfilters=" +encodeURIComponent(params["relfilters"]) : "") +
 			("&ver=" + top.HEURIST.search.VERSION) +
+			("&depth=" + maxDepth) +
 			("&q=" + encodeURIComponent(params["q"])) +
 			("&db=" + (params['db'] ? params['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
-			"&depth=3";
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 
 		window.heuristListeners["heurist-related-recordset-loaded"] = [];
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.applyFilterAndLayout);
@@ -608,11 +635,55 @@ top.HEURIST.search = {
 				});
 	},
 
+	// function to reload query with filtering on level more. This can be done by showing layout with one more level and
+	expandRelated: function(level) {
+		$("#showrelated" + level).addClass("expandSearch");//this makes sure to extend the search panels layout
+		top.HEURIST.search.updateBrowserHistory();
+		window.location.reload();
+	},
+
+	loadExpandSearchFilter: function(level){// this is a simple Filter level with no results and invokes a reload with existing layout
+
+		if (level < 0) return;
+		var results = top.HEURIST.search.results;
+		var resultsDiv =  $("#results-level" + level);
+		if (resultsDiv.length == 0) {
+			resultsDiv = document.createElement("div");
+			resultsDiv.id = "results-level" + level;
+			$(resultsDiv).attr("level",level);
+			document.getElementById("results").appendChild(resultsDiv);
+		}else{
+			resultsDiv =resultsDiv.get(0);
+		}
+		var style = top.HEURIST.util.getDisplayPreference("search-result-style"+level); // get startup prefernce style
+		resultsDiv.className = style+" related-results";
+
+		var filterDiv =  $(".filter",resultsDiv);
+		if (filterDiv.length == 0) {
+			filterDiv = document.createElement("div");
+			filterDiv.className = "filter";
+			if (resultsDiv.firstChild) {
+				resultsDiv.insertBefore(filterDiv, resultsDiv.firstChild);
+			}else{
+				resultsDiv.appendChild(filterDiv);
+			}
+		}
+		var expandSearchMenuItem = document.createElement("div");
+		expandSearchMenuItem.innerHTML = "<a title=\"Click to expand search to level "+level+" related records\" href='#' onclick=\"top.HEURIST.search.expandRelated("+level+");\">Expand Search Level "+level+"</a>";
+		expandSearchMenuItem.id = "showrelated"+level;
+		expandSearchMenuItem.className = "showrelated level" + level;
+		filterDiv.appendChild(expandSearchMenuItem);
+	},
+
 	loadLevelFilter: function(level,style){	// it's important that this function be called after results are completely loaded
 		var results = top.HEURIST.search.results;
-		var maxDepth = Math.min((results.params ? results.params.depth : 4), results.infoByDepth.length - 1);
+		var maxDepth = Math.min((results.params && results.params.depth ? results.params.depth : 4), results.infoByDepth.length - 1);
 		if (level > maxDepth) {
-			return;
+			if (level <= 3) {
+				top.HEURIST.search.loadExpandSearchFilter(level);
+			}else{
+				return;
+			}
 		}
 		var depthInfo = results.infoByDepth[level];
 		if (depthInfo.count == 0) {
@@ -1358,6 +1429,9 @@ top.HEURIST.search = {
 		resultsDiv.innerHTML += html;
 		top.HEURIST.search.addResultLevelEventHandlers(level);
 		top.HEURIST.search.addResultLevelLinks(level);
+		if (!$("#showrelated" + level).hasClass("loaded")){
+			$("#showrelated" + level).addClass("loaded");
+		}
 		//for each link type add lnkrel or lnkptr  to the recordDiv's class for next level records
 		//when all links are filtered (removed) the record is hidden. This is how we get multivalued filtering
 		if (!noFilter) {
@@ -1653,6 +1727,7 @@ top.HEURIST.search = {
 					classLinkedRecIDs.push("lnk");
 				}
 				$(recDiv).addClass(classLinkedRecIDs.join(" "));
+				fakeVar = 15;
 			});
 	},
 
@@ -3934,6 +4009,10 @@ top.HEURIST.search = {
 					filter[level].push( $(this).attr(type));
 					maxLevel = parseInt(level) > maxLevel ?  parseInt(level): maxLevel;
 				});
+			}else{//need to check that teh results we are looking at isn't filtered (which means all checked is still filtered
+				if ( top.HEURIST.search.results.infoByDepth[level]['filters'] && top.HEURIST.search.results.infoByDepth[level]['filters'][prefix + "filter"]) {
+					filter[level] = top.HEURIST.search.results.infoByDepth[level]['filters'][prefix + "filter"];
+				}
 			}
 		}
 		ret = YAHOO.lang.JSON.stringify(filter);
@@ -3956,7 +4035,7 @@ top.HEURIST.search = {
 			maxLevel = 0;
 		for (i=0; i<=len; i++) {
 			var resultsDiv = $("#results-level" + i);
-			if (!resultsDiv || resultsDiv.length < 1 || i> 0 && $(".loaded",resultsDiv).length < 1) {
+			if (!resultsDiv || resultsDiv.length < 1 || i> 0 && $(".loaded",resultsDiv).length < 1 && $(".expandSearch",resultsDiv).length < 1) {
 				break;
 			}
 			maxLevel = i;
