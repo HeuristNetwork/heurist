@@ -401,7 +401,7 @@
 					var newSelectionIDs = top.HEURIST.search.getSelectedRecIDs();
 					newSelectionIDs = newSelectionIDs.toArray().join();
 					if (FlatHMLQuery.filter != filter || FlatHMLQuery.maxDepth < maxDepth ||FlatHMLQuery.query != top.HEURIST.parameters['q']) {
-						var pageQuery = "?w=all&a=1&woot=1&depth="+ maxDepth +
+						var pageQuery = "?w=all&fc=1&woot=1&depth="+ maxDepth +
 											"&q=" +(top.HEURIST.parameters['q']&& top.HEURIST.parameters['q'].length >0 ? top.HEURIST.parameters['q'] :"")+
 											(filter.length > 0 ? filter : "") +
 											(layoutString.length > 0 &&  layoutString[1] != "" ? "&" + layoutString[1] : "") +
