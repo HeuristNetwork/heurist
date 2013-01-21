@@ -207,7 +207,7 @@ $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1? true :false);
 //$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
 //			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
-$PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true :false);
+$PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!is_logged_in() ? true: false));
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
 	die(" error invalid json rectype filters string");
@@ -661,6 +661,11 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 /*****DEBUG****///if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
 	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable'),
 			'selected' => (in_array($record['rec_ID'],$selectedIDs)?'yes':'no') ));
+	if (array_key_exists('error', $record)) {
+		makeTag('error', null, $record['error']);
+		closeTag('record');
+		return;
+	}
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
 		closeTag('record');
@@ -1252,8 +1257,8 @@ if(@$_REQUEST['mode']!='1'){ //not include
 //----------------------------------------------------------------------------//
 
 //echo "request = ".print_r($_REQUEST,true)."\n";
-
-$result = loadSearch($_REQUEST, false, true, false, $PUBONLY);
+//error_log("flathml pubonly = ".print_r($PUBONLY,true));
+$result = loadSearch($_REQUEST, false, true, $PUBONLY);
 /*****DEBUG****///error_log("$result = ".print_r($result,true)."\n");
 $hmlAttrs = array();
 if($USEXINCLUDE) {
@@ -1292,9 +1297,9 @@ makeTag('dateStamp', null, date('c'));
 if (array_key_exists('error', $result)) {
 	makeTag('error', null, $result['error']);
 } else {
-	makeTag('resultCount', null, $result['resultCount']);
-	makeTag('recordCount', null, $result['recordCount']);
-	outputRecords($result);
+	makeTag('resultCount', null, $result['resultCount'] ? $result['resultCount']: " 0 ");
+	makeTag('recordCount', null, $result['recordCount'] ? $result['recordCount']: " 0 ");
+	if ($result['recordCount']>0)  outputRecords($result);
 }
 
 closeTag('hml');

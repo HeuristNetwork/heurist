@@ -124,11 +124,11 @@ class Query {
 	}
 
 	function addOrLimb($text) {
-		$this->or_limbs[] = & new OrLimb($this, $text);
+		$this->or_limbs[] = new OrLimb($this, $text);
 	}
 
 	function addSortPhrase($text) {
-		$this->sort_phrases[] = & new SortPhrase($this, $text);
+		$this->sort_phrases[] = new SortPhrase($this, $text);
 	}
 
 	function addWorkgroupRestriction($wg_ids) {
@@ -212,7 +212,7 @@ class OrLimb {
 	}
 
 	function addAndLimb($text) {
-		$this->and_limbs[] = & new AndLimb($this, $text);
+		$this->and_limbs[] = new AndLimb($this, $text);
 	}
 
 

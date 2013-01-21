@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 if (!is_logged_in()) {
 	return;
 }
-error_log("made it to here");
+//error_log("made it to here");
 mysql_connection_db_select(DATABASE);
 
 $transformID = @$_REQUEST['transID'] ? $_REQUEST['transID'] : null;
@@ -89,10 +89,14 @@ if (@$_REQUEST['inputFilename']){// get a saved XML file
 	$inputFilename = HEURIST_BASE_URL."export/xml/flathml.php?ver=1&f=1".
 								(@$_REQUEST['depth'] ? "&depth=".$_REQUEST['depth']:"").
 								(@$_REQUEST['hinclude'] ? "&hinclude=".$_REQUEST['hinclude']:"").
+								(@$_REQUEST['layout'] ? "&layout=".$_REQUEST['layout']:"").
+								(@$_REQUEST['prtfilters'] ? "&prtfilters=".$_REQUEST['prtfilters']:"").
+								(@$_REQUEST['rtfilters'] ? "&rtfilters=".$_REQUEST['rtfilters']:"").
+								(@$_REQUEST['relfilters'] ? "&relfilters=".$_REQUEST['relfilters']:"").
 								(@$_REQUEST['selids'] ? "&selids=".$_REQUEST['selids']:"").
-								"&w=all&q=".$_REQUEST['q']."&db=".HEURIST_DBNAME.
+								"&w=all&pubonly=1&q=".$_REQUEST['q']."&db=".HEURIST_DBNAME.
 								(@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
-								($outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :"");
+								(@$outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :"");
 }else if (@$_REQUEST['recID']){//recID so assume that the file has been prepublished to the HML Publish directory
 	$inputFilename = "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$_REQUEST['recID'].".hml";
 	if ( !file_exists($inputFilename)) {
@@ -125,7 +129,7 @@ if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
 }
 //error_log("output UIR = $outputURI");
 
-saveTransformOutput($inputFilename,$styleFilename,$outputFilename);
+saveTransformOutput($inputFilename,$styleFilename,@$outputFilename);
 
 function loadRemoteFile($filename){
 
@@ -137,7 +141,7 @@ function loadRemoteFile($filename){
 	return $file_content;
 }
 
-function saveTransformOutput($recHMLFilename, $styleFilename, $outputFilename){
+function saveTransformOutput($recHMLFilename, $styleFilename, $outputFilename = null){
 global $outputURI;
 	$recHmlDoc = new DOMDocument();
 	if (preg_match("/http/",$recHMLFilename)) {
