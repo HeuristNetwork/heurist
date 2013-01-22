@@ -42,9 +42,6 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-if (!is_logged_in()) {
-	return;
-}
 //error_log("made it to here");
 mysql_connection_db_select(DATABASE);
 
@@ -150,14 +147,16 @@ global $outputURI;
 		$suc = $recHmlDoc->load($recHMLFilename);
 	}
 	if (!$suc){
-			returnXMLErrorMsgPage("Unable to load file $recHMLFilename");
+		returnXMLErrorMsgPage("Unable to load file $recHMLFilename");
 	}
 	$recHmlDoc->xinclude();//todo write code here to squash xincludes down to some limit.
 	if (!$styleFilename) {
 		if(!$outputFilename){
 			returnXMLErrorMsgPage("No transform filename or outputFilename provided for $recHMLFilename");
 		}
-		$cntByte = $recHmlDoc->saveHTMLFile($outputFilename);
+		if (is_logged_in()) {
+			$cntByte = $recHmlDoc->saveHTMLFile($outputFilename);
+		}
 		if ($cntByte>0) {
 			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of untransformed file $recHMLFilename to $outputFilename");
 		}else{
@@ -182,7 +181,7 @@ global $outputURI;
 	$xslProc->setParameter('','dbID',HEURIST_DBID);
 	$xslProc->setParameter('','transform',$styleFilename);
 	$xslProc->setParameter('','standalone','1');
-	if($outputFilename){
+	if($outputFilename && is_logged_in()){
 		$cntByte = $xslProc->transformToURI($recHmlDoc,$outputFilename);
 		if ($cntByte > 0) {
 			returnXMLSuccessMsgPage("Successfully wrote $cntByte bytes of $recHMLFilename transformed by  $styleFilename to $outputFilename".
@@ -192,8 +191,9 @@ global $outputURI;
 			returnXMLErrorMsgPage("Unable to  transform and/or output file $recHMLFilename transformed by  $styleFilename to $outputFilename");
 		}
 	}else{
-//		$xmlString = $xslProc->transformToXML($recHmlDoc);
-		echo $xslProc->transformToXML($recHmlDoc);
+		$doc = $xslProc->transformToDoc($recHmlDoc);
+//		echo $xslProc->transformToXML($recHmlDoc);
+		echo $doc->saveHTML();
 	}
 }
 
