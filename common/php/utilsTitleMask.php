@@ -248,18 +248,23 @@ function _title_mask__check_field_name($field_name, $rt)
 
 	/* recurse! */
 	if (strpos($inner_rec_type, ',')){ // multi rt pointer
-		$ret = "multi-rt return = ";
+		$ret = "";
 		$inner_rec_type = explode(",",$inner_rec_type);
 		foreach ($inner_rec_type as $rtID){
 			$rtid = intval($rtID);
-			if (!$rtid) continue;
+			if (!$rtid) {
+				continue;
+			}
 
-			if ($inner_field_name == "ID" || $inner_field_name == "Modified" || $inner_field_name == "RecTitle") continue;
+			if ($inner_field_name == "ID" || $inner_field_name == "Modified" || $inner_field_name == "RecTitle") {
+				continue;
+			}
 
 			$errStr = _title_mask__check_field_name($inner_field_name, $rtid);
 			if (!$errStr) return '';
-			$ret .= " ".$errStr;
+			$ret .= $errStr;
 		}
+		if($ret) $ret = "multi-rt return = ".$ret;
 		return $ret;
 	}
 
