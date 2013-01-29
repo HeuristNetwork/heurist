@@ -4562,6 +4562,7 @@ top.HEURIST.search = {
 
 			for (i = 0; i < tags.length; ++i) {
 				//kwd = encodeURIComponent(tags[i]);
+				if (!tags[i] || tags[i] == "") continue; //SAW fix for YUI bug for "" menu text
 				innerHTML += '<li><a style="padding-right:20px;" href="#" onclick="{top.HEURIST.search.executeQueryByTag(null,\''+tags[i]+'\');}">'+ tags[i] + "</a></li>";
 				tagMenuTems.push({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", "", tags[i]] } });
 				top.HEURIST.search.recMenuTags.addItem({ text: tags[i], onclick:{ fn: onMenuClick, obj: ["executeQueryByTag", "", tags[i]] } });
@@ -4783,6 +4784,7 @@ top.HEURIST.search = {
 };
 
 top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
+//top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.search.setupSearchPage);
 
 
 // layout
@@ -5059,6 +5061,7 @@ function layoutAppPanel(isToggle,newWidth){
 					layout.getUnitByPosition('right').resize();
 			}
 		});
+		top.HEURIST.fireEvent(window, "heurist-search-layout-loaded");
 	});
 
 

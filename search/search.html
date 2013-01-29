@@ -146,11 +146,9 @@
 				}
 			});
 
-			YAHOO.util.Event.onDOMReady(function(){
-				top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
-					// register handlers and render non-static elements of page
-					top.HEURIST.search.setupSearchPage();
-				});
+			top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
+				// register handlers and render non-static elements of page
+				top.HEURIST.search.setupSearchPage();
 			});
 
 			function _bugReportCallback(title, bd, bibID) {
