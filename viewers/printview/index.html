@@ -22,6 +22,9 @@
 		<script src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true" type="text/javascript"></script>
 		<script src="loadPrintFormats.php"></script>
 		<script>
+			if (!jQuery && typeof $ == "function"){// ensure backwards compatability for publish sites with older jQuery code
+				var jQuery = $;
+			}
 			function loadXMLDocFromFile(filename)
 			{
 				var xmlDoc=null;
