@@ -46,7 +46,7 @@ require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once('rssFeedAsRecords.php');
 require_once('generateKMLFromCursor.php');
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 /**

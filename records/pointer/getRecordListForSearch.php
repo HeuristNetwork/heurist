@@ -42,7 +42,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if (! array_key_exists('q', @$_REQUEST)  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
 	construct_legacy_search();	// migration path

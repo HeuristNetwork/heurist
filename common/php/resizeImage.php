@@ -40,7 +40,7 @@ if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$
 
 $img = null;
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 mysql_query('set character set binary');
 
 if (array_key_exists('ulf_ID', $_REQUEST))

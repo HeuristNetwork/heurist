@@ -33,7 +33,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once('libs.inc.php');
 
 	mysql_connection_overwrite(DATABASE);
-	//was mysql_connection_db_select(DATABASE);
+	//was mysql_connection_select(DATABASE);
 
 	//load definitions (USE CACHE)
 	$rtStructs = getAllRectypeStructures(true);

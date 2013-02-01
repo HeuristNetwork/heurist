@@ -16,7 +16,7 @@
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-mysql_connection_db_overwrite("hapi");
+mysql_connection_overwrite("hapi");
 
 mysql_query("start transaction");
 

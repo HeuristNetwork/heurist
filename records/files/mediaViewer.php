@@ -17,7 +17,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if (!@$_REQUEST['ulf_ID'] && !@$_REQUEST['rec_ID']) return; // nothing returned if no ulf_ID parameter
 

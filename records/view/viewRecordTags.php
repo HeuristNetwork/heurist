@@ -23,7 +23,7 @@ if (!is_logged_in()) {
 }
 /*****DEBUG****///error_log(print_r($LOOKUPS, 1));
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 $template = file_get_contents('viewRecordTags.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 

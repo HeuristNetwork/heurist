@@ -29,7 +29,7 @@
 
 $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if(array_key_exists('publish',$_REQUEST)){
 	$publish = intval($_REQUEST['publish']);

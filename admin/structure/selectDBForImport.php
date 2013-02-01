@@ -102,7 +102,7 @@ Click the database icon on the left to view available record types in that datab
 
 				require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 				require_once(dirname(__FILE__)."/../../common/config/initialise.php");
-				mysql_connection_db_insert(DATABASE); // Connect to the current database
+				mysql_connection_insert(DATABASE); // Connect to the current database
 
 				// Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
 				$reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG

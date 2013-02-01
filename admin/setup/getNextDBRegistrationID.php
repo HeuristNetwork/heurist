@@ -21,7 +21,7 @@
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-	mysql_connection_db_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
+	mysql_connection_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
 
 	$indexdb_user_id = 0; // Flags problem if not reset
 	$returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)

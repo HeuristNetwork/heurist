@@ -20,7 +20,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 header('Content-type: text/javascript');
 
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);

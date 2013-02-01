@@ -34,7 +34,7 @@ if(@$_REQUEST['recTypeIDs']) {
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 
 $res = mysql_query("select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_RecTypeID in ($recTypeIds) order by rand()");

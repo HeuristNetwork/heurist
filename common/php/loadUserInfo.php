@@ -21,7 +21,7 @@
 	header('Content-type: text/javascript');
 
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	if (is_logged_in()) {
 	?>

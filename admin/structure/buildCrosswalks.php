@@ -81,7 +81,7 @@
 		$isNewDB = false;
 		$tempDBName = "temp_".$dbname;
 		// Deals with all the database connections stuff
-		mysql_connection_db_insert(DATABASE);
+		mysql_connection_insert(DATABASE);
 
 	} // existing database
 
@@ -128,7 +128,7 @@
 		} // detect lock and shuffle out
 
 		// Mark database definitons as being modified by adminstrator
-		mysql_connection_db_insert(DATABASE);
+		mysql_connection_insert(DATABASE);
 		$query = "insert into sysLocks (lck_UGrpID, lck_Action) VALUES (".(function_exists('get_user_id') ? get_user_id(): 0).", 'buildcrosswalks')";
 		$res = mysql_query($query); // create sysLock
 		// Create the Heurist structure for the temp database, using a stripepd version of the new database template
@@ -143,7 +143,7 @@
 		}
 	}
 
-	mysql_connection_db_insert($tempDBName); // Use temp database
+	mysql_connection_insert($tempDBName); // Use temp database
 
 
 	// ------Find and set the source database-----------------------------------------------------------------------
@@ -441,7 +441,7 @@
 		if($isdroptemp && $tempDBName){
 			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
 		}
-		mysql_connection_db_insert(DATABASE); // Use logged into DB
+		mysql_connection_insert(DATABASE); // Use logged into DB
 		$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
 	}
 

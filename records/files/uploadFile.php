@@ -59,7 +59,7 @@
 		$name = preg_replace('!.*/!', '', $name);
 
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		$mimeType = null;
@@ -156,7 +156,7 @@
 		}
 
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		//get folder, extension and filename
@@ -224,7 +224,7 @@
 	function unregister_for_recid($recid, $needConnect=false){
 
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		// find all files associated with this record
@@ -252,7 +252,7 @@
 	function deleteUploadedFiles($fileid, $needConnect){
 
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		$filedata = get_uploaded_file_info_internal($fileid, false);
@@ -565,7 +565,7 @@
 	function get_uploaded_file_recordid($fileID, $needConnect)
 	{
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		$recID = null;
@@ -588,7 +588,7 @@
 	function get_uploaded_fileid_by_recid($recID, $needConnect)
 	{
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		$ulf_id = null;
@@ -613,7 +613,7 @@
 	{
 
 		if($needConnect){
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 		}
 
 		$res = null;

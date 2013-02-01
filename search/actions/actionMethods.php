@@ -17,7 +17,7 @@ function delete_bookmarks($data) {
 	$res = array();
 	$bkmk_ids = $data['bkmk_ids'];
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_RecID where bkm_ID in ('.join(',', $bkmk_ids).') and bkm_UGrpID=' . get_user_id());
 	mysql_query('delete from usrBookmarks where bkm_ID in ('.join(',', $bkmk_ids).') and bkm_UGrpID=' . get_user_id());
 	$deleted_count = mysql_affected_rows();
@@ -37,7 +37,7 @@ function add_tags($data) {
 	$tagString = trim($data['tagString']);
 
 	if ($tagString) {
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		$tags = get_ids_for_tags(array_filter(explode(',', $tagString)), true);
 		mysql_query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
@@ -71,7 +71,7 @@ function add_wgTags_by_id($data) {
 	$wgTags = $data['wgTag_ids'];
 
 	if (count($wgTags) && count($rec_ids)) {
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		mysql_query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
 				  . 'select rec_ID, tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, Records '
@@ -105,7 +105,7 @@ function remove_wgTags_by_id($data) {
 
 	if (count($wgTags) && count($rec_ids)) {
 
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		mysql_query('delete usrRecTagLinks from usrRecTagLinks'
 				 . ' left join usrTags on tag_ID = rtl_TagID'
@@ -137,7 +137,7 @@ function remove_tags($data) {
 	$tagString = trim($data['tagString']);
 
 	if ($tagString) {
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		$tag_count = 0;
 		$tags = get_ids_for_tags(array_filter(explode(',', $tagString)), false);
@@ -174,7 +174,7 @@ function set_ratings($data)
 	$bkmk_ids = $data['bkmk_ids'];
 	$rating = intval($data['ratings']);
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$query =  'update usrBookmarks set bkm_Rating = ' . $rating . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id();
 	mysql_query($query);
 	$update_count = mysql_affected_rows();
@@ -194,7 +194,7 @@ function bookmark_references($data) {
 
 	$res = array();
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	$rec_ids = record_filter($data['rec_ids']);
 	$new_rec_ids = mysql__select_array('Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id(),
@@ -246,7 +246,7 @@ function bookmark_and_tag_record_ids ( $data ) {
 
 	$res = array();
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	$rec_ids = record_filter($data['rec_ids']);
 	$tagString = trim($data['tagString']);
@@ -304,7 +304,7 @@ function bookmark_tag_and_save_search($data) {
 /*
 	$res = array();
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$res = bookmark_and_tag_record_ids($data);
 
 	if (@$res['problem']) {
@@ -358,7 +358,7 @@ function save_search($data) {
 
 	$res = array();
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$wg = intval(@$data['svs_UGrpID']);
 	$sID = $data['svs_ID'];
 	//$publish = $data['publish'];
@@ -418,7 +418,7 @@ function set_wg_and_vis($data) {
 		if (($wg == -1 ||  $wg == 0 || in_array($wg, get_group_ids()))  &&
 			(in_array(strtolower($vis),array('viewable','hidden','pending','public'))))
 		{
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 
 			if ($wg === 0 && $vis === 'hidden') $vis = 'viewable';
 			if ($wg >= 0){

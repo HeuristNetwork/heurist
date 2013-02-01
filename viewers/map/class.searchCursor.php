@@ -49,7 +49,7 @@ class Search{
    *
    */
   function _dbConnect(){
-    mysql_connection_db_select(DATABASE);
+    mysql_connection_select(DATABASE);
   }
 
 

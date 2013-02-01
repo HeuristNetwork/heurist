@@ -15,7 +15,7 @@
 
 	if (! is_logged_in()) return;
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	/*****DEBUG****///error_log("request is ".print_r($_REQUEST,true)); //>>>>DEBUG
 
@@ -172,7 +172,7 @@
 		$res = mysql_query('select '.USERS_EMAIL_FIELD.' from '.USERS_DATABASE.'.'.USERS_TABLE.' where '.USERS_ID_FIELD.' = ' . get_user_id());
 		$row = mysql_fetch_row($res);
 		if ($row) $user_email = $row[0];
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		$email_subject = '[HEURIST] email from ' . get_user_name();
 		if (count($bib_ids) == 1) $email_subject .= ' (one reference)';

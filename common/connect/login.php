@@ -35,7 +35,7 @@ if (! $last_uri) {
 }
 
 
-mysql_connection_db_select(USERS_DATABASE);
+mysql_connection_select(USERS_DATABASE);
 
 
 $LOGIN_ERROR = '';
@@ -70,11 +70,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
 
 		/* bookkeeping */
-		mysql_connection_db_overwrite(USERS_DATABASE);
+		mysql_connection_overwrite(USERS_DATABASE);
 		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
 					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
 
-		mysql_connection_db_select(USERS_DATABASE);
+		mysql_connection_select(USERS_DATABASE);
 
 		if ($last_uri){
 			header('Location: ' . $last_uri);

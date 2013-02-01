@@ -37,7 +37,7 @@ if (! is_logged_in()) {
 
 if (!array_key_exists('user',$_REQUEST) || !$_REQUEST['user'] ) $_REQUEST['user'] = get_user_id();
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if ($_REQUEST['user']) {
 	if (array_key_exists('kwd',$_REQUEST) && $_REQUEST['kwd']) {

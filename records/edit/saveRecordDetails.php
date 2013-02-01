@@ -45,7 +45,7 @@
 
 	if (! is_logged_in()) return;
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 

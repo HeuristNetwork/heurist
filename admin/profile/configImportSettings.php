@@ -22,7 +22,7 @@ if (! is_logged_in()) {
 
 $word_limit = 0;
 
-mysql_connection_db_overwrite(USERS_DATABASE);
+mysql_connection_overwrite(USERS_DATABASE);
 
 if (@$_REQUEST['submitted']) {  //reload with new word limit
 
@@ -37,7 +37,7 @@ if (@$_REQUEST['submitted']) {  //reload with new word limit
 	$word_limit = $row[0];	// minimum number of spaces that must appear in the link text
 }
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 if (@$_REQUEST['new_hyp_text']) {
 

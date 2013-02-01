@@ -22,7 +22,7 @@ if (! is_logged_in()) return;
 
 define("SAVE_URI", "disabled");
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 $bib_ids_to_fetch = array_map('intval', explode(',', $_REQUEST['ids']));

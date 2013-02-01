@@ -33,7 +33,7 @@ if (! $wg_id) {
 }
 
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $res = mysql_query("select ugl_UserID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=".get_user_id()." and ugl_GroupID=".$wg_id);
 if (mysql_num_rows($res) < 1) {

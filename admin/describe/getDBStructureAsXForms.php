@@ -13,25 +13,29 @@
  * the License.
 */
 /**
- * getDBStructureAsforms.php - writeout a manifest of created form definition using
+ * writeout a XForm for each rectype and XForm manifest of created form definition using
  * Heurist database definitions (rectypes, details etc.) for uses in ODK Collect Android app
  * ready for use in mobile app - primarily intended for NeCTAR FAIMS project
  *
- * @author      Artem Osmakov	<artem.osmakov@sydney.edu.au>
  * @author      Stephen White	<stephen.white@sydney.edu.au>
+ * @author      Artem Osmakov	<artem.osmakov@sydney.edu.au>
  * @copyright   (C) 2005-2013 University of Sydney
  * @link        http://Sydney.edu.au/Heurist/about.html
  * @version     3.1.0
  * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @package     Heurist academic knowledge management system
  * @subpackage  XForms
+ * @uses        buildform
+ * @uses        HEURIST_UPLOAD_DIR
+ * @uses        HEURIST_BASE_URL
+ * @uses        HEURIST_DBNAME
  */
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 require_once (dirname(__FILE__) . '/../../admin/describe/rectypeXFormLibrary.php');
 // Deals with all the database connections stuff
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 if (mysql_error()) {
 	die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 }
@@ -138,6 +142,9 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 	$a_rectypes = explode(",", $rectypes);
 	$formsList = "<?xml version=\"1.0\"?>\n" . "<forms>\n";
 	$xformsList = "<?xml version=\"1.0\"?>\n" . "<xforms>\n";
+	/**
+	* Create Xform for each recType
+	*/
 	foreach ($a_rectypes as $rtyID) {
 		if ($rtyID) {
 			print "<div>" . createform($rtyID) . "</div> ";
@@ -145,9 +152,11 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 	}
 	$formsList.= "</forms>\n";
 	$xformsList.= "</xforms>\n";
+	/**
+	* Write out the XForm List file (also output oldstyle ODK list file
+	*/
 	file_put_contents($folder . "formList", $formsList);
 	file_put_contents($folder . "xformList", $xformsList);
-	//			chgrp($folder."formList","acl");
 	print "<div>Wrote $folder" . "xformList </div>\n";
 ?>
 		<br/><br/>
@@ -165,9 +174,10 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 return;
 
 /**
- * Creates form, save it into FILESTORE/forms folder and adds an entry to the manifest lists
- * @param        integer [$rtyID] description
+ * Creates xform for $rtyID, saves it into FILESTORE/forms folder and adds an entry to the manifest lists
+ * @param        integer [$rtyID] the local id of the recType to creat the xform for
  * @return       string report about success or failure of the forms creation
+ * @uses         buildform from rectypeXFormLibrary to build the form
  */
 function createform($rtyID) {
 	global $folder, $formsList, $xformsList;

@@ -400,7 +400,7 @@
 				$password = crypt($password, $salt);
 
 			}else{
-				mysql_connection_db_insert(DATABASE);
+				mysql_connection_insert(DATABASE);
 				$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
 				$details = mysql_fetch_row($query);
 				$longName = mysql_escape_string($details[0]);
@@ -475,7 +475,7 @@
 			}
 
 			// Prepare to write to the newly created database
-			mysql_connection_db_insert($newname);
+			mysql_connection_insert($newname);
 
 			// Update file locations
 			$query='update sysIdentification

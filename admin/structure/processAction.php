@@ -32,7 +32,7 @@ $currentDate = date("d-m");
 $error = false;
 $importLog = array();
 
-mysql_connection_db_insert($targetDBName);
+mysql_connection_insert($targetDBName);
 
 
 switch($_GET["action"]) {

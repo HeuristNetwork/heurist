@@ -19,7 +19,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
-	mysql_connection_db_insert($tempDBName); // Use temp database
+	mysql_connection_insert($tempDBName); // Use temp database
 
 ?>
 <html>

@@ -24,11 +24,11 @@ if (! is_logged_in()) {
 
 
 if (@$_REQUEST['submitted']) {
-	mysql_connection_db_overwrite(USERS_DATABASE);
+	mysql_connection_overwrite(USERS_DATABASE);
 	mysql_query('update sysUGrps usr set ugr_MinHyperlinkWords = '.intval(@$_REQUEST['word_limit']).' where usr.ugr_ID='.get_user_id());
-	mysql_connection_db_overwrite(USERS_DATABASE);
+	mysql_connection_overwrite(USERS_DATABASE);
 	mysql_query('update sysUGrps usr set ugr_MinHyperlinkWords = '.intval(@$_REQUEST['word_limit']).' where usr.ugr_ID='.get_user_id());
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	if (@$_REQUEST['new_hyp_text']) {
 		$res = mysql_query('select * from usrHyperlinkFilter
@@ -44,7 +44,7 @@ if (@$_REQUEST['submitted']) {
 
 $tag_message = '';
 if (@$_REQUEST['delete_kwd_id']) {
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$kwd_id = intval(@$_REQUEST['delete_kwd_id']);
 	mysql_query('delete from usrTags where tag_ID = ' . $kwd_id . ' and tag_UGrpID= ' . get_user_id());
 	if (mysql_affected_rows()) {
@@ -55,7 +55,7 @@ if (@$_REQUEST['delete_kwd_id']) {
 	}
 }
 if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$kwd_from = intval(@$_REQUEST['update_kwd_from']);
 	$kwd_to = intval(@$_REQUEST['update_kwd_to']);
 
@@ -77,7 +77,7 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 	}
 }
 if (@$_REQUEST['change_names']) {
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	$orig_kwd_label = mysql__select_assoc('usrTags', 'tag_ID', 'tag_Text', 'tag_UGrpID='.get_user_id());
 
 	$count = 0;
@@ -96,14 +96,14 @@ if (@$_REQUEST['change_names']) {
 		$tag_message .= '<div class="failure">Error of some sort: ' . mysql_error() . '</div>';
 }
 if (@$_REQUEST['replace_kwd']) {
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query('update usrRecTagLinks set rtl_TagID = '.intval(@$_REQUEST['replace_with_kwd_id']).' where rtl_TagID = '.intval($_REQUEST['replace_kwd_id']));
 	$tag_message .= '<div class="success">Tag replaced</div>';
 }
 if (@$_REQUEST['delete_multiple_kwds']) {
 	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
 	if (count($kwd_ids)) {
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 		$res = mysql_query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. join(', ', $kwd_ids) .') and tag_UGrpID='.get_user_id());
 		$tag_message .= mysql_error() . '<div class="success">Tags deleted</div>';
 	} else {
@@ -112,7 +112,7 @@ if (@$_REQUEST['delete_multiple_kwds']) {
 }
 
 if (get_user_id() == 96) {
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	$user_hyperlinks_import = '<p>';
 	if (@$_REQUEST['import_hyperlinks_user']) {
@@ -160,7 +160,7 @@ END;
 
 } else	$user_hyperlinks_import = '';
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 /* Specify the template file containing the web page to be processed and displayed */
@@ -187,11 +187,11 @@ $template = str_replace('{body_only}', (array_key_exists('body_only', $_REQUEST)
 
 $template = str_replace('{section}', @$_REQUEST['section'], $template);
 
-mysql_connection_db_select(USERS_DATABASE);
+mysql_connection_select(USERS_DATABASE);
 $res = mysql_query('select ugr_MinHyperlinkWords from sysUGrps usr where usr.ugr_ID = '.get_user_id());
 $row = mysql_fetch_row($res);
 $word_limit = $row[0];	// minimum number of spaces that must appear in the link text
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $word_limit_options =
 '<option value="0" '.($word_limit==0? 'selected':'').'>any number of words</option>' .

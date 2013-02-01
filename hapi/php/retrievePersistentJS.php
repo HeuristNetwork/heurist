@@ -16,7 +16,7 @@
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-mysql_connection_db_select("hapi");
+mysql_connection_select("hapi");
 
 if (! is_logged_in()) {
 /*

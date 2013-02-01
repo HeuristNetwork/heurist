@@ -143,7 +143,7 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 */
 function loadWoot($args) {
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	$wootTitle = addslashes(@$args["title"]);
 	$wootId = intval(@$args["id"]);
@@ -274,7 +274,7 @@ function saveWoot($args) {
 		return(array("success" => false, "errorType" => "no logged-in user"));
 	}
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	$wootId = intval(@$args["id"]);
 	$wootTitle = addslashes(@$args["title"]);
@@ -614,7 +614,7 @@ function insertWootPermissions($wootId, &$woot) {
 
 function searchWoots($args) {
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	$text_search = getTextSearch($args["q"]);
 	if (! $text_search) {

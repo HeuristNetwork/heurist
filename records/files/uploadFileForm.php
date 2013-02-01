@@ -19,7 +19,7 @@ require_once(dirname(__FILE__)."/../../records/file/uploadFile.php");
 
 if (! is_logged_in()) return;
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 
 if (! @$_POST["recID"]) {

@@ -23,7 +23,7 @@ print $i.",";
 }
 */
 /*
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 $x = -170;
 $y = 80;
@@ -74,7 +74,7 @@ $filename = $_REQUEST['path'];
 if(!file_exists($filename) || is_dir($filename)){
 	$results = array("error"=>"File $filename not found on server");
 }else{
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	$ulf_ID = register_file($filename, '', false);
 

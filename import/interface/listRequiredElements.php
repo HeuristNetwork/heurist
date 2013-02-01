@@ -19,7 +19,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	$bdt = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 	$rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');

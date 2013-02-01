@@ -34,7 +34,7 @@
 	$imagelayerRT = (defined('RT_IMAGE_LAYER')?RT_IMAGE_LAYER:0);
 	$KMLlayerRT = (defined('RT_KML_LAYER')?RT_KML_LAYER:0);
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	if (array_key_exists('layers', $request)) { //special mode - load ALL image layers and kml records only - for general drop down list on map
 

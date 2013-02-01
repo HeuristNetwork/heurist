@@ -4,7 +4,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 

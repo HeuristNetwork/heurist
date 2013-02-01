@@ -76,9 +76,9 @@ function update_counts(divid, processed, added, total) {
 	$mediaExts = null;
 	$progress_divid = 0;
 
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 		if(mysql_error()) {
-			die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
+			die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 		}
 
 		print "<h2>Import Files On Disk / FieldHelepr Manifests</h2>";

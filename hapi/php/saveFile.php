@@ -37,7 +37,7 @@
 	}
 
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	mysql_query("start transaction");
 

@@ -217,7 +217,7 @@ else
 	return;	// wwgd
 
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $rectype = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 

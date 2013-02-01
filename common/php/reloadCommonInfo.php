@@ -25,7 +25,7 @@ require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 //require_once("dbMySqlWrappers.php");
 require_once("getRecordInfoLibrary.php");
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 header("Content-type: text/javascript");
 

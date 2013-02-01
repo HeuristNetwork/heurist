@@ -29,7 +29,7 @@
 		return;
 	}
 
-	mysql_connection_db_insert(DATABASE); // Connect to the current database (the one being registered)
+	mysql_connection_insert(DATABASE); // Connect to the current database (the one being registered)
 
 	// Look up current user email from sysUGrps table in the current database (the one being registered)
 	// Registering user must be a real user so that there is an email address and password to attach to the registration record.

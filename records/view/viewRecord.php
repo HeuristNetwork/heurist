@@ -23,7 +23,7 @@ if (!is_logged_in()) {
         return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if (@$_REQUEST['bkmk_id']) {
 	$bkm_ID = $_REQUEST['bkmk_id'];

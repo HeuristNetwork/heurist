@@ -39,9 +39,9 @@
 
 <?php
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 if(mysql_error()) {
-	die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
+	die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 }
 
 print "<h2>Heurist File Storage Updater</h2>";

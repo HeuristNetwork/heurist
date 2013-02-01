@@ -118,7 +118,7 @@
 	}
 
 	if($ids!=""){
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 		$query = "select ulf_ID, ulf_OrigFileName, ulf_Added, ulf_MimeExt, ulf_FileSizeKB, ulf_FilePath, ulf_FileName from recUploadedFiles where ulf_ID in ".$ids.")";
 

@@ -29,7 +29,7 @@ if (! ($loc = get_location($_REQUEST["key"]))) {
 }
 define_constants($loc["hl_instance"]);
 */
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $is_raw = (array_key_exists('raw', $_REQUEST));
 

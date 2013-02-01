@@ -23,7 +23,7 @@ if (! is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
 	return;
 }
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 ?>
 <html>
 <head>

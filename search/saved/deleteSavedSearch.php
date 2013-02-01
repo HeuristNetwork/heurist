@@ -33,7 +33,7 @@ if($label && $ssid){
 	jsonError("missing argument (id or label) for saved search deletion");
 }
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 if($ssid>0){
 	mysql_query("delete from usrSavedSearches where svs_ID=$ssid");

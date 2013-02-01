@@ -82,7 +82,7 @@ $rectype_to_bdt_id_map = array(
 );
 
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 /*****DEBUG****/// error_log("made it to importerFramework.php");

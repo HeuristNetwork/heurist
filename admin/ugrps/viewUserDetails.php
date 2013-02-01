@@ -17,7 +17,7 @@ if (!is_logged_in()) {
 	return;
 }
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 $refurl = HEURIST_BASE_URL."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
 

@@ -25,7 +25,7 @@ if (! is_logged_in()) {
 
 $_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 /* check if there are any records identified only by their hhash values */
 if (!is_logged_in()) {// must be logged into save

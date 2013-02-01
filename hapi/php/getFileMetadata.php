@@ -21,7 +21,7 @@ define('RESULT_COUNT_LIMIT', 20);
 
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 /* Accept input data via either POST or GET.

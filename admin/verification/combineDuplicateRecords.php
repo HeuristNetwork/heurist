@@ -43,8 +43,8 @@
 
 	if (! @$_REQUEST['bib_ids']) return;
 
-	mysql_connection_db_select(DATABASE);
-	//mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
+	mysql_connection_select(DATABASE);
+	//mysql_connection_select("`heuristdb-nyirti`");   //for debug
 
 	$bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 	$reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
@@ -521,8 +521,8 @@
 			}
 		}
 
-		//   mysql_connection_db_overwrite("`heuristdb-nyirti`");   //for debug
-		mysql_connection_db_overwrite(DATABASE);
+		//   mysql_connection_overwrite("`heuristdb-nyirti`");   //for debug
+		mysql_connection_overwrite(DATABASE);
 		//    mysql_query('set @suppress_update_trigger:=1'); // shut off update triggers to let us munge the records with out worrying about the archive.
 
 		// set modified on master so the changes will stick  aslo update url if there is one.

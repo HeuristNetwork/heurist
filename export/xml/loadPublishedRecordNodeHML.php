@@ -45,7 +45,7 @@ if (!is_logged_in()) { // check if the record being retrieved is a single non-pr
 	return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 // set parameter defaults
 $recID = @$_REQUEST['recID'] ? $_REQUEST['recID'] : null;

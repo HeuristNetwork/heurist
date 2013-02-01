@@ -32,7 +32,7 @@ if (! ($loc = get_location($_REQUEST["key"]))) {
 define_constants($loc["hl_instance"]);
 */
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 if (defined('HEURIST_USER_GROUP_ID')) {

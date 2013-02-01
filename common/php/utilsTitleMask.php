@@ -45,7 +45,7 @@
 
 require_once('Temporal.php');
 
-//mysql_connection_db_select(DATABASE);
+//mysql_connection_select(DATABASE);
 
 function check_title_mask($mask, $rt) {
 	return check_title_mask2($mask, $rt, false);

@@ -17,7 +17,7 @@
 
 	if (! is_logged_in()) return;
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["addRecordDefaults"];
 	if ($addRecDefaults) {

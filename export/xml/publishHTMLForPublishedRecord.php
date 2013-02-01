@@ -44,7 +44,7 @@ if (!is_logged_in()) {
 	return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 // set parameter defaults
 //input must be relative to HML publish directory

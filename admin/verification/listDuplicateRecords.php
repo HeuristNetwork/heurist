@@ -28,7 +28,7 @@
 	$recsGivenNames = array();
 	$dupeDifferences = array();
 
-	mysql_connection_db_insert(DATABASE);
+	mysql_connection_insert(DATABASE);
 
 
 	$res = mysql_query('select snd_SimRecsList from recSimilarButNotDupes');
@@ -45,8 +45,8 @@
 		}
 	}
 
-	mysql_connection_db_select(DATABASE);
-	//mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
+	mysql_connection_select(DATABASE);
+	//mysql_connection_select("`heuristdb-nyirti`");   //for debug
 	//FIXME  allow user to select a single record type
 	//$res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where rec_RecTypeID != 52 and rec_RecTypeID != 55 and not rec_FlagTemporary order by rec_RecTypeID desc');
 

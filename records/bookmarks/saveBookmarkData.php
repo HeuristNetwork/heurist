@@ -22,7 +22,7 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) return;
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 $usrID = get_user_id();
 $bkm_ID = intval($_POST["bkmk_id"]);
 if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {

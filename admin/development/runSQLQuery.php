@@ -49,7 +49,7 @@ require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 // Deals with all the database connections stuff
 
-    mysql_connection_db_select(DATABASE);
+    mysql_connection_select(DATABASE);
 
 // Page headers to explain what the listing represents, includes query for backtraqcking
 

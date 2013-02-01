@@ -54,7 +54,7 @@
 	<body class="popup">
 		<?php
 
-			mysql_connection_db_select(DATABASE);
+			mysql_connection_select(DATABASE);
 
 			$res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
 			from defDetailTypes

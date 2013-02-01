@@ -39,7 +39,7 @@ if (! is_logged_in()) {
 
 	if($metod=="searchreports"){
 
-		mysql_connection_db_select(DATABASE);
+		mysql_connection_select(DATABASE);
 
 		//search the list of users by specified parameters
 		$f_id 	= @$_REQUEST['recID'];
@@ -70,7 +70,7 @@ if (! is_logged_in()) {
 
 	}else if($metod=="getreport"){ //-----------------
 
-		mysql_connection_db_select(DATABASE);
+		mysql_connection_select(DATABASE);
 
 		$groupID = @$_REQUEST['recID'];
 		if ($groupID==null) {

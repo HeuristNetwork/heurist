@@ -27,7 +27,7 @@ if (! is_logged_in()) {
 	return;
 }
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 $nextmode = 'inputselect';
 
@@ -105,11 +105,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			}
 		}
 
-		mysql_connection_db_select(USERS_DATABASE);
+		mysql_connection_select(USERS_DATABASE);
 		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
 		$word_limit = $row[0];	// minimum number of words that must appear in the link
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 
 		$urls = array();
@@ -326,11 +326,11 @@ hyperlinks of interest).</p>
 		foreach ($tags as $kwd)
 			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
 */
-		mysql_connection_db_select(USERS_DATABASE);
+		mysql_connection_select(USERS_DATABASE);
 		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
 		$word_limit = $row[0];	// minimum number of words that must appear in the link
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 
 ?>
 <h2 style="padding-left: 20px;">Import Hyperlinks</h2>

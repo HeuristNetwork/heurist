@@ -79,7 +79,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
 $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
@@ -178,10 +178,10 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 /// group names
-mysql_connection_db_select(USERS_DATABASE) or die(mysql_error());
+mysql_connection_select(USERS_DATABASE) or die(mysql_error());
 $WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type ='workgroup'");
 $UGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type ='user'");
-mysql_connection_db_select(DATABASE) or die(mysql_error());
+mysql_connection_select(DATABASE) or die(mysql_error());
 
 
 $GEO_TYPES = array(

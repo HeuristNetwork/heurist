@@ -200,7 +200,7 @@
 	{
 		header('Content-type: text/javascript');
 
-		mysql_connection_db_overwrite(DATABASE);
+		mysql_connection_overwrite(DATABASE);
 		$db = mysqli_connection_overwrite(DATABASE); //artem's
 
 		//decode and unpack data

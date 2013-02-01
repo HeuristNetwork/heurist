@@ -48,7 +48,7 @@
 
 	if($metod=="search"){
 
-		mysql_connection_db_select(DATABASE);
+		mysql_connection_select(DATABASE);
 
 		$records = array();
 		//$records['list'] = array();
@@ -67,7 +67,7 @@
 
 	}else if($metod=="get"){ //-----------------
 
-		mysql_connection_db_select(DATABASE);
+		mysql_connection_select(DATABASE);
 
 		$recID = @$_REQUEST['recID'];
 		if ($recID==null) {

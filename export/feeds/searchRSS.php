@@ -28,7 +28,7 @@ require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 $_REQUEST['_rss_search_search'] = 1;
 define('rss_search-RESULTS_PER_PAGE', 500);
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 
 if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))

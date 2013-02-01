@@ -42,9 +42,9 @@
 
 		<?php
 
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 			if(mysql_error()) {
-				die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
+				die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 			}
 
 			print "<h2>Heurist Structure comparison</h2>";
@@ -164,7 +164,7 @@
 				$d_rtnames = $d_rectypes['names'];
 
 
-				mysql_connection_db_overwrite($sourcedb);
+				mysql_connection_overwrite($sourcedb);
 				$s_rectypes = getAllRectypeStructures(false);
 				$s_dettypes = getAllDetailTypeStructures(false);
 				$s_rtnames = $s_rectypes['names'];

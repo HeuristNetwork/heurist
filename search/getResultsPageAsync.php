@@ -26,7 +26,7 @@ require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
 
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 //remove any tempory records more that a week old since
 //it's possible that someone leaves the edit page up for a while before saving.

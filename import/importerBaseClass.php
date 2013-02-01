@@ -928,7 +928,7 @@ function load_bib_detail_requirements() {
 	// Should probably detail with eXcluded elements at some stage, but not now.
 	global $rec_detail_requirements;
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	//mysql_connection_select(DATABASE);
 	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID where rst_RequirementType = "Y" and dty_Type != "resource"');
 	$rec_detail_requirements = array();
@@ -946,7 +946,7 @@ function load_bib_requirement_names() {
 	// inner array is a mapping of dty_ID to rst_DisplayName, union a mapping of rst_DisplayName to dty_ID
 	global $bib_requirement_names;
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dty_Name from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID');
 	$bib_requirement_names = array();
 	while ($row = mysql_fetch_row($res)) {
@@ -962,7 +962,7 @@ function load_bib_type_names() {
 	// $bib_type_names is the mapping of dty_ID to dty_Name
 	global $bib_type_names;
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	$res = mysql_query('select dty_ID, dty_Name from defDetailTypes');
 	$bib_type_names = array();
 	while ($row = mysql_fetch_row($res))
@@ -974,7 +974,7 @@ function load_bib_type_name_to_id() {
 	// $bib_type_names is the mapping of dty_Name to dty_ID
 	global $bib_type_name_to_id;
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	$res = mysql_query('select dty_ID, dty_Name from defDetailTypes');
 	$bib_type_name_to_id = array();
 	while ($row = mysql_fetch_row($res))
@@ -988,7 +988,7 @@ function load_heurist_rectypes() {
 
 	$heurist_rectypes = array();
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	$res = mysql_query('select * from defRecTypes');
 	while ($row = mysql_fetch_assoc($res)) {
 		// fix up the title masks
@@ -1006,7 +1006,7 @@ function load_rectype_name_to_id() {
 	// $bib_type_names is the mapping of rty_Name to rty_ID
 	global $rectype_name_to_id;
 
-	// mysql_connection_db_select('SHSSERI_bookmarks');
+	// mysql_connection_select('SHSSERI_bookmarks');
 	$res = mysql_query('select rty_ID, rty_Name from defRecTypes where rty_ID');
 	$rectype_name_to_id = array();
 	while ($row = mysql_fetch_row($res))

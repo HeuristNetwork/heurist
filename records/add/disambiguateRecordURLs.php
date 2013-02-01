@@ -26,7 +26,7 @@ if (! $_REQUEST['bkmk_url']) {
 	return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $base_url = str_replace('&site_hierarchy', '', $_SERVER['REQUEST_URI']);
 $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);

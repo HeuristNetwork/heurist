@@ -41,7 +41,7 @@ else
 	$search_type = BOTH;	// all records
 
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if (preg_match('/\\b_BROKEN_\\b/', $_REQUEST['q'])) {
 	$broken = 1;

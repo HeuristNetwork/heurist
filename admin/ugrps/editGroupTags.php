@@ -23,7 +23,7 @@ if (! is_logged_in()) {
 	return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 ?>
 <html>
@@ -137,7 +137,7 @@ function add_tags() {
 	if (! $insert_stmt) return;
 
 	$insert_stmt = 'insert into usrTags (tag_Text, tag_UGrpID) values ' . $insert_stmt;
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query($insert_stmt);
 	if (mysql_affected_rows() == 1) {
 		print '<div style="color: red;">1 tag added</div>';
@@ -151,7 +151,7 @@ function add_tags() {
 
 function delete_tag() {
 	$tag_id = intval($_REQUEST['deleting']);
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query('delete from usrTags where tag_ID = ' . $tag_id );
 	if (mysql_affected_rows() >= 1) {	// overkill
 		print '<div style="color: red;">1 tag deleted</div>';

@@ -31,7 +31,7 @@
         return;
     }
 
-    mysql_connection_db_overwrite(DATABASE);
+    mysql_connection_overwrite(DATABASE);
 
     $query="delete from sysLocks";
     $res = mysql_query($query);

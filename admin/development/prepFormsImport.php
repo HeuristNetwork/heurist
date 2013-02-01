@@ -46,7 +46,7 @@ if (!is_logged_in()) {
 	return;
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 // set parameter defaults
 $formImportDir = @$_REQUEST['formImportDir']; // outName returns the hml direct.
 $resourceUriRoot = @$_REQUEST['resourceUriRoot']; // URI prefix for the resources upload with forms.

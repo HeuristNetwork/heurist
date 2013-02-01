@@ -31,7 +31,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     return;
 	}
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
 

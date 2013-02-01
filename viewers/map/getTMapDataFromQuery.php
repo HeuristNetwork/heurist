@@ -28,7 +28,7 @@
 	header("Content-type: text/javascript");
 
 
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 
 	if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
 		construct_legacy_search();      // migration path

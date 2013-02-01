@@ -40,9 +40,9 @@
 
 		<?php
 
-			mysql_connection_db_overwrite(DATABASE);
+			mysql_connection_overwrite(DATABASE);
 			if(mysql_error()) {
-				die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
+				die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 			}
 
 			print "<h2>Heurist Direct Data Transfer</h2>";
@@ -164,7 +164,7 @@
 					$needcrypt = true;//(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2');
 				}
 
-				mysql_connection_db_select($db_prefix.$sourcedbname);
+				mysql_connection_select($db_prefix.$sourcedbname);
 
 				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
 
@@ -187,7 +187,7 @@
 					header('Location: ' . HEURIST_BASE_URL . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
 					exit;
 				}
-				mysql_connection_db_overwrite(DATABASE);
+				mysql_connection_overwrite(DATABASE);
 			}
 
 

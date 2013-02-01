@@ -23,7 +23,7 @@
 
 	// Deals with all the database connections stuff
 	//define("DT_DRAWING","2-59");
-	mysql_connection_db_select(DATABASE);
+	mysql_connection_select(DATABASE);
 	if(mysql_error()) {
 		die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 	}

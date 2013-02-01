@@ -45,7 +45,7 @@
 	} // returnErrorMsgPage2
 
 
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 
 	/*****DEBUG****///error_log(HEURIST_DBNAME."         ".HEURIST_BASE_URL.'            '.DATABASE);
 

@@ -22,7 +22,7 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) return;
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 
 $rec_id = intval($_POST["recID"]);

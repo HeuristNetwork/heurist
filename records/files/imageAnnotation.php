@@ -20,7 +20,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-	//mysql_connection_db_select(DATABASE);
+	//mysql_connection_select(DATABASE);
 	mysql_connection_overwrite(DATABASE);
 
 	$res = array();

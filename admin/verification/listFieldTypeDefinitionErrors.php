@@ -53,7 +53,7 @@
 	<body class="popup">
 		<?php
 
-			mysql_connection_db_select(DATABASE);
+			mysql_connection_select(DATABASE);
 			// lookup detail type enum values
 			$TL = array();
 			$query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';

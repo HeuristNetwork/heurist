@@ -56,7 +56,7 @@ if (!defined("JSON_RESPONSE")) {
 	header('Content-type: text/javascript');
 }
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
 /*****DEBUG****///error_log("rec_id ".print_r($rec_id,true));
 

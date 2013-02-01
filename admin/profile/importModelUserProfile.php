@@ -32,7 +32,7 @@ if (is_modeluser()) {
 
 define('MODEL_USER_ID', ($_REQUEST['model_user_id'] ? $_REQUEST['model_user_id'] : 96));
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 $updated = 0;
 if (@$_REQUEST['submit']) $updated = update_my_settings();

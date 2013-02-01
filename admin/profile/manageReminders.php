@@ -22,7 +22,7 @@ if (! is_logged_in()) {
 }
 
 if (@$_REQUEST["action"] == "delete"  &&  @$_REQUEST["rem_ID"]) {
-	mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_overwrite(DATABASE);
 	mysql_query("delete from usrReminders where rem_ID = " . intval($_REQUEST["rem_ID"]) . " and rem_OwnerUGrpID = " . get_user_id());
 }
 
@@ -81,7 +81,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
     </tr>
 <?php
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $future_clause = $future ? "and rem_Freq != 'once' or rem_StartDate > now()" : "";
 

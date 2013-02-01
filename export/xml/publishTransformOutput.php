@@ -43,7 +43,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 //error_log("made it to here");
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $transformID = @$_REQUEST['transID'] ? $_REQUEST['transID'] : null;
 //if no style given then try default, if default doesn't exist we output raw xml

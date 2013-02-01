@@ -30,7 +30,7 @@ if ($u) {
 	}
 }
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 $res = mysql_query("select rem_Nonce from usrReminders where rem_ID = ".$r);
 $row = mysql_fetch_assoc($res);

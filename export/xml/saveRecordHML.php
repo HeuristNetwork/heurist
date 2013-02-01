@@ -70,7 +70,7 @@ $hinclude = (@$_REQUEST['hinclude'] ? $_REQUEST['hinclude'] : ($recID?0:-1)); //
 
 /*****DEBUG****///error_log("recID = .$recID.  q = .$q.  outName = .$outName. depth = .$depth");
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 if ($recID ){ // check access first
 	$res = mysql_query("select * from Records where rec_ID = $recID");

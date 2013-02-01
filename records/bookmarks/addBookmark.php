@@ -21,7 +21,7 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) return;
 
-mysql_connection_db_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 header("Content-type: text/javascript");
 

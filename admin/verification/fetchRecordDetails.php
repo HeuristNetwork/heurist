@@ -17,7 +17,7 @@ define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on n
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 
 $ref_detail_types = mysql__select_array('defDetailTypes', 'dty_ID', 'dty_Type="resource"');
 
