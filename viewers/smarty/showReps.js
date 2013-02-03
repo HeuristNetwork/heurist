@@ -965,7 +965,7 @@ function ShowReps() {
 	}
 
 	//
-	//
+	// NOT USED?
 	//
 	function _insertRootForEach(){
 		var textedit = Dom.get("edTemplateBody");
@@ -974,7 +974,7 @@ function ShowReps() {
 		insertAtCursor(textedit, _text, false, -12);
 	}
 	//
-	//
+	// NOT USED?
 	//
 	function _insertRectypeIf(rectypeName){
 
@@ -1342,6 +1342,9 @@ function ShowReps() {
 	//
 	function _insertModifier(modname){
 
+		insertAtCursor(null, "|"+modname, null, null);
+
+/*
 		var textedit = Dom.get("edTemplateBody");
 
 		if (textedit.selectionStart || textedit.selectionStart == '0') {
@@ -1375,6 +1378,7 @@ function ShowReps() {
 				+ "|"+modname
 				+ textedit.value.substring(pos2, textedit.value.length);
 		}
+*/
 	}
 
 	//

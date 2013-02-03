@@ -264,7 +264,7 @@ if(mysql_error()) {
 				$manifest = simplexml_load_file($manifest_file);
 				if($manifest==null || is_string($manifest)){ //manifest not found
 
-					$rec['error'] = "Cant load manifest file image layer. ".$manifest_file;
+					$rec['error'] = "Can not load manifest file image layer. ".$manifest_file;
 
 				}else{
 					if($rec['type'] == "maptiler"){
@@ -279,15 +279,21 @@ if(mysql_error()) {
 					}else{
 
 						$rect = findXMLelement($manifest, 0, array("LayerList","Layer","SourceMapRecordList","SourceMapRecord","MapRectangle"));
+
 						if($rect){
-							$sw = $rect[0];
-							$ne = $rect[1];
-							$rec['extent'] = $sw['lon'].','.$sw['lat'].','.$ne['lon'].','.$ne['lat'];
+							$rec['extent'] = "";
+							foreach ($rect->children() as $pnt){
+								$arr = $pnt->attributes();
+								$lon = $arr['lon'];
+								$lat = $arr['lat'];
+								$rec['extent'] = $rec['extent'].$lon.",".$lat.",";
+							}
+							//$rec['extent'] = $sw['lon'].','.$sw['lat'].','.$ne['lon'].','.$ne['lat'];
 						}
 					}
 
 					if(!array_key_exists('extent',$rec)){
-						$rec['error'] = "Can't find bounds parameters in manifest file";
+						$rec['error'] = "Can not find bounds parameters in manifest file";
 					}
 				}
 			}
@@ -491,7 +497,7 @@ if(mysql_error()) {
 					if($ind==count($atree)){
 						return $f_gen;
 					}else{
-						return findXMLelement($xml, $ind, $atree);
+						return findXMLelement($f_gen, $ind, $atree);
 					}
 
 				}
