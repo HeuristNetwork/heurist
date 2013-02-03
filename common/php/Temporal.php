@@ -97,14 +97,16 @@ function removeLeadingYearZeroes($value){
 		if(@$date['day']){
 			$res = $res."-".$date['day'];
 		}
-		if(@$date['hour']){
-			$res = $res." ".$date['hour'];
-		}
-		if(@$date['minute']){
-			$res = $res.":".$date['minute'];
-		}
-		if(@$date['second']){
-			$res = $res.":".$date['second'];
+
+		if(@$date['hour']>=0 || @$date['minute']>0 || @$date['second']>0){
+			$res = $res." ".str_pad($date['hour'],2,'0',STR_PAD_LEFT);
+
+			if(@$date['minute']>=0 || @$date['second']>0){
+				$res = $res.":".str_pad($date['minute'],2,'0',STR_PAD_LEFT);
+			}
+			if(@$date['second']>0){
+				$res = $res.":".str_pad($date['second'],2,'0',STR_PAD_LEFT);
+			}
 		}
 		if($isbce){
 			$res = $res." BCE";
@@ -155,9 +157,9 @@ function parseDateTime($value) {
 			}else{ //delimited version  23:59:59
 				preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
 			}
-			if (@$matches[1]) $res['hour'] = intval($matches[1]);
-			if (@$matches[2]) $res['minute'] = intval($matches[2]);
-			if (@$matches[3]) $res['second'] = intval($matches[3]);
+			$res['hour'] = (@$matches[1])? intval($matches[1]):0;
+			$res['minute'] = (@$matches[2])?intval($matches[2]):0;
+			$res['second'] = (@$matches[3])?intval($matches[3]):0;
 		}
 
 		return count($res)?$res:null;
