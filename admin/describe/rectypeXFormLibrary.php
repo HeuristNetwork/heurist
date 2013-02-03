@@ -16,22 +16,23 @@
  * rectypeXFormLibrary contains the functions which translate a heurist rectype definition info an XForm xml document
  * following the ODK Collect xForms guidelines.
  *
- * @author		Stephen White	<stephen.white@sydney.edu.au>
- * @author		Artem Osmakov	<artem.osmakov@sydney.edu.au>
- * @copyright 	(C) 2005-2013 University of Sydney
- * @link 		http://Sydney.edu.au/Heurist/about.html
- * @version		3.1.0
- * @license 	http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @package 	Heurist academic knowledge management system
- * @subpackage	XForms
+ * @author      Stephen White  <stephen.white@sydney.edu.au>
+ * @author      Artem Osmakov  <artem.osmakov@sydney.edu.au>
+ * @copyright   (C) 2005-2013 University of Sydney
+ * @link        http://Sydney.edu.au/Heurist/about.html
+ * @version     3.1.0
+ * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @package     Heurist academic knowledge management system
+ * @subpackage  XForms
+ * @todo        extend Heurist with the ability to express the condition/relevance aspect of data collection
  */
 /**
-* Function list:
-* - getXFormTypeFromBaseType()
-* - buildform()
-* - createRecordLookup()
-* - createTermSelect()
-*/
+ * Function list:
+ * - getXFormTypeFromBaseType()
+ * - buildform()
+ * - createRecordLookup()
+ * - createTermSelect()
+ */
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
@@ -54,14 +55,14 @@ require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 	video						Take a video recording.
 	calculate 					Perform a calculation; see “calculates” below.
 
-	Note: teh 'appearance " attribute can be used to launch intents that can be serviced by
+	Note: the 'appearance " attribute can be used to launch android intents that can be serviced by
 	arbritrary android applications - it's assumed that the app returns the correct type
 */
 /**
  * mapping function that maps Heurist base types into XForm ui types.
- * @param        string [$sDetailBasetype] base type of HERUIST detail
- * @return       string HEURIST extened  ODK and javaRosa XForm type mapped to input
- * @link         http://opendatakit.org/help/form-design/xlsform/
+ * @param    string [$sDetailBasetype] base type of HERUIST detail
+ * @return   string extened ODK and javaRosa XForm type mapped from Heurist detail base data type
+ * @link     http://opendatakit.org/help/form-design/xlsform/
  */
 function getXFormTypeFromBaseType($sDetailBasetype) {
 	switch ($sDetailBasetype) {
@@ -92,18 +93,25 @@ function getXFormTypeFromBaseType($sDetailBasetype) {
 	}
 }
 /**
- * main form generation code
- * detailed desription
- * @staticvar    array $dettypes array detail type definitions for this database
- * @staticvar    object $di field name to index mapping for detail type definition
- * @staticvar    array $rectypes array record type structure definitions for this database
- * @staticvar    object $ri field name to index mapping for record field structure definition
- * @staticvar    object $ti field name to index mapping for term definition
- * @staticvar    array $termLookup array term structure definitions for the enumerations in this database
- * @staticvar    array $relnLookup array term structure definitions for the relationships in this database
- * @param        integer [$rt_id] the rectype locally unique identifier
- * @return       object an array of strings representing form, rtName, rtConceptID, rtDescription, and report on success
- * @see          getXFormTypeFromBaseType, createRecordLookup, createTermSelect, getAllDetailTypeStructures, getAllRectypeStructures, getTerms
+ * main form generation code build the model to approximate HML, the form UI and the binding between UI and model
+ * @staticvar   array [$dettypes] array detail type definitions for this database
+ * @staticvar   object [$di] field name to index mapping for detail type definition
+ * @staticvar   array [$rectypes] array record type structure definitions for this database
+ * @staticvar   object [$ri] field name to index mapping for record field structure definition
+ * @staticvar   object [$ti] field name to index mapping for term definition
+ * @staticvar   array [$termLookup] array term structure definitions for the enumerations in this database
+ * @staticvar   array [$relnLookup] array term structure definitions for the relationships in this database
+ * @param       integer [$rt_id] the rectype locally unique identifier
+ * @return      object an array of strings representing form, rtName, rtConceptID, rtDescription, and report on success
+ * @uses        getXFormTypeFromBaseType()
+ * @uses        createRecordLookup()
+ * @uses        createTermSelect()
+ * @uses        getTerms()
+ * @uses        getAllDetailTypeStructures()
+ * @uses        getAllRectypeStructures()
+ * @uses        HEURIST_UPLOAD_DIR
+ * @uses        HEURIST_BASE_URL
+ * @uses        HEURIST_DBNAME
  */
 function buildform($rt_id) {
 	// mappings and lookups - static so we only retrieve once per service call
@@ -283,7 +291,7 @@ function buildform($rt_id) {
  * with HEURIST record ids as the lookup value.
  * @param        array [$rtIDs] array of record Type identifiers for which a resource pointer is constrained to.
  * @return       string formatted as a XForm select lookup item list
- * @todo         need to accept a filter for reducing the recordset, currently you get all records of every type in teh input list
+ * @todo         need to accept a filter for reducing the recordset, currently you get all records of every type in the input list
  */
 function createRecordLookup($rtIDs) {
 	$emptyLookup = "<item>\n" . "<label>\"no records found for rectypes '$rtIDs'\"</label>\n" . "<value>0</value>\n" . "</item>\n";
@@ -302,10 +310,10 @@ function createRecordLookup($rtIDs) {
 /**
  * creates an xForm item list for the set of terms passed in.
  *
- * @param        string $termIDTree json string representing the tree of term ids for this term field
- * @param        string $disabledTermIDsList a comma separated list of term ids to be markered as headers, can be empty
- * @param        $termLocalLookup a lookup array of term structures
- * @param        object $ti term structure field name to index mapping for term definition
+ * @param        string [$termIDTree] json string representing the tree of term ids for this term field
+ * @param        string [$disabledTermIDsList] a comma separated list of term ids to be markered as headers, can be empty
+ * @param        array [$termLocalLookup] a lookup array of term structures
+ * @param        object [$ti] term structure field name to index mapping for term definition
  * @return       string representing an xForm select item list
  * @see          getTermOffspringList
  * @todo         expand this function to xForm cascaded selects auto completion select
@@ -339,5 +347,4 @@ function createTermSelect($termIDTree, $disabledTermIDsList, $termLocalLookup, $
 	}
 	return $res;
 }
-
 ?>

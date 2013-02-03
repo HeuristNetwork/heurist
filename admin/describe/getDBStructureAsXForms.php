@@ -17,8 +17,8 @@
  * Heurist database definitions (rectypes, details etc.) for uses in ODK Collect Android app
  * ready for use in mobile app - primarily intended for NeCTAR FAIMS project
  *
- * @author      Stephen White	<stephen.white@sydney.edu.au>
- * @author      Artem Osmakov	<artem.osmakov@sydney.edu.au>
+ * @author      Stephen White  <stephen.white@sydney.edu.au>
+ * @author      Artem Osmakov  <artem.osmakov@sydney.edu.au>
  * @copyright   (C) 2005-2013 University of Sydney
  * @link        http://Sydney.edu.au/Heurist/about.html
  * @version     3.1.0
@@ -29,6 +29,7 @@
  * @uses        HEURIST_UPLOAD_DIR
  * @uses        HEURIST_BASE_URL
  * @uses        HEURIST_DBNAME
+ * @todo        Modify this file to be a javarosa compliant service for download and upload of forms.
  */
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
@@ -174,10 +175,14 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 return;
 
 /**
- * Creates xform for $rtyID, saves it into FILESTORE/forms folder and adds an entry to the manifest lists
- * @param        integer [$rtyID] the local id of the recType to creat the xform for
- * @return       string report about success or failure of the forms creation
- * @uses         buildform from rectypeXFormLibrary to build the form
+ * Creates xform for $rtyID, saves it into HEURIST_UPLOAD_DIR/xforms/ folder and adds an entry to the manifest lists
+ * @global   string [$folder] path of where to store output form
+ * @global   string [$formsList] manifest stream of forms oldstyle ODK
+ * @global   string [$xformsList] manifest stream of xforms
+ * @param    integer [$rtyID] the local id of the recType to creat the xform for
+ * @return   string report about success or failure of the forms creation
+ * @uses     buildform() from rectypeXFormLibrary to build the form
+ * @uses     HEURIST_DBNAME
  */
 function createform($rtyID) {
 	global $folder, $formsList, $xformsList;
