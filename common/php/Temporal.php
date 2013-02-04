@@ -155,8 +155,14 @@ function parseDateTime($value) {
 			if (preg_match('/[HMS]/',$time)){ //char separated version 6H5M8S
 				preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/',$time,$matches);
 			}else{ //delimited version  23:59:59
-				preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
+				//preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
+
+				//preg_match('/^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)$/',$time,$matches);
+
+				$matches = explode(":",$time);
+				$matches = array_merge(array($time), $matches);
 			}
+
 			$res['hour'] = (@$matches[1])? intval($matches[1]):0;
 			$res['minute'] = (@$matches[2])?intval($matches[2]):0;
 			$res['second'] = (@$matches[3])?intval($matches[3]):0;
