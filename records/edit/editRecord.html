@@ -156,8 +156,11 @@
 						document.getElementById("search-nav").innerHTML =
 						"<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
 						"<div>" +
-						(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
-						(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
+						(context.prev ? "<a class=\"button\" style=\"height:18px !important\" title='It will save changes' onclick='{top.HEURIST.edit.navigate_torecord(\""+top.HEURIST.parameters["sid"]+'",'+context.prev+"); return false;}'><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
+						(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" title='It will save changes' onclick='{top.HEURIST.edit.navigate_torecord(\""+top.HEURIST.parameters["sid"]+'",'+context.next+"); return false;}'>next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
+
+						//(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/nav_prev.png\">previous</a>" : "") +
+						//(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+dbname+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/nav_next.png\"></a>" : "") +
 						"<div style=\"clear:both\"></div></div>";
 					});
 				}
@@ -431,11 +434,6 @@
 				<div class=public-visible style="display:inline-block;margin:3px 10px">
 					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
 					<label for=input-visibility>show optional fields</label>
-					<script>
-						top.HEURIST.whenLoaded("display-preferences", function() {
-							document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
-						});
-					</script>
 				</div>
 				<div id="admin_editrectype" style="float:right;width:200px;text-align:right;"></div>
 			</div>

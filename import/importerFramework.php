@@ -137,7 +137,7 @@ function print_common_header($fileName) {
 
   <script src=displayImportProgress.js></script>
  </head>
- <body class="popup" width=720 height=480>
+ <body class="popup" width="640" height="480">
   <script src='<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js'></script>
   <script>
 if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php', true);
@@ -159,10 +159,10 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 				$frm = "Bibliographic";
 			}
 	?>
-<h2 style="display:inline">Import <? print $frm ?> records</h2>
+<h2 style="display:none">Import <? print $frm ?> records</h2>
 
 <?php	} else { ?>
-<h2 style="display:inline">Import records</h2>
+<h2 style="display:none">Import records</h2>
 <?php	}
 
 	  } else { ?>

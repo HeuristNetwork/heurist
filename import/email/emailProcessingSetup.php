@@ -54,7 +54,7 @@ if(!is_admin()){
 	</script>
 </head>
 
-<body class="popup" width="600" height="300" style="font-size: 11px;overflow:auto;">
+<body class="popup" width="600" height="400" style="font-size: 11px;overflow:auto;">
 
 <p>Heurist will connect to an email server using the login details stored in the
    database properties (sysIdentification table) and retrieve emails received from

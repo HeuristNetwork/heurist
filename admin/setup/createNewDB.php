@@ -20,6 +20,13 @@
 		return;
 	}
 
+	//
+	function prepareDbName(){
+		$db_name = substr(get_user_username(),0,5);
+		$db_name = preg_replace("/[^A-Za-z0-9_\$]/", "", $db_name);
+		return $db_name;
+	}
+
 ?>
 <html>
 	<head>
@@ -238,7 +245,7 @@
 					<!-- user name used as prefix -->
 					<b><?= HEURIST_DB_PREFIX ?>
 					<input type="text" maxlength="20" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
-				    style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?substr(get_user_username(),0,5):'')?> >
+				    style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> >
 				    _  </b>
 					<input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >

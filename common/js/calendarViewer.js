@@ -48,7 +48,11 @@ function CalendarViewer() {
 
 		isA: function (strClass) {
 			return (strClass === _className);
-		}
+		},
+
+/*		parent_tab:function(sname){
+			_parenttab = sname;
+		}*/
 
 	}
 

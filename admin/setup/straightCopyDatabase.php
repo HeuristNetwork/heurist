@@ -44,6 +44,36 @@
 		</style>
 	</head>
 	<body class="popup">
+
+		<script type="text/javascript">
+		function onKeyPress(event){
+
+			event = event || window.event;
+			var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+			if (charCode && charCode > 31)
+			{
+					var keyChar = String.fromCharCode(charCode);
+					if(!/^[a-zA-Z0-9$_]+$/.test(keyChar)){
+
+						event.cancelBubble = true;
+						event.returnValue = false;
+						event.preventDefault();
+						if (event.stopPropagation) event.stopPropagation();
+
+						/* does not work
+						var ele = event.target;
+						var evt = document.createEvent("KeyboardEvent");
+						evt.initKeyEvent("keypress",true, true, window, false, false,false, false, 0, 'A'.charCodeAt(0));
+						ele.dispatchEvent(evt);*/
+
+						return false;
+					}
+			}
+			return true;
+		}
+		</script>
+
+
 		<div class="banner"><h2>Heurist Direct Copy</h2></div>
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
@@ -82,7 +112,7 @@
 					<p>The database will be created with the prefix "hdb_" (all databases created by this installation of the software will have the same prefix).</p>
 					<h3>Enter a name for the new database:</h3>
 					<div style="margin-left: 40px;">
-						<input type='text' name='targetdbname' />
+						<input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
 						<input type='submit' value='Clone <?=HEURIST_DBNAME?>'/>
 					</div>
 

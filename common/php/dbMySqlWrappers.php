@@ -402,6 +402,9 @@ function mysql__getdatabases($with_prefix = false, $email = null, $role = null) 
 			}
 		}
 	}
+
+	natcasesort($result); //AO: Ian wants case insensetive order
+
 	return $result;
 }
 //ARTEM uses mysqli in saveStructure, saveUsergrps, srvMimetypes and loadReports

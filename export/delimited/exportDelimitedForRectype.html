@@ -90,8 +90,14 @@
 			</div>
 			<div class="input-row">
 				<label class="input-header-cell">Use delimeter</label>
-				<div class="input-cell"><select style="width:80px" id="delimiterSelect"  onchange="refreshRecordData()"><option value=",">comma</option><option value="\t">tab</option></select></div>
+				<div class="input-cell"><select style="width:80px" id="delimiterSelect" onchange="refreshRecordData()"><option value=",">comma</option><option value="\t">tab</option></select></div>
 			</div>
+			<!--
+			<div class="input-row">
+				<label class="input-header-cell">Quote</label>
+			 	<div class="input-cell"><select id="quoteSelect" onchange="refreshRecordData()"><option selected value='0'>&nbsp;</option><option value='"'>"</option><option value="'">'</option></select><br/><br/>
+			</div>
+			-->
 			<div class="input-row">
 				<label class="input-header-cell">Include field names as first output row</label>
 				<div class="input-cell" style="padding-top: 4px;"><input type="checkbox" id="includeFieldNamesCheckbox" onchange="refreshRecordData()"/></div>

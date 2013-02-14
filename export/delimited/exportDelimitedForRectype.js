@@ -16,6 +16,7 @@ var g_recDetailSelect = null;	//Detail Type Selection object
 
 var g_delimiterSelect = null;
 var g_dtIDsCheckbox = null;
+var g_quoteSelect = null;
 
 var g_detailTypes = [];
 var g_recType = null;
@@ -235,6 +236,13 @@ function showRecordData(hRecords) {
 
 	g_delimiterSelect = document.getElementById('delimiterSelect');
 	var strDelim = g_delimiterSelect.value;
+
+	//g_quoteSelect = document.getElementById('quoteSelect');
+	//var quoteDelim = g_quoteSelect.value;
+
+	if(quoteDelim=='0') {
+			quoteDelim = '';
+	}
 	var strRowTerm = "\n";
 
 	var e = document.getElementById("records-p");

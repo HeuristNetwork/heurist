@@ -366,11 +366,13 @@
 	*/
 	function getMediaType($mimeType, $extension){
 
+		//update it in initViewer.js
 		if($extension=="jpg" || $extension=="jpeg" || $extension=="png" || $extension=="gif"){
 			$type = 'image';
-		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi" || $extension=="flv"){
+
+		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi" || $extension=="webm" || $extension=="flv" || $extension=="qt" || $extension=="swf" || $extension=="wmv"){
 			$type = 'video';
-		}else if($extension=="mp3" || $extension=="wav"){
+		}else if($extension=="mp3" || $extension=="wav" || $extension=="ogg" || $extension=="wma"){
 			$type = 'audio';
 		}else if($extension=="html" || $extension=="htm" || $extension=="txt"){
 			$type = 'text/html';

@@ -279,7 +279,7 @@ function cancelAdd(e) {
 	</div>
 
 	<div class="input-row">
-		<div class="input-header-cell">Restrict access</div>
+		<div class="input-header-cell">Show restrict access settings</div>
 		<div class="input-cell">
 			<input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
 		</div>

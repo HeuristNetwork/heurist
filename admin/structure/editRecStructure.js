@@ -358,14 +358,14 @@ function EditRecStructure() {
 					//'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
 					//					'Preview:'+
 					'<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
-					'<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Change Vocabulary"</span>'+
+					'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Field Type" and then "Change Vocabulary"</span>'+
 					'</div></div>'+
 
 					// Pointer target types - pointers and relmarkers
 					'<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
 					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-					'<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Select Recprd Types"</span>'+
+					'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Field Type" and then "Select Recprd Types"</span>'+
 										//REMOVED BY IAN's request on 16-09	- too much complexity
 					// '<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
 					'</div></div>'+
@@ -904,6 +904,10 @@ function EditRecStructure() {
 */
 					recreateRecTypesPreview(rst_type,
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
+
+					// IAN's request 2013-02-14
+					var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
+					edt_def.parentNode.parentNode.style.display = "none";
 
 				}else{
 					edt.parentNode.parentNode.style.display = "none";

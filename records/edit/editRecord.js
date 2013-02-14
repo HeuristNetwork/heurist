@@ -36,16 +36,17 @@ if (! top.HEURIST.edit) {
 top.HEURIST.edit = {
 	modules: {
 		'public': { url: 'tabs/publicInfoTab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } },
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); }, title:"Shared information" },
 		'personal': { url: 'tabs/personalInfoTab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
-				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() } },
+				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() }, title:"Private information" },
 		'annotation': { url: 'tabs/annotationTab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
-				preload: function() { return true; } },
+				preload: function() { return true; }, title:"Text" },
 		'workgroups': { url: 'tabs/usergroupsTab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); } },
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); },
+				title:"Workgroup tags"},
 		'relationships': { url: 'tabs/relationshipsTab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } }
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); }, title:"Relationships" }
 	},
 
 	loadModule: function(name) {
@@ -113,6 +114,19 @@ top.HEURIST.edit = {
 
 					var helpLink = top.document.getElementById("help-link");
 					top.HEURIST.util.setHelpDiv(helpLink,null);
+
+
+					var status = top.HEURIST.displayPreferences["input-visibility"];
+					document.getElementById("input-visibility").checked = (status === "all");
+					//init class for body element
+					top.HEURIST.util.setDisplayPreference("input-visibility", status);
+
+					//apply onshow method
+					/*if(newIframe.contentWindow.onshow){
+						newIframe.contentWindow.onshow.call(newIframe.contentWindow);
+					}*/
+
+
 				} catch (e) { }
 			});
 
@@ -186,6 +200,8 @@ top.HEURIST.edit = {
 
 		if (modules[name].frame.contentWindow.onshow) {
 			modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);
+		}else if (name=='public') { //force for Google
+			setTimeout(function(){modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);},500);
 		}
 
 		return true;
@@ -314,7 +330,7 @@ top.HEURIST.edit = {
 		var changedModuleNames = [];
 		for (var eachName in modules) {
 			if (modules[eachName].changed)
-				changedModuleNames.push(eachName);
+				changedModuleNames.push(modules[eachName].title);
 		}
 
 		var message;
@@ -497,7 +513,16 @@ top.HEURIST.edit = {
 */
 	},
 
-	onbeforeunload: function() {
+
+	navigate_torecord:function(sid, recid){
+		if(top.HEURIST.edit.is_something_chnaged()){
+				top.HEURIST.edit.save();
+		}else{
+				location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
+		}
+	},
+
+	is_something_chnaged:function(){
 		var changed = false;
 		for (var moduleName in top.HEURIST.edit.modules) {
 			if (top.HEURIST.edit.modules[moduleName].changed) {
@@ -505,6 +530,11 @@ top.HEURIST.edit = {
 				break;
 			}
 		}
+		return changed;
+	},
+
+	onbeforeunload: function() {
+		var changed = top.HEURIST.edit.is_something_chnaged();
 // FIXME ... we can do better than this
 		if (changed) return "You have made changes to the details for this record.  If you continue, all changes will be lost.";
 	},
@@ -1212,6 +1242,7 @@ top.HEURIST.edit = {
 			dateBox.disabledStrictly = value;
 			dateBox.dateButton.disabled = value;
 			dateBox.dateButton.disabledStrictly = value;
+			dateBox.dateButton.style.visibility = value ?"hidden":"visible";
 		}
 /* AO: moved to temoralObjectLibrary.js
 		function decodeValue (inputStr) {
@@ -1979,7 +2010,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 
 	var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
 														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-														(bdValue && bdValue.value ? bdValue.value : null), (this.required!=="required"));
+														(bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian don't not want it (this.required!=="required"));
 
 /* removed by Ian request 2012-11-21
 	if(newInput.length>0){
@@ -2955,6 +2986,14 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		this.inputs[0].id = "rec_url";
 		this.inputs[0].value = defaultValue  ||  "";
 		inputCell.inputField = inputField;
+		this.inputs[0].onblur = function(e){
+			var val= e.target.value;
+			if(val!=''){
+				if(val.indexOf('://')<0){
+					e.target.value = 'http://'+val;
+				}
+			}
+		};
 
 	if (defaultValue) {
 		inputField.style.display = "none";

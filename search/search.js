@@ -3137,13 +3137,15 @@ top.HEURIST.search = {
 
 		if (! targ.href  && targ.parentNode && targ.parentNode.href) targ = targ.parentNode;	// sometimes get the span, not the link
 		var dim = top.HEURIST.util.innerDimensions(window);
+		var options = null;
 		if (targ.className.match(/\bsmall\b/)){
-			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.5, width:dim.w*0.5});
+			options =  {height:dim.h*0.5, width:dim.w*0.5};
 		}else if (targ.className.match(/\bportrait\b/)){
-			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.9, width:dim.w*0.5});
-		}else{
-			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.8, width:dim.w*0.8});
+			options = {height:dim.h*0.9, width:dim.w*0.5};
+		}else if (targ.className.match(/\blarge\b/)){
+			options = {height:dim.h*0.8, width:dim.w*0.8};
 		}
+		top.HEURIST.util.popupURL(top, targ.href, options);
 
 		return false;
 	},

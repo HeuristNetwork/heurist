@@ -313,7 +313,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	* Selects all children of the node clicked
 	*/
 	function _selectAllChildren(termid, state) { //
-			var parentNode = _findNodeById(termid); // _termTree.getNodeByIndex(parent);
+			var parentNode = _findNodeById(termid, false); // _termTree.getNodeByIndex(parent);
 
 			if(state<0){
 				state = parentNode.data.isall?0:1;
@@ -345,7 +345,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	/**
 	* Finds node by term id
 	*/
-	function _findNodeById(termid) {
+	function _findNodeById(termid, needExpand) {
 
 		//internal
 		function __doSearchById(node){
@@ -357,6 +357,11 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		//select and expand the node
 		if(nodes){
 			var node = nodes[0];
+			if(needExpand){
+				node.focus();
+				node.toggle();
+			}
+
 			return node;
 		}else{
 			return null
@@ -715,6 +720,15 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 		//redaw selected terms tree
 		_selectedTermsTree.render();
 		_createPreview();
+
+		if(existingTree){
+			setTimeout(function(){
+				for (var termid in existingTree){
+					_findNodeById(termid, true);
+					break;
+				}
+			}, 500);
+		}
 	}
 
 /*
