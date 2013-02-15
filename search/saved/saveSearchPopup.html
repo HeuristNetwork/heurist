@@ -222,7 +222,7 @@
 			function check_old() {
 			var wg = document.getElementById("edSaveDestination").value;
 			if (wg) {
-			top.HEURIST.json.loadWorkgroupDetails(wg, checkCallback);
+			top.HEURIST.util.loadWorkgroupDetails(wg, checkCallback);
 			} else {
 			checkCallback();
 			}

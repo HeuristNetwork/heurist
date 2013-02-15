@@ -113,7 +113,7 @@
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
 			if ( queryStr) {
-				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr);
+				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+dbname+"&"+queryStr,true);
 			}
 
 			//
@@ -139,15 +139,15 @@
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
 				var recID =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["recID"]:0) || (top.HEURIST ? top.HEURIST.parameters["recID"]:0));
 				if (! rec) {
-					window.location.replace(top.HEURIST.basePath +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
+//					window.location.replace(top.HEURIST.basePath +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.denied) {
-					window.location.replace(window.HEURIST.basePath +"common/html/msgAccessDenied.html"+ (recID ? "?" + recID : ""));
+//					window.location.replace(window.HEURIST.basePath +"common/html/msgAccessDenied.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
 					// Load that page (and make a best effort to stop this one from continuing)
-					window.location.replace("?recID=" + rec.replacedBy +"&db="+dbname);
+//					window.location.replace("?recID=" + rec.replacedBy +"&db="+dbname);
 				}
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {

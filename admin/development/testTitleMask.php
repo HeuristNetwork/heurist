@@ -29,7 +29,6 @@ if (!$ret && $recID) {
 
 
 //echo json_format(getTermTree("reltype","prefix"),true).";\n";
-//echo json_format(getDetailTypeDef(158),true)."<br><br><br>";
 //echo print_r(getTermSets('reltypevocab'),true)."<br><br><br>";
 //require_once(dirname(__FILE__).'/../../hapi/php/loadHapiCommonInfo.php');
 //echo json_format(getAllRectypeConstraint(),true)."<br>";

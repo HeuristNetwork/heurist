@@ -175,13 +175,17 @@ function mysql__insert($table, $pairs_assoc, $ignoreDupes = false) {
 	// Prepare statement
 	$keys = array_keys($pairs_assoc);
 	$ignore = $ignoreDupes ? " ignore " : "";
-	if (count($keys) == 0) return 1;
-	else {
+	if (count($keys) == 0) {
+		return 1;
+	} else {
 		$stmt = "INSERT $ignore INTO " . $table . ' (' . join(',', $keys) . ') VALUES (';
 		for ($i = 0;$i < count($keys);$i++) {
 			if ($i > 0) $stmt.= ",";
-			if (!is_array($pairs_assoc[$keys[$i]])) $stmt.= sql_niceify($pairs_assoc[$keys[$i]]);
-			else if (preg_match('/^[a-zA-Z0-9_]+[(](?:"[^\\"]+")?[)]$/', $pairs_assoc[$keys[$i]][0])) $stmt.= $pairs_assoc[$keys[$i]][0];
+			if (!is_array($pairs_assoc[$keys[$i]])) {
+				$stmt.= sql_niceify($pairs_assoc[$keys[$i]]);
+			} else if (preg_match('/^[a-zA-Z0-9_]+[(](?:"[^\\"]+")?[)]$/', $pairs_assoc[$keys[$i]][0])) {
+				$stmt.= $pairs_assoc[$keys[$i]][0];
+			}
 		}
 		$stmt.= ')';
 	}

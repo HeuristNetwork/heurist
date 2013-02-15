@@ -8,11 +8,11 @@ require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 
 // Deals with all the database connections stuff
 
-mysql_connection_db_select(DATABASE);
+mysql_connection_select(DATABASE);
 //place code here
 //echo DATABASE."\n";
 //echo json_format(getVocabTree('reltype'),true)."<br><br><br>";
-//echo json_format(getAllRectypeStructures(),true)."<br><br><br>";
+echo json_format(getAllRectypeStructures(),true)."<br><br><br>";
 /*
 echo $st = microtime(true)."<br><br><br>";
 echo json_format(getAllRelatedRecords2(205),true)."<br><br><br>";
@@ -45,13 +45,12 @@ var_dump($termIDs);
 echo preg_replace("/\"".$termIDs[0]."\"/","\"9999\"",$str);
 */
 //echo $temp2 . "<br />";
-echo json_format(expandCollections(array("147960"),true),true)."<br><br><br>";
+//echo json_format(expandCollections(array("147960"),true),true)."<br><br><br>";
 //echo json_format(getTerms(),true)."<br><br><br>";
 //echo json_format(getTermOffspringList(1820),true)."<br><br><br>";
 //echo json_format(getAllRectypeConstraint(),true)."<br><br><br>";
 //echo json_format(getAllDetailTypeStructures(),true)."<br><br><br>";
 //echo json_format(getTermTree("reltype","prefix"),true).";\n";
-//echo json_format(getDetailTypeDef(158),true)."<br><br><br>";
 //echo print_r(getTermSets('reltypevocab'),true)."<br><br><br>";
 //require_once(dirname(__FILE__).'/../../hapi/php/loadHapiCommonInfo.php');
 //echo json_format(getAllRectypeConstraint(),true)."<br>";

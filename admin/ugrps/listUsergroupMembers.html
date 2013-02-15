@@ -102,7 +102,7 @@ function showMembers() {
 }
 
 top.HEURIST.registerEvent(window, "load", function() {
-	top.HEURIST.json.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
+	top.HEURIST.util.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
 });
 
   </script>

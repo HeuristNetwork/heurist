@@ -686,7 +686,7 @@ top.HEURIST.search = {
 			}
 		}
 		var depthInfo = results.infoByDepth[level];
-		if (depthInfo.count == 0) {
+		if (!depthInfo || depthInfo.count == 0) {
 			return;
 		}
 		var resultsDiv =  $("#results-level" + level);
