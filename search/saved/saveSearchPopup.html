@@ -277,22 +277,37 @@
 			{
 				var cmb_label, cmb_url, cmb_workgroup, cmb_id;
 
-				/*ARTEM wtf
-				if (publish == "yes"){
-				publish = "true";
-				}
-				if (mode == "rename") {
-				cmb_id = ssid;
-				}
-				*/
+				var isEdit = (ssid>0);
 
-				if(ssid>0){
+				if(isEdit){
 					cmb_id = ssid;
 					cmb_workgroup = wgId;
 				}else{
 					cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
 				}
-				cmb_label = document.getElementById("edName").value;
+				var elname = document.getElementById("edName");
+				cmb_label = elname.value;
+
+				if(cmb_label==""){
+					alert("Name is mandatory");
+					elname.focus();
+					return;
+				}
+
+				//warning if saved search with the same name already exists
+				if(!isEdit || cmb_label!=sLabel){ //sLabel - previous value
+						var ss = top.HEURIST.search.savedSearchFindByName(cmb_label);
+						if(ss!=null){
+							if(!confirm("Search with name '"+cmb_label+"' already exists in "+
+									(ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+
+									"'.\n Do you still wish to save it under specified name?" )){
+								elname.focus();
+								return;
+							}
+						}
+				}
+
+
 
 				var query = new Array();
 
@@ -382,7 +397,7 @@
 		</style>
 	</head>
 
-	<body class="popup" width="400" height="250">
+	<body class="popup" width="400" height="260">
 		<!-- <div id="mainbody">-->
 
 		<label class="llab" id="lblName">Enter a name:</label>
@@ -426,7 +441,10 @@
 		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" /></div>
 		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" /></div>
 		<div><label class="llab">Layout:</label> <input class="fld" type="text" id="edLayout" /></div>
-		<div id="divSelids"><label class="llab" >Selids :</label> <input class="fld" type="text" id="edSelids"/> <input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;">&nbsp;<label for="cbSelids" id="lblCB1" >Save Selids</label></div>
+		<div id="divSelids">
+			<div><label class="llab" >Selected ids :</label> <input class="fld" type="text" id="edSelids"/></div>
+			<div style="text-align: center"><label for="cbSelids" id="lblCB1" >Save selected ids  </label><input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;"></div>
+		</div>
 
 
 		<!--

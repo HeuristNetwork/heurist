@@ -120,12 +120,14 @@ function EditRecStructure() {
 					var statusLock;
 					var aval = _dts[rst_ID];
 
+					var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+
 					arr.push([ rst_ID,
 						rst_ID,
 						Number(aval[fi.rst_DisplayOrder]),
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name], //field name
 						aval[fi.rst_DisplayName],
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type], //field type
+						fieldType, //field type
 						aval[fi.rst_RequirementType],
 						aval[fi.rst_DisplayWidth],
 						aval[fi.rst_MinValues],
@@ -248,7 +250,17 @@ function EditRecStructure() {
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var reqtype = oRecord.getData('rst_DefaultValue');
 					if (reqtype && reqtype.length > 0){
-						elLiner.innerHTML = reqtype.substring(0,9);// Artem, why do we do this??
+						var type = oRecord.getData("dty_Type");
+						if( type=='enum' ){
+							var term = top.HEURIST.terms.termsByDomainLookup['enum'][reqtype];
+							if(term){
+								reqtype = term[0].substring(0,15);
+							}
+						}else{
+								reqtype = reqtype.substring(0,9);// Artem, why do we do this??
+						}
+
+						elLiner.innerHTML = reqtype;
 					}
 				}
 			},

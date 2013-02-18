@@ -3013,11 +3013,11 @@ top.HEURIST.search = {
 		for (i = 0; i < top.HEURIST.user.savedSearches.length; ++i) {
 			if(Number(top.HEURIST.user.savedSearches[i][2]) === ssid){
 				ss = top.HEURIST.user.savedSearches[i];
-				ss[3] = 0;
+				ss[3] = 0; //reset workgroup to 0
 				break;
 			}
 		}
-		if(ss===null){ //noty found in common savedSearches
+		if(ss===null){ //not found in common savedSearches
 			for (_wgId in top.HEURIST.user.workgroupSavedSearches) {
 				if(_wgId){
 					var wg = top.HEURIST.user.workgroupSavedSearches[_wgId];
@@ -3036,6 +3036,37 @@ top.HEURIST.search = {
 
 		return ss;
 	},
+
+	savedSearchFindByName: function(ssname) {
+
+		var i, _wgId, ss = null;
+		//list of all workgroups
+		for (i = 0; i < top.HEURIST.user.savedSearches.length; ++i) {
+			if(top.HEURIST.user.savedSearches[i][0] === ssname){
+				ss = top.HEURIST.user.savedSearches[i];
+				ss[3] = 0;  //reset workgroup to 0
+			}
+		}
+		if(ss===null){ //not found in common savedSearches
+			for (_wgId in top.HEURIST.user.workgroupSavedSearches) {
+				if(_wgId){
+					var wg = top.HEURIST.user.workgroupSavedSearches[_wgId];
+					for (i = 0; i < wg.length; ++i) {
+						if(wg[i][0] === ssname){
+							ss = wg[i];
+							if(ss.length<4){
+								ss.push(_wgId);
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return ss;
+	},
+
 	//
 	// Execute the saved search by ID
 	//

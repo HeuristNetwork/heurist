@@ -70,7 +70,7 @@ $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 	<body class="popup">
 
 		<div class="banner">
-			<h2>Record Type Title Mask Check<?=$check==2?" AND CANONICAL SYNCHRONIZATION":"" ?> for <i>"<?=HEURIST_DBNAME?>"</i></h2>
+			<h2><?=(($check==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> <!-- <?=$check==2?" AND CANONICAL SYNCHRONIZATION":"" ?> for <i>"<?=HEURIST_DBNAME?>"</i> -->
 		</div>
 		<div id="page-inner">
 

@@ -23,7 +23,7 @@ if (!is_admin()) {
 	<head>
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Manage Record type Constraints</title>
+		<title>Record Type Constraints</title>
 
 		<link rel=stylesheet href="../../common/css/global.css">
 
@@ -112,7 +112,7 @@ if (!is_admin()) {
 	<body class="popup yui-skin-sam" style="overflow:auto;">
     <div>
 
-    	<div class="banner" id="titleBanner"><h2>Manage Record type Constraints</h2></div>
+    	<div class="banner" id="titleBanner"><h2>Record Type Constraints</h2></div>
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>

@@ -230,7 +230,7 @@ if (is_admin()) {
 					<ul>
 						<li class="seperator"><a href="#"
 								onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
-								title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
+								title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
 						<!-- : Also have capabuility for specific records and rectypes</p> -->
 						<li><a href="#"
 								onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
@@ -239,34 +239,36 @@ if (is_admin()) {
 							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=<?=HEURIST_DBNAME?>')"
 							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li>
 						<li><a href="#"
+							onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=<?=HEURIST_DBNAME?>')"
+							title="Fuzzy search to identify records which might contain duplicate data">Find Duplicate Records</a></li>
+						<li><a href="#"
 							onClick="loadContent('verification/listRecordPointerErrors.php?db=<?=HEURIST_DBNAME?>')"
-							title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointer check</a></li>
+							title="Find record pointer which point to an incorrect record type or to nothing at all">Check Invalid Pointers</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/listFieldTypeDefinitionErrors.php?db=<?=HEURIST_DBNAME?>')"
-							title="Find field types with invalid terms or rectypes">Invalid field type check</a></li>
-						<li><a href="#"
-							onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=<?=HEURIST_DBNAME?>')"
-							title="Fuzzy search to identify records which might contain duplicate data">Find duplicate records</a></li>
+							title="Find field types with invalid terms or rectypes">Check Invalid Field Types</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/checkXHTML.php?db=<?=HEURIST_DBNAME?>')"
-							title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
+							title="Check the wysiwyg text fields in records and blog entries for structural errors">Check Wysiwyg Texts</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/checkInvalidChars.php?db=<?=HEURIST_DBNAME?>')"
-								title="Check the wysiwyg text fields for invalid characters">Invalid characters check</a></li>
+								title="Check the wysiwyg text fields for invalid characters">Check Invalid Characters</a></li>
 						<li><a href="#"
 								onClick="loadContent('verification/cleanInvalidChars.php?db=<?=HEURIST_DBNAME?>')"
-								title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
+								title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean Invalid Characters</a></li>
 						<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-								title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URL search</a></li>
+								title="Show records with URLs which point to a non-existant or otherwise faulty address">Find Broken URLs</a></li>
 						<!-- Other non-verification functions -->
 						<li class="seperator"><a href="#"
 								onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
-								title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear database locks</a></li>
+								title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear Database Locks</a></li>
 						<li class="seperator"><a href="../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>" target="_blank"
-								title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database transfer</a></li>
+								title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->
+						<!-- AO: remarked on 2013-02-18. This is one-off correction of db format in 2011
 						<li><a href="../import/direct/upgradeToNamedFiles.php?db=<?=HEURIST_DBNAME?>" target="_blank"
-							title="Update the old format bare-number associated file storage to new format path + name">Upgrade associated files naming</a></li>
+							title="Update the old format bare-number associated file storage to new format path + name">Upgrade Associated Files Naming</a></li>
+						-->
 						<li class="seperator"><a href="#" onClick="loadContent('../export/publish/manageReports.html?db=<?=HEURIST_DBNAME?>')"
 							title="Add new / modify existing scheduled reports">Scheduled Reports</a></li>
 					</ul>

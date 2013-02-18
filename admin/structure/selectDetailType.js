@@ -308,7 +308,7 @@ function SelectDetailType() {
 				if(!Hul.isnull(lblSelect2)) {
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
-	}	
+	}
 	/**
 	* Show popup div with information about field types
 	*/
@@ -465,10 +465,12 @@ function SelectDetailType() {
 						var grpName = top.HEURIST.detailTypes.groups[index].name;
 
 						Hul.addoption(filterByGroup, dtg_ID, grpName);
+
 						if(filterByGroup.length==2){
 							filterByGroup.selectedIndex = 1;
 							filterByGroup.value = dtg_ID;
 						}
+
 					}
 				} //for
 
@@ -502,6 +504,8 @@ function SelectDetailType() {
 	{
 							filterByName = Dom.get('inputFilterByName');
 							filterByName.onkeyup = function (e) {
+								filterByGroup.selectedIndex = 0;
+								filterByGroup.value = 0;
 								clearTimeout(filterTimeout);
 								setTimeout(_updateFilter, 600);
 							};

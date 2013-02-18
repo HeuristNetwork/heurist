@@ -506,10 +506,9 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 					var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 
-					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&oldrole=member&role=delete&recIDs="+encodeURIComponent(recID);
-					top.HEURIST.util.getJsonData(baseurl, _updateRoles, params);
+					_updateRoles(params);
 
 				}else if(elLink.hash === "#delete_user"){
 
@@ -613,12 +612,30 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 	/**
 	*
 	*/
-	function _updateRoles(context) {
-		if(!Hul.isnull(context)){
-			_updateFilter();
-		}
-	}
+	function _updateRoles(params) {
 
+			function __onUpdateRoles(context) {
+				if(!Hul.isnull(context)){
+					_updateFilter();
+				}
+				top.HEURIST.util.finishLoadingPopup();
+				top.HEURIST.util.sendCoverallToBack();
+			}
+
+			function __showCoverall(){
+				if(top.HEURIST.util.coverallDiv && top.HEURIST.util.coverallDiv.style.visibility == "visible"){
+					setTimeout(__showCoverall, 100);
+				}else{
+					top.HEURIST.util.startLoadingPopup();
+				}
+			}
+
+			__showCoverall();
+			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+			top.HEURIST.util.getJsonData(baseurl, __onUpdateRoles, params);
+
+
+	}
 
 	//
 	//
@@ -934,23 +951,22 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.php?db=" +
 										_db + "&selection=1&popup=yes&grpID="+groupToBeUpdated;
 
+		function __onUserSelection(usersSelected){
+				if(!Hul.isempty(usersSelected)){
+//DEBUG alert(usersSelected);
+
+					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
+								"&role=member&recIDs="+encodeURIComponent(usersSelected);
+					_updateRoles(params);
+				}
+		}
+
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 600,
 			width: 820,
-			callback: function(usersSelected) {
-				if(!Hul.isempty(usersSelected)){
-//DEBUG alert(usersSelected);
-
-					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
-					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
-								"&role=member&recIDs="+encodeURIComponent(usersSelected);
-					top.HEURIST.util.getJsonData(baseurl, _updateRoles, params);
-
-
-				}
-			}
+			callback: __onUserSelection
 		});
 
 	}

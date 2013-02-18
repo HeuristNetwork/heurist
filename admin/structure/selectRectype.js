@@ -104,22 +104,22 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										el.style.display = "none";
 									}
 				}
-				
-				
+
+
 				_dtyID = dtyID;
 				_reinit_table();
 
 	}
-	
+
 	function _reinit_table()
-	{				
+	{
 				//////////////////// create data table
 				var arr = [];
 				var rty_ID;
 				var rectype;
 				lblSelect1 = Dom.get('lblSelect1');
 
-				
+
 
 				var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
@@ -488,11 +488,11 @@ oRecord.getData('description')+'"/>';}
 						var grpName = top.HEURIST.rectypes.groups[index].name;
 
 						Hul.addoption(filterByGroup, grpID, grpName);
-						
+
 						if(filterByGroup.length==2){
 							filterByGroup.selectedIndex = 1;
 							filterByGroup.value = grpID;
-						}						
+						}
 					}
 				} //for
 				filterByGroup.onchange = _updateFilter;
@@ -519,6 +519,8 @@ oRecord.getData('description')+'"/>';}
 	{
 							filterByName = Dom.get('inputFilterByName');
 							filterByName.onkeyup = function (e) {
+								filterByGroup.selectedIndex = 0;
+								filterByGroup.value = 0;
 								clearTimeout(filterTimeout);
 								setTimeout(_updateFilter, 600);
 							};
@@ -558,7 +560,7 @@ oRecord.getData('description')+'"/>';}
 						if(!isNaN(_rtyID)){
 							_arr_selection.push(""+Math.abs(_rtyID));
 						}
-						
+
 						//new field type to be added - refresh list
 						_reinit_table();
 					}

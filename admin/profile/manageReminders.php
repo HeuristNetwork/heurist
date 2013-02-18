@@ -31,7 +31,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 ?>
 <html>
  <head>
-  <title>Heurist reminders</title>
+  <title>My Profile. Manage Reminders</title>
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">

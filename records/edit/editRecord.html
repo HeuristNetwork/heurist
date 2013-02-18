@@ -356,7 +356,7 @@
 	<div id=record-title>
 		<div id=title-val></div>
 	</div>
-	<div id=workgroup-div>
+	<div id="workgroup-div">
 		<div id=workgroup-val-div title="Restrict access by workgroup" style="white-space:nowrap;">
 			<b><span id=workgroup-val></span></b>
 			<div id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();">
@@ -364,10 +364,12 @@
 			</div>
 		<div id=workgroup-access title="Access for users not in this workgroup"></div>
 	</div>
-	<div id=save-record-buttons>
+	<div id="save-record-buttons">
 		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
-		&nbsp;&nbsp;
-		<input type=button name=save-button style="font-weight: bold;" value=Save onClick="top.HEURIST.edit.save();">
+		&nbsp;
+		<input type=button name=save-button value=Save onClick="top.HEURIST.edit.save(false);">
+		&nbsp;
+		<input type=button name=save-button value="and close" title="Save and Close" onClick="top.HEURIST.edit.save(true);">
 	</div>
 		</div>
 
@@ -403,23 +405,25 @@
 		<b>Relationships</b>
 		<span id=desc>Cross-referencing, link related records</span>
 	</div>
-	<div class="sidebar-nav" style="text-align:right">
-		<div style="padding: 3px 0;">
+	<div class="sidebar-nav" style="text-align:right;">
+		<div style="padding: 3px 0;display:none;">
 			<label for=act-stay >stay on page</label>
 			<input type=radio name=act id=act-stay value="stay"
 				title="Saves the record but keeps this form open for further editing"
 				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
 		</div>
-		<div style="padding: 3px 0;" id="close-window-option">
+		<div style="padding: 3px 0;display:none;" id="close-window-option">
 			<label for=act-close>close window</label>
 			<input type=radio name=act id=act-close value="close"
 				title="Saves the record and closes the tab or window containing this data entry form"
 				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
 		</div>
-		<div id="public-link" style="padding: 3px 0;">
-			<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
-			&nbsp;&nbsp;
-			<input type=button name=save-button value=Save onClick="top.HEURIST.edit.save();">
+		<div id="public-link" style="padding: 3px 0;text-align:right;">
+			<input type=button name="save-button" value="Cancel" onClick="top.HEURIST.edit.cancelSave();">
+			<br />
+			<input type=button name="save-button" style="margin-top:3px;" value="Save" onClick="top.HEURIST.edit.save(false);">
+			<br />
+			<input type=button name=save-button style="margin-top:3px;" value="Save and close" onClick="top.HEURIST.edit.save(true);">
 		</div>
 	</div>
 

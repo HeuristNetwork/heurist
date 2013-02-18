@@ -77,12 +77,14 @@ $(document).ready(function() {
 		$("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
 	}
 	update_link();
+
+	showCurrentAccessSettings();
 });
 
 function buildworkgroupTagselect(wgID,keyword) {
 	var i, l, kwd, val;
 	$("#tag").empty();
-	$("<option value='' selected disabled>(select workgroup tag)</option>").appendTo("#tag");
+	$("<option value='' selected></option>").appendTo("#tag"); //(select workgroup tag)
 	l = top.HEURIST.user.workgroupTagOrder.length;
 	for (i = 0; i < l; ++i) {
 		kwd = top.HEURIST.user.workgroupTags[top.HEURIST.user.workgroupTagOrder[i]];
@@ -229,6 +231,22 @@ function cancelAdd(e) {
 	window.close();
 
 }
+
+function showCurrentAccessSettings(){
+	var cs = document.getElementById('currSettings');
+	cs.innerHTML = "Owner: "+$("#rec_OwnerUGrpID option:selected").text()+'. Visibility: '+$("#rec_NonOwnerVisibility option:selected").text()+
+			(($("#tag option:selected").text()!='')?'. Tags: '+$("#tag option:selected").text():'');
+}
+
+function showHideAcceesSettings(ele){
+	document.getElementById('maintable').className = ele.checked? '' : 'hide_workgroup';
+	var cs = document.getElementById('currSettings');
+	cs.style.display = ele.checked? 'none' : 'block';
+	if(!ele.checked){
+		showCurrentAccessSettings();
+	}
+}
+
   </script>
 
   <style type=text/css>
@@ -278,10 +296,15 @@ function cancelAdd(e) {
 		</div>
 	</div>
 
+
+	<div class="input-row" style="text-align: center;" id="currSettings">
+
+	</div>
 	<div class="input-row">
-		<div class="input-header-cell">Show restrict access settings</div>
+		<div class="input-header-cell">Show access settings</div>
 		<div class="input-cell">
-			<input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
+			<input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle"
+					onclick="showHideAcceesSettings(this);" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">
 			<div class="input-row workgroup">
@@ -289,15 +312,17 @@ function cancelAdd(e) {
 				<div class="input-cell">
 					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onChange="buildworkgroupTagselect(options[selectedIndex].value)">
 						<option value="0" disabled selected>(select group)</option>
-											<?php
-						print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." </option>\n";
-						$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
-						$wgs = array();
-						while ($row = mysql_fetch_row($res)) {
-							print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." </option>\n";
-							array_push($wgs, $row[0]);
-						}
-											?>
+
+<?php
+	print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." </option>\n";
+	$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
+	$wgs = array();
+	while ($row = mysql_fetch_row($res)) {
+				print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." </option>\n";
+				array_push($wgs, $row[0]);
+	}
+?>
+
 					</select>
 				</div>
 			</div>

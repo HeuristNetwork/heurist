@@ -52,6 +52,7 @@ $parent_id = @$_REQUEST['parent'];
 
 </head>
 <body class="popup">
+	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 <?php
 
 	$return_res = "";
@@ -75,13 +76,33 @@ $parent_id = @$_REQUEST['parent'];
 
 				echo "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>";
 				echo "<div style='color:green'>New term has been added successfully</div>";
-				$return_res = ($parent_id==0)?$res:"'ok'";
+				$return_res = ($parent_id==0)?$res:"ok";
 			}else{
 				echo "<div style='color:green'>".$res."</div>"; //error
 			}
 		}
 	}
 ?>
+<script type="text/javascript">
+
+	var return_res = "<?=$return_res ?>";
+
+	function showOtherTerms(){
+
+		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
+		{
+		"close-on-blur": false,
+		"no-resize": false,
+		height: 620,
+		width: 900,
+		callback: function(needTreeReload) {
+			return_res = 'ok';
+		}
+		});
+	}
+
+		setTimeout(function(){document.getElementById("trmName").focus();},500);
+</script>
 <div>
         <form name="main" action="editTermForm.php" method="post">
 
@@ -95,14 +116,12 @@ $parent_id = @$_REQUEST['parent'];
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px"/></div>
 
 			<div style="text-align: right; padding-top:8px;">
+					<input id="btnEditTree" type="button" value="Edit terms" onClick="{showOtherTerms();}"/>
 					<input id="btnSave" type="submit" value="Save"/>
-					<input id="btnCancel" type="button" value="Close" onClick="{window.close(<?=$return_res?>)}" />
+					<input id="btnCancel" type="button" value="Close" onClick="{window.close(return_res)}" />
 			</div>
 
 		</form>
 </div>
-<script type="text/javascript">
-		setTimeout(function(){document.getElementById("trmName").focus();},500);
-</script>
 </body>
 </html>

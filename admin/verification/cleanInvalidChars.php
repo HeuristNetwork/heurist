@@ -9,9 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
 
 define('dirname(__FILE__)', dirname(__FILE__));    // this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 /* require_once(dirname(__FILE__)."/../../common/config/initialise.php"); */
@@ -29,11 +26,21 @@ $res = mysql_query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($textDetails, $row);
 }
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Clean Invalid Characters</title>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+	</head>
+<body class="popup">
 
-print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-<h2> Cleaning invalid characters from field values</h2>
-This function removes invalid characters in the data fields in the database records.<br>
-&nbsp;<hr>";
+<div class="banner"><h2>Clean Invalid Characters</h2></div>
+<div id="page-inner" style="overflow:auto;padding-left: 20px;">
+<div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
+<table>
+<?php
 
 mysql_connection_overwrite(DATABASE);
 
@@ -57,16 +64,6 @@ foreach ($textDetails as $textDetail) {
 	}
 }
 
-?>
-
-<tr><td><p>[end of check]
-</table>
-</body>
-</html>
-
-
-<?php
-
 function check($text) {
 	global $invalidChars;
 	foreach ($invalidChars as $charCode){
@@ -79,3 +76,10 @@ function check($text) {
 }
 
 ?>
+</table>
+<p>
+[end of check]
+</p>
+</div>
+</body>
+</html>

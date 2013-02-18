@@ -9,10 +9,6 @@
 	* @todo
 	**/
 
-?>
-
-<?php
-
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -109,9 +105,18 @@
 		array_multisort($dupes[$typekey],SORT_ASC,SORT_STRING);
 	}
 
-?><html>
-	<body>
-		<h3>DUPLICATE RECORDS SEARCH</h3>
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Find Duplicate Records</title>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+	</head>
+<body class="popup">
+
+<div class="banner"><h2>Find Duplicate Records</h2></div>
+<div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
 		<form>
 			Matching precision: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
@@ -188,5 +193,6 @@
 				}
 			?>
 		</form>
-	</body>
+</div>
+</body>
 </html>

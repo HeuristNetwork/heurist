@@ -47,6 +47,7 @@ function EditTerms() {
 		_termTree2, //treeview for relation terms
 		_currTreeView,
 		_currentNode,
+		_vocabulary_toselect,
 		_parentNode,
 		_currentDomain,
 		_db,
@@ -63,6 +64,12 @@ function EditTerms() {
 
 		_isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
 
+		_vocabulary_toselect = top.HEURIST.parameters.vocabid;
+		var initdomain = 0;
+		if(_vocabulary_toselect && top.HEURIST.parameters.domain=='relation'){
+			initdomain  = 1;
+		}
+
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		_tabView.addTab(new YAHOO.widget.Tab({
@@ -78,7 +85,7 @@ function EditTerms() {
 		_tabView.addListener("activeTabChange", _handleTabChange);
 		_tabView.appendTo("tabContainer");
 
-		_tabView.set("activeIndex", 0);
+		_tabView.set("activeIndex", initdomain);
 
 		var dv1 = Dom.get('divApply');
 		var dv2 = Dom.get('divBanner');
@@ -121,6 +128,11 @@ function EditTerms() {
 				}
 				_currTreeView = _termTree2;
 			}
+		}
+
+		if(_vocabulary_toselect){
+			_findNodeById(_vocabulary_toselect, true);
+			_vocabulary_toselect=null;
 		}
 	}
 
@@ -318,7 +330,7 @@ function EditTerms() {
 				Dom.get('edParentId').value = node.data.parent_id;
 				var edName = Dom.get('edName');
 				edName.value = node.label;
-				if(node.label==="New Term"){
+				if(node.label==="new term"){
 					//highlight all text
 					edName.selectionStart = 0;
 					edName.selectionEnd = 8;
@@ -355,7 +367,7 @@ function EditTerms() {
 				}else{//new term
 						Dom.get('div_btnAddChild').style.display = "none";
 						Dom.get('btnDelete').value = "Cancel";
-						Dom.get('btnSave').value = "Add Term";
+						Dom.get('btnSave').value = "Save Term";
 				}
 
 				Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
@@ -743,9 +755,9 @@ function EditTerms() {
 		var term;
 		if(value==null){
 			if (isRoot){
-					value = {id:null,label:"new term [vocab]",desription:""};
+					value = {id:null,label:"",desription:""}; //new term [vocab]
 				} else {
-					value = {id:null,label:"new term",desription:""};
+					value = {id:null,label:"new term",desription:""}; //
 				}
 		}
 

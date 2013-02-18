@@ -70,7 +70,7 @@
 
 		?>
 		<div class="banner">
-			<h2>Invalid pointer check</h2>
+			<h2>Check Invalid Pointers</h2>
 		</div>
 		<div id="page-inner">
 

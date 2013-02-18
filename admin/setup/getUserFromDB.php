@@ -29,12 +29,13 @@
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Import user from another database</title>
+		<title>Import a User</title>
     	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 	</head>
 	<body class="popup">
 
-		<div class="banner"><h2>Import user from another database</h2></div>
+		<div class="banner"><h2>Import a User</h2></div>
 		<div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
 		<?php
@@ -44,7 +45,6 @@
 				die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 			}
 
-			print "<h2>Import user from another database</h2>";
 			print "Imports a user record from another Heurist database on the system and adds the user to the current database. You will need to allocate imported users to groups.";
 
 			$sourcedbname = NULL;

@@ -329,6 +329,11 @@
 
 				if (!rectypes) {// unconstrained pointer
 					tElt.options[tElt.options.length] = new Option("Any record type", "");
+					var isNotFound = true;
+					if(!lastSearchType){
+						lastSearchType = top.HEURIST.magicNumbers['RT_AGGREGATION'];
+					}
+
 					// rectypes displayed in Groups by group display order then by display order within group
 					for (index in top.HEURIST.rectypes.groups){
 						if (index == "groupIDToIndex" ||
@@ -343,9 +348,19 @@
 							var name = top.HEURIST.rectypes.names[recTypeID];
 							if(!top.HEURIST.util.isnull(name)){
 								tElt.appendChild(new Option(name, recTypeID));
+
+								if(recTypeID == lastSearchType){
+									tElt.selectedIndex = tElt.options.length-1;
+									isNotFound = false;
+								}
 							}
 						}
 					}
+
+					if(isNotFound){
+						lastSearchType = null;
+					}
+
 					if (tElt.rectypes){
 						delete tElt.rectypes;
 					}

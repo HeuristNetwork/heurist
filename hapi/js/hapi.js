@@ -633,11 +633,20 @@ var HRecord = function() {
 	// Strictly internal stuff
 	var _storageManager = null;	// the HStorageManager from which this record was loaded
 
+	var _isTempNew = false;
+
 
 	this.getID = function() { return _id; };
 	this.getVersion = function() { return _version; };
 
 	this.getNonce = function() { return _nonce; };
+
+	this.setTempNew = function(val){
+		_isTempNew = val;
+	};
+	this.isTempNew = function(){
+		return _isTempNew;
+	};
 
 	this.getValuesByTypePath = function(typePath) {
 		var values = [], values2 = [], value;

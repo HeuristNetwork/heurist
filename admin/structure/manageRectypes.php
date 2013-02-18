@@ -26,7 +26,7 @@ if (!is_admin()) {
 	<head>
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Record Types</title>
+		<title>Record Types / Fields</title>
 
 		<link rel="icon" href="../../favicon.ico" type="image/x-icon">
 		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
@@ -77,7 +77,7 @@ if (!is_admin()) {
 
 
 <div>
-	<div class="banner"><h2>Record Types</h2></div>
+	<div class="banner"><h2>Record Types / Fields</h2></div>
 	<div id="page-inner">
 <!--
 		<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"

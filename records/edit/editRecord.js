@@ -209,14 +209,24 @@ if (! top.HEURIST.edit) {
             document.getElementById(modules[name]["link-id"]).className += " selected";
             document.body.className = document.body.className.replace(/\b\s*mode-[a-z]+\b|$/, " mode-" + name);
 
-            if (modules[name].frame.contentWindow.onshow) {
-                modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);
-            }else if (name=='public') { //force for Google
-                setTimeout(function(){modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);},500);
-            }
+            top.HEURIST.edit.callOnShow(name);
 
             return true;
         },
+
+/**
+ * put your comment there...
+ *
+ */
+		callOnShow:function(name){
+			var modules = top.HEURIST.edit.modules;
+			if (modules[name].frame.contentWindow.onshow) {
+				modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);
+			}else{
+				setTimeout(function(){top.HEURIST.edit.callOnShow(name);},500);
+			}
+		},
+
 /**
  * put your comment there...
  *
@@ -388,7 +398,7 @@ if (! top.HEURIST.edit) {
  * put your comment there...
  *
  */
-        save: function() {
+        save: function(needCloseAfterSave) {
             // Attempt to save all the modules that need saving
 
             // Display a small saving window
@@ -410,7 +420,7 @@ if (! top.HEURIST.edit) {
                             }
                             top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 
-                            setTimeout(function() { top.HEURIST.edit.save(); }, 0);
+                            setTimeout(function() { top.HEURIST.edit.save(needCloseAfterSave); }, 0);
                         } });
                     return;
                 }
@@ -441,7 +451,7 @@ if (! top.HEURIST.edit) {
                     var moduleUnchangeFunction = function() {
                         top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                         top.HEURIST.edit.unchanged(moduleName);
-                        top.HEURIST.edit.save();    // will continue where we left off
+                        top.HEURIST.edit.save(needCloseAfterSave);    // will continue where we left off
                     };
                     top.HEURIST.registerEvent(module.frame, "load", moduleUnchangeFunction);
                     (form.heuristSubmit || form.submit)();
@@ -466,7 +476,7 @@ if (! top.HEURIST.edit) {
                     }
 
 
-                    top.HEURIST.edit.doSaveAction(false);
+                    top.HEURIST.edit.doSaveAction(false, needCloseAfterSave);
                 }, 1000);
             }, 0);
         },
@@ -487,11 +497,11 @@ if (! top.HEURIST.edit) {
  *
  * @param isCancel
  */
-        doSaveAction: function(isCancel) {
+        doSaveAction: function(isCancel, needClose) {
 
-            var forceClose = (isCancel && top.HEURIST.edit.isAdditionOfNewRecord());
+            var forceClose = needClose || (isCancel && top.HEURIST.edit.isAdditionOfNewRecord());
 
-            if (forceClose || document.getElementById("act-close").checked) {
+            if (forceClose) {
                 // try to close this window, and restore focus to the window that opened it
                 try {
                     var topOpener = top.opener;
@@ -564,7 +574,7 @@ if (! top.HEURIST.edit) {
  */
         navigate_torecord:function(sid, recid){
             if(top.HEURIST.edit.is_something_chnaged()){
-                    top.HEURIST.edit.save();
+                    top.HEURIST.edit.save(false);
             }else{
                     location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
             }

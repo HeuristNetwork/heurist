@@ -9,9 +9,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -26,13 +24,22 @@ $res = mysql_query("select * from woots");// where woot_Title='record:96990'");
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($woots, $row);
 }
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Check Wysiwyg Texts</title>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+	</head>
+<body class="popup">
 
-print "<head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head><body class='popup'>
-<h2>WYSIWYG text check</h2>
-This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<p><hr>";
+<div class="banner"><h2>Check Wysiwyg Texts</h2></div>
+<div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
-
-print "<table class='wysiwygCheckTable'>";
+<div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr /></div>
+<table class="wysiwygCheckTable">
+<?php
 
 foreach ($woots as $woot) {
 	$valid = true;
@@ -87,9 +94,11 @@ function check($html) {
 }
 
 ?>
-
-<p>
-&nbsp;
+</table>
+<p>&nbsp;</p>
 <p>
 [end of check]
+</p>
+</div>
 </body>
+</html>

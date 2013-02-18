@@ -747,8 +747,8 @@ BlogEntry: function(record, parentElement, isNew) {
 
 		var content = "<table><tbody>" +
 			"<tr>" +
-				"<td>Title: </td>" +
-				"<td><input class='entry-title-input' value='" +
+				"<td style='color:red;font-weight:bold;'>Title: </td>" +
+				"<td><input id='titleInput' class='entry-title-input' value='" +
 					this.record.getDetail(Blog.titleDetailType) + "'/></td>" +
 			"</tr>";
 
@@ -888,10 +888,14 @@ BlogEntry: function(record, parentElement, isNew) {
 	this.saveButtonClick = function() {
 
 		// title
-		if ($(".entry-title-input", this.$table).val()) {
+		var title = $("#titleInput", this.$table).val();
+
+		/*if ($(".entry-title-input", this.$table).val()) {
 			this.record.setDetails(Blog.titleDetailType, [$(".entry-title-input", this.$table).val()]);
 		} else if ($(".entry-title", this.$table).html()) {
-			this.record.setDetails(Blog.titleDetailType, [$(".entry-title", this.$table).html()]);
+			this.record.setDetails(Blog.titleDetailType, [$(".entry-title", this.$table).html()]);*/
+		if(title!="" && title!="Enter title here"){
+			this.record.setDetails(Blog.titleDetailType, [title]);
 		} else {
 			alert("Enter a title for this blog entry");
 			return;
@@ -960,6 +964,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		var saveFn = function () {
 			HeuristScholarDB.saveRecord(that.record, new HSaver(
 				function(r) {
+					that.record.setTempNew(false);
 					that.renderFields();
 					that.renderAdditionalData();
 					Blog.displayTagList();
@@ -992,6 +997,10 @@ BlogEntry: function(record, parentElement, isNew) {
 
 	this.cancelButtonClick = function() {
 		this.wootEditor.form.oncancel();
+
+		if(this.record.isTempNew()){
+			that.deleteButtonClick();
+		}
 	};
 
 
@@ -1267,6 +1276,7 @@ newEntry: function(related) {
 	if (Blog.newEntryDiv) return;
 	var mainElem = document.getElementById("main");
 	var record = new HRecord();
+	record.setTempNew(true);
 	record.setRecordType(Blog.type);
 	record.setDetails(Blog.titleDetailType, ["Enter title here"]);
 	if (Blog.user) {
@@ -1293,7 +1303,7 @@ newEntry: function(related) {
 			}
 		},
 		function(r,e) {
-			alert("record creation failed: " + e);
+			alert("Record creation failed: " + e);
 		}
 	));
 },

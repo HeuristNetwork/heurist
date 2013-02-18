@@ -83,8 +83,9 @@ function init () {
 
 function selectRelRecord() {
 
-		Hul.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&deft="+
-							top.HEURIST.magicNumbers['RT_AGGREGATION']+"&db=" + database, {
+		//deft="+top.HEURIST.magicNumbers['RT_AGGREGATION']+"
+
+		Hul.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&db=" + database, {
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recID && recTitle ? recTitle : "";
 				relTargetID = recID || null;

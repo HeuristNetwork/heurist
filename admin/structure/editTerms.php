@@ -28,7 +28,7 @@ if (!is_admin()) {
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Heurist - Edit terms</title>
+<title>Manage Terms</title>
 
 		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
@@ -74,7 +74,7 @@ if (!is_admin()) {
 
 	<script type="text/javascript" src="editTerms.js"></script>
 
-    <div id="divBanner" class="banner"><h2>Edit Terms</h2></div>
+    <div id="divBanner" class="banner"><h2>Manage Terms</h2></div>
 	<div id="page-inner">
 
 	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">

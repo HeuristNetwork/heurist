@@ -73,17 +73,22 @@ function update_counts2(processed, total) {
 	document.getElementById('percent2').innerHTML = Math.round(1000 * processed / total) / 10;
 }
 </script>
-</head>
-<body>
-<h2>CONSTRUCTED TITLE RECALCULATION</h2>
 
-<p>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+</head>
+<body class="popup">
+
+<div class="banner"><h2>Rebuild Titles</h2></div>
+<div id="page-inner" style="overflow:auto;padding: 20px;">
+
+<div style="max-width: 500px;">
    This function recalculates all the constructed record titles, compares
    them with the existing title and updates the title where the title has
    changed. At the end of the process it will display a list of records
    for which the titles were changed and a list of records for which the
    new title would be blank (an error condition).
-</p>
+</div>
 <p>This will take some time for large databases.</p>
 <!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
@@ -207,5 +212,6 @@ ob_flush();
 flush();
 
 ?>
+</div>
 </body>
 </html>

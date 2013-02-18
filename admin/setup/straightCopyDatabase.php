@@ -30,7 +30,7 @@
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Straight copy of a database to an identical copy</title>
+		<title>Clone Database</title>
 
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
@@ -74,7 +74,7 @@
 		</script>
 
 
-		<div class="banner"><h2>Heurist Direct Copy</h2></div>
+		<div class="banner"><h2>Clone Database</h2></div>
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>

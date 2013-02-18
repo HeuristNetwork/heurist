@@ -28,7 +28,7 @@ mysql_connection_select(DATABASE);
 ?>
 <html>
 <head>
- <title>Heurist workgroup tags addition/deletion/statistics</title>
+ <title>Workgroup Tags</title>
 
 <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
@@ -50,8 +50,9 @@ function delete_tag(tag_ID) {
 
 </head>
 
-<body class="popup" width="840" height="550" style="margin: 5px; padding: 0; overflow:hidden;">
+<body class="popup" width="840" height="550" style="padding: 0; overflow:hidden;">
 
+<div class="banner"><h2>Workgroup Tags</h2></div>
 <div id="page-inner">
 Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
 workgroup tags are a controlled list of shared tags established by a workgroup administrator.

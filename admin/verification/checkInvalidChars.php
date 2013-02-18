@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 /* require_once(dirname(__FILE__)."/../../common/config/initialise.php"); */
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -29,11 +25,34 @@ $res = mysql_query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($textDetails, $row);
 }
-print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-<h2> Checking field values for invalid characters </h2>
-This function checks for invalid characters in the data fields in the database records.<br>
-Use the following function to remove/clean up these characters, if found<br>&nbsp;<hr>";
-print "<table>";
+?>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<title>Check Invalid Characters</title>
+    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+	</head>
+<body class="popup">
+
+<div class="banner"><h2>Check Invalid Characters</h2></div>
+<div id="page-inner" style="overflow:auto;padding-left: 20px;">
+
+<div>This function checks for invalid characters in the data fields in the database records.<br>Use the following function to remove/clean up these characters, if found<br />&nbsp;<hr /></div>
+<table>
+<?php
+
+function check($text) {
+	global $invalidChars;
+	foreach ($invalidChars as $charCode){
+		//$pattern = "". chr($charCode);
+		if (strpos($text,$charCode)) {
+			error_log("found invalid char " );
+			return false;
+		}
+	}
+	return true;
+}
 
 $prevInvalidRecId = 0;
 foreach ($textDetails as $textDetail) {
@@ -48,23 +67,9 @@ foreach ($textDetails as $textDetail) {
 		print "<tr><td>" . "<b>Invalid text : </b>". htmlspecialchars($textDetail['dtl_Value']) . "</td></tr>\n";
 	}
 }
-print "</table>\n";
-print "<p>[end of check]";
-print "</body>";
-print "</html>";
-// END of OUTPUT
-
-
-function check($text) {
-	global $invalidChars;
-	foreach ($invalidChars as $charCode){
-		//$pattern = "". chr($charCode);
-		if (strpos($text,$charCode)) {
-			error_log("found invalid char " );
-			return false;
-		}
-	}
-	return true;
-}
-
 ?>
+</table>
+<p>[end of check]</p>
+</div>
+</body>
+</html>

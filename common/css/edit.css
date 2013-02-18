@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	bottom:0;
 	padding:8px 0;
 	position:absolute;
-	right:135px;
+	right:200px;
 	top:0;
 	width: 130px;
 	overflow:hidden;
@@ -208,7 +208,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	position:absolute;
 	right:0;
 	top:0;
-	width:135px;
+	width:200px;
 	text-align: center;
 }
 #action-cell div {

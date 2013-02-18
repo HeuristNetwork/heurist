@@ -128,7 +128,7 @@ function print_common_header($fileName) {
 ?>
 <html>
  <head>
-  <title>Import records</title>
+  <title>Import Records <?=(@$_REQUEST['format']=="GEO"?"from KML":@$_REQUEST['format']=="BIB"?"from Bibliography":"") ?></title>
 
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
@@ -148,27 +148,9 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
 <?php	}	?>
 
-  <div style="margin-bottom:30px">
-<?php if (! (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint'])) { ?>
-
-<?php 	if (@$_REQUEST['format']) {
-			$frm = $_REQUEST['format'];
-			if ($frm == "GEO") {
-				$frm = "Geographic";
-			}else if ($frm == "BIB") {
-				$frm = "Bibliographic";
-			}
-	?>
-<h2 style="display:none">Import <? print $frm ?> records</h2>
-
-<?php	} else { ?>
-<h2 style="display:none">Import records</h2>
-<?php	}
-
-	  } else { ?>
-   <div><h3>Synchronising Zotero records with Heurist</h3></div>
+<?php if ( (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint']) ) { ?>
+   <h2>Synchronising Zotero records with Heurist</h2
 <?php } ?>
-  </div>
 
   <div id="progress_indicator"><div id="progress_indicator_bar"></div><div id="progress"></div></div>
   <div id="progress_indicator_title"></div>
@@ -225,7 +207,7 @@ function mode_file_selection() {
 /*****DEBUG****/// error_log("mode_file_selection");
 
 ?>
-   <h1>File selection</h1>
+   <h2>File selection</h2>
 
    <div class="explanation">
     Use this webpage to import your records from another program into Heurist.<br>

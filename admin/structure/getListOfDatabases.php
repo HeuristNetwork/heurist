@@ -19,16 +19,19 @@
     if(mysql_error()) {
         die("Could not get database structure from given database source.");
     }
+?>
+<html>
+<head>
+	<title>Open Database</title>
+	<link rel=stylesheet href='../../common/css/global.css'>
+	<link rel=stylesheet href='../../common/css/admin.css'>
+</head>
 
-    print "<html><head>";
-    print "<link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head>";
+<body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">
 
-    print '<body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">';
-
-    print "<body class='popup'>";
-
-    print "<div class='banner'><h2>Heurist databases on this server</h2></div>";
-	print "<div id='page-inner'>";
+<?=(@$_REQUEST['popup']?"":"<div class='banner'><h2>Open Database</h2></div>") ?>
+<div id='page-inner'>
+<?php
 
 	$email = null;
 	$role = null;
@@ -67,14 +70,16 @@
 	}
 
 
-    print "<div>Click on the database name to open in new window</div>";
+    print "<br /><div>Click on the database name to open in new window</div>";
 	print "<ul class='dbList'>";
 
 	$list = mysql__getdatabases(false, $email, $role);
 	foreach ($list as $name) {
             print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
 	}
-
-	print "</ul></div></body></html>";
-
+	print "</ul>";
 ?>
+</div>
+</body>
+</html>
+

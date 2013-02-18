@@ -31,7 +31,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-		<title>Create New Heurist Database</title>
+		<title>Create New Database</title>
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
@@ -140,7 +140,7 @@
 
 	<body class="popup" onload="hideProgress()">
 
-		<div class="banner"><h2>Create new Heurist database</h2></div>
+		<div class="banner"><h2>Create New Database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
 <?php

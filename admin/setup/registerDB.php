@@ -69,13 +69,13 @@
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-		<title>Register DB to Heurist Index Server</title>
+		<title>Database Registration</title>
 	</head>
 
 	<!-- Database registration form -->
 
 	<body class="popup">
-		<div class="banner"><h2>Database registration</h2></div>
+		<div class="banner"><h2>Database Registration</h2></div>
 		<div id="page-inner" style="overflow:auto">
 			<div id="registerDBForm" class="input-row">
 				<form action="registerDB.php" method="POST" name="NewDBRegistration">

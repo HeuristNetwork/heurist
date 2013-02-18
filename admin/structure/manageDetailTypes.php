@@ -25,7 +25,7 @@ if (!is_admin()) {
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Field Types</title>
+		<title>Manage Field Types</title>
 
 		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
@@ -79,7 +79,7 @@ if (!is_admin()) {
 		<div id="delete-message-text" style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;"></div>
 	</div>
 
-	<div class="banner"><h2>Field Types</h2></div>
+	<div class="banner"><h2>Manage Field Types</h2></div>
 	<div id="page-inner">
 
 <!--   height:auto; max-height:500px;

@@ -29,7 +29,7 @@ if(!is_admin()){
 <html>
 
 <head>
-	<title>Email harvester</title>
+	<title>Import Records from Email</title>
 	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 
 	<script type="text/javascript">

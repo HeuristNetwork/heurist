@@ -27,7 +27,7 @@
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - FieldHelper synchronisation</title>
+		<title>Import Records In Situ / FieldHelepr Manifests</title>
 		<link rel=stylesheet href="../../common/css/global.css" media="all">
 	</head>
 	<body class="popup">
@@ -81,7 +81,7 @@ function update_counts(divid, processed, added, total) {
 			die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 		}
 
-		print "<h2>Import Files On Disk / FieldHelepr Manifests</h2>";
+		//print "<h2>Import Files On Disk / FieldHelepr Manifests</h2>";
 		print "<h2>ADVANCED USERS</h2>";
 		print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants) listed in Database > Advanced Properties<br>";
 		print "and writes the metadata as records in the current database, with pointers back to the files described by the manifests. <br>";

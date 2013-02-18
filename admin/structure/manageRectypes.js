@@ -640,9 +640,11 @@ function RectypeManager() {
 
 			var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
 			btnAddRecordType.onclick = function (e) {
-				var currentTabIndex = tabView.get('activeIndex');
-				var grpID = tabView.getTab(currentTabIndex).get('id');
-				_onAddEditRecordType(0, grpID);
+				if(confirm('Before defining new record types we suggest importing suitable definitions\nfrom Heurist databases registered in the Heurist clearinghouse\n\n(Import Structure link on the left)')){
+					var currentTabIndex = tabView.get('activeIndex');
+					var grpID = tabView.getTab(currentTabIndex).get('id');
+					_onAddEditRecordType(0, grpID);
+				}
 			};
 			var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'2');
 			btnAddRecordType2.onclick = btnAddRecordType.onclick;
