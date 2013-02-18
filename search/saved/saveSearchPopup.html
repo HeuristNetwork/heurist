@@ -24,13 +24,15 @@
 				sQuery = "",
 				sAllOrBookmarks = "all",
 				sFilter = "",
-				sLayout = top.HEURIST.search.getLayoutString(), //current layout
+				sLayout = "",
+				sCurrentLayout = top.HEURIST.search.getLayoutString(),
 				sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
 				rtFilter,
 				relFilter,
 				ptrFilter;
-			if(sLayout.length > 1 && sLayout[0] > -1){
-				sLayout = sLayout[1];
+
+			if(sCurrentLayout.length > 1 && sCurrentLayout[0] > -1){
+				sCurrentLayout = sCurrentLayout[1];
 			}
 			if(ssid>0){
 				//load values from  top.HEURIST.user.savedSearches
@@ -131,23 +133,16 @@
 					if(ssid>0){ //editing
 						//destination is already fixed so hide interface
 						document.getElementById("divSaveDestination").style.display = "none";
-						document.getElementById("divSelectStyle").style.display = "none";
-						//don't care about mode this is saved
-						document.getElementById("rbSaveFilterLayout").style.visibility = "hidden";
-						document.getElementById("rbSaveQuery").style.visibility = "hidden";
-						document.getElementById("rbSaveAll").style.visibility = "hidden";
-						document.getElementById("lblS1").innerHTML = "";
-						document.getElementById("lblS2").innerHTML = "";
-						document.getElementById("lblS3").innerHTML = "";
+						document.getElementById("divSelectLayoutStyle").style.display = "none";
 
 						if(!sQuery){ //query not defined so saved filtered layout- filter & Layout only
 							document.getElementById("divQuery").style.display = "none";
 							document.getElementById("divSelids").style.display = "none";
-							document.getElementById("rbSaveFilterLayout").checked = true;
+							//todo document.getElementById("rbSaveFilterAndLayout").checked = true;
 							//todo set height 160
 						}else{ //Saved search show only fields editable
 							//save any and all changes
-							document.getElementById("rbSaveAll").checked = true;
+							//todo document.getElementById("rbSaveAll").checked = true;
 							if (sSelids){
 								document.getElementById("cbSelids").checked = true;
 							}
@@ -186,6 +181,12 @@
 					document.getElementById("edLayout").value = sLayout;
 					document.getElementById("edSelids").value = sSelids;
 
+					document.getElementById("cbSaveQuery").checked = (document.getElementById("edQuery").value != "");
+					document.getElementById("cbSaveFilter").checked = (document.getElementById("edFilter").value != "");
+					document.getElementById("cbSaveLayout").checked = (document.getElementById("edLayout").value != "");
+
+					setSaveMode();
+
 					setTimeout(function() { document.getElementById('edName').focus() }, 10);
 			});
 
@@ -193,8 +194,30 @@
 			* Save mode for new one
 			*/
 			function setSaveMode(){
-				var saveFiltersOnly = document.getElementById("rbSaveFilterLayout").checked;
-				document.getElementById("divSaveDestination").style.visibility = saveFiltersOnly?"hidden":"visible";
+
+				var sq = document.getElementById("cbSaveQuery");
+				var sf = document.getElementById("cbSaveFilter");
+				var sl = document.getElementById("cbSaveLayout");
+				var si = document.getElementById("cbSelids");
+
+				sq.disabled = (document.getElementById("edQuery").value == "");
+				sf.disabled = (document.getElementById("edFilter").value == "");
+				sl.disabled = (document.getElementById("edLayout").value == "");
+				si.disabled = (document.getElementById("edSelids").value == "");
+
+				if(!(sq.checked || sf.checked || sl.checked || si.checked)){
+					if(!sq.disabled){
+						sq.checked = true;
+					}else if(!sf.disabled){
+						sf.checked = true;
+					}else if(!sl.disabled){
+						sl.checked = true;
+					}else if(!si.disabled){
+						si.checked = true;
+					}
+				}
+
+				document.getElementById("btnSave").disabled = (!( (!sq.disabled && sq.checked) || (!sf.disabled && sf.checked) || (!sl.disabled && sl.checked) || (!si.disabled && si.checked) ));
 			}
 			/*
 			* change layout
@@ -203,16 +226,15 @@
 				var selectLayout = document.getElementById("slctLayout");
 				switch (selectLayout.value) {
 					case "":
-						document.getElementById("edLayout").value = "";
+						document.getElementById("edLayout").value = "";  //status quo
 						break;
 					case "layout":
-						document.getElementById("edLayout").value = sLayout;
+						document.getElementById("edLayout").value = sCurrentLayout;  //entire layout
 						break;
 					default:
-						document.getElementById("edLayout").value = "layout=srch:" + selectLayout.value;
+						document.getElementById("edLayout").value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
 				}
-
-				document.getElementById("divSaveDestination").style.visibility = saveFiltersOnly?"hidden":"visible";
+				setSaveMode();
 			}
 
 			/*
@@ -313,8 +335,8 @@
 
 				// -------- SEARCH QUERY --------------
 
-				if (!document.getElementById("rbSaveFilterLayout").checked)
-					{
+				if (document.getElementById("cbSaveQuery").checked) // !document.getElementById("rbSaveFilterAndLayout").checked)
+				{
 					top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
 
 					var q = document.getElementById("edQuery").value;
@@ -345,13 +367,13 @@
 
 				// -------- FILTERS --------------
 
-				if (!document.getElementById("rbSaveQuery").checked && document.getElementById("edFilter").value != "") {
+				if (document.getElementById("cbSaveFilter").checked && document.getElementById("edFilter").value != "") {
 					query.push(document.getElementById("edFilter").value);//TODO: validate format
 				}
 
 				// -------- LAYOUT --------------
 
-				if (!document.getElementById("rbSaveQuery").checked && document.getElementById("edLayout").value != "") {
+				if (document.getElementById("cbSaveLayout").checked && document.getElementById("edLayout").value != "") {
 					query.push(document.getElementById("edLayout").value);//TODO: validate format
 				}
 
@@ -380,7 +402,7 @@
 			#warning-message { color: #990000; }
 			input, select{ margin-top: 5px;}
 
-			#save {font-weight: bold;}
+			#btnSave {font-weight: bold;}
 			#coverall {background-color:RGBA(255,255,255,0.5);}
 
 			.llab{
@@ -397,21 +419,21 @@
 		</style>
 	</head>
 
-	<body class="popup" width="400" height="260">
+	<body class="popup" width="440" height="260">
 		<!-- <div id="mainbody">-->
 
 		<label class="llab" id="lblName">Enter a name:</label>
 		<input class="fld" type="text" id="edName">
 
-		<div id="divSelectStyle">
+		<div id="divSelectLayoutStyle">
 			<label class="llab">Layout style:</label>
 			<select class="fld" id="slctLayout" onchange="onChangeLayout()" style="width:140px">
-				<option value="">Status quo</option>
+				<option value="" selected>Status quo</option>
 				<option value="l">One column</option>
 				<option value="2">Two columns</option>
 				<option value="t">Thumbnails</option>
 				<option value="i">Icons</option>
-				<option value="layout"  selected>Save Current Layout</option>
+				<option value="layout">Current Layout</option>
 			</select>
 		</div>
 
@@ -423,28 +445,27 @@
 			</select>
 		</div>
 
-		<div style="text-align: center;padding-bottom: 10px;" id="divSaveMode">
-			<input id="rbSaveQuery" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbSaveQuery" id="lblS1" style="padding:3px;">Save Query</label>
-			<input id="rbSaveFilterLayout" type="radio" name="rbSaveMode" style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbSaveFilterLayout" id="lblS2" style="padding:3px;">Save Filter &amp; Layout</label>
-			<input id="rbSaveAll" type="radio" name="rbSaveMode" checked style="vertical-align:text-bottom;" onclick="setSaveMode()">&nbsp;<label for="rbSaveAll" id="lblS3" style="padding:3px;">Save All</label>
-			<input style="float:right" type=button value="Save" id="save" onClick="check();">
+		<div style="text-align: center; padding-bottom: 10px;" id="divSaveMode">
+			<input type=button value="Save" id="btnSave" onClick="check();">
 		</div>
 		<!--
 		<p id=warning-message></p>
 		<p id=message></p>
 		-->
-
 		<hr/>
 
 
+
+
 		<div><strong>Advanced:</strong></div>
-		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" /></div>
-		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" /></div>
-		<div><label class="llab">Layout:</label> <input class="fld" type="text" id="edLayout" /></div>
-		<div id="divSelids">
-			<div><label class="llab" >Selected ids :</label> <input class="fld" type="text" id="edSelids"/></div>
-			<div style="text-align: center"><label for="cbSelids" id="lblCB1" >Save selected ids  </label><input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;"></div>
-		</div>
+		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" onkeyup="setSaveMode()" />&nbsp;
+				<input type="checkbox" id="cbSaveQuery" style="vertical-align:text-bottom; display: inline;" title="Save Query" onclick="setSaveMode()"></div>
+		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" onkeyup="setSaveMode()"/>&nbsp;
+				<input type="checkbox" id="cbSaveFilter" style="vertical-align:text-bottom; display: inline;" title="Save Filter" onclick="setSaveMode()"></div>
+		<div><label class="llab">Layout:</label> <input class="fld" type="text" id="edLayout" onkeyup="setSaveMode()"/>&nbsp;
+				<input type="checkbox" id="cbSaveLayout" style="vertical-align:text-bottom; display: inline;" title="Save Layout" onclick="setSaveMode()"></div>
+		<div id="divSelids"><label class="llab" >Selected ids :</label> <input class="fld" type="text" id="edSelids" onkeyup="setSaveMode()"/>&nbsp;
+				<input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;" title="Save Selected Ids"></div>
 
 
 		<!--

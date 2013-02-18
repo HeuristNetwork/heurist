@@ -460,13 +460,16 @@
 				echo($output2);
 				$warnings = 1;
 			}
-			// copy xsl template directories from default set in the program code
-			$cmdline = "cp -R xsl-templates $uploadPath";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) {
-				echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
-				echo($output2);
-				$warnings = 1;
+
+			if($isExtended){
+				// copy xsl template directories from default set in the program code
+				$cmdline = "cp -R xsl-templates $uploadPath";
+				$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+				if ($res2 != 0 ) {
+					echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
+					echo($output2);
+					$warnings = 1;
+				}
 			}
 
 			$warnings =+ createFolder("settings","used to store import mappings and the like");

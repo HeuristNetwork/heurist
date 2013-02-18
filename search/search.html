@@ -352,17 +352,17 @@
 								</select>
 							</div>
 							<div class="simple-search-row">
-								<label for="field-select">Field:</label>
+								<label for="field-select">Field type:</label>
 								<select id="field-select">
 								</select>
-								<label for="input-contains">contains</label>
+								<label for="input-contains">Contains:</label>
 								<input type="text" id="input-contains" onKeyPress="setTimeout(top.HEURIST.search.calcShowSimpleSearch,0);"/>
 							</div>
 							<div class="simple-search-row">
-								<label for="sortby-select">Sortby:</label>
+								<label for="sortby-select">Sort By:</label>
 								<select id="sortby-select" >
-									<option value=rt>record type</option>
 									<option value=t>record title</option>
+									<option value=rt>record type</option>
 									<option value=u>record URL</option>
 									<option value=m>date modified</option>
 									<option value=a>date added</option>
@@ -370,12 +370,12 @@
 									<option value=p>popularity</option>
 									<optgroup label="Detail fields"></optgroup>
 								</select>
-								<label for="sortAsc">Sort Ascending</label>
+								<label for="sortAsc">Sort Ascending:</label>
 								<input type="checkbox" id="sortAsc" checked/>
 							</div>
 							<div class="simple-search-row" style="text-align:center;">
-								<a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a>
-								<a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
+								<a href="#" title="Search only records which have been bookmarked by you" onClick="top.HEURIST.search.quickSearchSubmit('bookmark');" class="button">search my bookmarks</a>
+								<a href="#" title="Search across all records in Heurist" onClick="top.HEURIST.search.quickSearchSubmit('all');" class="button">search all records</a>
 								<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(event); return false;">Go to <b>Advanced Search</b></a>
 							</div>
 						</div>

@@ -2014,12 +2014,20 @@ top.HEURIST.search = {
 		var srt = $("#sortby-select").val();
 		srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
 		q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?'"'+ctn+'"':"") + (srt? " " + srt : "");
-		if (q) {
-			$("#q").val(q);
+		if(!q){
+			q = "sortby:t";
 		}
+		$("#q").val(q);
+
 		//alert('calc');
 		//return false;
 		e = top.HEURIST.util.stopEvent(e);
+	},
+
+	quickSearchSubmit: function(type){
+		top.HEURIST.search.calcShowSimpleSearch();
+		document.getElementById('w-input').value = type;
+		top.HEURIST.search.submitSearchForm();
 	},
 
 	showAddNewRecordDialogue: function(event){

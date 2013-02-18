@@ -505,7 +505,6 @@ function SelectDetailType() {
 							filterByName = Dom.get('inputFilterByName');
 							filterByName.onkeyup = function (e) {
 								filterByGroup.selectedIndex = 0;
-								filterByGroup.value = 0;
 								clearTimeout(filterTimeout);
 								setTimeout(_updateFilter, 600);
 							};
