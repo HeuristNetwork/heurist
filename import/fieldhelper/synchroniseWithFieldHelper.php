@@ -98,7 +98,8 @@ function update_counts(divid, processed, added, total) {
 		}
 		if(count($notfound)>0){
 			print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".implode(", ",$notfound).
-				"</b><br>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
+				"</b><br />Note: these fields may appear to be present, but do not have the correct origin codes (source of the field definition) for this function to use them.<br />".
+				"We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
 				"<ul><li>Go to Designer View > Essentials > Import Structure<br>&nbsp;</li>".
 				"<li>Navigate to the H3CoreDefinitions database<br>&nbsp;</li>".
 				"<li>Check 'Show existing record types'</li>&nbsp;".
