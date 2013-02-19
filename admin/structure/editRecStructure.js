@@ -1908,7 +1908,7 @@ function _preventSel(event){
 function _setDefTermValue(event){
 
 	var el = event.target,
-		name = el.parentElement.attributes.item('id').nodeValue;
+		name = el.parentElement.attributes.name.nodeValue; //item('id').nodeValue;
 
 	name = name.substr(3);
 
