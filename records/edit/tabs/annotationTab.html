@@ -47,13 +47,13 @@
   <script>
 
 			var installDir = function(){
-	 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
-	 if ( path && path != "undefined") {
-	 	path = path.match(/\/[^\s\/]\//);
-	 	path = path ? path.replace(/\//g,"") : "";
-	 	return path;
-	 }
-	 return "";
+				 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
+				 if ( path && path != "undefined") {
+					path = path.match(/\/[^\s\/]\//);
+					path = path ? path.replace(/\//g,"") : "";
+					return path;
+				 }
+				 return "";
 			}();
 
 
@@ -61,13 +61,13 @@
 			function unchanged() { top.HEURIST.edit.unchanged("annotation"); }
 
 			document.forms[0].heuristForceSubmit = function() {
-	if (wootEditor.unlockedChunk) {
-		wootEditor.save();
-	}
+					if (wootEditor.unlockedChunk) {
+						wootEditor.save();
+					}
 
-	for (var i in openComments) {
-		openComments[i].save();
-	}
+					for (var i in openComments) {
+						openComments[i].save();
+					}
 			}
 
 
@@ -75,7 +75,7 @@
 			var wootTitle = "record:" + top.HEURIST.edit.record.bibID;
 			var recTitle = top.HEURIST.edit.record.title;
 
-			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
+			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle+ "&db="+top.HEURIST.database.name;
 
 			HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
 			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, element: document.getElementById("publicWoot") });
