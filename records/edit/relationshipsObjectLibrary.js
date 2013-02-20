@@ -72,6 +72,13 @@ if (!top.Relationship) {
 		editTd.onclick = function() {
 			thisRef.edit();
 		};
+		editTd = this.tr.appendChild(this.document.createElement("div"));
+		editTd.className = "edit";
+		editTd.title = "Edit related record";
+		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
+		editTd.onclick = function() {
+			thisRef.editRelatedRecord();
+		};
 
 		var optionalTd = this.tr.appendChild(this.document.createElement("div"));
 
@@ -157,6 +164,18 @@ if (!top.Relationship) {
 		});
 		return false;
 	};
+
+	top.Relationship.prototype.editRelatedRecord = function() {
+		var thisRef = this;
+		var _db =  (top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:""));
+
+		if( thisRef.relationshipRec.relatedRec.recID ){
+				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + thisRef.relationshipRec.relatedRec.recID + "&db="+_db);
+		} //"&caller=" + encodeURIComponent(textElt.id) +
+
+		return false;
+	};
+
 	top.Relationship.prototype.remove = function() {
 		this.tr.parentNode.removeChild(this.tr);
 		this.manager.remove(this);

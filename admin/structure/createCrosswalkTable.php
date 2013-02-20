@@ -725,8 +725,11 @@ function dropTempDB(redirect) {
 	top.HEURIST.util.popupURL(top, "structure/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
 			"close-on-blur": false,
 			"no-resize": true,
+			//"no-close": true,
 			height: 100,
 			width: 300,
+			x: 10000,
+			y: 10000,
 			callback: function(context) {
 
 				if(redirect) {

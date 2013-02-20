@@ -1126,6 +1126,11 @@ if (! top.HEURIST.edit) {
                     var dtID = order[i];
                     if (rfrs[dtID][rstFieldNamesToRdrIndexMap['rst_RequirementType']] == 'forbidden') continue;
 
+                    /*IAN's super trick to avoid Stiv's fury
+                    if(top.HEURIST.database.name == "Arts_eResearch"){
+                    	if([150,79,149,57,70,80,151,69,77,74,39].indexOf(Number(dtID))>=0) continue;
+					}*/
+
                     var newInput = top.HEURIST.edit.createInput(recID, dtID, rectypeID, fieldValues[dtID] || [], container);
                     if (newInput) {
                         inputs.push(newInput);
@@ -1807,11 +1812,41 @@ if (! top.HEURIST.edit) {
 * @constructor
 * @return {Object}
 */
-    top.HEURIST.edit.inputs.BibDetailFloatInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
+    top.HEURIST.edit.inputs.BibDetailFloatInput = function() {
+    		top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments);
+
+        	for (var i=0; i < this.inputs.length; ++i) {
+        		this.inputs[i].onkeypress = function(event){
+					if(event && event.charCode>0 && !event.ctrlKey){
+
+						var val = String.fromCharCode(event.charCode)+event.target.value;
+
+						 //top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
+				        if (val=="" || val=="-" || val=="+"){
+							return true;
+						}  else if (typeof(val.match) === "function") {
+
+				        	var regex = top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
+							//  	new RegExp("^([+/-]?(([0-9]+(\\.)?)|([0-9]*\\.[0-9]+)))$", "g");
+
+				            var res = val.match(regex);
+				            return (res!=null);
+						}else{
+							return false;
+						}
+
+					}else{
+						return true;
+					}
+        		}
+			}
+    		//top.HEURIST.edit.inputs.BibDetailInput.prototype.verify
+    };
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.typeDescription = "a numeric value";
-    top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex = new RegExp("^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+))\\s*$");    // extended float regex
+    top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex = new RegExp("^([+/-]?(([0-9]+(\\.)?)|([0-9]*\\.[0-9]+)))$");
+    //"^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+))\\s*$");    // extended float regex
 
 /**
 * BibDetailYearInput input
@@ -2865,7 +2900,7 @@ if (! top.HEURIST.edit) {
                     var val = eval(json.responseText);
                     if (val && val.byRectype) {
                         top.HEURIST.edit.record.relatedRecords = val;
-                    }else{
+                    }else if(val.error) {
                         alert(" There was an error: " + val.error);
                     }
             });

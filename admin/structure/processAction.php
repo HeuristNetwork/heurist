@@ -688,29 +688,39 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 // Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
 
-	echo "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
+	echo "<html><head><link rel=stylesheet href='../../common/css/global.css'></head>";
+	echo "<body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
 
+	$message = "";
 	$res = true;
 	$tempDBName = $_GET["tempDBName"];
 	$isTempDB = strpos($tempDBName, "temp_");
 	if($isTempDB !== false) {
 		mysql_query("drop database ".$tempDBName);
 		if(!mysql_error()) {
-			echo "Temporary database was sucessfully deleted";
+			$message = "Temporary database was sucessfully deleted";
 		} else {
-			echo "Error: Something went wrong deleting the temporary database";
+			$message = "Error: Something went wrong deleting the temporary database";
 			$res = false;
 		}
 	} else {
-		echo "Error: cannot delete a non-temporary database";
+		$message = "Error: cannot delete a non-temporary database";
 		$res = false;
 	}
 
-	echo "</div>";
+	echo $message."</div>";
 
 	if($res){
 		echo "<script>setTimeout(function(){window.close();}, 1500);</script>";
-
+	}else{
+		echo "<script>setTimeout(function(){
+					if(window.frameElement.parentElement){
+						var ele = window.frameElement.parentElement.parentElement;
+                		var xy = top.HEURIST.util.suggestedPopupPlacement(300, 100);
+                		ele.style.left = xy.x + 'px';
+                		ele.style.top = xy.y + 'px';
+                	}
+				}, 200);</script>";
 	}
 	echo "</body></html>";
 
