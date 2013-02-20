@@ -526,23 +526,49 @@ function EditTerms() {
 				}
 			}
 
-			_currentNode.label = sName;
-			_currentNode.data.description = sDesc;
-			_currentNode.data.termcode = sCode;
-			_currentNode.data.status = sStatus;
+			if(_validateDups(_currentNode, sName, sCode)){
 
-			_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
-			_currentNode.title = _currentNode.data.description;
+				_currentNode.label = sName;
+				_currentNode.data.description = sDesc;
+				_currentNode.data.termcode = sCode;
+				_currentNode.data.status = sStatus;
 
-			var needReload = (_currentNode.data.parent_id != iParentId);
-			_currentNode.data.parent_id = iParentId;
+				_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
+				_currentNode.title = _currentNode.data.description;
 
-			_currTreeView.render();
+				var needReload = (_currentNode.data.parent_id != iParentId);
+				_currentNode.data.parent_id = iParentId;
 
-			_updateTermsOnServer(_currentNode, needReload);
-			//alert("TODO SAVE ON SERVER");
+				_currTreeView.render();
+
+				_updateTermsOnServer(_currentNode, needReload);
+				//alert("TODO SAVE ON SERVER");
+			}
 		}
 	}
+
+	/**
+	*
+	*/
+	function _validateDups(node, new_name, new_code){
+
+			var sibs = node.getSiblings();
+			var ind;
+			for (ind in sibs){
+				if(!Hul.isnull(ind)){
+					if(sibs[ind].label == new_name){
+						alert("There is already the term with the same label in this branch");
+						return false;
+					}
+					if(sibs[ind].data.termcode == new_code){
+						alert("There is already the term with the same code in this branch");
+						return false;
+					}
+				}
+			}
+			return true;
+	}
+
 
 	/**
 	* Sends data to server
@@ -552,18 +578,22 @@ function EditTerms() {
 
 		var term = node.data;
 
-		//check for duplicates
-		if(term.id.indexOf("-")>0){ //new
-
+		/*
 			var sibs = node.getSiblings();
 			var ind;
 			for (ind in sibs){
-				if(!Hul.isnull(ind) && sibs[ind].label == node.label){
-					alert("There is already the term with the same label in this branch");
-					return;
+				if(!Hul.isnull(ind)){
+					if(sibs[ind].label == node.label){
+						alert("There is already the term with the same label in this branch");
+						return;
+					}
+					if(sibs[ind].data.termcode == node.data.termcode){
+						alert("There is already the term with the same code in this branch");
+						return;
+					}
 				}
 			}
-		}
+		*/
 
 
 		var needReload = _needReload;

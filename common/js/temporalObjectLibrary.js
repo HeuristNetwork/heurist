@@ -873,6 +873,7 @@ var TDate = function (strDate) {
 
         setHours: function (str) {
             if ( str !== null && str !== "" ) {
+				if(Number(str)==24) { str = '0'; }
                 if ( isNaN(str) || !TDate.validateHour(Number(str))) {
                     throw " TDate exception - invalid string supplied to setHours() - " + str;
                 }
@@ -1332,6 +1333,8 @@ TDate.parse = function () {
         }
 
         time = time.match(/\s*(\d+)(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?\s*/);
+
+		if(time[1] !== null && Number(time[1])==24) { time[1] = '0'; }
 
         if (time[1] !== null  && TDate.validateHour(time[1])) { //valid hour input
             _hours = time[1];
