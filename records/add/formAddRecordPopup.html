@@ -34,6 +34,7 @@
 
 window.HEURIST.edit = {
 	publicHasChanged: false,
+	save_in_progress:false,
 
 	unchanged: function() {
 		window.HEURIST.edit.publicHasChanged = false;
@@ -49,25 +50,33 @@ window.HEURIST.edit = {
 
 	save: function() {
 		// Attempt to save the public tab
+		if(!window.HEURIST.edit.save_in_progress){
 
-		var editFrame = document.getElementById("edit-frame");
-		var contentWindow = editFrame.contentWindow;
-		if (contentWindow) {
-			var form = contentWindow.document.forms[0];
-			if (form.onsubmit  &&  ! form.onsubmit()) {
-				return;	// submit failed ... up to the individual form handlers to display messages
+			window.HEURIST.edit.save_in_progress = true;
+			var editFrame = document.getElementById("edit-frame");
+			var contentWindow = editFrame.contentWindow;
+			if (contentWindow) {
+
+				var form = contentWindow.document.forms[0];
+				if (form && form.onsubmit  &&  ! form.onsubmit()) {
+					window.HEURIST.edit.save_in_progress = false;
+					return;	// submit failed ... up to the individual form handlers to display messages
+				}
+
+				top.HEURIST.registerEvent(editFrame, "load", function() {
+					window.HEURIST.edit.save_in_progress = false;
+					var record = (window.HEURIST.record ? window.HEURIST.record :
+									(window.HEURIST.edit.record ? window.HEURIST.edit.record : null));
+					if (!record) return;
+					window.close(record.title, record.bdValuesByType, record.bibID);
+				});
+
+				(form.heuristSubmit || form.submit)();
+
+				return;
 			}
-			top.HEURIST.registerEvent(editFrame, "load", function() {
-				var record = (window.HEURIST.record ? window.HEURIST.record :
-								(window.HEURIST.edit.record ? window.HEURIST.edit.record : null));
-				if (!record) return;
-				window.close(record.title, record.bdValuesByType, record.bibID);
-			});
 
-			(form.heuristSubmit || form.submit)();
-			return;
 		}
-
 		// If we get here, there were no unsaved changes.
 		// Grab the biblio title from the saved document, and close the window.
 	}

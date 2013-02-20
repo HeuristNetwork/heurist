@@ -1246,7 +1246,8 @@ function ShowReps() {
 		if(_isAceEditor){
 			codeEditor.insert(myValue);
 		}else{
-			codeEditor.replaceSelection(myValue);
+			codeEditor.replaceSelection("\n"+myValue);
+			codeEditor.setCursor(codeEditor.getCursor());
 		}
 	}
 	//
