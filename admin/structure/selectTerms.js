@@ -105,8 +105,9 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
 
-				}else if(_datatype === "relationtype" || _datatype === "relmarker")
+				}else if(_datatype === "relation" || _datatype === "relationtype" || _datatype === "relmarker")
 				{
+					_datatype = "relation";
 					treesByDomain = top.HEURIST.terms.treesByDomain.relation;
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
 
@@ -748,7 +749,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&db="+db,
+	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&db="+db+"&domain="+_datatype,
 		{
 		"close-on-blur": false,
 		"no-resize": false,
@@ -760,7 +761,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 				if(_datatype === "enum"){
 					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
-				}else if(_datatype === "relationtype" || _datatype === "relmarker")
+				}else if(_datatype === "relation" || _datatype === "relationtype" || _datatype === "relmarker")
 				{
 					treesByDomain = top.HEURIST.terms.treesByDomain.relation;
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;

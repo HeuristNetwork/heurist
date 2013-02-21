@@ -402,12 +402,12 @@ function DetailTypeEditor() {
 		var allTerms = Dom.get("dty_JsonTermIDTree").value;
 		var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 
+		if(type!="enum"){
+			type="relation";
+		}
+
 		var el_sel = Dom.get("selVocab");
 		if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
-
-			if(type!="enum"){
-				type="relation";
-			}
 
 			Hul.popupURL(top, top.HEURIST.basePath +
 				"admin/structure/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,

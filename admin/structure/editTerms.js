@@ -66,7 +66,7 @@ function EditTerms() {
 
 		_vocabulary_toselect = top.HEURIST.parameters.vocabid;
 		var initdomain = 0;
-		if(_vocabulary_toselect && top.HEURIST.parameters.domain=='relation'){
+		if(top.HEURIST.parameters.domain=='relation'){
 			initdomain  = 1;
 		}
 
