@@ -491,7 +491,7 @@ function _hideToolTip(){
 	}
 }
 function directImportWarning(event){
-	if(!event.target.checked){
+	if(event.target.checked){
 		alert("Unchecking this box allows record types with constrained pointer fields to be imported even if the target record type is not in the database. This means that incomplete definitions may be imported");
 	}
 }
@@ -518,7 +518,7 @@ function directImportWarning(event){
 		<div style="display:inline-block;">
 			<input id="inputFilterByExist" type="checkbox"/><label for="inputFilterByExist">&nbsp;&nbsp;Show record types with same original source</label><br />
 			<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."
-				onchange="directImportWarning(event)" checked><label for="noRecursion">&nbsp;&nbsp;Direct Record Types Import Only (without all related types - constrained pointers)</label><br />
+				onchange="directImportWarning(event)"><label for="noRecursion">&nbsp;&nbsp;Direct Record Types Import Only (without all related types - constrained pointers)</label><br />
 			<input type="checkbox" id="strict" title="Check this for strict import of types!" checked><label for="strict">&nbsp;&nbsp;Strict Import - only import if structure is entirely correct</label>
 		</div>
 	</div>

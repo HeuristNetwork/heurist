@@ -310,7 +310,10 @@
 											:top.HEURIST.util.getDisplayPreference("record-search-type");
 				var rectypeIDList = [];
 				//set focus
-				window.setTimeout(function() { document.forms[0].elements["q"].focus(); },100);
+				window.setTimeout(function() {
+						document.forms[0].elements["q"].focus();
+						document.forms[0].elements["q"].select();
+				},200);
 
                 document.body.className = document.body.className + ' help-'+top.HEURIST.util.getDisplayPreference("help")+' ';
 
