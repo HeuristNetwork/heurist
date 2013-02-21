@@ -1910,8 +1910,14 @@ div.recorddiv:hover {
 	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));*/
 }
 #results > div[id|="results"] {
-	box-shadow: 0 0 4px 3px gray; /* AO:was 1px #B0BDC4; */
+	/*
+	box-shadow: 0 0 4px 1px #B0BDC4;
 	margin: 10px 0;
+	*/
+	border-top: 1px solid gray;
+    box-shadow: 0 2px 2px 1px gray;
+    margin: 7px 0;
+}
 }
 #results div#results-message {
 	box-shadow:none;

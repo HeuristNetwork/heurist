@@ -1806,10 +1806,10 @@ if (! top.HEURIST.edit) {
         var values = [];
         for (var i=0; i < this.inputs.length; ++i) {
             if (this.inputOK(this.inputs[i])) {
-                var inputValue = this.getValue(this.inputs[i]);
+                var inputValue = this.getPrimaryValue(this.inputs[i]);
                 if (this.inputs[i].bdID) inputValue.id = this.inputs[i].bdID;
+                values.push(inputValue);
             }
-            values.push(inputValue);
         }
         return values;
     };
@@ -2130,7 +2130,6 @@ if (! top.HEURIST.edit) {
             });
         }
     };
-    top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getValue = function(input) { return input? input.hiddenElt.value : ""; };
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getPrimaryValue = function(input) { return input? input.hiddenElt.value : ""; };
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResourceAuto = function() {
         this.chooseResource(this.inputs[0]);
