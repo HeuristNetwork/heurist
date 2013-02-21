@@ -372,9 +372,11 @@ top.HEURIST.search = {
 
 	getAppState: function(appID){
 		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
-		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
-		if(typeof appWin == "object" && appWin.initted && typeof appWin.getState == "function"){
-			return appWin.getState.call(appWin);
+		if(tabApp){
+			var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
+			if(typeof appWin == "object" && appWin.initted && typeof appWin.getState == "function"){
+				return appWin.getState.call(appWin);
+			}
 		}
 		return null;
 	},
@@ -385,12 +387,14 @@ top.HEURIST.search = {
 					top.HEURIST.deregisterEvent(window,strEvent,setAppStateHandler);
 				};
 		var tabApp = _tabView.getTab(appnameToTabIDMap[appID]); //find the tab for the specified applet
-		var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
-		if(typeof appWin == "object"&& appWin.initted && typeof appWin.setState == "function"){
-			appWin.setState.call(appWin,strState);
-		}else{
-			strEvent = "heurist-"+tabIDToAppnameMap[appnameToTabIDMap[appID]] +"-app-ready";
-			top.HEURIST.registerEvent(window, strEvent,setAppStateHandler);
+		if(tabApp){
+			var appWin = tabApp.get("contentEl").getElementsByTagName("IFRAME")[0].contentWindow;//get the app window
+			if(typeof appWin == "object"&& appWin.initted && typeof appWin.setState == "function"){
+				appWin.setState.call(appWin,strState);
+			}else{
+				strEvent = "heurist-"+tabIDToAppnameMap[appnameToTabIDMap[appID]] +"-app-ready";
+				top.HEURIST.registerEvent(window, strEvent,setAppStateHandler);
+			}
 		}
 	},
 
@@ -1987,6 +1991,11 @@ top.HEURIST.search = {
 				if (enumSelector){
 					enumSelector.id = "simple-search-enum-selector";
 				}
+
+				for (var i=0; i<enumSelector.length; i++){
+					enumSelector.options[i].text = enumSelector.options[i].text+" ["+enumSelector.options[i].value+"]";
+				}
+
 				//attach onchange handler
 				enumSelector.onchange = function(e){
 					top.HEURIST.search.calcShowSimpleSearch(e);
@@ -2013,7 +2022,7 @@ top.HEURIST.search = {
 		var asc = ($("#sortAsc:checked").length > 0 ? "" : "-");
 		var srt = $("#sortby-select").val();
 		srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
-		q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?'"'+ctn+'"':"") + (srt? " " + srt : "");
+		q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn? (isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
 		if(!q){
 			q = "sortby:t";
 		}
@@ -2070,6 +2079,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.calcShowSimpleSearch();
 		}
 		// rectypes displayed in Groups by group display order then by display order within group
+		//rectypeValSelect.style.fontFamily = "Courier,monospaced !important;";
 		for (var index in rectypes.groups){
 			if (index == 'groupIDToIndex' || top.HEURIST.rectypes.groups[index].showTypes.length < 1){
 				continue;
@@ -2086,10 +2096,13 @@ top.HEURIST.search = {
 						firstInGroup = false;
 					}
 					var name = rectypes.names[recTypeID];
+					name = name +" ["+recTypeID+"]";
+
 					var value =  "t:" + (useIDs ? recTypeID : '"'+name+'"');
 					var opt = new Option(name, value);
 					$(opt).attr("rectype", recTypeID);
 					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
+
 					rectypeValSelect.appendChild(opt);
 				}
 			}
@@ -2139,6 +2152,8 @@ top.HEURIST.search = {
 						firstInGroup = false;
 					}
 					var name = detailTypes.names[detailTypeID];
+					name = name +" ["+detailTypeID+"]";
+
 //					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					var sortValue =  "" + (useIDs ? detailTypeID : '"'+name+'"');
@@ -4575,7 +4590,7 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
 			if(!top.HEURIST.util.isnull(_tabView)){
-//				_tabView.removeTab(_tabView.getTab(_TAB_TRANSFORM));
+				_tabView.removeTab(_tabView.getTab(_TAB_TRANSFORM)); //Bug# 232
 			}
 		}
 

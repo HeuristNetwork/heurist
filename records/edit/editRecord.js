@@ -1178,9 +1178,51 @@ if (! top.HEURIST.edit) {
             // Return true if and only if all required fields have been filled in.
             // Otherwise, display a terse message describing missing fields.
 
+            if (windowRef.HEURIST.uploadsInProgress  &&  windowRef.HEURIST.uploadsInProgress.counter > 0) {
+                // can probably FIXME if it becomes an issue ... register an autosave with the upload completion handler
+                alert("File uploads are in progress ... please wait");
+                return false;
+            }
+
             var missingFields = [];
             var firstInput = null;
+
+			//check duplication
+			var details = {};
+			var duplicatedInputs = [];
+			var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
             for (var i=0; i < inputs.length; ++i) {
+
+				var values = inputs[i].getValues();
+				var val = null;
+				if(values){
+					for (var j=0; j < values.length; ++j) {
+						if(values[j]){
+							val = null;
+							if(typeof(values[j])=="object"){
+								val = values[j].value;
+							}else{
+								val = values[j];
+							}
+							if(val){
+								var det_id = inputs[i].detailType[fi_id];
+								if(details[fi_id]){
+									//check duplication
+									if(details[fi_id].vals.indexOf(val)<0){
+										details[fi_id].vals.push(val);
+									}else{
+										if(duplicatedInputs.indexOf(inputs[i].shortName)<0){
+											duplicatedInputs.push(inputs[i].shortName);
+										}
+									}
+								}else{
+									details[fi_id] = {vals:[val]};
+								}
+							}
+						}
+					}
+				}
+
                 if (inputs[i].required !== "required") continue;
 
                 if (! inputs[i].verify()) {
@@ -1193,22 +1235,21 @@ if (! top.HEURIST.edit) {
 
                     if (! firstInput) firstInput = inputs[i];
                 }
-            }
+            }//for inputs
 
-            if (windowRef.HEURIST.uploadsInProgress  &&  windowRef.HEURIST.uploadsInProgress.counter > 0) {
-                // can probably FIXME if it becomes an issue ... register an autosave with the upload completion handler
-                alert("File uploads are in progress ... please wait");
-                return false;
-            }
+            if(duplicatedInputs.length>0){
+				alert("There are duplicated values in your inputs:<br /> - " + duplicatedInputs.join("<br /> - "));
+				return false;
+			}
 
             if (missingFields.length == 0) {
 
                 return top.HEURIST.edit.datetimeInputsOK(inputs, windowRef)
 
             }else if (missingFields.length == 1) {
-                alert("There was a problem with one of your inputs:\n" + missingFields[0]);
+                alert("There was a problem with one of your inputs:<br />" + missingFields[0]);
             } else {    // many errors
-                alert("There were problems with your inputs:\n - " + missingFields.join("\n - "));
+                alert("There were problems with your inputs:<br /> - " + missingFields.join("<br /> - "));
             }
 
             firstInput.focus();
@@ -1241,7 +1282,7 @@ if (! top.HEURIST.edit) {
             if (missingFields.length == 0) {
                 return true;
             }else{
-                alert("There are problems with your datetime inputs (wrong format):\n - " + missingFields.join("\n"));
+                alert("There are problems with your datetime inputs (wrong format):<br /> - " + missingFields.join("<br /> - "));
                 firstInput.focus();
                 return false;
             }
@@ -2089,6 +2130,7 @@ if (! top.HEURIST.edit) {
             });
         }
     };
+    top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getValue = function(input) { return input? input.hiddenElt.value : ""; };
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getPrimaryValue = function(input) { return input? input.hiddenElt.value : ""; };
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResourceAuto = function() {
         this.chooseResource(this.inputs[0]);

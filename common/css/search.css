@@ -2263,7 +2263,7 @@ div.recorddiv:hover > #recordID {
 }
 #result-header {
  	clear:both;
- 	background: none repeat scroll 0 0 #DCDFE6 !important;
+ 	background: none; /* repeat scroll 0 0 #DCDFE6 !important; */
  	overflow:auto;
 
 }
@@ -2272,15 +2272,17 @@ div.recorddiv:hover > #recordID {
 	color: #666666;
 	font-size: 12px;
 	font-weight: bold;
-	height: 22px;
+	height: 26px;
 	line-height: 23px;
-	max-width:90%;
+	max-width:99%;
 	padding-left: 10px;
+	padding-top: 4px;
 	text-align: left !important;
 	text-transform: uppercase;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	background-color: #DCDFE6;
 }
 
 #search-description, #results-message {

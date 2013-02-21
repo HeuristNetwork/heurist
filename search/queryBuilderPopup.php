@@ -51,8 +51,8 @@
 			eltvalue = elt.value;
 
 		if(eltname == 'tag'){
-			var elt2 = document.getElementById('wgtag')
-			if(elt2.selectedIndex>0){
+			var elt2 = document.getElementById('wgtag');
+			if(elt2 && elt2.selectedIndex>0){
 				var tag = elt2.value;
 				if (tag.indexOf(' ')) tag = '"' + tag + '"';
 				eltvalue = eltvalue + ' ' + tag;
@@ -522,7 +522,7 @@
 
 		<div class="advanced-search-row">
 			<label for="tag">Tags:</label>
-			<input name=tag id=tag onChange="update(this);" onKeyPress="return keypress(event);">
+			<input name=tag id="tag" onChange="update(this);" onKeyPress="return keypress(event);">
 			<?php
 				$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
 				if (mysql_num_rows($res) > 0) {

@@ -583,20 +583,16 @@ function processAction(rtyID, action, rectypeName) {
 		if (xmlhttp.readyState==4 && xmlhttp.status==200) { // done and OK
 			importPending = false;
 			var response = xmlhttp.responseText;
+
+			document.getElementById("importIcon"+rtyID).src = "../../common/images/download.png";
+
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
 				changeDuplicateEntryName(rtyID, rectypeName);
-			} else if(response.substring(0,5) == "Error") {
+			} else if(true || response.substring(0,5) == "Error") {
 
 				detailedImportLog = '<p style="color:red">'+ logHeader+response+"</p>" + detailedImportLog;
 
-				document.getElementById("popup-saved").innerHTML = "<b>Error. Check log for details</b>";
-				setTimeout(function() {
-					document.getElementById("popup-saved").style.display = "block";
-					setTimeout(function() {
-						document.getElementById("popup-saved").style.display = "none";
-					}, 1000);
-				}, 0);
 				document.getElementById("log").innerHTML='<p style="color:red">'+response+"</p>";
 				result += logHeader;
 				response = response.split("<br />");
@@ -607,12 +603,15 @@ function processAction(rtyID, action, rectypeName) {
 						tempLog += response[i]+"<br />";
 					}
 				}
+
+				alert("Import error. Check log for details at the end of page");
+
 				shortImportLog = logHeader+'<p style="color:red">'+tempLog+"</p><br />"+shortImportLog;
-				document.getElementById("popup-saved").innerHTML = "<b>Import error</b>";
 				document.getElementById("detailedLog").innerHTML = "Show detailed log";
 				document.getElementById("shortLog").innerHTML = "Show short log";
 			} else {
 				document.getElementById("importIcon"+rtyID).src = "../../common/images/import_icon.png";
+
 				detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
 				result += logHeader;
 				response = response.split("<br />");
@@ -723,7 +722,7 @@ function dropTempDB(redirect) {
 		dropped = true;
 
 	top.HEURIST.util.popupURL(top, "structure/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
-			"close-on-blur": false,
+			"close-on-blur": true,
 			"no-resize": true,
 			//"no-close": true,
 			height: 100,

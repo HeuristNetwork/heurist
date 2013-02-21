@@ -531,10 +531,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             coverall.className = "invisible";
         } else {
             coverall.className = "";
+
+            coverall.style.visibility = "visible";
+            top.HEURIST.util.coverallDiv.style.visibility = "visible";
         }
 
-        coverall.style.visibility = "visible";
-        top.HEURIST.util.coverallDiv.style.visibility = "visible";
+        //coverall.style.visibility = "visible";
+        //top.HEURIST.util.coverallDiv.style.visibility = "visible";
 
         // register an ESCAPE key handler on the document
         top.document.onkeypress = top.HEURIST.util.coverallEscapeHandler;
