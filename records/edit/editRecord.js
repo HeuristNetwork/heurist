@@ -261,6 +261,10 @@ if (! top.HEURIST.edit) {
             if (firstName) {
                 top.HEURIST.edit.showModule(firstName);
             }
+
+            if(top.HEURIST.edit.isAdditionOfNewRecord()){
+				top.HEURIST.edit.changed("public");
+			}
         },
 
         userCanEdit: function() {
@@ -1231,14 +1235,14 @@ if (! top.HEURIST.edit) {
                     var niceName = inputs[i].recFieldRequirements[0].toLowerCase();
                     niceName = niceName.substring(0, 1).toUpperCase() + niceName.substring(1);
                     */
-                    missingFields.push("\"" + inputs[i].shortName + "\" field requires " + inputs[i].typeDescription);
+                    missingFields.push(inputs[i].shortName + ": requires " + inputs[i].typeDescription);
 
                     if (! firstInput) firstInput = inputs[i];
                 }
             }//for inputs
 
             if(duplicatedInputs.length>0){
-				alert("There are duplicated values in your inputs:<br /> - " + duplicatedInputs.join("<br /> - "));
+				alert("There are duplicated values in your inputs:<br />" + duplicatedInputs.join("<br />"));
 				return false;
 			}
 
@@ -1247,9 +1251,11 @@ if (! top.HEURIST.edit) {
                 return top.HEURIST.edit.datetimeInputsOK(inputs, windowRef)
 
             }else if (missingFields.length == 1) {
-                alert("There was a problem with one of your inputs:<br />" + missingFields[0]);
+            	//"There was a problem with one of your inputs:<br />" +
+                alert(missingFields[0]);
             } else {    // many errors
-                alert("There were problems with your inputs:<br /> - " + missingFields.join("<br /> - "));
+            	//"There were problems with your inputs:<br /> - " +
+                alert(missingFields.join("<br />"));
             }
 
             firstInput.focus();
@@ -2013,6 +2019,7 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.typeDescription = "a text value";
+	top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.regex = new RegExp("\\S");
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.addInput = function(bdValue) {
         var newInput = this.document.createElement("textarea");
         newInput.rows = "3";
