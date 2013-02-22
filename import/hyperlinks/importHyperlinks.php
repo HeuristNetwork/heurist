@@ -196,35 +196,43 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		if (! @$checked) continue;
 
 		$rec_id = records_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), @$_REQUEST['rec_ID'][$linkno]);
-		if (is_array($rec_id)  and  $rec_id) {
+		if ($rec_id && is_array($rec_id)) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_rec_ids[$_REQUEST['link'][$linkno]] = $rec_id;
 			continue;
 		}
+
 		if (! @$rec_id) continue;	/* malformed URL */
 
 		array_push($record_tobebookmarked, $rec_id);
 	}
 
-	if (@$_REQUEST['adding_tags'] == 1) {
-		$kwd = @$_REQUEST['wgTags'];
-	} else {
-		$kwd = @$_REQUEST['kwd'][$linkno];
-	}
+	if(count($record_tobebookmarked)>0){
 
-	//method to add bookmarks and tags
-	$data = array();
-	$data['rec_ids'] = $record_tobebookmarked;
-	$data['tagString'] = $kwd;
+		if (@$_REQUEST['adding_tags'] == 1) {
+			$kwd = @$_REQUEST['wgTags'];
+		} else {
+			$kwd = @$_REQUEST['kwd'][$linkno];
+		}
 
-	$res = bookmark_and_tag_record_ids($data);
-	if(@$res['ok']){
-		$success = $res['ok'];
-	}else if (@$res['none']){
-		$success = $res['none'];
+		//method to add bookmarks and tags
+		$data = array();
+		$data['rec_ids'] = $record_tobebookmarked;
+		$data['tagString'] = $kwd;
+
+		$res = bookmark_and_tag_record_ids($data);
+		if(@$res['ok']){
+			$success = $res['ok'];
+		}else if (@$res['none']){
+			$success = $res['none'];
+		}else{
+			$error = $res['problem'];
+		}
+
 	}else{
-		$error = $res['problem'];
+		$error = "Nothing to bookmark. Select links";
 	}
+
 
 	/*
 	$bkmk_insert_count = 0;
@@ -276,10 +284,10 @@ if (@$urls) {
 	top.HEURIST.baseURL="<?=HEURIST_SITE_PATH?>";
 </script>
 <script src="importHyperlinks.js"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>
-<!--
--->
+<script>
+//top.HEURIST.loadScript("<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
+</script>
 
 <?php //this frame is needed for title lookup ?>
 <iframe style="display: none;" name="grabber"></iframe>
@@ -356,7 +364,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
  <div class="input-row" style="color:#0000ff;font-weight:bold;"><?= htmlspecialchars($success) ?></div>
 <?php		} ?>
 <?php		if (@$disambiguate_rec_ids) { ?>
- <div class="input-row">
+ <div class="input-row" style="color:blue;"">
   <b><?= (count($disambiguate_rec_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
   similar to record(s) already in the database.</b><br>
   The similar records are shown below: please select the appropriate page, or add a new URL to the database.<br>
