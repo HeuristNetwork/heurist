@@ -262,9 +262,9 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.edit.showModule(firstName);
             }
 
-            if(top.HEURIST.edit.isAdditionOfNewRecord()){
+            /*if(top.HEURIST.edit.isAdditionOfNewRecord()){
 				top.HEURIST.edit.changed("public");
-			}
+			}*/
         },
 
         userCanEdit: function() {
@@ -1230,6 +1230,21 @@ if (! top.HEURIST.edit) {
 						}
 					}
 				}
+
+                if(inputs[i].relManager){
+                    var open_rels = inputs[i].relManager.openRelationships;
+                    for (var k in open_rels) {
+                        if(k && open_rels[k] && (!open_rels[k].isempty()) && open_rels[k].isvalid()==null){
+                            if(confirm("There is an unsaved relationship in this record.\n Press 'OK' to ignore this relationship.\n 'Cancel' to return to edit form")){
+                                //inputs[i].relManager.cancelAllOpen();
+                            }else{
+                                return false;
+                            }
+                            break;
+                        }
+                    }
+                }
+
 
                 if (inputs[i].required !== "required") continue;
 
@@ -2958,6 +2973,11 @@ if (! top.HEURIST.edit) {
             });
         }
         //    this.windowRef.changed();
+    };
+
+    top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.getPrimaryValue = function(input) {
+        //this.relManager
+        return input? input.value : "";
     };
 
 /**

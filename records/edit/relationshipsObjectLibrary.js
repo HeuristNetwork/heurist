@@ -376,6 +376,7 @@ if (!top.Relationship) {
 
 		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], tr, "input2"); //was tbody);
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
+		this.relatedRecordID.name = "relationship-type"; //to avoid save this element
 
 
 		td = tr.appendChild(this.document.createElement("div"));
@@ -532,17 +533,29 @@ if (!top.Relationship) {
 		this.notes.className = "in";
 	};
 
-	top.EditableRelationship.prototype.save = function() {
-		if (! (this.relTypeSelect.value  ||  this.relatedRecordID.value  ||  this.startDate.value  ||  this.endDate)) return;
+    top.EditableRelationship.prototype.isempty = function() {
+        return (! (this.relTypeSelect.value  ||  this.relatedRecordID.value  ||  this.startDate.value  ||  this.endDate));
+    };
 
-		if (this.relTypeSelect.value == "") {
-			alert("You must select a relationship type");
-			return;
-		}
-		if (this.relatedRecordID.value == ""  ||  this.relatedRecordID.value == 0) {
-			alert("You must select a related record");
-			return;
-		}
+    top.EditableRelationship.prototype.isvalid = function() {
+        if (this.relTypeSelect.value == "") {
+            return "You must select a relationship type";
+        }
+        if (this.relatedRecordID.value == ""  ||  this.relatedRecordID.value == 0) {
+            return "You must select a related record";
+
+        }
+        return null;
+    };
+
+	top.EditableRelationship.prototype.save = function() {
+		if (this.isempty()) return;
+
+        var swarn = this.isvalid();
+        if(swarn){
+            alert(swarn);
+            return;
+        }
 
 		var fakeForm = { action: top.HEURIST.basePath +"records/relationships/saveRelationships.php",
 			elements: [
@@ -1013,6 +1026,12 @@ if (!top.Relationship) {
 			this.openRelationships[i].save();
 		}
 	}
+    top.RelationManager.prototype.cancelAllOpen = function () {
+        for (var i in this.openRelationships) {
+            this.openRelationships[i].remove();
+        }
+    }
+
 
 	top.RelationManager.prototype.remove = function (relObj) {
 
