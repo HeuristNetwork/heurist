@@ -98,12 +98,14 @@ function removeLeadingYearZeroes($value){
 			$res = $res."-".$date['day'];
 		}
 
-		if(@$date['hour']>=0 || @$date['minute']>0 || @$date['second']>0){
-			if(!@$date['hour']) { $date['hour'] = 0; }
+		if(@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+			if(!@$date['hour']) {
+					$date['hour'] = 0;
+			}
 
-			$res = $res." ".str_pad($date['hour'],2,'0',STR_PAD_LEFT);
+			if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+				$res = $res." ".str_pad($date['hour'],2,'0',STR_PAD_LEFT);
 
-			if(@$date['minute']>=0 || @$date['second']>0){
 				if(!@$date['minute']) { $date['minute'] = 0; }
 				$res = $res.":".str_pad($date['minute'],2,'0',STR_PAD_LEFT);
 			}
@@ -111,6 +113,8 @@ function removeLeadingYearZeroes($value){
 				$res = $res.":".str_pad($date['second'],2,'0',STR_PAD_LEFT);
 			}
 		}
+
+
 		if($isbce){
 			$res = $res." BCE";
 		}

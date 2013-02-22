@@ -1197,6 +1197,10 @@ if (! top.HEURIST.edit) {
 			var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
             for (var i=0; i < inputs.length; ++i) {
 
+            	if (typeof(inputs[i].getValues) !== "function") {
+            		 continue;
+				}
+
 				var values = inputs[i].getValues();
 				var val = null;
 				if(values){

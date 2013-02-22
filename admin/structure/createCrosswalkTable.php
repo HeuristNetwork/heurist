@@ -589,7 +589,7 @@ function processAction(rtyID, action, rectypeName) {
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
 				changeDuplicateEntryName(rtyID, rectypeName);
-			} else if(true || response.substring(0,5) == "Error") {
+			} else if(response.substring(0,5) == "Error") {
 
 				detailedImportLog = '<p style="color:red">'+ logHeader+response+"</p>" + detailedImportLog;
 
