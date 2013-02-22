@@ -560,7 +560,7 @@ function EditTerms() {
 						alert("There is already the term with the same label in this branch");
 						return false;
 					}
-					if(sibs[ind].data.termcode == new_code){
+					if(new_code!='' && sibs[ind].data.termcode == new_code){
 						alert("There is already the term with the same code in this branch");
 						return false;
 					}

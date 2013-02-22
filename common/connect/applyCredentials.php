@@ -219,6 +219,7 @@ if(is_admin()){
 		$files = array_diff(scandir($path), array('.', '..'));
 		foreach ($files as $file)
 		{
+			if(is_readable($path . '/' . $file)){
 				try{
 					$content = file_get_contents($path . '/' . $file);
 
@@ -237,6 +238,7 @@ if(is_admin()){
 					}
 				}catch(Exception $e){
 				}
+			}
 		}
 
 		//back to my session

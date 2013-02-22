@@ -162,7 +162,7 @@
 				$rv = array();
 				$rv['error'] = "invalid or not IDs sent with changeRole method call to saveUsergrps.php";
 			}else{
-				$rv = changeRole($recID, $recIds, $newRole, $oldRole, true);
+				$rv = changeRole($recID, $recIds, $newRole, $oldRole, true, true);
 				if (!array_key_exists('error',$rv)) {
 					//$rv['rectypes'] = getAllRectypeStructures();
 				}
@@ -339,14 +339,14 @@
 
 							if($groupID){
 								//add new user to specified group
-								changeRole($groupID, $recID, "member", null, false);
+								changeRole($groupID, $recID, "member", null, false, false);
 							}
 
 
 						}else{
 							//this is addition of new group
 							//add current user as admin for new group
-							changeRole($recID, get_user_id(), "admin", null, false);
+							changeRole($recID, get_user_id(), "admin", null, false, true);
 						}
 						$ret = -$recID;
 
@@ -626,7 +626,7 @@
 	* @param mixed $recIds - comma separated list of affected user IDs
 	* @param mixed $newRole - new role
 	*/
-	function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck){
+	function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck, $updateSession){
 		global $db;
 
 		$ret = array();
@@ -752,9 +752,11 @@
 
 
 		//update group info for affected users
-		foreach ($arrUsers as $userID) {
-				$groups = reloadUserGroups($userID);
-				updateSessionForUser($userID, 'user_access', $groups);
+		if($updateSession){
+			foreach ($arrUsers as $userID) {
+					$groups = reloadUserGroups($userID);
+					updateSessionForUser($userID, 'user_access', $groups);
+			}
 		}
 		//if($is_myself_affected){
 		//	updateSessionInfo();
