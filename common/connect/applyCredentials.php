@@ -126,9 +126,8 @@ function get_access_levels() {//T1000.php only
 		'member'=> is_logged_in() ? 1 : 0
 	);
 }
-
+//TODO : this doesn't match sysUGrp check validity
 function is_modeluser() { return (get_user_username() == 'model_user'); }
-
 
 function jump_sessions() {
 	/* Some pages store a LOT of data in the session variables;

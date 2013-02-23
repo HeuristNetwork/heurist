@@ -409,7 +409,7 @@
 											(filter.length > 0 ? filter : "") +
 											(layoutString.length > 0 &&  layoutString[1] != "" ? "&" + layoutString[1] : "") +
 											(selFilter.length > 0 &&  selFilter[1] != "" ? "&" + selFilter[1] : "") +
-											($("#expandColl:checked").length > 0 ? "&expandColl=1" : "") +
+											($("#expandColl").attr("checked") ? "&expandColl=1" : "") +
 											(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
 						curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 						var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
