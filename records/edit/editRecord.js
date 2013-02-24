@@ -1214,17 +1214,17 @@ if (! top.HEURIST.edit) {
 							}
 							if(val){
 								var det_id = inputs[i].detailType[fi_id];
-								if(details[fi_id]){
+								if(details[det_id]){
 									//check duplication
-									if(details[fi_id].vals.indexOf(val)<0){
-										details[fi_id].vals.push(val);
+									if(details[det_id].vals.indexOf(val)<0){
+										details[det_id].vals.push(val);
 									}else{
 										if(duplicatedInputs.indexOf(inputs[i].shortName)<0){
 											duplicatedInputs.push(inputs[i].shortName);
 										}
 									}
 								}else{
-									details[fi_id] = {vals:[val]};
+									details[det_id] = {vals:[val]};
 								}
 							}
 						}

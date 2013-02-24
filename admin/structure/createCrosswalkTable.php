@@ -492,7 +492,7 @@ function _hideToolTip(){
 }
 function directImportWarning(event){
 	if(event.target.checked){
-		alert("Unchecking this box allows record types with constrained pointer fields to be imported even if the target record type is not in the database. This means that incomplete definitions may be imported");
+		alert("Checking this box allows record types with constrained pointer fields to be imported even if the target record type is not in the database. This means that incomplete definitions may be imported");
 	}
 }
 
