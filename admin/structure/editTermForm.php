@@ -78,7 +78,7 @@ $parent_id = @$_REQUEST['parent'];
 				echo "<div style='color:green'>New term has been added successfully</div>";
 				$return_res = ($parent_id==0)?$res:"ok";
 			}else{
-				echo "<div style='color:green'>".$res."</div>"; //error
+				echo "<div style='color:red'>".$res."</div>"; //error
 			}
 		}
 	}
@@ -111,9 +111,9 @@ $parent_id = @$_REQUEST['parent'];
         	<input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
         	<input name="parent" value="<?=$_REQUEST['parent']?>" type="hidden" />
 
-			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px"/></div>
-			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px"/></div>
-			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px"/></div>
+			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px" value="<?=@$_REQUEST['name'] ?>" /></div>
+			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px" value="<?=@$_REQUEST['description'] ?>" /></div>
+			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px" value="<?=@$_REQUEST['code'] ?>" /></div>
 
 			<div style="text-align: right; padding-top:8px;">
 					<input id="btnEditTree" type="button" value="Edit terms" onClick="{showOtherTerms();}"/>

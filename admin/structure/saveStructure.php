@@ -1606,6 +1606,11 @@
 			$parameters = array("");
 			$fieldNames = join(",",$colNames);
 
+            $ch_parent_id = null;
+            $ch_code = null;
+            $ch_label = null;
+
+
 			foreach ($colNames as $colName) {
 
 				$val = array_shift($values);
@@ -1623,13 +1628,60 @@
 						$query = $query."$colName = ?";
 					}
 
+                    if($colName=="trm_ParentTermID"){
+                        $ch_parent_id = $val;
+                    }else if($colName=="trm_Code"){
+                        $ch_code = $val;
+                    }else if($colName=="trm_Label"){
+                        $ch_label = $val;
+                    }
+
 					$parameters[0] = $parameters[0].$trmColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
 
 				}
 			}//for columns
 
-			if($query!=""){
+            //check label and code duplication for the same level
+            if($ch_code || $ch_label){
+                if($ch_parent_id){
+                    $ch_parent_id = "trm_ParentTermID=".$ch_parent_id;
+                }else{
+                    $ch_parent_id = "(trm_ParentTermID is null or trm_ParentTermID=0)";
+                }
+
+                $dupquery = "select trm_ID from defTerms where ".$ch_parent_id;
+
+                if(!$isInsert){
+                    $dupquery .= " and (trm_ID <>".$trmID.")";
+                }
+                $dupquery .= " and (";
+                if($ch_code){
+                    $dupquery .= "(trm_Code = '".mysql_real_escape_string($ch_code)."')";
+                }
+                if($ch_label){
+                    if($ch_code){
+                        $dupquery .= " or ";
+                    }
+                    $dupquery .= "(trm_Label = '".mysql_real_escape_string($ch_label)."')";
+                }
+                $dupquery .= ")";
+
+                $res = mysql_query($dupquery);
+                if (mysql_error()) {
+                    $ret = "SQL error checking duplication values in terms: ".mysql_error();
+                } else {
+                    $recCount = mysql_num_rows($res);
+                    if($recCount>0){
+                        $ret = "Duplication of label or code is not allowed for same level terms";
+                    }
+                }
+
+            }
+
+
+            //insert, update
+			if(!$ret && $query!=""){
 				if($isInsert){
 					$query = "insert into defTerms (".$fieldNames.") values (".$query.")";
 				}else{

@@ -230,7 +230,7 @@ function DetailTypeEditor() {
 				vocabId = 0;
 			}
 
-			var dom = (datatype === "relmarker" || datatype === "relationtype")?"relation":"enum",
+			var dom = (datatype === "relation" || datatype === "relmarker" || datatype === "relationtype")?"relation":"enum",
 				fi_label = top.HEURIST.terms.fieldNamesToIndex['trm_Label'];
 			var termID,
 				termName,
@@ -280,20 +280,24 @@ function DetailTypeEditor() {
 
 		var	btn_addsel = Dom.get("btnAddSelTerm"),
 			editedTermTree = "",
+            divAddSelTerm = Dom.get("divAddSelTerm"),
 			divAddVocab = Dom.get("divAddVocab");
 
-		btn_addsel.disabled = false;
+		//btn_addsel.disabled = false;
 
 		if(el_sel.value > 0){ //individual selection
 			btn_addsel.value = "Add  term";
 			editedTermTree = el_sel.value;
+            divAddSelTerm.style.display = "inline-block";
 			divAddVocab.style.display = "inline-block";
 		}else if(el_sel.value < 0){
-			btn_addsel.disabled = true;
-			btn_addsel.value = "";
+			//btn_addsel.disabled = true;
+			//btn_addsel.value = "";
+            divAddSelTerm.style.display = "none";
 			divAddVocab.style.display = "inline-block";
 		}else{
 			btn_addsel.value = "Select terms";
+            divAddSelTerm.style.display = "inline-block";
 			divAddVocab.style.display = "none";
 		}
 
@@ -414,6 +418,7 @@ function DetailTypeEditor() {
 				{
 				"close-on-blur": false,
 				"no-resize": true,
+                "no-close": true,
 				height: 160,
 				width: 400,
 				callback: function(context) {
@@ -421,7 +426,7 @@ function DetailTypeEditor() {
 
 						if(context=="ok"){
 							_recreateTermsPreviewSelector(type, allTerms, "");
-						}else{ //after add new vocab
+						}else if(!Hul.isempty(context)) { //after add new vocab
 							Dom.get("dty_JsonTermIDTree").value =  context;
 							Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
 							_recreateTermsVocabSelector(type);
