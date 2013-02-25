@@ -661,8 +661,11 @@
 			foreach ($arrUsers as $userID) {
 
 				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
-
-				$error = checkLastAdmin($userID, $grpID);
+                if($userID==2){
+                    $error = "Not possible to delete database owner";
+                }else{
+				    $error = checkLastAdmin($userID, $grpID);
+                }
 				if($error==null){
 
 					/*****DEBUG****///error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
@@ -689,7 +692,10 @@
 				$is_myself_affected =  ($is_myself_affected || $userID == $current_user_id);
 
 				$error = null;
-				if($oldRole=="admin" && $newRole=="member"){
+                if($userID==2 && $grpID==1){
+                    $error = "Not possible to change role for database owner";
+                    array_push($ret['errors'], $error);
+                }else if($oldRole=="admin" && $newRole=="member"){
 					$error = checkLastAdmin($userID, $grpID);
 					if($error){
 						array_push($ret['errors'], $error);

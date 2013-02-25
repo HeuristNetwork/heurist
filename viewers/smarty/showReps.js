@@ -927,7 +927,7 @@ function ShowReps() {
 	}
 
 	function _addIfOperator(nodedata, prefix){
-		return "{if ($"+prefix+nodedata.this_id+")}\n{else}\n{/if} {* "+prefix+nodedata.this_id+" *}";
+		return "{if ($"+prefix+nodedata.this_id+")}\n\n{else}\n{/if} {* "+prefix+nodedata.this_id+" *}";
 	}
 	//
 	//
@@ -1246,8 +1246,18 @@ function ShowReps() {
 		if(_isAceEditor){
 			codeEditor.insert(myValue);
 		}else{
+            var crs = codeEditor.getCursor();
 			codeEditor.replaceSelection("\n"+myValue);
-			codeEditor.setCursor(codeEditor.getCursor());
+
+            if(myValue.indexOf("{if")>=0){
+                crs.line = crs.line+2;
+                crs.ch = 0;
+            }else{
+                crs = codeEditor.getCursor();
+            }
+
+			codeEditor.setCursor(crs);
+            setTimeout(function(){codeEditor.focus();},200);
 		}
 	}
 	//

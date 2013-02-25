@@ -573,6 +573,13 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				var newValue = elDropdown.options[elDropdown.selectedIndex].value;
 				var oldValue = record.getData(column.key);
 
+
+                if(Number(record.getData('id'))===2 && Number(groupToBeUpdated)===1){
+                    elDropdown.selectedIndex = 0;
+                    alert("It is not possible to change role for database owner");
+                    return;
+                }
+
 				if(newValue!=="invited" && newValue!=="request" && newValue!==oldValue)
 				{
 					var data = record.getData();

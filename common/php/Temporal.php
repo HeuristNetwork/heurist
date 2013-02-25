@@ -92,10 +92,10 @@ function removeLeadingYearZeroes($value){
 			$res = "".abs($date['year']);
 		}
 		if(@$date['month']){
-			$res = $res."-".$date['month'];
+			$res = $res."-".str_pad($date['month'],2,'0',STR_PAD_LEFT);
 		}
 		if(@$date['day']){
-			$res = $res."-".$date['day'];
+			$res = $res."-".str_pad($date['day'],2,'0',STR_PAD_LEFT);
 		}
 
 		if(@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
