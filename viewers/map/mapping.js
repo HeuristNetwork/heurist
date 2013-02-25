@@ -158,16 +158,41 @@ if (typeof mxn.LatLonPoint == "function") {
 			} else if (zoomIndex>=M.timeZoomSteps.length){
 				zoomIndex = M.timeZoomSteps.length-1;
 			}
-						var band, interval;
-						band = tm.timeline.getBand(bandIndex),
+				var band, interval;
+				band = tm.timeline.getBand(bandIndex);
+
+                if(band){
 						interval = M.timeZoomSteps[zoomIndex].unit;
 						band._zoomIndex = zoomIndex;
 						band.getEther()._pixelsPerInterval = M.timeZoomSteps[zoomIndex].pixelsPerInterval;
 						band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
 						band.getEtherPainter()._unit = interval;
+                }
 
 	},
 
+    zoomTimeLineToAll: function(tm){
+            var M = RelBrowser.Mapping;
+            if(!tm) tm = M.tmap;
+
+            //$("#timeline").css("height", "99%");
+
+            var start, end, zoomIndex, eventSource, d = new Date();
+            eventSource = tm.timeline.getBand(0).getEventSource();
+
+            if (eventSource.getCount() > 0) {
+                start = eventSource.getEarliestDate();
+                end = eventSource.getLatestDate();
+                d = M.timeMidPoint(start, end);
+
+                zoomIndex = M.findTimeScale(start, end, M.timeZoomSteps, ($(tm.tElement).width()));
+
+                M.changeScale(1, zoomIndex, tm); //WAS + zoomIndex+3
+                M.changeScale(0, zoomIndex, tm);
+            }
+            tm.timeline.getBand(0).setCenterVisibleDate(d);
+            tm.timeline.layout();
+    },
 
 	keepMinDate:null,
 	keepMinDate:null,
@@ -178,6 +203,7 @@ if (typeof mxn.LatLonPoint == "function") {
 		if(M.tmap && M.keepMinDate && M.keepMinDate){
 			M.keepMinNaxDate = false;
 			setTimeout(function (){
+                //$("#timeline").css("height", "99%");
 				var tm = RelBrowser.Mapping.tmap;
 				var band = tm.timeline.getBand(0);
 				band.setMinVisibleDate(M.keepMinDate);
@@ -257,10 +283,6 @@ if (typeof mxn.LatLonPoint == "function") {
 				// then shift it back to where the mouse was
 				band._moveEther(x);
 
-/*
-			var newzoom = band._zoomIndex + (zoomIn?-1:1);
-			M.changeScale(1, newzoom+3);
-			M.changeScale(0, newzoom);*/
 
 			/*
 			band.zoom(zoomIn, x);*/
@@ -273,6 +295,11 @@ if (typeof mxn.LatLonPoint == "function") {
 				zoom(true);
 			})
 			.appendTo($div);
+        $("<div id='divZoomAll' title='Show All'><img src='"+RelBrowser.baseURL+"common/images/zoom_all.png'></img></div>")
+            .click(function () {
+                M.zoomTimeLineToAll();
+            })
+            .appendTo($div);
 		$("<div  id='divZoomOut' title='Zoom Out'><img src='"+RelBrowser.baseURL+"common/images/zoom_minus.png'></img></div>")
 			.click(function () {
 				zoom(false);
@@ -411,6 +438,7 @@ if (typeof mxn.LatLonPoint == "function") {
 			tl_theme.event.bubble.bodyStyler = function(elem){
 				$(elem).addClass("popup_body");
 			};
+            tl_theme.event.track.offset = 20;
 			//tl_theme.event.instant.icon = Timeline.urlPrefix + "images/dull-blue-circle.png";
 			//tl_theme.event.bubble.maxHeight = 0;
 			//tl_theme.event.bubble.width = 320;
@@ -424,22 +452,9 @@ if (typeof mxn.LatLonPoint == "function") {
 			//after loading - zoom to extent
 			var __onDataLoaded = function (tm) {
 				// find centre date, choose scale to show entire dataset
-				var start, end, zoomIndex, eventSource, d = new Date();
 				var M = RelBrowser.Mapping;
 
-				eventSource = tm.timeline.getBand(0).getEventSource();
-				if (eventSource.getCount() > 0) {
-					start = eventSource.getEarliestDate();
-					end = eventSource.getLatestDate();
-					d = M.timeMidPoint(start, end);
-
-					zoomIndex = M.findTimeScale(start, end, M.timeZoomSteps, ($(tm.tElement).width()));
-
-					M.changeScale(1, zoomIndex + 3, tm);
-					M.changeScale(0, zoomIndex, tm);
-				}
-				tm.timeline.getBand(0).setCenterVisibleDate(d);
-				tm.timeline.layout();
+                M.zoomTimeLineToAll(tm);
 
 				// finally, draw the zoom control for timeline
 				M.renderTimelineZoom(tm);
@@ -565,20 +580,22 @@ if (typeof mxn.LatLonPoint == "function") {
 */
 
 			bandInfo: [
-					{
+					/* #302s
+                    {
 					theme: tl_theme2,
 					showEventText: false,
-					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex-1].unit,
-					intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex-1].pixelsPerInterval,
+					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex].unit,
+					intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex].pixelsPerInterval,
 					zoomIndex: M.initTimeZoomIndex-1,
 					zoomSteps: M.timeZoomSteps,
-					trackHeight:    0.2,
-					trackGap:       0.1,
+					trackHeight:    0.01,
+					trackGap:       0.01,
 					width: "30px",
 					layout:'overview'
-					},
+					},*/
 					{
 					theme: tl_theme,
+                    align: "Top",
 					showEventText: true,
 					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex].unit,
 					intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex].pixelsPerInterval,
