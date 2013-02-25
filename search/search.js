@@ -96,6 +96,9 @@ top.HEURIST.search = {
 	},
 
 	searchNotify: function(results) {
+
+        top.HEURIST.search.processVersionStableCode(results.current_stable_version);
+
 		top.HEURIST.search.results = {
 			recSet: {},
 			infoByDepth: [ {
@@ -4835,7 +4838,37 @@ top.HEURIST.search = {
 
 
 		return false;
-	}
+	},
+
+    processVersionStableCode: function(current_stable_version){
+        if(!(top.HEURIST.util.isempty(current_stable_version) ||
+             top.HEURIST.util.isempty(top.HEURIST.VERSION))){
+
+            var curver2 = current_stable_version.split("|");
+            if(curver2.length==2){
+                var curver = curver2[1].split(".");
+                if(curver.length>2){
+                    var major = Number(curver[0]);
+                    var subver = Number(curver[1]);
+
+                    //compare with local versions
+                    var locver = top.HEURIST.VERSION.split(".");
+                    var major_local = Number(locver[0]);
+                    var subver_local = Number(locver[1]);
+                    var message = null;
+                    if(major_local<major){
+                        message = "Outdated version: please ask system administrator to upgrade Heurist to version "+major;
+
+                    }else if(major_local == major && subver_local<subver){
+                        message = "Please ask system administrator to update Heurist to version "+curver2[1];
+                    }
+                    if(message!=null){
+                        $("#message_version").html(message);
+                    }
+                }
+            }
+        }
+    }
 
 };
 

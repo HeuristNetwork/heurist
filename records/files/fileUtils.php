@@ -50,20 +50,25 @@ function saveURLasFile($url, $filename)
 { //Download file from remote server
 
 	$rawdata = loadRemoteURLContent($url);
-
-    if($rawdata){
-		if(file_exists($filename)){
-			unlink($filename);
-		}
-		$fp = fopen($filename,'x');
-		fwrite($fp, $rawdata);
-		fclose($fp);
-
-		return filesize($filename);
-	}else{
-		return 0;
-	}
+    return saveAsFile($rawdata, $filename);
 }
+
+function saveAsFile($rawdata, $filename)
+{
+    if($rawdata){
+        if(file_exists($filename)){
+            unlink($filename);
+        }
+        $fp = fopen($filename,'x');
+        fwrite($fp, $rawdata);
+        fclose($fp);
+
+        return filesize($filename);
+    }else{
+        return 0;
+    }
+}
+
 
 
 /**
@@ -75,8 +80,10 @@ function downloadViaProxy($filename, $mimeType, $url){
 
 	if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
 
-		$raw = loadRemoteURLContent($url);
+		$rawdata = loadRemoteURLContent($url);
 
+        saveAsFile($rawdata, $filename);
+/*
 		if ($raw) {
 
 			if(file_exists($filename)){
@@ -87,8 +94,8 @@ function downloadViaProxy($filename, $mimeType, $url){
 			fwrite($fp, $raw);
 			//fflush($fp);    // need to insert this line for proper output when tile is first requestet
 			fclose($fp);
-
 		}
+*/
 	}
 
 	if(file_exists($filename)){

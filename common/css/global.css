@@ -486,6 +486,8 @@ body {left:0 !important;margin:0;position:absolute;right:0 !important;top:0 !imp
 #logo {width:180px;left:0px;top:0px;}
 #version { position: absolute; left: 150px; top: 36px; color: white; font-size: 10px; }
 #message {color:#FFF;width:auto;position:absolute;top:15px;left:295px;height: 30px;padding: 10px;display: table-cell;display: none;}
+#message_version{color: #FFF;left:225px;position:absolute;top:4px;}
+
 img {border: 0;}
 .banner {padding: 0;margin: 0;position: absolute;top: 0px;left: 0px;right:0px;height: 25px;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:0px;-moz-border-radius-bottomright:0px;-moz-border-radius-topleft:5px;-moz-border-radius-topright:5px;-webkit-border-bottom-left-radius:0px;-webkit-border-bottom-right-radius:0px;-webkit-border-top-left-radius:5px;-webkit-border-top-right-radius:5px;border-bottom-left-radius:0px;border-bottom-right-radius:0px;border-top-left-radius:5px;border-top-right-radius:5px;border-bottom :1px solid #999999;color:#333333;}
 #login, #heurist-link {padding: 5px;vertical-align: middle;display: table-cell;color: #6A7C99;}

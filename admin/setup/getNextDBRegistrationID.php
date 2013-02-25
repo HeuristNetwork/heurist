@@ -143,11 +143,12 @@
 			"Title: ".$dbTitle."\n".
 			"ID:    ".$indexdb_user_id."\n".
 			"Version: ".$dbVersion."\n".
-			"User name:    "$usrFirstName." ".$usrLastName."\n".
+			"User name:    ".$usrFirstName." ".$usrLastName."\n".
 			"Email address: ".$usrEmail."\n".
 			"Go to the address below to review database:\n".
 			$serverURL;
 
+            //
 			$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist database registration: '.$dbTitle.' ['.$indexdb_user_id.']', $email_text,
 				"From: root");
 			if (! $rv) {//TODO  SAW this should not fail silently

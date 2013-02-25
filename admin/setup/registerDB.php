@@ -138,7 +138,7 @@
 					$usrLastName = rawurlencode($usrLastName);
 					$usrPassword = rawurlencode($usrPassword);
 					$dbDescriptionEncoded = rawurlencode($dbDescription);
-					$reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
+					$reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
 					"?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
 					"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 					"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
