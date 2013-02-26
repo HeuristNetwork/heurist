@@ -401,10 +401,6 @@ top.HEURIST.search = {
 		}
 	},
 
-	appRegisterInterface:function(appID,appObj) {
-		appInterface[appID]= appObj;
-	},
-
 	applyFilterAndLayout: function(evt){
 		var i,layoutSrch, layoutNav, layoutApp, layouts, style, activeApp
 			maxFilterDepth=0,
@@ -564,7 +560,7 @@ top.HEURIST.search = {
 				top.HEURIST.search.filterRelated(0);
 			}
 
-            top.HEURIST.search.updateMapOrSmarty();
+            top.HEURIST.search.updateMapOrSmarty(); //todo: replace this with appropriate event. to have app specific code is a maintenace issue.
 	},
 
 	loadRelatedResults: function() {
@@ -2081,6 +2077,7 @@ top.HEURIST.search = {
 			}else{
 				top.HEURIST.search.createUsedDetailTypeSelector(true);
 			}
+            $("#input-contains").val("");
 			top.HEURIST.search.calcShowSimpleSearch();
 		}
 		// rectypes displayed in Groups by group display order then by display order within group
