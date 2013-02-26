@@ -109,7 +109,7 @@ function detectSourceAndType(link, extension){
 
 	//1. detect source
 	if(link.indexOf(location.protocol+'//'+location.hostname)==0 && link.indexOf('records/files/downloadFile.php')>0 ){
-		source = 'heurist';
+        source = 'heurist';
 	}else if(link.indexOf('http://www.flickr.com')==0){
 		source = 'flickr';
 		type = 'image';

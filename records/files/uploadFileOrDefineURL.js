@@ -47,6 +47,11 @@ var viewerObject,
 
  		var oType = detectSourceAndType(curr_link, ext);
 
+        //it is possible to define link to resource within heurist domain as REMOTE
+        if(oType.source=='heurist' && (!_fileuploaded || _filedata.remoteURL) ){
+            oType.source = 'generic';
+        }
+
  		document.getElementById("cbSource").value = oType.source;
  		document.getElementById("cbType").value = oType.type;
  		curr_ext = oType.extension;
