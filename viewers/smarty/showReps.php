@@ -776,10 +776,12 @@ if($isunconstrained){
 					}else{
 						$recordTypeName = $rtNames[$rectypeID];
 					}*/
-					$recordTypeName = $dt_label;
+                    if(@$dt_label){
+					    $recordTypeName = $dt_label;
 
-					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
+					    $recordTypeName = getVariableNameForSmarty($recordTypeName, false);
+					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
+                    }
 				}else{
 					$res = null;
 				}

@@ -33,7 +33,7 @@
 			top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
 			setTimeout(function(){
 				top.HEURIST.util.closePopupLast();
-			}, 1000);
+			}, 500);
 		}
 
 		if([popup!]=='1' || [popup!]=='2'){
@@ -88,7 +88,7 @@ Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapP
 </div>
 <div class="input-row">
 <div class="input-header-cell">Addresses from which incoming mail to be harvested may be received  </div>
-<div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=60] <br />comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored</div>
+<div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=60] <br />semicolon separated, shared list, additional addresses can be added in personal profile, other addresses are ignored</div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">Potential email addresses to which database records may be sent  </div>

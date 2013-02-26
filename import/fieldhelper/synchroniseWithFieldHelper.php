@@ -214,7 +214,11 @@ function update_counts(divid, processed, added, total) {
 						$dir .= "/";
 				}
 
-				if(file_exists($dir) && is_dir($dir))
+                if($dir == HEURIST_UPLOAD_DIR){
+
+                    print "<div style=\"color:red\">It is not possible to scan root upload folder $dir</div>";
+
+                }else if(file_exists($dir) && is_dir($dir))
 				{
 					$files = scandir($dir);
 					if($files && count($files)>0)

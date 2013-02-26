@@ -220,6 +220,7 @@
 
 	/**
 	* Unregister file: delete record from table and remove file
+    * (not used)
 	*/
 	function unregister_for_recid($recid, $needConnect=false){
 
@@ -227,11 +228,22 @@
 			mysql_connection_overwrite(DATABASE);
 		}
 
-		// find all files associated with this record
-		$res = mysql_query("select dtl_UploadedFileID from recDetails where dtl_RecID=".$recid);
-		while ($row = mysql_fetch_array($res)) {
-			deleteUploadedFiles($row[0], false);
-		}
+        unregister_for_recid2($recid, true);
+    }
+
+    /**
+    * Unregister file: delete record from table and remove file
+    */
+    function unregister_for_recid2($recid, $needDelete){
+
+        if($needDelete){
+		    // find all files associated with this record
+            $query = "select dtl_UploadedFileID from recDetails where dtl_RecID=".$recid;
+		    $res = mysql_query($query);
+		    while ($row = mysql_fetch_array($res)) {
+			    deleteUploadedFiles($row[0]);
+		    }
+        }
 
 		//remove from database
 		mysql_query('SET foreign_key_checks = 0');
@@ -249,11 +261,11 @@
 	/**
 	*
 	*/
-	function deleteUploadedFiles($fileid, $needConnect){
+	function deleteUploadedFiles($fileid){
 
-		if($needConnect){
+		/*if($needConnect){
 			mysql_connection_overwrite(DATABASE);
-		}
+		}*/
 
 		$filedata = get_uploaded_file_info_internal($fileid, false);
 		if($filedata!=null){
@@ -272,15 +284,22 @@
 				$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
 				$filename = str_replace('//', '/', $filename);
 
-				if(file_exists($filename)){
-					unlink($filename);
-				}
+                //do not delete files that are not in root folder, they may be indexed/imported by "filez in situ" utility
+                $path_parts = pathinfo($filename);
+                $dirname = $path_parts['dirname']."/";
+
+                if( $dirname == HEURIST_UPLOAD_DIR ){
+				    if(file_exists($filename)){
+					    unlink($filename);
+				    }
+                }
 
 				//remove thumbnail
 				$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
 				if(file_exists($thumbnail_file)){
 					unlink($thumbnail_file);
 				}
+
 			}
 		}
 	}

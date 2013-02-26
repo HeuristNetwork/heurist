@@ -15,7 +15,7 @@ require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 //
 // important: transaction/rollback must performed in caller of this function
 //
-function deleteRecord($id) {
+function deleteRecord($id, $needDeleteFile=true) {
 	$id = intval($id);
 
 
@@ -73,7 +73,7 @@ function deleteRecord($id) {
 
 		while (true) {
 			//delete uploaded files
-			$fd_res = unregister_for_recid($id);
+            $fd_res = unregister_for_recid2($id, $needDeleteFile);
 			if ($fd_res) { $error = "database error - " . $fd_res; break; }
 
 			mysql_query('SET foreign_key_checks = 0');

@@ -79,12 +79,13 @@ print '<div><span id=relations>0</span> relationships</div>';
 print '<div><span id=bookmarks>0</span> associated bookmarks</div>';
 print '<div><span id=errors>0</span> errors</div>';
 
+        $needDeleteFile = (@$_REQUEST['delfile']=="1");
 
 		foreach ($_REQUEST['bib'] as $rec_id) {
 
 			mysql_query("start transaction");
 
-			$res = deleteRecord($rec_id);
+			$res = deleteRecord($rec_id, $needDeleteFile);
 			//$res = array("bkmk_count"=>0, "rel_count"=>0);
 
 			if( array_key_exists("error", $res) ){
@@ -155,6 +156,9 @@ if(document.getElementById('spSelected')){
 }
 </script>
 <form method="post">
+<div>
+    <input type="checkbox" name="delfile" id="delfile" value="1" checked />&nbsp;&nbsp;<label for="delfile">Delete uploaded associated files</label>
+</div>
 <?php
 	$bib_ids = explode(',', $_REQUEST['ids']);
 	if(count($bib_ids)>20){
