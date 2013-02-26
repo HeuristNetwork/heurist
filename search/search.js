@@ -563,6 +563,8 @@ top.HEURIST.search = {
 				}
 				top.HEURIST.search.filterRelated(0);
 			}
+
+            top.HEURIST.search.updateMapOrSmarty();
 	},
 
 	loadRelatedResults: function() {

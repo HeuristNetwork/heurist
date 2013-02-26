@@ -39,8 +39,10 @@
 * No Classes in this File
 *
 */
+
 require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
 require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
+
 /*
 	the standard initialisation file configIni.php is in the root directory of the Heurist
 	distribution and contains (mostly) blank definitions. This file should be edited to set the configuration
@@ -373,6 +375,7 @@ if ($sysAdminEmail) {
 	define('HEURIST_MAIL_TO_ADMIN', $infoEmail); //mailto string for heurist installation issues
 
 }
+
 // url of 3d party service that generates thumbnails for given website, set for installation in intialise.php
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 define('WEBSITE_THUMBNAIL_USERNAME', $websiteThumbnailUsername);

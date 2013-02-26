@@ -377,6 +377,10 @@
 	*/
 	function sendNewUserInfoEmail($recID){
 
+        $dbowner_Email = get_dbowner_email();
+        if($dbowner_Email)
+        {
+
 		//mysql_connection_overwrite(DATABASE);
 		$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
 		$res = mysql_query($query);
@@ -398,13 +402,15 @@
 			"Go to the address below to review further details and approve the registration:\n".
 			HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
-			$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
+
+			$rv = mail($dbowner_Email, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
 				"From: root");
 			if (! $rv) {//TODO  SAW this should not fail silently
-				error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
+				error_log("mail send failed: " . $dbowner_Email);
 			}
 
 		}
+        }
 	}
 
 	/**
@@ -412,6 +418,9 @@
 	*/
 	function sendApprovalEmail($recID, $tmp_password){
 
+        $dbowner_Email = get_dbowner_email();
+        if($dbowner_Email)
+        {
 		//mysql_connection_overwrite(DATABASE);
 		$query = "select * from ".DATABASE.".sysUGrps where ugr_ID=$recID";
 		$res = mysql_query($query);
@@ -449,11 +458,12 @@
 			"function, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
 
 			$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
-				"From: ".HEURIST_MAIL_TO_ADMIN."\r\nCc: ".HEURIST_MAIL_TO_ADMIN);
+				"From: ".$dbowner_Email."\r\nCc: ".$dbowner_Email);
 			if (! $rv) {//TODO  SAW this should not fail silently
 				error_log("mail send failed: " . $ugr_eMail);
 			}
 		}
+        }
 	}
 
 	/**

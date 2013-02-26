@@ -36,7 +36,7 @@ You can attempt to log in anyway. If your login does not work, send your details
 
 <hr>
 <p>
-<input type="button" onclick="{window.close()}" value="Back to Heurist" />
+<input type="button" onclick="{(window == window.top)?window.location.replace('../../index.html'):window.close();}" value="Back to Heurist" />
 </p>
 </body>
 </html>

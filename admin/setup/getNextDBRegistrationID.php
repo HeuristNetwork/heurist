@@ -148,12 +148,14 @@
 			"Go to the address below to review database:\n".
 			$serverURL;
 
-            //
-			$rv = mail(HEURIST_MAIL_TO_ADMIN, 'Heurist database registration: '.$dbTitle.' ['.$indexdb_user_id.']', $email_text,
-				"From: root");
-			if (! $rv) {//TODO  SAW this should not fail silently
-				error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
-			}
+            $dbowner_Email = get_dbowner_email();
+            if($dbowner_Email){
+			    $rv = mail($dbowner_Email, 'Heurist database registration: '.$dbTitle.' ['.$indexdb_user_id.']', $email_text,
+				    "From: root");
+			    if (! $rv) {//TODO  SAW this should not fail silently
+				    error_log("mail send failed: " . $dbowner_Email);
+			    }
+            }
 			//END email -----------------------------------
 
 

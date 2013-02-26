@@ -411,6 +411,23 @@ function mysql__getdatabases($with_prefix = false, $email = null, $role = null) 
 
 	return $result;
 }
+
+/**
+* put your comment there...
+*
+*/
+function get_dbowner_email()
+{
+        $query = "select ugr_eMail from ".DATABASE.".sysUGrps where ugr_ID=2";
+        $res = mysql_query($query);
+        $row = mysql_fetch_array($res);
+        if($row){
+               return $row[0];
+        }
+        error_log("email for dbowner is not found");
+        return null;
+}
+
 //ARTEM uses mysqli in saveStructure, saveUsergrps, srvMimetypes and loadReports
 /**
 * Execute a query (can be parameterised) and return either rows affected or data
