@@ -1180,10 +1180,6 @@ FlexImport = (function () {
 					logError( j, "Null value found for required field : " + name + "(" + FlexImport.cols[j] + ")");
 					logError("invalidRecord", " Missing value for " + name +".");
 				}
-				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[j]);
-				if (detailType && detailType.getVariety() == HVariety.REFERENCE) {
-					logError( j, "Pointer record ID is not defined");
-				}
 				continue;
 			}
 			try {
