@@ -9,7 +9,6 @@
 input[type="button"], input[type="submit"], select {
 	text-transform: uppercase !important;
 	display:inline-block !important;
-	color: #666;
 	cursor: pointer !important;
 	font-weight:bold !important;
 	background-color:transparent !important;

@@ -9,17 +9,12 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 define('ISSERVICE',1);
 define("SAVE_URI", "disabled");
 
 // using ob_gzhandler makes this stuff up on IE6-
 ini_set("zlib.output_compression_level", 5);
 //ob_start('ob_gzhandler');
-
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
@@ -34,25 +29,21 @@ $url = $_REQUEST["url"];
 
 if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
 
-$res = mysql_query("select rec_id
-					  from records
-				 left join usrBookmarks on bkm_recID = rec_id
-					 where (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/')
-				  group by bkm_ID
-				  order by count(bkm_ID), rec_id
-					 limit 1");
+$query = "select rec_id from Records left join usrBookmarks on bkm_recID = rec_id where (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/') ".
+            "group by bkm_ID  order by count(bkm_ID), rec_id limit 1";
+
+$res = mysql_query($query);
+
 if ($row = mysql_fetch_assoc($res)) {
 	print "HEURIST_url_bib_id = ".$row["rec_id"].";\n\n";
 } else {
 	print "HEURIST_url_bib_id = null;\n\n";
 }
 
-$res = mysql_query("select bkm_ID
-					  from usrBookmarks
-				 left join records on rec_id = bkm_recID
-					 where bkm_UGrpID=".get_user_id()."
-					   and (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/')
-					 limit 1");
+$query = "select bkm_ID from usrBookmarks left join Records on rec_id = bkm_recID where bkm_UGrpID=".get_user_id().
+        " and (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/') limit 1";
+
+$res = mysql_query($query);
 if ($res && $row = mysql_fetch_assoc($res)) {
 	print "HEURIST_url_bkmk_id = ".$row["bkm_ID"].";\n\n";
 } else {

@@ -1457,6 +1457,11 @@ if (! top.HEURIST.edit) {
 
             var callback = function(date) {
                 if (date) {
+                    if(dateBox.value != date){
+                            var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
+                            windowRef.changed();
+                    }
+
                     dateBox.value = date;
                     dateBox.style.width = '14ex';
 
@@ -1470,6 +1475,7 @@ if (! top.HEURIST.edit) {
                     top.HEURIST.edit.calendarViewer.close();
                 }
             }
+
 
             buttonElt.onclick = function() {
                 var date = dateBox.value;

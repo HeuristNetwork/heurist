@@ -9,8 +9,8 @@
  * @todo
  -->*/
 
-	header('Content-type: text/javascript');
-	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
+header('Content-type: text/javascript');
+require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 ?>
 var Heurist = {
 
@@ -52,11 +52,12 @@ init: function () {
 	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php?db=' + Heurist.database;
 	document.getElementsByTagName('head')[0].appendChild(scr);
 
-	// get bkmk id if already bookmarked
+	/* get bkmk id if already bookmarked */
 	scr = document.createElement('script');
 	scr.type = 'text/javascript';
 	scr.src = Heurist.uriBase +'import/bookmarklet/getRecordIDFromURL.php?db='+Heurist.database+'&url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
 	document.getElementsByTagName('head')[0].appendChild(scr);
+
 },
 
 render: function() {
@@ -192,6 +193,7 @@ render: function() {
         button.id = "add-as-type-button";
         button.type = "button";
         button.value = "Add";
+        button.style.color = 'grey';
         button.disabled = true;
         button.onclick = function() {
             var r = document.getElementById("rectype-select").value;
@@ -369,7 +371,10 @@ renderrectypeSelect: function(sel) {
 	var i,grpID;
 	sel.id = 'rectype-select';
 	sel.onchange = function() {
-		document.getElementById("add-as-type-button").disabled = ! this.value;
+        var btn = document.getElementById("add-as-type-button");
+		btn.disabled = ! this.value;
+        btn.style.color = this.value?'black':'grey';
+
 	};
 	sel.options[0] = new Option('Select type...', '');
 	sel.options[0].selected = true;
@@ -402,4 +407,3 @@ var HEURIST_urlBookmarkedOnload = function() {
 };
 
 Heurist.init();
-
