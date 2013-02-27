@@ -128,7 +128,7 @@ class Query {
 	}
 
 	function addSortPhrase($text) {
-		$this->sort_phrases[] = new SortPhrase($this, $text);
+		array_unshift($this->sort_phrases, new SortPhrase($this, $text));
 	}
 
 	function addWorkgroupRestriction($wg_ids) {
@@ -438,7 +438,7 @@ class SortPhrase {
 
 		$this->value = $value;
 	}
-
+// return list of  sql Phrase, signature, from clause for sort
 	function makeSQL() {
 		$colon_pos = strpos($this->value, ':');
 		$text = substr($this->value, $colon_pos+1);
@@ -1212,19 +1212,21 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$q_bits = explode('&&', $parms['qq']);
 		if ($parms['q']) array_push($q_bits, $parms['q']);
 */
-		$qq = $parms['qq'];
+//error_log("params = ".print_r($parms,true));
+		$qq = @$parms['qq'];
 		if ($parms['q']) {
 			if ($qq) $qq .= ' && ' . $parms['q'];
 			else $qq = $parms['q'];
 		}
 		$q_bits = preg_split('/&&|\\bAND\\b/i', $qq);
-
+//error_log("qbits = ".print_r($q_bits,true));
 		$where_clause = '';
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
-			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids, $publicOnly);
+			$q = parse_query($search_type, $q_bit, @$parms['s'], $wg_ids, $publicOnly);
+//error_log("parsed q for qbits = ".print_r($q,true));
 			// for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
-			preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*) order by/s', $q, $matches);
+			preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*?) order by/s', $q, $matches);
 			if ($matches[1]) {
 				array_push($q_clauses, '(' . $matches[1] . ')');
 			}
@@ -1232,7 +1234,8 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		sort($q_clauses);
 		$where_clause = join(' and ', $q_clauses);
 		// check last qbits for form of owner/vis prefix and order by suffix, then capture and add them
-		if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*( order by.*)/s', $q, $matches))
+		if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*?( order by.*)$/s', $q, $matches))
+//error_log("where_clauses matches for q = ".print_r($matches,true));
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
@@ -1263,7 +1266,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-/*****DEBUG****///	error_log("request to query returns ".print_r($query,true));
+/*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

@@ -133,7 +133,7 @@
         /*****DEBUG****///error_log( "term IDS = ". print_r($termIDs,true));
         foreach ($termIDs as $trmID) {
             // check that the term valid
-            if ( $trmID && $TL[$trmID] && !in_array($trmID,$validTermIDs)){ // valid trm ID
+            if ( $trmID && array_key_exists($trmID,$TL) && !in_array($trmID,$validTermIDs)){ // valid trm ID
                 array_push($validTermIDs,$trmID);
             }
         }
