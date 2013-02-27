@@ -864,7 +864,7 @@ ul li ul div.separator {
 #tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator {border-top:1px solid #666;}
 
 .error{
-	font-size:14px;
+	font-size:12px !important;
 	color:#FF0000;
 }
 

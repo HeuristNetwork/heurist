@@ -36,32 +36,45 @@
 		jsonError("no logged-in user");
 	}
 
+    if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) &&  empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0 ){
 
-	mysql_connection_overwrite(DATABASE);
+        jsonError("File is too large. ".$_SERVER['CONTENT_LENGTH']." bytes exceeds the limit of ".ini_get('post_max_size').
+        ". Please get system administrator to increase the file size limits or load your large files on a video server or other suitable web service and use the URL to reference the file here");
 
-	mysql_query("start transaction");
+    }else{
+        $upload = @$_FILES["file"];
 
+        if($upload){
 
-	$upload = $_FILES["file"];
-	/*****DEBUG****///error_log("upload file info - ". print_r($_FILES["file"],true));
-	//$upload["type"]
-	$fileID = upload_file($upload["name"], null, $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"], false);
+            /*****DEBUG****///error_log("upload file info - ". print_r($_FILES["file"],true));
 
-	if (is_numeric($fileID)) {
+	        mysql_connection_overwrite(DATABASE);
 
-		$file = get_uploaded_file_info($fileID, false);
-		print json_format($file);
+	        mysql_query("start transaction");
+        //POST Content-Length of 103399974 bytes exceeds the limit of 29360128 bytes in Unknown on line
 
-		mysql_query("commit");
-	}
-	else if ($fileID) {
-		jsonError($fileID);
-	}else if ($_FILES["file"]["error"]) {
-		jsonError("uploaded file was too large");
-	}
-	else {
-		jsonError("file upload was interrupted");
-	}
+	        //$upload["type"]
+	        $fileID = upload_file($upload["name"], null, $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"], false);
+
+	        if (is_numeric($fileID)) {
+
+		        $file = get_uploaded_file_info($fileID, false);
+		        print json_format($file);
+
+		        mysql_query("commit");
+	        }
+	        else if ($fileID) {
+		        jsonError($fileID);
+	        }else if ($_FILES["file"]["error"]) {
+		        jsonError("uploaded file was too large");
+	        }
+	        else {
+		        jsonError("file upload was interrupted");
+	        }
+        }else{
+                jsonError("File data are not posted to server side");
+        }
+    }
 
 	//***** END OF OUTPUT *****/
 

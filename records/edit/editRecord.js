@@ -1046,6 +1046,7 @@ if (! top.HEURIST.edit) {
                 var b = uploadsDiv.appendChild(this.document.createElement("b"));
                 b.appendChild(this.document.createTextNode(fileDetails.origName));
                 b.title = fileDetails.origName;
+                uploadsDiv.style.padding = "5px";
                 uploadsDiv.appendChild(this.document.createElement("br"));
                 uploadsDiv.appendChild(this.document.createTextNode(fileDetails.error));
             } else {
