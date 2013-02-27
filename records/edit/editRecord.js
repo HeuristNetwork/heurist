@@ -394,7 +394,7 @@ if (! top.HEURIST.edit) {
                 // Nothing
             }
 
-            top.HEURIST.edit.doSaveAction(true);
+            top.HEURIST.edit.afterSaveAction(true);
         },
 
         savePopup: null,
@@ -402,7 +402,7 @@ if (! top.HEURIST.edit) {
  * put your comment there...
  *
  */
-        save: function(needCloseAfterSave) {
+        save: function(callback) {
             // Attempt to save all the modules that need saving
 
             // Display a small saving window
@@ -424,7 +424,7 @@ if (! top.HEURIST.edit) {
                             }
                             top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 
-                            setTimeout(function() { top.HEURIST.edit.save(needCloseAfterSave); }, 0);
+                            setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
                         } });
                     return;
                 }
@@ -455,7 +455,7 @@ if (! top.HEURIST.edit) {
                     var moduleUnchangeFunction = function() {
                         top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                         top.HEURIST.edit.unchanged(moduleName);
-                        top.HEURIST.edit.save(needCloseAfterSave);    // will continue where we left off
+                        top.HEURIST.edit.save(callback);    // will continue where we left off
                     };
                     top.HEURIST.registerEvent(module.frame, "load", moduleUnchangeFunction);
                     (form.heuristSubmit || form.submit)();
@@ -479,8 +479,11 @@ if (! top.HEURIST.edit) {
                         opener.updateFromChild(caller_id_element, top.HEURIST.edit.record.title);
                     }
 
-
-                    top.HEURIST.edit.doSaveAction(false, needCloseAfterSave);
+                    if(callback && typeof(callback)==="function"){
+                            callback.call(this);
+                    }else{
+                            top.HEURIST.edit.afterSaveAction(false, callback);
+                    }
                 }, 1000);
             }, 0);
         },
@@ -501,7 +504,7 @@ if (! top.HEURIST.edit) {
  *
  * @param isCancel
  */
-        doSaveAction: function(isCancel, needClose) {
+        afterSaveAction: function(isCancel, needClose) {
 
             var forceClose = needClose || (isCancel && top.HEURIST.edit.isAdditionOfNewRecord());
 
@@ -578,7 +581,9 @@ if (! top.HEURIST.edit) {
  */
         navigate_torecord:function(sid, recid){
             if(top.HEURIST.edit.is_something_chnaged()){
-                    top.HEURIST.edit.save(false);
+                    top.HEURIST.edit.save(function(){
+                        location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
+                    });
             }else{
                     location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
             }
