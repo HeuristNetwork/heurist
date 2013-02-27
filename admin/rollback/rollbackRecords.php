@@ -9,8 +9,12 @@
  * @todo
  **/
 
-?>
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
+    if(isForAdminOnly("to rollback the database")){
+       return;
+    }
+?>
 <html>
 	<head>
     <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
@@ -42,19 +46,9 @@
 <div id="page-inner" style="overflow:auto">
 <div id=errorMsg><span>Warning! This function not yet debugged</span></div>
 <?php
-
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 require_once("rollbackRecordsFuncs.php");
-
-// User must be system administrator or admin of the owners group for this database
-if (!is_admin()) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to rollback the database</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
-	return;
-}
-
 
 $ids = @$_REQUEST["ids"];
 $date = @$_REQUEST["date"];

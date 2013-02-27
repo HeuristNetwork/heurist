@@ -8,8 +8,15 @@
 	* @package Heurist academic knowledge management system
 	* @todo
 	*/
-?>
 
+    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+
+    if(isForAdminOnly("to import structural elements")){
+       return;
+    }
+
+?>
 <html>
 	<head>
 		<title>Selection of source database for structure import</title>
@@ -44,22 +51,6 @@
 		<div class="banner"><h2>Import structural definitions into current database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
-			<?php
-				require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-				require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-
-				if (!is_logged_in()) {
-					header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-					return;
-				}
-
-				// User must be system administrator or admin of the owners group for this database
-				if (!is_admin()) {
-					print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to import structural elements</span><p><a href=" . HEURIST_BASE_URL . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
-					return;
-				}
-			?>
-
 			<div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 			<p>The list below shows available databases registered with the HeuristScholar.org Index database.<br />
 Older (or newer) format registered databases may not shown, as this list pny show databases with version number <?=HEURIST_DBVERSION?>.<br />
@@ -88,17 +79,6 @@ Click the database icon on the left to view available record types in that datab
 		<script type="text/javascript">
 			var registeredDBs = [];
 			<?php
-
-				if (!is_logged_in()) {
-					header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-					return;
-				}
-
-				// User must be system administrator or admin of the owners group for this database
-				if (!is_admin()) {
-					print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to import structural elements</span><p><a href=" . HEURIST_BASE_URL . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
-					return;
-				}
 
 				require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 				require_once(dirname(__FILE__)."/../../common/config/initialise.php");

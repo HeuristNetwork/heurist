@@ -262,8 +262,9 @@ if (is_admin()) {
 						<li class="seperator"><a href="#"
 								onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
 								title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear Database Locks</a></li>
-						<li class="seperator"><a href="../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>" target="_blank"
-								title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->
 						<!-- AO: remarked on 2013-02-18. This is one-off correction of db format in 2011
 						<li><a href="../import/direct/upgradeToNamedFiles.php?db=<?=HEURIST_DBNAME?>" target="_blank"

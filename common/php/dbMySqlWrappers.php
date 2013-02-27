@@ -373,13 +373,13 @@ function json_format($obj, $purdy = false) {
 * @param    mixed $email - current user email
 * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
 */
-function mysql__getdatabases($with_prefix = false, $email = null, $role = null) {
+function mysql__getdatabases($with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX) {
 	$query = "show databases";
 	$res = mysql_query($query);
 	$result = array();
 	$isFilter = ($email != null && $role != null);
 	while ($row = mysql_fetch_array($res)) {
-		$test = strpos($row[0], HEURIST_DB_PREFIX);
+		$test = strpos($row[0], $prefix);
 		if (is_numeric($test) && ($test == 0)) {
 			if ($isFilter) {
 				if ($role == 'user') {
@@ -402,7 +402,7 @@ function mysql__getdatabases($with_prefix = false, $email = null, $role = null) 
 				array_push($result, $row[0]);
 			} else {
 				// delete the prefix
-				array_push($result, substr($row[0], strlen(HEURIST_DB_PREFIX)));
+				array_push($result, substr($row[0], strlen($prefix)));
 			}
 		}
 	}

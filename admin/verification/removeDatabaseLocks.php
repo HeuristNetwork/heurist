@@ -19,15 +19,7 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
-
-    if (! is_admin()) {
-    ?>
-    You must be a HEURIST administrator to use this page.
-    <?php
+    if(isForAdminOnly("to perform this action")){
         return;
     }
 

@@ -12,8 +12,9 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-	if (!is_admin()) return;
-
+    if(isForAdminOnly("to perform this action")){
+        return;
+    }
 
 	$fuzziness = intval($_REQUEST['fuzziness']);
 	if (! $fuzziness) $fuzziness = 10;

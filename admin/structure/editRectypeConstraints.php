@@ -13,11 +13,9 @@
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-// User must be system administrator or admin of the owners group for this database
-if (!is_admin()) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to modify database structure</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
-	return;
-}
+    if(isForAdminOnly("to modify database structure")){
+       return;
+    }
 ?>
 <html>
 	<head>

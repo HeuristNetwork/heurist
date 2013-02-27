@@ -26,7 +26,6 @@ if (!is_admin()) {
 */
 $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 ?>
-
 <html>
 	<head>
 

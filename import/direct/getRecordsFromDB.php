@@ -13,47 +13,50 @@
 	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+
+    if(isForAdminOnly("to import records")){
+        return;
+    }
+
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 	require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-
-	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-		return;
-	}
-	if (! is_admin()) {
-		print "<html><body><p>You must be an administrator to import records from a source database</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
-		return;
-	}
 ?>
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - Direct database transfer</title>
-	</head>
-	<body>
+		<title>Database-to-database Transfer</title>
+        <link rel=stylesheet href="../../common/css/global.css" media="all">
+        <link rel=stylesheet href="../../common/css/admin.css" media="all">
+    </head>
+    <body class="popup">
 		<!-- script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script -->
 
-		<?php
+    <div class="banner"><h2>Database-to-database Transfer</h2></div>
+    <div id="page-inner">
+
+<?php
 
 			mysql_connection_overwrite(DATABASE);
 			if(mysql_error()) {
 				die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
 			}
-
-			print "<h2>Heurist Direct Data Transfer</h2>";
-			print "<h2>FOR  ADVANCED USERS ONLY</h2>";
-			print "This script reads records from a source database of H2 or H3 format, maps the record type, field type and term codes to new values, ";
-			print "and writes the records into the current logged-in database. It also transfers uploaded file records. It does not (at present) transfer tags and othe user data";
-			print "The current database can already contain data, new records are appended and IDs adjsuted for records and files.<br>";
-			print "<br>";
-			print "Make sure the target records and field types are compatible. <b>";
-			print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
-
+?>
+<h2>FOR  ADVANCED USERS ONLY</h2>
+<p>
+This script reads records from a source database of H2 or H3 format, maps the record type, field type and term codes to new values,
+and writes the records into the current logged-in database. It also transfers uploaded file records. It does not (at present) transfer tags and othe user data
+The current database can already contain data, new records are appended and IDs adjsuted for records and files.
+<br /><br />
+If you find you are missing some record types, field types or terms from the Target database, click Save Settings, create the new record types/fields/terms that you need , then return to this function and click Load Settings. You may find it easier to import the record types you need from the Source database, as this also brings in all necessary fields and terms
+<br /><br />
+Make sure the target records and field types are compatible. <b>If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b>
+</p>
+<?php
 			//print ">>>".(defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 
 			$dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
@@ -72,17 +75,27 @@
 
 			}
 			if($dt_SourceRecordID==0){
-				print "<hr><b>Original record IDs</b> ".
-				"<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-589) for each record".
-				"<br/>This field does not exist in the database - please import it from the Heurist Core definitions database (db#2)".
-				"<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.".
-				"<p><a href=../../admin/structure/selectDBForImport.php?db=" . HEURIST_DBNAME . " title='Import database structure elements' target=_blank><b>Import structure elements</b></a> (loads in new tab)".
-				"<br/>(choose H3 Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)".
-				"<br/>Reload this page after importing the field<hr><p>";
+?>
+<hr><b>Original record IDs</b>
+<p>
+This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-589) for each record
+<br/>This field does not exist in the database - please import it from the Heurist Core definitions database (db#2)
+<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.
+<a href="../../admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME ?>" title="Import database structure elements"
+            target=_blank><b>Import structure elements</b></a> (loads in new tab)
+<br/>(choose H3 Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)
+<br/>Reload this page after importing the field
+</p>
+<hr/>
+<?php
 			}else{
-				print "<hr><b>Original record IDs</b> ".
-				"<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-36) for each record".
-				"<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.";
+?>
+<hr><b>Original record IDs</b>
+<p>
+This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-36) for each record
+<br />You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data
+</p>
+<?php
 			}
 
 
@@ -114,9 +127,9 @@
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 				print "<input name='h2' value='".($is_h2?1:0)."' type='hidden'>";
 				// print "Enter source database name (prefix added automatically): <input type='text' name='sourcedbname' />";
-				print "Choose source database: <select id='db' name='sourcedbname'>";
+				print "<br/>Choose source database: <select id='db' name='sourcedbname'>";
 
-				$list = mysql__getdatabases();
+				$list = mysql__getdatabases(false,null,null,$db_prefix);
 				foreach ($list as $name) {
 						print "<option value='$name'>$name</option>";
 				}
@@ -133,7 +146,7 @@
 
 				print "</div>";
 				}
-				print "<input type='submit' value='Continue'/>";
+				print "&nbsp;&nbsp;<input type='submit' value='Continue'/>";
 				print "</form>";
 				exit;
 			}
@@ -167,6 +180,7 @@
 				mysql_connection_select($db_prefix.$sourcedbname);
 
 				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+
 
 				$user = mysql_fetch_assoc($res);
 
@@ -254,7 +268,7 @@
 					print "<input name='username' value='$username' type='hidden'>";
 					print "<input name='password' value='$password' type='hidden'>";
 				}
-				print "<input name='reportlevel' value='1' type='checkbox' checked='checked'>Report level: show errors only<br>";
+				print "<input name='reportlevel' value='1' type='checkbox' checked='checked'>&nbsp;Report level: show errors only<br>";
 				print "Check the code mappings below, then click  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
 				// alert(document.getElementById(\"mode\").value);
 
@@ -1023,5 +1037,6 @@
 				return $key;
 			}
 		?>
+    </div>
 	</body>
 </html>

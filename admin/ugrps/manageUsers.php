@@ -15,15 +15,15 @@
 **/
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-if (!(is_admin() || array_key_exists('grpID', $_REQUEST))) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to add or change users</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
-    return;
+
+if(!array_key_exists('grpID', $_REQUEST)){
+    if(isForAdminOnly("to add or change users")){
+        return;
+    }
 }
 
 $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
-
 ?>
-
 <html>
 	<head>
 

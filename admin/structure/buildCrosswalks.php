@@ -55,13 +55,10 @@
 
 	// Requires admin user if updating current database, even though get_definitions is open
     // If it's processing the SQL file for a new database it does not
-	if ((! is_admin()) && $isExistingDB) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'>
-		</head><body><div class=wrap><div id=errorMsg>
-		<span>You must be an administrator to get structure elements from another database</span><p>
-		<a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
-		" target='_top'>Log out</a></p></div></div></body></html>";
-		return;
+	if ($isExistingDB) {
+        if(isForAdminOnly("to get structure elements from another database")){
+            return;
+        }
 	}
 
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

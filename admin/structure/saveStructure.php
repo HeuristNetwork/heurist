@@ -29,7 +29,7 @@
 	if (! is_admin()) {
 		header('Content-type: text/javascript');
 		$rv = array();
-		$rv['error'] = "Sorry, you need to be a database owner and adminstrator to be able to modify the database structure";
+		$rv['error'] = "Sorry, you need to be a database owner to be able to modify the database structure";
 		print json_format($rv);
 		return;
 	}

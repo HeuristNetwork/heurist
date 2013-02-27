@@ -12,14 +12,13 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-	if (!is_logged_in()) {
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-		return;
-	}
-
-	$user_id = get_user_id();
+    if(isForAdminOnly("to register a database")){
+        return;
+    }
 
 	$sError = null;
+/*
+    $user_id = get_user_id();
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
 		$sError = "You must be logged in as system administrator to register a database";
@@ -28,6 +27,7 @@
 		"<br/><br/>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database";
 		return;
 	}
+*/
 
 	mysql_connection_insert(DATABASE); // Connect to the current database (the one being registered)
 
