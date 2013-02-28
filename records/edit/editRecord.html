@@ -365,9 +365,9 @@
 	<div id="save-record-buttons">
 		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
 		&nbsp;
-		<input type=button name=save-button value=Save onClick="top.HEURIST.edit.save(false);">
+		<input type=button name=save-button value=Save onClick="top.HEURIST.edit.save_record(false);">
 		&nbsp;
-		<input type=button name=save-button value="Save/close" title="Save and Close" onClick="top.HEURIST.edit.save(true);">
+		<input type=button name=save-button value="Save/close" title="Save and Close" onClick="top.HEURIST.edit.save_record(true);">
 	</div>
 		</div>
 
@@ -419,9 +419,9 @@
 		<div id="public-link" style="padding: 3px 0;text-align:right;">
 			<input type=button name="save-button" value="Cancel" onClick="top.HEURIST.edit.cancelSave();">
 			<br />
-			<input type=button name="save-button" style="margin-top:3px;" value="Save" onClick="top.HEURIST.edit.save(false);">
+			<input type=button name="save-button" style="margin-top:3px;" value="Save" onClick="top.HEURIST.edit.save_record(false);">
 			<br />
-			<input type=button name=save-button style="margin-top:3px;" value="Save and close" onClick="top.HEURIST.edit.save(true);">
+			<input type=button name=save-button style="margin-top:3px;" value="Save and close" onClick="top.HEURIST.edit.save_record(true);">
 		</div>
 	</div>
 
@@ -573,9 +573,14 @@
 		<div id=notes-container></div>
 
 		<div>
-	<div id=popup-saved style="display: none">
+
+	<div id="popup-saved" class="popup-message" style="display: none">
 		<b>Record saved</b>
 	</div>
+    <div id="popup-nothingchanged" class="popup-message" style="display: none">
+        <b>Nothing changed</b>
+    </div>
+
 		</div>
 
 		<script src="../disambig/similarRecordsPopup.js"></script>

@@ -471,16 +471,21 @@ term_id+'\', -1)">&nbsp;&nbsp;all</a>';//+termsByDomainLookup[term_id][0]+'</div
 						}
 
 					}else{
-						term.label = term.label + '&nbsp;&nbsp;' +
-								((cnt_children>0)?'<b>':'')+
-								termsByDomainLookup[term_id][0]+
-								((cnt_children>0)?'</b> ('+cnt_children+')':'')+'</div>';
-						childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+                         if(!termsByDomainLookup[term_id]){
+                            //error alert(term_id);
+                         }else{
 
-						if(_inExistingTree(term_id)) { //selected
-							childNode.highlightState = 1;
-							parentEntry.expand();
-						}
+						    term.label = term.label + '&nbsp;&nbsp;' +
+								    ((cnt_children>0)?'<b>':'')+
+								    termsByDomainLookup[term_id][0]+
+								    ((cnt_children>0)?'</b> ('+cnt_children+')':'')+'</div>';
+						    childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+
+						    if(_inExistingTree(term_id)) { //selected
+							    childNode.highlightState = 1;
+							    parentEntry.expand();
+						    }
+                         }
 					}
 
 					__createChildren(parentNode[term_id], childNode); // __createChildren() again for every child found

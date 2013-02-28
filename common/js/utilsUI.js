@@ -2134,6 +2134,28 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                                             if (callback) callback(wg_id);
                                         }
                                     );
+    },
+
+/**
+* Returns current position of curstor in text input
+*
+* @param ele
+*/
+    getCaretPos: function (ele){
+        // Initialize
+          var iCaretPos = 0;
+          // IE Support
+          if (document.selection) {
+            ele.focus ();
+            var oSel = document.selection.createRange();
+            oSel.moveStart ('character', -ele.value.length);
+            iCaretPos = oSel.text.length;
+
+          } // Firefox support
+          else if (ele.selectionStart || ele.selectionStart == '0'){
+            iCaretPos = ele.selectionStart;
+          }
+          return (iCaretPos);
     }
 };
 //-----------------------------------------------------------------------------------------------------

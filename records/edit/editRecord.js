@@ -262,9 +262,6 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.edit.showModule(firstName);
             }
 
-            /*if(top.HEURIST.edit.isAdditionOfNewRecord()){
-				top.HEURIST.edit.changed("public");
-			}*/
         },
 
         userCanEdit: function() {
@@ -394,12 +391,45 @@ if (! top.HEURIST.edit) {
                 // Nothing
             }
 
-            top.HEURIST.edit.afterSaveAction(true);
+            if(top.HEURIST.edit.isAdditionOfNewRecord())
+            {
+                top.HEURIST.edit.closeEditWindow();
+            }
+        },
+
+
+        save_record: function(callback){
+            if(top.HEURIST.edit.is_something_chnaged()){
+
+                    top.HEURIST.edit.save(callback);
+
+            }else{ //nothing was changed
+
+                //always check required field
+                var publicWindow = top.HEURIST.edit.modules['public']  &&  top.HEURIST.edit.modules['public'].frame  &&  top.HEURIST.edit.modules['public'].frame.contentWindow;
+                if(publicWindow && top.HEURIST.edit.requiredInputsOK(publicWindow.HEURIST.inputs, publicWindow)){
+
+                    if(callback && typeof(callback)==="function")
+                    {
+                            callback.call(this);
+
+                    } else if(callback){ //force close
+
+                            top.HEURIST.edit.closeEditWindow();
+
+                    }else{
+                            document.getElementById("popup-nothingchanged").style.display = "block";
+                            setTimeout(function() {
+                                            document.getElementById("popup-nothingchanged").style.display = "none";
+                                  },500);
+                    }
+                }
+            }
         },
 
         savePopup: null,
 /**
- * put your comment there...
+ * this is internal function that goes through all tabs and calls submit
  *
  */
         save: function(callback) {
@@ -457,12 +487,12 @@ if (! top.HEURIST.edit) {
                         top.HEURIST.edit.unchanged(moduleName);
                         top.HEURIST.edit.save(callback);    // will continue where we left off
                     };
+                    //trigger this event after save
                     top.HEURIST.registerEvent(module.frame, "load", moduleUnchangeFunction);
                     (form.heuristSubmit || form.submit)();
                     return;
                 }
             }
-
 
             // If we get here, then every module has been marked as unchanged (i.e. saved or equivalent)
             // Do whatever it is we need to do.
@@ -481,8 +511,8 @@ if (! top.HEURIST.edit) {
 
                     if(callback && typeof(callback)==="function"){
                             callback.call(this);
-                    }else{
-                            top.HEURIST.edit.afterSaveAction(false, callback);
+                    }else if (callback){
+                            top.HEURIST.edit.closeEditWindow();
                     }
                 }, 1000);
             }, 0);
@@ -504,18 +534,15 @@ if (! top.HEURIST.edit) {
  *
  * @param isCancel
  */
-        afterSaveAction: function(isCancel, needClose) {
+        closeEditWindow: function(isCancel, needClose) {
 
-            var forceClose = needClose || (isCancel && top.HEURIST.edit.isAdditionOfNewRecord());
-
-            if (forceClose) {
                 // try to close this window, and restore focus to the window that opened it
                 try {
                     var topOpener = top.opener;
                     top.close();
                     if (topOpener) topOpener.focus();
                 } catch (e) { }
-            }
+s
         },
 /**
  * put your comment there...
@@ -579,21 +606,18 @@ if (! top.HEURIST.edit) {
  * @param sid
  * @param recid
  */
-        navigate_torecord:function(sid, recid){
-            if(top.HEURIST.edit.is_something_chnaged()){
-                    top.HEURIST.edit.save(function(){
+        navigate_torecord: function(sid, recid){
+            top.HEURIST.edit.save_record(function(){
                         location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
                     });
-            }else{
-                    location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
-            }
         },
+
 /**
  * put your comment there...
  *
  * @returns {Boolean}
  */
-        is_something_chnaged:function(){
+        is_something_chnaged: function(){
             var changed = false;
             for (var moduleName in top.HEURIST.edit.modules) {
                 if (top.HEURIST.edit.modules[moduleName].changed) {
@@ -1896,29 +1920,29 @@ if (! top.HEURIST.edit) {
     		top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments);
 
         	for (var i=0; i < this.inputs.length; ++i) {
+
         		this.inputs[i].onkeypress = function(event){
-					if(event && event.charCode>0 && !event.ctrlKey){
+                    if(event && event.charCode>0 && !event.ctrlKey){
+                        var newchar = String.fromCharCode(event.charCode);
+                        var oldval = event.target.value;
 
-						var val = String.fromCharCode(event.charCode)+event.target.value;
+                        if (newchar=="" || (oldval=="" && (newchar=="-" || newchar=="+")) ){
+                            return true;
+                        }else{
 
-						 //top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
-				        if (val=="" || val=="-" || val=="+"){
-							return true;
-						}  else if (typeof(val.match) === "function") {
+                            var pos = top.HEURIST.util.getCaretPos(event.target);
+                            var newval = oldval.substr(0,pos)+newchar+oldval.substr(pos);
 
-				        	var regex = top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
-							//  	new RegExp("^([+/-]?(([0-9]+(\\.)?)|([0-9]*\\.[0-9]+)))$", "g");
+                            var regex = top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
+                            var res = newval.match(regex);
+                            return (res!=null);
+                        }
 
-				            var res = val.match(regex);
-				            return (res!=null);
-						}else{
-							return false;
-						}
+                    }else{
+                        return true;
+                    }
 
-					}else{
-						return true;
-					}
-        		}
+        		};
 			}
     		//top.HEURIST.edit.inputs.BibDetailInput.prototype.verify
     };

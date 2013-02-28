@@ -89,7 +89,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	color: rgba(0,0,0,0.2);
 	line-height: 21px;
 }
-#popup-saved {
+.popup-message {
 	text-align :center;
 	color:#FFF;
 	font-size: 18px;
@@ -120,7 +120,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 	z-index: 100;
 }
-#popup-saved b {
+.popup-message b {
 	font-size: 16px;
 	line-height:75px;
 }

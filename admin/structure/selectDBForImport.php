@@ -100,6 +100,7 @@ Click the database icon on the left to view available record types in that datab
 					}
 					$data = json_decode($data);
 					foreach($data as $registeredDB) {
+
 						if($ownDBID != $registeredDB->rec_ID) {
 
 							if(array_key_exists('version',$registeredDB) &&	($registeredDB->version==null || $registeredDB->version<HEURIST_DBVERSION))
