@@ -456,7 +456,7 @@ function print_private_details($bib) {
 				}
 				*/
 			} else {
-				if (preg_match('/^http:/', $bd['val'])) {
+				if (preg_match('/^https?:/', $bd['val'])) {
 					if (strlen($bd['val']) > 100)
 						$trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
 					else
