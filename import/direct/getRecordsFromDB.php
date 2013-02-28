@@ -23,6 +23,7 @@
 	require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+
 ?>
 <html>
 	<head>
@@ -36,11 +37,38 @@
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script -->
 
+    <script type="text/javascript">
+function printMapping(){
+    var frm = document.getElementById('mapping');
+    var i, ele, lbl, tp='', res = '';
+    var elem = frm.elements;
+    for(i = 0; i < elem.length; i++)
+    {
+        ele = elem[i];
+        if(ele.localName=='select' && ele.value>0){
+            if(tp!=ele.id.substr(0,3)){
+                res = res + '\n';
+                tp=ele.id.substr(0,3);
+            }
+            //find label
+            lbl = document.getElementById('lbl'+ele.id.substr(2));
+            if(lbl){
+                res = res + lbl.innerHTML+' ==> '+ele.options[ele.selectedIndex].text+'\n';
+            }
+        }
+    }
+    if(res){
+            alert(res);
+
+    }
+}
+    </script>
+
+
     <div class="banner"><h2>Database-to-database Transfer</h2></div>
     <div id="page-inner">
 
 <?php
-
 			mysql_connection_overwrite(DATABASE);
 			if(mysql_error()) {
 				die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
@@ -105,7 +133,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			$user_id_insource = NULL;
 			$user_workgroups = array();
 
-			$is_h2 = array_key_exists('h2', $_REQUEST) && ($_REQUEST['h2']==1);
+			$is_h2 = (@$_REQUEST['h2']==1);
 
 			$db_prefix = $is_h2?"heuristdb-" :$dbPrefix;
 
@@ -140,7 +168,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				print "Password:&nbsp;<input type='password' name='password' size='20' class='in'>&nbsp;&nbsp;";
 				print "Use the same as current:&nbsp;<input type='checkbox' checked='checked' name='samelogin' value='1'/>";
 
-				if(array_key_exists('loginerror', $_REQUEST) && $_REQUEST['loginerror']=='1'){
+				if(@$_REQUEST['loginerror']=='1'){
 					print '<br/><font color="#ff0000">Incorrect Username / Password for source database</font>';
 				}
 
@@ -157,7 +185,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 			if(!$is_h2){
 				//verify user+password for source database
-				$usecurrentlogin = array_key_exists('samelogin', $_REQUEST) && $_REQUEST['samelogin']=='1';
+				$usecurrentlogin = (@$_REQUEST['samelogin']=='1');
 
 				if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
 					$username = get_user_username();
@@ -205,7 +233,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			}
 
 
-			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+			if(@$_REQUEST['mode']=='2'){
 
 				createMappingForm(null);
 
@@ -213,31 +241,31 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				// ---- visit #3 - SAVE SETTINGS -----------------------------------------------------------------
 
-				if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='3'){
-					saveSettings();
-				} else
-
+                if(@$_REQUEST['mode']=='3'){
+                    saveSettings();
+                } else
 					// ---- visit #4 - LOAD SETTINGS -----------------------------------------------------------------
 
-					if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='4'){
+					if(@$_REQUEST['mode']=='4'){
 						loadSettings();
 					} else
 
 						// ---- visit #5 - PROCESS THE TRANSFER -----------------------------------------------------------------
 
-						if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='5'){
+						if(@$_REQUEST['mode']=='5'){
 							doTransfer();
 							//transfer();
 						}
 
 						// ---- Create mapping form -----------------------------------------------------------------
 
-						function getPresetId($config, $id){
-				if($config && array_key_exists($id, $config)){
-					return $config[$id];
-				}else{
-					return null;
-				}
+            //get mapping from resaved config
+            function getPresetId($config, $id){
+				    if($config && array_key_exists($id, $config)){
+					            return $config[$id];
+				    }else{
+					            return null;
+			        }
 			}
 
 			function createMappingForm($config){
@@ -259,7 +287,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				}
 
 
-				print "<form name='mappings' action='getRecordsFromDB.php' method='post'>";
+				print "<form id='mapping' name='mappings' action='getRecordsFromDB.php' method='post'>";
 				print "<input id='mode' name='mode' value='5' type='hidden'>"; // calls the transfer function
 				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 				print "<input name='h2' value='".($is_h2?1:0)."' type='hidden'>";
@@ -272,26 +300,27 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				print "Check the code mappings below, then click  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
 				// alert(document.getElementById(\"mode\").value);
 
-				print "<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
+				print "<input type='button' value='Print mapping' onclick='{printMapping();}'>&nbsp;";
+                print "<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
 
 				$filename = HEURIST_UPLOAD_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
 				if(file_exists($filename)){
-					print "<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";
+					print "&nbsp;<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";
 				}
 
 				print "<p><hr>\n";
 
 				// --------------------------------------------------------------------------------------------------------------------
 				// Get the record type mapping, by default assume that the code is unchanged so select the equivalent record type if available
-				$entnames = getAllRectypeStructures(); //in current database
-				$entnames = $entnames['names'];
+				$allrectypes = getAllRectypeStructures(); //in current database
+				$entnames = $allrectypes['names'];
 				$seloptions = createOptions("or", $entnames);
 
 				if($is_h2){
 					$query1 = "SELECT DISTINCT `rec_type`,`rt_name`, '0' as cnt FROM `$sourcedb`.`records`,`$sourcedb`.`rec_types` where `rec_type`=`rt_id`";
 				}else{
-					$query1 = "SELECT rty_ID, rty_Name, count(rec_ID) as cnt ".
+					$query1 = "SELECT rty_ID, rty_Name, count(rec_ID) as cnt, rty_OriginatingDBID, rty_IDInOriginatingDB  ".
 					"from `$sourcedb`.`Records` ".
 					"left join `$sourcedb`.`defRecTypes` on rec_RecTypeID=rty_ID ".
 					"group by rty_ID";
@@ -306,17 +335,33 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					$rt=$row1[0]; //0=rec_RecTypeID
 					$cnt=$row1[2];
 					$selopts = $seloptions;
+                    $selectedId = null;
+                    $bgcolor = "";
+
 					if($config){
 						$selectedId = getPresetId($config,"cbr".$rt);
-					}else{ //					if(!$selectedId){	//find the closest name
-						$selectedId = findClosestName($row1[1], $entnames);  //1=rty_Name
-					}
+                    }else{
+                        if(!$is_h2){ //find by concept code
+                            $selectedId = findByRtConceptCode($row1[3], $row1[4], $allrectypes);
+                            if($selectedId){
+                                $bgcolor = "style='background-color:#ccffcc;'";
+                            }
+                        }
+                        if(!$selectedId){ //find the closest name
+						    $selectedId = findClosestName($row1[1], $entnames);  //1=rty_Name
+                            if($selectedId<0){ //exact match
+                                $bgcolor = "style='background-color:#ccc;'";
+                                $selectedId = -$selectedId;
+                            }
+					    }
+                    }
+
 					if($selectedId){
 						$repl = "value='".$selectedId."'";
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr><td>[ $rt ] ".$row1[1].(($is_h2)?"":"($cnt) ")."</td>".
+					print "<tr $bgcolor><td><label id='lblr$rt'>[ $rt ] ".$row1[1].(($is_h2)?"":"($cnt) ")."</label></td>".
 					"<td>==> <select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
 				} // loop through record types
 				print "</table>";
@@ -325,8 +370,8 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				// --------------------------------------------------------------------------------------------------------------------
 				// Get the field type mapping, by default assume that the code is unchanged so select the equivalent detail type if available
 				//create the string for combobox
-				$entnames = getAllDetailTypeStructures(); //in current database
-				$entnames = $entnames['names'];
+				$alldettypes = getAllDetailTypeStructures(); //in current database
+				$entnames = $alldettypes['names'];
 				$seloptions = createOptions("od", $entnames);
 
 				print "<h3>Field type mappings</h3>[FT code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
@@ -334,7 +379,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					$query1 = "SELECT DISTINCT `rd_type`,`rdt_name`,`rdt_type` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_types` ".
 					"where `rd_type`=`rdt_id`";
 				}else{
-					$query1 = "SELECT DISTINCT `dtl_DetailTypeID`,`dty_Name`,`dty_Type` FROM `$sourcedb`.`recDetails`,`$sourcedb`.`defDetailTypes` ".
+					$query1 = "SELECT DISTINCT `dtl_DetailTypeID`,`dty_Name`,`dty_Type`,`dty_OriginatingDBID`,`dty_IDInOriginatingDB` FROM `$sourcedb`.`recDetails`,`$sourcedb`.`defDetailTypes` ".
 					"where `dtl_DetailTypeID`=`dty_ID`";
 				}
 				$res1 = mysql_query($query1);
@@ -343,18 +388,35 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					$ft=$row1[0]; //0=dtl_DetailTypeID
 
 					$selopts = $seloptions;
+                    $bgcolor = "";
+                    $selectedId = null;
+
 					//find the closest name
 					if($config){
 						$selectedId = getPresetId($config,"cbd".$ft);
-					}else{///	if(!$selectedId){	//find the closest name
-						$selectedId = findClosestName($row1[1], $entnames); //dty_Name
-					}
+					}else{
+
+                        if(!$is_h2){ //find by concept code
+                            $selectedId = findByDtConceptCode($row1[3], $row1[4], $alldettypes);
+                            if($selectedId){
+                                $bgcolor = "style='background-color:#ccffcc;'";
+                            }
+                        }
+
+                        if(!$selectedId){	//find the closest name
+						    $selectedId = findClosestName($row1[1], $entnames); //dty_Name
+                            if($selectedId<0){ //exact match
+                                $bgcolor = "style='background-color:#ccc;'";
+                                $selectedId = -$selectedId;
+                            }
+					    }
+                    }
 					if($selectedId){
 						$repl = "value='".$selectedId."'";
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr><td>[ $ft ] - ".$row1[2]." ".$row1[1]." </td>".  //2=dty_Type
+					print "<tr $bgcolor><td><label id='lbld$ft'>[ $ft ] - ".$row1[2]." ".$row1[1]."</label></td>".  //2=dty_Type
 					"<td>==> <select id='cbd$ft' name='cbd$ft' class='detailTypes'><option id='od0' value='0'></option>".
 					$selopts."</select></td></tr>\n";
 				} // loop through field types
@@ -374,8 +436,8 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$entnames = getTerms(); //in current database
-				$entnames = $entnames['termsByDomainLookup'][$type];
+				$allterms = getTerms(); //in current database
+				$entnames = $allterms['termsByDomainLookup'][$type];
 				foreach ($entnames as $id => $name) {
 					$entnames[$id] = $name[0];
 				}
@@ -389,13 +451,11 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					"where (`rd_type`=`rdl_rdt_id`) AND (`rdl_value`=`rd_val`) AND (`rdl_related_rdl_id` is ".
 					(($type!='enum')?"not":"")." null)";
 				}else{
-					if($type!='enum'){
-						$type = 'relationtype';
-					}
+					$dt_type = ($type=='enum')?$type:'relationtype';
 
-					$query1 = "SELECT DISTINCT `dtl_Value`,`trm_ID`,`trm_Label` FROM `$sourcedb`.`recDetails`,`$sourcedb`.`defTerms` ".
+					$query1 = "SELECT DISTINCT `dtl_Value`,`trm_ID`,`trm_Label`,`trm_OriginatingDBID`,`trm_IDInOriginatingDB` FROM `$sourcedb`.`recDetails`,`$sourcedb`.`defTerms` ".
 					"where (`dtl_Value`=`trm_ID`) AND (`dtl_DetailTypeID` in (select `dty_ID` from `$sourcedb`.`defDetailTypes` ".
-					"where (`dty_Type`='$type') ))";
+					"where (`dty_Type`='$dt_type') ))";
 				}
 				$res1 = mysql_query($query1);
 				print "<table>";
@@ -403,17 +463,35 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					$tt=$row1[0]; //0=trm_ID
 
 					$selopts = $seloptions;
+                    $bgcolor = "";
+                    $selectedId = null;
+
 					if($config){
 						$selectedId = getPresetId($config,"cbt".$tt);
 					}else{//	if(!$selectedId){	//find the closest name
-						$selectedId = findClosestName($row1[2], $entnames); //trm_Label
+
+                        if(!$is_h2){ //find by concept code
+                            $selectedId = findTermDtConceptCode($row1[3], $row1[4], $allterms, $type);
+                            if($selectedId){
+                                $bgcolor = "style='background-color:#ccffcc;'";
+                            }
+                        }
+
+                        if(!$selectedId){    //find the closest name
+						    $selectedId = findClosestName($row1[2], $entnames); //trm_Label
+                            if($selectedId<0){ //exact match
+                                $bgcolor = "style='background-color:#ccc;'";
+                                $selectedId = -$selectedId;
+                            }
+
+                        }
 					}
 					if($selectedId){
 						$repl = "value='".$selectedId."'";
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr><td>[ $tt ] ".$row1[2]." </td>".
+					print "<tr $bgcolor><td><label id='lblt$tt'>[ $tt ] ".$row1[2]."</label></td>".
 					"<td>==> <select id='cbt$tt' name='cbt$tt' class='terms'><option id='ot0' value='0'></option>".
 					$selopts."</select></td></tr>\n";
 				} // loop through terms
@@ -432,6 +510,67 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				return $res;
 			}
+            //
+            // returns the id in array with the same concept id
+            //
+            function findByRtConceptCode($dbid, $id, $allrectypes){
+
+                   if(intval($dbid)>0 && intval($id)>0){
+
+                        $conceptid = $dbid."-".$id;
+
+                        $rectypes = $allrectypes['typedefs'];
+                        $fid = intval($allrectypes['typedefs']['commonNamesToIndex']["rty_ConceptID"]);
+
+                        foreach ($rectypes as $id => $def) {
+//error_log($id."  ".count($def)); //print_r($def,true));
+                            if(is_numeric($id) && $def['commonFields'][$fid]==$conceptid){
+                                    return $id;
+                            }
+                        }
+                   }
+                   return null;
+            }
+            function findByDtConceptCode($dbid, $id, $alldettypes){
+
+                   if(intval($dbid)>0 && intval($id)>0){
+
+                        $conceptid = $dbid."-".$id;
+
+                        $dttypes = $alldettypes['typedefs'];
+                        $fid = intval($alldettypes['typedefs']['fieldNamesToIndex']["dty_ConceptID"]);
+
+                        foreach ($dttypes as $id => $def) {
+                            if(is_numeric($id) && $def['commonFields'][$fid]==$conceptid){
+                                    return $id;
+                            }
+                        }
+                   }
+                   return null;
+            }
+            function findTermDtConceptCode($dbid, $id, $allterms, $type){
+
+                   if(intval($dbid)>0 && intval($id)>0){
+
+                        $conceptid = $dbid."-".$id;
+
+//error_log(">>".$conceptid);
+
+                        $terms = $allterms['termsByDomainLookup'][$type];
+                        $fid = intval($allterms['fieldNamesToIndex']["trm_ConceptID"]);
+
+                        foreach ($terms as $id => $def) {
+                            if(is_numeric($id) && $def[$fid]==$conceptid){
+//error_log("found>>".$def[$fid]."  ".$id);
+                                    return $id;
+                            }
+                        }
+                   }
+                   return null;
+            }
+
+
+
 
 			//
 			// returns the id in array with closest similar name
@@ -447,7 +586,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 					$name = strtolower($name);
 					if($tocompare == $name){
-						return $id;
+						return -$id;
 					}else{
 						similar_text($tocompare, $name, $p);
 						if($p > $minp){
@@ -514,6 +653,31 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				createMappingForm($config);
 			}
 
+            function printMapSettings(){
+?>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Database-to-database Transfer Mapping</title>
+        <link rel=stylesheet href="../../common/css/global.css" media="all">
+    </head>
+    <body>
+<?php
+
+                $str = "";
+                foreach ($_REQUEST as $name => $value) {
+                    $pos = strpos($name,"cb");
+                    if(is_numeric($pos) && $pos==0){
+                        $str  = $name."=".$value;
+
+                        print $str."<br/>";
+                    }
+                }
+
+                print "</body></html>";
+            }
+
+
 			// ---- TRANSFER AND OTHER FUNCTIONS -----------------------------------------------------------------
 
 			function doTransfer()
@@ -522,13 +686,14 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$rep_errors_only = (array_key_exists('reportlevel', $_REQUEST) && $_REQUEST['reportlevel']=="1");
+				$rep_errors_only = (@$_REQUEST['reportlevel']=="1");
 
 
 				echo "<p>Now copying data from <b>$sourcedb</b> to <b>". $dbPrefix.HEURIST_DBNAME. "</b><p>Processing: ";
 
 				$terms_h2 = array();
 
+                $user_rights = null;
 				// Loop through types for all records in the database (actual records, not defined types)
 				if($is_h2){
 					//load all terms
@@ -539,10 +704,12 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					}
 
 					$query1 = "SELECT DISTINCT (`rec_type`) FROM `$sourcedb`.`records`";
+
+                    $user_rights = "rec_temporary=0";
 				}else{
 					$query1 = "SELECT DISTINCT (`rec_RecTypeID`) FROM $sourcedb.Records";
 
-					$user_rights = ' (not rec_FlagTemporary and (rec_OwnerUGrpID='.$user_id_insource.' or (not rec_NonOwnerVisibility="hidden")';
+					$user_rights = ' (rec_FlagTemporary=0 and (rec_OwnerUGrpID='.$user_id_insource.' or (not rec_NonOwnerVisibility="hidden")';
 					// rec_NonOwnerVisibility="public")
 					if (!empty($user_workgroups)) {
 							$user_rights = $user_rights.' or rec_OwnerUGrpID in (' . join(',', $user_workgroups) . ')))';
@@ -550,8 +717,11 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 							$user_rights = $user_rights.'))';
 					}
 
-					$query1 = $query1.' where '.$user_rights;
 				}
+                if($user_rights){
+                    $query1 = $query1." where ".$user_rights;
+                }
+
 				$res1 = mysql_query($query1);
 				if(!$res1) {
 					print "<br>Bad query for record type loop $res1 <br>";
@@ -600,9 +770,11 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 						$query2 = "select `rec_id`,`rec_url` from `$sourcedb`.`records` Where `$sourcedb`.`records`.`rec_type`=$rt";
 					}else{
 						$query2 = "select `rec_ID`,`rec_URL` from $sourcedb.Records Where $sourcedb.Records.rec_RecTypeID=$rt";
-
-						$query2 = $query2.' and '.$user_rights;
 					}
+                    if($user_rights){
+                        $query2 = $query2." and ".$user_rights;
+                    }
+
 					$res2 = mysql_query($query2);
 					if(!$res2) {
 						print "<div  style='color:red;'>Bad query for records loop for source record type $rt</div>";

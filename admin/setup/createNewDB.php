@@ -232,7 +232,7 @@
 				<input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1" class="labelBold">Standard database</label>
 				<div style="padding-left: 38px;padding-bottom:10px">Gives an uncluttered database with essential record and field types<br />Recommended for general use</div>
 				<input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">Extended database</label>
-				<div style="padding-left: 38px;">A database structure with extra record types and fields to support tool such as XSL transforsm<br />The additional structure elements can be imported later from the H3ToolSupport database</div>
+				<div style="padding-left: 38px;">A database structure with extra record types and fields to support tool such as XSL transforms<br />The additional structure elements can be imported later from the H3ToolSupport database</div>
 
 				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
