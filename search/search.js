@@ -532,7 +532,7 @@ top.HEURIST.search = {
 				if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
 					top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
 					top.HEURIST.search.loadLevelFilter(maxDepth+1);
-				} else if (maxDepth < 3){
+				} else if (maxDepth < 3 && top.HEURIST.search.results.infoByDepth[maxDepth].count > 0) {
 					// need to show filter with link to expand the search using existing filtering.
 					top.HEURIST.search.loadExpandSearchFilter(maxDepth+1);
 				}
@@ -645,6 +645,7 @@ top.HEURIST.search = {
 		$("#showrelated" + level).addClass("expandSearch");//this makes sure to extend the search panels layout
 		top.HEURIST.search.updateBrowserHistory();
 		window.location.reload();
+		//todo: this really needs to be an asych call for the next level
 	},
 
 	loadExpandSearchFilter: function(level){// this is a simple Filter level with no results and invokes a reload with existing layout
@@ -684,7 +685,7 @@ top.HEURIST.search = {
 		var results = top.HEURIST.search.results;
 		var maxDepth = Math.min((results.params && results.params.depth ? results.params.depth : 4), results.infoByDepth.length - 1);
 		if (level > maxDepth) {
-			if (level <= 3) {
+			if (level <= 3) {//arbitrary limit set at depth 3 that's related to related to related to a record set record
 				top.HEURIST.search.loadExpandSearchFilter(level);
 			}else{
 				return;
@@ -1604,7 +1605,7 @@ top.HEURIST.search = {
 
 		//for each of the menus disable rectype menu items not in the rectype set and filter records of those that are not checked
 		//DO THIS FIRST  so that the links can be validated for non-filtered records on this level
-		var activeRecIDs = {};
+		activeRecIDs = {};
 		$('ul.rectype>li:not(.cmd)',resultsDiv).each( function(i,li){
 				var rtID = $(li).attr('rectype'),
 					isChecked = $(li).hasClass('checked');
@@ -1618,10 +1619,23 @@ top.HEURIST.search = {
 					}
 				}
 			});
-
-		top.HEURIST.search.recalcLinkMenus(level);
-		if (!noPush) {
-			top.HEURIST.search.filterRelated(level + 1, noPush, useParamFilters);
+		if (level == 0 || $('div.recordDiv.lnk:not(.filtered)',resultsDiv).length > 0) {
+			$(resultsDiv).removeClass('allfiltered');
+			top.HEURIST.search.recalcLinkMenus(level);
+			if (!noPush) {
+				top.HEURIST.search.filterRelated(level + 1, noPush, useParamFilters);
+			}
+			// if the next level has allfiltered and is not loaded then remove allfiltered
+			if ($("#results-level"+(level+1)).hasClass('allfiltered') &&
+				!$("#showrelated"+(level+1)).hasClass('loaded')) {
+				$("#results-level"+(level+1)).removeClass('allfiltered');
+			}
+		} else if (level>0){
+			var l = level
+			while (l<=3){
+				$("#results-level"+l).addClass('allfiltered');
+				l++;
+			}
 		}
 	},
 
