@@ -259,7 +259,7 @@
             return;
         }
         $record = mysql_fetch_assoc($res);
-        /*****DEBUG****///error_log("save record dtls POST ".print_r($_POST,true));
+        /*****DEBUG****/error_log("save record dtls POST ".print_r($_POST,true));
         // Upload any files submitted ... (doesn't have to take place right now, but may as well)
         uploadFiles();  //Artem: it does not work here - since we uploaded files at once
 
@@ -329,7 +329,7 @@
         // Try to insert anything left in POST as new recDetails rows
         $bibDetailInserts = array();
 
-        /*****DEBUG****/// error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
+        /*****DEBUG****/ error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
         foreach ($_POST as $eltName => $bds) {
             // if not properly formatted or empty or an empty array then skip it
             if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
@@ -381,14 +381,14 @@
                 $recUpdates["rec_NonOwnerVisibility"] = 'pending';
             }
         }
-        /*****DEBUG****///error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
+        /*****DEBUG****/error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
         if (mysql_error()) error_log("error rec update".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
 
-            /*****DEBUG****///error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
+            /*****DEBUG****/error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 
             mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$recID", $vals);
             if (mysql_affected_rows() > 0) {
@@ -399,7 +399,7 @@
 
         $insertedRowCount = 0;
         foreach ($bibDetailInserts as $vals) {
-            /*****DEBUG****///error_log(" in saveRecord insert details detail =".print_r($vals,true));
+            /*****DEBUG****/error_log(" in saveRecord insert details detail =".print_r($vals,true));
             mysql__insert("recDetails", $vals);
             if (mysql_affected_rows() > 0) {
                 ++$insertedRowCount;
@@ -409,7 +409,7 @@
 
         $deletedRowCount = 0;
         if ($bibDetailDeletes) {
-            /*****DEBUG****///error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
+            /*****DEBUG****/error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
             mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$recID");
             if (mysql_affected_rows() > 0) {
                 $deletedRowCount = mysql_affected_rows();
@@ -456,7 +456,7 @@
     }
 
 
-    function insertRecord($rtyID) {
+    function insertRecord($rtyID = null) {
 // check if there is preference for OwnerGroup and visibility
         $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
         if ($addRecDefaults){
@@ -480,7 +480,7 @@
             (@$userDefaultVisibility ? $userDefaultVisibility :
                 (defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable')));
 
-
+//error_log(" in insertRecord");
         // if non zero (everybody group, test if user is member, if not then set owner to user
         if (intval($owner) != 0 && !in_array($owner,get_group_ids())) {
             $owner = get_user_id();
@@ -498,6 +498,7 @@
 
         $_REQUEST["recID"] = $recID = mysql_insert_id();
         if($recID){
+//error_log(" in insertRecord recID = $recID");
 
             if ($usrID) {
                 mysql__insert('usrBookmarks', array(

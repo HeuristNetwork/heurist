@@ -150,7 +150,7 @@
 			foreach ($arr as $key => $value)
 			{
 				$pos = strpos($key, "type:");
-				/*****DEBUG****///error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+				/*****DEBUG****/error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
 				if (is_numeric($pos) && $pos == 0)
 				{
@@ -186,7 +186,7 @@
 
 					$newkey = getDetailTypeLocalID($typeid);
 
-					/*****DEBUG****///error_log(">>>> ".$newkey."  dettype=".$typeid);
+					/*****DEBUG****/error_log(">>>> ".$newkey."  dettype=".$typeid);
 
 					$value=str_replace("&#13;", "\n", $value);
 
@@ -258,6 +258,7 @@
 			}
 		}else if(defined('RT_NOTE')){
 			// this is from usual email - we will add email rectype
+//error_log(" in emailProccesor as Note");
 
 			// liposuction away those unsightly double, triple and quadruple spaces
 			$description=preg_replace('/ +/', ' ', $description);
@@ -325,7 +326,7 @@
 			$_POST["visibility"] = 'hidden';
 			/*****DEBUG****///error_log(">>>>before insert POST=".print_r($_POST, true));
 
-			$updated = insertRecord(); //from saveRecordDetails.php
+			$updated = insertRecord($_POST['rectype']); //from saveRecordDetails.php
 			if ($updated) {
 				$rec_id = $_REQUEST["recID"];
 				$email->setRecId($rec_id);

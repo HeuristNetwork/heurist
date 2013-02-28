@@ -240,8 +240,8 @@ function showRecordData(hRecords) {
 	//g_quoteSelect = document.getElementById('quoteSelect');
 	//var quoteDelim = g_quoteSelect.value;
 
-	if(quoteDelim=='0') {
-			quoteDelim = '';
+	if(strDelim=='0') {
+			strDelim = '';
 	}
 	var strRowTerm = "\n";
 
