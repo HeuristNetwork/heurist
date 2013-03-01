@@ -65,6 +65,7 @@
 		$bug_descr = $_POST["type:".DT_BUG_REPORT_DESCRIPTION];
 		if($bug_descr){
 			$bug_descr = str_replace("\n","&#13;",$bug_descr);
+			$bug_descr = str_replace("\"","\\\"",$bug_descr);
 			$_POST["type:".DT_BUG_REPORT_DESCRIPTION] = $bug_descr;
 		}
 

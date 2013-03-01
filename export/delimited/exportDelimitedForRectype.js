@@ -323,7 +323,7 @@ function showRecordData(hRecords) {
 						}
 						line += csv_escape(field.slice(0,-1)) + strDelim;  // trim off last delimiter
 					}else{ // multi-valued non-reference case
-						line += csv_escape(details.join("|")) + strDelim;
+						line += dblquote_escape(details.join("|")) + strDelim;
 					}
 				}
 			}else{ // single valued cases
@@ -346,8 +346,8 @@ function showRecordData(hRecords) {
 				}else if (baseType == HVariety.ENUMERATION || baseType == HVariety.RELATIONTYPE ) { //enum or relation
 					var termDetail = hRecords[i].getDetail(hDty);
 					line += (termDetail ? csv_escape(termDetail) : '') +strDelim;
-				}else{//non-reference case
-					line += csv_escape(hRecords[i].getDetail(hDty))+strDelim;
+				}else{//general case
+					line += dblquote_escape(hRecords[i].getDetail(hDty))+strDelim;
 				}
 			}
 		}
@@ -355,17 +355,21 @@ function showRecordData(hRecords) {
 	}
 	recDisplay.value = lines;
 }
-
+function dblquote_escape(str) {
+	if (!str) {
+		return '';
+	}
+	return '"' + str.replace(/"/g, '""') + '"';
+}
 function csv_escape(str) {
 	if (!str) {
 		return '';
 	}
-	if(typeof(disabledTermIDsList) === "string"){
-		if (g_delimiterSelect.value == "," && str.match(/[",\n\t]/)) {
-			return '"' + str.replace(/\n/g,"\\n").replace(/\t/g,"\\t").replace(/"/g, '""') + '"';
-		}else if (str.match(/[\n\t]/)) {
-			return str.replace(/\n/g,"\\n").replace(/\t/g,"\\t");
+	//removing broken code add from Nov.
+//	if(typeof(disabledTermIDsList) === "string"){
+		if (g_delimiterSelect.value == "," && str.match(/[",]/)||(str.match(/[\n\t]/))) {
+			return '"' + str.replace(/"/g, '""') + '"';
 		}
-	}
+//	}
 	return str;
 }
