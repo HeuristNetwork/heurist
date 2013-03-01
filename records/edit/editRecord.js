@@ -387,8 +387,13 @@ if (! top.HEURIST.edit) {
                 if(needClose || top.HEURIST.edit.isAdditionOfNewRecord())
                 {
                     top.HEURIST.edit.closeEditWindow();
-                }else if (message != null){
+                } else if (message != null){
                     top.location.reload();
+                } else if (message == null){
+                            document.getElementById("popup-nothingchanged").style.display = "block";
+                            setTimeout(function() {
+                                            document.getElementById("popup-nothingchanged").style.display = "none";
+                                  },500);
                 }
             }
 
@@ -561,7 +566,9 @@ s
 
             $("#close-button").hide();
             $("#save-record-buttons").show();
-            $("#save-record-buttons2").show();
+
+            //$("#save-record-buttons2 input").removeAttr('disabled');
+            //$("#save-record-buttons2 input").css("color", "#222222");
 
             /*
             // Enable save buttons
@@ -603,7 +610,8 @@ s
 
             if(!top.HEURIST.edit.is_something_chnaged()){
                 $("#save-record-buttons").hide();
-                $("#save-record-buttons2").hide();
+                //$("#save-record-buttons2 input").attr('disabled', 'disabled');
+                //$("#save-record-buttons2 input").css("color", "#666666");
                 $("#close-button").show();
             }
 

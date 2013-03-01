@@ -224,16 +224,21 @@
 			*/
 			function onChangeLayout(){
 				var selectLayout = document.getElementById("slctLayout");
+                var ele = document.getElementById("edLayout");
 				switch (selectLayout.value) {
 					case "":
-						document.getElementById("edLayout").value = "";  //status quo
+						ele.value = "";  //status quo
 						break;
 					case "layout":
-						document.getElementById("edLayout").value = sCurrentLayout;  //entire layout
+						ele.value = sCurrentLayout;  //entire layout
 						break;
 					default:
-						document.getElementById("edLayout").value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
+						ele.value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
 				}
+
+                var sl = document.getElementById("cbSaveLayout");
+                sl.checked = (ele.value!="");
+
 				setSaveMode();
 			}
 
