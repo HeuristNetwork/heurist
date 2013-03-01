@@ -357,7 +357,7 @@ if (! top.HEURIST.edit) {
  * put your comment there...
  *
  */
-        cancelSave: function() {
+        cancelSave: function(needClose) {
             // Cancel the saving of the record (reload the page)
             // Out of courtesy, check if there have been any changes that WOULD have been saved.
             var modules = top.HEURIST.edit.modules;
@@ -380,21 +380,18 @@ if (! top.HEURIST.edit) {
                 message = "Abandon changes to " + changedModuleNames.join(", ") + " and " + lastName + " data?";
             }
 
-            if (message === null  ||  confirm(message)) {
+            if (message === null || confirm(message)) {
                 for (var eachName in modules)
                     top.HEURIST.edit.unchanged(eachName);
 
-                if(message != null && !top.HEURIST.edit.isAdditionOfNewRecord()){
+                if(needClose || top.HEURIST.edit.isAdditionOfNewRecord())
+                {
+                    top.HEURIST.edit.closeEditWindow();
+                }else if (message != null){
                     top.location.reload();
                 }
-            } else {
-                // Nothing
             }
 
-            if(top.HEURIST.edit.isAdditionOfNewRecord())
-            {
-                top.HEURIST.edit.closeEditWindow();
-            }
         },
 
 
@@ -562,6 +559,10 @@ s
                 link.title = "Content has been changed";
             }
 
+            $("#close-button").hide();
+            $("#save-record-buttons").show();
+            $("#save-record-buttons2").show();
+
             /*
             // Enable save buttons
             var sbs = document.getElementsByName("save-button");
@@ -599,6 +600,14 @@ s
             for (var i=0; i < sbs.length; ++i)
             sbs[i].disabled = true;
             */
+
+            if(!top.HEURIST.edit.is_something_chnaged()){
+                $("#save-record-buttons").hide();
+                $("#save-record-buttons2").hide();
+                $("#close-button").show();
+            }
+
+
         },
 /**
  * put your comment there...

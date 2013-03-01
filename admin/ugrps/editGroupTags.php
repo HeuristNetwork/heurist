@@ -51,8 +51,9 @@ function delete_tag(tag_ID) {
 </head>
 
 <body class="popup" width="840" height="550" style="padding: 0; overflow:hidden;">
-
+<?php if(@$_REQUEST['popup']!="yes") { ?>
 <div class="banner"><h2>Workgroup Tags</h2></div>
+<?php } ?>
 <div id="page-inner">
 Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
 workgroup tags are a controlled list of shared tags established by a workgroup administrator.
@@ -73,7 +74,7 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 
 
 <input type="submit" value="Add workgroup tag(s)">
-<?php if(array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes") { ?>
+<?php if(@$_REQUEST['popup']=="yes") { ?>
 <input type="button" value="Close Form" onclick="{window.close('bla');}">
 <?php } ?>
 <input type="hidden" name="adding" value="1">

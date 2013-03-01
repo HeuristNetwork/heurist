@@ -201,15 +201,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #title-val * {
 	font-size:inherit;
 }
-#save-record-buttons {
+.save-record-buttons {
 	border-left:1px solid #D6D6D6;
 	bottom:0;
-	padding:10px 0;
+	padding:10px 10px 0px 0px;
 	position:absolute;
 	right:0;
 	top:0;
-	width:200px;
-	text-align: center;
+	width:190px;
+	text-align: right;
 }
 #action-cell div {
 	padding: 2px 0;
