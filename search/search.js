@@ -4097,9 +4097,14 @@ top.HEURIST.search = {
 		return [maxLevel,ret];
 	},
 
-	getLayoutString: function(){
+	getLayoutString: function(useWidth){
 		var ret = "layout=srch:",
 			prefix;
+
+        if(useWidth=='undefined'){
+            useWidth = true;
+        }
+
 		//for each level find its style and collapsed state
 		// then find id's of all check items
 		var i,
@@ -4132,14 +4137,14 @@ top.HEURIST.search = {
 			ret += "|nav:off";
 		}else{
 //			ret += "|nav:"+top.HEURIST.displayPreferences.leftWidth;
-			ret += "|nav:"+layout.getSizes().left.w;
+			ret += "|nav:"+(useWidth?layout.getSizes().left.w:'');
 		}
 		// check application (right side) panel
 		if (top.HEURIST.displayPreferences.applicationPanel == "closed") {
 			ret += "|app:off";
 		}else{
 //			ret += "|app:"+top.HEURIST.displayPreferences.rightWidth;
-			ret += "|app:"+layout.getSizes().right.w+","+_tabView.get('activeTab').getAttributeConfig('label').value;
+			ret += "|app:"+(useWidth?layout.getSizes().right.w:'')+","+_tabView.get('activeTab').getAttributeConfig('label').value;
 			var appID = tabIDToAppnameMap[_tabView.get("activeIndex")];
 			var appState = top.HEURIST.search.getAppState(appID);
 			ret += appState ? "|"+appID+":"+appState : "";

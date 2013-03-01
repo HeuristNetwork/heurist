@@ -25,7 +25,8 @@
 				sAllOrBookmarks = "all",
 				sFilter = "",
 				sLayout = "",
-				sCurrentLayout = top.HEURIST.search.getLayoutString(),
+				sCurrentLayout = top.HEURIST.search.getLayoutString(true),
+                sCurrentLayoutNoWidth = top.HEURIST.search.getLayoutString(false),
 				sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
 				rtFilter,
 				relFilter,
@@ -34,6 +35,9 @@
 			if(sCurrentLayout.length > 1 && sCurrentLayout[0] > -1){
 				sCurrentLayout = sCurrentLayout[1];
 			}
+            if(sCurrentLayoutNoWidth.length > 1 && sCurrentLayoutNoWidth[0] > -1){
+                sCurrentLayoutNoWidth = sCurrentLayoutNoWidth[1];
+            }
 			if(ssid>0){
 				//load values from  top.HEURIST.user.savedSearches
 				//find it by ID
@@ -232,7 +236,10 @@
 					case "layout":
 						ele.value = sCurrentLayout;  //entire layout
 						break;
-					default:
+                    case "layout_wo_width":
+                        ele.value = sCurrentLayoutNoWidth;  //entire layout
+                        break;
+				    default:
 						ele.value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
 				}
 
@@ -438,7 +445,8 @@
 				<option value="2">Two columns</option>
 				<option value="t">Thumbnails</option>
 				<option value="i">Icons</option>
-				<option value="layout">Current Layout</option>
+				<option value="layout">Current Layout (fixed width)</option>
+                <option value="layout_wo_width">Current Layout</option>
 			</select>
 		</div>
 

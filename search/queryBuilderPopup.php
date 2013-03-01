@@ -61,7 +61,7 @@
 			// update the list of record-type-specific bib-detail-types
 			var typeOptgroup = document.getElementById("rectype-specific-fields");
 			var typeSelect = document.getElementById("fieldtype");
-			var prevValue = typeSelect.options[typeSelect.selectedIndex].value;
+			var prevValue = typeSelect.options[typeSelect.selectedIndex].value; //previous value for fieldtype select
 
 			typeOptgroup.innerHTML = "";	// remove all record-type-specific options
 
