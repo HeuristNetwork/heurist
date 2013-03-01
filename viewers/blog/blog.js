@@ -155,6 +155,7 @@ setFilter: function(state) {
 BlogEntry: function(record, parentElement, isNew) {
 	var that = this;
 	this.record = record;
+    this.fileThumbnail = null;
 	this.$div = $("<div/>").addClass("entry");
 	this.$outerTable = $("<table class='entry-outer-table'/>").appendTo(this.$div);
 	this.$outerTbody = $("<tbody/>").appendTo(this.$outerTable);
@@ -357,10 +358,10 @@ BlogEntry: function(record, parentElement, isNew) {
 		$(".entry-left", this.$outerTbody).empty();	//blog image
 		var thumb = this.record.getDetail(Blog.thumbnailDetailType);
 		if (thumb) {
-			$(".entry-left", this.$outerTbody).append("<a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL()+"'/></a>"); //+ "&w=170&h=170'/></a>");
+			$(".entry-left", this.$outerTbody).append("<div id='img-thumb'><a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL()+"'/></a></div>"); //+ "&w=170&h=170'/></a>");
 		}
 		else {
-			$("<a href='#' title='Click to add a thumbnail image'><img src='no_image.png'/></a>")
+			$("<div id='img-thumb'><a href='#' title='Click to add a thumbnail image'><img src='no_image.png'/></a></div>")
 				.click(function () {
 					that.edit();
 					$(".entry-thumb-input-row input", this.$table).trigger('click');
@@ -820,6 +821,24 @@ BlogEntry: function(record, parentElement, isNew) {
 			.append($td)
 			.appendTo($(".entry-fields tbody", this.$table));
 
+        $(".entry-thumb-input-row input", this.$table).change(function(){
+            var $fileInput = $(this);
+
+            if ($fileInput.val()) {
+                HeuristScholarDB.saveFile($fileInput[0], new HSaver(
+                    function(i,thumb) {
+                        that.record.setDetails(Blog.thumbnailDetailType, [thumb]);
+                        $("#img-thumb", that.$outerTbody).html("<div id='img-thumb'><a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL()+"'/></a></div>");
+                        ///that.renderAdditionalData();
+                    },
+                    function(r,e) {
+                        alert("file save failed: " + e);
+                    }
+                ));
+            }
+
+        });
+
 /* OBSOLETE
 		// geos
 		var geos = record.getDetails(Blog.geoDetailType);
@@ -976,6 +995,9 @@ BlogEntry: function(record, parentElement, isNew) {
 			));
 		};
 
+        saveFn();
+
+/* ARTEM: old way since 2013-03-01
 		var $fileInput = $(".entry-thumb-input-row input", this.$table);
 		if ($fileInput.val()) {
 			HeuristScholarDB.saveFile($fileInput[0], new HSaver(
@@ -990,7 +1012,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		} else {
 			saveFn();
 		}
-
+*/
 		// save woot
 		this.wootEditor.save();
 	};
