@@ -566,9 +566,9 @@ s
 
             $("#close-button").hide();
             $("#save-record-buttons").show();
+            $("#close-button2").hide();
+            $("#save-record-buttons2").show();
 
-            //$("#save-record-buttons2 input").removeAttr('disabled');
-            //$("#save-record-buttons2 input").css("color", "#222222");
 
             /*
             // Enable save buttons
@@ -610,9 +610,9 @@ s
 
             if(!top.HEURIST.edit.is_something_chnaged()){
                 $("#save-record-buttons").hide();
-                //$("#save-record-buttons2 input").attr('disabled', 'disabled');
-                //$("#save-record-buttons2 input").css("color", "#666666");
                 $("#close-button").show();
+                $("#save-record-buttons2").hide();
+                $("#close-button2").show();
             }
 
 
