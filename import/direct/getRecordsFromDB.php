@@ -372,7 +372,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				//create the string for combobox
 				$alldettypes = getAllDetailTypeStructures(); //in current database
 				$entnames = $alldettypes['names'];
-				$seloptions = createOptions("od", $entnames);
+				$seloptions = createOptionsDt($alldettypes);
 
 				print "<h3>Field type mappings</h3>[FT code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 				if($is_h2){
@@ -416,7 +416,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr $bgcolor><td><label id='lbld$ft'>[ $ft ] - ".$row1[2]." ".$row1[1]."</label></td>".  //2=dty_Type
+					print "<tr $bgcolor><td><label id='lbld$ft'>[ $ft - ".$row1[2]." ] ".$row1[1]."</label></td>".  //2=dty_Type
 					"<td>==> <select id='cbd$ft' name='cbd$ft' class='detailTypes'><option id='od0' value='0'></option>".
 					$selopts."</select></td></tr>\n";
 				} // loop through field types
@@ -499,6 +499,22 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			}
 
 			// ---- Create options for HTML select -----------------------------------------------------------------
+            function createOptionsDt($alldettypes){
+                $pref = "od";
+
+                $dttypes = $alldettypes['typedefs'];
+                $fid_name = intval($dttypes['fieldNamesToIndex']["dty_Name"]);
+                $fid_type = intval($dttypes['fieldNamesToIndex']["dty_Type"]);
+                $res = "";
+
+                foreach ($dttypes as $id => $def) {
+                    if(is_numeric($id)){
+                        $res = $res."<option id='".$pref.$id."' name='".$pref.$id."' value='".$id."'>".$def['commonFields'][$fid_name]." [ $id - ".$def['commonFields'][$fid_type]." ]</option>";
+                    }
+                }
+
+                return $res;
+            }
 
 			function createOptions($pref, $names){
 
