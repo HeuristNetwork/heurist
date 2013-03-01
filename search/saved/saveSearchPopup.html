@@ -332,12 +332,18 @@
 				if(!isEdit || cmb_label!=sLabel){ //sLabel - previous value
 						var ss = top.HEURIST.search.savedSearchFindByName(cmb_label);
 						if(ss!=null){
+                            alert("Search with name '"+cmb_label+"' already exists in "+
+                                    (ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+"'");
+                            elname.focus();
+                            return;
+                            /*
 							if(!confirm("Search with name '"+cmb_label+"' already exists in "+
 									(ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+
 									"'.\n Do you still wish to save it under specified name?" )){
 								elname.focus();
 								return;
 							}
+                            */
 						}
 				}
 
