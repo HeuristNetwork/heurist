@@ -1,5 +1,4 @@
 <?php
-
 /*
 * Copyright (C) 2005-2013 University of Sydney
 *
@@ -27,46 +26,10 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  CommonPHP
 */
 
-?>
 
-<?php
-
-/*<!--
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- -->*/
-
-	/*<!-- TitleMask.php
-
-	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
-	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
-	mailto:info@heuristscholar.org
-
-	Concept and direction: Ian Johnson.
-	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
-				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
-	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
-
-	Heurist is free software; you can redistribute it and/or modify it under the terms of the
-	GNU General Public License as published by the Free Software Foundation; either version 3
-	of the License, or (at your option) any later version.
-
-	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License along with this program.
-	If not, see <http://www.gnu.org/licenses/>
-	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-	-->*/
 /* TitleMask.php
  * 2006-09-21
  *
@@ -187,7 +150,6 @@ function _title_mask__check_field_name($field_name, $rt)
 	if (! array_key_exists($rt, $rct) ){
 		return "Title mask cannot be tested with the existing record type. Record type $rt not found";
 	}
-
 	$dot_pos = strpos($field_name, '.');
 	if ($dot_pos === FALSE) {	/* direct field-name check */
 		if (preg_match('/^(\\d+)\\s*(?:-.*)?$/', $field_name, $matches)) {	// field number has been supplied
@@ -872,12 +834,5 @@ function array_str_replace($search, $replace, $subject) {
 }
 
 }
-
-
-//print check_title_mask('[Title], [Creator]', 4);
-// print check_title_mask('[Title], [Creator], [Year] ([Book Series Reference.Publisher Reference.Publisher])', 5);
-//print check_title_mask('[Title], [Creator], [Year] ([Book Series Reference.Publisher Reference.Publisher])', 5);
-//print fill_title_mask('[Title], [Creator], [Year] ([Book Series Reference.Publisher Reference.Publisher])', 46842, 5) . "\n";
-
 
 ?>
