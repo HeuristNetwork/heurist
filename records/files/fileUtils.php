@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 function loadRemoteURLContent($url) {
 	return loadRemoteURLContentWithRange($url, null);

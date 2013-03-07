@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--
  * downloadFile.php, returns an attached file requested using the obfuscated file identifier

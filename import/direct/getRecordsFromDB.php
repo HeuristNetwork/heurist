@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/* getRecordsFromDB.php - gets all records in a specified database (later, a selection) and write directly to current DB
 	* Reads from either H2 or H3 format databases

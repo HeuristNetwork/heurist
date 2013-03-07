@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 

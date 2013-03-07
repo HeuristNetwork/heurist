@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,16 +41,14 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 $numLevels = 21;
 $zoomFactor = 3;
 $verySmall = 0.00001;
 $forceEndpoints = true;
 
-for($i = 0; $i < $numLevels; $i++) 
+for($i = 0; $i < $numLevels; $i++)
 {
 	$zoomLevelBreaks[$i] = $verySmall*pow($zoomFactor, $numLevels-$i-1);
 }
@@ -71,7 +67,7 @@ function computeLevel($dd)
     }
     return $lev;
 }
-function dpEncode($points) 
+function dpEncode($points)
 {
     global $verySmall;
 
@@ -79,10 +75,10 @@ function dpEncode($points)
     $absMaxDist = 0;
     $dists = array();
 
-    if(count($points) > 2) 
+    if(count($points) > 2)
     {
 	$stack[] = array(0, count($points)-1);
-	while(count($stack) > 0) 
+	while(count($stack) > 0)
 	{
 	    $current = array_pop($stack);
 	    $maxDist = 0;
@@ -93,7 +89,7 @@ function dpEncode($points)
 		{
 		    $maxDist = $temp;
 		    $maxLoc = $i;
-		    if($maxDist > $absMaxDist) 
+		    if($maxDist > $absMaxDist)
 		    {
 		        $absMaxDist = $maxDist;
 		    }
@@ -128,11 +124,11 @@ function distance($p0, $p1, $p2)
         {
             $out = sqrt(pow($p0[0] - $p1[0],2) + pow($p0[1] - $p1[1],2));
         }
-        if($u >= 1) 
+        if($u >= 1)
 	{
             $out = sqrt(pow($p0[0] - $p2[0],2) + pow($p0[1] - $p2[1],2));
         }
-        if(0 < $u && $u < 1) 
+        if(0 < $u && $u < 1)
 	{
             $out = sqrt(pow($p0[0]-$p1[0]-$u*($p2[0]-$p1[0]),2) + pow($p0[1]-$p1[1]-$u*($p2[1]-$p1[1]),2));
         }
@@ -143,7 +139,7 @@ function distance($p0, $p1, $p2)
 function encodeSignedNumber($num)
 {
    $sgn_num = $num << 1;
-   if ($num < 0) 
+   if ($num < 0)
    {
        $sgn_num = ~($sgn_num);
    }
@@ -157,7 +153,7 @@ function createEncodings($points, $dists)
     $plng = 0;
     for($i=0; $i<count($points); $i++)
     {
-        if(isset($dists[$i]) || $i == 0 || $i == count($points)-1) 
+        if(isset($dists[$i]) || $i == 0 || $i == count($points)-1)
 	{
 	    $point = $points[$i];
 	    $lat = $point[0];
@@ -174,7 +170,7 @@ function createEncodings($points, $dists)
     return $encoded_points;
 }
 
-function encodeLevels($points, $dists, $absMaxDist) 
+function encodeLevels($points, $dists, $absMaxDist)
 {
     global $numLevels, $forceEndpoints;
     $encoded_levels = "";
@@ -185,7 +181,7 @@ function encodeLevels($points, $dists, $absMaxDist)
     }
     else
     {
-        $encoded_levels .= encodeNumber($numLevels-computeLevel($absMaxDist)-1);    
+        $encoded_levels .= encodeNumber($numLevels-computeLevel($absMaxDist)-1);
     }
     for($i=1; $i<count($points)-1; $i++)
     {
@@ -208,7 +204,7 @@ function encodeLevels($points, $dists, $absMaxDist)
 function encodeNumber($num)
 {
     $encodeString = "";
-    while($num >= 0x20) 
+    while($num >= 0x20)
     {
         $nextValue = (0x20 | ($num & 0x1f)) + 63;
         $encodeString .= chr($nextValue);

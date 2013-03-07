@@ -13,7 +13,7 @@
 */
 
 /**
- * brief description of file
+ * pop-up window to define recordtype title mask
  *
  * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
  * @copyright   (C) 2005-2013 University of Sydney

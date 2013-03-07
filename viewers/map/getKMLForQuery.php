@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 // ARTEM: TO REMOVE
 
@@ -48,9 +46,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 // Date in the past
 header("Expires: Mon, 1 Jul 1982 00:00:00 GMT");
 // always modified

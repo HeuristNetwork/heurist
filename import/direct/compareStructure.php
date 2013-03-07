@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/* compareStructure.php - gets all structure definitions (terms, fields, rectypes) in a specified database and compare to current DB
 	*

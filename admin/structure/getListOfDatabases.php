@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
     /* getListOfdatabases.php - returns list of databases on the current server, with links
     * Ian Johnson 10/8/11

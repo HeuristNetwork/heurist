@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /* importRecordsFromDelimited.php - save, load mappings for csv import
  * Ian Johnson Artem Osmakov 18 Nov 2011

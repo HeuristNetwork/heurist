@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
 * manageDetailTypes.php - display tabbed view of fields (detail types) and link to field type addition and editor

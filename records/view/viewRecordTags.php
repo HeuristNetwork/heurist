@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 define('T1000_DEBUG',1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

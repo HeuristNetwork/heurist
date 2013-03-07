@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 /**
 *This file retruns a json code array of array of tags keyed by record id
 *  [rec_id1 => [ tag1,tag2...],

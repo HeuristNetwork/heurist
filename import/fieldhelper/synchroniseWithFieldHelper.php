@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/* synchroniseWithFieldHelper.php - currently reads the FieldHelper XML manifests and creates Heurist records
 	* Ian Johnson Artem Osmakov 18 Nov 2011

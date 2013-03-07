@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* showMapUrl.php
@@ -51,9 +49,9 @@
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
 
 	$mapobjects = null;
-	
+
 	if(@$_REQUEST['value'] && $_REQUEST['value']!='undefined'){
-		
+
 		$val = $_REQUEST['value'];
 		$type = substr($val,0,strpos($val,' '));
 		$geoval = substr($val,strpos($val,' ')+1);
@@ -63,9 +61,9 @@
 		if($geoobj){
 			$mapobjects = array("cntWithGeo"=>1, "geoObjects"=>array($geoobj) );
 		}
-		
+
 	}else{
-		$mapobjects = getMapObjects($_REQUEST);	
+		$mapobjects = getMapObjects($_REQUEST);
 	}
 
 	if($mapobjects && $mapobjects['cntWithGeo']>0){

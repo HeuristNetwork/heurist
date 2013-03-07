@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 // ARTEM: TO REMOVE
 
@@ -46,9 +44,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 header('Content-type: text/xml; charset=utf-8');
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');

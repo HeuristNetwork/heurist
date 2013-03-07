@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/* getUserFromDB.php - gets a user definition from an existing database and adds to current database
 	* Ian Johnson Artem Osmakov 25 - 28 Oct 2011

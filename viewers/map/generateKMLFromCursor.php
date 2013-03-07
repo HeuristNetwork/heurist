@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 // ARTEM: TO REMOVE
 
@@ -45,9 +43,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 /**
  *
  * Filename: generateKMLFromCursor.php

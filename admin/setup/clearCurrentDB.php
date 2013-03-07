@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
     /**
     * File: clearCurrentDB.php Deletes all records/details/bookmarks from the current database (owner group admins only)
     *  Does not affect definitions. Resets record counter to 0.

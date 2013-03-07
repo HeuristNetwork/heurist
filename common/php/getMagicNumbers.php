@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 require_once(dirname(__FILE__)."/../config/initialise.php");
 
 print "if (!top.HEURIST) top.HEURIST = {};\n";

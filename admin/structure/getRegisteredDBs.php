@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* getRegisteredDBs.php - Returns all databases and their URLs that are registered in the master Heurist index server,

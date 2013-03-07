@@ -937,29 +937,33 @@ var HRecord = function() {
 //		if (! tmpDetails) {
 //			throw new HValueException("can't change non-existent value");
 //		}
-		for (var bdID in tmpDetails) {
-			var detail = tmpDetails[bdID];
-			if (HAPI.isA(detail, "HRecord")) {
-				detail = _storageManager.getStubForRecord(detail);
-			}
-			if (detail === oldValue) {
-				tmpDetails[bdID] = newValue;
-				_modified = true;
-				return;
+		if (tmpDetails) {
+			for (var bdID in tmpDetails) {
+				var detail = tmpDetails[bdID];
+				if (HAPI.isA(detail, "HRecord")) {
+					detail = _storageManager.getStubForRecord(detail);
+				}
+				if (detail === oldValue) {
+					tmpDetails[bdID] = newValue;
+					_modified = true;
+					return;
+				}
 			}
 		}
 
 		// ... or the un-named details.
 		tmpDetails = _details[detailType.getID()];
-		for (var i=0; i < tmpDetails.length; ++i) {
-			var detail = tmpDetails[i];
-			if (HAPI.isA(detail, "HRecord")) {
-				detail = _storageManager.getStubForRecord(detail);
-			}
-			if (detail === oldValue) {
-				tmpDetails[i] = newValue;
-				_modified = true;
-				return;
+		if (tmpDetails) {
+			for (var i=0; i < tmpDetails.length; ++i) {
+				var detail = tmpDetails[i];
+				if (HAPI.isA(detail, "HRecord")) {
+					detail = _storageManager.getStubForRecord(detail);
+				}
+				if (detail === oldValue) {
+					tmpDetails[i] = newValue;
+					_modified = true;
+					return;
+				}
 			}
 		}
 

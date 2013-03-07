@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /* getDBStructure.php - returns database definitions (rectypes, details etc.)
  *						as SQL statements ready for INSERT processing

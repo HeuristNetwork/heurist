@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--
  * filename, brief description, date of creation, by whom
@@ -180,9 +178,7 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 
 <?php	if (defined('use_alt_db')) {	?>
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
-<?php	}	?>
-
-<?php if ( (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint']) ) { ?>
+<?php	}	 if ( (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint']) ) { ?>
    <h2>Synchronising Zotero records with Heurist</h2
 <?php } ?>
 
@@ -203,9 +199,7 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 <?php } ?>
  </span>
 </div>
-<?php	}	?>
-
-<?php
+<?php	}
 }
 
 function print_common_footer() {
@@ -1066,9 +1060,7 @@ function mode_entry_insertion() {
 		'svs_UGrpID'	=> get_user_id(),
 		'svs_Added'		=> $now,
 		'svs_Modified'	=> $now));
-?>
 
-<?php
 	set_progress_bar_title('Preparing database entries');
 
 	$creatorDT = defined('DT_CREATOR')?DT_CREATOR:0;

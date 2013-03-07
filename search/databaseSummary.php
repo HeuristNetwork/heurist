@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/*<!--
 	* databaseSummary.php - request aggregation query for all records grouped by record type

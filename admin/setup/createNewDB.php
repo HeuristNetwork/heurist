@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/**
 	* File: createNewDB.php Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
 	* Juan Adriaanse 10 Apr 2011

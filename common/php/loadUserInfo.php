@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/*<!--
 	* filename, brief description, date of creation, by whom
@@ -199,9 +197,7 @@ return false;
 
 <?php if (! is_admin()) { ?>
 	top.document.body.className += " is-not-admin";
-	<?php } ?>
-
-<?php if (! is_logged_in()) { ?>
+	<?php }  if (! is_logged_in()) { ?>
 	top.document.body.className += " is-not-logged-in";
 	<?php } ?>
 top.HEURIST.fireEvent(window, "heurist-obj-user-loaded");

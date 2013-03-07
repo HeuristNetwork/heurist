@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/*
 	* createCrosswalkTable.php, Imports recordtypes from another Heurist database, 17-05-2011, by Juan Adriaanse
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.

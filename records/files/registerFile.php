@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--
  * registerFile.php, register file that is already on server - returns JSON fileinfo

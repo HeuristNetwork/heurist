@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 // AO: NOT USED, TO REMOVE ???
 
@@ -45,9 +43,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");

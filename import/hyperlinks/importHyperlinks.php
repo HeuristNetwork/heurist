@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -441,9 +439,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
 
 			print_link($url, $title);
 		}
-?>
 
-<?php
 	}
 ?>
 </form>

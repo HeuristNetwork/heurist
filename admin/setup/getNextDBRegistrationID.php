@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* getNextRegistrationID.php - request an ID from HeuristScholar.org/db=HeuristIndex, allocates the ID,

@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/**
 	* File: deleteCurrentDB.php Deletes the current database (owner group admins only)
 	* Ian Johnson 24 Dec 2011

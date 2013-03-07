@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--publishRecordHML.php
  * configIni.php - Configuration information for Heurist Initialization - USER EDITABLE

@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/**
 	* File: processAction.php Import a record type, with all its Record Structure, Field types, and terms, or crosswalk it with an existing record type
 	*

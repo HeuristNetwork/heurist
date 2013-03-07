@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * findReplaceRecord.php - where a record has been merged into another, this one finds the record into which it has been merged
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 

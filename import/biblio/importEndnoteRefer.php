@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 /* Subclass of the importRefer stuff, specially suited to the quirks of the REFER stuff pumped out by EndNote.
    Note that these quirks are not implemented here, except for type determination.
    The rest are left as an exercise for the reader, or for the author when he gets back from Greece.

@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* listDuplicateRecordsForSearchResults.php, Takes a search resutls set and looks for duplicates
@@ -43,9 +41,7 @@
 	* @todo
 	**/
 
-?>
 
-<?php
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

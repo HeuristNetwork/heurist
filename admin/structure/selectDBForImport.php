@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/*
 	* selectDBForImport.php, Shows a list of registered databases to allow choosing source for structural elements
 	* First version 26-05-2011, by Juan Adriaanse

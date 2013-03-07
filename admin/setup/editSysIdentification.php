@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * editSysIdentification.php, edits the system identification record which provides core settigns for the database
@@ -44,9 +42,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');

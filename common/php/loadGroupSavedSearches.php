@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 /* Take a wg_id and fill in top.HEURIST.workgroups[wg_id].members with member details
    and top.HEURIST.workgroups[wg_id].savedSearches with workgroup saved search details */

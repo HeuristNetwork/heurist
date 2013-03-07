@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 /* Search for records entries matching the given standard query string in $_REQUEST['q']
  * The returned fields include rec_ID, rec_Title, rec_URL and rec_RecTypeID.

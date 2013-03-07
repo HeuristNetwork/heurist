@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/*<!--
 	* buildCrosswalks.php, Gets definitions from a specified installation of Heurist and writes them
 	* either to a new DB, or temp DB, 18-02-2011, by Juan Adriaanse

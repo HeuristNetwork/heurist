@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/**
 	* getCurrentVersion.php - requests code and database version from HeuristScholar.org
     *

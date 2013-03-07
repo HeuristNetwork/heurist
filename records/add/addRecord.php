@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  -->*/
 
-?>
 
-<?php
 
 // translate variable names
 if (@$_REQUEST['t']) $_REQUEST['bkmrk_bkmk_title'] = $_REQUEST['t'];

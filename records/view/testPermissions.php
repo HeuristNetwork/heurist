@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -46,9 +44,7 @@
 
 // ARTEM - used in viewRecord.php only
 
-?>
 
-<?php
 
 function have_bkmk_permissions($bkm_ID) {
 

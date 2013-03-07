@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * templateGenerate.php
@@ -54,9 +52,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 define('SEARCH_VERSION', 1);
 

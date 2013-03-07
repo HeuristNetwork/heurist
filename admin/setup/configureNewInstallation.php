@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* File: configure_new_installation.php Set up required data and databases for a new Heurist installation, Ian Johnson 22 Nov 2011

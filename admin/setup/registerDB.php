@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 	/**
 	* registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
 	* metadata in the index database, sets registration code in sysIdentification table. Juan Adriaanse 26 May 2011.

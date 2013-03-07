@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 	/**
 	* emailRecordDetailsphp, generic function to email a record from a Heurist database (generally to another), AO 2011/06/07

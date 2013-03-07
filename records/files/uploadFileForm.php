@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * It seems this is old way of upload file for isEarlyWebkit (ref in editRecord.js only)

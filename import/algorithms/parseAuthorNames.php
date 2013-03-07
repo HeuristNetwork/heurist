@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /**
  * filename, brief description, date of creation, by whom
@@ -43,9 +41,7 @@
  * @todo
  **/
 
-?>
 
-<?php
 
 // hand-rolled punctuation class ... doesn't go sticking its finger into any characters past chr(0x7F)
 define('PUNCT', '[\041-\057\072-\100\133-\140\173-\176]');
