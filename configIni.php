@@ -30,9 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-?>
 
-<?php
 
 /*<!--
  * configIni.php - Configuration information for Heurist Initialization - EDITABLE by the installer of Heurist
