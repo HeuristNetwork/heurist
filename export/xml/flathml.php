@@ -1258,7 +1258,7 @@ function outputTDateDetail($attrs, $value) {
             if (@$matches[3]) makeTag('day', null, $matches[3]);
         }
         if ($time) {
-            preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
+            preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
             if (@$matches[1]) makeTag('hour', null, $matches[1]);
             if (@$matches[2]) makeTag('minutes', null, $matches[2]);
             if (@$matches[3]) makeTag('seconds', null, $matches[3]);

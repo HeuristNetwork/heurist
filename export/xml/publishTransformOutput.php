@@ -77,6 +77,7 @@ require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 //error_log("made it to here");
 mysql_connection_select(DATABASE);
 
+$verbose = @$_REQUEST['v'] && $_REQUEST['v']==0 ? false : true;
 $transformID = @$_REQUEST['transID'] ? $_REQUEST['transID'] : null;
 //if no style given then try default, if default doesn't exist we output raw xml
 
@@ -230,8 +231,12 @@ global $outputURI;
 }
 
 function returnXMLSuccessMsgPage($msg) {
-	die("<html><body><success>$msg</success></body></html>");
+    if ($verbose) {
+	    die("<html><body><success>$msg</success></body></html>");
+    }
 }
 function returnXMLErrorMsgPage($msg) {
-	die("<?xml version='1.0' encoding='UTF-8'?>\n<error>$msg</error>");
+	if ($verbose) {
+        die("<?xml version='1.0' encoding='UTF-8'?>\n<error>$msg</error>");
+    }
 }
