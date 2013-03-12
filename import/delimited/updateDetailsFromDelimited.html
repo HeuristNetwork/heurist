@@ -91,6 +91,15 @@
 			var fMapIndex=0; //default to dd/mm/yyyy
 			var fMap = [["0","1","2"],["1","0","2"],["2","1","0"],["2","zm","zd"]];
 
+            var err={"count":0};
+            function logError(key, msg) {
+                if (!err[key]) {
+                    err[key] = msg;
+                }else{
+                    err[key] += "\n" + msg;
+                }
+                err.count ++;
+            }
 
 			function stripCharacter(words,character) {
 				var spaces = words.length;
@@ -135,20 +144,29 @@
 				//get recChunkSize records
 				for(i=0; i < (recEnd-recStart); i++) {
 					var newIDs = [];
+                    function isValidNewID(index){
+                        if ( !isNaN(index)) {
+                            var id = parseInt(index);
+                            if (!HeuristScholarDB.getRecord(id) && !(recIDs.indexOf(id)>=0) && !(newIDs.indexOf(id)>=0)){
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
 					// flatten the recordID
-					if ( !isNaN(fields[i+recStart][0]) && !(recIDs.indexOf(fields[i+recStart][0])>=0)) { //if new value
-						recIDs.push(parseInt(fields[i+recStart][0])); //store the Record ID
+					if ( isValidNewID(fields[i+recStart][0])) { //if new value
+						newIDs.push(parseInt(fields[i+recStart][0])); //store the Record ID
 					}
 					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(parseInt(fields[i+recStart][1])).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
 						var vals = fields[i+recStart][2].split("|");
 						for(v in vals){
-							if (!isNaN(vals[v]) && !(recIDs.indexOf(vals[v])>=0)){
-								recIDs.push(parseInt(vals[v]));
+							if (isValidNewID(vals[v])){
+								newIDs.push(parseInt(vals[v]));
 							}
 						}
 						// case - replace existing value with a new value - redirecting a reference
-						if (fields[i+recStart][3] && !isNaN(fields[i+recStart][3]) && !(recIDs.indexOf(fields[i+recStart][3])>=0)){
-							recIDs.push(parseInt(fields[i+recStart][3]));
+						if (fields[i+recStart][3] && isValidNewID(fields[i+recStart][3])){
+							newIDs.push(parseInt(fields[i+recStart][3]));
 						}
 					}
 					if ((newIDs.length + recIDs.length)>recChunkSize){ // increased from 1000 by Ian 24/10/11
@@ -160,10 +178,10 @@
 					}
 				} //for i
 //				console.debug("loading records " + recIDs.join());
-				if (recIDs.length > recChunkSize) { // increased from 1000 by Ian 24/10/11
+				if (recIDs.length > recChunkSize) { // if over by 10% then error out
                     // the chunks are now processed automatically, so you shouldn't get this message
 					alert("This is embarrassing, but somehow you have exceeded ("+ recIDs.length +
-							") the capacity (1000) of the updater to handle. We need to start again. The last row handled was " + recStart);
+							") the capacity ("+recChunkSize+" per transfer) of the updater to handle. We need to start again. The last row handled was " + recStart);
 					location.reload();
 				}
 
@@ -212,7 +230,8 @@
 						//get the HRecord to be updated
 						recHR = HeuristScholarDB.getRecord(parseInt(fields[j][0]));
 
-						if (! recHR) {
+						if (! recHR) { //record not loaded skip it
+                            logError(j," record "+ fields[j][0] +" on line "+j+"not loaded into Hapi");
 							continue;
 						}
 
@@ -247,41 +266,41 @@
 						}else{//get the detail type
 							recHDT = HDetailManager.getDetailTypeById(parseInt(fields[j][1]));
 							if (recHDT){ //valid detail type
-								if (fields[j][2]!=null && fields[j][2]!=""  ) {
+								if (fields[j][2]!=null && fields[j][2]!="") {
 
 									switch( recHDT.getVariety()){
 
 										// change data to a date object for validity code. FIXME need to do the same for GEOGRAPHIC, FILE details
 										case HVariety.GEOGRAPHIC:
-										var vals = fields[j][2].split("|");
-										var geoFields;
-										var geo;
-										details = recHR.getDetails(recHDT);
-										if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
-											// update/add the detail if the value exist and is valid
-											for (var v in vals) {
-												geoFields = vals[v].split(":");
-												geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
-												geo = new HGeographicValue(geoFields[0], geoFields[1]);
-												if (recHDT.checkValue(geo)) {
-													details.push(geo);
-												} else {
-													//  FIXME: add code to show invalid entry in error bin
-													alert("the value" + vals[v] + " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
-												}
-											}
-											recHR.setDetails(recHDT, details);
-										} else { //singleton  case  update/add
-											geoFields = vals[0].split(":");
-											geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
-											geo = new HGeographicValue(geoFields[0], geoFields[1]);
-											if (!details[0]) {
-												recHR.addDetail(recHDT, geo);
-											} else {
-												recHR.changeDetail(recHDT, details[0], geo);
-											}
-										}
-										break;
+										    var vals = fields[j][2].split("|");
+										    var geoFields;
+										    var geo;
+										    details = recHR.getDetails(recHDT);
+										    if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
+											    // update/add the detail if the value exist and is valid
+											    for (var v in vals) {
+												    geoFields = vals[v].split(":");
+												    geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
+												    geo = new HGeographicValue(geoFields[0], geoFields[1]);
+												    if (recHDT.checkValue(geo)) {
+													    details.push(geo);
+												    } else {
+													    //  FIXME: add code to show invalid entry in error bin
+													     logError(j,"the value" + vals[v] + " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
+												    }
+											    }
+											    recHR.setDetails(recHDT, details);
+										    } else { //singleton  case  update/add
+											    geoFields = vals[0].split(":");
+											    geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
+											    geo = new HGeographicValue(geoFields[0], geoFields[1]);
+											    if (!details[0]) {
+												    recHR.addDetail(recHDT, geo);
+											    } else {
+												    recHR.changeDetail(recHDT, details[0], geo);
+											    }
+										    }
+										    break;
 
 										case HVariety.FILE:
 
@@ -300,99 +319,161 @@
 										break;
 
 										case HVariety.DATE:
-										details = recHR.getDetails(recHDT);
-										if (fields[j][3]) {	//there is an old value supplied this is a replacement
-											recHR.changeDetail(recHDT, fields[j][3], fields[j][2]);
-										}else if (details && details.length < 1 || HDetailManager.getDetailRepeatable(recHRT, recHDT )){
-											recHR.addDetail(recHDT, fields[j][2]);
-										}else{
-											if (confirm("Trying to add new value ("+fields[j][2] + ") which will overwrite existing value (" + details[0] + "). Would you like to overwrite?")) {
-												recHR.changeDetail(recHDT, details[0], fields[j][2]);
-											} else {
-												alert("the value" + fields[j][2] + " was not updated in record " + fields[j][0]);
-											}
-										}
-										break;
+										    details = recHR.getDetails(recHDT);
+										    if (fields[j][3]) {	//there is an old value supplied this is a replacement
+											    recHR.changeDetail(recHDT, fields[j][3], fields[j][2]);
+										    }else if (details && details.length < 1 || HDetailManager.getDetailRepeatable(recHRT, recHDT )){
+											    recHR.addDetail(recHDT, fields[j][2]);
+										    }else if (details && details[0]){
+												    recHR.changeDetail(recHDT, details[0], fields[j][2]);
+										    }else{
+                                                recHR.addDetail(recHDT, fields[j][2]);
+                                            }
+										    break;
 
 										case HVariety.REFERENCE:
-										var recDetailIDs = [];
-										var ids = fields[j][2].split("|");
-										details = recHR.getDetails(recHDT);
-										for (var d in details){
-											recDetailIDs[details[d].getID()] = d;
-										}
-										if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
-											for(var i in ids){
-												if (!isNaN(ids[i])){
-													if ( !isNaN(fields[j][3])){ // if there is a replacement value  HRecordID, HDT, newRefID, oldRefID
-														if (fields[j][3] in recDetailIDs){ //the old ref is a details
-															if (!(ids[i] in recDetailIDs)){// the new value is not then replace
-																recHR.changeDetail(recHDT, HeuristScholarDB.getRecord(fields[j][3]), HeuristScholarDB.getRecord(ids[i]));
-															}else {  // the new value already exist so delete the old
-																recHR.removeDetails(recHDT);
-																details.splice(recDetailIDs[fields[j][3]],1);  //remove the old from details
-																recHR.setDetails(recHDT,details);
-															}
-														}else {	// old ref doesn't exist so just add the new ref if it doesn't exist
-															if (!(ids[i] in recDetailIDs)) recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[i]));
-														}
-													}else{	// if it's not already a detail then add it
-														if (!(ids[i] in recDetailIDs)) recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[i]));
-													}
-												}
-											}
-										}else{//non repeatable
-											if (ids.length=1 && !recDetailIDs[ids[0]]){ //different id
-												if (details[0]){//update if there is an existing detail
-													if (fields[j][3] && !isNaN(fields[j][3])){
-														recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(fields[j][3]));
-													}else{
-														recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(ids[0]));
-													}
-												}else{//add
-													recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[0]));
-												}
-											}else{//multi-value
-												//FIXME: add code to place this row in error bin
-											}
-										}
-										break;
+										    var recDetailIDs = [];
+										    var ids = fields[j][2].split("|"),
+                                                i,d, recDTConst,
+                                                newRefHR,
+                                                validIDs = [];
+										    details = recHR.getDetails(recHDT);
+										    for ( d in details){//details lookup by recID
+											    recDetailIDs[details[d].getID()] = d;
+										    }
+                                            // Add code to check type constraints if constraints exist
+                                            //get HRec is not logError and skip
+                                            //get HRT in not match then remove id and logError
+                                            if (recHDT.getConstrainedRecordTypeIDs &&    //check to make sure the record matches constraints
+                                                recHDT.getConstrainedRecordTypeIDs() &&
+                                                recHDT.getConstrainedRecordTypeIDs().length > 0) {
+                                                recDTConst = recHDT.getConstrainedRecordTypeIDs();
+                                                for (i in ids) {//if rtyID is in constraint set the put in valid array
+                                                    newRefHR = HeuristScholarDB.getRecord(ids[i]);
+                                                    if (!newRefHR) {
+                                                        logError(j,"linked record id not found");
+                                                    }else if (recDTConst.indexOf(""+newRefHR.getRecordType().getID()) != -1){
+                                                        //add id
+                                                        validIDs.push(ids[i]);
+                                                    }else{
+                                                        logError(j,"rectype not in constraint set ignoring input");
+                                                    }
+                                                }
+                                                ids = validIDs;
+                                            }
+										    if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {//repeatable field
+											    for(i in ids){
+												    if (!isNaN(ids[i])){
+                                                        newRefHR = HeuristScholarDB.getRecord(ids[i]);
+                                                        if (!newRefHR) {
+                                                            logError(j,"rec not found");
+                                                        }else if ( !isNaN(fields[j][3])){ // if there is a replacement value  HRecordID, HDT, newRefID, oldRefID
+														    if (fields[j][3] in recDetailIDs){ //the old ref is a details
+															    if (!(ids[i] in recDetailIDs)){// the new value is not then replace
+																    recHR.changeDetail(recHDT, HeuristScholarDB.getRecord(fields[j][3]), HeuristScholarDB.getRecord(ids[i]));
+															    }else if (confirm("Trying to replace "+recHDT.getName()+"("+recHDT.getID()+") repeatable link ID "+
+                                                                                    fields[j][3] + "-" +HeuristScholarDB.getRecord(fields[j][3]).getTitle() +
+                                                                                    " with ID " + ids[i] + "-" + HeuristScholarDB.getRecord(ids[i]).getTitle() +"." +
+                                                                                    "\nSince ID "+ids[i]+" already exist, would you like to just remove ID "+
+                                                                                    fields[j][3] +"?")){  // the new value already exist so delete the old
+																    recHR.removeDetails(recHDT);//TODO:SAW this needs to be replaced with a delete detail so that we minimize the changing of ids for future pointers to details.
+																    details.splice(recDetailIDs[fields[j][3]],1);  //remove the old from details
+																    recHR.setDetails(recHDT,details);
+															    }else{
+                                                                    logError(j,"user cancelled delete of "+fields[j][3]+" from "+recHDT.getName());
+                                                                }
+														    }else {	// old ref doesn't exist so just add the new ref if it doesn't exist
+															    if (!(ids[i] in recDetailIDs)) recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[i]));
+														    }
+													    }else{	// if it's not already a detail then add it
+														    if (!(ids[i] in recDetailIDs)) recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[i]));
+													    }
+												    }
+											    }
+										    }else{//non repeatable
+											    if (ids.length=1 && !recDetailIDs[ids[0]]){ //different id
+												    if (details[0]){//update if there is an existing detail
+													    if (fields[j][3] && !isNaN(fields[j][3])){
+														    recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(fields[j][3]));
+													    }else{
+														    logError(j,"update failed on non matching existing value " + fields[j][3]);
+													    }
+												    }else{//add
+													    recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[0]));
+												    }
+											    }else{//multi-value
+												    //FIXME: add code to place this row in error bin
+											    }
+										    }
+										    break;
 
 										default:
-										var vals=fields[j][2].split("|");
-										details = recHR.getDetails(recHDT);
-										if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
-											// update/add the detail if the value exist and is valid
-											for (var v in vals) {
-												if (recHDT.checkValue(vals[v])) {// if not in the list of detail values
-													if (!(details.indexOf(vals[v])>=0))  {
-														details.push(vals[v]);
-													}
-												}else{
-													//  FIXME: add code to show invalid entry in error bin
-													alert("the value" + vals[v] + " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
-												}
-											}
-											recHR.setDetails(recHDT, details);
-										}else{ //singleton  case  update/add
-											if (!details[0]) {
-												recHR.addDetail(recHDT, vals[0]);
-											}else{
-												recHR.changeDetail(recHDT, details[0], vals[0]);
-											}
-										}
+										    var vals=fields[j][2].split("|");
+										    details = recHR.getDetails(recHDT);
+										    if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
+											    // update/add the detail if the value exist and is valid
+											    for (var v in vals) {
+												    if (recHDT.checkValue(vals[v])) {// if not in the list of detail values
+													    if (!(details.indexOf(vals[v])>=0))  {
+														    details.push(vals[v]);
+													    }
+												    }else{
+													    //  show invalid entry in error bin
+						                                logError(j,"the value" + vals[v] +" on line "+j+ " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
+												    }
+											    }
+											    recHR.setDetails(recHDT, details);
+										    }else{ //singleton  case  update/add
+											    if (!details[0]) {
+												    recHR.addDetail(recHDT, vals[0]);
+											    }else{
+												    recHR.changeDetail(recHDT, details[0], vals[0]);
+											    }
+										    }
 									}//end switch
 									// add the record to the list of records to save
 									if (!(savRecords.indexOf(recHR)>=0)) {
 										savRecords.push(recHR);
 									}
 								}else{  // null value interpret as delete detail
-									recHR.removeDetails(recHDT);
-									if (!(savRecords.indexOf(recHR)>=0)) {
-										savRecords.push(recHR);
-									}
+                                    //check for multivalue delete
+                                    //TODO: this needs to handle multiple values for repeatable fields
+                                    //right now assume multi for repeatable pointers
+                                    var dels=fields[j][3].split("|");
+                                    var recDetailIDs = []
+                                        i,d;
+                                    details = recHR.getDetails(recHDT);
+                                    for ( d in details){//details lookup by recID
+                                        recDetailIDs[details[d].getID()] = d;
+                                    }
+                                    if (dels.length >= 1 && HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
+                                        // remove the detail if the value exist
+                                        for (var i in dels) {
+                                            if (dels[i] in recDetailIDs) {
+                                                details.splice(recDetailIDs[dels[i]],1);
+                                                delete recDetailIDs[dels[i]];
+                                                for ( d in details){//details index lookup by recID needs to recalc
+                                                    recDetailIDs[details[d].getID()] = d;
+                                                }
+                                            } else {
+                                                 logError(j,"the value" + dels[i] +" on line "+j+ " was not found as a value of detail type(" + fields[j][1] + ") specified.  " + fields[j].join());
+                                            }
+                                        }
+                                        if (details.length > 0){
+                                            recHR.setDetails(recHDT, details);
+                                        } else {//down to no details so just remove all
+                                            recHR.removeDetails(recHDT);
+                                        }
+                                    }else{ //singleton
+                                        recHR.removeDetails(recHDT);
+                                    }
+                                    if (!(savRecords.indexOf(recHR)>=0)) {
+                                        savRecords.push(recHR);
+                                    }
 								}	//end null value
-							} //end if valid Detail type
+							}else{ //end if valid Detail type
+                                logError(j,"detail type "+fields[j][1]+" on line "+j+" was not found in Hapi");
+                            }
 						} // process detail
 					}else{  // command input   dateformat,yyyy
 						if (fields[j][0].toLowerCase() == "dateformat") {
@@ -453,8 +534,8 @@
 
 			function showProcessSummary() {
 
-				var p = document.getElementById("records-p");
-				p.innerHTML = "";
+				var log = document.getElementById("log");
+				log.innerHTML = "";
 				var table = document.createElement("table");
 				table.id = "detail-input-table";
 				tr = table.appendChild(document.createElement("tr"));
@@ -474,9 +555,9 @@
 					if(!isNaN(fields[i][0])) { //record input
 						//get the HRecord updated
 						recHR = HeuristScholarDB.getRecord(fields[i][0]);
-						if (! recHR) {
+						if (! recHR && !err[i]) {
 							continue;
-						}else if (recHR.hasError() || recHR.hasWarning()) {
+						}else if (err[i] || recHR.hasError() || recHR.hasWarning()) {
 							var tr = table.appendChild(document.createElement("tr"));
 							var td = tr.appendChild(document.createElement("td"));
 							td.innerHTML = i + 1; //row number
@@ -499,12 +580,18 @@
 								para.innerHTML = "Warning(s):\n" + warnings.join(". \n");
 								td.appendChild(para);
 							}
+                            if (err[i]) {
+                                errorsOrWarningExist = true;
+                                para = document.createElement('pre');
+                                para.innerHTML = "Input errors:\n" + err[i];
+                                td.appendChild(para);
+                            }
 						}
 					}
 				}
 				if (errorsOrWarningExist) { // there were problems
-					p.appendChild(table);
-					e.style.display = "block";
+					log.appendChild(table);
+					log.style.display = "block";
 				} else { // The detail update completed successfully
                 /*  Unecessary option: if (confirm("Update successful, " + fields.length + " entries processed. \n" +"Would you like to use DetailUpdater for more updating?")){location.reload();}else{window.close();}   */
                 alert("Update successful, " + fields.length + " entries processed" );
@@ -584,6 +671,7 @@
 
 		<div id="theList" class="tooltip"><div class="close-button fieldsToggle" style="right:3px; top:3px"></div><ul id="fieldList"><h3>Field Types</h3></ul></div>
 		<p id=info-p></p>
+        <div id="log"></div>
 		<div id=process-div style="display:none;">
 			<p>The details shown below will be used to update records in the database.
             <br>Please review before proceeding. Note that erroneous input rows will be skipped.</p>

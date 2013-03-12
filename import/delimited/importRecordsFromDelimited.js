@@ -811,9 +811,9 @@ FlexImport = (function () {
 				//mark which columns have the REFERENCE identifying data
 				if (detailType.getVariety() == HVariety.REFERENCE) {
 					if (HDetailManager.getDetailRepeatable(FlexImport.recType, detailType)) {
-						refCols[i]=2;
+						refCols[i]=2;//mark as repeatable  todo:SAW should store max value and constrain against that.
 					} else {
-						refCols[i]=1;
+						refCols[i]=1;//mark as single value
 					}
 				}
 			}
@@ -840,7 +840,7 @@ FlexImport = (function () {
 					if (!j) continue; // skip any undefined entries
 					var tempRecIDs = FlexImport.fields[i][j];
 					if (tempRecIDs) {
-						if (tempRecIDs.search("/"+this.valSep+"/")){
+						if (tempRecIDs.search("/"+this.valSep+"/")){//if there is a
 							tempRecIDs = tempRecIDs.split(this.valSep);
 						}else{
 							tempRecIDs = tempRecIDs.split(","); // split into array of ids with comma as delimiter
@@ -890,7 +890,7 @@ FlexImport = (function () {
 							}
 							continue;
 						}
-						reString = "(\\d\\d?)\\/(\\d\\d?)\\/(\\d{4})";
+						reString = "(\\d\\d?)\\/(\\d\\d?)\\/(\\d{4})";//check mm/dd/yyyy or dd/mm/yyyy
 						re = new RegExp(reString);
 						matches = val.match(re);
 						if (matches) {
@@ -908,7 +908,7 @@ FlexImport = (function () {
 								}
 							}
 						} else {
-							reString = "(\\d{4})\\/(\\d\\d?)\\/(\\d\\d?)";
+							reString = "(\\d{4})\\/(\\d\\d?)\\/(\\d\\d?)"; //check yyyy/mm/dd
 							re = new RegExp(reString);
 							matches = val.match(re);
 							if (matches) {
@@ -1255,19 +1255,21 @@ FlexImport = (function () {
 							vals[v] = new HGeographicValue(HGeographicType.abbreviationForType(FlexImport.subTypes[j]), vals[v]);
 						}
 					} else if (detailType.getVariety() == HVariety.REFERENCE) {
-						// FIXME add code to load object(s) for reference and verify that it's the constrained type. output log entry for invalid data
-						if (vals.length == 1 && vals[0].indexOf(",",0) != -1) {	// ??? how is this possible - multi-valued in a non-repeating field, shouldn't we select first and warn user
+						if (vals.length == 1 && vals[0].indexOf(",",0) != -1) {	// This is to capture the case of the user not understanding verticle bar as we train them to use comma ids:345,456,567
 							vals = vals[0].split(",");
 						}
 						var l = vals.length;
 						for (var v = 0; v < l; ++v) {
 							var temp = vals[v];
-							if(parseInt(vals[v])<1){
-								logError(j," Record id is not defined");
+							if(parseInt(vals[v])<1){// invalid recID
+								logError(j," Record id "+temp+"is not defined");
+                                vals.splice(v,1);    // remove the val in order to ignore it
+                                v--;
+                                l = vals.length;
 							}else{
 								vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v]));
 								if (!vals[v]) { //there was an error loading the referenced record so mark it
-									logError(j," Record id:" + temp + " not found.");
+									logError(j," Record id:" + temp + " was not found.");
 									vals.splice(v,1);	// remove the val in order to ignore it
 									v--;
 									l = vals.length;
