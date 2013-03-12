@@ -625,7 +625,7 @@ function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false,
 	if ($info->isDir() && $info->isWritable()) {
 		define($defString, $dir);
 		return true;
-	} else if ($tryMakeDir) {
+	} else if (!$info->isDir() && $tryMakeDir) {
 		if (mkdir($info, 0777, true)) {
 			define($defString, $dir);
 			return true;
