@@ -196,7 +196,7 @@ function RectypeManager() {
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:375px;">'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'2" value="Define new record type / fields" class="add"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="Define new record type / fields" class="add"/>'+
                         '</div>'+
                         '</div>')
 
@@ -660,7 +660,7 @@ function RectypeManager() {
                     _onAddEditRecordType(0, grpID);
                 }
             };
-            var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'2');
+            var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick;
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {

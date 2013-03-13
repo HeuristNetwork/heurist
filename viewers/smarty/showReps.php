@@ -119,7 +119,7 @@ function executeSmartyTemplate($params){
 	}
 
 	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
-/*****DEBUG****///error_log(print_r($qresult,true));
+/*****DEBUG****///error_log(print_r($params,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
@@ -754,7 +754,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 						$res0 = null;
 						if(true){  //64719  45171   48855    57247
-							$res0 = getRecordForSmarty($record, $recursion_depth+2, $order); //@todo - need to
+							$res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
 							$order++;
 						}
 

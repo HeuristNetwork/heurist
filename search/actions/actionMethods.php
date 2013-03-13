@@ -516,9 +516,14 @@ function record_filter($rec_ids) {
 	return $f_rec_ids;
 }
 
+// $tags - array of tag names
 //
-//
-function get_ids_for_tags($tags, $add) {
+function get_ids_for_tags($tags, $add, $userid=null) {
+
+    if(!$userid){
+        $userid = get_user_id();
+    }
+
 	$tag_ids = array();
 	foreach ($tags as $tag_name) {
 		$tag_name = preg_replace('/\\s+/', ' ', trim($tag_name));
@@ -527,10 +532,10 @@ function get_ids_for_tags($tags, $add) {
 		if ( ($slashpos = strpos($tag_name, '\\')) ) {	// it's a workgroup tag
 			$grp_name = substr($tag_name, 0, $slashpos);
 			$tag_name = substr($tag_name, $slashpos+1);
-			$res = mysql_query('select tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp where ugr_Type != "User" and tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID='.get_user_id().' and grp.ugr_Name="'.addslashes($grp_name).'" and lower(tag_Text)=lower("'.addslashes($tag_name).'")');
+			$res = mysql_query('select tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp where ugr_Type != "User" and tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID='.$userid.' and grp.ugr_Name="'.addslashes($grp_name).'" and lower(tag_Text)=lower("'.addslashes($tag_name).'")');
 		}
 		else {
-			$res = mysql_query('select tag_ID from usrTags where lower(tag_Text)=lower("'.addslashes($tag_name).'") and tag_UGrpID='.get_user_id());
+			$res = mysql_query('select tag_ID from usrTags where lower(tag_Text)=lower("'.addslashes($tag_name).'") and tag_UGrpID='.$userid);
 		}
 
 		if (mysql_num_rows($res) > 0) {
@@ -540,9 +545,13 @@ function get_ids_for_tags($tags, $add) {
 		else if ($add) {
 			// non-existent tag ... add it
 			$tag_name = str_replace("\\", "/", $tag_name);	// replace backslashes with forwardslashes
-			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag_name) . "\", " . get_user_id() . ")");
-			// saw TODO: add error coding here
-			array_push($tag_ids, mysql_insert_id());
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag_name) . "\", " . $userid . ")");
+            if (mysql_error()) {
+                error_log(">>>> Erorr adding tag ".mysql_error());
+            }else{
+			    // saw TODO: add error coding here
+			    array_push($tag_ids, mysql_insert_id());
+            }
 		}
 
 		}

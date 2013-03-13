@@ -108,7 +108,7 @@
 		$fresh = !! @$args["f"];
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
-		/*****DEBUG****///print("QUERY:".$query);
+		/*****DEBUG****///error_log("QUERY:".$query);
 
 		$res = mysql_query($query);
 
