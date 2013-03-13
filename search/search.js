@@ -2141,12 +2141,12 @@ top.HEURIST.search = {
 						firstInGroup = false;
 					}
 					var name = rectypes.names[recTypeID];
-					name = name +" ["+recTypeID+"]";
+//					name = name +" ["+recTypeID+"]";
 
 					var value =  "t:" + (useIDs ? recTypeID : '"'+name+'"');
 					var opt = new Option(name, value);
 					$(opt).attr("rectype", recTypeID);
-					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
+					$(opt).attr("title","id ="+recTypeID+" count =" + rectypes.usageCount[recTypeID] + " records");
 
 					rectypeValSelect.appendChild(opt);
 				}
@@ -2197,13 +2197,17 @@ top.HEURIST.search = {
 						firstInGroup = false;
 					}
 					var name = detailTypes.names[detailTypeID];
-					name = name +" ["+detailTypeID+"]";
+//					name = name +" ["+detailTypeID+"]";
 
 //					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					var sortValue =  "" + (useIDs ? detailTypeID : '"'+name+'"');
-					fieldValSelect.appendChild(new Option(name,value));
-					sortbyValSelect.appendChild(new Option(name,sortValue));
+                    var opt = new Option(name,value);
+                    $(opt).attr("title","id = "+detailTypeID+" count = " + detailTypes.usageCount[detailTypeID] + " details");
+					fieldValSelect.appendChild(opt);
+                    opt = new Option(name,sortValue);
+                    $(opt).attr("title","id = "+detailTypeID);
+					sortbyValSelect.appendChild(opt);
 					//if(sortValue==keepVal){}
 				}
 			}
@@ -2233,8 +2237,12 @@ top.HEURIST.search = {
 			var name = fields[dtID][0] +" (" + dtID + ")";
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
 			var sortValue =  "" + (useIDs ? dtID : '"'+name+'"');
-			fieldValSelect.appendChild(new Option(name,value));
-			sortbyValSelect.appendChild(new Option(name,sortValue));
+            var opt = new Option(name,value);
+            $(opt).attr("title","id = "+detailTypeID);
+            fieldValSelect.appendChild(opt);
+            opt = new Option(name,sortValue);
+            $(opt).attr("title","id = "+detailTypeID);
+            sortbyValSelect.appendChild(opt);
 		}
 
 		sortbyValSelect.value = keepVal;
@@ -2476,10 +2484,10 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenuBkmk){
 					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark",{zindex: 21});
 					top.HEURIST.search.recMenuBkmk.addItems([
-						{ text: "Tag" },
+						{ text: "Delete" },
 						{ text: "Rate" },
 						{ text: "Un-bookmark" },
-						{ text: "Delete" }
+						{ text: "Tag" }
 					]);
 					top.HEURIST.search.recMenuBkmk.render(document.getElementById('page')); //document.body);
 					$("#menu_boomark").bind("mouseleave",function(){
@@ -2492,9 +2500,9 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenu){
 					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd",{zindex: 21});  //e.parentNode.id
 					top.HEURIST.search.recMenu.addItems([
-						{ text: "Tag" },
+						{ text: "Delete" },
 						{ text: "Bookmark" },
-						{ text: "Delete" }
+						{ text: "Tag" }
 					]);
 					top.HEURIST.search.recMenu.render(document.getElementById('page')); //document.body);//"rd"+recID);
 					$("#menu_recordrd").bind("mouseleave",function(){
@@ -2506,7 +2514,7 @@ top.HEURIST.search = {
 			}
 
 			var items = oMenu.getItems();
-			items[0].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["addRemoveTagsPopup", false, recID, bkmkID] } );
+			items[0].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["deleteRecords", false, recID, bkmkID] } );
 			if(bkmkID){
 				items[1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["setRatingsPopup", bkmkID] } );
 				items[2].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["deleteBookmarks", bkmkID] } );
@@ -2514,7 +2522,7 @@ top.HEURIST.search = {
 				items[1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["addBookmarks", recID] } );
 			}
 
-			items[items.length-1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["deleteRecords", recID] } );
+			items[items.length-1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["addRemoveTagsPopup", recID] } );
 
 
 			oMenu.cfg.setProperty("context",

@@ -1263,6 +1263,10 @@ function getTransformsByOwnerGroup() {
     /*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
     while ($row = mysql_fetch_assoc($res)) {
         $transRecID = $row['rec_ID'];
+        $uri = (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID'] : null));
+        if (!$uri) {
+            continue;
+        }
         if (!@$transforms["groups"][$row['grpName']]) {
             $transforms["groups"][$row['grpName']] = array($transRecID);
             array_push($transforms["groupOrder"], $row['grpName']);
@@ -1271,7 +1275,7 @@ function getTransformsByOwnerGroup() {
         }
         /*****DEBUG****///error_log("row ".print_r($row,true));
         $transforms["nameLookup"][$row['lbl']] = $transRecID;
-        $transforms["byID"][$transRecID] = array("label" => $row['lbl'], "uri" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID'] : null)), "type" => $row['typ'], "trans" => (@$row['trans'] ? $row['trans'] : null));
+        $transforms["byID"][$transRecID] = array("label" => $row['lbl'], "uri" => $uri, "type" => $row['typ'], "trans" => (@$row['trans'] ? $row['trans'] : null));
     }
     return $transforms;
 }

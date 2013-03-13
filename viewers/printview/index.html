@@ -555,15 +555,19 @@
 						if (top.HEURIST.transforms.nameLookup[style]){
 							var transID = top.HEURIST.transforms.nameLookup[style];
 							var uri = encodeURIComponent(top.HEURIST.transforms.byID[transID].uri);
-							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + uri);
+							if (uri) {
+                                xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + uri);
+                            }
 						}else{
-							xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + styles[style][0]);
+                            if (styles && styles[style] && styles[style][0]){
+							    xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + styles[style][0]);
+                            }
 						}
 					}
 					if (!xsls[style]) {
 						alert("Unable to read '"+ style +"' file, check to see if this style sheet is readable in your browser or another browser.");
 						return;
-					}else if ( xsls[style].activeElement && xsls[style].activeElement.nodeName == "parsererror") {//the transform is invalid
+					}else if ( xsls[style].activeElement && (xsls[style].activeElement.nodeName == "parsererror" || xsls[style].activeElement.nodeName == "error")) {//the transform is invalid
 						// tell the user
 							alert("The tranformation you have chosen is invalid. \n Please contact the owner/creator of the tranform");
 						//and remove it from the list of choices

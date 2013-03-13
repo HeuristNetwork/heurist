@@ -107,7 +107,21 @@ foreach ($arr_files as $filename) {
     $handle = fopen($filePath, "rb");
     $contents = fread($handle, filesize($filePath));
     fclose($handle);
+    if ($contents === false) {
+        echo "<error> Error reading $filename from internal storage location </error>";
+        return;
+    }
+    $parser = xml_parser_create();
+    $ret = xml_parse_into_struct($parser, $contents, $vals, $index);
+    if ($ret == 0) {
+        echo "<parsererror> Error file $filename returns invalid XML (".xml_error_string(xml_get_error_code($parser)).")</parsererror>";
+        xml_parser_free($parser);
+        return;
+    }
     echo $contents;
     return;
 }
+//fell through the loop above so no file found.
+echo "<error> Specified file not found in internal storage location and specify a valid style </error>";
+return;
 ?>

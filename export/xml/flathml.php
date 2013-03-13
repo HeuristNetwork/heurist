@@ -948,10 +948,15 @@ function makeFileContentNode($file) {
     if ($file['mimeType'] === "application/xml") { // && file_exists($filename)) {
         if ($file['origName'] !== "_remote") {
             $xml = simplexml_load_file($filename);
+            if (!$xml) {
+                makeTag('error', null, " Error while attemping to read $filename .");
+                return;
+            }
             $xml = $xml->asXML();
         } else {
             $xml = loadRemoteURLContent($filename);
             if (!$xml) {
+                makeTag('error', null, " Error while attemping to read $filename .");
                 return;
             }
         }
@@ -962,43 +967,17 @@ function makeFileContentNode($file) {
         if (preg_match("/\<\!DOCTYPE/", $content)) {
             $content = preg_replace("/\<\!DOCTYPE[^\>]+\>/", "", $content, 1);
         }
+        $parser = xml_parser_create();
+        $ret = xml_parse_into_struct($parser, $content, $vals, $index);
+        if ($ret == 0) {
+            makeTag('error', null, "Invalid XML - ".xml_error_string(xml_get_error_code($parser)));
+            xml_parser_free($parser);
+            return;
+        }
         if ($content) {
             makeTag('content', array("type" => "xml"), $content, true, false);
         }
         return;
-        // remove the name space
-        //		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
-        /*		$xml = simplexml_load_string($xml);
-        if (!$xml){
-        $attrs = array("type" => "unknown", "error" => "invalid xml content");
-        $content = "Unable to read ". $file['origName']. " as xml file";
-        makeTag('content',$attrs,$content);
-        }else{
-        if ( count($xml->xpath('//TEI'))) {
-        $attrs = array("type" => "TEI");
-        $teiHeader = $xml->xpath('//TEI/teiHeader');
-        $content = $xml->xpath('//TEI/text');
-        $content = (@$teiHeader && @$teiHeader[0]? $teiHeader[0]->asXML():"").
-        ($content && $content[0]? $content[0]->asXML():"");
-        }else if ( count($xml->xpath('//TEI.2'))) {
-        $attrs = array("type" => "TEI.2");
-        $teiHeader = $xml->xpath('//TEI.2/teiHeader');
-        $content = $xml->xpath('//TEI.2/text');
-        $content = (@$teiHeader && @$teiHeader[0]? $teiHeader[0]->asXML():"").
-        ($content && $content[0]? $content[0]->asXML():"");
-        }else if ( count($xml->xpath('//rss'))) {
-        $attrs = array("type" => "rss");
-        $content = $xml->xpath('//rss');
-        $content = ($content && $content[0]? $content[0]->asXML():"");
-        $content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
-        }else {
-        $content = $xml->asXML();
-        $content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
-        }
-        if ($content) {
-        makeTag('content',$attrs,$content,true,false);
-        }
-        }*/
     }
 }
 /**
