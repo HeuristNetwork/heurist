@@ -69,6 +69,7 @@ require_once('libs.inc.php');
 	$rtStructs = getAllRectypeStructures(true);
 	$dtStructs = getAllDetailTypeStructures(true);
 	$dtTerms = getTerms(true);
+	$recursion_depth = 0;
 	$first_record = null;  //to obtain names of record header fields
 
 	$resVars = array();
@@ -92,7 +93,7 @@ require_once('libs.inc.php');
 											"tree"=>$res0['tree'] ));
 											*/
 
-		$res = getRecordTypeSectionForSmarty($rectypeID, 'r', 0, 0);
+		$res = getRecordTypeSectionForSmarty($rectypeID, 'r', 0);
 
 		//text for rectypes fill be inserted manually:  $resText  = $resText.$res['text'];
 		$resVars = array_merge($resVars, $res['vars']); //whole list of variables without grouping by record type
@@ -198,7 +199,7 @@ require_once('libs.inc.php');
 				$key = array_search($rectypeID, $recTypes);
 				if( !(is_numeric($key) && $key>=0) )
 				{
-					$res = getRecordTypeSectionForSmarty($rectypeID, 'r', 0, 0);
+					$res = getRecordTypeSectionForSmarty($rectypeID, 'r', 0);
 
 					//text for rectypes fill be inserted manually:  $resText  = $resText.$res['text'];
 					$resVars = array_merge($resVars, $res['vars']);
@@ -442,9 +443,9 @@ function getRecordHeaderSectionForSmarty($rec, $_parentName, $ind, $addrelationf
 // 1. template text
 // 2. array list of used variables
 
-function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind, $recursion_depth){
+function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 
-	global $first_record, $rtStructs, $mode;
+	global $first_record, $rtStructs, $recursion_depth, $mode;
 
 	/*$rtNames = $rtStructs['names'];
 	$recordTypeName = $rtNames[$rectypeID];
@@ -466,9 +467,9 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind, $recursion
 
 
 	foreach ($details as $dtKey => $dtValue){
-        //ART 13-03-09 $recursion_depth = 0;
+		$recursion_depth = 0;
 
-		$dt = getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursion_depth);
+		$dt = getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind);
 		if($dt){
 			array_push($arr_text, $dt['text']);
 			$vars = array_merge($vars, $dt['vars']);
@@ -499,9 +500,9 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind, $recursion
 
  $dtValue - record type structure definition
 */
-function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursion_depth){
+function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 
-	global $dtStructs, $rtStructs, $first_record, $mode;
+	global $dtStructs, $rtStructs, $first_record, $recursion_depth, $mode;
 
 	$dtNames = $dtStructs['names'];
 	$rtNames = $rtStructs['names'];
@@ -581,8 +582,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 				//load this record
 				if($recursion_depth<2){ // && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {
 
-				//ART 13-03-09 
-                $recursion_depth++;
+				$recursion_depth++;
 
 				/*if($mode=='varsonly' || !array_key_exists($pointerRecTypeId, $rtNames)){
 					$recordTypeName = $dt_label;
@@ -625,7 +625,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 					// no need $text  = $text.'\n<tr><td colspan="13">';
 
 					foreach ($details as $dtKey2 => $dtValue2){
-						$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind, $recursion_depth);
+						$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind);
 						if($dt){
 							array_push($arr_text, $dt['text']);
 							$vars = array_merge($vars, $dt['vars']);
@@ -640,7 +640,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 
 								$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree_children']); //detail fields
 
-								if($recursion_depth>0){
+								if($recursion_depth>1){
 									$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree']);
 								}else{
 									$tree = array_merge($tree, $dt['tree']); //assign first level records to root

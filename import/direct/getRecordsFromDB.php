@@ -55,7 +55,6 @@
 	require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-    require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
 ?>
 <html>
@@ -459,11 +458,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				createTermsOptions($config, 'enum');
 				createTermsOptions($config, 'relation');
-
-
-                // --------------------------------------------------------------------------------------------------------------------
-                createTagsOptions($config);
-
 				print "</form>";
 
 			}
@@ -535,79 +529,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				} // loop through terms
 				print "</table>";
 			}
-
-            //@todo - move to some user info lib (like getRecordInfoLibrary)
-            function getUsers($database=USERS_DATABASE){
-                $res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
-        from `".$database."`.`sysUGrps` usr
-        where usr.ugr_Enabled='y' and usr.ugr_Type='user' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and usr.ugr_IsModelUser=0
-        order by fullname");
-
-                $allusers = array();
-                while ($row = mysql_fetch_row($res)) {
-                    $allusers[$row[0]] = $row[1];
-                }
-                return $allusers;
-            }
-
-            //
-            function createTagsOptions($config){
-
-                global $sourcedbname, $db_prefix, $dbPrefix, $is_h2;
-
-                $sourcedb = $db_prefix.$sourcedbname;
-
-                $allusers = getUsers(); //in current database
-                $seloptions = createOptions("us", $allusers);
-
-
-                print "<h3>User mappings for tag(keyword) import"."</h3>[User id] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
-                // Get users with tags
-                if($is_h2){
-                    $query1 = "select usr.Id, usr.Username, usr.Realname as fullname, count(kwl_rec_id)
-                            from `$sourcedb`.`Users` usr, `$sourcedb`.`keywords` kwd, `$sourcedb`.`keyword_links` kwl
-                            where usr.IsModelUser=0 and kwd.kwd_usr_id=usr.Id and kwl.kwl_kwd_id=kwd.kwd_id
-                            group by usr.Id
-                            order by fullname";
-
-                }else{
-
-                    $query1 = "select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname, count(rtl_RecID)
-                            from `$sourcedb`.`sysUGrps` usr, `$sourcedb`.`usrTags` kwd, `$sourcedb`.`usrRecTagLinks` kwl
-                            where usr.ugr_Enabled='y' and usr.ugr_Type='user' and usr.ugr_IsModelUser=0 and kwd.tag_UGrpID=usr.ugr_ID and kwl.rtl_TagID=kwd.tag_ID
-                            group by usr.ugr_ID
-                            order by fullname";
-                }
-                $res1 = mysql_query($query1);
-                print "<table>";
-                while ($row1 = mysql_fetch_array($res1)) {
-                    $tt=$row1[0]; //0=usr_ID
-
-                    $selopts = $seloptions;
-                    $bgcolor = "";
-                    $selectedId = null;
-
-                    if($config){
-                        $selectedId = getPresetId($config,"cbu".$tt);
-                    }else{//    if(!$selectedId){    //find the closest name
-
-                            $selectedId = findClosestName($row1[1], $allusers); //ugr_Name
-                            if($selectedId<0){ //exact match
-                                $bgcolor = "style='background-color:#ccc;'";
-                                $selectedId = -$selectedId;
-                            }
-                    }
-                    if($selectedId){
-                        $repl = "value='".$selectedId."'";
-                        $selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
-                    }
-
-                    print "<tr $bgcolor><td><label id='lblu$tt'>[ $tt ] ".$row1[1]."</label></td>".
-                    "<td>==> <select id='cbu$tt' name='cbu$tt' class='users'><option id='ou0' value='0'></option>".
-                    $selopts."</select></td></tr>\n";
-                } // loop through terms
-                print "</table>";
-            }
 
 			// ---- Create options for HTML select -----------------------------------------------------------------
             function createOptionsDt($alldettypes){
@@ -1161,102 +1082,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					}
 				}
 
-                //IMPORT TAGS/KEYWORDS ==================================
-
-                // get all target users
-                // find corresspondant source users
-                // find all tags with records for source user
-                // add tags to target tag table
-                // add tag links in target for all imported records
-
-                // get all target users
-                $allusers = getUsers(); //in target database
-                $rkeys = array_keys($_REQUEST);
-                $tags_corr = array();
-
-                foreach($rkeys as $rkey) {
-                    if(strpos($rkey,'cbu')===0 && @$allusers[$_REQUEST[$rkey]])
-                    {
-
-                    // find corresspondant source users
-                    $source_uid = substr($rkey,3);
-                    $target_uid = $_REQUEST[$rkey];
-
-                    //find all tags with records for source user
-                    if($is_h2){
-                        $query1 = "select kwd.kwd_id, kwd.kwd_name, count(kwl_rec_id)
-                                from `$sourcedb`.`keywords` kwd, `$sourcedb`.`keyword_links` kwl
-                                where kwd.kwd_usr_id=$source_uid and kwl.kwl_kwd_id=kwd.kwd_id
-                                group by kwd.kwd_id
-                                order by kwd.kwd_id";
-
-                    }else{
-
-                        $query1 = "select kwd.tag_ID, kwd.tag_Text, count(rtl_RecID)
-                                from `$sourcedb`.`usrTags` kwd, `$sourcedb`.`usrRecTagLinks` kwl
-                                where kwd.tag_UGrpID=$source_uid and kwl.rtl_TagID=kwd.tag_ID
-                                group by kwd.tag_ID
-                                order by kwd.tag_ID";
-                    }
-
-                    //add tags to target tag table
-                    $res1 = mysql_query($query1);
-                    while ($row1 = mysql_fetch_array($res1)) {
-                        $ress = get_ids_for_tags( array($row1[1]), true, $target_uid);
-
-                        if(count($ress)>0){
-                            $tags_corr[$row1[0]] = array($ress[0], $row1[1], 0, $target_uid);
-                        }
-                    }
-
-                    }
-                }//foreach users
-
-                foreach ($added_records as $oldid => $newid) {
-
-                    // find tag links in source database
-                    if($is_h2){
-                        $query1 = "select kwl.kwl_kwd_id
-                                from `$sourcedb`.`keyword_links` kwl
-                                where kwl.kwl_rec_id=".$oldid;
-                    }else{
-
-                        $query1 = "select kwl.rtl_TagID
-                                from `$sourcedb`.`usrRecTagLinks` kwl
-                                where kwl.rtl_RecID=".$oldid;
-                    }
-
-                    $res1 = mysql_query($query1);
-                    while ($row1 = mysql_fetch_array($res1)) {
-
-                        $newtag = @$tags_corr[$row1[0]];
-                        if($newtag){
-
-                            mysql_query('insert ignore into `'.USERS_DATABASE.'`.usrRecTagLinks (rtl_RecID, rtl_TagID, rtl_AddedByImport) '
-                                   .' values ('.$newid.','.$newtag[0].',1)');
-                            $tag_count = mysql_affected_rows();
-                            if (mysql_error()) {
-
-                            } else if ($tag_count > 0) {
-                                    $tags_corr[$row1[0]][2]++;
-                                    mysql_query('insert into `'.USERS_DATABASE.'`.usrBookmarks (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID, bkm_AddedByImport) '
-                                        .'values( ' . $newtag[3] . ', now(), now(), '.$newid.',1 )');
-                            }
-                        }
-                    }
-                }
-                //report
-                print "<br />*********************************************************<br />";
-                print "Tags added<br /><br />";
-                foreach ($tags_corr as $oldid => $newtag) {
-                    print $oldid." ".$newtag[1]." ==> ".$newtag[0].",  ".$newtag[2]." records<br />";
-                }
-                print "<br /><br />";
-
-
-                //FINAL ==================================
-
-				print "<br><br><br><h3>Transfer completed - <a href=getRecordsFromDB.php?db=" . HEURIST_DBNAME .
+				print "<br><br><br><h3>Transfer completed - <a href=../../index.php?db=" . HEURIST_DBNAME .
 				" title='Return to the main search page of the current database'><b>return to main page</b></a></h3>";
 
 			} // function doTransfer
