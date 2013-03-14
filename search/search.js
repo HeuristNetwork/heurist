@@ -2234,14 +2234,14 @@ top.HEURIST.search = {
 
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var dtID in fields){
-			var name = fields[dtID][0] +" (" + dtID + ")";
+			var name = fields[dtID][0];
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
 			var sortValue =  "" + (useIDs ? dtID : '"'+name+'"');
             var opt = new Option(name,value);
-            $(opt).attr("title","id = "+detailTypeID);
+            $(opt).attr("title","id = "+dtID);
             fieldValSelect.appendChild(opt);
             opt = new Option(name,sortValue);
-            $(opt).attr("title","id = "+detailTypeID);
+            $(opt).attr("title","id = "+dtID);
             sortbyValSelect.appendChild(opt);
 		}
 

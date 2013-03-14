@@ -444,7 +444,11 @@
                                         i,d;
                                     details = recHR.getDetails(recHDT);
                                     for ( d in details){//details lookup by recID
-                                        recDetailIDs[details[d].getID()] = d;
+                                        if (recHDT.getVariety() == HVariety.REFERENCE) {
+                                            recDetailIDs[details[d].getID()] = d;
+                                        }else{
+                                            recDetailIDs[details[d]] = d;
+                                        }
                                     }
                                     if (dels.length >= 1 && HDetailManager.getDetailRepeatable(recHRT, recHDT )) {
                                         // remove the detail if the value exist
@@ -453,7 +457,11 @@
                                                 details.splice(recDetailIDs[dels[i]],1);
                                                 delete recDetailIDs[dels[i]];
                                                 for ( d in details){//details index lookup by recID needs to recalc
-                                                    recDetailIDs[details[d].getID()] = d;
+                                                    if (recHDT.getVariety() == HVariety.REFERENCE) {
+                                                        recDetailIDs[details[d].getID()] = d;
+                                                    }else{
+                                                        recDetailIDs[details[d]] = d;
+                                                    }
                                                 }
                                             } else {
                                                  logError(j,"the value" + dels[i] +" on line "+j+ " was not found as a value of detail type(" + fields[j][1] + ") specified.  " + fields[j].join());

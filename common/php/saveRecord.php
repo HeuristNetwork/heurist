@@ -332,7 +332,8 @@
         $dtyVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($dtyIDs, ",") . ")");
         if($modeImport!=2){ //import without check of record type structure
             //TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
-            $repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($dtyIDs, ",") . ") and rst_RecTypeID=" . $recordType);
+            $repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_RecTypeID=" . $recordType);
+//            $repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($dtyIDs, ",") . ") and rst_RecTypeID=" . $recordType);
         }
         /*****DEBUG****///error_log("repeats = ".print_r($repeats,true));
         /*****DEBUG****///error_log("details = ".print_r($details,true));
@@ -344,11 +345,12 @@
         $ignoreIDs = array();
         $translated = array();
         $translatedIDs = array();
-        // second pass to divide the work up in to inseerts, updates, deletes, translates and ignores
+        // second pass to divide the work up in to inserts, updates, deletes, translates and ignores
         foreach ($details as $dtyID => $pairs) {
             if (substr($dtyID, 0, 2) != "t:") continue;	// skip any non t: or non type designators
             if (! ($bdtID = intval(substr($dtyID, 2)))) continue;	// invalid (non integer) type id so skip it
 
+            $firstDetail = true;
             foreach ($pairs as $bdID => $val) {
                 if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
                     if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid (non integer) id so skip it
@@ -357,48 +359,56 @@
                     if (mysql_num_rows($resDtl) == 1){
                         $dtlTypeID = (mysql_fetch_row($resDtl));
                         if ($dtlTypeID[0] != $bdtID){// invalid type supplied so skip and give warning
-                            warnSaveRec("invalid detail type supplied $bdtID, did not update detail id $bdID");
+                            warnSaveRec("invalid detail type supplied $bdtID for existing detail, did not update detail id $bdID ignoring");
                             array_push($ignoreIDs,$bdID);
                             continue;
                         }
-                    }else{// no existent dtl id so change this to insert and give warning.
+                    }else{// no existing dtl id for the given record so change this to insert and give warning.
                         warnSaveRec("detail id $bdID is not part of record $recordID, inserting new detail instead");
                         $oldBdID = $bdID;
-                        $bdID = false; // fail test differently to identify different processing
+                        $bdID = false; // fail test differently to signal translate
                     }
                 }else {	// simple case: this is a new detail (no existing dtl_ID) it assumes an array index number
-                    if ($bdID != intval($bdID)) continue;
-                    $bdID = "";
+                    if ($bdID != intval($bdID)) continue;  //bd155  is not equal to 155 while if this is an array index $bdID is numeric
+                    $bdID = "";//signal insert
                 }
                 $val = trim($val);
 
                 $bdVal = $bdFileID = $bdGeo = "NULL";
                 if($modeImport!=2){ //import without check of record type structure
-                    //check limit constraints
-                    if ( ! array_key_exists($bdtID, $repeats)) {
-                        error_log("hit limit for detail type $bdtID");
-                        warnSaveRec("hit limit for detail type $bdtID ignoring detail input");
-                        continue; // detail type not allowed or hit limit
+                    //check max limit constraints
+                    if ( ! array_key_exists($bdtID, $repeats)) {//if no entry in repeats then extra detail
+                        /*****DEBUG****///error_log("non rectype detail type $bdtID found");
+                        warnSaveRec("non rectype detail type $bdtID found");
                     }else if (is_numeric($repeats[$bdtID])) {
-                        if ($repeats[$bdtID] > 1) {
+                        if ($repeats[$bdtID] >= 1) {
                             $repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save
-                        } else if ($repeats[$bdtID] == 1) {
-                            unset ($repeats[$bdtID]);	// remove this type so no more values can be accepted
+                        }else if ($firstDetail && $repeats[$bdtID] == 0){ // case of not allowed
+                            warnSaveRec("detail type supplied $bdtID is not allowed, marking detail id $bdID for delete");
+                            continue;
+                        }else{
+                            warnSaveRec("hit max for detail type supplied $bdtID , ignoring update detail id $bdID");
+                            array_push($ignoreIDs,$bdID);
                         }
                     }
                 }
+
                 switch ($dtyVarieties[$bdtID]) {
-                    case "integer":  // these shoudl no logner exist, retained for backward compatibility
-                        // bug: non-integer valeus are not saved
-                        if (intval($val)  ||  $val == "0") $bdVal = intval($val);
-                        else { if ($bdID) array_push($updateIDs, $bdID); continue; }
+                    case "integer":  // these should no logner exist, retained for backward compatibility
+                                    // bug: non-integer values are not saved
+                        if (intval($val)  ||  $val == "0"){
+                            $bdVal = intval($val);
+                        } else if ($bdID) {//not integer so ignore
+                            array_push($ignoreIDs, $bdID);
+                            continue;
+                        }
                         break;
 
                     case "float":
                         if (floatval($val)  ||  preg_match('/^0(?:[.]0*)?$/', $val)) {
                             $bdVal = floatval($val);
-                        } else if ($bdID){
-                            array_push($updateIDs, $bdID);
+                        } else if ($bdID){ //not a float so ignore
+                            array_push($ignoreIDs, $bdID);
                             continue;
                         }
                         break;
@@ -406,14 +416,14 @@
                     case "freetext": case "blocktext":
                     case "date":
                     case "year": case "urlinclude": // these (year and urlinclude) should no logner exist, retained for backward compatibility
-                        if (! $val) {
-                            if ($bdID) array_push($updateIDs, $bdID);
+                        if (! $val) {//TODO: SAW check if this includes setting a string to "". if so perhaps this is a second pass delete
+                            if ($bdID) array_push($ignoreIDs, $bdID);
                             continue;
                         }
                         $bdVal = "'" . addslashes($val) . "'";
                         break;
 
-                    case "boolean":  // these shoudl no logner exist, retained for backward compatibility
+                    case "boolean":  // these should no logner exist, retained for backward compatibility
                         $bdVal = ($val && $val != "0")? "'true'" : "'false'";
                         break;
 
@@ -445,7 +455,7 @@
                                     ($bdID ? " detailID = $bdID":""));
                             }
                         }
-                        //FIXME :saw  change this to check for superuser adn valid recID or valid and viewable record for current user.
+                        //FIXME :saw  change this to check for superuser and valid recID or valid and viewable record for current user.
                         if (mysql_num_rows(mysql_query("select rec_ID from Records where (! rec_OwnerUGrpID or rec_OwnerUGrpID=$wg) and rec_ID=".intval($val))) <= 0) {
                             //	jsonError("invalid resource #".intval($val));
                         }
@@ -489,11 +499,12 @@
 
                     default:
                         // ???
-                        if ($bdID) array_push($updateIDs, $bdID);
+                        if ($bdID) array_push($ignoreIDs, $bdID);
                         continue;
                 }
 
-                if ($bdID) {
+                if ($bdID) {//danger the following update must restrict to a single detail id.
+                    //TODO: saw perhaps we should check value the same?
                     array_push($updateQueries, "update recDetails set dtl_Value=$bdVal, dtl_UploadedFileID=$bdFileID, dtl_Geo=$bdGeo where dtl_ID=$bdID and dtl_DetailTypeID=$bdtID and dtl_RecID=$recordID");
                     array_push($updateIDs, $bdID);
                 } else if ($bdID === false) { //bad bdID passed insert detail
@@ -503,8 +514,9 @@
                 }else {
                     array_push($insertQueryValues, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
                 }
-            }
-        }
+                $firstDetail = false;
+            }//end details values loop for dty
+        }//end dty loop
         //delete all details except the one that are being updated
         $deleteDetailIDsQuery = "select dtl_ID from recDetails where dtl_RecID=$recordID";
         if (count($updateIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . join(",", $updateIDs) . ")";
@@ -521,6 +533,9 @@
                 array_push($deleteIDs, $row[0]);
             }
         }
+        /*****DEBUG****///error_log("ignore detail IDs = ".print_r($ignoreIDs,true));
+        /*****DEBUG****///error_log("update detail IDs = ".print_r($updateIDs,true));
+        /*****DEBUG****///error_log("delete detail IDs = ".print_r($deleteIDs,true));
 
         /*	$retval is an array of arrays of detail ids
         *	with an array for deletes, updates and inserts
@@ -534,17 +549,17 @@
         //update all details to be kept
         if (count($deleteIDs)) {
             $deleteDetailsQuery = "delete from recDetails where dtl_ID in (" . join(",", $deleteIDs) . ")";
-            mysql_query($deleteDetailsQuery);
+//            mysql_query($deleteDetailsQuery);
             if (mysql_error()) {
                 errSaveRec("db error while deleteing details (" . join(",", $deleteIDs) . ") for record ID ".$recordID." error : ".mysql_error());
                 return array("error" => "recordID = $recordID rectype = $recordType ");
             }
-            $retval["deleted"] = $deleteIDs;
+//            $retval["deleted"] = $deleteIDs;
         }
 
         //update all details to be kept
         if (count($updateQueries)) {
-            /*****DEBUG****///		error_log("in DoInserts updating details ".print_r($updateQueries,true));
+            /*****DEBUG****///error_log("in DoInserts updating details ".print_r($updateQueries,true));
             foreach ($updateQueries as $update) {
                 mysql_query($update);
                 if (mysql_error()) {
@@ -556,7 +571,7 @@
         }
 
         if (count($insertQueryValues)) {//insert all new details
-            /*****DEBUG****///		error_log("in DoInserts inserting details ".print_r($inserts,true));
+            /*****DEBUG****///error_log("in DoInserts inserting details ".print_r($inserts,true));
             mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . join(",", $insertQueryValues));
             $first_bd_id = mysql_insert_id();
             if (mysql_error()) {
@@ -567,7 +582,7 @@
         }
 
         if (count($badIdInsertQueryValues)) {//insert all new details
-            /*****DEBUG****///		error_log("in DoInserts inserting details ".print_r($inserts,true));
+            /*****DEBUG****///error_log("in DoInserts inserting Bad ID details ".print_r($badIdInsertQueryValues,true));
             $j = 0;
             foreach ($badIdInsertQueryValues as $valueSet ) {
                 mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . $valueSet);

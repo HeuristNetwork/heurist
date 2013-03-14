@@ -1399,14 +1399,11 @@ var HRecord = function() {
 				if (val.getID()) { return val.getID(); }
 				else if (nonceOkay) { return val.getNonce(); }
 				else { throw new HUnsavedRecordException("Cannot save reference to unsaved record"); }
-			}
-			else if (HAPI.isA(val, "HFile")) {
+			}else if (HAPI.isA(val, "HFile")) {
 				return (val.getID()>0)?val.getID():val.getURL();
-			}
-			else if (HAPI.isA(val, "HGeographicValue")) {
+			}else if (HAPI.isA(val, "HGeographicValue")) {
 				return (HGeographicType.abbreviationForType(val.getType()) + " " + val.getWKT());
-			}
-			else if (typeof(val) === "object"  &&  val.constructor === Date) {
+			}else if (typeof(val) === "object"  &&  val.constructor === Date) {
 				return 	(val.getFullYear() + "-" +
 					(val.getMonth() < 9  ?  "0" + (val.getMonth()+1)  :  val.getMonth()+1) + "-" +
 					(val.getDate() <= 9  ?  "0" + val.getDate()  :  val.getDate()) +
@@ -1415,8 +1412,7 @@ var HRecord = function() {
 					(val.getSeconds() < 10 ? "0"+ val.getSeconds() : val.getSeconds()) :
 					((val.getHours() !=0 || val.getMinutes()!=0) ? " " + (val.getHours() < 10 ? "0"+ val.getHours() : val.getHours()) + ":" +
 					(val.getMinutes() < 10 ? "0"+ val.getMinutes() : val.getMinutes()) : "")));
-			}
-			else {
+			}else{
 				return (val + "");
 			}
 		}
@@ -3359,7 +3355,7 @@ var HeuristScholarDB = new HStorageManager();
 
 			case HVariety.ENUMERATION:
 			case HVariety.RELATIONTYPE:
-			return hDetailType.getEnumerationValueFromId(details);
+			return hDetailType.getIdForEnumerationValue (details);
 
 			case HVariety.REFERENCE:
 			return that.getRecordStub(details.id, details.title, details.hhash);
