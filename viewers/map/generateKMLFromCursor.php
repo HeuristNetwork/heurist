@@ -15,48 +15,19 @@
 */
 
 /**
-* brief description of file
+* Generates a KML output
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Tobias Peirick
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Viewers/Map
+* @deprecated
 */
 
-
-
-// ARTEM: TO REMOVE
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
-/**
- *
- * Filename: generateKMLFromCursor.php
- * Author:   Tobias Peirick
- * Description:
- * Generates a KML output
- *
- *
- * change history:
- * 2007-04-13 Tobias Peirick initial version
- *
- *
- */
 
 require_once('class.record.php');
 require_once('class.geometry.php');

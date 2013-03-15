@@ -15,9 +15,10 @@
 */
 
 /**
-* brief description of file
+* This class is used to perform search action on the heurist
+*  database for the use of accessing Biblio items*
 *
-* @author      Tom Murtagh
+* @author      Hanna Chamoun
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
@@ -27,31 +28,11 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Viewers/Map
+* @deprecated
 */
 
 
-
-// ARTEM: TO REMOVE
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
-/**
- * FileName:    class.searchCursor.php
- * Author:      Hanna Chamoun
- *
- * Description: This class is used to perform search action on the heurist
- *              database for the use of accessing Biblio items
- *
- */
 require_once('class.record.php');
 //require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

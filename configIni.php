@@ -15,11 +15,8 @@
 */
 
 /**
-* brief description of file
+* configutration file for a heurist installation
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -27,20 +24,8 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/*<!--
- * configIni.php - Configuration information for Heurist Initialization - EDITABLE by the installer of Heurist
- * @version $Id$
- * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- -->*/
 
 // if a heuristConfigIni.php file exists in the parent directory of the installation,
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist

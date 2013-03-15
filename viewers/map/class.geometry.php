@@ -15,9 +15,10 @@
 */
 
 /**
-* brief description of file
+* This class has been written to be a wrapper from the OpenGIS format,
+* that is the geometry format of MySQL.
 *
-* @author      Tom Murtagh
+* @author      Tobias Peirick
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
@@ -27,39 +28,11 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Viewers/Map
+* @deprecated
 */
 
 
-
-// ARTEM: TO REMOVE
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
-/**
- *
- * Filename: class.geometry.php
- * Author:   Tobias Peirick
- * Description:
- * This class has been written to be a wrapper from the OpenGIS format,
- * that is the geometry format of MySQL.
- *
- * Information about the OpenGIS standard of MySQL can be found at
- * http://dev.mysql.com/doc/refman/5.0/en/spatial-extensions.html
- *
- * change history:
- * 2007-04-02 Tobias Peirick initial version
- *
- *
- */
 class Geometry {
   var $type;
 	var $geo;

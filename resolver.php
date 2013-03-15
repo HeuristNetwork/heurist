@@ -15,12 +15,9 @@
 */
 
 /**
-* brief description of file
+ * redirect.php - acts as a PID redirector to view record  - provides a minimal URL for redirection
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
