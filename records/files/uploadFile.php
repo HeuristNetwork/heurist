@@ -15,11 +15,15 @@
 */
 
 /**
-* brief description of file
+ set of functions
+*     upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
+*     register_file - registger the existing file on the server in recUploadedFiles (used in import)
+*     get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
+*     getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
+*     is_image - detect if resource is image
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -27,32 +31,10 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Records/Util
+* @todo        rename functions to match global convention
 */
 
-
-
-	/**
-	* uploadFile.php
-	*
-	* set of functions
-	* 		upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
-	*
-	* 		register_file - registger the existing file on the server in recUploadedFiles (used in import)
-	*
-	* 		get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
-	*
-	* 		getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
-	*
-	* 		is_image - detect if resource is image
-	*
-	*
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
 
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");

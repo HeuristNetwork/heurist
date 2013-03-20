@@ -9,7 +9,7 @@
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
  -- http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=rH3CoreDefinitions
- 
+
 -- This file is used, through the buildCrosswalks function, to populate a blank Heurist
 -- database structure with a minimal set of essential record type, detail type etc. definitions
 
@@ -20,7 +20,7 @@
 -- Heurist Definitions Exchange File generated: 01 Mar 2013 @ 14:08
 -- Installation = http://heuristscholar.org/h3-ao/
 -- Database = H3CoreDefinitions
--- Program Version: 3.1.0 RC1
+-- Program Version: 3.1.0
 -- Database Version: 1.1.0
 
 -- RECORD TYPE GROUPS
@@ -32,9 +32,9 @@
 ('11','Try \'Import structure\' in menu on left','functionalgroup','001','We recommend downloading pre-defined record types via the \'Import structure\' menu on the left, and then customising them to your needs. This will save you a lot of time and allow you to build on other people\'s experience'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPE GROUPS
 
@@ -49,9 +49,9 @@
 ('105','File Metadata','005','File metadata used in processing in situ file indexing and the import of FieldHelper manifests'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- ONTOLOGIES
 
@@ -62,9 +62,9 @@
 ('3','CIDOC-CRM','CIDOC-CRM','', 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424','open', '2','CIDOC-CRM','3', '255','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- TERMS
 
@@ -480,9 +480,9 @@
 ('3296','RAW','', '','', '','','', '0','0','enum','0', '0','3273','1','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD TYPES
 
@@ -500,9 +500,9 @@
 ('10','Person','33','A standard record for a person, may be expanded with additional information as required.','[Family name], [Given names] ([Birth Date])', '[1], [18] ([10])','Persons','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '1','1','1'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPES
 
@@ -560,9 +560,9 @@
 ('72','Parent record','Please document the nature of this detail type (field)) ...','resource','Pointer which can be created automatically when a record is created as a child through as pointer field', '','','reserved','', '','','99', '0','','', '','','1','viewable','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD STRUCTURE
 
@@ -685,9 +685,9 @@
 ('1435','10', '38','Related file','An uploaded file or a reference to a file through a URI', 'A single detail of this type can be used to reference a file uploaded into Heurist or available via URL. Note that currently the URL must be publicly accessible','016','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','9'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RELATIONSHIP CONSTRAINTS
 
@@ -695,9 +695,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- FILE EXTENSIONS TO MIME TYPES
 
@@ -888,9 +888,9 @@
 ('zip','application/zip', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- Definitions translations
 
@@ -898,9 +898,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CALC FUNCTIONS
 
@@ -908,9 +908,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CROSSWALK
 
@@ -918,9 +918,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF LANGUAGE
 
@@ -964,9 +964,9 @@
 ('','YI','Yiddish',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF URL PREFIXES
 
@@ -974,6 +974,5 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+

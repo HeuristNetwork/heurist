@@ -73,7 +73,7 @@ if (! top.HEURIST) {
          *
          * @type String
          */
-        VERSION: "3.1.0 RC1",
+        VERSION: "3.1.0",
 
         basePath: installDir,
 /**

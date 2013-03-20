@@ -1,14 +1,14 @@
  -- coreDefinitionsExtended.txt: Database definitions for a new database with EXTENDED STRUCTURE
  -- @author Ian Johnson 11/1/2011
  -- @copyright 2005-2013 University of Sydney
- -- @link: http://HeuristScholar.org                                                                        
+ -- @link: http://HeuristScholar.org
  -- @license http://www.gnu.org/licenses/gpl-3.0.txt
  -- @package Heurist academic knowledge management system
  -- @todo
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
  -- http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=rH3CoreDefinitions
- 
+
 -- This file is used, through the buildCrosswalks function, to populate a blank Heurist
 -- database structure with a minimal set of essential record type, detail type etc. definitions
 
@@ -20,7 +20,7 @@
 -- Heurist Definitions Exchange File generated: 01 Mar 2013 @ 14:34
 -- Installation = http://heuristscholar.org/h3-ij/
 -- Database = H3CorePlusTools_temporary
--- Program Version: 3.1.0 RC1
+-- Program Version: 3.1.0
 -- Database Version: 1.1.0
 
 -- RECORD TYPE GROUPS
@@ -33,9 +33,9 @@
 ('12','Transform and Annotate','functionalgroup','001','Record types required for the annotation functions'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPE GROUPS
 
@@ -51,9 +51,9 @@
 ('106','Imported','255','This group contains all detailtypes that were imported from external databases'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- ONTOLOGIES
 
@@ -64,9 +64,9 @@
 ('3','CIDOC-CRM','CIDOC-CRM','', 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424','open', '2','CIDOC-CRM','3', '255','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- TERMS
 
@@ -674,9 +674,9 @@
 ('3488','YellowGreen','', '','open', '2','YellowGreen','698', '1','0','enum','0', '0','3341','1','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD TYPES
 
@@ -703,9 +703,9 @@
 ('19','Heurist Layout','0','Record which contains information which captures or resets the layout of the Heurist interface.','[Layout Name]', '[1]','Heurist Layouts','approved', '2','Heurist Layout','16', 'viewable','0','4','', '0','','','normal', '1','1','1'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPES
 
@@ -783,9 +783,9 @@
 ('92','Version Number','Please document the nature of this detail type (field)) ...','freetext','Numeric string representing a version, typically a squence of numbers separated by full stop.', '','','approved','2', 'Version Number','49','106', '0','','', '','0','0','viewable','1'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD STRUCTURE
 
@@ -966,9 +966,9 @@
 ('1493','19', '92','Version Number','Numeric string representing a version, typically a sequence of numbers separated by full stops', 'Please provide an extended description for display on rollover ...','002','10', '1.0','0','0', 'optional','viewable','open','open', '2','107', '1','0','1', '','', '0','','1'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RELATIONSHIP CONSTRAINTS
 
@@ -976,9 +976,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- FILE EXTENSIONS TO MIME TYPES
 
@@ -1169,9 +1169,9 @@
 ('zip','application/zip', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- Definitions translations
 
@@ -1179,9 +1179,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CALC FUNCTIONS
 
@@ -1189,9 +1189,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CROSSWALK
 
@@ -1199,9 +1199,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF LANGUAGE
 
@@ -1245,9 +1245,9 @@
 ('','YI','Yiddish',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF URL PREFIXES
 
@@ -1255,6 +1255,5 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+

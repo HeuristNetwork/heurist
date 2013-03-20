@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* Popup dialogue to define URLinclude field type in editRecord
+* URL is either to external resource or link file uploaded to heurist
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -25,20 +26,10 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Records/Util
 */
-/**
- * initViewer.js
- *
- * Popup dialogue to define URLinclude field type in editRecord
- * URL is either to external resource or link file uploaded to heurist
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- *
- * this file requires
+
+/* this file requires
  * ../../common/js/utilsUI.js
  * ../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js
  * ../../records/files/imageAnnotation.js

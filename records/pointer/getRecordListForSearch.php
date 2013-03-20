@@ -15,47 +15,31 @@
 */
 
 /**
-* brief description of file
+* Search for records entries matching the given standard query string in $_REQUEST['q']
+* The returned fields include rec_ID, rec_Title, rec_URL and rec_RecTypeID.
+* If $_REQUEST['l'] is supplied, it is used as the maximum number of results to return,
+*  (or defaults to 50)
+* If $_REQUEST['r'] is "recent", then matches are restricted to records records viewed
+*  or edited by the user
+* If $_REQUEST['searchID'] is present, it is used as a search notification ID;
+*  this defaults to "search";
+* Results are stored in (object) top.HEURIST.results[ searchID ]:
+*  - colNames is an array of the field names
+*  - records is an array, with each entry being an array corresponding to one matching record
+* Once the results are finished, the window.HEURIST.notifyResults( searchID ) is called.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Records/Util
 */
 
 
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
-
-/* Search for records entries matching the given standard query string in $_REQUEST['q']
- * The returned fields include rec_ID, rec_Title, rec_URL and rec_RecTypeID.
- * If $_REQUEST['l'] is supplied, it is used as the maximum number of results to return,
- *  (or defaults to 50)
- * If $_REQUEST['r'] is "recent", then matches are restricted to records records viewed
- *  or edited by the user
- * If $_REQUEST['searchID'] is present, it is used as a search notification ID;
- *  this defaults to "search";
- * Results are stored in (object) top.HEURIST.results[ searchID ]:
- *  - colNames is an array of the field names
- *  - records is an array, with each entry being an array corresponding to one matching record
- * Once the results are finished, the window.HEURIST.notifyResults( searchID ) is called.
- */
 
 define("RESULT_LIMIT", 100);
 define('ISSERVICE',1);
