@@ -2897,7 +2897,7 @@ s
                     width: 780,
                     callback: function(_, _, response) {
 
-                        var sURL = top.HEURIST.basePath+"/records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
+                        var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
                         top.HEURIST.util.popupURL(
                             windowRef,
                             sURL,
