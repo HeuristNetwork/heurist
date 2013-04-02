@@ -147,8 +147,8 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
 	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select bkm_ID from usrBookmarks left join Records on rec_ID=bkm_recID where bkm_UGrpID="'.addslashes($usrID).'"
-							and (rec_URL="'.addslashes($burl).'" or rec_URL="'.addslashes($burl).'/")');
+	$res = mysql_query('select bkm_ID from usrBookmarks left join Records on rec_ID=bkm_recID where bkm_UGrpID="'.mysql_real_escape_string($usrID).'"
+							and (rec_URL="'.mysql_real_escape_string($burl).'" or rec_URL="'.mysql_real_escape_string($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
 		$bkm_ID = $bkmk['bkm_ID'];
@@ -188,7 +188,7 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 		$pos = strpos($tag, "\\");
 		if ($pos !== false) {
 			$grpName = substr($tag, 0, $pos);	//extract the name of the workgroup
-			$res = mysql_query("select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where grp.ugr_Name='".addslashes($grpName)."' and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
+			$res = mysql_query("select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where grp.ugr_Name='".mysql_real_escape_string($grpName)."' and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
 			if (mysql_num_rows($res) == 0) { //if the user is not a member
 				$wg .= '&wgkwd=' . urlencode($tag);
 				array_push($outTags, str_replace("\\", "", $tag));	//this removes the \ from wgname\tagname to create a personal tag of wgnametagname
@@ -224,23 +224,23 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	if (! @$rec_id  &&  ! @$force_new) {
 
 		/* look up the records table, see if the requested URL is already in the database; if not, add it */
-		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" '.
+		$res = mysql_query('select * from Records where rec_URL = "'.mysql_real_escape_string($url).'" '.
 								'and (rec_OwnerUGrpID in (0'.(get_user_id()?','.get_user_id():'').')'.
 										' or not rec_NonOwnerVisibility="hidden")');
 		if (($row = mysql_fetch_assoc($res))) { // found record
 			$rec_id = intval($row['rec_ID']);
 			$fav = $_REQUEST["f"];
 			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1',
-				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = '.$doiDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))'.
-					' or  (dtl_DetailTypeID = '.$webIconDT.' and dtl_Value = "'.addslashes($fav).'"))'.
-					' or  (dtl_DetailTypeID = '.$issnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))'.
-					' or  (dtl_DetailTypeID = '.$isbnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
+				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = '.$doiDT.' and dtl_Value in ("'.join('","', array_map("mysql_real_escape_string", $dois)).'"))'.
+					' or  (dtl_DetailTypeID = '.$webIconDT.' and dtl_Value = "'.mysql_real_escape_string($fav).'"))'.
+					' or  (dtl_DetailTypeID = '.$issnDT.' and dtl_Value in ("'.join('","', array_map("mysql_real_escape_string", $issns)).'"))'.
+					' or  (dtl_DetailTypeID = '.$isbnDT.' and dtl_Value in ("'.join('","', array_map("mysql_real_escape_string", $isbns)).'")))');
 
 			$inserts = array();
-			foreach ($dois as $doi) if (! $bd["$doiDT.$doi"]) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
-			if ($fav  &&  ! $bd["$webIconDT.$fav"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($fav) . "')");
-			foreach ($isbns as $isbn) if (! $bd["$isbnDT.$isbn"]) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
-			foreach ($issns as $issn) if (! $bd["$issnDT.$issn"]) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
+			foreach ($dois as $doi) if (! $bd["$doiDT.$doi"]) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
+			if ($fav  &&  ! $bd["$webIconDT.$fav"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($fav) . "')");
+			foreach ($isbns as $isbn) if (! $bd["$isbnDT.$isbn"]) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
+			foreach ($issns as $issn) if (! $bd["$issnDT.$issn"]) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
 
 			if ($inserts) {
 				mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
@@ -304,13 +304,13 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
 		$inserts = array();
-		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
-		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($_REQUEST["f"]) . "')");
-		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
-		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
+		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
+		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
+		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
+		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
 		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
@@ -355,13 +355,13 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
-						$rec_id.','.$titleDT.',"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+						$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 	}
 	$inserts = array();
-	foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
-	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($_REQUEST["f"]) . "')");
-	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
-	foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
+	foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
+	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
+	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
+	foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
 	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);
@@ -394,7 +394,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			}
 			$notesOut = preg_replace("/\n\n+/", "\n", $notesOut);
 
-			mysql_query("update Records set rec_ScratchPad = '" . addslashes($notesOut) . "' where rec_ID = $rec_id");
+			mysql_query("update Records set rec_ScratchPad = '" . mysql_real_escape_string($notesOut) . "' where rec_ID = $rec_id");
 
 			insert_woot_content($rec_id, $description);
 		}
@@ -429,13 +429,13 @@ if ($rec_id) {
 				$pos = strpos($tag, "\\");
 				$grpName = substr($tag, 0, $pos);
 				$kwdName = substr($tag, $pos+1);
-				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where tag_Text='".addslashes($kwdName)."' and grp.ugr_Name='".addslashes($grpName)."' and tag_UGrpID=grp.ugr_ID and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
+				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where tag_Text='".mysql_real_escape_string($kwdName)."' and grp.ugr_Name='".mysql_real_escape_string($grpName)."' and tag_UGrpID=grp.ugr_ID and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
 				$kwd_id = mysql_fetch_row($res);
 				$kwd_id = $kwd_id[0];
 			}
 			else {
 				//check for existing usr personal tag
-				$res = mysql_query("select tag_ID from usrTags where tag_Text = \"".addslashes($tag)."\" and tag_UGrpID=$usrID");
+				$res = mysql_query("select tag_ID from usrTags where tag_Text = \"".mysql_real_escape_string($tag)."\" and tag_UGrpID=$usrID");
 				if ($row = mysql_fetch_assoc($res)) {
 					$kwd_id = $row['tag_ID'];
 				} else {// no existing tag so add it
@@ -460,7 +460,7 @@ if ($rec_id) {
 		$other_bib_id = $_REQUEST["related"];
 		$reln_type = "IsRelatedTo";
 		if (@$_REQUEST["reltype"]) {
-			mysql_query("select trm_ID,trm_Label from defTerms where trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
+			mysql_query("select trm_ID,trm_Label from defTerms where trm_Label like '".mysql_real_escape_string($_REQUEST["reltype"])."' limit 1;");
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
 				$reln_type = $row["trm_ID"];	// saw TODO: check that this is aligned with the enum value change
@@ -481,7 +481,7 @@ if ($rec_id) {
 			$query .=   "($relnBibID, $titleDT, 'Relationship')";
 			$query .= ", ($relnBibID, $relSrcDT, $rec_id)";
 			$query .= ", ($relnBibID, $relTrgDT, $other_bib_id)";
-			$query .= ", ($relnBibID, $relTypDT, '" . addslashes($reln_type) . "')"; //saw BUG!!! places in label not ID
+			$query .= ", ($relnBibID, $relTypDT, '" . mysql_real_escape_string($reln_type) . "')"; //saw BUG!!! places in label not ID
 			mysql_query($query);
 		}
 	}

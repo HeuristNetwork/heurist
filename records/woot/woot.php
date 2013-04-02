@@ -163,7 +163,7 @@ function loadWoot($args) {
 
 	mysql_connection_select(DATABASE);
 
-	$wootTitle = addslashes(@$args["title"]);
+	$wootTitle = mysql_real_escape_string(@$args["title"]);
 	$wootId = intval(@$args["id"]);
 	$wootPermissions = array();
 
@@ -295,7 +295,7 @@ function saveWoot($args) {
 	mysql_connection_overwrite(DATABASE);
 
 	$wootId = intval(@$args["id"]);
-	$wootTitle = addslashes(@$args["title"]);
+	$wootTitle = mysql_real_escape_string(@$args["title"]);
 
 	mysql_query("start transaction");
 
@@ -665,11 +665,11 @@ function getTextSearch($q) {
 	foreach ($searchTerms as $term) {
 		if (substr($term, 0, 1) != "-") {
 			if ($TEXT_SEARCH) { $TEXT_SEARCH .= " or "; }
-			$TEXT_SEARCH .= "chunk_Text like '%" . addslashes($term) . "%'";
+			$TEXT_SEARCH .= "chunk_Text like '%" . mysql_real_escape_string($term) . "%'";
 		}
 		else {
 			if ($NEGATIVE_TEXT_SEARCH) { $NEGATIVE_TEXT_SEARCH .= " or "; }
-			$NEGATIVE_TEXT_SEARCH .= "chunk_Text like '%" . addslashes(substr($term, 1)) . "%'";
+			$NEGATIVE_TEXT_SEARCH .= "chunk_Text like '%" . mysql_real_escape_string(substr($term, 1)) . "%'";
 		}
 	}
 	if ($TEXT_SEARCH) {

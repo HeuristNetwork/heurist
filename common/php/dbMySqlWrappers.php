@@ -187,7 +187,7 @@ function mysqli_connection_overwrite($database = '', $server = HEURIST_DBSERVER_
 */
 function sql_niceify($val) {
 	if (isset($val) and !is_null($val)) {
-		return '"' . addslashes(preg_replace('/\r\n?/', "\n", $val)) . '"';
+		return '"' . mysql_real_escape_string(preg_replace('/\r\n?/', "\n", $val)) . '"';
 	} else {
 		return 'NULL';
 	}
@@ -326,12 +326,12 @@ function mysql__lookup($query) {
 	return $lookup;
 }
 /**
-* enhancement to addslashes that standardises the return character.
+* enhancement to mysql_real_escape_string that standardises the return character.
 * @param    string [$str] sql query string to be slashed
 * @return   string slashed string with \n for return
 */
 function slash($str) {
-	return preg_replace("/\r\n|\r|\n/", "\\n", addslashes($str));
+	return preg_replace("/\r\n|\r|\n/", "\\n", mysql_real_escape_string($str));
 }
 /**
 * simple test to see if this is a zero based ordered array

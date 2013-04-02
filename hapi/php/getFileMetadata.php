@@ -67,7 +67,7 @@ if (@$_REQUEST["file-name"]) {
 	$hasQuestion = strpos($_REQUEST["file-name"], "?");
 	if ($hasStar === false  &&  $hasBracket === false  &&  $hasQuestion === false) {
 		// no need for trickiness -- direct string match
-		$fileNameQuery = "and ulf_OrigFileName = '" . addslashes($_REQUEST["file-name"]) . "'";
+		$fileNameQuery = "and ulf_OrigFileName = '" . mysql_real_escape_string($_REQUEST["file-name"]) . "'";
 	}
 	else if ($hasBracket === false) {
 		// an asterisk is used -- use LIKE
@@ -90,10 +90,10 @@ if (@$_REQUEST["file-name"]) {
 				$glob .= $match[3];
 			}
 			else if ($match[4]) {	// a NEGATIVE CHARACTER SET
-				$glob .= addslashes($match[4]);
+				$glob .= mysql_real_escape_string($match[4]);
 			}
 			else if ($match[5]) {	// a POSITIVE CHARACTER SET (can be collapsed into case 3)
-				$glob .= addslashes($match[5]);
+				$glob .= mysql_real_escape_string($match[5]);
 			}
 			else if ($match[6]) {	// regular text -- escape any special characters
 				$glob .= preg_replace("/[\\\"'()\[\]{}^$?|+]/", "\\\\$0", $match[6]);
@@ -105,26 +105,26 @@ if (@$_REQUEST["file-name"]) {
 	}
 }
 if (@$_REQUEST["file-description"]) {
-	$fileDescriptionSpec = addslashes($_REQUEST["file-description"]);
+	$fileDescriptionSpec = mysql_real_escape_string($_REQUEST["file-description"]);
 	$fileDescriptionQuery = "and match (ulf_Description) against ('$fileDescriptionSpec')";
 }
 if (@$_REQUEST["file-type"]) {
 	$fileTypeSpec = $_REQUEST["file-type"];
 	if (substr($fileTypeSpec, strlen($fileTypeSpec)-2) == "/*") {
 		$fileTypeSpec = str_replace(array("\\", "\"", "'", "%", "_"), array("\\\\", "\\\"", "\\'", "\\%", "\\_"), $fileTypeSpec);
-		$fileTypeQuery = "and file_mimetype like '" . addslashes(substr($fileTypeSpec, 0, strlen($fileTypeSpec)-1)) . "%'";
+		$fileTypeQuery = "and file_mimetype like '" . mysql_real_escape_string(substr($fileTypeSpec, 0, strlen($fileTypeSpec)-1)) . "%'";
 	}
 	else {
-		$fileTypeQuery = "and file_mimetype = '" . addslashes($_REQUEST["file-type"]) . "'";
+		$fileTypeQuery = "and file_mimetype = '" . mysql_real_escape_string($_REQUEST["file-type"]) . "'";
 	}
 }
 if (@$_REQUEST["file-any"]) {
 	// match against either the filename or the description
 	$words = preg_split('/\\s+/', $_REQUEST["file-any"]);
 
-	$fileQuery = "match (ulf_Description) against ('" . addslashes($_REQUEST["file-any"]) . "')";
+	$fileQuery = "match (ulf_Description) against ('" . mysql_real_escape_string($_REQUEST["file-any"]) . "')";
 	foreach ($words as $word) {
-		$fileQuery .= " or ulf_OrigFileName like '%" . addslashes($word) . "%'";
+		$fileQuery .= " or ulf_OrigFileName like '%" . mysql_real_escape_string($word) . "%'";
 	}
 }
 if (! (@$fileNameQuery  ||  @$fileDescriptionQuery  ||  @$fileTypeQuery  ||  @$fileQuery)) {

@@ -194,18 +194,18 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 				defined('DT_TARGET_RESOURCE') &&
 				defined('DT_PRIMARY_RESOURCE')) {
 		$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
-		$query .=   "($relnRecID, ".DT_NAME.", '" . addslashes($title) . "')";
+		$query .=   "($relnRecID, ".DT_NAME.", '" . mysql_real_escape_string($title) . "')";
 		$query .= ", ($relnRecID, ".DT_PRIMARY_RESOURCE.", $recID)";
 		$query .= ", ($relnRecID, ".DT_TARGET_RESOURCE.", $trgRecID)";
 		$query .= ", ($relnRecID, ".DT_RELATION_TYPE.", $relTermID)";
 		if ($interpRecID && defined('DT_INTERPRETATION_REFERENCE'))
 			$query .= ", ($relnRecID, ".DT_INTERPRETATION_REFERENCE.", $interpRecID)";
 		if ($notes && defined('DT_SHORT_SUMMARY'))
-			$query .= ", ($relnRecID, ".DT_SHORT_SUMMARY.", '" . addslashes($notes) . "')";
+			$query .= ", ($relnRecID, ".DT_SHORT_SUMMARY.", '" . mysql_real_escape_string($notes) . "')";
 		if ($start_date && defined('DT_START_DATE'))
-			$query .= ", ($relnRecID, ".DT_START_DATE.", '" . addslashes($start_date) . "')";
+			$query .= ", ($relnRecID, ".DT_START_DATE.", '" . mysql_real_escape_string($start_date) . "')";
 		if ($end_date && defined('DT_END_DATE'))
-			$query .= ", ($relnRecID, ".DT_END_DATE.", '" . addslashes($end_date) . "')";
+			$query .= ", ($relnRecID, ".DT_END_DATE.", '" . mysql_real_escape_string($end_date) . "')";
 /*****DEBUG****///error_log(" rel save query = $query");
 		$res = mysql_query($query);
 /*****DEBUG****///error_log("res = $res  error " .mysql_error());

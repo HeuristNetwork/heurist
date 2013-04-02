@@ -75,14 +75,14 @@ if (@$_REQUEST['new_hyp_text']) {
 			//remove filter text if found
 			$res = mysql_query('delete from usrHyperlinkFilters
 			                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
-			                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+			                       and hyf_String="'.mysql_real_escape_string(@$_REQUEST['new_hyp_text']).'"');
 
 		}else{
 
 			//add new filter text if not found
 			$res = mysql_query('select count(*) from usrHyperlinkFilters
 			                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
-			                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+			                       and hyf_String="'.mysql_real_escape_string(@$_REQUEST['new_hyp_text']).'"');
 			$row = mysql_fetch_array($res);
 			if ($row[0] == 0) {
 				mysql__insert('usrHyperlinkFilters',

@@ -47,7 +47,7 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 function get_location($key) {
 	mysql_connection_select("hapi");
-	return mysql_fetch_assoc(mysql_query("select * from hapi_locations where hl_key='".addslashes($key)."'"));
+	return mysql_fetch_assoc(mysql_query("select * from hapi_locations where hl_key='".mysql_real_escape_string($key)."'"));
 }
 
 ?>

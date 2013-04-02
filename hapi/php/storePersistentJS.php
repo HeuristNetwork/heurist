@@ -76,10 +76,10 @@ if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)
 
 	if (@$_REQUEST["crossSession"]) {
 		// cross-session values are stored in the database
-		$res = mysql_query("select * from hapi_pj_party where pj_location='" . addslashes($location) . "'" .
+		$res = mysql_query("select * from hapi_pj_party where pj_location='" . mysql_real_escape_string($location) . "'" .
 		                                                " and pj_instance='" . HEURIST_DBNAME . "'" .
 		                                                " and pj_user_id=" . get_user_id() .
-		                                                " and pj_varname='" . addslashes($topLevelVarName) . "'");
+		                                                " and pj_varname='" . mysql_real_escape_string($topLevelVarName) . "'");
 		$topObject = mysql_fetch_assoc($res);
 		$topObject = json_decode($topObject["pj_value"], 1);
 		if (! is_array($topObject)) $topObject = array();
@@ -87,11 +87,11 @@ if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)
 		setInnerValue($topObject, $innerVarPath, $value);
 
 		mysql_query("replace hapi_pj_party (pj_location, pj_instance, pj_user_id, pj_varname, pj_value)
-		                            values ('".addslashes($location)."',
+		                            values ('".mysql_real_escape_string($location)."',
 		                                     '".HEURIST_DBNAME."',
 		                                     ".get_user_id().",
-		                                     '".addslashes($topLevelVarName)."',
-		                                     '".addslashes(json_encode($topObject))."')");
+		                                     '".mysql_real_escape_string($topLevelVarName)."',
+		                                     '".mysql_real_escape_string(json_encode($topObject))."')");
 	}
 	else {
 		// non cross-session values are stored in $_SESSION
@@ -111,11 +111,11 @@ if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)
 else if (preg_match("/^([a-zA-Z0-9_]+)$/", $varName)) {
 	if (@$_REQUEST["crossSession"]) {
 		mysql_query("replace hapi_pj_party (pj_location, pj_instance, pj_user_id, pj_varname, pj_value)
-		                            values ('".addslashes($location)."',
+		                            values ('".mysql_real_escape_string($location)."',
 		                                     '".HEURIST_DBNAME."',
 		                                     ".get_user_id().",
-		                                     '".addslashes($varName)."',
-		                                     '".addslashes(json_encode($value))."')");
+		                                     '".mysql_real_escape_string($varName)."',
+		                                     '".mysql_real_escape_string(json_encode($value))."')");
 	}
 	else {
 		session_start();

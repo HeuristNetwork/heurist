@@ -63,7 +63,7 @@ if (@$_REQUEST['submitted']) {
 	if (@$_REQUEST['new_hyp_text']) {
 		$res = mysql_query('select * from usrHyperlinkFilter
 		                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
-		                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+		                       and hyf_String="'.mysql_real_escape_string(@$_REQUEST['new_hyp_text']).'"');
 		if (mysql_num_rows($res) == 0) {
 			mysql__insert('usrHyperlinkFilter',
 			             array('hyf_String' => @$_REQUEST['new_hyp_text'],
@@ -113,7 +113,7 @@ if (@$_REQUEST['change_names']) {
 	$count = 0;
 	foreach (@$_REQUEST['kwdl'] as $kwd_id => $new_kwd_label) {
 		if ($orig_kwd_label[$kwd_id]  and  $orig_kwd_label[$kwd_id] != $new_kwd_label) {
-			mysql_query('update usrTags set tag_Text="'.addslashes($new_kwd_label).'"
+			mysql_query('update usrTags set tag_Text="'.mysql_real_escape_string($new_kwd_label).'"
 			                           where tag_ID='.intval($kwd_id));
 			$count += mysql_affected_rows();
 		}
@@ -152,7 +152,7 @@ if (get_user_id() == 96) {
 			$insert_stmt = '';
 			foreach ($hls as $hl) {
 				if ($insert_stmt) $insert_stmt .= ', ';
-				$insert_stmt .= '("'.addslashes($hl).'", get_user_id())';
+				$insert_stmt .= '("'.mysql_real_escape_string($hl).'", get_user_id())';
 			}
 			$insert_stmt = 'insert into usrHyperlinkFilter (hyf_String, hyf_UGrpID) values ' . $insert_stmt;
 			mysql_query($insert_stmt);

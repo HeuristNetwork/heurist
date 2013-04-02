@@ -210,7 +210,7 @@
         /*****DEBUG****///error_log("DEBUG >>>>>>MASK=".$mask."=".$title);
 
         if ($title) {
-            mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $recordID");
+            mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $recordID");
         }
 
         // Update memcache: we can do this here since it's only the public data that we cache.
@@ -420,7 +420,7 @@
                             if ($bdID) array_push($ignoreIDs, $bdID);
                             continue;
                         }
-                        $bdVal = "'" . addslashes($val) . "'";
+                        $bdVal = "'" . mysql_real_escape_string($val) . "'";
                         break;
 
                     case "boolean":  // these should no logner exist, retained for backward compatibility
@@ -481,7 +481,7 @@
                     case "geo":
                         $geoType = trim(substr($val, 0, 2));
                         $geoVal = trim(substr($val, 2));
-                        $res = mysql_query("select geomfromtext('".addslashes($geoVal)."') = 'Bad object'");
+                        $res = mysql_query("select geomfromtext('".mysql_real_escape_string($geoVal)."') = 'Bad object'");
                         $row = mysql_fetch_row($res);
                         if ($row[0]) {
                             // bad object!  Go stand in the corner.
@@ -489,8 +489,8 @@
                             return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
                                 ($bdID ? " detailID = $bdID":""));
                         }
-                        $bdVal = '"' . addslashes($geoType) . '"';
-                        $bdGeo = "geomfromtext('".addslashes($geoVal)."')";
+                        $bdVal = '"' . mysql_real_escape_string($geoType) . '"';
+                        $bdGeo = "geomfromtext('".mysql_real_escape_string($geoVal)."')";
 
                     case "separator":
                     case "relmarker":
@@ -613,7 +613,7 @@
         $tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $tagString))));     // replace backslashes with forwardslashes
         // create a map of this user's personal tags to tagIDs
         $tagMap = mysql__select_assoc("usrTags", "trim(lower(tag_Text))", "tag_ID",
-            "tag_UGrpID=".get_user_id()." and tag_Text in (\"".join("\",\"", array_map("addslashes", $tags))."\")");
+            "tag_UGrpID=".get_user_id()." and tag_Text in (\"".join("\",\"", array_map("mysql_real_escape_string", $tags))."\")");
 
         //create an ordered list of personal tag ids
         $tag_ids = array();
@@ -621,7 +621,7 @@
             if (@$tagMap[strtolower($tag)]) {// existing tag
                 $tag_id = $tagMap[strtolower($tag)];
             } else { // new tag so add it
-                mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag) . "\", $usrID)");
+                mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)");
                 $tag_id = mysql_insert_id();
             }
             array_push($tag_ids, $tag_id);

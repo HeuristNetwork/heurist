@@ -1481,8 +1481,8 @@ function find_exact_entry(&$entry) {
 		return true;
 	}
 
-	/*****DEBUG****/// error_log("select rec_ID from records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
-	$res = mysql_query("select rec_ID from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
+	/*****DEBUG****/// error_log("select rec_ID from records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . mysql_real_escape_string($entry->getHHash()) . "') order by rec_ID");
+	$res = mysql_query("select rec_ID from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . mysql_real_escape_string($entry->getHHash()) . "') order by rec_ID");
 
 	if (mysql_num_rows($res) < 1) return false;
 	// choose One Of The Matches ... tend to think that the one with the lowest bibID has precedence ...
@@ -1513,10 +1513,10 @@ function find_similar_entries(&$entry) {
 	// use a strict substring to take advantage of the index on hash
 	if (HASH_PREFIX_LENGTH) {
 		$hprefix = mb_substr($hash, 0, HASH_PREFIX_LENGTH);
-		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . addslashes($hprefix) . "%' having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . mysql_real_escape_string($hprefix) . "%' having lev is not null order by lev";
 	}
 	else {
-		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev is not null order by lev";
 	}
 	/*****DEBUG****/// error_log($similar_query);
 
@@ -1667,16 +1667,16 @@ function insert_biblio(&$entry) {
 		if ($field->getType() == $creatorDT) {//MAGIC NUMBER - Author/Creator
 			foreach ($field->getValue() as $person_bib_id) {
 				if ($bib_detail_insert) $bib_detail_insert .= ', ';
-				$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($person_bib_id).'", NULL, 1)';
+				$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.mysql_real_escape_string($person_bib_id).'", NULL, 1)';
 			}
 		}
 		else if ($field->getGeographicValue()) {
 			if ($bib_detail_insert) $bib_detail_insert .= ', ';
-			$bib_detail_insert .= '('.$rec_id.','.$field->getType().',"'.addslashes($field->getValue()).'",geomfromtext("'.addslashes($field->getGeographicValue()).'"),1)';
+			$bib_detail_insert .= '('.$rec_id.','.$field->getType().',"'.mysql_real_escape_string($field->getValue()).'",geomfromtext("'.mysql_real_escape_string($field->getGeographicValue()).'"),1)';
 		}
 		else {
 			if ($bib_detail_insert) $bib_detail_insert .= ', ';
-			$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($field->getValue()).'", NULL, 1)';
+			$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.mysql_real_escape_string($field->getValue()).'", NULL, 1)';
 		}
 	}
 
@@ -1698,7 +1698,7 @@ function insert_biblio(&$entry) {
 
 	$recTitle = $entry->getTitle();
 	mysql_query('set @suppress_update_trigger := 1');
-	mysql_query('update Records set rec_Title = "'.addslashes($recTitle).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
+	mysql_query('update Records set rec_Title = "'.mysql_real_escape_string($recTitle).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
 	mysql_query('set @suppress_update_trigger := NULL');
 }
 
@@ -1779,7 +1779,7 @@ left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
 	}
 
 	if ($new_val) {
-		mysql_query('update Records set rec_ScratchPad="'.addslashes($new_val).'", rec_Modified=now() where rec_ID='.$master_bib_id);
+		mysql_query('update Records set rec_ScratchPad="'.mysql_real_escape_string($new_val).'", rec_Modified=now() where rec_ID='.$master_bib_id);
 	} else if ($num_bd_rows) {
 		mysql_query('update Records set rec_Modified=now() where rec_ID='.$master_bib_id);
 	}
@@ -1861,7 +1861,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 			', by user: ' . get_user_name(). ']' . "\n" . $extraNotesString;
 
 		if ($notesString) $newNotesString = $notesString . "\n" . $newNotesString;
-		mysql_query("update Records set rec_Modified=now(), rec_ScratchPad='" . addslashes($newNotesString) . "' where rec_ID=" . $master_biblio_id);
+		mysql_query("update Records set rec_Modified=now(), rec_ScratchPad='" . mysql_real_escape_string($newNotesString) . "' where rec_ID=" . $master_biblio_id);
 	}
 	else if (count($newFields) > 0) {
 		mysql_query("update Records set rec_Modified=now() where rec_ID=" . $master_biblio_id);
@@ -1878,10 +1878,10 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 			// delete existing geos
 			mysql_query("delete from recDetails where dtl_RecID = $master_biblio_id and dtl_DetailTypeID = " . $newFields[$i]->getType());
 			if ($insertStmt) $insertStmt .= ', ';
-			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getValue())."',geomfromtext('".addslashes($newFields[$i]->getGeographicValue()) . "'), 1)";
+			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . mysql_real_escape_string($newFields[$i]->getValue())."',geomfromtext('".mysql_real_escape_string($newFields[$i]->getGeographicValue()) . "'), 1)";
 		} else {
 			if ($insertStmt) $insertStmt .= ",";
-			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getRawValue()) . "', NULL, 1)";
+			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . mysql_real_escape_string($newFields[$i]->getRawValue()) . "', NULL, 1)";
 		}
 	}
 	$insertStmt = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values " . $insertStmt;
@@ -1974,7 +1974,7 @@ function insert_tags(&$entry, $tag_map=array()) {
 			$tag = $tag_map[strtolower(trim($tag))];
 
 		if ($tag_select_clause) $tag_select_clause .= ',';
-		$tag_select_clause .= '"'.addslashes($tag).'"';
+		$tag_select_clause .= '"'.mysql_real_escape_string($tag).'"';
 	}
 	// create user specific tagText to tagID lookup
 	$res = mysql_query('select tag_ID, lower(trim(tag_Text)) from usrTags where tag_Text in (' . $tag_select_clause . ')'
@@ -2000,7 +2000,7 @@ function insert_tags(&$entry, $tag_map=array()) {
 	Well, it's very very difficult to get feedback from the user, so we just won't insert any new tags at all, I guess.  Hope you're happy.
 */		else if (! $wg_tag) {	// do not insert new workgroup tags
 			mysql_query('insert into usrTags (tag_UGrpID, tag_Text) ' .
-			                         ' values ('.get_user_id().', "'.addslashes($tag).'")');
+			                         ' values ('.get_user_id().', "'.mysql_real_escape_string($tag).'")');
 			$tag_id = mysql_insert_id();
 			array_push($entry_tag_ids, $tag_id);
 			$tags[strtolower(trim($tag))] = $tag_id;
@@ -2048,8 +2048,8 @@ function process_author(&$field) {
 		                             left join recDetails SURNAME on SURNAME.dtl_RecID=rec_ID and SURNAME.dtl_DetailTypeID=$titleDT
 		                             left join recDetails GIVENNAMES on GIVENNAMES.dtl_RecID=rec_ID and GIVENNAMES.dtl_DetailTypeID=291
 		                     where rec_RecTypeID = 75
-		                      and SURNAME.dtl_Value = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"
-		                      and GIVENNAMES.dtl_Value = "'.addslashes(trim($person['first names'])).'"');//MAGIC NUMBER
+		                      and SURNAME.dtl_Value = "'.mysql_real_escape_string(trim($person['surname'].' '.@$person['postfix'])).'"
+		                      and GIVENNAMES.dtl_Value = "'.mysql_real_escape_string(trim($person['first names'])).'"');//MAGIC NUMBER
 
 
 		if (mysql_num_rows($res) > 0) {
@@ -2057,10 +2057,10 @@ function process_author(&$field) {
 			$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 		} else {
 			// no match -- insert a new person
-			mysql_query('insert into Records (rec_Title, rec_RecTypeID, rec_FlagTemporary, rec_Modified, rec_Added) values ("'.addslashes(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
+			mysql_query('insert into Records (rec_Title, rec_RecTypeID, rec_FlagTemporary, rec_Modified, rec_Added) values ("'.mysql_real_escape_string(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
 			$rec_id = mysql_insert_id();
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.', 160, "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"),
-			                                                                        ('.$rec_id.', 291, "'.addslashes($person['first names']).'")');//MAGIC NUMBER
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.', 160, "'.mysql_real_escape_string(trim($person['surname'].' '.@$person['postfix'])).'"),
+			                                                                        ('.$rec_id.', 291, "'.mysql_real_escape_string($person['first names']).'")');//MAGIC NUMBER
 			mysql_query("update Records set rec_Hash = hhash(rec_ID) where rec_ID = $rec_id");
 		}
 
@@ -2124,8 +2124,8 @@ function print_disambiguation_options(&$entry) {
     </tr>
 <?php
 	$res = mysql_query('select rec_ID,rec_Title,
-	                           levenshtein(rec_Hash,upper("'.addslashes($ambig_entry->getHHash()).'")) as diff1,
-	                           levenshtein(upper(rec_Title),upper("'.addslashes($ambig_entry->getTitle()).'")) as diff2
+	                           levenshtein(rec_Hash,upper("'.mysql_real_escape_string($ambig_entry->getHHash()).'")) as diff1,
+	                           levenshtein(upper(rec_Title),upper("'.mysql_real_escape_string($ambig_entry->getTitle()).'")) as diff2
 	                      from Records where rec_ID in ('.join(',',$ambig_entry->getPotentialMatches()).') order by diff1, diff2');
 	$is_first = true;
 	while ($bib = mysql_fetch_assoc($res)) {
@@ -2240,7 +2240,7 @@ function print_tag_stuff(&$out_entries) {
 	$query = "";
 	foreach ($orig_tags as $tag) {
 		if ($query) $query .= "', '";
-		$query .= addslashes($tag);
+		$query .= mysql_real_escape_string($tag);
 	}
 	$query = "select tag_Text from usrTags where tag_Text in ('" . $query . "')";
 	$res = mysql_query($query);

@@ -121,7 +121,7 @@
 		$file_id = mysql_insert_id();
 		$filename = "ulf_".$file_id."_".$name;
 		mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
-			'", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			'", ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 		/*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
 		$pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);
@@ -195,8 +195,8 @@
 
 		//check if such file is already registered
 		$res = mysql_query('select ulf_ID from recUploadedFiles '.
-			'where ulf_FilePath = "'.addslashes($dirname).
-			'" and ulf_FileName = "'.addslashes($filename).'"');
+			'where ulf_FilePath = "'.mysql_real_escape_string($dirname).
+			'" and ulf_FileName = "'.mysql_real_escape_string($filename).'"');
 
 		if (mysql_num_rows($res) == 1) {
 			$row = mysql_fetch_assoc($res);
@@ -225,7 +225,7 @@
 
 			$file_id = mysql_insert_id();
 
-			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
 			return $file_id;
 
@@ -434,7 +434,7 @@
 		if($mimetypeExt){
 			$mimetypeExt = strtolower($mimetypeExt);
 
-			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
+			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.mysql_real_escape_string($mimetypeExt).'"');
 			if (mysql_num_rows($fres) == 1) {
 				$res = mysql_fetch_assoc($fres);
 				$mimeType = $res['fxm_Mimetype'];
@@ -523,7 +523,7 @@
 			//2. find duplication (the same url)
 			if(array_key_exists('remoteSource', $filedata) && $filedata['remoteSource']!='heurist'){
 				$res = mysql_query('select ulf_ID from recUploadedFiles '.
-					'where ulf_ExternalFileReference = "'.addslashes($filedata['remoteURL']).'"');
+					'where ulf_ExternalFileReference = "'.mysql_real_escape_string($filedata['remoteURL']).'"');
 
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
@@ -559,7 +559,7 @@
 
 			$file_id = mysql_insert_id();
 
-			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
 		}
 
@@ -670,7 +670,7 @@
 			from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
 			where '.(is_numeric($fileID)
 				?'ulf_ID = '.intval($fileID)
-				:'ulf_ObfuscatedFileID = "'.addslashes($fileID).'"') );
+				:'ulf_ObfuscatedFileID = "'.mysql_real_escape_string($fileID).'"') );
 
 		if (mysql_num_rows($fres) == 1) {
 

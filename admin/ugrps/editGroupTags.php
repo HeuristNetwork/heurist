@@ -164,7 +164,7 @@ function add_tags() {
 		if ($value == '' || intval($key) == 0) continue;	// saw NOTE: assumes UGrpID 0 is not valid for tagging
 
 		if ($insert_stmt) $insert_stmt .= ', ';
-		$insert_stmt .= '("' . addslashes($value) . '", ' . intval($key) . ')';
+		$insert_stmt .= '("' . mysql_real_escape_string($value) . '", ' . intval($key) . ')';
 	}
 	if (! $insert_stmt) return;
 

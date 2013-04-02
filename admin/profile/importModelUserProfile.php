@@ -277,7 +277,7 @@ function update_my_settings() {
 		$values = '';
 		while ($row = mysql_fetch_row($res)) {
 			if ($values) $values .= ', ';
-			$values .= '("'.addslashes($row[0]).'",'.get_user_id().')';
+			$values .= '("'.mysql_real_escape_string($row[0]).'",'.get_user_id().')';
 		}
 
 		if ($values) {

@@ -153,7 +153,7 @@ if (count($retitleRecs) > 0) {
 		$mask = $mask["rty_TitleMask"];
 		$title = fill_title_mask($mask, $id, $type);
 		if ($title) {
-			mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $id");
+			mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $id");
 		}
 	}
 }

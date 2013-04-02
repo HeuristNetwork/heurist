@@ -203,7 +203,7 @@ function getDetailRollbacks ($rec_id, $version) {
 				select dtl_ID
 				from recDetails
 				where dtl_ID = $ard_id
-				and dtl_Value " . ($ard_val ? "= '" . addslashes($ard_val) . "'" : "is null") . "
+				and dtl_Value " . ($ard_val ? "= '" . mysql_real_escape_string($ard_val) . "'" : "is null") . "
 				and dtl_UploadedFileID " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
 				and astext(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
 			);
@@ -251,7 +251,7 @@ function rollRecordBack ($rec_id, $changes) {
 
 	foreach ($changes["updates"] as $update) {
 		$rd_id       = $update["ard_ID"];
-		$rd_val      = $update["ard_Value"] ? "'" . addslashes($update["ard_Value"]) . "'" : "null";
+		$rd_val      = $update["ard_Value"] ? "'" . mysql_real_escape_string($update["ard_Value"]) . "'" : "null";
 		$rd_file_id  = $update["ard_UploadedFileID"] ? $update["ard_UploadedFileID"] : "null";
 		$rd_geo      = $update["ard_Geo"] ? "geomfromtext('" . $update["ard_Geo"] . "')" : "null";
 		mysql_query("
@@ -270,7 +270,7 @@ function rollRecordBack ($rec_id, $changes) {
 	foreach ($changes["inserts"] as $insert) {
 		$rd_id       = $insert["ard_ID"];
 		$rd_type     = $insert["ard_DetailTypeID"];
-		$rd_val      = $insert["ard_Value"] ? "'" . addslashes($insert["ard_Value"]) . "'" : "null";
+		$rd_val      = $insert["ard_Value"] ? "'" . mysql_real_escape_string($insert["ard_Value"]) . "'" : "null";
 		$rd_file_id  = $insert["ard_UploadedFileID"] ? $insert["ard_UploadedFileID"] : "null";
 		$rd_geo      = $insert["ard_Geo"] ? "geomfromtext('" . $insert["ard_Geo"] . "')" : "null";
 		mysql_query("
@@ -306,7 +306,7 @@ function rollRecordBack ($rec_id, $changes) {
 			$title = fill_title_mask($row[1], $rec_id, $row[0]);
 			if ($title) {
 				mysql_query("set @suppress_update_trigger := 1");
-				mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $rec_id");
+				mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $rec_id");
 				if (mysql_error()) {
 					error_log(mysql_error());
 					mysql_query("rollback");

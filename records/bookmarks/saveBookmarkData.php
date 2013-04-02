@@ -93,7 +93,7 @@ global $usrID;
 	$tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["tagString"]))));	// replace backslashes with forwardslashes
 	//create a map of this user's personal tags to tagIDs
 	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(tag_Text))", "tag_ID",
-	                               "tag_UGrpID=$usrID and tag_Text in (\"".join("\",\"", array_map("addslashes", $tags))."\")");
+	                               "tag_UGrpID=$usrID and tag_Text in (\"".join("\",\"", array_map("mysql_real_escape_string", $tags))."\")");
 
 	$tag_ids = array();
 	foreach ($tags as $tag) {
@@ -101,7 +101,7 @@ global $usrID;
 		if (@$kwd_map[strtolower($tag)]) {// tag exist get it's id
 			$tag_id = $kwd_map[strtolower($tag)];
 		} else {// no existing tag so add it and get it's id
-			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag) . "\", $usrID)");
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)");
 			$tag_id = mysql_insert_id();
 		}
 		array_push($tag_ids, $tag_id);

@@ -723,7 +723,7 @@
 			$mask = $mask[0];
 			$title = fill_title_mask($mask, $master_rec_id, $type);
 			if ($title) {
-				mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $master_rec_id");
+				mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $master_rec_id");
 			}
 		}
 		mysql_query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);

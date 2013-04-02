@@ -85,7 +85,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 	}*/
 
 
-	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
+	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
 
@@ -215,7 +215,7 @@ $resized = file_get_contents($resized_file);
 
 if ($standard_thumb  &&  @$file) {
 	// store to database
-	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . addslashes($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
+	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . mysql_real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
 }else{
 	unlink($resized_file);
 }

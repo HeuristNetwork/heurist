@@ -124,18 +124,18 @@ if (substr($url, -1) != "/") $url .= "/";
 
 $res = mysql_query("select hl_key
                       from hapi_locations
-                     where hl_location = '" . addslashes($url) . "'
-                       and hl_instance = '" . addslashes($instance) . "'");
+                     where hl_location = '" . mysql_real_escape_string($url) . "'
+                       and hl_instance = '" . mysql_real_escape_string($instance) . "'");
 if (mysql_num_rows($res) > 0) {
 	$row = mysql_fetch_assoc($res);
 	$key = $row["hl_key"];
 } else {
 	mysql_query("insert into hapi_locations (hl_location, hl_instance, hl_user_id, hl_key, hl_created)
-					values ('" . addslashes($url) . "', '" . addslashes($instance) . "', " . $user_id . ", sha1('" . addslashes($instance) . addslashes($url) . "'), now())");
+					values ('" . mysql_real_escape_string($url) . "', '" . mysql_real_escape_string($instance) . "', " . $user_id . ", sha1('" . mysql_real_escape_string($instance) . mysql_real_escape_string($url) . "'), now())");
 	$res = mysql_query("select hl_key
 	                      from hapi_locations
-	                     where hl_location = '" . addslashes($url) . "'
-	                       and hl_instance = '" . addslashes($instance) . "'");
+	                     where hl_location = '" . mysql_real_escape_string($url) . "'
+	                       and hl_instance = '" . mysql_real_escape_string($instance) . "'");
 	if (mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_assoc($res);
 		$key = $row["hl_key"];

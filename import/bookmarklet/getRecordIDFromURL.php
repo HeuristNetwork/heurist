@@ -61,7 +61,7 @@ $url = $_REQUEST["url"];
 
 if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
 
-$query = "select rec_id from Records left join usrBookmarks on bkm_recID = rec_id where (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/') ".
+$query = "select rec_id from Records left join usrBookmarks on bkm_recID = rec_id where (rec_URL='".mysql_real_escape_string($url)."' or rec_URL='".mysql_real_escape_string($url)."/') ".
             "group by bkm_ID  order by count(bkm_ID), rec_id limit 1";
 
 $res = mysql_query($query);
@@ -73,7 +73,7 @@ if ($row = mysql_fetch_assoc($res)) {
 }
 
 $query = "select bkm_ID from usrBookmarks left join Records on rec_id = bkm_recID where bkm_UGrpID=".get_user_id().
-        " and (rec_URL='".addslashes($url)."' or rec_URL='".addslashes($url)."/') limit 1";
+        " and (rec_URL='".mysql_real_escape_string($url)."' or rec_URL='".mysql_real_escape_string($url)."/') limit 1";
 
 $res = mysql_query($query);
 if ($res && $row = mysql_fetch_assoc($res)) {

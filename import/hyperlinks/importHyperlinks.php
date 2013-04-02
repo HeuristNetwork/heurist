@@ -459,14 +459,14 @@ function records_check($url, $title, $notes, $user_rec_id) {
 	 */
 
 	// saw FIXME this should be
-	$res = mysql_query('select rec_ID from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+	$res = mysql_query('select rec_ID from Records where rec_URL = "'.mysql_real_escape_string($url).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 	if (mysql_num_rows($res) > 0) {
 		$bib = mysql_fetch_assoc($res);
 		return $bib['rec_ID'];
 	}
 
 	if ($user_rec_id > 0) {
-		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_rec_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+		$res = mysql_query('select rec_ID from Records where rec_ID = "'.mysql_real_escape_string($user_rec_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
 			$bib = mysql_fetch_assoc($res);
 			return $bib['rec_ID'];
@@ -481,7 +481,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it
 			$par_url = substr($par_url, 0, strlen($par_url)-1);
 
-		$res = mysql_query('select rec_ID from Records where rec_URL like "'.addslashes($par_url).'%" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+		$res = mysql_query('select rec_ID from Records where rec_URL like "'.mysql_real_escape_string($par_url).'%" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
 			$rec_ids = array();
 			while ($row = mysql_fetch_row($res))
@@ -531,7 +531,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
 function bookmark_insert($url, $title, $tags, $rec_id) {
 
-	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.addslashes($rec_id).'"
+	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.mysql_real_escape_string($rec_id).'"
 	                                              and bkm_UGrpID="'.get_user_id().'"');
 	//if already bookmarked then return
 	if (mysql_num_rows($res) > 0) return 0;

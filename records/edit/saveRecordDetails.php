@@ -471,7 +471,7 @@
             }
 
             mysql_query("update Records
-                set rec_Title = '" . addslashes($new_title) . "'
+                set rec_Title = '" . mysql_real_escape_string($new_title) . "'
                 where rec_ID = $recID");
 
             mysql_query("commit");

@@ -179,7 +179,7 @@ function add_vars($type, $name, &$src_vars, &$dst_vars, $suppress_rv=false) {
 			fatal("Don't know how to handle type $type in scope $name");
 		if (! array_key_exists($type.'-ID', $src_vars))
 			fatal("Scope enclosing $name does not define a unique $type");
-		$stmt .= ' where ' . $TABLE_TYPE_TO_KEY[$type] . '="' . addslashes($src_vars[$type.'-ID']) . '"';
+		$stmt .= ' where ' . $TABLE_TYPE_TO_KEY[$type] . '="' . mysql_real_escape_string($src_vars[$type.'-ID']) . '"';
 
 		if (@$DELETED_FIELD[$type])
 			$stmt .= ' and (!'.$DELETED_FIELD[$type].' or '.$DELETED_FIELD[$type].' is null) ';
@@ -188,10 +188,10 @@ function add_vars($type, $name, &$src_vars, &$dst_vars, $suppress_rv=false) {
 		if (! array_key_exists('RESOURCE-ID', $src_vars))
 			fatal("Scope enclosing $name does not define a unique $type");
 		if (array_key_exists('VERSION-ID', $src_vars)) {
-			$stmt .= ' where ' . RESOURCE_VERSION_RESOURCEKEY.'="'.addslashes($src_vars['RESOURCE-ID']) . '" and '
-			                   . RESOURCE_VERSION_VERSIONKEY.' ="'.addslashes($src_vars['VERSION-ID']) . '"';
+			$stmt .= ' where ' . RESOURCE_VERSION_RESOURCEKEY.'="'.mysql_real_escape_string($src_vars['RESOURCE-ID']) . '" and '
+			                   . RESOURCE_VERSION_VERSIONKEY.' ="'.mysql_real_escape_string($src_vars['VERSION-ID']) . '"';
 		} else {	// fudge: if no version specified, grab the latest
-			$stmt .= ' where ' . RESOURCE_VERSION_RESOURCEKEY.'="'.addslashes($src_vars['RESOURCE-ID']) . '" '
+			$stmt .= ' where ' . RESOURCE_VERSION_RESOURCEKEY.'="'.mysql_real_escape_string($src_vars['RESOURCE-ID']) . '" '
 			                   . 'order by ' . RESOURCE_VERSION_VERSIONKEY . ' desc';
 		}
 	}
@@ -253,7 +253,7 @@ function get_iter_statement($type, $vars) {
 
 		foreach ($LINK_KEYS[$type] as $varname => $field) {
 			if (array_key_exists($varname, $vars))
-				$stmt .= ' and '.$field.' = "'.addslashes($vars[$varname]).'"';
+				$stmt .= ' and '.$field.' = "'.mysql_real_escape_string($vars[$varname]).'"';
 			else
 				$iters[$field] = $varname;
 		}
@@ -265,15 +265,15 @@ function get_iter_statement($type, $vars) {
 	} else if (@$SAME_JOINS[$type]  and  ! array_key_exists($type.'-ID', $vars)) {
 		$stmt = 'select '.$MAINTABLES[$type].'.*';
 		foreach ($SAME_JOINS[$type] as $varname => $fields) {
-			$stmt .= ', if('.$fields[0].'="'.addslashes($vars[$varname]).'", '
+			$stmt .= ', if('.$fields[0].'="'.mysql_real_escape_string($vars[$varname]).'", '
 			                .$fields[1].', '.$fields[0].') as _samejoin_id';	// only look at two keys
 			break;	// only looks at the first join
 		}
 		$stmt .= ' from '. $MAINTABLES[$type]. ' where ';
 
 		foreach ($SAME_JOINS[$type] as $varname => $fields) {
-			$stmt .=    '('.$fields[0].' = "'.addslashes($vars[$varname]).'"'.
-			         ' or '.$fields[1].' = "'.addslashes($vars[$varname]).'")';
+			$stmt .=    '('.$fields[0].' = "'.mysql_real_escape_string($vars[$varname]).'"'.
+			         ' or '.$fields[1].' = "'.mysql_real_escape_string($vars[$varname]).'")';
 			$iters["_samejoin_id"] = $varname;
 			break;
 		}
@@ -286,7 +286,7 @@ function get_iter_statement($type, $vars) {
 	// especially DWIM for special case of RESOURCE_VERSION: iterate only over the current resource
 	} else if ($type == 'RESOURCE_VERSION') {
 		$stmt = 'select ' . RESOURCE_VERSION_VERSIONKEY . ' from '.$MAINTABLES['RESOURCE_VERSION'];
-		$stmt .= ' where '.RESOURCE_VERSION_RESOURCEKEY.'="'.addslashes($vars['RESOURCE-ID']).'"';
+		$stmt .= ' where '.RESOURCE_VERSION_RESOURCEKEY.'="'.mysql_real_escape_string($vars['RESOURCE-ID']).'"';
 		$iters[RESOURCE_VERSION_VERSIONKEY] = 'VERSION-ID';
 
 	} else {
@@ -299,12 +299,12 @@ function get_iter_statement($type, $vars) {
 			if (array_key_exists($type.'-ID', $vars)) {
 				// primary key already defined for this type of object: just select that object, but warn about it
 				error_log("warning: $type-ID already defined in foreach $type scope");
-				$stmt .= ' where '.$TABLE_TYPE_TO_KEY[$type].' = "'.addslashes($vars[$type.'-ID']).'"';
+				$stmt .= ' where '.$TABLE_TYPE_TO_KEY[$type].' = "'.mysql_real_escape_string($vars[$type.'-ID']).'"';
 			} else {
 				$stmt .= ' where 1';
 				if (@$JOINS[$type]) foreach ($JOINS[$type] as $typeID => $fieldname) {
 					if (array_key_exists($typeID, $vars))
-						$stmt .= ' and '.$fieldname.' = "'.addslashes($vars[$typeID]).'"';
+						$stmt .= ' and '.$fieldname.' = "'.mysql_real_escape_string($vars[$typeID]).'"';
 				}
 			}
 
@@ -383,7 +383,7 @@ function do_update($updates, $name, $type, $vars) {
 
 
 	if (@$TABLE_TYPE_TO_KEY[$type])
-		$condition = $TABLE_TYPE_TO_KEY[$type].' = "'.addslashes($vars["$type-ID"]).'"';
+		$condition = $TABLE_TYPE_TO_KEY[$type].' = "'.mysql_real_escape_string($vars["$type-ID"]).'"';
 	else
 		fatal("trying to update unknown object-type $type");
 
@@ -391,7 +391,7 @@ function do_update($updates, $name, $type, $vars) {
 	if (@$MODDATE_FIELD[$type]) $updates[$MODDATE_FIELD[$type]] = date('Y-m-d H:i:s');
 
 	if ($rval = mysql__update($MAINTABLES[$type], $condition, $updates)) {
-		$pkey = addslashes($vars["$type-ID"]);
+		$pkey = mysql_real_escape_string($vars["$type-ID"]);
 		if (@$file) do_file_update($file, $type, ($TABLE_TYPE_TO_KEY[$type].'="'.$pkey.'"'), $type . '/' . $pkey);
 	} else {
 		array_push($MYSQL_ERRORS, mysql_error());
@@ -429,7 +429,7 @@ function do_update_resource($updates, $name, $vars) {
 	if (@$OWNER_FIELD['RESOURCE_VERSION']) $ver_fields[$OWNER_FIELD['RESOURCE_VERSION']] = get_user_id();
 
 
-	$pkey = addslashes($vars['RESOURCE-ID']);
+	$pkey = mysql_real_escape_string($vars['RESOURCE-ID']);
 
 	if ($rval = mysql__update($MAINTABLES['RESOURCE'], $PKEY['RESOURCE'].'="'.$pkey.'"', $res_fields)) {
 		$rval = mysql__insert($MAINTABLES['RESOURCE_VERSION'], $ver_fields);
@@ -469,7 +469,7 @@ function do_insert($inserts, $name, $type, $vars) {
 		// check if an isomorphic link exists already, and delete it if it does.
 		$query = 'delete from '.$MAINTABLES[$type].' where 1 ';
 		foreach ($LINK_KEYS[$type] as $varname => $field)
-			$query .= ' and '. $varname .' = "'.addslashes($inserts[$field]).'"';
+			$query .= ' and '. $varname .' = "'.mysql_real_escape_string($inserts[$field]).'"';
 		mysql_query($query);
 	}
 
@@ -1348,7 +1348,7 @@ class SearchScope extends Scope {
 		$query = $SEARCHES[$this->name];
 		$query = preg_replace('/\[\s*word-match\s*:\s*([^:]+)\s*:([^:\s]+)\s*\]/es',
 		                      'decode_word_match(\'\1\', $values[\'\2\'])', $query);
-		$query = preg_replace('/\[(%?)([^]%]+)(%?)\]/es', '"\'\\1".addslashes($values[\'\\2\'])."\\3\'"', $query);
+		$query = preg_replace('/\[(%?)([^]%]+)(%?)\]/es', '"\'\\1".mysql_real_escape_string($values[\'\\2\'])."\\3\'"', $query);
 		if ($return_query) return $query;
 
 		$this->internal_search_stuff($vars, $auto_vars, $query);
@@ -1951,7 +1951,7 @@ class DeleteScope extends Scope {
 		}
 
 		// only made it here if ALL child values are non-false
-		$pkey = addslashes($vars[$this->type."-ID"]);
+		$pkey = mysql_real_escape_string($vars[$this->type."-ID"]);
 		if (defined('T1000_DEBUG')) print('<!-- delete from '.$MAINTABLES[$this->type].' where '.$TABLE_TYPE_TO_KEY[$this->type].'="'.$pkey.'" -->');
 		mysql_query('delete from '.$MAINTABLES[$this->type].' where '.$TABLE_TYPE_TO_KEY[$this->type].'="'.$pkey.'"');
 	}
@@ -2566,7 +2566,7 @@ class Textbox extends InputComponent {
 		$param_name = $this->container->name . '_' . $this->name . @$vars['-SUFFIX'];
 
 		if ($_REQUEST[$param_name]  or  $_REQUEST[$param_name] === "0") {
-			$value = addslashes($_REQUEST[$param_name]);
+			$value = mysql_real_escape_string($_REQUEST[$param_name]);
 			$value = str_replace(array('%', '_'), array('\\%', '\\_'), $value);
 			return $this->name . ' like "%' . $value . '%"';
 		}
@@ -2650,7 +2650,7 @@ class Datebox extends Textbox {
 	function sql_snippet($vars, $auto_vars) {
 		$value = $this->value($vars);
 		if ($value)
-			return $this->name . '= "'.addslashes($value).'"';
+			return $this->name . '= "'.mysql_real_escape_string($value).'"';
 		else
 			return NULL;
 	}
@@ -2713,7 +2713,7 @@ class Hidden extends InputComponent {
 		$param_name = $this->container->name . '_' . $this->name . @$vars['-SUFFIX'];
 
 		if ($_REQUEST[$param_name]  or  $_REQUEST[$param_name] == "0") {
-			$value = addslashes($_REQUEST[$param_name]);
+			$value = mysql_real_escape_string($_REQUEST[$param_name]);
 			$value = str_replace(array('%', '_'), array('\\%', '\\_'), $value);
 			return $this->name . ' like "%' . $value . '%"';
 		}
@@ -2764,7 +2764,7 @@ class Textarea extends InputComponent {
 			print '<textarea name="'.$param_name.'" '.'title="'.htmlspecialchars($this->description).'" '.$this->extra_html.'>'.htmlspecialchars($value).'</textarea>';
 		else {
 			print '<textarea name="'.$param_name.
-			      '" onFocus="if (this.value==\'('.addslashes($this->description).')\') '.
+			      '" onFocus="if (this.value==\'('.mysql_real_escape_string($this->description).')\') '.
 			      'this.value=\'\';" '.'title="'.htmlspecialchars($this->description).'" '.
 			      $this->extra_html.'>('.htmlspecialchars($this->description).')</textarea>';
 		}
@@ -2775,7 +2775,7 @@ class Textarea extends InputComponent {
 		$my_value = $this->value($vars);
 
 		if ($my_value  or  $my_value == "0") {
-			$value = addslashes($my_value);
+			$value = mysql_real_escape_string($my_value);
 			$value = str_replace(array('%', '_'), array('\\%', '\\_'), $value);
 			return $this->name . ' like "%' . $value . '%"';
 		}
@@ -2885,7 +2885,7 @@ if (defined('T1000_DEBUG')) print "<!-- $user_key -->";
 		$param_name = $this->container->name . '_' . $this->name . $vars['-SUFFIX'];
 
 		if (@$_REQUEST[$param_name]) {
-			$value = addslashes($_REQUEST[$param_name]);
+			$value = mysql_real_escape_string($_REQUEST[$param_name]);
 			return $this->name . ' = "' . $value . '"';
 		}
 		return NULL;
@@ -2956,7 +2956,7 @@ class Checkbox extends InputComponent {
 		$param_name = $this->container->name . '_' . $this->name . @$vars['-SUFFIX'];
 
 		if (array_key_exists($param_name, $_REQUEST) or ($this->inverted and ! array_key_exists($param_name, $_REQUEST))) {
-			$value = addslashes($this->checked_value);
+			$value = mysql_real_escape_string($this->checked_value);
 			return $this->name . ' = "' . $value . '"';
 		}
 		return NULL;
@@ -3026,7 +3026,7 @@ class Radio extends InputComponent {
 if (defined('T1000_DEBUG')) error_log('radio val: ' . $value);
 
 		if ($value !== NULL)
-			return $this->name . ' = "' . addslashes($value) . '"';
+			return $this->name . ' = "' . mysql_real_escape_string($value) . '"';
 
 		return NULL;
 	}
@@ -3176,7 +3176,7 @@ class Auto extends Component {
 		if ($this->type == 'field')
 			return $this->name . ' = "' . $this->value($vars, $auto_vars) . '"';
 		else if ($this->type == 'literal')
-			return $this->name . ' = "' . addslashes($this->_value) . '"';
+			return $this->name . ' = "' . mysql_real_escape_string($this->_value) . '"';
 		else
 			return '0';
 	}
@@ -3353,7 +3353,7 @@ function decode_extension($filename) {
 	// return a best guess of the MIME type associated with this file, based on its extension
 
 	$extension = substr(strtolower(strrchr($filename, '.')), 1);
-	$res = mysql_query('select * from ' . MIMETYPE_TABLE . ' where ' . MIMETYPE_EXTENSION_FIELD . ' = "'.addslashes($extension).'"');
+	$res = mysql_query('select * from ' . MIMETYPE_TABLE . ' where ' . MIMETYPE_EXTENSION_FIELD . ' = "'.mysql_real_escape_string($extension).'"');
 	$filetype = mysql_fetch_assoc($res);
 	if (! @$filetype[MIMETYPE_TYPE_FIELD])
 		return 'application/octet-stream';
@@ -3373,7 +3373,7 @@ function decode_word_match($col_name, $var_value) {
 			$word = preg_replace('/\s+/s', '_', $word);
 			$word = substr($word, 1, strlen($word)-2);
 		}
-		array_push($subclauses, $col_name . ' like "%'. addslashes($word) .'%"');
+		array_push($subclauses, $col_name . ' like "%'. mysql_real_escape_string($word) .'%"');
 	}
 	return '(' . join(' and ', $subclauses) . ')';
 }
@@ -3401,11 +3401,11 @@ function make_extended_sql_snippet($name, $value) {
 
 	if (preg_match('/^\s*(.*)\s*\.\.\.\s*(.*)\s*/', $value, $matches)) {
 		if ($matches[1] < $matches[2]) {
-			return '(' . $name . ' >= "'.addslashes($matches[1]).'"'
-			  .' and ' . $name . ' <= "'.addslashes($matches[2]).'")';
+			return '(' . $name . ' >= "'.mysql_real_escape_string($matches[1]).'"'
+			  .' and ' . $name . ' <= "'.mysql_real_escape_string($matches[2]).'")';
 		} else {
-			return '(' . $name . ' >= "'.addslashes($matches[2]).'"'
-			  .' and ' . $name . ' <= "'.addslashes($matches[1]).'")';
+			return '(' . $name . ' >= "'.mysql_real_escape_string($matches[2]).'"'
+			  .' and ' . $name . ' <= "'.mysql_real_escape_string($matches[1]).'")';
 		}
 	} else {
 		preg_match('/^\s*([<>]?=?)\s*(.*)\s*/', $value, $matches);
@@ -3415,7 +3415,7 @@ function make_extended_sql_snippet($name, $value) {
 			                            "('\\1'?'\"\\1\"':'').('\\3'?'\\2_\\4':'').('\\6'?'\\5%\\7':'')", $matches[2]);
 			return decode_word_match($name, $match_value);
 		} else {
-			return '(' . $name . $matches[1] . '"'.addslashes($matches[2]).'")';
+			return '(' . $name . $matches[1] . '"'.mysql_real_escape_string($matches[2]).'")';
 		}
 	}
 }

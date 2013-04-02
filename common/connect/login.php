@@ -71,7 +71,7 @@ mysql_connection_select(USERS_DATABASE);
 $LOGIN_ERROR = '';
 if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
-	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
+	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.mysql_real_escape_string($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
 		 $user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD] ) {

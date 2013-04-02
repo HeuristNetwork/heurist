@@ -189,9 +189,9 @@ if (count($updates) > 0) {
 	$i = 0;
 	foreach ($updates as $rec_id => $new_title) {
 /*
-		mysql_query('update Records set rec_Modified=now(), rec_Title="'.addslashes($new_title).'" where rec_ID='.$rec_id.' and rec_Title!="'.addslashes($new_title).'"');
+		mysql_query('update Records set rec_Modified=now(), rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id.' and rec_Title!="'.mysql_real_escape_string($new_title).'"');
 */
-		mysql_query('update Records set rec_Title="'.addslashes($new_title).'" where rec_ID='.$rec_id);
+		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
 		++$i;
 		if ($rec_id % 10 == 0) {
 			print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";

@@ -59,7 +59,7 @@ $rec_id = intval($_POST["recID"]);
 $rem_id = intval($_POST["rem_ID"]);
 if ($rec_id  &&  $_POST["save-mode"] == "add") {
 	if ($_POST["reminder-user"]) {
-		$res = mysql_query("select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) = '" . addslashes($_POST["reminder-user"]) . "'");
+		$res = mysql_query("select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) = '" . mysql_real_escape_string($_POST["reminder-user"]) . "'");
 		$user = mysql_fetch_row($res);
 		if ($user) {
 			$_POST["reminder-user"] = intval($user[0]);

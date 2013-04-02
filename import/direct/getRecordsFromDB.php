@@ -222,7 +222,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				if($usecurrentlogin || (!(@$_REQUEST['username']  and  @$_REQUEST['password'])) ){
 					$username = get_user_username();
 					//take from database
-					$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+					$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.mysql_real_escape_string($username).'"');
 					$user = mysql_fetch_assoc($res);
 					if ($user){
 						$password = $user[USERS_PASSWORD_FIELD];
@@ -239,7 +239,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				mysql_connection_select($db_prefix.$sourcedbname);
 
-				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($username).'"');
+				$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.mysql_real_escape_string($username).'"');
 
 
 				$user = mysql_fetch_assoc($res);
