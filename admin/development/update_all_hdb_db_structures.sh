@@ -1,1 +1,0 @@
-for db in `echo "select schema_name from information_schema.schemata where schema_name like 'hdb_%' "| mysql -u root -psmith18`; do mysql --skip-column-names -u root -psmith18 $db < update_h3_mysql_structure.sql;  done
