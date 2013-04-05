@@ -631,7 +631,7 @@ function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false,
 			return true;
 		}
 	}
-	error_log("initialize.php - Failed to create $info folder for defining $defineName as $dir");
+	error_log("initialize.php - Failed to create $info folder for defining $defString as $dir");
 	return false;
 }
 /**
