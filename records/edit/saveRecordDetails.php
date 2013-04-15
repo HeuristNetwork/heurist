@@ -291,7 +291,7 @@
             return;
         }
         $record = mysql_fetch_assoc($res);
-        /*****DEBUG****/error_log("save record dtls POST ".print_r($_POST,true));
+        /*****DEBUG****///error_log("save record dtls POST ".print_r($_POST,true));
         // Upload any files submitted ... (doesn't have to take place right now, but may as well)
         uploadFiles();  //Artem: it does not work here - since we uploaded files at once
 
@@ -303,6 +303,20 @@
         /*****DEBUG****///error_log("save record dtls ".print_r($recDetails,true));
         foreach ($recDetails as $dtyID => $dtlIDs) {
             $eltName ="type:".$dtyID;
+            $skipEltName = "_type:".$dtyID;
+            if (@$_POST[$skipEltName]  &&  is_array($_POST[$skipEltName])) { // handle any _type post meant for ignore, need to remove from recDetails
+              foreach (@$_POST[$skipEltName] as $codedDtlID => $ingnoreVal) {
+                if (! preg_match("/^bd:\\d+$/", $codedDtlID)) continue;
+
+                $dtlID = substr($codedDtlID, 3);  // everything after "bd:"
+
+                unset($_POST[$skipEltName][$codedDtlID]);  // remove data from post submission
+                if (count($_POST[$skipEltName]) == 0){  // if nothing left in post dtyID then remove it also
+                    unset($_POST[$skipEltName]);
+                }
+                unset($recDetails[$dtyID][$dtlID]);  // remove data from local reflection of the database
+              }
+            }
             if (! (@$_POST[$eltName]  &&  is_array($_POST[$eltName]))) {
                 // element wasn't in POST: ignore it -this could be a non-rectype detail
                 unset($recDetails[$dtyID]); // remove from details so it's not deleted
@@ -346,6 +360,7 @@
         /*****DEBUG****///error_log("save record dtls POST after updates removed ".print_r($_POST,true));
         /*****DEBUG****///error_log("save record dtls after updates removed ".print_r($recDetails,true));
 
+
 // find DELETES
         // Anything left in recDetails now represents recDetails rows that need to be deleted
 
@@ -356,12 +371,13 @@
                 array_push($bibDetailDeletes, $dtlID);
             }
         }
+        /*****DEBUG****///error_log("save record dtlIDs to delete = ".print_r($bibDetailDeletes,true));
 
 // find INSERTS
         // Try to insert anything left in POST as new recDetails rows
         $bibDetailInserts = array();
 
-        /*****DEBUG****/ error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
+        /*****DEBUG****///error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
         foreach ($_POST as $eltName => $bds) {
             // if not properly formatted or empty or an empty array then skip it
             if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
@@ -413,14 +429,14 @@
                 $recUpdates["rec_NonOwnerVisibility"] = 'pending';
             }
         }
-        /*****DEBUG****/error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
+        /*****DEBUG****///error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
         if (mysql_error()) error_log("error rec update".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
 
-            /*****DEBUG****/error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
+            /*****DEBUG****///error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 
             mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$recID", $vals);
             if (mysql_affected_rows() > 0) {
@@ -431,7 +447,7 @@
 
         $insertedRowCount = 0;
         foreach ($bibDetailInserts as $vals) {
-            /*****DEBUG****/error_log(" in saveRecord insert details detail =".print_r($vals,true));
+            /*****DEBUG****///error_log(" in saveRecord insert details detail =".print_r($vals,true));
             mysql__insert("recDetails", $vals);
             if (mysql_affected_rows() > 0) {
                 ++$insertedRowCount;
@@ -441,7 +457,7 @@
 
         $deletedRowCount = 0;
         if ($bibDetailDeletes) {
-            /*****DEBUG****/error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
+            /*****DEBUG****///error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
             mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$recID");
             if (mysql_affected_rows() > 0) {
                 $deletedRowCount = mysql_affected_rows();
@@ -551,8 +567,16 @@
     function getRecordDetails($recID) {
         $recID = intval($recID);
         $details = array();
-
-        $res = mysql_query("select * from recDetails where dtl_RecID = " . $recID);
+        $dtlColumns = array("dtl_ID",
+                            "dtl_RecID",
+                            "dtl_DetailTypeID",
+                            "dtl_Value",
+                            "dtl_AddedByImport",
+                            "dtl_UploadedFileID",
+                            "if(dtl_Geo is not null, astext(dtl_Geo),null) as dtl_Geo",
+                            "dtl_ValShortened",
+                            "dtl_Modified");
+        $res = mysql_query("select ".join(",",$dtlColumns)." from recDetails where dtl_RecID = " . $recID);
         while ($val = mysql_fetch_assoc($res)) {
             $dtyID = $val["dtl_DetailTypeID"];
             $dtlID = $val["dtl_ID"];
@@ -817,7 +841,7 @@
             $type = strtolower($matches[1]);
             $pointString = $matches[2];
 
-            $FLOAT = '-?[0-9]+(?:\\.[0-9]*)?';
+            $FLOAT = '-?[0-9]+(?:\\.[0-9]*)?'; // ensure that we have a list of float pairs  xx.xxxxx yy.yyyyyy, x.xx y.yy, etc
             return preg_match("/^$FLOAT $FLOAT(?:,$FLOAT $FLOAT)*$/", $pointString);
         }
     }
