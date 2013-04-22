@@ -377,7 +377,9 @@
         // Try to insert anything left in POST as new recDetails rows
         $bibDetailInserts = array();
 
+
         /*****DEBUG****///error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
+
         foreach ($_POST as $eltName => $bds) {
             // if not properly formatted or empty or an empty array then skip it
             if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;

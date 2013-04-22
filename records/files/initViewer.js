@@ -143,6 +143,9 @@ function detectSourceAndType(link, extension){
 	}else if(link.match('http://(www.)?youtube|youtu\.be')){
 		source = 'youtube';
 		type = 'video';
+    }else if(link.indexOf('https://docs.google.com/file')==0){
+        source = 'gdrive';
+        type = 'video';
 	}
 
 	if(type==='xml'){
@@ -234,6 +237,11 @@ function linkifyYouTubeURLs(text) {
         '<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>');
         //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>');
 }
+
+function linkifyGoogleDriveURLs(text) {
+    return '<iframe width="420" height="345" src="'+text+'" frameborder="0" allowfullscreen></iframe>';
+}
+
 
 //
 // remove all child elements for given container
@@ -331,6 +339,8 @@ function showViewer(container, url_and_cfg, _recordID){
 			if(sSource === "youtube"){
 				//var id = /^.*((youtu.be\/)|(v\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/.exec(curr_link);
 				container.innerHTML = linkifyYouTubeURLs(sUrl);
+            }else if(sSource === "gdrive"){
+                container.innerHTML = linkifyGoogleDriveURLs(sUrl);
 			}else{
 				container.innerHTML = '<embed width="100%" height="100%" name="plugin" src="'+sUrl+'">';// type="'.$mimeType.'">';;
 			}

@@ -156,7 +156,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 		//var lft = popup_div.css('left');
 		left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
- 		top_pos=Math.max(xy[1]-(div_height/2)+offset,0)+scrollValue;
+ 		top_pos=Math.max(xy[1]-(div_height/2)+offset,0);//-scrollValue;
 
 		popup_div.css( {left:left_pos+'px',
 					top:top_pos+'px',

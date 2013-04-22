@@ -458,7 +458,7 @@ function print_private_details($bib) {
 							'id' => $filedata['id'],
 							'url' => $filedata['URL'],   //download
 							'thumb' => $filedata['thumbURL'],
-							'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube')?"":"&height=60%"):null  //link to generate player html
+							'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  //link to generate player html
 						));
 					}
 

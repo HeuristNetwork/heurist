@@ -144,6 +144,7 @@ if (!top.Relationship) {
 	* @author Stephen White
 	*/
 	top.Relationship.prototype.edit = function() {
+        var _calendarViewer = top.HEURIST.edit.calendarViewer;
 		var thisRef = this;
 		var _db =  (top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:""));
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
@@ -166,6 +167,7 @@ if (!top.Relationship) {
 									((thisRef.relationshipRec.role == "Primary") ?thisRef.relationshipRec.relTerm :thisRef.relationshipRec.relInvTerm) + " "+
 										(thisRef.relationshipRec.relatedRec? thisRef.relationshipRec.relatedRec.title : thisRef.relationshipRec.title);
 							}
+                            top.HEURIST.edit.calendarViewer = _calendarViewer;
 						},
 						"db="+_db+"&recID="+thisRef.manager.recID+"&action=getrelated");
 				}

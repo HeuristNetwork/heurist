@@ -1222,7 +1222,15 @@ function construct_legacy_search() {
 	$_REQUEST['q'] = $q;
 }
 
-
+/**
+* put your comment there...
+* 
+* @param mixed $query
+* @param mixed $search_type
+* @param mixed $parms
+* @param mixed $wg_ids
+* @param mixed $publicOnly
+*/
 function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
 

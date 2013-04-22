@@ -150,6 +150,7 @@ function EditRecStructure() {
 					var aval = _dts[rst_ID];
 
 					var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+                    var conceptCode = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ConceptID];
 
 					arr.push([ rst_ID,
 						rst_ID,
@@ -165,7 +166,8 @@ function EditRecStructure() {
 						aval[fi.rst_Status],
 						aval[fi.rst_NonOwnerVisibility],
 						aval[fi.rst_DisplayHelpText],
-						'']);
+						'',
+                        conceptCode]);
 					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
 			}
@@ -178,7 +180,7 @@ function EditRecStructure() {
 					"dty_Name",
 					"rst_DisplayName", "dty_Type", "rst_RequirementType",
 					"rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
-					"rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values"]
+					"rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode"]
 				}
 			});
 
@@ -202,7 +204,11 @@ function EditRecStructure() {
 				}
 			},
 			{
-				key:"rst_ID", label: "Code", sortable:false, className:"center"
+				key:"rst_ID", label: "Code", sortable:false, className:"center",
+                formatter: function(elLiner, oRecord, oColumn, oData){
+                   elLiner.innerHTML = oData;
+                   elLiner.title = oRecord.getData("conceptCode");
+                }
 			},
 			{
 				key:"expandColumn",

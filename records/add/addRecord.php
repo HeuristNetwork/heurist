@@ -64,7 +64,6 @@ if (@$_REQUEST['addref']) {	// add a record		//saw TODO: change this to addrec
 if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['rec_rectype'])
 	$_REQUEST['rec_rectype'] = (defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:0);
 
-
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../records/files/saveURLasFile.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");

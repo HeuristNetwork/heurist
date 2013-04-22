@@ -449,7 +449,7 @@ function UserEditor() {
 
 			isA: function (strClass) {
 				return (strClass === _className);
-		}
+		    }
 
 	};
 

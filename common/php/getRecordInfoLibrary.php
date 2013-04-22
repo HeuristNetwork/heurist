@@ -127,7 +127,7 @@ $dbID = intval(HEURIST_DBID);
  */
 function setLastModified() {
     global $lastModified;
-
+  
     $res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
     $lastModified = mysql_fetch_row($res);
     $lastModified = strtotime($lastModified[0]);

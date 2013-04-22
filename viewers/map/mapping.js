@@ -222,7 +222,7 @@ if (typeof mxn.LatLonPoint == "function") {
     },
 
 	keepMinDate:null,
-	keepMinDate:null,
+	keepMaxDate:null,
 	keepMinNaxDate:true,
 
 	onWinResize:function(){
