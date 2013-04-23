@@ -123,7 +123,7 @@ saveTransformOutput($inputFilename,$styleFilename,@$outputFilename);
 
 function loadRemoteFile($filename){
 
-	$file_content = loadRemoteURLContent($filename);
+	$file_content = loadRemoteURLContent($filename,true);
 	if(!$file_content){
 		returnXMLErrorMsgPage("Error loading remote file '$filename'");
 	}
@@ -135,6 +135,7 @@ function saveTransformOutput($recHMLFilename, $styleFilename, $outputFilename = 
 global $outputURI;
 	$recHmlDoc = new DOMDocument();
 	if (preg_match("/http/",$recHMLFilename)) {
+//error_log("hml = ".loadRemoteFile($recHMLFilename));
 		$suc = $recHmlDoc->loadXML( loadRemoteFile($recHMLFilename));
 	}else{
 		$suc = $recHmlDoc->load($recHMLFilename);
