@@ -81,7 +81,7 @@
         styleSelectElt.options[0].disabled = true;
         var localStyleName;
         for (localStyleName in styles){
-          styleSelectElt.appendChild( new Option(localStyleName,styles[localStyleName][0]));
+          styleSelectElt.appendChild( new Option(localStyleName,localStyleName));
           if (localStyleName == s) {
             styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
           }
@@ -519,6 +519,8 @@
           curStyle = "Generic XML";
         }else if (top.HEURIST.transforms.byID[transformID]) {
           curStyle = top.HEURIST.transforms.byID[transformID].label;
+        }else if (isNaN(transformID)){
+          curStyle = transformID;
         }else{
           curStyle = "Default view";
         }

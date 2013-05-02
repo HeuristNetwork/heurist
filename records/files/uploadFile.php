@@ -767,7 +767,13 @@
 		$thumbUrlDT = (defined('DT_THUMB_IMAGE_URL')?DT_THUMB_IMAGE_URL:0); //deprecated
 		$fullUrlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0); //deprecated
 		$webIconDT = (defined('DT_WEBSITE_ICON')?DT_WEBSITE_ICON:0);
-
+		$squery = "select rec_RecTypeID".
+							" from Records".
+							" where rec_ID = $recordId";
+		$res = mysql_query($squery);
+		$row = mysql_fetch_assoc($res);
+		$rtyID = $row["rec_RecTypeID"];
+		//error_log("rectype is ".print_r($rtyID,true));
 		$thumb_url = "";
 		// 223  Thumbnail
 		// 222  Logo image
@@ -780,7 +786,7 @@
 			" left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
 			" where dtl_RecID = $recordId" .
 			" and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".	// no dty_ID of zero so undefined are ignored
-			" and fxm_MimeType like 'image%'".
+			" and (fxm_MimeType like 'image%' or ulf_Parameters like '%mediatype=image%')".
 			" order by".
 			($thumbDT?		" dtl_DetailTypeID = $thumbDT desc,"	:"").
 			($logoDT?		" dtl_DetailTypeID = $logoDT desc,"		:"").
@@ -801,6 +807,7 @@
 				}
 			}
 		}
+			/*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>thumb url ".$thumb_url);
 		//check freetext (url) type details for a something to represent this record as an icon
 		if( $thumb_url == "" && ($thumbUrlDT || $fullUrlDT || $webIconDT)) {
 			$squery = "select dtl_Value".
