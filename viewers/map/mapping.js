@@ -721,7 +721,7 @@ if (typeof mxn.LatLonPoint == "function") {
 						}
 						//internal function to obtain tile URL
 						tile_url =	function(tile,zoom) {
-				              if ((zoom < 1) || (zoom > 19) || (zoom < layer.min_zoom) || (zoom > layer.max_zoom)) {
+				              if ((zoom < 1) /*|| (zoom > 19)*/ || (zoom < layer.min_zoom) || (zoom > layer.max_zoom)) {
 				                  return "http://www.maptiler.org/img/none.png";
 				              }
 				              var ymax = 1 << zoom;
@@ -754,11 +754,11 @@ if (typeof mxn.LatLonPoint == "function") {
 						}
 						if(layer.min_zoom>layer.max_zoom){layer.min_zoom = layer.max_zoom;}
 						if(layer.min_zoom<1){ layer.min_zoom = 1; }
-						if(layer.max_zoom>19){ layer.max_zoom = 19; }
+						//if(layer.max_zoom>19){ layer.max_zoom = 19; }
 
 						M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
 						//layer.min_zoom, layer.max_zoom, true);
-
+            M.map.getMap().mapTypes["roadmap"].maxZoom = layer.max_zoom;
 						layer.extent = M.getImageLayerExtent(layer['extent']);
 /* DEBUG
 if(layer.extent){
