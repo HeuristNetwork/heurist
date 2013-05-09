@@ -1030,7 +1030,7 @@ s
                 // translate the HFile object back into something we can use here
                 // update the BibDetailFileInput to show the file
                 element.input.replaceInput(element, fileDetails );
-                windowRef.changed();
+                if (windowRef.changed) windowRef.changed();
             }
         },
 
@@ -1146,7 +1146,7 @@ s
 
                 // update the BibDetailFileInput to show the file
                 element.input.replaceInput(element, { file: fileObj });
-                windowRef.changed();
+                if (windowRef.changed) windowRef.changed();
             }
         },
 /**
@@ -1534,7 +1534,7 @@ s
                 if (date) {
                     if(dateBox.value != date){
                             var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
-                            windowRef.changed();
+                            if (windowRef.changed) windowRef.changed();
                     }
 
                     dateBox.value = date;
@@ -1660,7 +1660,7 @@ s
                         disableCtrls(isTemporal(str));
 
                         if( dateBox.strTemporal != str) {
-                            windowRef.changed();
+                            if (windowRef.changed) windowRef.changed();
                         }
                         dateBox.strTemporal = str;
                         dateBox.value = temporalToHumanReadableString(str);
@@ -1834,12 +1834,12 @@ s
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (element.value !== undefined) {    /* if this is an input element, register the onchange event */
-            top.HEURIST.registerEvent(element, "change", function() { windowRef.changed(); });
+            top.HEURIST.registerEvent(element, "change", function() { if (windowRef.changed) windowRef.changed(); });
 
             /* also, His Nibs doesn't like the fact that onchange doesn't fire until after the user has moved to another field,
             * so ... jeez, I dunno.  onkeypress?
             */
-            top.HEURIST.registerEvent(element, "keypress", function() { windowRef.changed(); });
+            top.HEURIST.registerEvent(element, "keypress", function() { if (windowRef.changed) windowRef.changed(); });
         }
         if (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "resource" || this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "relmarker") {    // dt_type
             if (this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']]) {    // dt_constrain_rectype
@@ -2036,7 +2036,7 @@ s
         textElt.className = "in";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
-        top.HEURIST.registerEvent(textElt, "change", function() { windowRef.changed(); });
+        top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
 
         top.HEURIST.edit.makeDateButton(textElt, this.document);
     };
@@ -2071,7 +2071,7 @@ s
         newDiv.style.width = "";
         top.HEURIST.registerEvent(textElt, "change", function() {
                 textElt.strTemporal = null;
-                windowRef.changed();
+                if (windowRef.changed) windowRef.changed();
         });
         //    var isTemporal = /^\|\S\S\S=/.test(textElt.value);        //sw check the beginning of the string for temporal format
         //    var isDate = ( !isTemporal && /\S/.test(textElt.value));    //sw not temporal and has non - white space must be a date
@@ -2210,7 +2210,7 @@ s
         top.HEURIST.registerEvent(removeImg, "click", function() {
                 if (! newDiv.readOnly) {
                     thisRef.clearResource(newDiv);
-                    windowRef.changed();
+                    if (windowRef.changed) windowRef.changed();
                 }
         });
 
@@ -2251,8 +2251,9 @@ s
 
         if (! searchValue) searchValue = element.textElt.value;
         var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
-        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"") +
-        "&target_recordtype="+top.HEURIST.edit.record.rectypeID;
+        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
+        if (top.HEURIST.edit.record)
+            url += "&target_recordtype="+top.HEURIST.edit.record.rectypeID;
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
         top.HEURIST.util.popupURL(window, url, {
@@ -2280,7 +2281,7 @@ s
         }
         top.HEURIST.util.autoSize(element.textElt, {maxWidth: maxWidth});
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        windowRef.changed();
+        if (windowRef.changed) windowRef.changed();
     };
 
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.handlePossibleDragDrop = function(input, element) {
@@ -2661,7 +2662,7 @@ s
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
             top.HEURIST.registerEvent(removeImg, "click", function() {
                     thisRef.removeFile(inputDiv);
-                    windowRef.changed();
+                    if (windowRef.changed) windowRef.changed();
             });
             inputDiv.valueElt = hiddenElt;
             inputDiv.removeImg = removeImg;
@@ -2694,7 +2695,7 @@ s
                 inputDiv.appendChild(fileElt);
 
                 var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-                // top.HEURIST.registerEvent(fileElt, "change", function() { windowRef.changed(); });
+                // top.HEURIST.registerEvent(fileElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
                 // (nowadays an uploaded file is automatically saved to the relevant record)
                 inputDiv.fileElt = fileElt;
 
@@ -2923,7 +2924,7 @@ s
         removeImg.title = "Remove this geographic object";
         top.HEURIST.registerEvent(removeImg, "click", function() {
                 thisRef.removeGeo(newDiv);
-                windowRef.changed();
+                if (windowRef.changed) windowRef.changed();
         });
 
         if (bdValue && bdValue.geo) {
@@ -2966,7 +2967,7 @@ s
         element.className = "geo-div";    // not empty
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        windowRef.changed();
+        if (windowRef.changed) windowRef.changed();
     };
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.removeGeo = function(input) {
         input.parentNode.removeChild(input);
@@ -3534,7 +3535,7 @@ s
         }
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        top.HEURIST.registerEvent(this.inputs[0], "change", function() { windowRef.changed(); });
+        top.HEURIST.registerEvent(this.inputs[0], "change", function() { if (windowRef.changed) windowRef.changed(); });
     };
     top.HEURIST.edit.inputs.BibURLInput.prototype.setReadonly = function(readonly) {
         if (readonly) {
