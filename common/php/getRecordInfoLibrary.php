@@ -127,7 +127,7 @@ $dbID = intval(HEURIST_DBID);
  */
 function setLastModified() {
     global $lastModified;
-  
+
     $res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
     $lastModified = mysql_fetch_row($res);
     $lastModified = strtotime($lastModified[0]);
@@ -942,7 +942,7 @@ function getRectypeStructureFieldColNames() {
                  "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
                  "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
                  "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
-                 "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID");
+                 "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type");
 }
 /**
  * get field definitions for a given rectype
@@ -968,7 +968,7 @@ function getRectypeFields($rtID) {
                       //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
                       "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
                       "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
-                      "dty_FieldSetRectypeID");
+                      "dty_FieldSetRectypeID", "dty_Type");
     // get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
     $res = mysql_query("select " . join(",", $colNames) . " from defRecStructure
 															left join defDetailTypes on rst_DetailTypeID = dty_ID
@@ -1068,7 +1068,7 @@ function getAllRectypeStructures($useCachedData = false) {
                       //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
                       "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
                       "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs",
-                      "dty_FieldSetRectypeID");
+                      "dty_FieldSetRectypeID", "dty_Type");
     $query = "select " . join(",", $colNames) .
              " from defRecStructure".
              " left join defDetailTypes on rst_DetailTypeID = dty_ID".
@@ -1255,9 +1255,13 @@ function getTransformsByOwnerGroup() {
                 ' left join defTerms on dttrantyp.dtl_Value = trm_ID' .
                 ' left join recDetails dttrans on rec_ID=dttrans.dtl_RecID and dttrans.dtl_DetailTypeID=' . $transDT .
                 ' left join sysUGrps on ugr_ID=rec_OwnerUGrpID' .
-             ' where rec_RecTypeID=' . $transRT .
-                ' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")' .
-             ' order by dispOrder, grpName, lbl';
+             ' where rec_RecTypeID=' . $transRT;
+             if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
+                $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
+             }else{
+                $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
+             }
+             $query = $query.' order by dispOrder, grpName, lbl';
     $res = mysql_query($query);
     /*****DEBUG****///error_log("query ".print_r($query,true));
     /*****DEBUG****///error_log("error ".print_r(mysql_error(),true));
@@ -1320,9 +1324,14 @@ function getToolsByTransform() {
                 ' left join recDetails dtValue on rec_ID=dtValue.dtl_RecID and dtValue.dtl_DetailTypeID=' . $toolDtValueDT .
                 ' left join defTerms dtv on dtValue.dtl_Value = dtv.trm_ID' .
                 ' left join recDetails cmd on rec_ID=cmd.dtl_RecID and cmd.dtl_DetailTypeID=' . $commandDT .
-              ' where rec_RecTypeID=' . $toolRT .
-                        ' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")' .
-              ' order by name';
+              ' where rec_RecTypeID=' . $toolRT;
+
+             if($ACCESSABLE_OWNER_IDS && count($ACCESSABLE_OWNER_IDS)>0){
+                $query = $query.' and (rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' . 'NOT rec_NonOwnerVisibility = "hidden")';
+             }else{
+                $query = $query.' and (NOT rec_NonOwnerVisibility = "hidden")';
+             }
+             $query = $query.' order by name';
     $res = mysql_query($query);
     /*****DEBUG****///error_log("query ".print_r($query,true));
     /*****DEBUG****///error_log("error ".print_r(mysql_error(),true));

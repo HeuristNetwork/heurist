@@ -632,7 +632,7 @@ top.HEURIST.search = {
 				function(related) {	// callback function to process related record results into HEURIST search results
 					var results = top.HEURIST.search.results,
 						recID,i,j;
-					if (related && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
+					if (related && results && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
 						results.recSetCount = related.count;
 						results.params = related.params;
 						for (recID in related.recSet){

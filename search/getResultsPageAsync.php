@@ -231,6 +231,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	$rectypes = array();
 
 	print "results.records.push(\n";
+    if($res){
 	while ($row = mysql_fetch_row($res)) {
 		if (! $first_of_page) print ",\n";
 
@@ -268,6 +269,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 			}
 		}
 	}
+    }
 	print ");\n";
 
 	if ($num % RESULTS_PER_PAGE) {

@@ -297,6 +297,11 @@ if (is_admin()) {
                         <li><a href="#"
                             onClick="loadContent('../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>
+
+                        <li><a href="#"
+                            onClick="loadContent('../import/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Import records and structure from FAIMS database">FAIMS sync</a></li>
+
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->
 						<!-- AO: remarked on 2013-02-18. This is one-off correction of db format in 2011
 						<li><a href="../import/direct/upgradeToNamedFiles.php?db=<?=HEURIST_DBNAME?>" target="_blank"
