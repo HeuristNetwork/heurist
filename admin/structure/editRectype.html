@@ -54,12 +54,16 @@
     <body class="popup">
         <!-- <body class="popup editRectype"> -->
 
+        <script src="../../common/php/displayPreferences.php"></script>
+
+<!-- ARTEM: these are redundant
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/displayPreferences.php"></script>
+        <script src="../../common/js/utilsLoad.js">
+        </script><script src="../../common/php/loadCommonInfo.php"></script>
+-->
         <!-- script src="../../common/php/getMagicNumbers.php"></script -->
-        <script src="../../common/php/loadCommonInfo.php"></script>
+
         <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
         <script	 type="text/javascript">
 
@@ -71,7 +75,7 @@
             var defaultGroupID = Hul.getUrlParameter('groupID',query);
             var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
-            var db = ((window.HEURIST.parameters && window.HEURIST.parameters["db"]) || "");
+            var db = ((top.HEURIST.parameters && top.HEURIST.parameters["db"]) || "");
 
         </script>
         <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
@@ -726,7 +730,8 @@
                         oRectype.rectype.defs[rectypeID][0].common.push(values[val]);
                     }
 
-                    var str = YAHOO.lang.JSON.stringify(oRectype);
+                    var str = JSON.stringify(oRectype);
+                    //var str = YAHOO.lang.JSON.stringify(oRectype);
 
                     return str;
                 }

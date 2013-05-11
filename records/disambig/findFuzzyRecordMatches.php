@@ -80,7 +80,7 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 		array_push($groups,0);
 	}
 	$groupPred = count($groups) > 0 ? "rec_OwnerUGrpID in (".join(",",$groups).") or ":"";
-	$tables = "records";
+	$tables = "Records";
 	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and ($groupPred not rec_NonOwnerVisibility='hidden')" . ($rec_id ? " and rec_ID != $rec_id" : "");
 	$N = 0;
 	foreach ($fuzzyFields as $field) {

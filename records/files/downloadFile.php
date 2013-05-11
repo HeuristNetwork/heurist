@@ -80,6 +80,9 @@
     if($type_source=='youtube')
     {
       print linkifyYouTubeURLs($filedata['URL'], $size); //returns iframe
+    }else if($type_source=='gdrive')
+    {
+        print linkifyGoogleDriveURLs($filedata['URL'], $size); //returns iframe
     }
     else if($type_media=='image')
     {
@@ -251,6 +254,15 @@
     /*****DEBUG****///error_log(">>>".$text."<<<<");
     return $text;
   }
+
+function linkifyGoogleDriveURLs($text, $size) {
+    if($size==null || $size==''){
+        $size = 'width="420" height="345"';
+    }
+
+    return '<iframe '.$size.' src="'.$text.'" frameborder="0" allowfullscreen></iframe>';
+}
+
 
 
   /*

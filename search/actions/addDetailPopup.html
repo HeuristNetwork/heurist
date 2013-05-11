@@ -1,0 +1,221 @@
+<!--
+
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* brief description of file
+*
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  Search
+*/
+
+-->
+
+<html>
+ <head>
+  <link rel="stylesheet" href="../../common/css/global.css">
+  <title>Add a value to each record</title>
+
+  <style type="text/css">
+	#record-count {
+		font-weight: bold;
+	}
+  </style>
+ </head>
+
+ <body class="popup" width=600 height=400 onload="init();">
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="../../Records/edit/editRecord.js"></script>
+  <script src="../../common/php/getMagicNumbers.php"></script>
+
+  <script>
+
+var recIDs, rtyID, dtyID, value, fileID, wkt;
+var scopeSelect,fieldSelect,inputDiv;
+var resultSetIDs, selectedResultSetIDs, allSelectedIDs, rtyIDs = [];
+var hBase = "http://" + window.location.host +
+			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
+
+function init () {
+  resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs;
+  selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
+  allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
+  inputDiv = document.getElementById("inputDiv");
+  scopeSelect = document.getElementById("scope-select");
+  fieldSelect = document.getElementById("field-select");// fill scope select and default to resultset
+  fillScope();
+//fill Field select  - formated with rectypename.filedname sorted
+  fillFields();
+//bind onchange to add/replace field entry input depending on type selected and asynch call to check change validity
+  createInputElement();
+}
+
+function fillScope(){
+//add result count option default
+  var opt = new Option("Current results set N = " + resultSetIDs.length, "resultSet");
+  scopeSelect.appendChild(opt);
+//selected count option
+  if ( selectedResultSetIDs.length > 0) {
+    opt = new Option("Selected results set N = " + selectedResultSetIDs.length, "selectedResultSet");
+    scopeSelect.appendChild(opt);
+    if ( allSelectedIDs.length > selectedResultSetIDs.length) {
+      opt = new Option("All selected N = " + allSelectedIDs.length, "allSelected");
+      scopeSelect.appendChild(opt);
+    }
+  }
+//find all types for result and add option for each with counts.
+  for (var rty in top.HEURIST.search.results.infoByDepth[0].rectypes){
+    rtyIDs.push(rty);
+    opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
+    scopeSelect.appendChild(opt);
+  }
+// add onchange handler to fill fieldSelect
+  scopeSelect.onchange = fillFields;
+}
+
+function fillFields(){
+  var dtys = {}, dtyNames = [],dtyNameToID = {};
+  var rtys = {};
+  var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
+  alert(" User selected scope "+scopeSelect.value);
+  //remove all options
+  while (fieldSelect.options.length){
+    fieldSelect.removeChild(fieldSelect.options[0]);
+  }
+  //for selected scope find all types
+  switch(scopeSelect.value){
+    case "resultSet":
+      break;
+    case "selectedResultSet":
+      rtyIDs = [];
+      for(i in selectedResultSetIDs){
+        recID = selectedResultSetIDs[i];
+        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        if (!rtys[rty]){
+          rtys[rty] = 1;
+          rtyIDs.push(rty);
+        }
+      }
+      break;
+    case "allSelected":
+      rtyIDs = [];
+      for(i in allSelectedIDs){
+        recID = allSelectedIDs[i];
+        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        if (!rtys[rty]){
+          rtys[rty] = 1;
+          rtyIDs.push(rty);
+        }
+      }
+      break;
+    default:
+      rtyIDs = [scopeSelect.value];
+  }
+//for all rectypes find all fields as Detail names sorted
+  for (i in rtyIDs) {
+    rty = rtyIDs[i];
+    rtyName = top.HEURIST.rectypes.names[rty];
+    for (dty in top.HEURIST.rectypes.typedefs[rty].dtFields) {
+      if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in ["selector","relmarker"]){
+        continue;
+      }
+      dtyName = top.HEURIST.detailTypes.names[dty];
+      if (!dtys[dtyName]){
+        dtys[dtyName] = [];
+        dtyNameToID[dtyName] = dty;
+        dtyNames.push(dtyName);
+      }
+      fieldName = rtyName + "." + top.HEURIST.rectypes.typedefs[rty].dtFields[dty][0];
+      dtys[dtyName].push(fieldName);
+    }
+  }
+  dtyNames.sort();
+//add option for DetailType enabled followed by all Rectype.Fieldname options disabled
+  for (i in dtyNames) {
+    dtyName = dtyNames[i];
+    opt = new Option(dtyName, dtyNameToID[dtyName]);
+    fieldSelect.appendChild(opt);
+    //sort RectypeName.FieldName
+    dtys[dtyName].sort();
+    for (j in dtys[dtyName]){
+      fieldName = dtys[dtyName][j];
+      opt = new Option(" -"+fieldName, "");
+      opt.disabled = "disabled";
+      fieldSelect.appendChild(opt);
+    }
+  }
+  fieldSelect.onchange = createInputElement;
+}
+
+function createInputElement(){
+  inputDiv.innerHTML = "";
+  top.HEURIST.edit.allInputs = [];
+  top.HEURIST.edit.createInput("",fieldSelect.value,null,[],inputDiv,null);
+}
+
+function save() {
+  var _data = {};
+//need to extract the value for the input and return all appropriate values
+  if (scopeSelect.value == "allSelected") {
+    recIDs = allSelectedIDs;
+  }else if (scopeSelect.value == "resultSet") {
+    recIDs = resultSetIDs;
+  }else if (scopeSelect.value == "selectedResultSet") {
+    recIDs = selectedResultSetIDs;
+  }else {
+    rtyID = scopeSelect.value;
+  }
+  value = (top.HEURIST.edit.allInputs[0].inputs[0].value || top.HEURIST.edit.allInputs[0].inputs[0].input.value || top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt.value);
+  match = value.match(/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\(?\([-0-9.+, ]+?\)\)?)$/i);
+  if (match[2]) {
+    value = match[1];
+    wkt = match[2];
+  }
+  _data.recIDs = recIDs;
+  _data.dtyID =  fieldSelect.value;
+  if (rtyID) _data.rtyID = rtyID;
+  if (value) _data.val = value;
+  if (fileID) _data.ulfID = fileID;
+  if (wkt) _data.geo = wkt;
+  top.HEURIST.search.executeAction( "add_detail", _data );
+// alert("the value is "+ value + "wkt = " + wkt);
+
+}
+
+
+  </script>
+   <p>This function adds a new value for a specified field to each record. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).</p>
+
+   <div id="uiControls">
+     <div><label for="scope-select">Apply value to: </label><select id="scope-select"></select></div>
+     <div><label for="field-select">Select Field: </label><select id="field-select"></select></div>
+
+     <div id="inputDiv"><label for="value">Value: </label><input  type="text" id="value"/></div>
+   </div>
+   <input type="button" value="Recode" onclick="save();">
+   <input type="button" value="Close" onclick="window.close();">
+
+   <div id="status"></div>
+
+ </body>
+</html>

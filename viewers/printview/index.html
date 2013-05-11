@@ -81,7 +81,7 @@
         styleSelectElt.options[0].disabled = true;
         var localStyleName;
         for (localStyleName in styles){
-          styleSelectElt.appendChild( new Option(localStyleName,styles[localStyleName][0]));
+          styleSelectElt.appendChild( new Option(localStyleName,localStyleName));
           if (localStyleName == s) {
             styleSelectElt.selectedIndex = styleSelectElt.options.length -1;
           }
@@ -519,6 +519,8 @@
           curStyle = "Generic XML";
         }else if (top.HEURIST.transforms.byID[transformID]) {
           curStyle = top.HEURIST.transforms.byID[transformID].label;
+        }else if (isNaN(transformID)){
+          curStyle = transformID;
         }else{
           curStyle = "Default view";
         }
@@ -594,15 +596,27 @@
             xsltProcessor.reset();
             try{
               xsltProcessor.importStylesheet(xsls[style]);
-              xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
             }catch(e){
-              alert("There was an error with the '"+ style + "' transform. \n"+
+              alert("Unable to load the '"+ style + "' transform. \n"+
                 "Please select a different transform. \n\n"+
-                "Error Message:\n\t"+e.message);
-              clearAndDisplayMessage("Please select a different transform above");
+                "The xsltProcessor returned Error Message:\n\t"+e.message);
+              clearAndDisplayMessage(style+" transform loading problem, please select a different transform above");
               return;
             }finally{
               delete xsltProcessor;
+            }
+            if (xsltProcessor){
+              try{
+                xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
+              }catch(e){
+                alert("The '"+ style + "' transform had an error during transformation. \n"+
+                  "You might try different data or select a different transform. \n\n"+
+                  "The xsltProcessor returned Error Message:\n\t"+e.message);
+                clearAndDisplayMessage(style+" transformation error. Please select different data or a different transform above");
+                return;
+              }finally{
+                delete xsltProcessor;
+              }
             }
           }
         }

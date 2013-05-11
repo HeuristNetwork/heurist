@@ -632,7 +632,7 @@ top.HEURIST.search = {
 				function(related) {	// callback function to process related record results into HEURIST search results
 					var results = top.HEURIST.search.results,
 						recID,i,j;
-					if (related && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
+					if (related && results && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
 						results.recSetCount = related.count;
 						results.params = related.params;
 						for (recID in related.recSet){
@@ -3853,6 +3853,18 @@ top.HEURIST.search = {
 			}
 		});
 	},
+
+  addDetailPopup: function() {
+    var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+    if (recIDs_list.length == 0) {
+      recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+    }
+    if (recIDs_list.length == 0) {
+      alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+      return;
+    }
+    top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/addDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+  },
 
 	addRelationshipsPopup: function() {
 		if (top.HEURIST.search.getSelectedRecIDs().get().length === 0) {

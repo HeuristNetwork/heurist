@@ -1844,6 +1844,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
     },
 
+    //validate numeric
     validate: function(evt) {
         var theEvent = evt || window.event;
         var key = theEvent.keyCode || theEvent.which;
@@ -1910,9 +1911,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             posy = e.pageY;
         }
         else if (e.clientX || e.clientY)     {
-            posx = e.clientX + document.body.scrollLeft
+            posx = e.clientX
             + document.documentElement.scrollLeft;
-            posy = e.clientY + document.body.scrollTop
+            posy = e.clientY
             + document.documentElement.scrollTop;
         }
 
@@ -1922,12 +1923,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     getOffset: function(obj) {
 
         var x = y = 0;
+        var sleft = 0;//obj.ownerDocument.body.scrollLeft;
+        var stop = 0; //obj.ownerDocument.body.scrollTop;
         while (obj) {
             x += obj.offsetLeft;
             y += obj.offsetTop;
             obj = obj.offsetParent;
         }
-        return [x, y];
+        return [x-sleft, y-stop];
     },
 
 /**

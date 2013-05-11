@@ -626,12 +626,12 @@ function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false,
 		define($defString, $dir);
 		return true;
 	} else if (!$info->isDir() && $tryMakeDir) {
-		if (mkdir($info, 0777, true)) {
+		if (@mkdir($info, 0777, true)) {
 			define($defString, $dir);
 			return true;
 		}
 	}
-	error_log("initialize.php - Failed to create $info folder for defining $defineName as $dir");
+	error_log("initialize.php - Failed to create $info folder for defining $defString as $dir");
 	return false;
 }
 /**

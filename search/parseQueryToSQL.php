@@ -768,7 +768,7 @@ class FieldPredicate extends Predicate {
 
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
-/*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
+/*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true)." type = ".print_r($this->field_type,true));
 
 		$match_value = is_numeric($this->value)? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
 
@@ -803,13 +803,16 @@ class FieldPredicate extends Predicate {
 		return $not . 'exists (select * from recDetails rd '
 		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
 		                        . 'left join Records link on rd.dtl_Value=link.rec_ID '
+		                        . 'left join defTerms trm on trm.trm_Label '. $match_pred . " "
 		                            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-		                            . '  and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
+		                            . ' and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
 		                                      .'link.rec_Title ' . $match_pred . ', '
+		                                      .'if(rdt.dty_Type in ("enum","relationtype"), '
+		                                      .'rd.dtl_Value = trm.trm_ID, '
 		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
 		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.dtl_Value ' . $match_pred . ')'
-		                                     : 'rd.dtl_Value ' . $match_pred ) . ')'
+		                                     : 'rd.dtl_Value ' . $match_pred ) . '))'
 		                              .' and ' . $rd_type_clause . ')';
 	}
 }
@@ -1222,7 +1225,15 @@ function construct_legacy_search() {
 	$_REQUEST['q'] = $q;
 }
 
-
+/**
+* put your comment there...
+*
+* @param mixed $query
+* @param mixed $search_type
+* @param mixed $parms
+* @param mixed $wg_ids
+* @param mixed $publicOnly
+*/
 function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
 

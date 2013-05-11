@@ -62,7 +62,7 @@ require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
-//require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
 require_once('libs.inc.php');
@@ -119,7 +119,7 @@ function executeSmartyTemplate($params){
 	}
 
 	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
-/*****DEBUG****///error_log(print_r($qresult,true));
+/*****DEBUG****///error_log(print_r($params,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
@@ -754,7 +754,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 						$res0 = null;
 						if(true){  //64719  45171   48855    57247
-							$res0 = getRecordForSmarty($record, $recursion_depth+2, $order); //@todo - need to
+							$res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
 							$order++;
 						}
 
@@ -963,7 +963,7 @@ function smarty_function_wrap($params, &$smarty)
 
 
 //!!!!!
-/*****DEBUG****///error_log("WARP VALUE>>>>".print_r($values,true));
+/*****DEBUG****///error_log("WARP VALUE>>>>".$mode."  ".print_r($values,true));
 
 			$sres = "";
 
@@ -981,7 +981,11 @@ function smarty_function_wrap($params, &$smarty)
 					if($type_media == 'image'){
 						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
 					}else if($value['remoteSource']=='youtube' ){
+
 						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+
+                    }else if($value['remoteSource']=='gdrive' ){
+                        $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
 
 					}else if($type_media=='document' && $value['mimeType']) {
 
@@ -1005,6 +1009,8 @@ function smarty_function_wrap($params, &$smarty)
 						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
 					}else if( $value['remoteSource']=='youtube' ){
 						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
+                    }else if( $value['remoteSource']=='gdrive' ){
+                        $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
 					}else{
 						$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 					}

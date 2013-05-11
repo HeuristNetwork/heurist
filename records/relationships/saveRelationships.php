@@ -137,7 +137,7 @@ if (count(@$deletions) > 0) {
 		print "(" . json_format($relatedRecords) . ")";
 	}
 }else if (@$_REQUEST["save-mode"] == "new") {
-	if ($recID) {
+	if ($recID) {//single save
 		print "(" . json_format(saveRelationship(
 			$recID,
 			intval(@$_REQUEST["RelTermID"]),
@@ -148,7 +148,7 @@ if (count(@$deletions) > 0) {
 			@$_REQUEST["StartDate"],
 			@$_REQUEST["EndDate"]
 		)) . ")";
-	} else {
+	} else {//multiple relations
 		$rv = array();
 		foreach ($recIDs as $recID) {
 			array_push($rv, saveRelationship(

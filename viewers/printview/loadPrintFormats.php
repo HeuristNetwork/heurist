@@ -35,6 +35,8 @@
 
 
 	define("SAVE_URI", "disabled");
+
+
 	if (is_dir(HEURIST_UPLOAD_DIR)) {
 		if (is_dir(HEURIST_UPLOAD_DIR.'xsl-templates')) {
 			define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
@@ -45,10 +47,15 @@
 		define('DIR', 'xsl-templates');
 	}else if(is_dir('xsl')) {
 		define('DIR', 'xsl');
-	}
+    }
 	// using ob_gzhandler makes this stuff up on IE6-
 
-	header('Content-type: text/javascript');
+    header('Content-type: text/javascript');
+
+    if(!defined('DIR')){
+            print "styles = {}";
+            exit();
+    }
 
 	$arr_styles = load_output_styles();
 

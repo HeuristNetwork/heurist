@@ -51,11 +51,19 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 $terms = getTerms();
 
 // get a list of workgroups the user belongs to. - ARTEM - NOT USED
-$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
-array_push($wg_ids, 0);
+$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID',
+                                            'ugl_GroupID',
+                                            'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
+if (is_logged_in()) {
+    array_push($ACCESSABLE_OWNER_IDS, get_user_id());
+    if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
+        array_push($ACCESSABLE_OWNER_IDS, 0);
+    }
+}
+
 
 // if we get a record id then see if there is a personal bookmark for it.
- if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
+if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
 	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
 	if (mysql_num_rows($res)>0) {
 		$row = mysql_fetch_assoc($res);
@@ -450,7 +458,7 @@ function print_private_details($bib) {
 							'id' => $filedata['id'],
 							'url' => $filedata['URL'],   //download
 							'thumb' => $filedata['thumbURL'],
-							'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube')?"":"&height=60%"):null  //link to generate player html
+							'player' => $isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  //link to generate player html
 						));
 					}
 
@@ -576,7 +584,7 @@ $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
 function print_relation_details($bib) {
 
-	global $relRT,$relSrcDT,$relTrgDT;
+	global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS;
 
 	$from_res = mysql_query('select recDetails.*
 	                           from recDetails
@@ -584,6 +592,8 @@ function print_relation_details($bib) {
 	                          where dtl_DetailTypeID = '.$relSrcDT.
 	                           ' and rec_RecTypeID = '.$relRT.
 	                           ' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
+
+
 	$to_res = mysql_query('select recDetails.*
 	                         from recDetails
 	                    left join Records on rec_ID = dtl_RecID
@@ -596,8 +606,20 @@ function print_relation_details($bib) {
 </div>
 <div class=detailRowHeader>Related
 <?php
+  $accessCondition = (count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
+                     (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
 	while ($reln = mysql_fetch_assoc($from_res)) {
 		$bd = fetch_relation_details($reln['dtl_RecID'], true);
+
+    // check related record
+    if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
+      continue;
+    }
+    $relatedRecID = $bd['RelatedRecID']['rec_ID'];
+    if (count(mysql__select_array("Records","rec_ID","rec_ID = $relatedRecID and $accessCondition")) == 0) { //related is not accessable
+    error_log("condition = $accessCondition with related = ".print_r($bd,true));
+      continue;
+    }
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
@@ -617,6 +639,15 @@ function print_relation_details($bib) {
 	}
 	while ($reln = mysql_fetch_assoc($to_res)) {
 		$bd = fetch_relation_details($reln['dtl_RecID'], false);
+
+    // check related record
+    if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
+      continue;
+    }
+    $relatedRecID = $bd['RelatedRecID']['rec_ID'];
+    if (count(mysql__select_array("Records","rec_ID","rec_ID = $relatedRecID and $accessCondition")) == 0) { //related is not accessable
+      continue;
+    }
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
@@ -638,15 +669,19 @@ function print_relation_details($bib) {
 
 
 function print_linked_details($bib) {
-global $relRT;
-	$res = mysql_query('select *
-	                      from recDetails
-	                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
-	                 left join Records on rec_ID = dtl_RecID
-	                     where dty_Type = "resource"
-	                       and dtl_DetailTypeID = dty_ID
-	                       and dtl_Value = ' . $bib['rec_ID'] . '
-	                       and rec_RecTypeID != '.$relRT);
+global $relRT,$ACCESSABLE_OWNER_IDS;
+	$query = 'select * '.
+	         'from recDetails '.
+	          'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
+	          'left join Records on rec_ID = dtl_RecID '.
+	         'where dty_Type = "resource" '.
+	             'and dtl_DetailTypeID = dty_ID '.
+	             'and dtl_Value = ' . $bib['rec_ID'].' '.
+	             'and rec_RecTypeID != '.$relRT.' '.
+               'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
+               (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
+  error_log("in renderRecData with query link = $query");
+  $res = mysql_query($query);
 
 	if (mysql_num_rows($res) <= 0) return;
 ?>
