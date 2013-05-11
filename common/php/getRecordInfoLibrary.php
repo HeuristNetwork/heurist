@@ -117,8 +117,6 @@
 */
 require_once (dirname(__FILE__) . '/imageLibrary.php');
 require_once (dirname(__FILE__) . '/../../records/files/uploadFile.php');
-if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
-$memcache = null;
 $lastModified = null;
 $dbID = intval(HEURIST_DBID);
 /**
@@ -143,19 +141,11 @@ function setLastModified() {
 function getCachedData($key) {
     global $memcache, $lastModified;
 
-    if (!$memcache) {
-        $memcache = new Memcache;
-        if (!$memcache->connect('localhost', MEMCACHED_PORT)) {
-            error_log("couldn't connect to memcached - running directly from DB");
-            return null;
-        }
-    }
-
     setLastModified();
 
     // check the cached lastupdate value and return false on not equal meaning recreate data
-    if (!$memcache || $lastModified > $memcache->get('lastUpdate:' . $key)) {
-        error_log("returning null from cache for key = $key");
+    if ($lastModified > $memcache->get('lastUpdate:' . $key)) {
+	// error_log("returning null from cache for key = $key");
         return null;
     }
 
@@ -172,13 +162,9 @@ function getCachedData($key) {
  */
 function setCachedData($key, $var) {
     global $memcache, $lastModified;
-    if (!$memcache) {
-        $memcache = new Memcache;
-        if (!$memcache->connect('localhost', MEMCACHED_PORT)) { //saw Decision: error or just load raw???
-            error_log("couldn't connect to memcached - not caching DB queries");
-        }
-    }
+
     setLastModified();
+
     $memcache->set('lastUpdate:' . $key, $lastModified);
     return $memcache->set($key, $var);
 }

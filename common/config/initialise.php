@@ -89,6 +89,8 @@ require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 	$dbReadonlyUsername, $dbReadonlyPassword - read-only user name and password
 	$dbPrefix - prepended to all database names
 	$defaultDBname - database to use if no ?db= specified
+	$memcachedHost - host for the memcached server
+	$memcachedPort - port for the memcached server
 	$defaultRootFileUploadPath - root location for uploaded files/record type icons/templates etc.
 	$siteRelativeIconUploadBasePath - Document root relative pathname of a directory where Heurist can store uploaded icons
 	$sysAdminEmail - email address of system adminstrator
@@ -133,7 +135,7 @@ define('HEURIST_BASE_URL', $serverBaseURL . HEURIST_SITE_PATH); // eg. http://he
 if ($dbHost) {
 	define('HEURIST_DBSERVER_NAME', $dbHost);
 } else {
-	define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heruist codebase
+	define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heurist codebase
 
 }
 if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonlyPassword)) { //if these are not specified then we can't do anything
@@ -144,6 +146,16 @@ define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('READONLY_DBUSERNAME', $dbReadonlyUsername); //readonly user for access to user and heurist databases
 define('READONLY_DBUSERPSWD', $dbReadonlyPassword);
 define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix'] ? $_REQUEST['prefix'] : $dbPrefix)); //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
+
+// set up memcached server(s) connection defines
+define('MEMCACHED_HOST', $memcachedHost ? $memcachedHost : "localhost");
+define('MEMCACHED_PORT', $memcachedPort ? $memcachedPort : "11211");
+// this was a global already anyway (in getSearchResults.php)
+$memcache = new Memcache;
+// with addServer, connection is not established until actually used
+// the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
+$memcache->addServer($memcachedHost,MEMCACHED_PORT);
+
 define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/"); // Heurist Installation which contains reference structure definitions (registered DB # 3)
 define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3-dev/"); //@todo: CHANGE TP h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 define('HEURIST_SYS_GROUP_ID', 1); // ID of Heurist System User Group which has special privileges - deprecated, although more generally group 1 on every database is the Database Managers group

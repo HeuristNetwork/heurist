@@ -160,10 +160,10 @@
 		mysql_connection_insert(DATABASE);
 		$query = "insert into sysLocks (lck_UGrpID, lck_Action) VALUES (".(function_exists('get_user_id') ? get_user_id(): 0).", 'buildcrosswalks')";
 		$res = mysql_query($query); // create sysLock
-		// Create the Heurist structure for the temp database, using a stripepd version of the new database template
+		// Create the Heurist structure for the temp database, using a tripped version of the new database template
 		mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");	// database might exist from previous use
 		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
-		$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
+		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
 		" -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {

@@ -110,9 +110,9 @@
 			// CREATE H3ExampleDB FROM WHICH USERS CAN START TO GENERATE NEW DATABASES
 			$newname=HEURIST_DB_PREFIX.H3ExampleDB;
 			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
+				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
 			} else {
-				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 			}
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1); // create database
 			if ($res1 != 0 ) {

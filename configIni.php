@@ -65,6 +65,11 @@ $dbPrefix = "hdb_"; // recommended
 // If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
 $defaultDBname = ""; // may be left blank
 
+// enter the server name or IP address of your Memcached server, blank --> localhost
+$memcachedHost = ""; // required
+// enter the port of your Memcached server, blank --> 11211
+$memcachedPort = ""; // required
+
 // The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
 // this address will allow heurist to request content through the firewall for general Internet URI's
 $httpProxy = ""; // blank = assumes direct internet access from server - ok for laptop installations.

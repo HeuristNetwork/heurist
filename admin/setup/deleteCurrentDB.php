@@ -93,7 +93,7 @@
 					echo ("<p>Please ask your system adminstrator to delete this folder if it exists.<br>");
 					echo($output2);
 				}
-				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
+				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
 				$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
 			}
 			if ($res2 != 0 ) {

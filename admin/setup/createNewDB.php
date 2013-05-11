@@ -295,7 +295,7 @@
 
 	function cleanupNewDB ($newname) { // called in case of failure to remove the partially created database
 		global $newDBName, $isNewDB, $done;
-		$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
+		$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
 		$output2=exec($cmdline . ' 2>&1', $output, $res2);
 		echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
 		echo($output2);
@@ -342,9 +342,9 @@
 			} // rejecting illegal characters in db name
 
 			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
+				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
 				} else {
-				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 			}
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
@@ -370,7 +370,7 @@
 			// Create the Heurist structure for the newly created database, using the template SQL file
 			// This file sets up teh table definitions and inserts a few critical values
 			// it does not set referential integrity constraints or triggers
-			$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < blankDBStructure.sql";
+			$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < blankDBStructure.sql";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
@@ -382,7 +382,7 @@
 			}
 
 			// Add referential constraints
-			$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addReferentialConstraints.sql";
+			$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addReferentialConstraints.sql";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
@@ -394,7 +394,7 @@
 			}
 
 			// Add procedures and triggers
-			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
+			$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			if ($res2 != 0 ) {
