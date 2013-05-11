@@ -341,26 +341,26 @@
 										    for ( d in details){//details lookup by recID
 											    recDetailIDs[details[d].getID()] = d;
 										    }
-                                            // Add code to check type constraints if constraints exist
-                                            //get HRec is not logError and skip
-                                            //get HRT in not match then remove id and logError
-                                            if (recHDT.getConstrainedRecordTypeIDs &&    //check to make sure the record matches constraints
-                                                recHDT.getConstrainedRecordTypeIDs() &&
-                                                recHDT.getConstrainedRecordTypeIDs().length > 0) {
-                                                recDTConst = recHDT.getConstrainedRecordTypeIDs();
-                                                for (i in ids) {//if rtyID is in constraint set the put in valid array
-                                                    newRefHR = HeuristScholarDB.getRecord(ids[i]);
-                                                    if (!newRefHR) {
-                                                        logError(j,"linked record id not found");
-                                                    }else if (recDTConst.indexOf(""+newRefHR.getRecordType().getID()) != -1){
-                                                        //add id
-                                                        validIDs.push(ids[i]);
-                                                    }else{
-                                                        logError(j,"rectype not in constraint set ignoring input");
-                                                    }
-                                                }
-                                                ids = validIDs;
-                                            }
+                        // Add code to check type constraints if constraints exist
+                        //get HRec is not logError and skip
+                        //get HRT in not match then remove id and logError
+                        if (recHDT.getConstrainedRecordTypeIDs &&    //check to make sure the record matches constraints
+                            recHDT.getConstrainedRecordTypeIDs() &&
+                            recHDT.getConstrainedRecordTypeIDs().length > 0) {
+                            recDTConst = recHDT.getConstrainedRecordTypeIDs();
+                            for (i in ids) {//if rtyID is in constraint set the put in valid array
+                                newRefHR = HeuristScholarDB.getRecord(ids[i]);
+                                if (!newRefHR) {
+                                    logError(j,"linked record id not found");
+                                }else if (recDTConst.indexOf(""+newRefHR.getRecordType().getID()) != -1){
+                                    //add id
+                                    validIDs.push(ids[i]);
+                                }else{
+                                    logError(j,"rectype not in constraint set ignoring input");
+                                }
+                            }
+                            ids = validIDs;
+                        }
 										    if (HDetailManager.getDetailRepeatable(recHRT, recHDT )) {//repeatable field
 											    for(i in ids){
 												    if (!isNaN(ids[i])){
@@ -392,13 +392,16 @@
 											    }
 										    }else{//non repeatable
 											    if (ids.length=1 && !recDetailIDs[ids[0]]){ //different id
-												    if (details[0]){//update if there is an existing detail
+												    if (details && details.length > 0 && details[0]){//update if there is an existing detail
+                              recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(ids[0]));
+/*
 													    if (fields[j][3] && !isNaN(fields[j][3])){
 														    recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(fields[j][3]));
 													    }else{
 														    logError(j,"update failed on non matching existing value " + fields[j][3]);
 													    }
-												    }else{//add
+*/
+                            }else{//add
 													    recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[0]));
 												    }
 											    }else{//multi-value
