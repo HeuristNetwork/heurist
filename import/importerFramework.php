@@ -1513,10 +1513,10 @@ function find_similar_entries(&$entry) {
 	// use a strict substring to take advantage of the index on hash
 	if (HASH_PREFIX_LENGTH) {
 		$hprefix = mb_substr($hash, 0, HASH_PREFIX_LENGTH);
-		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . addslashes($hprefix) . "%' having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . mysql_real_escape_string($hprefix) . "%' having lev < $hash_len order by lev";
 	}
 	else {
-		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev < $hash_len order by lev";
 	}
 	/*****DEBUG****/// error_log($similar_query);
 

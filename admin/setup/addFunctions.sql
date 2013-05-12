@@ -7,11 +7,12 @@
 
 -- Contains
 -- LEVENSHSTEIN(VARCHAR(255),VARCHAR(255)) RETURNS INT NOT NULL
--- LIMITED_LEVENSHSTEIN(VARCHAR(255),VARCHAR(255)) RETURNS INT
+-- LIMITED_LEVENSHSTEIN obsoleted (modified calling code)
 -- LIPOSUCTION(VARCHAR(20480)) RETURNS VARCHAR(20480)
 
 -- Changelog
--- 2013-05-08 by Arjen Lentz (arjen@archefact.com.au)
+-- 2013-05-08 by Arjen Lentz (arjen@archefact.com.au) initial
+-- 2013-05-12 by Arjen Lentz (arjen@archefact.com.au) removed LIMITED_LEVENSHTEIN()
 
 
 -- core levenshtein function adapted from
@@ -77,85 +78,6 @@ CREATE FUNCTION LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) 
         SET cv0 = CONCAT(cv0, CHAR(c)),
             j = j + 1;
       END WHILE;
-
-      SET cv1 = cv0,
-          i = i + 1;
-    END WHILE;
-
-   RETURN (c);
-  END $$
-
-
-DROP FUNCTION IF EXISTS LIMITED_LEVENSHTEIN $$
--- variation of levenshtein with a specified maximum levenshstein value
-CREATE FUNCTION LIMITED_LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8, maxval INT UNSIGNED)
-  RETURNS INT
-  DETERMINISTIC
-  BEGIN
-    DECLARE s1_len, s2_len, i, j, c, c_temp, cost, maxval_exceeded INT;
-    DECLARE s1_char CHAR;
-    -- max strlen=255 for this function
-    DECLARE cv0, cv1 VARBINARY(256);
-
-    SET s1_len = CHAR_LENGTH(s1),
-        s2_len = CHAR_LENGTH(s2),
-        cv1 = 0x00,
-        j = 1,
-        i = 1,
-        c = 0;
-
-    IF (s1 = s2) THEN
-      RETURN (0);
-    ELSEIF (s1_len = 0) THEN
-      RETURN (IF(s2_len > maxval, NULL, s2_len));
-    ELSEIF (s2_len = 0) THEN
-      RETURN (IF(s1_len > maxval, NULL, s1_len));
-    END IF;
-
-    IF (((s2_len - s1_len) > maxval) || ((s1_len - s2_len) > maxval)) THEN
-      -- difference in string lengths is a minimum bound for the levenshtein distance
-      RETURN NULL;
-    END IF;
-
-    WHILE (j <= s2_len) DO
-      SET cv1 = CONCAT(cv1, CHAR(j)),
-          j = j + 1;
-    END WHILE;
-
-    WHILE (i <= s1_len) DO
-      SET s1_char = SUBSTRING(s1, i, 1),
-          c = i,
-          cv0 = CHAR(i),
-          j = 1,
-          maxval_exceeded = IF(i > maxval, 1, 0);
-
-      WHILE (j <= s2_len) DO
-        SET c = c + 1,
-            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
-
-        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
-        IF (c > c_temp) THEN
-          SET c = c_temp;
-        END IF;
-
-        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
-        IF (c > c_temp) THEN
-          SET c = c_temp;
-        END IF;
-
-        SET cv0 = CONCAT(cv0, CHAR(c)),
-            j = j + 1;
-
-        IF (c <= maxval) THEN
-          SET maxval_exceeded = 0;
-        END IF;
-      END WHILE;
-
-      IF (maxval_exceeded) THEN
-        -- every entry in this row exceeded the maximum specified levenstein value
-        -- abort comparison, return NULL
-        RETURN (NULL);
-      END IF;
 
       SET cv1 = cv0,
           i = i + 1;
