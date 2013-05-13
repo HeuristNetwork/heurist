@@ -14,6 +14,19 @@
 -- 2013-05-08 by Arjen Lentz (arjen@archefact.com.au) initial
 -- 2013-05-12 by Arjen Lentz (arjen@archefact.com.au) removed LIMITED_LEVENSHTEIN()
 
+-- ------------------------------------------------------------------------------
+-- The functions contained in this file have been merged with addProceduresTriggers.sql
+-- so new installations are automatically handled and may thus ignore this file
+--
+-- Existing installations must execute the following upgrade steps:
+-- 1) disable old UDFs from MySQL installation
+--    DROP FUNCTION LEVENSHTEIN;
+--    DROP FUNCTION LIMITED_LEVENSHTEIN;
+--    DROP FUNCTION LIPOSUCTION;
+-- 2) for each existing Heurist database, run
+--    USE dbname
+--    SOURCE addFunctions.sql
+-- ------------------------------------------------------------------------------
 
 -- core levenshtein function adapted from
 -- function by Jason Rust (http://sushiduy.plesk3.freepgs.com/levenshtein.sql)
