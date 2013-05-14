@@ -31,30 +31,60 @@
 
   require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
+  if (!@$ACCESSABLE_OWNER_IDS) {
+    $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
+    array_push($ACCESSABLE_OWNER_IDS, get_user_id());
+    if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
+        array_push($ACCESSABLE_OWNER_IDS, 0);
+    }
+  }
+
   function add_detail($data) {
+    global $ACCESSABLE_OWNER_IDS;
+//error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['val'] || @$data['geo'] || @$data['ulfID']))){
-
+      $result['problem'] = "Database problem - insufficent data passed to add_detail service";
+      return;
     }
+//normalize recIDs to an array for code below
     $recIDs = $data['recIDs'];
     if ($recIDs && ! is_array($recIDs)){
       $recIDs = array($recIDs);
     }
-    if (!$recIDs) {
+    $passedRecIDCnt = count(@$recIDs);
+    if ($passedRecIDCnt) {//check editable access for passed records
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
+    }
+// user chose add by rectype not recIDs so calc recID set
+    if (!$passedRecIDCnt && $data['rtyID']) {
       $rtyID = $data['rtyID'];
       if (is_array($rtyID)){
-        $rtyID = $rtyID[0];
+        $rtyID = $rtyID[0];// limit to single type for now
       }
-      $recIDs = mysql__select_array('Records','rec_ID',"rec_RecTypeID = $rtyID");
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_RecTypeID = $rtyID and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
+      $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-    $dtyID = $data['dtyID'];
-    $val = $data['val'];
+//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
 
-    $now = date('Y-m-d');
-    $dtl = Array(
-      'dtl_DetailTypeID'  => $dtyID,
-      'dtl_Modified'  => $now);
+    if (count($recIDs) == 0){
+      $result['none'] = "No editable records found in current set". ($inAccessableRecCnt ? " ($inAccessableRecCnt inaccessable records).":".");
+      return;
+    }else{
+      $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
+    }
+//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    $dtyID = $data['dtyID'];
+    $rtyLimits = mysql__select_assoc("defRecStructure","rst_RecTypeID","rst_MaxValues","rst_DetailTypeID = $dtyID and rst_RecTypeID in (".join(",",$rtyIDs).")");
+//error_log("rectypeLimits ".print_r($rtyLimits,true). " ".mysql_error());
+
+    $now = date('Y-m-d H:i:s');
+    $dtl = Array('dtl_DetailTypeID'  => $dtyID,
+                  'dtl_Modified'  => $now);
+    $baseTag = "add field (type $dtyID) $now";
     if(@$data['val']){
       $dtl['dtl_Value'] = $data['val'];
     }
@@ -64,16 +94,73 @@
     if(@$data['ulfID']){
       $dtl['dtl_UploadedFileID'] = $data['ulfID'];
     }
+    $undefinedFieldsRecIDs = array();
+    $processedRecIDs = array();
+    $limittedRecIDs = array();
+    $insertErrors = array();
     mysql_connection_overwrite(DATABASE);
     foreach ($recIDs as $recID) {
+      //check field limit for this record
+      $query = "select rec_RecTypeID, tmp.cnt from Records ".
+                "left join (select dtl_RecID as recID, count(dtl_ID) as cnt ".
+                            "from recDetails ".
+                            "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID group by dtl_RecID) as tmp on rec_ID = tmp.recID ".
+                "where rec_ID = $recID";
+      $res = mysql_query($query);
+      $row = mysql_fetch_row($res);
+//error_log("recID $recID - detailcount ".print_r($row,true). " ".mysql_error());
+      if (!array_key_exists($row[0],$rtyLimits)) {
+          array_push($undefinedFieldsRecIDs, $recID);
+          continue;
+      }else if (is_numeric($rtyLimits[$row[0]]) && ($rtyLimits[$row[0]] - $row[1]) < 1){
+          array_push($limittedRecIDs, $recID);
+          continue;
+      }
+      //limit ok so insert field
       $dtl['dtl_RecID'] = $recID;
       mysql__insert('recDetails', $dtl);
       if (mysql_error()) {
-        $result['problem'] = "Database problem - inserting field type ($dtyID) for record ($recID) error - ". mysql_error();
-        return $result;
+        $insertErrors[$recID] = "Database problem - inserting field type ($dtyID) for record ($recID) error - ". mysql_error();
+        continue;
       }
+      array_push($processedRecIDs, $recID);
     }
-    $result['ok'] = "Added field type ($dtyID) to ". count($recIDs). " Record(s)";
+    if (count($processedRecIDs)){
+      $resIndex = 'ok';
+      $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
+      $result[$resIndex] = "Added field type ($dtyID) to ".count($processedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag\") ".array_shift($processedTagResult)."\n\n";
+    }
+    if ($inAccessibleRecCnt > 0) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n";
+    }
+    if (count($undefinedFieldsRecIDs)) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $undefinedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $undefinedFieldsRecIDs, 'tagString' => $baseTag." undefined"));
+      $result[$resIndex] .= "Skipped undefined field type ($dtyID) for ".count($undefinedFieldsRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag undefined\") ".array_shift($undefinedFieldsTagResult)."\n\n";
+    }
+    if (count($limittedRecIDs)) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $limittedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $limittedRecIDs, 'tagString' => $baseTag." limitted"));
+      $result[$resIndex] .= "Skipped limitted field type ($dtyID) for ".count($limittedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag limitted\") ".array_shift($limittedFieldsTagResult)."\n\n";
+    }
+    if (count($insertErrors)) {
+      if (!@$resIndex ) {
+            $resIndex = 'problem';
+            $result[$resIndex] = '';
+      }
+      $insertErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($insertErrors), 'tagString' => $baseTag." error"));
+      $result[$resIndex] .= "Skipped limitted field type ($dtyID) for ".count($insertErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($insertErrorsTagResult)."\n\n";
+    }
     return $result;
   }
 
@@ -516,8 +603,7 @@
             'ugl_GroupID=grp.ugr_ID and ugl_UserID='.$userid.
             ' and grp.ugr_Name="'.addslashes($grp_name).
             '" and lower(tag_Text)=lower("'.addslashes($tag_name).'")');
-        }
-        else {
+        }else {
           $res = mysql_query('select tag_ID from usrTags where lower(tag_Text)=lower("'.
             addslashes($tag_name).'") and tag_UGrpID='.$userid);
         }
@@ -525,8 +611,7 @@
         if (mysql_num_rows($res) > 0) {
           $row = mysql_fetch_row($res);
           array_push($tag_ids, $row[0]);
-        }
-        else if ($add) {
+        }else if ($add) {
           // non-existent tag ... add it
           $tag_name = str_replace("\\", "/", $tag_name);	// replace backslashes with forwardslashes
           mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag_name) . "\", " . $userid . ")");
@@ -537,7 +622,6 @@
             array_push($tag_ids, mysql_insert_id());
           }
         }
-
       }
     }
 

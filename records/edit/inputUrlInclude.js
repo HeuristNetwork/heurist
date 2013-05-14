@@ -220,7 +220,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		top.HEURIST.registerEvent(removeImg, "click", function() {
 			if (! newDiv.readOnly) {
 				thisRef.clearURL(newDiv);
-				windowRef.changed();
+				if (windowRef.changed) windowRef.changed();
 			}
 		});
 
@@ -338,7 +338,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(ele
 	element.className = top.HEURIST.util.isempty(hiddenValue)?"file-resource-div empty":"file-resource-div";
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-	windowRef.changed();
+	if (windowRef.changed) windowRef.changed();
 };
 
 /**

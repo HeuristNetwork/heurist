@@ -2706,7 +2706,8 @@ s
                 //inputDiv.style.border = "solid 1px red"; debug
 
                 //additional button for Thumbnail Image - to create web snap shot
-                if(Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+                if(top.HEURIST.edit.record && top.HEURIST.edit.record.rectypeID &&
+                  Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
                     var thumbElt = this.document.createElement("input");
                     thumbElt.name = inputDiv.name;
                     thumbElt.value = "Web page snapshot";

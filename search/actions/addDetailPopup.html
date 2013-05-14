@@ -31,6 +31,8 @@
 <html>
  <head>
   <link rel="stylesheet" href="../../common/css/global.css">
+  <link rel="stylesheet" href="../../common/css/edit.css">
+  <link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
   <title>Add a value to each record</title>
 
   <style type="text/css">
@@ -44,7 +46,12 @@
   <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
   <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
   <script src="../../common/js/utilsLoad.js"></script>
-  <script src="../../Records/edit/editRecord.js"></script>
+  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+  <script src="../../common/js/hintDiv.js"></script>
+  <script src="../../common/js/calendarViewer.js"></script>
+  <script src="../../common/js/calendar.js"></script>
+  <script src="../../records/edit/editRecord.js"></script>
+  <script src="../../records/edit/inputUrlInclude.js"></script>
   <script src="../../common/php/getMagicNumbers.php"></script>
 
   <script>
@@ -57,6 +64,7 @@ var hBase = "http://" + window.location.host +
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 
 function init () {
+  top.HEURIST.edit.calendarViewer = calendarViewer;
   resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs;
   selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
   allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -97,7 +105,6 @@ function fillFields(){
   var dtys = {}, dtyNames = [],dtyNameToID = {};
   var rtys = {};
   var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
-  alert(" User selected scope "+scopeSelect.value);
   //remove all options
   while (fieldSelect.options.length){
     fieldSelect.removeChild(fieldSelect.options[0]);
@@ -159,7 +166,8 @@ function fillFields(){
     dtys[dtyName].sort();
     for (j in dtys[dtyName]){
       fieldName = dtys[dtyName][j];
-      opt = new Option(" -"+fieldName, "");
+      opt = new Option(".  ."+fieldName, "");
+      opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
       opt.disabled = "disabled";
       fieldSelect.appendChild(opt);
     }
@@ -185,11 +193,19 @@ function save() {
   }else {
     rtyID = scopeSelect.value;
   }
-  value = (top.HEURIST.edit.allInputs[0].inputs[0].value || top.HEURIST.edit.allInputs[0].inputs[0].input.value || top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt.value);
+  value = (top.HEURIST.edit.allInputs[0].inputs[0].value ||
+            top.HEURIST.edit.allInputs[0].inputs[0].input.value ||
+            (top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt ? top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt.value:false) ||
+            (top.HEURIST.edit.allInputs[0].inputs[0].textElt ? top.HEURIST.edit.allInputs[0].inputs[0].textElt.strTemporal:false));
   match = value.match(/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\(?\([-0-9.+, ]+?\)\)?)$/i);
-  if (match[2]) {
+  if (match && match[2]) {
     value = match[1];
     wkt = match[2];
+  }
+  match = value.match(/^\{"id":(\d+).*}$/);
+  if (match && match[1]) {
+   fileID = match[1];
+   value = null;
   }
   _data.recIDs = recIDs;
   _data.dtyID =  fieldSelect.value;
@@ -198,7 +214,7 @@ function save() {
   if (fileID) _data.ulfID = fileID;
   if (wkt) _data.geo = wkt;
   top.HEURIST.search.executeAction( "add_detail", _data );
-// alert("the value is "+ value + "wkt = " + wkt);
+//alert("the value is "+ value + "wkt = " + wkt);
 
 }
 
