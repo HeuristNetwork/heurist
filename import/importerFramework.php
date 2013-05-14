@@ -1513,10 +1513,10 @@ function find_similar_entries(&$entry) {
 	// use a strict substring to take advantage of the index on hash
 	if (HASH_PREFIX_LENGTH) {
 		$hprefix = mb_substr($hash, 0, HASH_PREFIX_LENGTH);
-		$similar_query = "select rec_ID as matching_bib_id, levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . mysql_real_escape_string($hprefix) . "%' having lev < $hash_len order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, new_levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . mysql_real_escape_string($hprefix) . "%' having lev < $hash_len order by lev";
 	}
 	else {
-		$similar_query = "select rec_ID as matching_bib_id, levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev < $hash_len order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, new_levenshtein($hashColumn, upper('" . mysql_real_escape_string($hash) . "')) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev < $hash_len order by lev";
 	}
 	/*****DEBUG****/// error_log($similar_query);
 
@@ -1560,7 +1560,7 @@ function biblio_are_equal($bib_id1, $bib_id2) {
 '
    select sum(rst_RecordMatchOrder) as bdr_match_count
      from recDetails BD1
-left join recDetails BD2 on BD1.dtl_DetailTypeID=BD2.dtl_DetailTypeID and (BD1.dtl_Value=BD2.dtl_Value or (length(BD1.dtl_ValShortened) > 20 and cast(liposuction(BD1.dtl_Value) as char) = cast(liposuction(BD2.dtl_Value) as char)))
+left join recDetails BD2 on BD1.dtl_DetailTypeID=BD2.dtl_DetailTypeID and (BD1.dtl_Value=BD2.dtl_Value or (length(BD1.dtl_ValShortened) > 20 and cast(new_liposuction(BD1.dtl_Value) as char) = cast(new_liposuction(BD2.dtl_Value) as char)))
 left join Records on BD1.dtl_RecID=rec_ID
 left join defRecStructure on rst_DetailTypeID=BD1.dtl_DetailTypeID and rst_RecTypeID=rec_RecTypeID
 left join defDetailTypes on dty_ID=BD1.dtl_DetailTypeID
@@ -2124,8 +2124,8 @@ function print_disambiguation_options(&$entry) {
     </tr>
 <?php
 	$res = mysql_query('select rec_ID,rec_Title,
-	                           levenshtein(rec_Hash,upper("'.addslashes($ambig_entry->getHHash()).'")) as diff1,
-	                           levenshtein(upper(rec_Title),upper("'.addslashes($ambig_entry->getTitle()).'")) as diff2
+	                           new_levenshtein(rec_Hash,upper("'.mysql_real_escape_string($ambig_entry->getHHash()).'")) as diff1,
+	                           new_levenshtein(upper(rec_Title),upper("'.mysql_real_escape_string($ambig_entry->getTitle()).'")) as diff2
 	                      from Records where rec_ID in ('.join(',',$ambig_entry->getPotentialMatches()).') order by diff1, diff2');
 	$is_first = true;
 	while ($bib = mysql_fetch_assoc($res)) {

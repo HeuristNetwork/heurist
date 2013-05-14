@@ -6,26 +6,27 @@
 -- License http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 
 -- Contains
--- LEVENSHSTEIN(VARCHAR(255),VARCHAR(255)) RETURNS INT NOT NULL
+-- NEW_LEVENSHSTEIN(VARCHAR(255),VARCHAR(255)) RETURNS INT NOT NULL
 -- LIMITED_LEVENSHSTEIN obsoleted (modified calling code)
--- LIPOSUCTION(VARCHAR(20480)) RETURNS VARCHAR(20480)
+-- NEW_LIPOSUCTION(VARCHAR(20480)) RETURNS VARCHAR(20480)
 
 -- Changelog
 -- 2013-05-08 by Arjen Lentz (arjen@archefact.com.au) initial
 -- 2013-05-12 by Arjen Lentz (arjen@archefact.com.au) removed LIMITED_LEVENSHTEIN()
+-- 2013-05-14 by Arjen Lentz (arjen@archefact.com.au) added NEW_ prefix to ease upgrade
 
 -- ------------------------------------------------------------------------------
 -- The functions contained in this file have been merged with addProceduresTriggers.sql
 -- so new installations are automatically handled and may thus ignore this file
 --
 -- Existing installations must execute the following upgrade steps:
--- 1) disable old UDFs from MySQL installation
+-- 1) for each existing Heurist database, run
+--    USE dbname
+--    SOURCE addFunctions.sql
+-- 2) at a convenient later time, disable/remove old UDFs from MySQL installation
 --    DROP FUNCTION LEVENSHTEIN;
 --    DROP FUNCTION LIMITED_LEVENSHTEIN;
 --    DROP FUNCTION LIPOSUCTION;
--- 2) for each existing Heurist database, run
---    USE dbname
---    SOURCE addFunctions.sql
 -- ------------------------------------------------------------------------------
 
 -- core levenshtein function adapted from
@@ -38,8 +39,8 @@
 -- thus the maximum string length this implementation can handle is also limited to 255 characters.
 
 DELIMITER $$
-DROP FUNCTION IF EXISTS LEVENSHTEIN $$
-CREATE FUNCTION LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8)
+DROP FUNCTION IF EXISTS NEW_LEVENSHTEIN $$
+CREATE FUNCTION NEW_LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8)
   RETURNS INT
   DETERMINISTIC
   BEGIN
@@ -101,12 +102,12 @@ CREATE FUNCTION LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) 
 
 
 DELIMITER $$
-DROP FUNCTION IF EXISTS LIPOSUCTION $$
+DROP FUNCTION IF EXISTS NEW_LIPOSUCTION $$
 -- LIPOSUCTION returns string removing any spaces/punctuation
 -- C isspace(): 0x20 SPC 0x09 TAB 0x0a LF 0x0b VT 0x0c FF 0x0d CR
 -- For simplicity we just regard anything <= ASCII 32 as space
 -- C ispunct(): any of ! " # % &  ' ( ) ; < = > ? [ \ ] * + , - . / : ^ _ { | } ~
-CREATE FUNCTION LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
+CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
   RETURNS VARCHAR(20480) CHARACTER SET utf8
   DETERMINISTIC
   BEGIN
