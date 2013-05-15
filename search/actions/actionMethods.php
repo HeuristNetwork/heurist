@@ -30,6 +30,7 @@
 */
 
   require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+  require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
   if (!@$ACCESSABLE_OWNER_IDS) {
     $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
@@ -129,13 +130,14 @@
       $resIndex = 'ok';
       $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
       $result[$resIndex] = "Added field type ($dtyID) to ".count($processedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag\") ".array_shift($processedTagResult)."\n\n";
+      updateRecTitles($processedRecIDs);
     }
     if ($inAccessibleRecCnt > 0) {
       if (!@$resIndex ) {
             $resIndex = 'none';
             $result[$resIndex] = '';
       }
-      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n";
+      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n\n";
     }
     if (count($undefinedFieldsRecIDs)) {
       if (!@$resIndex ) {
@@ -159,9 +161,173 @@
             $result[$resIndex] = '';
       }
       $insertErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($insertErrors), 'tagString' => $baseTag." error"));
-      $result[$resIndex] .= "Skipped limitted field type ($dtyID) for ".count($insertErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($insertErrorsTagResult)."\n\n";
+      $result[$resIndex] .= "Skipped insert errors on field type ($dtyID) for ".count($insertErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($insertErrorsTagResult)."\n\n";
     }
     return $result;
+  }
+
+  function replace_detail($data) {
+    global $ACCESSABLE_OWNER_IDS;
+//error_log("data ".print_r($data,true));
+
+    $result = array();
+    if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && @$data['sVal'] && @$data['rVal'] )){
+      $result['problem'] = "Database problem - insufficent data passed to add_detail service";
+      return $result;
+    }
+//normalize recIDs to an array for code below
+    $recIDs = $data['recIDs'];
+    if ($recIDs && ! is_array($recIDs)){
+      $recIDs = array($recIDs);
+    }
+    $passedRecIDCnt = count(@$recIDs);
+    if ($passedRecIDCnt) {//check editable access for passed records
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
+    }
+// user chose add by rectype not recIDs so calc recID set
+    if (!$passedRecIDCnt && $data['rtyID']) {
+      $rtyID = $data['rtyID'];
+      if (is_array($rtyID)){
+        $rtyID = $rtyID[0];// limit to single type for now
+      }
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_RecTypeID = $rtyID and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
+      $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
+    }
+//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+
+    if (count($recIDs) == 0){
+      $result['none'] = "No editable records found in current set". ($inAccessableRecCnt ? " ($inAccessableRecCnt inaccessable records).":".");
+      return $result;
+    }else{
+      $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
+    }
+//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    $dtyID = $data['dtyID'];
+
+    $basetype = mysql__select_array('defDetailTypes','dty_Type',"dty_ID = $dtyID");
+    $basetype = $basetype[0];
+    switch ($basetype) {
+      case "freetext":
+      case "blocktext":
+        $searchClause = "dtl_Value like \"%".$data['sVal']."%\"";
+        $partialReplace = true;
+        break;
+      case "enum":
+      case "relationtype":
+      case "float":
+      case "integer":
+      case "resource":
+      case "date":
+        $searchClause = "dtl_Value = \"".$data['sVal']."\"";
+        $partialReplace = false;
+        break;
+      default:
+        $result['problem'] = "Detail Type Problem - $basetype details are not supported for replace service.";
+        return $result;
+    }
+
+    $noneMatchingFieldsRecIDs = array();
+    $processedRecIDs = array();
+    $updateErrors = array();
+    $detailCnt = 0;
+    $detailErrorCnt = 0;
+    mysql_connection_overwrite(DATABASE);
+    foreach ($recIDs as $recID) {
+      //get matching detail value for record if there is one
+      $query = "select dtl_ID, dtl_Value from recDetails ".
+                "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
+      $res = mysql_query($query);
+      if (mysql_num_rows($res)==0) {
+        array_push($noneMatchingFieldsRecIDs, $recID);
+        continue;
+      }
+      //update the details
+      $recDetailWasUpdated = false;
+      while ($row = mysql_fetch_row($res)) {
+//error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
+        $dtlID = @$row[0];
+        if ($partialReplace) {// need to replace sVal with rVal
+          $dtlVal = @$row[1];
+          $newVal = preg_replace("/".$data['sVal']."/",$data['rVal'],$dtlVal);
+        }else{
+          $newVal = $data['rVal'];
+        }
+        mysql_query("update recDetails set dtl_Value = '$newVal' where dtl_ID = $dtlID");
+//error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
+        if (mysql_error()) {
+          $detailErrorCnt++;
+          $updateErrors[$recID] = "Database problem - finding field type ($dtyID) for record ($recID) error - ". mysql_error();
+          continue;
+        } else {
+          $recDetailWasUpdated = true;
+          $detailCnt++;
+        }
+      }
+      if ($recDetailWasUpdated) {//only put in processed if a detail was processed, obscure case when record has multiple details we record in error array also
+        array_push($processedRecIDs, $recID);
+      }
+    }
+
+    $now = date('Y-m-d H:i:s');
+    $dtl = Array('dtl_Modified'  => $now);
+    $baseTag = "replace field (type $dtyID) $now";
+
+    if (count($processedRecIDs)){
+      $resIndex = 'ok';
+      $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
+      $result[$resIndex] = "Updated field type ($dtyID) for $detailCnt fields in ".count($processedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag\") ".array_shift($processedTagResult)."\n\n";
+      updateRecTitles($processedRecIDs);
+    }
+    if (@$inAccessibleRecCnt > 0) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n\n";
+    }
+    if (count($noneMatchingFieldsRecIDs)) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $noneMatchingFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $noneMatchingFieldsRecIDs, 'tagString' => $baseTag." nonMatching"));
+      $result[$resIndex] .= "Skipped due to no matching field type ($dtyID) for ".count($noneMatchingFieldsRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag nonMatching\") ".array_shift($noneMatchingFieldsTagResult)."\n\n";
+    }
+    if (count($updateErrors)) {
+      if (!@$resIndex ) {
+            $resIndex = 'problem';
+            $result[$resIndex] = '';
+      }
+      $updateErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($updateErrors), 'tagString' => $baseTag." error"));
+      $result[$resIndex] .= "Skipped update errors on field type ($dtyID) for $detailErrorCnt fields in ".count($updateErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($updateErrorsTagResult)."\n\n";
+    }
+    return $result;
+  }
+
+  function updateRecTitles ($recIDs) {
+    if (!is_array($recIDs)) {
+      if (is_numeric($recIDs)) {
+        $recIDs = array($recIDs);
+      }else{
+        return false;
+      }
+    }
+    $res = mysql_query("select rec_ID, rec_Title, rec_RecTypeID from Records".
+                        " where ! rec_FlagTemporary and rec_ID in (".join(",",$recIDs).") order by rand()");
+    $recs = array();
+    while ($row = mysql_fetch_assoc($res)) {
+      $recs[$row['rec_ID']] = $row;
+    }
+    /*****DEBUG****///error_log(print_r($recs,true));
+    $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
+
+    foreach ($recIDs as $recID) {
+      $rtyID = $recs[$recID]['rec_RecTypeID'];
+      $new_title = fill_title_mask($masks[$rtyID], $recID, $rtyID);
+      mysql_query("update Records set rec_Title = '" . addslashes($new_title) . "'where rec_ID = $recID");
+    }
   }
 
   function delete_bookmarks($data) {
@@ -441,10 +607,10 @@
           } else {
             $message = 'Tagged '.count($bkmk_ids). ' records';
           }
-          $message .= ''.($inserted_count ? ' ('. $inserted_count . ' new bookmarks, ' : ' (').
+          $message .= ''.(@$inserted_count ? ' ('. $inserted_count . ' new bookmarks, ' : ' (').
           ($tag_count ? $tag_count . ' tags)' : ')');
 
-          $result[(($inserted_count>0 || $tag_count>0)?'ok':'none')] = $message;
+          $result[((@$inserted_count>0 || $tag_count>0)?'ok':'none')] = $message;
         }
       }
     }

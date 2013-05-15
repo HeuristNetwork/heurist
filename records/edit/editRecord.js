@@ -733,6 +733,22 @@ s
 
         allInputs: [],
 /**
+* creates a undeclared input separator on the fly
+*
+* @param label - the label for the separator
+* @param container -DOM element to attach this separator
+*/
+        createSeparator: function(label,container) {
+            var dt = top.HEURIST.edit.createFakeDetailType("fakeSep",label,"separator",label,null,null,null)
+            var rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,1);
+
+            var newSeparator = new top.HEURIST.edit.inputs.BibDetailSeparator("sep1", dt, rfr, [], container);
+            if (newSeparator){
+                top.HEURIST.edit.allInputs.push(newSeparator);
+            }
+            return newSeparator;
+        },
+/**
  * put your comment there...
  *
  * @param dt
@@ -1744,8 +1760,8 @@ s
         else if (required == 'recommended') required = "recommended";
         else required = "";
         this.required = required;
-
-        this.repeatable = (recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']] != 1)? true : false; //saw TODO this really needs to check many exist
+        var maxValue = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']];
+        this.repeatable = ( maxValue == null || maxValue > 1)? true : false; //saw TODO this really needs to check many exist
 
         this.row = this.document.createElement("div");
         parentElement.appendChild(this.row);

@@ -32,7 +32,7 @@
  <head>
   <link rel="stylesheet" href="../../common/css/global.css">
   <link rel="stylesheet" href="../../common/css/edit.css">
-  <link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
+  <link rel="stylesheet" type="text/css" href="../../common/css/calendar.css" />
   <title>Add a value to each record</title>
 
   <style type="text/css">
@@ -143,7 +143,7 @@ function fillFields(){
     rty = rtyIDs[i];
     rtyName = top.HEURIST.rectypes.names[rty];
     for (dty in top.HEURIST.rectypes.typedefs[rty].dtFields) {
-      if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in ["selector","relmarker"]){
+      if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"selector":1,"relmarker":1}){
         continue;
       }
       dtyName = top.HEURIST.detailTypes.names[dty];
@@ -178,7 +178,8 @@ function fillFields(){
 function createInputElement(){
   inputDiv.innerHTML = "";
   top.HEURIST.edit.allInputs = [];
-  top.HEURIST.edit.createInput("",fieldSelect.value,null,[],inputDiv,null);
+  top.HEURIST.edit.createSeparator("Value to add",inputDiv);
+  top.HEURIST.edit.createInput("addValue",fieldSelect.value,null,[],inputDiv,null);
 }
 
 function save() {
@@ -193,10 +194,24 @@ function save() {
   }else {
     rtyID = scopeSelect.value;
   }
-  value = (top.HEURIST.edit.allInputs[0].inputs[0].value ||
-            top.HEURIST.edit.allInputs[0].inputs[0].input.value ||
-            (top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt ? top.HEURIST.edit.allInputs[0].inputs[0].hiddenElt.value:false) ||
-            (top.HEURIST.edit.allInputs[0].inputs[0].textElt ? top.HEURIST.edit.allInputs[0].inputs[0].textElt.strTemporal:false));
+  var allInputs = top.HEURIST.edit.allInputs;
+  var addInput, i;
+  for (i=0; i<allInputs.length; i++){
+    if ( allInputs[i].recID == "addValue") {
+      addInput = allInputs[i].inputs[0];
+    };
+  }
+  if (!addInput) {
+    alert("no valid add input element found, unable to proceed with add");
+    return;
+  }
+  value = (addInput.value || addInput.input.value ||
+            (addInput.hiddenElt ? addInput.hiddenElt.value:false) ||
+            (addInput.textElt ? addInput.textElt.strTemporal:false));
+  if (!value){
+    alert("No value found, please enter a field value to add");
+    return;
+  }
   match = value.match(/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\(?\([-0-9.+, ]+?\)\)?)$/i);
   if (match && match[2]) {
     value = match[1];
@@ -223,9 +238,8 @@ function save() {
    <p>This function adds a new value for a specified field to each record. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).</p>
 
    <div id="uiControls">
-     <div><label for="scope-select">Apply value to: </label><select id="scope-select"></select></div>
-     <div><label for="field-select">Select Field: </label><select id="field-select"></select></div>
-
+     <div style="padding-top: 5px;"><label for="scope-select">Apply value to: </label><select id="scope-select"></select></div>
+     <div style="padding-top: 5px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
      <div id="inputDiv"><label for="value">Value: </label><input  type="text" id="value"/></div>
    </div>
    <input type="button" value="Recode" onclick="save();">
