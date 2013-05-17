@@ -68,14 +68,11 @@
 	if (! defined('SEARCH_VERSION')) {
 		define('SEARCH_VERSION', 1);
 	}
-	if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 
 	require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 	require_once(dirname(__FILE__)."../../records/files/uploadFile.php");
-
-	$memcache = null;
 
 	mysql_connection_overwrite(DATABASE);
 
@@ -194,12 +191,6 @@
 		if (! $id) {
 			return array("error" => "must specify record id");
 		}
-		if (! $memcache) {
-			$memcache = new Memcache;
-			if (! $memcache->connect('localhost', MEMCACHED_PORT)) {	//saw Decision: error or just load raw???
-				return array("error" => "couldn't connect to memcached");
-			}
-		}
 		$key = DATABASE . ":record:" . $id;
 		$record = null;
 		if (! $fresh) {
@@ -220,12 +211,6 @@
 
 	function updateCachedRecord($id) {
 		global $memcache;
-		if (! $memcache) {
-			$memcache = new Memcache;
-			if (! $memcache->connect('localhost', MEMCACHED_PORT)) {
-				return array("error" => "couldn't connect to memcached");
-			}
-		}
 		$key = DATABASE . ":record:" . $id;
 		$record = $memcache->get($key);
 		if ($record) {	// will only update if previously cached

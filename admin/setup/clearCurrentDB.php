@@ -91,7 +91,7 @@
 
                 // set parents to null to avoid referential integrity checks on deletion of parent before child
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'update recThreadedComments set cmt_ParentCmtID = NULL' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'update recThreadedComments set cmt_ParentCmtID = NULL' ";
                     echo ("Setting parents of threaded comments to null</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -101,7 +101,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recThreadedComments' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recThreadedComments' ";
                     echo ("Deleting threaded comments</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -111,7 +111,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recForwarding' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recForwarding' ";
                     echo ("Deleting record forwards</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -121,7 +121,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recRelationshipsCache' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recRelationshipsCache' ";
                     echo ("Deleting record relationships cache</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -131,7 +131,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recSimilarButNotDupes' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recSimilarButNotDupes' ";
                     echo ("Deleting list of similar but not dupe records</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -141,7 +141,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecentRecords' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecentRecords' ";
                     echo ("Deleting user's recent records list</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -151,7 +151,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecTagLinks' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecTagLinks' ";
                     echo ("Deleting record to tag links</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -161,7 +161,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrReminders' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrReminders' ";
                     echo ("Deleti9ng user reminders</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -171,7 +171,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRemindersBlockList' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRemindersBlockList' ";
                     echo ("Deleting user reminders block list</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -183,7 +183,7 @@
                 // Now delete the main data tables
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recDetails' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recDetails' ";
                     echo ("deleting record details (fields)</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2 != 0 ) {
@@ -193,7 +193,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrBookmarks' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrBookmarks' ";
                     echo ("Deleting user bookmarks</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -203,7 +203,7 @@
                 }
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM Records' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM Records' ";
                     echo ("Deleting Records</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
@@ -215,7 +215,7 @@
                 // Reset the record counter to zero
 
                 if ($res2==0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
+                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
                     echo ("Resetting record counter to zero</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
