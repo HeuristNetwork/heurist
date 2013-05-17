@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* printview.css
+* Global styles for Heurist import popupsbrief description of file
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,29 +28,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/* printview.css
- * Copyright 2010 Ireneusz "Irek" Golka
- * http://heuristscholar.org/
- *
- * Global styles for Heurist import popups,
- */
 
-/*
-This file is part of Heurist.
 
-Heurist is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Heurist is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 body {padding:0;overflow: hidden;}
 
 *|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}

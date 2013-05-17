@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* createCrosswalkTable.php, Imports recordtypes from another Heurist database
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,17 +30,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-	/*
-	* createCrosswalkTable.php, Imports recordtypes from another Heurist database, 17-05-2011, by Juan Adriaanse
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	*
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo Sorting of columns - Matches sorts alphabatically, not numeric and Record type name doesn't seem to sort at all
-	* @todo Find nicer way to show data in expanded row and tooltip
-	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	// Requires admin user, access to definitions though get_definitions is open

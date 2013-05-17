@@ -13,8 +13,10 @@
 */
 
 /**
-* brief description of file
-*
+* loadGroupInfo.js
+* Functions to load JSON data for workgroups
+* functions are installed as  top.HEURIST.json.*
+* 
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,15 +29,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * loadGroupInfo.js, Functions to load JSON data for workgroups
- * functions are installed as  top.HEURIST.json.*
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
 if (! top.HEURIST.json) top.HEURIST.json = {
 

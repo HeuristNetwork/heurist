@@ -15,42 +15,7 @@
 */
 
 /**
-* brief description of file
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
-
-
-
-/*<!--
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- -->*/
-
-/* Tuning parameters to determine how similar two bibliographic records are.
- * HASH_FUZZINESS controls how many differences there can be between the records' hashes,
- * as a fraction of the length.
- * HASH_PREFIX_LENGTH controls how many characters from the beginning of the records' hashes need to be identical.
- */
-define("HASH_FUZZINESS", 0.1);		// 0.1 is 10% difference
-define("HASH_PREFIX_LENGTH", 0);	// 5 is a good value 0 ignores prefix
-
-/* importerFramework.php
-
+* importerFramework.php
 A process presenting a half-dozen or so pages to the user.
 Temporary objects describing the entries are stored in the session data and meddled with;
 for now, all the data is left there so that we can pick at it and debug it;
@@ -67,9 +32,28 @@ session rather than keeping it in the request as is usual, the potential for use
 It would probably be possible (using JavaScript and appropriate HTTP redirects) to minimise the impact on the
 user's browser history to two pages -- the page wherein they specify the file, and the page telling them they're done,
 either of which should be refresh-happy (no POST data).
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
 
+
+/* Tuning parameters to determine how similar two bibliographic records are.
+ * HASH_FUZZINESS controls how many differences there can be between the records' hashes,
+ * as a fraction of the length.
+ * HASH_PREFIX_LENGTH controls how many characters from the beginning of the records' hashes need to be identical.
  */
-
+define("HASH_FUZZINESS", 0.1);		// 0.1 is 10% difference
+define("HASH_PREFIX_LENGTH", 0);	// 5 is a good value 0 ignores prefix
 
 // Make sure these are loaded before the session data is loaded, so that the class definitions are in place
 require_once("importerBaseClass.php");

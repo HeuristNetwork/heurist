@@ -13,7 +13,10 @@
 */
 
 /**
-* brief description of file
+* Popup window functions
+* Open the given URL in a nicely blinged-out iframe popup in the top-level window (even if invoked from a nested frame)
+* which will be cancelled by the user clicking outside it.
+* The width and height of the popup are controlled by the width and height of the <body> of the loaded document* brief description of file
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,23 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
-
-/* Popup window functions */
-
-
-/*
- * Open the given URL in a nicely blinged-out iframe popup in the top-level window (even if invoked from a nested frame)
- * which will be cancelled by the user clicking outside it.
- * The width and height of the popup are controlled by the width and height of the <body> of the loaded document.
- */
 
 
 var page_size = null;

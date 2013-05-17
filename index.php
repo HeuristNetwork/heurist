@@ -15,7 +15,8 @@
 */
 
 /**
- * index.php, the main entry point to Heurist, redirects to the search page
+* index.php
+* the main entry point to Heurist, redirects to the search page
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,6 +30,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
 
 	define('ROOTINIT',"1");//signal that we are enterring from the root
 

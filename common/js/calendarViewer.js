@@ -13,7 +13,13 @@
 */
 
 /**
-* brief description of file
+* calendarViewer.js
+* Creates popup div with calendar
+*
+* requires
+* common/js/hintDiv.js (popup div)
+* common/js/calendar.js
+* common/css/calendar.css* brief description of file
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,24 +33,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* calendarViewer.js
-* Creates popup div with calendar
-*
-* requires
-* common/js/hintDiv.js (popup div)
-* common/js/calendar.js
-* common/css/calendar.css
-*
-* 11/04/2012
-* @author: Artem Osmakov
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
 
 function CalendarViewer() {
 

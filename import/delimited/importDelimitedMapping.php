@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* importRecordsFromDelimited.php
+* save, load mappings for csv import
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,21 +28,12 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+    * @param includeUgrps=1 will output user and group information in addition to definitions
+    * @param approvedDefsOnly=1 will only output Reserved and Approved definitions
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
 
-
-/* importRecordsFromDelimited.php - save, load mappings for csv import
- * Ian Johnson Artem Osmakov 18 Nov 2011
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions
-	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
- * @todo
-*/
 define('ISSERVICE',1);
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');

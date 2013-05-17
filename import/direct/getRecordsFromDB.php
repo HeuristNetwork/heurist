@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* getRecordsFromDB.php
+* gets all records in a specified database (later, a selection) and write directly to current DB
+* Reads from either H2 or H3 format databases
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,22 +29,10 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+* @param       includeUgrps=1 will output user and group information in addition to definitions
+* @param       approvedDefsOnly=1 will only output Reserved and Approved definitions
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/* getRecordsFromDB.php - gets all records in a specified database (later, a selection) and write directly to current DB
-	* Reads from either H2 or H3 format databases
-	* Ian Johnson Artem Osmakov 25 - 28 Oct 2011
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions
-	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
-	* @todo
-	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

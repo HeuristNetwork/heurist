@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* Operations with rectype icons and thumnail images 
+
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,17 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-/*<!--
- * Operations with rectype icons and thumnail images
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- -->*/
 
  /**
  * Check the existense of file [databaseid-rectypeid.png]. If not found - creates stub image with text

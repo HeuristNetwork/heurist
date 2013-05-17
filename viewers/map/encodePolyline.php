@@ -15,7 +15,7 @@
 */
 
 /**
-* encode polyline
+* encode polyline 
 *
 * @author      Kim Jackson
 * @copyright   (C) 2005-2013 University of Sydney
@@ -25,9 +25,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
 
 
 $numLevels = 21;

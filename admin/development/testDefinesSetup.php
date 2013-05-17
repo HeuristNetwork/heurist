@@ -30,8 +30,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 echo "<span style=\"padding-right:73px;\">&nbsp;</span>HEURIST_SERVER_NAME - &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".HEURIST_SERVER_NAME ."<br><br>";

@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* UpgradeDB_3.0_3.1.sql: SQL file to update Heurist database between indicated versions 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,13 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
- -- UpgradeDB_3.0_3.1.sql: SQL file to update Heurist database between indicated versions
- -- @author Ian Johnson 4/4/2011
- -- @copyright 2005-2011 University of Sydney Digital Innovation Unit.
- -- @link: http://HeuristScholar.org
- -- @license http://www.gnu.org/licenses/gpl-3.0.txt
- -- @package Heurist academic knowledge management system
- -- @todo
+
 
  \W -- warnings to standard out
 

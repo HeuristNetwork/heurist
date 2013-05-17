@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* databaseSummary.php
+* request aggregation query for all records grouped by record type 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,18 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/*<!--
-	* databaseSummary.php - request aggregation query for all records grouped by record type
-	*
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	-->*/
 
 	require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');

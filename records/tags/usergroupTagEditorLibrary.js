@@ -13,7 +13,10 @@
 */
 
 /**
-* brief description of file
+* motley hack to make this code reusable ... no semblance of OO, I'm afraid ...
+* In particular, don't try having two workgroup tag editors in the same window.
+* Why would you do that, anyway?  I don't know!  It's really up to you.
+* But if you do end up wanting to do that then you will need to fix this code
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,20 +30,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
-/* motley hack to make this code reusable ... no semblance of OO, I'm afraid ...
- * In particular, don't try having two workgroup tag editors in the same window.
- * Why would you do that, anyway?  I don't know!  It's really up to you.
- * But if you do end up wanting to do that then you will need to fix this code.
- */
 
 if (! window.HEURIST) window.HEURIST = {};
 window.HEURIST.wgTagEditor = {

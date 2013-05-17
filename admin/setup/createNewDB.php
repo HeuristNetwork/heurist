@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* File: createNewDB.php Create a new database by applying blankDBStructure.sql and coreDefinitions.txt 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,20 +30,11 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+      /**
+    * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
+    * a series of files with checks on each stage and cleanup code
+    * **/
 
-	/**
-	* File: createNewDB.php Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
-	* Juan Adriaanse 10 Apr 2011
-	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	*
-	* Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
-	* a series of files with checks on each stage and cleanup code
-	*
-	* **/
 	define('NO_DB_ALLOWED',1);
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

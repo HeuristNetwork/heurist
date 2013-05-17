@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* getListOfdatabases.php
+* returns list of databases on the current server, with links
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,17 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-    /* getListOfdatabases.php - returns list of databases on the current server, with links
-    * Ian Johnson 10/8/11
-    * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-    * @link: http://HeuristScholar.org
-    * @license http://www.gnu.org/licenses/gpl-3.0.txt
-    * @package Heurist academic knowledge management system
-    * @todo
-    *
-    -->*/
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* editReportSchedule.js
+* A form to edit report schedules, or create a new one It is utilized as pop-up from manageReports
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,19 +28,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* editReportSchedule.js
-* A form to edit report schedules, or create a new one It is utilized as pop-up from manageReports
-*
-* 2011/05/09
-* @author: Artem Osmakov
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
+
 
 //aliases
 var Dom = YAHOO.util.Dom,

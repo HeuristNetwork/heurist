@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* editTermsImport.php
+* Imports terms from text file
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -28,19 +29,6 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
-
-
-
-/**
-* editTermsImport.php
-* Imports terms from text file
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
 */
 
 

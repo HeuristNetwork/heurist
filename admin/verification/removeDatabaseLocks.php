@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* removeDatabaseLocks.php, Removes all locks on the database. Ian Johnson 20/9/12
+* We can get away with no checkiong b/c locks are administrative and collisons are almost inconceivable
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,19 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-    /**
-    * removeDatabaseLocks.php, Removes all locks on the database. Ian Johnson 20/9/12
-    * We can get away with no checkiong b/c locks are administrative and collisons are almost inconceivable
-    * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-    * @link: http://HeuristScholar.org
-    * @license http://www.gnu.org/licenses/gpl-3.0.txt
-    * @package Heurist academic knowledge management system
-    * @todo
-    **/
-
 
 
     define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant

@@ -13,7 +13,9 @@
 */
 
 /**
-* brief description of file
+* editDetailType.js
+* A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
+* it may call another pop-ups: selectTerms and selectRectype
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,22 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* editDetailType.js
-* A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
-* it may call another pop-ups: selectTerms and selectRectype
-*
-* 28/04/2011
-* @author: Juan Adriaanse
-* @author: Artem Osmakov
-* @author: Stephen White
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
+
 
 /**  NOT USED
 * Validates value inserted into input field. In this case, make sure it's an integer

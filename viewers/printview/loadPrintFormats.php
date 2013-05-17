@@ -28,7 +28,6 @@
 */
 
 
-
 	/* load the read through the xsl directory detecting thoses xsl files that are to written for print formatting. Output an array
 	into JS */
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

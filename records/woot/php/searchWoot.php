@@ -15,17 +15,20 @@
 */
 
 /**
-* Thin wrapper service to return woot search results
+* thin wrapper service to return woot dataa as JSon   
 *
+* @author      Tom Murtagh
 * @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Woot
+* @subpackage  Records/Woot 
 */
-
 
 
 require_once(dirname(__FILE__)."/../woot.php");

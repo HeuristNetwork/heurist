@@ -13,8 +13,9 @@
 */
 
 /**
-* brief description of file
-*
+
+* brief description of file 
+* 
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,6 +28,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
 // SelectTerms object
 var selectTerms;
 
@@ -34,8 +36,9 @@ var selectTerms;
 var Dom = YAHOO.util.Dom,
 	Hul = top.HEURIST.util;
 
-/**
-* SelectTerms - class for pop-up window to select terms for editing detail type
+/** 
+* SelectTerms
+* class for pop-up window to select terms for editing detail type
 *
 * @param _isFilterMode - either select from all terms or filtering of existing tree
 * @param _isWindowMode - true in window popup, false in div
@@ -43,10 +46,8 @@ var Dom = YAHOO.util.Dom,
 *
 * apply
 * cancel
-*
-* @author Artem Osmakov <osmakov@gmail.com>
-* @version 2011.0427
 */
+    
 function SelectTerms(_isFilterMode, _isWindowMode) {
 
 	var _className = "SelectTerms",

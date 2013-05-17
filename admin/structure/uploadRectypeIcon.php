@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* uploadRectypeIcon.php
+* uploads icons and thumbnails for record types
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,20 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/**
-	* uploadRectypeIcon.php
-	* uploads icons and thumbnails for record types
-	*
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
-
 
 	define('SAVE_URI', 'disabled');
 

@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* loadUserGrps.php
+* load the particular user info and list of its groups, or group info and list of its memebrs
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,19 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/*
- * loadUserGrps.php
- *
- * load the particular user info and list of its groups, or group info and list of its memebrs
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
 define("SAVE_URI", "disabled");
 

@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* File: deleteCurrentDB.php Deletes the current database (owner group admins only)
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,17 +30,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-	/**
-	* File: deleteCurrentDB.php Deletes the current database (owner group admins only)
-	* Ian Johnson 24 Dec 2011
-	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	*
-	* **/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

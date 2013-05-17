@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* buildExampleDB.sql: SQL file to create an example Heurist database as a starter/seed database
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,13 +27,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
- -- buildExampleDB.sql: SQL file to create an example Heurist database as a starter/seed database
- -- @author Ian Johnson 11/1/2011
- -- @copyright 2005-2010 University of Sydney Digital Innovation Unit.
- -- @link: http://HeuristScholar.org
- -- @license http://www.gnu.org/licenses/gpl-3.0.txt
- -- @package Heurist academic knowledge management system
- -- @todo
 
 \W -- warnings to standard out, OK for cammand line but not for phpMyAdmin
 

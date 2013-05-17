@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* EditRecStructure - class for pop-up edit record type structure 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,6 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
 // EditRecStrucutre object
 var editStructure;
 
@@ -39,13 +40,6 @@ var Dom = YAHOO.util.Dom,
 	DDM = YAHOO.util.DragDropMgr,
 	Hul = top.HEURIST.util;
 
-
-/**
-* EditRecStructure - class for pop-up edit record type structure
-*
-* @author Artem Osmakov <osmakov@gmail.com>
-* @version 2011.0427
-*/
 
 function EditRecStructure() {
 

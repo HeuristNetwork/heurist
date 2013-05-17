@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* processAction.php
+* Import a record type, with all its Record Structure, Field types, and terms, or crosswalk it with an existing record type
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -28,20 +29,9 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @todo Show the import log once the importing is done, so user can see what happened, and change things where desired
+* @todo If an error occurres, delete everything that has been imported
 */
-
-
-	/**
-	* File: processAction.php Import a record type, with all its Record Structure, Field types, and terms, or crosswalk it with an existing record type
-	*
-	* Juan Adriaanse 13 Apr 2011
-	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo Show the import log once the importing is done, so user can see what happened, and change things where desired
-	* @todo If an error occurres, delete everything that has been imported
-	**/
 
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

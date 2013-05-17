@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* buildCrosswalks.php, Gets definitions from a specified installation of Heurist and writes them
+    * either to a new DB, or temp DB
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,17 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-	/*<!--
-	* buildCrosswalks.php, Gets definitions from a specified installation of Heurist and writes them
-	* either to a new DB, or temp DB, 18-02-2011, by Juan Adriaanse
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	-->*/
 
 	// crosswalk_builder.php  - gets definitions from a specified installation of Heurist
 	// Processes them into local definitions, allows the administrator to import definitions

@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* getUserFromDB.php - gets a user definition from an existing database and adds to current database
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,19 +29,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/* getUserFromDB.php - gets a user definition from an existing database and adds to current database
-	* Ian Johnson Artem Osmakov 25 - 28 Oct 2011
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions
-	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
-	* @todo
-	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

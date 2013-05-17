@@ -27,6 +27,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
+
     var last_vals = new Object();
 
     var updateTimeoutID = 0,

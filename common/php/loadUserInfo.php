@@ -31,17 +31,6 @@
 */
 
 
-
-	/*<!--
-	* filename, brief description, date of creation, by whom
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	-->*/
-
-
 	/* load the user's search preferences into JS -- saved searches are all that spring to mind at the moment */
 
 	define("SAVE_URI", "disabled");

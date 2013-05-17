@@ -13,8 +13,9 @@
 */
 
 /**
-* brief description of file
-*
+* editGroup.js
+* A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
+* 
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,21 +28,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* editGroup.js
-* A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
-*
-* 2011/05/09
-* @author: Artem Osmakov
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
 
 //aliases
+
 var Dom = YAHOO.util.Dom,
 	Hul = top.HEURIST.util;
 

@@ -13,8 +13,10 @@
 */
 
 /**
-* brief description of file
-*
+* Heurist API  v0.3
+* 0.2 (2007/12/12) - JSON data transfer both upstream and downstream
+* 0.1 - initial release
+* 
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,22 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
-* filename, brief description, date of creation, by whom
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-*/
 
-/* Heurist API  v0.3
-* Copyright (c) Archaeological Computing Laboratory, University of Sydney 2007
-* Author: Tom Murtagh
-*
-* 0.2 (2007/12/12) - JSON data transfer both upstream and downstream
-* 0.1 - initial release
-*/
 
 if (! window.console) { console = { log: function() { } } }
 if (! window.firebug) { firebug = console; }

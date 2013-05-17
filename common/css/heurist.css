@@ -13,7 +13,9 @@
 */
 
 /**
-* brief description of file
+* heurist.css
+* Common styles for Heurist,
+* including funky hover- and keyboard-accessible dropdown menus.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,39 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
-/* heurist.css
- * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
- * http://heuristscholar.org/
- *
- * Common styles for Heurist,
- * including funky hover- and keyboard-accessible dropdown menus.
- */
-
-/*
-This file is part of Heurist.
-
-Heurist is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Heurist is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 
 /* Contents of  http://yui.yahooapis.com/2.2.2/build/fonts/fonts-min.css  -- standardises font sizes */

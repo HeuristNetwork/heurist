@@ -15,15 +15,16 @@
 */
 
 /**
- set of functions
-*     upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
-*     register_file - registger the existing file on the server in recUploadedFiles (used in import)
-*     get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
-*     getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
-*     is_image - detect if resource is image
+* set of functions
+*   upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
+*   register_file - registger the existing file on the server in recUploadedFiles (used in import)
+*   get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
+*   getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
+*   is_image - detect if resource is image
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney

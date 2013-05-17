@@ -15,7 +15,10 @@
 */
 
 /**
-* brief description of file
+* getNextRegistrationID.php - request an ID from HeuristScholar.org/db=HeuristIndex, allocates the ID,
+* sets metadata in record and details.
+* This file is called by registerDB.php
+* ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -31,23 +34,11 @@
 */
 
 
-
-	/**
-	* getNextRegistrationID.php - request an ID from HeuristScholar.org/db=HeuristIndex, allocates the ID,
-	* sets metadata in record and details, Ian Johnson 18 Jan 2011.
-	* This file is called by registerDB.php
-	* ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
-
 	// TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
 	// We may need to hobble/delete some of the functionality on HeuristIndex to avoid people
 	// creating unwanted records or importing random crap into it
+    
 	$dbID = 0;
 	$error = "";
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");

@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* resetUserPassword.php
+* is called from login to reset forgotten password.
+* Generates new password and send it to user email
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,19 +32,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
- * resetUserPassword.php
- * is called from login to reset forgotten password.
- * Generates new password and send it to user email
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
