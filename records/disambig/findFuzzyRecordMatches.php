@@ -89,7 +89,7 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 
 		++$N;
 		$tables .= ", recDetails bd$N";
-		$predicates .= " and (bd$N.dtl_RecID=rec_ID and bd$N.dtl_DetailTypeID=$rdt_id and limited_levenshtein(bd$N.dtl_Value, '".mysql_real_escape_string($val)."', $threshold) is not null)";
+		$predicates .= " and (bd$N.dtl_RecID=rec_ID and bd$N.dtl_DetailTypeID=$rdt_id and new_levenshtein(bd$N.dtl_Value, '".mysql_real_escape_string($val)."') < $threshold)";
 	}
 	foreach ($strictFields as $field) {
 		list($rdt_id, $val) = $field;
