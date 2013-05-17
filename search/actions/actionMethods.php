@@ -137,7 +137,7 @@
             $resIndex = 'none';
             $result[$resIndex] = '';
       }
-      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n\n";
+      $result[$resIndex] .= "Skipped ".$inAccessibleRecCnt. " inaccessible Record(s) from selected action scope.\n\n";
     }
     if (count($undefinedFieldsRecIDs)) {
       if (!@$resIndex ) {
@@ -176,7 +176,7 @@
       return $result;
     }
 //normalize recIDs to an array for code below
-    $recIDs = $data['recIDs'];
+    $recIDs = @$data['recIDs'];
     if ($recIDs && ! is_array($recIDs)){
       $recIDs = array($recIDs);
     }
@@ -196,6 +196,9 @@
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
 //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
+                              'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
+                              'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
 
     if (count($recIDs) == 0){
       $result['none'] = "No editable records found in current set". ($inAccessableRecCnt ? " ($inAccessableRecCnt inaccessable records).":".");
@@ -228,7 +231,7 @@
         return $result;
     }
 
-    $noneMatchingFieldsRecIDs = array();
+    $nonMatchingFieldsRecIDs = array();
     $processedRecIDs = array();
     $updateErrors = array();
     $detailCnt = 0;
@@ -240,7 +243,7 @@
                 "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
       $res = mysql_query($query);
       if (mysql_num_rows($res)==0) {
-        array_push($noneMatchingFieldsRecIDs, $recID);
+        array_push($nonMatchingFieldsRecIDs, $recID);
         continue;
       }
       //update the details
@@ -277,7 +280,9 @@
     if (count($processedRecIDs)){
       $resIndex = 'ok';
       $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
-      $result[$resIndex] = "Updated field type ($dtyID) for $detailCnt fields in ".count($processedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag\") ".array_shift($processedTagResult)."\n\n";
+      $result[$resIndex] = "Updated field type ($dtyID) for $detailCnt fields in ".count($processedRecIDs). " Record(s).\n\n";
+      $result['count']['processed'] = count($processedRecIDs);
+      $result['replaced'] = array('recIDs' => $processedRecIDs, 'queryString' => "tag=\"$baseTag\"", 'tagResults' => $processedTagResult);
       updateRecTitles($processedRecIDs);
     }
     if (@$inAccessibleRecCnt > 0) {
@@ -285,15 +290,17 @@
             $resIndex = 'none';
             $result[$resIndex] = '';
       }
-      $result[$resIndex] .= "Skipped ".count($undefinedFieldsRecIDs). " inaccessible Record(s) from selected action scope.\n\n";
+      $result[$resIndex] .= "Skipped ".$inAccessibleRecCnt. " inaccessible Record(s) from selected action scope.\n\n";
     }
-    if (count($noneMatchingFieldsRecIDs)) {
+    if (count($nonMatchingFieldsRecIDs)) {
       if (!@$resIndex ) {
             $resIndex = 'none';
             $result[$resIndex] = '';
       }
-      $noneMatchingFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $noneMatchingFieldsRecIDs, 'tagString' => $baseTag." nonMatching"));
-      $result[$resIndex] .= "Skipped due to no matching field type ($dtyID) for ".count($noneMatchingFieldsRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag nonMatching\") ".array_shift($noneMatchingFieldsTagResult)."\n\n";
+      $nonMatchingFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $nonMatchingFieldsRecIDs, 'tagString' => $baseTag." nonMatching"));
+      $result[$resIndex] .= "Skipped due to no matching field type ($dtyID) for ".count($nonMatchingFieldsRecIDs). " Record(s).\n\n";
+      $result['count']['noMatch'] = count($nonMatchingFieldsRecIDs);
+      $result['nonMatching'] = array('recIDs' => $nonMatchingFieldsRecIDs, 'queryString' => "tag:\"$baseTag nonMatching\"", 'tagResults' => $nonMatchingFieldsTagResult);
     }
     if (count($updateErrors)) {
       if (!@$resIndex ) {
@@ -301,7 +308,9 @@
             $result[$resIndex] = '';
       }
       $updateErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($updateErrors), 'tagString' => $baseTag." error"));
-      $result[$resIndex] .= "Skipped update errors on field type ($dtyID) for $detailErrorCnt fields in ".count($updateErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($updateErrorsTagResult)."\n\n";
+      $result[$resIndex] .= "Skipped update errors on field type ($dtyID) for $detailErrorCnt fields in ".count($updateErrors). " Record(s).\n\n";
+      $result['count']['error'] = count($updateErrors);
+      $result['errors'] = array('byRecID' => $updateErrors, 'queryString' => "tag:\"$baseTag error\"", 'tagResults' => $updateErrorsTagResult);
     }
     return $result;
   }

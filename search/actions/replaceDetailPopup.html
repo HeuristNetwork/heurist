@@ -57,7 +57,7 @@
   <script>
 
 var recIDs, rtyID, dtyID, sValue, rValue, sFileID, rFileID, sWkt, rWkt;
-var scopeSelect,fieldSelect,inputDiv;
+var scopeSelect,fieldSelect,inputDiv,statusDiv;
 var resultSetIDs, selectedResultSetIDs, allSelectedIDs, rtyIDs = [];
 var hBase = "http://" + window.location.host +
 			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
@@ -69,6 +69,7 @@ function init () {
   selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
   allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
   inputDiv = document.getElementById("inputDiv");
+  statusDiv = document.getElementById("statusDiv");
   scopeSelect = document.getElementById("scope-select");
   fieldSelect = document.getElementById("field-select");// fill scope select and default to resultset
   fillScope();
@@ -183,11 +184,57 @@ function createInputElement(){
   top.HEURIST.edit.createSeparator("Value for replace",inputDiv);
   top.HEURIST.edit.createInput("replaceValue",fieldSelect.value,null,[],inputDiv,null);
 }
+
 function cbSave(results){
-  alert("made it to save cb func \n\n"+results.ok);
+  var html = "";
+  if(top.HEURIST.util.isnull(results)){
+    alert("Failed to return results from replace detail action!");
+    return
+  }
+  if (results.none){
+    html += "<p>"+results.none+"</p>";
+  }else if (results.problem){
+    html += "<p style=\"color: red;\">"+results.problem+"</p>";
+  }
+  if (results.count && (results.count.rtyRecs || results.count.passed)){
+    if (results.count.processed > 0) {
+      html += '<br><input type=\"button\" value=\"Requery\"'+
+              ' title=\"Click to force requery in order to show updated results\"'+
+              ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
+    }
+    html += "<div style=\"color: #DC8501; padding-top:5px\"> Results : </div><ul>";
+    if (results.count.passed > 0) {
+      html += "<li> Passed Record IDs ............ "+results.count.passed+"</li>";
+    }
+    if (results.count.rtyRecs > 0) {
+      html += "<li> RecType Record IDs ........ "+results.count.rtyRecs+"</li>";
+    }
+    if (results.count.noAccess > 0) {
+      html += "<li> Unaccessable Record IDs ... "+results.count.noAccess+"</li>";
+    }
+    if (results.count.processed > 0) {
+      html += "<li><strong> Processed Record IDs ..... "+results.count.processed+"</strong>"+
+              "...<a target=_new title=\" View replaced results -tagged "+ results.replaced.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.replaced.queryString)+"\">view</a></li>";
+    }
+    if (results.count.noMatch > 0) {
+      html += "<li> Non Matching Record IDs ... "+results.count.noMatch+
+              "...<a target=_new title=\" View no match results -tagged "+ results.nonMatching.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.nonMatching.queryString)+"\">view</a></li>";
+    }
+    if (results.count.error > 0) {
+      html += "<li> Non Matching Record IDs ... "+results.error.noMatch+
+              "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view</a></li>";
+    }
+    html += "</ul>";
+  }
+  statusDiv.innerHTML = html;
 }
+
 function save() {
   var _data = {};
+  statusDiv.innerHTML = "";
 //need to extract the value for the input and return all appropriate values
   if (scopeSelect.value == "allSelected") {
     recIDs = allSelectedIDs;
@@ -253,7 +300,7 @@ function save() {
    <input type="button" value="Recode" onclick="save();">
    <input type="button" value="Close" onclick="window.close();">
 
-   <div id="status"></div>
+   <div id="statusDiv"></div>
 
  </body>
 </html>

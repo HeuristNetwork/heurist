@@ -2672,7 +2672,7 @@ top.HEURIST.search = {
 	},
 
 
-	executeAction: function(action, _data){
+	executeAction: function(action, _data, cbAction){
 
 			function _requestCallBack(context) {
 
@@ -2703,7 +2703,7 @@ top.HEURIST.search = {
 			var str = YAHOO.lang.JSON.stringify(_data);
 
 			var baseurl = top.HEURIST.baseURL + "search/actions/actionHandler.php";
-			var callback = _requestCallBack;
+			var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
 			var params = "db="+_db+"&action="+action+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 
