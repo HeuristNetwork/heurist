@@ -380,6 +380,7 @@ top.HEURIST.search = {
 					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
 
 			window.history.pushState("object or string", "Title", location.pathname+'?'+ top.HEURIST.currentQuery_main);
+      top.HEURIST.parseParams();
 	},
 
 	parseLayoutParam: function(layoutString){
