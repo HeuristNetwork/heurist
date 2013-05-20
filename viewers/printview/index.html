@@ -456,12 +456,15 @@
             }else{
               xml.getElementsByTagName("selectedIDs").item(0).firstChild.nodeValue = newSelectionIDs;
             }
+            //update record nodes with selected attribute
             var selIds = newSelectionIDs.split(",");
             $("record[selected='yes']",$(xml)).attr("selected","no");
             $("record[selected='no']",$(xml)).each(function(i,rec){
                 var recID = $(rec).children("id").text();
                 if(selIds.indexOf(recID) > -1) $(rec).attr("selected","yes");
-            })
+            });
+            //change selids in curQueryURL
+            curQueryURL = curQueryURL.replace(/selids=\{.*\}/,selFilter[1]);
           }
           FlatHMLQuery.selectIDs = newSelectionIDs;
           selectedIds = newSelectionIDs.split(",");

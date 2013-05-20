@@ -2646,6 +2646,7 @@ top.HEURIST.search = {
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 
+    top.HEURIST.search.updateBrowserHistory();
 		var viewerFrame = document.getElementById("viewer-frame");
 		if(viewerFrame){
 			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2664,7 +2665,6 @@ top.HEURIST.search = {
 		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
 */
 		top.HEURIST.search.setSelectedCount();
-
 		top.HEURIST.search.updateRecordView(recID);
 		top.HEURIST.search.updateMapOrSmarty();
 
