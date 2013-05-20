@@ -47,7 +47,7 @@
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['val'] || @$data['geo'] || @$data['ulfID']))){
       $result['problem'] = "Database problem - insufficent data passed to add_detail service";
-      return;
+      return result;
     }
 //normalize recIDs to an array for code below
     $recIDs = $data['recIDs'];
@@ -70,22 +70,27 @@
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
 //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
+                              'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
+                              'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
+
 
     if (count($recIDs) == 0){
       $result['none'] = "No editable records found in current set". ($inAccessableRecCnt ? " ($inAccessableRecCnt inaccessable records).":".");
-      return;
+      return result;
     }else{
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
 //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
+    $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
     $rtyLimits = mysql__select_assoc("defRecStructure","rst_RecTypeID","rst_MaxValues","rst_DetailTypeID = $dtyID and rst_RecTypeID in (".join(",",$rtyIDs).")");
 //error_log("rectypeLimits ".print_r($rtyLimits,true). " ".mysql_error());
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_DetailTypeID'  => $dtyID,
                   'dtl_Modified'  => $now);
-    $baseTag = "add field (type $dtyID) $now";
+    $baseTag = "add field $dtyName $now";
     if(@$data['val']){
       $dtl['dtl_Value'] = $data['val'];
     }
@@ -121,7 +126,7 @@
       $dtl['dtl_RecID'] = $recID;
       mysql__insert('recDetails', $dtl);
       if (mysql_error()) {
-        $insertErrors[$recID] = "Database problem - inserting field type ($dtyID) for record ($recID) error - ". mysql_error();
+        $insertErrors[$recID] = "Database problem - inserting field type $dtyName for record ($recID) error - ". mysql_error();
         continue;
       }
       array_push($processedRecIDs, $recID);
@@ -129,7 +134,9 @@
     if (count($processedRecIDs)){
       $resIndex = 'ok';
       $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
-      $result[$resIndex] = "Added field type ($dtyID) to ".count($processedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag\") ".array_shift($processedTagResult)."\n\n";
+      $result[$resIndex] = "Added field type $dtyName to ".count($processedRecIDs). " Record(s).\n\n";
+      $result['count']['processed'] = count($processedRecIDs);
+      $result['added'] = array('recIDs' => $processedRecIDs, 'queryString' => "tag=\"$baseTag\"", 'tagResults' => $processedTagResult);
       updateRecTitles($processedRecIDs);
     }
     if ($inAccessibleRecCnt > 0) {
@@ -145,7 +152,9 @@
             $result[$resIndex] = '';
       }
       $undefinedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $undefinedFieldsRecIDs, 'tagString' => $baseTag." undefined"));
-      $result[$resIndex] .= "Skipped undefined field type ($dtyID) for ".count($undefinedFieldsRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag undefined\") ".array_shift($undefinedFieldsTagResult)."\n\n";
+      $result[$resIndex] .= "Skipped undefined field type $dtyName for ".count($undefinedFieldsRecIDs). " Record(s).\n\n";
+      $result['count']['notDefined'] = count($undefinedFieldsRecIDs);
+      $result['notDefined'] = array('recIDs' => $undefinedFieldsRecIDs, 'queryString' => "tag:\"$baseTag undefined\"", 'tagResults' => $undefinedFieldsTagResult);
     }
     if (count($limittedRecIDs)) {
       if (!@$resIndex ) {
@@ -153,7 +162,9 @@
             $result[$resIndex] = '';
       }
       $limittedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $limittedRecIDs, 'tagString' => $baseTag." limitted"));
-      $result[$resIndex] .= "Skipped limitted field type ($dtyID) for ".count($limittedRecIDs). " Record(s),\nwhile tagging (tag:\"$baseTag limitted\") ".array_shift($limittedFieldsTagResult)."\n\n";
+      $result[$resIndex] .= "Exceedeed limit for field type $dtyName in ".count($limittedRecIDs). " Record(s).\n\n";
+      $result['count']['limitted'] = count($limittedRecIDs);
+      $result['limitted'] = array('recIDs' => $limittedRecIDs, 'queryString' => "tag:\"$baseTag limitted\"", 'tagResults' => $limittedFieldsTagResult);
     }
     if (count($insertErrors)) {
       if (!@$resIndex ) {
@@ -161,7 +172,9 @@
             $result[$resIndex] = '';
       }
       $insertErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($insertErrors), 'tagString' => $baseTag." error"));
-      $result[$resIndex] .= "Skipped insert errors on field type ($dtyID) for ".count($insertErrors). " Record(s),\nwhile tagging (tag:\"$baseTag error\") ".array_shift($insertErrorsTagResult)."\n\n";
+      $result[$resIndex] .= "Skipped insert errors on field type $dtyName for ".count($insertErrors). " Record(s).\n\n";
+      $result['count']['error'] = count($insertErrors);
+      $result['errors'] = array('byRecID' => $insertErrors, 'queryString' => "tag:\"$baseTag error\"", 'tagResults' => $insertErrorsTagResult);
     }
     return $result;
   }
@@ -172,7 +185,7 @@
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && @$data['sVal'] && @$data['rVal'] )){
-      $result['problem'] = "Database problem - insufficent data passed to add_detail service";
+      $result['problem'] = "Database problem - insufficent data passed to replace_detail service";
       return $result;
     }
 //normalize recIDs to an array for code below
@@ -208,6 +221,7 @@
     }
 //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
+    $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
 
     $basetype = mysql__select_array('defDetailTypes','dty_Type',"dty_ID = $dtyID");
     $basetype = $basetype[0];
@@ -261,7 +275,7 @@
 //error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
         if (mysql_error()) {
           $detailErrorCnt++;
-          $updateErrors[$recID] = "Database problem - finding field type ($dtyID) for record ($recID) error - ". mysql_error();
+          $updateErrors[$recID] = "Database problem - finding field type $dtyName for record ($recID) error - ". mysql_error();
           continue;
         } else {
           $recDetailWasUpdated = true;
@@ -275,7 +289,7 @@
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_Modified'  => $now);
-    $baseTag = "replace field (type $dtyID) $now";
+    $baseTag = "replace field $dtyName $now";
 
     if (count($processedRecIDs)){
       $resIndex = 'ok';
@@ -298,7 +312,7 @@
             $result[$resIndex] = '';
       }
       $nonMatchingFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $nonMatchingFieldsRecIDs, 'tagString' => $baseTag." nonMatching"));
-      $result[$resIndex] .= "Skipped due to no matching field type ($dtyID) for ".count($nonMatchingFieldsRecIDs). " Record(s).\n\n";
+      $result[$resIndex] .= "Skipped due to no matching field type $dtyName for ".count($nonMatchingFieldsRecIDs). " Record(s).\n\n";
       $result['count']['noMatch'] = count($nonMatchingFieldsRecIDs);
       $result['nonMatching'] = array('recIDs' => $nonMatchingFieldsRecIDs, 'queryString' => "tag:\"$baseTag nonMatching\"", 'tagResults' => $nonMatchingFieldsTagResult);
     }
@@ -308,9 +322,155 @@
             $result[$resIndex] = '';
       }
       $updateErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($updateErrors), 'tagString' => $baseTag." error"));
-      $result[$resIndex] .= "Skipped update errors on field type ($dtyID) for $detailErrorCnt fields in ".count($updateErrors). " Record(s).\n\n";
+      $result[$resIndex] .= "Skipped update errors on field type $dtyName for $detailErrorCnt fields in ".count($updateErrors). " Record(s).\n\n";
       $result['count']['error'] = count($updateErrors);
       $result['errors'] = array('byRecID' => $updateErrors, 'queryString' => "tag:\"$baseTag error\"", 'tagResults' => $updateErrorsTagResult);
+    }
+    return $result;
+  }
+
+
+  function delete_detail($data) {
+    global $ACCESSABLE_OWNER_IDS;
+//error_log("data ".print_r($data,true));
+
+    $result = array();
+    if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['sVal'] || @$data['rAll']) )){
+      $result['problem'] = "Database problem - insufficent data passed to delete_detail service";
+      return $result;
+    }
+//normalize recIDs to an array for code below
+    $recIDs = @$data['recIDs'];
+    if ($recIDs && ! is_array($recIDs)){
+      $recIDs = array($recIDs);
+    }
+    $passedRecIDCnt = count(@$recIDs);
+    if ($passedRecIDCnt) {//check editable access for passed records
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
+    }
+// user chose add by rectype not recIDs so calc recID set
+    if (!$passedRecIDCnt && $data['rtyID']) {
+      $rtyID = $data['rtyID'];
+      if (is_array($rtyID)){
+        $rtyID = $rtyID[0];// limit to single type for now
+      }
+      $recIDs = mysql__select_array('Records','rec_ID',"rec_RecTypeID = $rtyID and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
+      $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
+      $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
+    }
+//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
+                              'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
+                              'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
+
+    if (count($recIDs) == 0){
+      $result['none'] = "No editable records found in current set". ($inAccessableRecCnt ? " ($inAccessableRecCnt inaccessable records).":".");
+      return $result;
+    }else{
+      $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
+    }
+
+//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    $dtyID = $data['dtyID'];
+    $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
+
+    $basetype = mysql__select_array('defDetailTypes','dty_Type',"dty_ID = $dtyID");
+    $basetype = $basetype[0];
+    switch ($basetype) {
+      case "freetext":
+      case "blocktext":
+      case "enum":
+      case "relationtype":
+      case "float":
+      case "integer":
+      case "resource":
+      case "date":
+        $searchClause = (array_key_exists("rAll",$data) || empty($data['sVal']) ? "1" : "dtl_Value = \"".$data['sVal']."\"");
+        break;
+      default:
+        $result['problem'] = "Detail Type Problem - $basetype details are not supported for delete service.";
+        return $result;
+    }
+
+    $nonMatchingFieldsRecIDs = array();
+    $processedRecIDs = array();
+    $deleteErrors = array();
+    $detailCnt = 0;
+    $detailErrorCnt = 0;
+    mysql_connection_overwrite(DATABASE);
+    foreach ($recIDs as $recID) {
+      //get matching detail value for record if there is one
+      $query = "select dtl_ID, dtl_Value from recDetails ".
+                "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
+      $res = mysql_query($query);
+      if (mysql_num_rows($res)==0) {
+        array_push($nonMatchingFieldsRecIDs, $recID);
+        continue;
+      }
+      //delete the details
+      $recDetailWasDeleted = false;
+      $errorDtlIDs = array();
+      $mysqlErrorDtl = array();
+      while ($row = mysql_fetch_row($res)) {
+//error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
+        $dtlID = @$row[0];
+        mysql_query("delete from recDetails where dtl_RecID = $recID and dtl_ID = $dtlID");
+//error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
+        if (mysql_error() || ! mysql_affected_rows()) {
+          $detailErrorCnt++;
+          array_push($errorDtlIDs, $dtlID);
+          array_push($mysqlErrorDtl, mysql_error());
+          $deleteErrors[$recID] = "Database problem - deleting field type $dtyName (dtlID=".join(",",$errorDtlIDs).") for record ($recID) error - ". join("- error -",$mysqlErrorDtl);
+          continue;
+        } else {
+          $recDetailWasDeleted = true;
+          $detailCnt++;
+        }
+      }
+      if ($recDetailWasDeleted) {//only put in processed if a detail was processed, obscure case when record has multiple details we record in error array also
+        array_push($processedRecIDs, $recID);
+      }
+    }
+
+    $now = date('Y-m-d H:i:s');
+    $dtl = Array('dtl_Modified'  => $now);
+    $baseTag = "delete field $dtyName $now";
+
+    if (count($processedRecIDs)){
+      $resIndex = 'ok';
+      $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
+      $result[$resIndex] = "Deleted field type ($dtyID) for $detailCnt fields in ".count($processedRecIDs). " Record(s).\n\n";
+      $result['count']['processed'] = count($processedRecIDs);
+      $result['deleted'] = array('recIDs' => $processedRecIDs, 'queryString' => "tag=\"$baseTag\"", 'tagResults' => $processedTagResult);
+      updateRecTitles($processedRecIDs);
+    }
+    if (@$inAccessibleRecCnt > 0) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $result[$resIndex] .= "Skipped ".$inAccessibleRecCnt. " inaccessible Record(s) from selected action scope.\n\n";
+    }
+    if (count($nonMatchingFieldsRecIDs)) {
+      if (!@$resIndex ) {
+            $resIndex = 'none';
+            $result[$resIndex] = '';
+      }
+      $nonMatchingFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $nonMatchingFieldsRecIDs, 'tagString' => $baseTag." nonMatching"));
+      $result[$resIndex] .= "Skipped due to no matching field type $dtyName for ".count($nonMatchingFieldsRecIDs). " Record(s).\n\n";
+      $result['count']['noMatch'] = count($nonMatchingFieldsRecIDs);
+      $result['nonMatching'] = array('recIDs' => $nonMatchingFieldsRecIDs, 'queryString' => "tag:\"$baseTag nonMatching\"", 'tagResults' => $nonMatchingFieldsTagResult);
+    }
+    if (count($deleteErrors)) {
+      if (!@$resIndex ) {
+            $resIndex = 'problem';
+            $result[$resIndex] = '';
+      }
+      $deleteErrorsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => array_keys($deleteErrors), 'tagString' => $baseTag." error"));
+      $result[$resIndex] .= "Skipped delete errors on field type $dtyName for $detailErrorCnt fields in ".count($deleteErrors). " Record(s).\n\n";
+      $result['count']['error'] = count($deleteErrors);
+      $result['errors'] = array('byRecID' => $deleteErrors, 'queryString' => "tag:\"$baseTag error\"", 'tagResults' => $deleteErrorsTagResult);
     }
     return $result;
   }

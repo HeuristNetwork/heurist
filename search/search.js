@@ -3879,6 +3879,18 @@ top.HEURIST.search = {
     top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/replaceDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
   },
 
+  deleteDetailPopup: function() {
+    var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+    if (recIDs_list.length == 0) {
+      recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+    }
+    if (recIDs_list.length == 0) {
+      alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+      return;
+    }
+    top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/deleteDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+  },
+
 	addRelationshipsPopup: function() {
 		if (top.HEURIST.search.getSelectedRecIDs().get().length === 0) {
 			alert("Select at least one record to add relationships");

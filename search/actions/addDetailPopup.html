@@ -32,6 +32,7 @@
  <head>
   <link rel="stylesheet" href="../../common/css/global.css">
   <link rel="stylesheet" href="../../common/css/edit.css">
+  <link rel="stylesheet" href="../../common/css/printview.css">
   <link rel="stylesheet" type="text/css" href="../../common/css/calendar.css" />
   <title>Add a value to each record</title>
 
@@ -57,7 +58,7 @@
   <script>
 
 var recIDs, rtyID, dtyID, value, fileID, wkt;
-var scopeSelect,fieldSelect,inputDiv;
+var scopeSelect,fieldSelect,inputDiv,statusDiv;
 var resultSetIDs, selectedResultSetIDs, allSelectedIDs, rtyIDs = [];
 var hBase = "http://" + window.location.host +
 			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
@@ -69,6 +70,7 @@ function init () {
   selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
   allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
   inputDiv = document.getElementById("inputDiv");
+  statusDiv = document.getElementById("statusDiv");
   scopeSelect = document.getElementById("scope-select");
   fieldSelect = document.getElementById("field-select");// fill scope select and default to resultset
   fillScope();
@@ -182,8 +184,68 @@ function createInputElement(){
   top.HEURIST.edit.createInput("addValue",fieldSelect.value,null,[],inputDiv,null);
 }
 
+function cbSave(results){
+  var html = "",i;
+  if(top.HEURIST.util.isnull(results)){
+    alert("Failed to return results from replace detail action!");
+    return
+  }
+  if (results.none){
+    html += "<p>"+results.none+"</p>";
+  }else if (results.problem){
+    html += "<p style=\"color: red;\">"+results.problem+"</p>";
+  }
+  if (results.count && (results.count.rtyRecs || results.count.passed)){
+    if (results.count.processed > 0) {
+      html += '<br><input type=\"button\" value=\"Requery\"'+
+              ' title=\"Click to force requery in order to show updated results\"'+
+              ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
+    }
+    html += "<div style=\"color: #DC8501; padding-top:5px\"> Results : </div><ul>";
+    if (results.count.passed > 0) {
+      html += "<li> Passed Record IDs .............. "+results.count.passed+"</li>";
+    }
+    if (results.count.rtyRecs > 0) {
+      html += "<li> RecType Record IDs .......... "+results.count.rtyRecs+"</li>";
+    }
+    if (results.count.noAccess > 0) {
+      html += "<li> Unaccessable Record IDs .... "+results.count.noAccess+"</li>";
+    }
+    if (results.count.processed > 0) {
+      html += "<li><strong> Processed Record IDs ....... "+results.count.processed+"</strong>"+
+              "...<a target=_new title=\" View added results -tagged "+ results.added.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.added.queryString)+"\">view</a></li>";
+    }
+    if (results.count.notDefined > 0) {
+      html += "<li> Undefined Field Record IDs ... "+results.count.notDefined+
+              "...<a target=_new title=\" View not defined results -tagged "+ results.notDefined.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.notDefined.queryString)+"\">view</a></li>";
+    }
+    if (results.count.limitted > 0) {
+      html += "<li> Max Limit Record IDs ..... "+results.count.limitted+
+              "...<a target=_new title=\" View max limit results -tagged "+ results.limitted.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.limitted.queryString)+"\">view</a></li>";
+    }
+    if (results.count.error > 0) {
+      html += "<li> Insert error Record IDs .... "+results.count.error+
+              "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view</a></li>";
+      if (results.errors.byRecID) {
+        html += "<ul>";
+        for ( i in results.errors.byRecID) {
+          html += "<li>" + results.errors.byRecID[i] + "</li>";
+        }
+        html += "</ul>";
+      }
+    }
+    html += "</ul>";
+  }
+  statusDiv.innerHTML = html;
+}
+
 function save() {
   var _data = {};
+  statusDiv.innerHTML = "<div id=\"loading\"/>";
 //need to extract the value for the input and return all appropriate values
   if (scopeSelect.value == "allSelected") {
     recIDs = allSelectedIDs;
@@ -224,11 +286,12 @@ function save() {
   }
   _data.recIDs = recIDs;
   _data.dtyID =  fieldSelect.value;
+  _data.dtyName = fieldSelect.options[fieldSelect.selectedIndex].label;
   if (rtyID) _data.rtyID = rtyID;
   if (value) _data.val = value;
   if (fileID) _data.ulfID = fileID;
   if (wkt) _data.geo = wkt;
-  top.HEURIST.search.executeAction( "add_detail", _data );
+  top.HEURIST.search.executeAction( "add_detail", _data, cbSave );
 //alert("the value is "+ value + "wkt = " + wkt);
 
 }
@@ -238,14 +301,14 @@ function save() {
    <p>This function adds a new value for a specified field to each record. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).</p>
 
    <div id="uiControls">
-     <div style="padding-top: 5px;"><label for="scope-select">Apply value to: </label><select id="scope-select"></select></div>
-     <div style="padding-top: 5px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
+     <div style="padding-top: 5px;"><label for="scope-select">Add value to: </label><select id="scope-select"></select></div>
+     <div style="padding-top: 5px; padding-left: 5px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
      <div id="inputDiv"><label for="value">Value: </label><input  type="text" id="value"/></div>
    </div>
    <input type="button" value="Recode" onclick="save();">
    <input type="button" value="Close" onclick="window.close();">
 
-   <div id="status"></div>
+   <div id="statusDiv"></div>
 
  </body>
 </html>
