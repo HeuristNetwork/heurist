@@ -53,7 +53,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         recordtype = event.target.value;
 
-        var allowedlist = ["enum", "integer", "float"];//, "date", "freetext"]; //"resource",
+        var allowedlist = ["enum", "integer", "float", "resource"];//, "date", "freetext"]; //"resource",
 
         var selObj = createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
         createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
@@ -148,7 +148,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
              calculateIntervals(name);
 
          }else if(detailtype=="float" || detailtype=="integer"){
-             //get min and max for this detail in database
+                //get min and max for this detail in database
 
                 var request = { a:'minmax', db: database, rt:recordtype , dt:detailid };
 
@@ -195,12 +195,37 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
                 return;
 
+         }else if(detailtype=="resource"){
+
+
+                //get list of possible values for pointer detail type
+
+                var request = { a:'pointers', db: database, rt:recordtype , dt:detailid };
+
+                var baseurl = top.HEURIST.basePath + "viewers/crosstab/crosstabs_srv.php";
+                var params = "a=pointers&db=" + database+'&rt='+recordtype+'&dt='+detailid;
+                top.HEURIST.util.getJsonData(baseurl,
+                    function(response){
+                        if(response.status == "OK"){
+
+                            if(!response.data){
+                                fields3[name].values = [];
+                                $container = clearIntervals(name);
+                                $container.html('There are no pointerv values for this field.');
+                            }else{
+                                fields3[name].values = response.data;
+                                calculateIntervals(name);
+                            }
+
+                        }else{
+                            alert(response.message);
+                        }
+                    }, params);
+
+                    return;
 
          }else if(detailtype=="date"){
              //get min and max for this detail in database
-
-         }else if(detailtype=="resource"){
-             //show list of fields and then recursive
 
          }else if(detailtype=="freetext"){
              //alphabetically, or if distinct values less that 50 like terms
@@ -235,6 +260,18 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 fields3[name].intervals.push( {name:val0+' ~ '+val1, description: val0+' ~ '+val1 , values:[ val0, val1 ] });  //minvalue, maxvalue
                 val0 = val1;
                 cnt++;
+             }
+
+        }else if(fields3[name].type=="resource"){
+
+            var pointers = fields3[name].values;
+
+             var mcnt = (count>0)?Math.min(pointers.length, count+1):pointers.length;
+             fields3[name].intervals = [];
+
+             var i;
+             for (i=0; i<mcnt; i++){
+                fields3[name].intervals.push( {name:pointers[i].text, description:pointers[i].text, values:[ parseInt(pointers[i].id) ] });
              }
 
         }else if(fields3[name].type=="enum"){
@@ -283,7 +320,6 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                         .attr('intid', 'b0' )
                         .appendTo($container);
 
-                    //if(fields3[name].type=="float" || fields3[name].type=="integer"){}
                     $intdiv
                             .append('&nbsp;&nbsp;<label>Number of intervals:</label>')
                             .append($('<input id="'+name+'IntCount">').attr('size',3).val(keepCount))
@@ -414,10 +450,11 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
           var cnt=0;
 
 
-          if ( detailtype=="enum") { //false &&
+          if ( detailtype=="enum" || detailtype=="resource")
+          {
 
                 var i, j,
-                    termlist = fields3[name].values; //all terms
+                    termlist = fields3[name].values; //all terms or pointers
                 for(i=0; i<termlist.length; i++)
                 {
                     var notused = true, itself = false;
@@ -501,7 +538,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                             }
                             fields3[name].intervals[idx].name = $dlg.find("#intname").val();
 
-                            if(detailtype=="enum"){ //false &&
+                            if(detailtype=="enum" || detailtype=="resource"){ //false &&
 
                                 var sels = $dlg.find("input:checked")
                                 $.each(sels, function(i, ele){
@@ -757,8 +794,9 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
 
                             if(page_interval_idx>=0 && curr_interval_idx!=page_interval_idx && records.length>0){
-
-                                doRenderPage(fields3.page.fieldname+'. '+pages[page_interval_idx].name, records);
+                                if(curr_interval_idx>=0){
+                                    doRenderPage(fields3.page.fieldname+'. '+pages[curr_interval_idx].name, records);
+                                }
                                 records = [];
                             }
                         }
@@ -800,6 +838,13 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             var supressBlankPage = $('#rbSupressBlankPage').get(0).checked;
             */
 
+            var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
+            var isAVG = (aggregationMode === "avg");
+            if(isAVG){
+                showPercentageRow = false;
+                showPercentageColumn = false;
+            }
+
             //var $table = $('#tabres');
             //$table.empty();
             var idx,i,j;
@@ -816,26 +861,32 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             if(showPercentageRow && clen>0) colspan++;
             if(showPercentageColumn) colspan++;
 
+            var noColumns = (clen==0);
+            if(noColumns){
+                clen = 1;
+                columns = [];
+                columns.push({});
+            }
+
             //reset output array for rows
             for (i=0; i<rlen; i++){
 
                 rows[i].output = [];
+                rows[i].avgcount = [];
                 rows[i].percent_col = [];
                 rows[i].percent_row = [];
+
 
                 rows[i].total = 0;
                 rows[i].percent = 0;
                 rows[i].isempty = true;
 
-                if(clen==0){
-                    rows[i].output.push(0);
-                    rows[i].percent_row.push(0);
-                }else{
-                    for (j=0; j<clen; j++){
-                           rows[i].output.push(0);
-                           rows[i].percent_col.push(0);
-                           rows[i].percent_row.push(0);
-                    }
+
+                for (j=0; j<clen; j++){
+                       rows[i].output.push(0);
+                       rows[i].percent_col.push(0);
+                       rows[i].percent_row.push(0);
+                       rows[i].avgcount.push(0);
                 }
             }
             for (j=0; j<clen; j++){
@@ -866,11 +917,12 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
                     if(row_interval_idx>=0)
                     {
-                        if(clen==0){ //no columns
+                        if(noColumns){ //no columns
 
                                      var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                                     if(!isNaN(val)){
+                                     if(!isNaN(val) && rnd(val)!=0){
                                         rows[row_interval_idx].output[0] = rows[row_interval_idx].output[0] + rnd(val);
+                                        rows[row_interval_idx].avgcount[0] ++;
                                         grantotal = grantotal + val;
                                         rows[row_interval_idx].isempty = false;
                                      }
@@ -880,10 +932,12 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                             for (j=0; j<clen; j++){
                                if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1] ) ){
                                      var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                                     if(!isNaN(val)){
+                                     if(!isNaN(val) && rnd(val)!=0){
                                         rows[row_interval_idx].output[j] = rows[row_interval_idx].output[j] + rnd(val);
+                                        rows[row_interval_idx].avgcount[j] ++;
                                         rows[row_interval_idx].total = rows[row_interval_idx].total + val;
                                         rows[row_interval_idx].isempty = false;
+
                                         columns[j].isempty = false;
                                         columns[j].total = columns[j].total + val;
                                      }
@@ -896,7 +950,40 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                 }
             }//records
 
-            if(clen==0){
+            //special calc fo average
+            if(isAVG)
+            {
+                    for (i=0; i<rlen; i++){
+                        rows[i].total = 0;
+                    }
+
+                    for (j=0; j<clen; j++){  //cols
+                        columns[j].total = 0;
+                        for (i=0; i<rlen; i++){  //rows
+                            if(rows[i].avgcount[j]>1){
+                                rows[i].output[j] = rnd(rows[i].output[j]/rows[i].avgcount[j]);
+                            }
+
+                            rows[i].total = rows[i].total + rows[i].output[j];
+                            columns[j].total = columns[j].total + rows[i].output[j];
+                        }
+
+                        columns[j].total = rnd(columns[j].total/rlen);
+                    }
+
+                    grantotal = 0;
+                    for (i=0; i<rlen; i++){
+                        rows[i].total = rnd(rows[i].total/clen);
+                        grantotal = grantotal + rows[i].total;
+                    }
+                    grantotal = rnd(grantotal/rlen);
+
+
+            }else{
+
+            //
+            //
+            if(noColumns){
                 if(grantotal!=0){
                     for (i=0; i<rlen; i++){
                         rows[i].percent_row[0] =  rnd(rows[i].output[0]*100/grantotal);
@@ -914,6 +1001,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                     for (j=0; j<clen; j++){
                         for (i=0; i<rlen; i++){
 
+
                             if(rows[i].total!=0){
                                rows[i].percent_row[j] =  rnd(rows[i].output[j]*100/rows[i].total);
                             }
@@ -930,6 +1018,8 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                 }
             }
 
+            }
+
             var s, notemtycolumns = 0;
             //main render output
             var $table = $('<table>').css({'border':'1px solid black'}).attr('cellpadding',2).attr('cellspacing',0);
@@ -937,7 +1027,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             $row.append('<td class="crosstab-header0">'+(fields3.column.fieldname?fields3.column.fieldname:'')+'<br>'+fields3.row.fieldname+'</td>');
 
             // render HEADER, reset column totals
-            if(clen==0){
+            if(noColumns){
                 $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
             }else{
                 for (j=0; j<clen; j++){
@@ -961,7 +1051,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
                $row.append('<td class="crosstab-header">'+rows[i].name+'</td>');
 
-               if(clen==0){
+               if(noColumns){
                        if(rows[i].output[0]!=0 || !supressZero){
                            s = '<td class="crosstab-value">'+rows[i].output[0] +'</td>'
                            if(showPercentageColumn){
@@ -1009,7 +1099,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             }
 
             // LAST ROW - totals
-            if(clen==0){
+            if(noColumns){
 
                 if(showTotalsColumn && grantotal!=0){
                    $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
@@ -1087,7 +1177,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
     function fitToInterval(type, values, val){
         val = parseFloat(val);
-        if(type=="enum"){
+        if(type=="enum" || type=="resource"){
             return (values.indexOf(val)>=0);
         }else{
             return (val>=values[0] && val<=values[1]);
@@ -1108,7 +1198,8 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             $('#aggAvg').css('display','inline-block');
             $('#divAggField').css('display','inline-block');
         }
-        if ( $("input:radio[name=aggregationMode]:checked").val() == "count" ) {
+        var aggMode = $("input:radio[name=aggregationMode]:checked").val();
+        if ( aggMode == "count" ) {
 
             $('#cbAggField').attr('disabled','disabled');
             //$('#divAggField').hide();
@@ -1116,6 +1207,20 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             $('#cbAggField').removeAttr('disabled');
             //$('#divAggField').css('display','inline-block');
         }
+
+        if ( aggMode == "avg" ) {
+            $("#rbShowPercentColumn").attr('disabled','disabled');
+            $("#rbShowPercentRow").attr('disabled','disabled');
+            $("#rbShowValue").attr('disabled','disabled');
+            $("#rbShowPercentColumn").get(0).checked = false;
+            $("#rbShowPercentRow").get(0).checked = false;
+            $("#rbShowValue").get(0).checked = true;
+        }else{
+            $("#rbShowValue").removeAttr('disabled');
+            $("#rbShowPercentColumn").removeAttr('disabled');
+            $("#rbShowPercentRow").removeAttr('disabled');
+        }
+
     }
 
 

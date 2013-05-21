@@ -12,6 +12,10 @@ if(@$_REQUEST['a'] == 'minmax' ){
 
         $response = recordSearchMinMax($mysqli, $params);
 
+}else if(@$_REQUEST['a'] == 'pointers' ){
+
+        $response = recordSearchDistictPointers($mysqli, $params);
+
 }else if(@$_REQUEST['a'] == 'crosstab' ){
 
         $response = getCrossTab($mysqli, $params);
@@ -24,12 +28,22 @@ header('Content-type: text/javascript');
 print json_encode($response);
 exit();
 
+/**
+* put your comment there...
+*
+* @param mixed $mysqli
+* @param mixed $params
+*/
 function recordSearchMinMax($mysqli, $params){
 
-    if(@$params['rt'] && @$params['dt']){
+    if(@$params['dt']){
 
-        $query = "select min(cast(dtl_Value as decimal)) as min, max(cast(dtl_Value as decimal)) as max from Records, recDetails where rec_ID=dtl_RecID and rec_RecTypeID="
-                .$params['rt']." and dtl_DetailTypeID=".$params['dt'];
+// no more rectype filter
+//        $query = "select min(cast(dtl_Value as decimal)) as min, max(cast(dtl_Value as decimal)) as max from Records, recDetails where rec_ID=dtl_RecID and rec_RecTypeID="
+//                .$params['rt']." and dtl_DetailTypeID=".$params['dt'];
+
+
+        $query = "select min(cast(dtl_Value as decimal)) as min, max(cast(dtl_Value as decimal)) as max from recDetails where dtl_DetailTypeID=".$params['dt'];
 
         //@todo - current user constraints
 
@@ -55,6 +69,45 @@ function recordSearchMinMax($mysqli, $params){
 
    return $response;
 }
+
+/**
+* put your comment there...
+*
+* @param mixed $mysqli
+* @param mixed $params
+*/
+function recordSearchDistictPointers($mysqli, $params){
+
+    if(@$params['dt']){
+
+        $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_RecID and dtl_DetailTypeID=".$params['dt']." order by rec_Title ";
+
+        //@todo - current user constraints
+
+//error_log(">>>>".@$_REQUEST['db']."<<<<<<".  $query);
+
+        $res = $mysqli->query($query);
+        if (!$res){
+            $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
+            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+
+
+            $outp = array();
+            while ($row = $res->fetch_assoc()) {
+                array_push($outp, $row);
+            }
+            $response = array("status"=>"OK", "data"=> $outp);
+            $res->close();
+        }
+
+    }else{
+        $response = array("status"=>"INVALID REQUEST");
+    }
+
+   return $response;
+}
+
 
 function getCrossTab($mysqli, $params){
 
@@ -171,7 +224,8 @@ if($dt_col){
     }
 }
 
-//DEBUG error_log(">>>".$query);
+//DEBUG
+error_log(">>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

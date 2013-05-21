@@ -103,7 +103,7 @@
                 <div class="fldheader"></div>
                 <div class="input-cell" style="padding-top: 10px;">
                     <input type="checkbox"  style="margin-left: 0;" checked id="rbSupressZero">blank for zero values
-                    <input type="checkbox" id="rbShowBlanks">show blank rows/columns/pages
+                    <input type="checkbox" id="rbShowBlanks">show blank rows/columns
                 </div>
             </div>
 
