@@ -114,6 +114,15 @@ function fillFields(){
   //for selected scope find all types
   switch(scopeSelect.value){
     case "resultSet":
+      rtyIDs = [];
+      for(i in resultSetIDs){
+        recID = resultSetIDs[i];
+        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        if (!rtys[rty]){
+          rtys[rty] = 1;
+          rtyIDs.push(rty);
+        }
+      }
       break;
     case "selectedResultSet":
       rtyIDs = [];
@@ -158,23 +167,29 @@ function fillFields(){
       dtys[dtyName].push(fieldName);
     }
   }
-  dtyNames.sort();
-//add option for DetailType enabled followed by all Rectype.Fieldname options disabled
-  for (i in dtyNames) {
-    dtyName = dtyNames[i];
-    opt = new Option(dtyName, dtyNameToID[dtyName]);
-    fieldSelect.appendChild(opt);
-    //sort RectypeName.FieldName
-    dtys[dtyName].sort();
-    for (j in dtys[dtyName]){
-      fieldName = dtys[dtyName][j];
-      opt = new Option(".  ."+fieldName, "");
-      opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
-      opt.disabled = "disabled";
+  if (dtyNames.length >0) {
+    dtyNames.sort();
+  //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
+    for (i in dtyNames) {
+      dtyName = dtyNames[i];
+      opt = new Option(dtyName, dtyNameToID[dtyName]);
       fieldSelect.appendChild(opt);
+      //sort RectypeName.FieldName
+      dtys[dtyName].sort();
+      for (j in dtys[dtyName]){
+        fieldName = dtys[dtyName][j];
+        opt = new Option(".  ."+fieldName, "");
+        opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
+        opt.disabled = "disabled";
+        fieldSelect.appendChild(opt);
+      }
     }
+  }else{
+    opt = new Option("no suitable fields", "");
+    fieldSelect.appendChild(opt);
   }
   fieldSelect.onchange = createInputElement;
+  createInputElement();
 }
 
 function createInputElement(){
@@ -245,7 +260,6 @@ function cbSave(results){
 
 function save() {
   var _data = {};
-  statusDiv.innerHTML = "<div id=\"loading\"/>";
 //need to extract the value for the input and return all appropriate values
   if (scopeSelect.value == "allSelected") {
     recIDs = allSelectedIDs;
@@ -291,6 +305,7 @@ function save() {
   if (value) _data.val = value;
   if (fileID) _data.ulfID = fileID;
   if (wkt) _data.geo = wkt;
+  statusDiv.innerHTML = "<div id=\"loading\"/>";
   top.HEURIST.search.executeAction( "add_detail", _data, cbSave );
 //alert("the value is "+ value + "wkt = " + wkt);
 
@@ -305,7 +320,7 @@ function save() {
      <div style="padding-top: 5px; padding-left: 5px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
      <div id="inputDiv"><label for="value">Value: </label><input  type="text" id="value"/></div>
    </div>
-   <input type="button" value="Recode" onclick="save();">
+   <input type="button" value="Go" onclick="save();">
    <input type="button" value="Close" onclick="window.close();">
 
    <div id="statusDiv"></div>

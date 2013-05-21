@@ -1735,8 +1735,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(!isNaN(Number(termIDTree))){
             var tree = top.HEURIST.terms.treesByDomain[datatype];
             termIDTree = tree[termIDTree];
+            if (top.HEURIST.util.isEmptyVar(termIDTree)) {
+              var label = document.createElement("span");
+              label.innerHTML = " no terms available ";
+              return label;
+            }
         }
-
 
         function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
             var termID;
@@ -1842,6 +1846,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     isempty: function(obj){
         return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
+    },
+
+    isEmptyVar: function(obj){
+      if( (typeof obj==="undefined") || (obj==="") || (obj===null) ){
+        return true;
+      }
+      if (obj.constructor.name == "Array" ||obj.constructor.name == "Object") {
+          for (var i in obj) { return false };
+          return true;
+      }
+      return (obj.toString()).length == 0;
     },
 
     //validate numeric
