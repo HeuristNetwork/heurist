@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* emailToDatabasePopup.php
+* Sends a set of records to an IMAP server for harvesting
+* by another Heurist database, copied from sendNotificationsPopup.php, Ian Johnson 1/8/11
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -28,31 +30,10 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+* @Todo        AO: NOT USED, TO REMOVE?
+* @Todo        1/8/11 MODIFY THIS CODE TO EMAIL IN SUITABLE FORMAT FOR HARVESTING BY TARGET DB
+*/ 
 
-
-
-
-// AO: NOT USED, TO REMOVE ???
-
-
-/**
- * emailToDatabasePopup.php, Sends a set of records to an IMAP server for harvesting
- * by another Heurist database, copied from sendNotificationsPopup.php, Ian Johnson 1/8/11
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
- // TO DO: 1/8/11 MODIFY THIS CODE TO EMAIL IN SUITABLE FORMAT FOR HARVESTING BY TARGET DB
-
- ?>
-
-
-<?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* editSysIdentification.php, edits the system identification record which provides core settigns for the database  
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,19 +29,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-/**
- * editSysIdentification.php, edits the system identification record which provides core settigns for the database
- * Ian Johnson 12 aug 2011
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
 
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

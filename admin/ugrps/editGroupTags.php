@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* editGroupTags.php
+* workgroup tags addition/deletion/statistics
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,18 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
- * editGroupTags.php
- * workgroup tags addition/deletion/statistics
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
 
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant

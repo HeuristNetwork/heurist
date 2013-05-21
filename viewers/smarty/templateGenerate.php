@@ -15,7 +15,15 @@
 */
 
 /**
-* brief description of file
+* templateGenerate.php
+*
+* Generates a Smarty template on the basis of structure of record
+* type that are included in result of given query
+*
+* besides template text it returns the list of variables (array indexes) that are utilized
+* in this tempalte
+*
+* the result is JSON array
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,29 +37,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-/**
- * templateGenerate.php
- *
- * Generates a Smarty template on the basis of structure of record
- * type that are included in result of given query
- *
- * besides template text it returns the list of variables (array indexes) that are utilized
- * in this tempalte
- *
- * the result is JSON array
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @author Artem Osmakov
- * @version 2011.0819
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
 
 
 define('SEARCH_VERSION', 1);

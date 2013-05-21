@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* Constructor for Relationship class a relationship display line. It displays the Relation Type
+* with the record title, delete button and edit button.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -25,29 +26,13 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+* @param       parentElement a DOM element where the Relationship will be displayed
+* @param       relationshipRec a reference to an object containing the record details for the relationship record
+* @param       manager a reference to the RelationManager that manages this Relationship Object
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * relationshipsObjectLibrary.js
- *
- * brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
-/**
-* Constructor for Relationship class a relationship display line. It displays the Relation Type
-* with the record title, delete button and edit button.
-* @author Tom Murtagh
-* @author Kim Jackson
-* @author Stephen White
-* @param parentElement a DOM element where the Relationship will be displayed
-* @param relationshipRec a reference to an object containing the record details for the relationship record
-* @param manager a reference to the RelationManager that manages this Relationship Object
-*/
+
 if (!top.Relationship) {
 	top.Relationship = function(parentElement, relationshipRec, manager) {
 		var elt = parentElement;

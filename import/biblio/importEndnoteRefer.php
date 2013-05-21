@@ -31,17 +31,6 @@
 */
 
 
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
 /* Subclass of the importRefer stuff, specially suited to the quirks of the REFER stuff pumped out by EndNote.
    Note that these quirks are not implemented here, except for type determination.
    The rest are left as an exercise for the reader, or for the author when he gets back from Greece.

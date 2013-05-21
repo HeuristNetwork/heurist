@@ -15,7 +15,15 @@
 */
 
 /**
-* brief description of file
+* resizeImage.php
+*
+* Thumbnail service
+* It loads thumbnail from recUploadedFiles.ulf_Thumbnail
+* Or creates new thumbnail and stores it in this field in case this is standard thumnail request
+*
+* parameters
+* w, h or maxw, maxh - size of thumbnail, if they are omitted - it returns standard thumbnail 100x100
+* ulf_ID - file ID from recUploadedFiles, if defined and standard thumbnail - thumbnail is stored in table
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,23 +38,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-/* resizeImage.php
- *
- * Thumbnail service
- * It loads thumbnail from recUploadedFiles.ulf_Thumbnail
- * Or creates new thumbnail and stores it in this field in case this is standard thumnail request
- *
- * parameters
- * w, h or maxw, maxh - size of thumbnail, if they are omitted - it returns standard thumbnail 100x100
- * ulf_ID - file ID from recUploadedFiles, if defined and standard thumbnail - thumbnail is stored in table
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- *
- */
 
  header('Content-type: image/png');
 

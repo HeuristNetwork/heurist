@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* saveUsergrps.php
+* This file accepts request to update sysUGrps and sys sysUsrGrpLinks tables
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,21 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-	/*<!--
-	saveUsergrps.php
-	* This file accepts request to update sysUGrps and sys sysUsrGrpLinks tables
-	*
-	* @version 2011.0510
-	* @autor: Artem Osmakov
-	*
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	-->*/
 
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

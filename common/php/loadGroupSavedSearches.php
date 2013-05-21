@@ -31,18 +31,6 @@
 */
 
 
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-
-
 /* Take a wg_id and fill in top.HEURIST.workgroups[wg_id].members with member details
    and top.HEURIST.workgroups[wg_id].savedSearches with workgroup saved search details */
 define('ISSERVICE',1);

@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* saveStructure.php. This file accepts request to update the system structural definitions -
+* rectypes, detailtypes, terms and constraints. It returns the entire structure for the affected area
+* in order to update top.HEURIST
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,20 +32,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-	/*
-	* saveStructure.php. This file accepts request to update the system structural definitions -
-	* rectypes, detailtypes, terms and constraints. It returns the entire structure for the affected area
-	* in order to update top.HEURIST
-	*
-	* create by Stephen A. White on 17/03/2011
-	*
-	* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

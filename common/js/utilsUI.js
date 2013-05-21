@@ -13,7 +13,11 @@
 */
 
 /**
-* brief description of file
+* Useful functions/vars for Heurist pages -- autosizing, popups, drag/drop wrappers etc
+* These are not in utilsLoad.js because they can be loaded asynchronously -- only post-load
+* stuff should be put in here.
+* Included automatically by heurist.js
+* functions are installed as  top.HEURIST.util.*
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -25,39 +29,9 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  Common 
 */
-/*
-* Copyright 2006, 2007 Tom Murtagh and Kim Jackson
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-/**
- * Useful functions/vars for Heurist pages -- autosizing, popups, drag/drop wrappers etc
- * These are not in utilsLoad.js because they can be loaded asynchronously -- only post-load
- * stuff should be put in here.
- * Included automatically by heurist.js
- * functions are installed as  top.HEURIST.util.*
- *
- * @author      Tom Murtagh
- * @author      Kim Jackson
- * @author      Stephen White	<stephen.white@sydney.edu.au>
- * @author      Artem Osmakov	<artem.osmakov@sydney.edu.au>
- * @copyright   Copyright 2006, 2007 Tom Murtagh and Kim Jackson
- * @link        http://Sydney.edu.au/Heurist/about.html
- * @version     3.1.0
- * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @package     Heurist academic knowledge management system
- * @subpackage  Common
- */
+
 
 if (!top.HEURIST){
     top.HEURIST = {};

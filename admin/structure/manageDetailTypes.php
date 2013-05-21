@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* manageDetailTypes.php
+* display tabbed view of fields (detail types) and link to field type addition and editor  
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,19 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
-* manageDetailTypes.php - display tabbed view of fields (detail types) and link to field type addition and editor
-* 2011-03-14
-* @autor: Artem Osmakov
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
 
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

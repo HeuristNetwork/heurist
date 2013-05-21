@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* editTermForm.php
+* add individual term for given vocabulary
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,23 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
-* editTermForm.php
-*
-* add individual term for given vocabulary
-*
-* 2012-11-20
-* @autor: Artem Osmakov
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-*
-* @todo
-**/
 
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

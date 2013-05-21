@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* Heurist blog functions
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,19 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
-/*
- *  Heurist blog functions
- *  Kim Jackson, July 2008
- */
 
 var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath :
 				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :

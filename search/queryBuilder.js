@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* Heurist Query helper 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,19 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
 
-/*
- *  Heurist Query helper
- *  Kim Jackson, October 2008
- */
 
 var HQuery = (function() {
 

@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* createDefinitionTablesOnly.sql: SQL file to create the definition tables for use in crosswalking 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,13 +27,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
- -- createDefinitionTablesOnly.sql: SQL file to create the definition tables for use in crosswalking
- -- @author Ian Johnson 4/8/2011
- -- @copyright 2005-2010 University of Sydney Digital Innovation Unit.
- -- @link: http://HeuristScholar.org
- -- @license http://www.gnu.org/licenses/gpl-3.0.txt
- -- @package Heurist academic knowledge management system
- -- @todo
 
  -- The rest of this file is a MySQL table creation script for the 10 (eventually more?)
  -- database definition and user/groups tables, stripped of anything superfluous

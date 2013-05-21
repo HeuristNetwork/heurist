@@ -15,7 +15,17 @@
 */
 
 /**
-* brief description of file
+* showReps.php
+* 
+* parameters
+* 'template' or 'template_body' - template file name or template value as a text
+* 'replevel'  - 1 notices, 2 all, 3 debug mode
+*
+* 'output' - full file path to be saved
+* 'mode' - if publish>0: js or html (default)
+* 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
+*
+* other parameters are hquery's
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,28 +40,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
- * showReps.php
- *
- *
- * parameters
- * 'template' or 'template_body' - template file name or template value as a text
- * 'replevel'  - 1 notices, 2 all, 3 debug mode
- *
- * 'output' - full file path to be saved
- * 'mode' - if publish>0: js or html (default)
- * 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
- *
- * other parameters are hquery's
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
 
 define('ISSERVICE',1);
 define('SEARCH_VERSION', 1);

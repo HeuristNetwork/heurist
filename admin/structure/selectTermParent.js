@@ -27,6 +27,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
 // SelectTermParent object
 var selectTermParent;
 

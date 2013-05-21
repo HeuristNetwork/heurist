@@ -31,8 +31,6 @@
 */
 
 
-
-
 //define('_PREF', 'c:/xampp/');
 define('_PREF', '/var/www/');
 

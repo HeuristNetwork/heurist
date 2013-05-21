@@ -27,7 +27,6 @@
 */
 
 
-
 	define('ISSERVICE',1);
 
 

@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* editRectypeTitle.php
+* Generates the title from mask, recid and rectype
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,21 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
- * editRectypeTitle.php
- *
- * Generates the title from mask, recid and rectype
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @author Artem Osmakov
- * @version 2011.0819
- * @package Heurist academic knowledge management system
- * @todo
- **/
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

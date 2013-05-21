@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* editSysIdentificationEmail.php, edits the email section of the system identification record
+* defining email server and addresses for incoming and outgoing mail
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,20 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-/**
- * editSysIdentificationEmail.php, edits the email section of the system identification record
- * defining email server and addresses for incoming and outgoing mail
- * Ian Johnson 12 aug 2011
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
 
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

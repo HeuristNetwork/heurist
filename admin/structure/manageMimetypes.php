@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* manageMimetypes.php
+* mimetypes listing
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,21 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
-* manageMimetypes.php
-* mimetypes listing
-*
-* @version 2012.1217
-* @autor: Artem Osmakov
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

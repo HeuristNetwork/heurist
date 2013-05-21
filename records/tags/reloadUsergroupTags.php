@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* reloadUsergroupTags.php
+* returns json array to client side with updated list of workgroup tags to use in
+* top.HEURIST.user.workgroupTags  and top.HEURIST.user.workgroupTagOrder
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,20 +32,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
- * reloadUsergroupTags.php
- *
- * returns json array to client side with updated list of workgroup tags to use in
- * top.HEURIST.user.workgroupTags  and top.HEURIST.user.workgroupTagOrder
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
 
 define('ISSERVICE',1);
 define("SAVE_URI", "disabled");

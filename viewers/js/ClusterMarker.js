@@ -13,8 +13,10 @@
 */
 
 /**
-* brief description of file
-*
+* A marker manager for the Google Maps API
+    http://googlemapsapi.martinpearman.co.uk/clustermarker
+* 
+* @author      Martin Pearman
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,25 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
-	ClusterMarker Version 1.3.2
 
-	A marker manager for the Google Maps API
-	http://googlemapsapi.martinpearman.co.uk/clustermarker
-
-	Copyright Martin Pearman 2008
-	Last updated 29th September 2008
-
-	This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-	This version modified by Steve White (Nov 28 2010) - allows you to pass in a marker creation link for clusters
-	to do: modify to pass out the default zoom out behaviour
-
-*/
 
 function ClusterMarker($map, $options){
 	this._map=$map;

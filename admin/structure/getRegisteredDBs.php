@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* getRegisteredDBs.php
+* Returns all databases and their URLs that are registered in the master Heurist index server,
+* SIDE ONLY. ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,17 +32,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-	/**
-	* getRegisteredDBs.php - Returns all databases and their URLs that are registered in the master Heurist index server,
-	* Juan Adriaanse 27 May 2011. SERVER SIDE ONLY. ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
 
 	if (!@$_REQUEST['db']){// be sure to override default this should only be called on the Master Index server so point db master index dbname
 		$_REQUEST['db'] = "H3MasterIndex";

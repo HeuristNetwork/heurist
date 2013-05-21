@@ -16,7 +16,7 @@
 
 /**
 * add/edit record types
-* 2011-03-14
+* 
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Juan Adriaanse
 * @copyright   (C) 2005-2013 University of Sydney

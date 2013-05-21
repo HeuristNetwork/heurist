@@ -13,7 +13,11 @@
 */
 
 /**
-* brief description of file
+* temporal.js
+* Temporal Object Library V 1.0
+* 
+* This file contains Objects for dealing with temporals. Temporals are a robust representation
+* of date - time information allowing for uncertainty and imprecision.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,24 +31,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/*
-* filename, brief description, date of creation, by whom
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-*/
-
-/* temporal.js
-* Copyright 2009 Stephen White
-*
-* Temporal Object Library V 1.0
-*
-* This file contains Objects for dealing with temporals. Temporals are a robust representation
-* of date - time information allowing for uncertainty and imprecision.
-*/
-
 
 var g_version = "1";
 

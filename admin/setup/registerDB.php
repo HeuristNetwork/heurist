@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
+* metadata in the index database, sets registration code in sysIdentification table.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -31,15 +32,6 @@
 */
 
 
-	/**
-	* registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
-	* metadata in the index database, sets registration code in sysIdentification table. Juan Adriaanse 26 May 2011.
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');

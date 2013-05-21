@@ -13,7 +13,10 @@
 */
 
 /**
-* brief description of file
+* hintDiv.js
+* Creates popup div with given HTML content to view at the specified coordinates
+*
+* requires jquery
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,21 +30,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* hintDiv.js
-* Creates popup div with given HTML content to view at the specified coordinates
-*
-* requires jquery
-*
-* 11/04/2012
-* @author: Artem Osmakov
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
 
 function HintDiv(_id, _width, _height, _initcontent) {
 

@@ -13,8 +13,16 @@
 */
 
 /**
-* brief description of file
+* search.js 
+* JS for the main Heurist search page:
+* functions are installed as  top.HEURIST.search.*
+* search data is loaded into  top.HEURIST.search.results.*
 *
+* NOTE: personal keywords are now referred to as "tags", to distinguish
+* them from workgroup keywords.  The code still refers to both as keywords.
+* -kj, 2007-08-13
+* Note: now there are tags (user) and wgTags (workgroup)
+* 
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -26,47 +34,6 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
-
-/* search.js
- * Copyright 2006 - 2009 University of Sydney Digital Innovation Unit
- * http://heuristscholar.org/
- *
- * Programming: Tom Murtagh, Kim Jackson
- *
- * JS for the main Heurist search page:
- * functions are installed as  top.HEURIST.search.*
- * search data is loaded into  top.HEURIST.search.results.*
- *
- * NOTE: personal keywords are now referred to as "tags", to distinguish
- * them from workgroup keywords.  The code still refers to both as keywords.
- * -kj, 2007-08-13
- * Note: now there are tags (user) and wgTags (workgroup)
- */
-
-/*
-This file is part of Heurist.
-
-Heurist is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Heurist is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 

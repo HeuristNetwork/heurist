@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* getDBStructure.php
+* returns database definitions (rectypes, details etc.)
+* as SQL statements ready for INSERT processing
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,26 +29,11 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+* @param includeUgrps=1 will output user and group information in addition to definitions
+* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/* getDBStructure.php - returns database definitions (rectypes, details etc.)
- *						as SQL statements ready for INSERT processing
- *
- * Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions
-	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
- * @todo
- *
- * IJ Updated to database format 3.1.0 2/8/11
- *
-	-->*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

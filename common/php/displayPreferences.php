@@ -15,7 +15,16 @@
 */
 
 /**
-* brief description of file
+* Load the user's display preferences.
+* Display preferences are added as CSS classes to the document body:
+* you should include this file in the BODY, not in the head.
+* If arguments  xxx=yyy  are supplied, set those for future display,
+* and suppress normal output.
+*
+* Setting  xxx=yyy  will add class  xxx-yyy  to the body,
+* but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
+*
+* Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,29 +39,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-	/*<!--
-	* filename, brief description, date of creation, by whom
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	-->*/
-
-	/* Load the user's display preferences.
-	* Display preferences are added as CSS classes to the document body:
-	* you should include this file in the BODY, not in the head.
-	*
-	* If arguments  xxx=yyy  are supplied, set those for future display,
-	* and suppress normal output.
-	*
-	* Setting  xxx=yyy  will add class  xxx-yyy  to the body,
-	* but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
-	*
-	* Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
-	*/
 	define('ISSERVICE',1);
 	define("SAVE_URI", "disabled");
 

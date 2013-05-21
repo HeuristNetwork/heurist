@@ -15,7 +15,11 @@
 */
 
 /**
-* brief description of file
+* run_sql_query.php  - EXECUTES A DEFINED sql QUERY ON THE DATABASE AND PRINTS RESULTS
+* This script is fairly generic and can be sued for any direct queries into the Heurist database
+* It coudl be parameterised with a formatting string, but it was considered not worth the effort
+*  The first parameter indicates the formatting in the switch in print_row
+* Ian Johnson and Steve White 25 Feb 2010
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -34,24 +38,6 @@
 
 <?php
 
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-?>
-
-<?php
-
-// run_sql_query.php  - EXECUTES A DEFINED sql QUERY ON THE DATABASE AND PRINTS RESULTS
-// This script is fairly generic and can be sued for any direct queries into the Heurist database
-// It coudl be parameterised with a formatting string, but it was considered not worth the effort
-// The first parameter indicates the formatting in the switch in print_row
-// Ian Johnson and Steve White 25 Feb 2010
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 

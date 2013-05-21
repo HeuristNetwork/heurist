@@ -15,7 +15,9 @@
 */
 
 /**
-* brief description of file
+* editTerms.php
+* add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
+* form to edit term on the right side
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,24 +32,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/**
-* editTerms.php
-*
-* add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
-* form to edit term on the right side
-*
-* 2011-03-25
-* @autor: Artem Osmakov
-*
-* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-*
-* @todo
-**/
 
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

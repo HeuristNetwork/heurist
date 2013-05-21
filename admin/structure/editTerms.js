@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* editTerms.js
+* Support file for editTerms.php
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,21 +28,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* editTerms.js
-* Support file for editTerms.php
-*
-* 28/04/2011
-* @author: Juan Adriaanse
-* @author: Artem Osmakov
-* @author: Stephen White
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
+
 
 // EditTerms object
 var editTerms;

@@ -30,18 +30,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
-/*
- * Temporal.php
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
-
 function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 
 		if (strpos($value,"|")!==false) {// temporal encoded date

@@ -15,7 +15,8 @@
 */
 
 /**
-* brief description of file
+* teamplateOperations.pho
+* operations with template files - save, delete, get, list
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -31,19 +32,6 @@
 */
 
 
-
-/**
- * teamplateOperations.pho
- *
- * operations with template files - save, delete, get, list
- *
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
 // called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 define('ISSERVICE',1);
 

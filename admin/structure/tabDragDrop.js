@@ -13,7 +13,7 @@
 */
 
 /**
-* brief description of file
+* custom drag and drop implementation 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,13 +27,12 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
 var Dom = YAHOO.util.Dom;
 var Event = YAHOO.util.Event;
 var DDM = YAHOO.util.DragDropMgr;
 
-//////////////////////////////////////////////////////////////////////////////
-// custom drag and drop implementation
-//////////////////////////////////////////////////////////////////////////////
+
 
 YAHOO.example.DDList = function(id, callback, sGroup, config) {
 

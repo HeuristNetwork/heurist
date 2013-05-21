@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+*  File: configure_new_installation.php Set up required data and databases for a new Heurist installation, Ian Johnson 22 Nov 2011
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,17 +29,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/**
-	* File: configure_new_installation.php Set up required data and databases for a new Heurist installation, Ian Johnson 22 Nov 2011
-	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @todo
-	**/
 
 	/* This file should be called if Heurist attempts to access a database through index.php
 	and there are no Heurist databases, indicating that the installation has not yet been fully configured */

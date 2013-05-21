@@ -13,25 +13,29 @@
 */
 
 /**
-* Creates popup div with Gmap to view given coordinates
+* Creates popup div with Gmap to view given coordinates  
+* 
+* requires
+* common/js/hintDiv.js (popup div)
 *
+* for dynaminc map viewer it requires
+* records/edit/digitizer/digitizer.js
+*   viewer/map/mapping.js
+*   jquery   
+* 
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Map
+* @subpackage  Records/Map  
 */
-/** requires
-* common/js/hintDiv.js (popup div)
-*
-* for dynaminc map viewer it requires
-* records/edit/digitizer/digitizer.js
-*   viewer/map/mapping.js
-*   jquery
-*
-**/
+
 
 function MapViewer() {
 

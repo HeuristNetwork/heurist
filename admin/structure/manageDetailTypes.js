@@ -13,7 +13,8 @@
 */
 
 /**
-* brief description of file
+* manageDetailTypes.js
+* DetailTypeManager object for listing and searching of detail types
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,19 +28,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/**
-* manageDetailTypes.js
-* DetailTypeManager object for listing and searching of detail types
-*
-* @version 2011.0510
-* @author: Artem Osmakov
-*
-* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
-* @license http://www.gnu.org/licenses/gpl-3.0.txt
-* @package Heurist academic knowledge management system
-* @todo
-**/
+
+
 var g_version = "1";
 
 var detailTypeManager;

@@ -28,7 +28,6 @@
 */
 
 
-
 require_once('class.geometry.php');
 
 class PseudoRssBiblio {

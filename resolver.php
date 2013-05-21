@@ -15,7 +15,8 @@
 */
 
 /**
- * redirect.php - acts as a PID redirector to view record  - provides a minimal URL for redirection
+* redirect.php
+* acts as a PID redirector to view record  - provides a minimal URL for redirection
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -26,17 +27,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-/**
- * redirect.php - acts as a PID redirector to view record  - provides a minimal URL for redirection
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * **/
 
 
 // called by applyCredentials require_once('configIni.php');
