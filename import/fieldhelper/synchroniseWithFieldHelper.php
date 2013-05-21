@@ -755,7 +755,7 @@ function readEXIF($filename){
         $flleinfo = pathinfo($filename);
         $ext = strtolower($flleinfo['extension']);
 
-        if( $ext=="jpeg" ||$ext=="jpg" )
+        if( $ext=="jpeg" || $ext=="jpg" || $ext=="tif" || $ext=="tiff" )
         {
 
             $exif = exif_read_data($filename, 'IFD0');
