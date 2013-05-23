@@ -224,8 +224,7 @@ if($dt_col){
     }
 }
 
-//DEBUG
-error_log(">>>".$query);
+//DEBUG error_log(">>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
