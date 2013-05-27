@@ -651,7 +651,7 @@ function ShowMap() {
 	* mode: 0 - both, 1 -image layers, 2 - kml
 	*/
 	function _load_layers(mode) {
-            return; //ARTEM
+            //return; //ARTEM
 
 			var baseurl = HRST.basePath + "viewers/map/showMap.php";
 			var callback = _updateLayersList;

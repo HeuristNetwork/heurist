@@ -155,19 +155,29 @@ div .selected, div .selected:hover{
 
 .crosstab-header0{
     font-size: 1em;
-    color:gray;
+    font-weight: bold;
+    text-transform:uppercase;
 }
 .crosstab-header{
     font-size: 1em;
+    text-align:center;
 }
 .crosstab-value{
     font-size: 1em;
     min-width:4em;
+    text-align:right;
+}
+.crosstab-total{
+    font-size: 1em;
+    min-width:4em;
+    text-align:right;
+    font-weight: bold;
 }
 .percent {
     font-size: 0.9em;
     color:gray;
     min-width:4em;
+    text-align:right;
 }
 
 .crosstab-page{

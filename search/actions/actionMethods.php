@@ -403,6 +403,8 @@
       //get matching detail value for record if there is one
       $query = "select dtl_ID, dtl_Value from recDetails ".
                 "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
+
+
       $res = mysql_query($query);
       if (mysql_num_rows($res)==0) {
         array_push($nonMatchingFieldsRecIDs, $recID);

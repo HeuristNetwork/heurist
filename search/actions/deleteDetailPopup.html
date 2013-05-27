@@ -40,7 +40,7 @@
 	#record-count {
 		font-weight: bold;
 	}
-  </style>
+  </style>1
  </head>
 
  <body class="popup" width=600 height=500 onload="init();">
@@ -260,7 +260,7 @@ function cbRemove(results){
   statusDiv.innerHTML = html;
 }
 
-function remove() {
+function removeFieldValues() {
   var _data = {};
 //need to extract the value for the input and return all appropriate values
   if (scopeSelect.value == "allSelected") {
@@ -272,6 +272,7 @@ function remove() {
   }else {
     rtyID = scopeSelect.value;
   }
+
   if (fieldScopeCB.checked){//user request to delete all fields from
     if (confirm("You are requesting to remove ALL fields of type '"+fieldSelect.options[fieldSelect.selectedIndex].label+
                 "\n from "+recCnt+" records."+
@@ -326,7 +327,7 @@ function remove() {
      </div>
      <div id="inputDiv"></div>
    </div>
-   <input type="button" value="Go" onclick="remove();">
+   <input type="button" value="Go" onclick="removeFieldValues();">
    <input type="button" value="Close" onclick="window.close();">
 
    <div id="statusDiv"></div>

@@ -252,12 +252,21 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
              var valmax = fields3[name].values[1];
              fields3[name].intervals = [];
 
-             var delta = Math.round((valmax - val0)/count);
+             var delta = (valmax - val0)/count;
+             if(fields3[name].type=="integer"){
+                delta = Math.round(delta);
+                if(Math.abs(delta)<1){
+                    delta = delta<0?-1:1;
+                }
+             }
              var cnt = 0;
              while (val0<valmax && cnt<count){
                 var val1 = (val0+delta>valmax)?valmax:val0+delta;
+                if(cnt==count-1 && val1!=valmax){
+                    val1 = valmax;
+                }
 
-                fields3[name].intervals.push( {name:val0+' ~ '+val1, description: val0+' ~ '+val1 , values:[ val0, val1 ] });  //minvalue, maxvalue
+                fields3[name].intervals.push( {name:rnd(val0)+' ~ '+rnd(val1), description: rnd(val0)+' ~ '+rnd(val1) , values:[ val0, val1 ] });  //minvalue, maxvalue
                 val0 = val1;
                 cnt++;
              }
@@ -346,8 +355,12 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 */
         }
 
+
         var idx;
         var intervals = fields3[name].intervals;
+
+        $('#'+name+'IntCount').val(intervals.length)
+
         for (idx=0; idx<intervals.length; idx++){
 
                 var interval = intervals[idx];
@@ -435,12 +448,13 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 if($dlg.length==0){
                     $dlg = $('<div>')
                             .attr('id','terms-dialog')
+                            .css('overflow-y', 'auto')
                             .appendTo($('body'));
                 }
                 $dlg.empty();
 
           var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
-          $('<div>Name:<input id="intname" value="'+intname+'"></div>')
+          $('<div id="topdiv">Label:<input id="intname" value="'+intname+'"></div>')
                         //.addClass('intervalDiv list')
                         .css({'padding':'0.2em'})
                         .appendTo($dlg);
@@ -526,7 +540,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                     cnt++;
           }
 
-                if(cnt>0){
+          if(cnt>0){
                         function __addeditInterval(){
 
                             if(idx<0){
@@ -560,9 +574,9 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                         }
 
 
-                        $dlg.append($('<button>').html('Apply').css('margin','1em').click(__addeditInterval));
+                        $dlg.find("#topdiv").append($('<button>').html('Apply').css('margin','1em').click(__addeditInterval));
 
-                        dialogbox = Hul.popupElement(window, $dlg.get(0), {height: iHeight, width:220, title:"Edit interval", modal:true} );
+                        dialogbox = Hul.popupElement(window, $dlg.get(0), {height: iHeight, width:320, title:"Edit interval", modal:true} );
 /*
                         $dlg.dialog({
                             autoOpen: true,
@@ -580,9 +594,9 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                               ]
                         });
 */
-            }else{
+          }else{
                     alert('no more available terms');
-            }
+          }
 
 
     }
@@ -745,7 +759,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
     }
 
     function rnd(original){
-        return Math.round(original*100)/100;
+        return Math.round(original*10)/10;
     }
 
     /**
@@ -764,6 +778,31 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             $divres.empty();
 
             $divres.append('<div style="text-align:center"><button onclick="crosstabsAnlysis.setMode(0)">Back to form</button>&nbsp;&nbsp;<button onclick="crosstabsAnlysis.doPrint()">Print</button></div>');
+
+            $divres.append('<div>Database name: '+database+'</div>');
+            $divres.append('<div>Date and time: '+ (new Date()) +'</div>');
+            $divres.append('<div>Type of analysis: Crosstab</div>');
+            //$divres.append('<div>Title (name) of saved analysis: '+ +'</div>');
+            //????? $divres.append('<div>Record type analysed: '++'</div>');
+            $divres.append('<div>Query string: q='+query_main+'&w='+query_domain +'</div>');
+            //$divres.append('<div>Total number of records: '+ +'</div>');
+            //$divres.append('<div>Number of records for each record type</div>');
+
+//eg. Artefact N=37, Deposit N=12
+
+            var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
+            if(aggregationMode!="count"){
+                aggregationMode = (aggregationMode=="avg")?"Average":"Sum";
+                aggregationMode = aggregationMode + ' of '+$("#cbAggField option:selected").text();
+            }else{
+                aggregationMode = "Counts";
+            }
+
+            $divres.append('<div>Type of value displayed: '+aggregationMode+'</div>');
+
+            $divres.append('<div>---------------------------------</div>');
+//Type of value displayed (count, average, sum)
+
 
             if(plen<1){
                 doRenderPage('', records_resp);
@@ -814,7 +853,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
             }
 
-            $divres.find('td').css({'border':'1px solid gray'});
+            $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
             that.setMode(2);
     }
 
@@ -1021,10 +1060,20 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             }
 
             var s, notemtycolumns = 0;
-            //main render output
-            var $table = $('<table>').css({'border':'1px solid black'}).attr('cellpadding',2).attr('cellspacing',0);
+            //main render output   .css({'border':'1px solid black'})
+            var $table = $('<table>').attr('cellspacing','0');
+
+            if(!noColumns){
+                var row1 = $('<tr>').appendTo($table);
+                for (j=0; j<clen; j++){
+                      if(supressBlankColumn && columns[j].isempty) continue;
+                      notemtycolumns++;
+                }
+                row1.append('<td>&nbsp;</td><td class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</td>');
+            }
+
             var $row = $('<tr>').appendTo($table);
-            $row.append('<td class="crosstab-header0">'+(fields3.column.fieldname?fields3.column.fieldname:'')+'<br>'+fields3.row.fieldname+'</td>');
+            $row.append('<td class="crosstab-header0">'+fields3.row.fieldname+'</td>');
 
             // render HEADER, reset column totals
             if(noColumns){
@@ -1032,13 +1081,25 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             }else{
                 for (j=0; j<clen; j++){
                       if(supressBlankColumn && columns[j].isempty) continue;
-                      $row.append('<td class="crosstab-header" style="{width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</td>');
-                      notemtycolumns++;
+                      $row.append('<td class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</td>');
+                      //notemtycolumns++;
                 }
                 if(showTotalsRow){ //special column for totals
-                    $row.append('<td colspan="'+(showPercentageRow?2:1)+'">&nbsp;</td>');
+                    $row.append('<td class="crosstab-header0" style="{text-align:center;}" colspan="'+colspan+'">totals</td>');  //(showPercentageRow?2:1)  ART2
                 }else if(showTotalsColumn){
+                    $row.append('<td class="crosstab-header0" style="{text-align:center;}">totals</td>');
+                }
+
+                if(showPercentageRow && showPercentageColumn){
+                    $row = $('<tr>').appendTo($table);
                     $row.append('<td>&nbsp;</td>');
+                    for (j=0; j<clen; j++){
+                        if(supressBlankColumn && columns[j].isempty) continue;
+                        $row.append('<td class="crosstab-value">&nbsp;</td><td class="percent">row%</td><td class="percent">col%</td>');
+                    }
+                    if(showTotalsRow || showTotalsColumn){
+                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
+                    }
                 }
             }
 
@@ -1048,14 +1109,14 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
                if(supressBlankRow && rows[i].isempty) continue;
 
-               $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
-               $row.append('<td class="crosstab-header">'+rows[i].name+'</td>');
+               $row = $('<tr>').appendTo($table);
+               $row.append('<td class="crosstab-header" style="{text-align:left;}">'+rows[i].name+'</td>');
 
                if(noColumns){
                        if(rows[i].output[0]!=0 || !supressZero){
                            s = '<td class="crosstab-value">'+rows[i].output[0] +'</td>'
                            if(showPercentageColumn){
-                               s = s+'<td class="percent">'+rows[i].percent_row[0] +'</td>'
+                               s = s+'<td class="percent">'+rows[i].percent_row[0] +'%</td>'
                            }
                            $row.append(s);
                        }else{
@@ -1070,10 +1131,10 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                        if(rows[i].output[j]!=0 || !supressZero){
                            s = '<td class="crosstab-value">'+rows[i].output[j] +'</td>'
                            if(showPercentageRow){
-                               s = s+'<td class="percent">'+rows[i].percent_row[j] +'</td>'
+                               s = s+'<td class="percent">'+rows[i].percent_row[j] +'%</td>'
                            }
                            if(showPercentageColumn){
-                               s = s+'<td class="percent">'+rows[i].percent_col[j] +'</td>'
+                               s = s+'<td class="percent">'+rows[i].percent_col[j] +'%</td>'
                            }
 
                             $row.append(s);
@@ -1084,13 +1145,16 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
                    if(showTotalsRow){ //special column for totals
                        if(rows[i].total!=0 || !supressZero){
-                           s = '<td class="crosstab-value">'+rnd(rows[i].total) +'</td>';
+                           s = '<td class="crosstab-total">'+rnd(rows[i].total) +'</td>';
                            if(showPercentageRow){
-                               s = s+'<td class="percent">'+rows[i].percent +'</td>'
+                               s = s+'<td class="percent">'+rows[i].percent +'%</td>'
+                           }
+                           if(showPercentageColumn){
+                               s = s+'<td class="percent">100%</td>'
                            }
                            $row.append(s);
                        }else{
-                            $row.append('<td colspan="'+(showPercentageRow?2:1)+'">&nbsp;</td>');
+                            $row.append('<td colspan="'+colspan+'">&nbsp;</td>'); //(showPercentageRow?2:1) ART2
                        }
                    }else if(showTotalsColumn){
                        $row.append('<td>&nbsp;</td>');
@@ -1102,28 +1166,28 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             if(noColumns){
 
                 if(showTotalsColumn && grantotal!=0){
-                   $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
-                   $row.append('<td>&nbsp;</td>');
-                   $row.append('<td colspan="'+colspan+'">'+rnd(grantotal) +'</td>');
+                   $row = $('<tr>').appendTo($table);
+                   $row.append('<td class="crosstab-header0" >totals</td>');
+                   $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+rnd(grantotal) +'</td>');
                 }
 
             }else{
 
                 if(showTotalsColumn){ //columns totals - last row in table
-                   $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
-                   $row.append('<td>&nbsp;</td>');
+                   $row = $('<tr>').appendTo($table);
+                   $row.append('<td class="crosstab-header0">Totals</td>');
 
                    for (j=0; j<clen; j++){
                        if(supressBlankColumn && columns[j].isempty) continue;
 
                        if(columns[j].total!=0 || !supressZero){
-                           s = '<td>'+rnd(columns[j].total) +'</td>';
+                           s = '<td class="crosstab-total">'+rnd(columns[j].total) +'</td>';
 
                            if(showPercentageRow){
-                               s = s+'<td class="percent">&nbsp;</td>'
+                               s = s+'<td class="percent">'+(showPercentageColumn?'100%':'&nbsp;')+'</td>'
                            }
                            if(showPercentageColumn){
-                               s = s+'<td class="percent">'+columns[j].percent +'</td>'
+                               s = s+'<td class="percent">'+  columns[j].percent +'%</td>'
                            }
 
                             $row.append(s);
@@ -1132,11 +1196,14 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
                        }
                    }
 
-                   $row.append('<td colspan="'+(showPercentageRow?2:1)+'">'+rnd(grantotal)+'</td>');
+                   $row.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
+                   if(showPercentageRow || showPercentageColumn){
+                        $row.append('<td colspan="'+colspan+'">&nbsp;</td>');  //(showPercentageRow?2:1)
+                   }
                 }else if(showTotalsRow){
-                   $row = $('<tr>').appendTo($table);  //.css({'border':'1px solid black'})
+                   $row = $('<tr>').appendTo($table);
                    $row.append('<td colspan="'+(notemtycolumns*colspan+1)+'">&nbsp;</td>');
-                   $row.append('<td colspan="'+(showPercentageRow?2:1)+'">'+grantotal+'</td>');
+                   $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+grantotal+'</td>');  //(showPercentageRow?2:1) ART2
                 }
 
             }
@@ -1145,6 +1212,9 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             if(grantotal!=0){
                 $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
                 $divres.append($table);
+
+                $divres.append('<div>---------------------------------</div>');
+
             }else if (!supressBlankPage) {
                 $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
                 $divres.append("<div>empty set</div>");
@@ -1338,7 +1408,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
     function getPlainTermsList(datatype, termIDTree, headerTerms) {
         //var selObj = Hul.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
-        var tree = top.HEURIST.terms.treesByDomain[datatype];
+        var terms = top.HEURIST.terms;//.treesByDomain[datatype];
 
         if(!isNaN(Number(termIDTree))){
             //this is vocabulary id - show list of all terms for this vocab

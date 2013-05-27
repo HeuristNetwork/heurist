@@ -89,13 +89,18 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
     if( !$dbname_faims ||  !file_exists($dbname_faims)){
 
-        if(!file_exists($dbname_faims)){
+        if($dbname_faims && !file_exists($dbname_faims)){
             print "<div style='color:red; font-weight:bold;padding:10px'>The specified database file does not found</div>";
         }
 
 
         //$dbname_faims = HEURIST_UPLOAD_DIR."faims/db2.sqlite3";
-        $dbname_faims = HEURIST_UPLOAD_DIR."faims/tracklog/db.sqlite3";
+        //$dbname_faims = HEURIST_UPLOAD_DIR."faims/tracklog/db.sqlite3";
+        // /var/www/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/tracklog/db.sqlite3
+        // /var/www/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/syncdemo/db.sqlite3
+        if(!$dbname_faims){
+            $dbname_faims = "/var/www/faims-server/";
+        }
 
         print "<form name='selectdb' action='syncFAIMS.php' method='get'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
@@ -228,7 +233,6 @@ exit();
         }
     }
 
-
     print "<h3>Sync structure</h3><br>";
 
     $rectypeMap = array();
@@ -245,9 +249,8 @@ exit();
     {
         $attrID = $row1[0];
 
-
             //try to find correspondant dettype in Heurist
-            $row = mysqli__select_array($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
+            $row = mysqli__select_array($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree, dty_Type from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
             if($row){
 
 print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
@@ -256,7 +259,7 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
                 $dtyName = $row[1];
                 $vocabID = $row[2];
 
-                $detailMap[$attrID] = $row[0];
+                $detailMap[$attrID] = array($row[0], $row[3]);
             }else{
                 //add new detail type into HEURIST
                 $query = "INSERT INTO defDetailTypes (dty_Name, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?)";
@@ -268,7 +271,7 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
                 $fid = 'FAIMS.'.$attrID;
                 $ftype = faimsToH3_dt_mapping($row1[2]);
 //print ">>>>".$fid." ".$row1[1];
-                $fname = ($fid." ".$row1[1]);
+                $fname = ($row1[1]." [$attrID]");
 
                 $stmt->bind_param('ssss', $fname, $row1[3], $ftype, $fid);
                 if(!$stmt->execute()){
@@ -282,7 +285,7 @@ exit();
 
                 $stmt->close();
 
-                $detailMap[$attrID] = $dtyId;
+                $detailMap[$attrID] = array($dtyId, $ftype);
 
 print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3]."<br/>";
             }
@@ -348,7 +351,7 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
     while ($row1 = $res1->fetchArray(SQLITE3_NUM))
     {
             $attrID = $row1[0];
-            $rtyName = $row1[1];
+            $rtyName = $row1[1]." [$attrID]";
 
             //try to find correspondant rectype in Heurist
             $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
@@ -511,27 +514,53 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
         //attr id, freetext, measure, certainity, vocabid
         echo "<div style='padding-left:30px'>".$row[6]."  ".$row[4]."  ".$row[7]."  ".$row[8]."  ".$row[5]."  "."</div>";
 
-                  //detail type
-                  $key = intval(@$detailMap[$row[6]]); //attrib id
+                  //get detailtype id in H3 by attrib id
+                  $key = -1;
+                  if(@$detailMap[$row[6]]){
+                       $key = intval($detailMap[$row[6]][0]);
+                       $detType = $detailMap[$row[6]][1];
+                  }
                   if($key>0){
 
-                      $vocabID = $row[5];
+                     if($detType=="file"){
 
-                     if($vocabID){ //vocabID
-                        if(@$termsMap[$vocabID]){
-                            $value = $termsMap[$vocabID];
+
+                        $filename = dirname($dbname_faims).DIRECTORY_SEPARATOR.$row[4];
+
+                        if(file_exists($filename)){
+                            //add-update the uploaded file
+                            $value = register_file($filename, null, false);
+                            if(!is_numeric($value)){
+                                print "<div style=\"color:red\">warning $filename failed to register, detail type ignored. $value</div>";
+                                $value = null;
+                            }
                         }else{
-                            print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
-                            continue;
+                            print "<div style=\"color:red\">warning $filename file not found, detail type ignored</div>";
+                            $value = null;
                         }
-                     }else if($row[4]){ //freetext
-                        $value = $row[4];
-                     }else if($row[7]){ //measure
-                        $value = $row[7];
-                     }else if($row[8]){ //Certainty
-                        $value = $row[8];
+
+
                      }else{
-                         continue;
+
+                         $vocabID = $row[5];
+
+                         if($vocabID){ //vocabID
+                            if(@$termsMap[$vocabID]){
+                                $value = $termsMap[$vocabID];
+                            }else{
+                                print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
+                                continue;
+                            }
+                         }else if($row[4]){ //freetext
+                            $value = $row[4];
+                         }else if($row[7]){ //measure
+                            $value = $row[7];
+                         }else if($row[8]){ //Certainty
+                            $value = $row[8];
+                         }else{
+                             continue;
+                         }
+
                      }
 
                      if($value){
@@ -763,6 +792,9 @@ function faimsToH3_dt_mapping($ftype){
                     break;
                  case 'dropdown':
                     $res = 'resource';
+                    break;
+                 case 'file':
+                    $res = 'file';
                     break;
                  default:
                     $res = 'freetext';
