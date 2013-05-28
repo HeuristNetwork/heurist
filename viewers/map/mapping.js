@@ -45,6 +45,8 @@ if (typeof mxn.LatLonPoint == "function") {
 		defaultZoom: 14,
 
 		timeZoomSteps : window["Timeline"] ? [
+            { pixelsPerInterval:  20,  unit: Timeline.DateTime.MINUTE },
+            { pixelsPerInterval:  50,  unit: Timeline.DateTime.HOUR },
 			{ pixelsPerInterval: 200,  unit: Timeline.DateTime.DAY },
 			{ pixelsPerInterval: 100,  unit: Timeline.DateTime.DAY },
 			{ pixelsPerInterval:  50,  unit: Timeline.DateTime.DAY },
@@ -583,7 +585,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				datasets: M.mapdata.timemap,
 				options: {
 					mapZoom: 2,
-					useMarkerCluster: (M.mapdata.count_mapobjects<300),
+					useMarkerCluster: false, //(M.mapdata.count_mapobjects<300),
 					onlyTimeline: (M.mapdata.count_mapobjects<1),
 					infoTemplate: template,
 					theme: customTheme,
@@ -761,7 +763,7 @@ if (typeof mxn.LatLonPoint == "function") {
 
 						M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
 						//layer.min_zoom, layer.max_zoom, true);
-            M.map.getMap().mapTypes["roadmap"].maxZoom = layer.max_zoom;
+            //M.map.getMap().mapTypes["roadmap"].maxZoom = layer.max_zoom;
 						layer.extent = M.getImageLayerExtent(layer['extent']);
 /* DEBUG
 if(layer.extent){

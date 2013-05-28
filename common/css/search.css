@@ -1195,9 +1195,11 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	z-index:1;
 	text-align: right;
 }
+/*ART
 input[type=checkbox] {
 	display: none;
 }
+*/
 #select-all-checkbox {
 	margin: 3px 10px 0px 21px;
 	vertical-align:middle;

@@ -347,6 +347,7 @@ top.HEURIST.search = {
 					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
 
 			window.history.pushState("object or string", "Title", location.pathname+'?'+ top.HEURIST.currentQuery_main);
+      top.HEURIST.parseParams();
 	},
 
 	parseLayoutParam: function(layoutString){
@@ -2612,6 +2613,7 @@ top.HEURIST.search = {
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 
+    top.HEURIST.search.updateBrowserHistory();
 		var viewerFrame = document.getElementById("viewer-frame");
 		if(viewerFrame){
 			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2630,7 +2632,6 @@ top.HEURIST.search = {
 		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
 */
 		top.HEURIST.search.setSelectedCount();
-
 		top.HEURIST.search.updateRecordView(recID);
 		top.HEURIST.search.updateMapOrSmarty();
 
@@ -2639,7 +2640,7 @@ top.HEURIST.search = {
 	},
 
 
-	executeAction: function(action, _data){
+	executeAction: function(action, _data, cbAction){
 
 			function _requestCallBack(context) {
 
@@ -2670,7 +2671,7 @@ top.HEURIST.search = {
 			var str = YAHOO.lang.JSON.stringify(_data);
 
 			var baseurl = top.HEURIST.baseURL + "search/actions/actionHandler.php";
-			var callback = _requestCallBack;
+			var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
 			var params = "db="+_db+"&action="+action+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 
@@ -3831,6 +3832,30 @@ top.HEURIST.search = {
       return;
     }
     top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/addDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+  },
+
+  replaceDetailPopup: function() {
+    var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+    if (recIDs_list.length == 0) {
+      recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+    }
+    if (recIDs_list.length == 0) {
+      alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+      return;
+    }
+    top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/replaceDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+  },
+
+  deleteDetailPopup: function() {
+    var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+    if (recIDs_list.length == 0) {
+      recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+    }
+    if (recIDs_list.length == 0) {
+      alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+      return;
+    }
+    top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/deleteDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
   },
 
 	addRelationshipsPopup: function() {

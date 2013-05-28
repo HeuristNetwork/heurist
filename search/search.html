@@ -256,6 +256,12 @@
 								title="Navigate to and login to another Heurist database">
 								Open (new window)</a></li>
 
+                            <li><div class="separator">ANALYSIS</div></li>
+                            <li style="padding-left:15px;"><a title="Crosstabs analysis"
+                                href="#"
+                                onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'viewers/crosstab/crosstabs.php?' + top.HEURIST.currentQuery_main)">
+                                Crosstabs</a></li>
+
 							<li><div class="separator">IMPORT</div></li>
 							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
@@ -585,9 +591,8 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 								<ul>
 									<li style="padding-top: 10px"><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
 									<li class="separator"><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
-									<li>--------------------------</li>
+                  <li>--------------------------</li>
 
-									<li><a href="#" onClick="top.HEURIST.search.addDetailPopup(true); return false;" title="Select one or more records, then click to add field value" class="seperator">Add Field Value</a></li>
                   <li class="separator"><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate to ...</a></li>
 									<li>--------------------------</li>
 
@@ -598,7 +603,12 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 									<li class="separator"><a href="#" onClick="top.HEURIST.search.deleteRecords(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
 									<li>--------------------------</li>
 
-									<li style="padding-bottom: 5px"><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
+									<li class="separator"><a href="#" onClick="top.HEURIST.search.fixDuplicatesPopup(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
+                  <li>--------------------------</li>
+                  <li><a href="#" onClick="top.HEURIST.search.addDetailPopup(); return false;" title="Add field value to Search Result Records" class="seperator">Add Field Value</a></li>
+                  <li><a href="#" onClick="top.HEURIST.search.replaceDetailPopup(); return false;" title="Replace field value found in Search Result Records">Replace Field Value</a></li>
+                  <li class="separator" style="padding-bottom: 5px"><a href="#" onClick="top.HEURIST.search.deleteDetailPopup(); return false;" title="Delete field value found in Search Result Records">Delete Field Value</a></li>
+
 								</ul>
 							</li>
 

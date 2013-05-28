@@ -450,6 +450,10 @@ function update_counts(divid, processed, added, total) {
 										$file_id = register_file($filename, null, false);
 										if(is_numeric($file_id)){
 											$details["t:".$fileDT] = array("1"=>$file_id);
+
+                                            //read EXIF data for JPEG images
+                                            $recordNotes = readEXIF($filename);
+
 										}else{
 											print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
 											//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
@@ -598,6 +602,7 @@ XML;
 					$filename = $dir.$filename;
 					$currfile = $filename;
 					$flleinfo = pathinfo($filename);
+                    $recordNotes = null;
 
 					//checks for allowed extensions
 					if(in_array(strtolower($flleinfo['extension']),$mediaExts))
@@ -608,6 +613,10 @@ XML;
 						$file_id = register_file($filename, null, false);
 						if(is_numeric($file_id)){
 							$details["t:".$fileDT] = array("1"=>$file_id);
+
+                          //read EXIF data for JPEG images
+                          $recordNotes = readEXIF($filename);
+
 						}else{
 							print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created:  .$file_id</div>";
 							//$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
@@ -649,7 +658,7 @@ XML;
 						$out = saveRecord(null, //record ID
 							RT_MEDIA_RECORD, //record type
 							null,  //record URL
-							null,  //Notes
+							$recordNotes,  //Notes
 							null, //???get_group_ids(), //group
 							null, //viewable
 							null, //bookmark
@@ -719,6 +728,43 @@ XML;
 
 			return $rep_processed+$rep_processed_dir;
 		}
+
+/**
+* Read EXIF from JPEG files
+*
+* @param mixed $fielname
+*/
+function readEXIF($filename){
+
+    if(function_exists('exif_read_data') && file_exists($filename)){
+
+        $flleinfo = pathinfo($filename);
+        $ext = strtolower($flleinfo['extension']);
+
+        if( $ext=="jpeg" || $ext=="jpg" || $ext=="tif" || $ext=="tiff" )
+        {
+
+            $exif = exif_read_data($filename, 'IFD0');
+
+            if($exif===false){
+                return null;
+            }
+
+            $exif = exif_read_data($filename, 0, true);
+            return json_encode($exif);
+            /*
+            foreach ($exif as $key => $section) {
+                foreach  ($section as $name => $val) {
+                    echo "$key.$name: $val<br />\n";
+                }
+            }*/
+        }
+
+    }else{
+        return null;
+    }
+
+}
 	?>
 	</body>
 </html>

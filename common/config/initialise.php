@@ -79,7 +79,7 @@ require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
  * All root are root directories and will also have a trailing / NOTE: HEURIST_DOCUMENT_ROOT to be migrated.
  * All URL are to have full protocol
 */
-define('HEURIST_VERSION', "3.1.0"); // need to change this in common/js/utilLoad.js
+define('HEURIST_VERSION', "3.1.2"); // need to change this also in common/js/utilLoad.js
 define('HEURIST_MIN_DBVERSION', "1.1.0");
 // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
 define('HEURIST_TOP_DIRS', "admin|common|export|external|hapi|help|import|records|search|viewers");

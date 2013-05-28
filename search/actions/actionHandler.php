@@ -79,12 +79,12 @@
         $result = add_detail($data);
         break;
 
-      case 'replace_term':
-        $result = replace_term($data);
+      case 'replace_detail':
+        $result = replace_detail($data);
         break;
 
-      case 'replace_text':
-        $result = replace_text($data);
+      case 'delete_detail':
+        $result = delete_detail($data);
         break;
 
       case 'set_ratings':

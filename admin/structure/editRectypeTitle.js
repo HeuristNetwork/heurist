@@ -303,7 +303,8 @@ function EditRectypeTitle() {
                                     term.label = term.label + '<b>' + label + '</b></div>';
                                     //'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
                                     //				child+'\')">All</a>&nbsp;&nbsp';
-                                    term.href = "{javascript:void(0)}";
+                                    //term.href = "#";
+                                    //term.onclick = "{javascript:void(0); return false;}";
                                 }else{
                                     term.label = term.label + label + '</div>';
                                 }

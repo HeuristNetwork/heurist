@@ -60,12 +60,13 @@ require_once('libs.inc.php');
 	$resVarsByType = array();
 
 	$mode = @$_REQUEST['mode'];
+
 	if($mode=='varsonly'){
 
 		$rectypeID = @$_REQUEST['rty_id'];
 
-
 		$res0 = getRecordHeaderSectionForSmarty(null, 'r', 0); //from
+
 
 		$resVars = array_merge($resVars, $res0['vars']);
 
@@ -91,6 +92,7 @@ require_once('libs.inc.php');
 										"tree"=>$res['tree']));
 
 		$qresult = loadSearch($_REQUEST);
+
 
 		header("Content-type: text/javascript");
 		echo json_format( array("vars"=>$resVarsByType,
@@ -323,8 +325,6 @@ function __addvar($key)
 			$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
 			$vars = array_merge($vars, array($name=>$key));
 			array_push($arr_text, '{$'.$name.'}');
-
-//error_log(">>>".$key);// print_r(
 }
 
 //
@@ -483,6 +483,12 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind, $recursion
  $dtKey	 - detail type ID
 
  $dtValue - record type structure definition
+
+ return
+    array("text"=>$text,
+            "vars"=>$vars,
+            'detailtypes'=>$detailtypes,
+            'tree_children'=>$tree_children, 'tree'=>$tree)
 */
 function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursion_depth){
 
@@ -544,13 +550,13 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 					"label"=>$dtname.".label",
 					"conceptid"=>$dtname.".conceptid");
 
-				$tree_children = array_merge($tree_children, array($dtname=>$enumtree));
+				$tree_children = array_merge($tree_children, array($dtname_wo_parent=>$enumtree));
 
+                $vars[$dtname.".id"]="id";
+                $vars[$dtname.".code"]="code";
+                $vars[$dtname.".label"]="label";
+                $vars[$dtname.".conceptid"]="conceptid";
 
-				$vars = array_merge($vars, array($dtname.".id"=>"id"));
-				$vars = array_merge($vars, array($dtname.".code"=>"code"));
-				$vars = array_merge($vars, array($dtname.".label"=>"label"));
-				$vars = array_merge($vars, array($dtname.".conceptid"=>"conceptid"));
 
 				array_push($arr_text, '{$'.$dtname.'.id}',  '{$'.$dtname.'.code}', '{$'.$dtname.'.label}', '{$'.$dtname.'.conceptid}');
 
@@ -566,15 +572,9 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 				//load this record
 				if($recursion_depth<2){ // && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {
 
-				//ART 13-03-09 $recursion_depth++;
-
-				/*if($mode=='varsonly' || !array_key_exists($pointerRecTypeId, $rtNames)){
-					$recordTypeName = $dt_label;
-				}else{
-					$recordTypeName = $rtNames[$pointerRecTypeId];
-				}*/
 				$recordTypeName = $dt_label;
 				$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
+
 
 				if($pointerRecTypeId==""){ //unconstrainded
 					$dt_label = $dt_label." ptr";
@@ -601,44 +601,25 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 				//add specific for this record type details
 				if(array_key_exists($pointerRecTypeId, $rtNames)){
 
-					//$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $res2['tree']);
-
 					//get the list of details from this record
 					$details =  $rtStructs['typedefs'][$pointerRecTypeId]['dtFields'];
-	                // TODO: delete this? TEMP - to avoid self recursion
-					// no need $text  = $text.'\n<tr><td colspan="13">';
 
 					foreach ($details as $dtKey2 => $dtValue2){
-						$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind, $recursion_depth);
+						$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind, $recursion_depth+1);
 						if($dt){
 							array_push($arr_text, $dt['text']);
 							$vars = array_merge($vars, $dt['vars']);
 							$detailtypes = array_merge($detailtypes, $dt['detailtypes']);
 
-							if(false && $recursion_depth>1){
-								//$res2[$recordTypeName] = array_merge($res2[$recordTypeName], $dt['tree_children']);
-								//$res2 = array_merge($res2, $dt['tree']);
-							}else{
+							    $tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree_children']); //detail fields
 
-
-
-								$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree_children']); //detail fields
-
-								if($recursion_depth>0){
+								if($recursion_depth+1>0){
 									$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree']);
 								}else{
 									$tree = array_merge($tree, $dt['tree']); //assign first level records to root
 								}
-							}
 						}
 					}//for
-					///no need $text = $text.'</td></tr>\n';
-					/*
-					if($recursion_depth>1){
-/*****DEBUG****///error_log(">>>>            ");
-/*****DEBUG****///error_log(">>>>            ".print_r($res2['tree'], true));
-//						$tree = array_merge($tree, $res2['tree']);
-//					}*/
 
 				}//array_key_exists($pointerRecTypeId, $rtNames))
 
@@ -647,44 +628,6 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind, $recursi
 
 				}
 
-/*
-				//@todo - parsing will depend on depth level
-				// if there are not mentions about this record type in template (based on obtained array of variables)
-				// we will create href link to this record
-				// otherwise - we have to obtain this record (by ID) and add subarray
-
-				$res = array();
-				$rectypeID = null;
-
-				foreach ($dtValue as $key => $value){
-/*****DEBUG****///error_log(">>>>>>>>>>".array_key_exists('id',$value));
-/*					if (array_key_exists('id',$value))
-					{
-						//this is record ID
-						$recordID = $value['id'];
-						//get full record info
-						$record = loadRecord($recordID); //from search/getSearchResults.php
-						$res0 = getRecordForSmarty($record); //@todo - need to
-
-						if($res0){
-							array_push($res, $res0);
-							if($rectypeID==null){
-								$rectypeID = $res0['recRecTypeID'];
-							}
-						}
-					}
-				}//for each
-
-				if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
-				{
-					$recordTypeName = $rtNames[$rectypeID];
-					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-/*****DEBUG****///error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName);
-/*					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
-				}else{
-					$res = null;
-				}
-*/
 			break;
 
 			default:
