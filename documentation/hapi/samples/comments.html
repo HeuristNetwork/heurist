@@ -1,0 +1,46 @@
+<html>
+ <head>
+  <link rel=stylesheet type=text/css href=comments.css>
+
+  <style>
+	body { font-size: 80%; }
+  </style>
+
+  <script src=http://hapi.heuristscholar.org/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+  <script src=http://hapi.heuristscholar.org/comments.js></script>
+
+ </head>
+ <body>
+  <div>
+   <b>Comments</b>
+   &nbsp;&nbsp;
+   Threaded discussion of this record
+   <div id=comments></div>
+  </div>
+
+  <script>
+
+if (! HCurrentUser.isLoggedIn()) {
+	window.location.href = "http://heuristscholar.org/heurist/php/login.php?last_uri=" + window.location.href;
+}
+
+function parseRecordId() {
+	var matches = window.location.search.match(/record_id=([0-9]+)/);
+	if (matches  &&  matches[1]) return matches[1];
+	return null;
+}
+
+var loader = new HLoader(
+	function(s,r) {
+		var cm = new CommentManager(document.getElementById("comments"), r[0]);
+		cm.printAllComments();
+	}
+);
+HeuristScholarDB.loadRecords(new HSearch("id:" + parseRecordId()), loader);
+
+</script>
+
+
+
+ </body>
+</html>

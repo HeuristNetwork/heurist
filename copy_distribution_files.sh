@@ -27,6 +27,8 @@ cp -r records /var/www/htdocs/h3-setup/h$1
 cp -r search /var/www/htdocs/h3-setup/h$1
 cp -r viewers /var/www/htdocs/h3-setup/h$1
 cp -r MYSQL /var/www/htdocs/h3-setup/h$1
+cp -r documentation /var/www/htdocs/h3-setup/h$1
+
 cp -r *.* /var/www/htdocs/h3-setup/h$1
 cp -r /var/www/htdocs/h3/external /var/www/htdocs/h3-setup/h$1
 cp -r /var/www/htdocs/h3/help /var/www/htdocs/h3-setup/h$1
