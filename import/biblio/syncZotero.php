@@ -14,6 +14,18 @@
 * the License.
 */
 
+/**
+*   Sync h3 database with zotero lib or user items
+*   zotero API key and maaping are specified in zotero<ap.xml
+*
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://sydney.edu.au/heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+*/
+
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
     if(isForAdminOnly("to import records")){
@@ -34,8 +46,7 @@
         <link rel=stylesheet href="../../common/css/global.css" media="all">
         <link rel=stylesheet href="../../common/css/admin.css" media="all">
     </head>
-    <body class="popup">r
-
+    <body class="popup">
 <?php
             mysql_connection_overwrite(DATABASE);
             if(mysql_error()) {
@@ -47,6 +58,7 @@
     // 1) load mapping/config file
     $mapping_file = "zoteroMap.xml";
     $user_ID = null;
+    $group_ID = null;
     $api_Key = null;
     $mapping_rt = array();
     $mapping_dt_errors = array();
@@ -67,6 +79,7 @@
 
             $arr = $f_gen->attributes();
             $user_ID = @$arr['userId'];
+            $group_ID = @$arr['groupId'];
             $api_Key = @$arr['key'];
 
         }else if($f_gen->getName()=="zTypes"){
@@ -97,41 +110,29 @@
 
                                         //pointer mapping
                                         if(strpos($dt_code,".")>0){
-                                            $arrdt = explode(".",$dt_code);
-                                            if(count($arrdt)==3){
-                                                $dt_code = $arrdt[0];
-                                                $resource_rt_id = $arrdt[1]; //resource record type
-                                                $resource_dt_id = $arrdt[2]; //dettype in resource record
+
+                                            $res = getResourceMapping($dt_code);
+                                            if(is_array($res)){
+                                                $mapping_dt[strval($arr['value'])] = $res;
+
+//DEBUG error_log(">>>>>".print_r($res, true));
+
                                             }else{
-                                                array_push($mapping_dt_errors, $arr['value']."  wrong resource mapping ".$dt_code." in ".$zType);
+                                                array_push($mapping_dt_errors, $arr['value'].$res." in ".$zType);
                                                 continue;
                                             }
-                                        }
 
-                                        $dt_id = getDetailTypeLocalID($dt_code);
-
-//error_log($arr['value']."  ".$arr['h3id']."  ".$dt_id);
-                                        if($dt_id == null){
-                                            array_push($mapping_dt_errors, $arr['value']." detail type not found ".$dt_code." in ".$zType);
                                         }else{
-                                            if($resource_rt_id){
 
-                                                $res_rt_id = getRecTypeLocalID($resource_rt_id);
-                                                if($rt_id == null){
-                                                    array_push($mapping_dt_errors, $arr['value']." resource rectype not recognized: ".$resource_rt_id." in ".$zType);
-                                                }else{
+                                            $dt_id = getDetailTypeLocalID($dt_code);
 
-                                                    $res_dt_id = getDetailTypeLocalID($resource_dt_id);
-                                                    if($dt_id == null){
-                                                        array_push($mapping_dt_errors, $arr['value']." detail type for resource not recognized ".$resource_dt_id." in ".$zType);
-                                                    }else{
-                                                        //pointer detail type and detail type in resource record
-                                                        $mapping_dt[strval($arr['value'])] = array($dt_id, $res_rt_id, $res_dt_id);
-                                                    }
-                                                }
+    //error_log($arr['value']."  ".$arr['h3id']."  ".$dt_id);
+                                            if($dt_id == null){
+                                                array_push($mapping_dt_errors, $arr['value']." detail type not found ".$dt_code." in ".$zType);
                                             }else{
                                                 $mapping_dt[strval($arr['value'])] = $dt_id;
                                             }
+
                                         }
                                     }
                                 }
@@ -151,7 +152,7 @@
         }
     }///foreach
 
-    if($user_ID == null || $api_Key == null){
+    if( ($group_ID == null && $user_ID == null) || $api_Key == null){
         die("Sorry, connection parameters are not defined in configuration file for Zotero sync");
     }
 
@@ -163,7 +164,11 @@
 if(!$step){
 
     // 1) verify connection to zotero (get total count of top-level items in zotero)
-    $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+    if($group_ID){
+        $items = $zotero->getItemsTop($group_ID, array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ), "groups");
+    }else{
+        $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+    }
 
     $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19, strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
 
@@ -200,12 +205,17 @@ if(!$step){
 
     // 1) start loop: fetch items by 100
     $start = 0;
-    $fetch = 100;
+    $fetch = min($_REQUEST['cnt'],100);
     $totalitems = $_REQUEST['cnt'];
+    $new_recid = 0;
 
     while ($start<$totalitems){
 
-        $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start, 'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ));
+        if($group_ID){
+            $items = $zotero->getItemsTop($group_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start, 'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ), "groups");
+        }else{
+            $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'json', 'start'=>$start, 'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ));
+        }
 
 //print $items;
 //print "<br/>";
@@ -219,14 +229,13 @@ if(!$step){
     // 2) get content of item if itemType is supported
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
 
-ob_flush();flush();
 print " <br/>".$itemtype."  ".strval(findXMLelement($entry, null, "title"))."<br/>";
+ob_flush();flush();
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
-print " ignored<br/>";
+                        print " ignored<br/>";
                         continue;
                 }
-
 
                 $zotero_itemid = strval(findXMLelement($entry, "zapi", "key"));
                 $recId = null;
@@ -330,14 +339,18 @@ print "Rec#".$recId." entry was not changed since last sync.  ".date("Y-m-d", $t
                     if($key){
 
                         if(is_array($key)){ //reference to record pointer
-                              $resource_rt_id = $key[1];
+                              $detail_id = $key[0];
+                              /*$resource_rt_id = $key[1];
                               $resource_dt_id = $key[2];
-                              $key = $key[0];
+                              $key = $key[0];  //detail in main rec
+                              */
+                        }else{
+                              $detail_id = $key;
                         }
 
-                        if(!@$alldettypes['typedefs'][$key]) continue;
+                        if(!@$alldettypes['typedefs'][$detail_id]) continue;
 
-                        $dt_type = $alldettypes['typedefs'][$key]['commonFields'][$fi_dettype];
+                        $dt_type = $alldettypes['typedefs'][$detail_id]['commonFields'][$fi_dettype];
 
                         if($dt_type=='enum' || $dt_type=='relationtype'){
     // 6) find terms by label values
@@ -352,29 +365,28 @@ print "Rec#".$recId." entry was not changed since last sync.  ".date("Y-m-d", $t
                         }else if ($dt_type=='resource'){
 
     // 7) store pointer titles in 'unresolved' pointers
-
-                                if($resource_rt_id==null){
-                                    $resource_rt_id = RT_NOTE;   //@todo - take from constraints
-                                }
-                                if($resource_dt_id==null){
-                                    $resource_dt_id = DT_NAME;
+                                if(!is_array($key)){ //by default
+                                    $key = array($detail_id, RT_NOTE, DT_NAME);
                                 }
 
-                                if(!@$unresolved_records[$key]){
-                                    $unresolved_records[$key] = array();
-                                }
-                                if(!@$unresolved_records[$key][$resource_rt_id]){
-                                    $unresolved_records[$key][$resource_rt_id] = array();
-                                }
-
-
-                                //array_push($unresolved_records[$key][$resource_rt_id], array($resource_dt_id => $value) );
-                                $unresolved_records[$key][$resource_rt_id][$resource_dt_id] = $value;
+                                assignUnresolvedPointer($unresolved_records, $key, $value);
 
                                 continue;
                         }
+                        if($zkey=="pages"){
 
-                        $details["t:".$key] = array("0"=>$value);
+                            $pages = explode("-",$value);
+                            $details["t:".$detail_id] = array("0"=>$pages[0]);
+                            if(count($pages)>1){
+                                $detail_id2 = getDetailTypeLocalID("3-1027"); //MAGIC NUMBER
+                                if($detail_id2){
+                                    $details["t:".$detail_id2] = array("0"=>$pages[1]);
+                                }
+                            }
+
+                        }else{
+                            $details["t:".$detail_id] = array("0"=>$value);
+                        }
 
 //debug print $key."  ".$value."<br/>";
 
@@ -400,9 +412,12 @@ print "Rec#".$recId." entry was not changed since last sync.  ".date("Y-m-d", $t
         $start = $start + $fetch;
     }// end of loop
 
+//DEBUG error_log("unresolved pointers>>>>>".print_r($unresolved_pointers, true));
 
 print "<div>Create/update resource records</div>";
 ob_flush();flush();
+
+//    exit();
 
     // try to find 'unresolved pointers
     // $rec_id - record to be updated
@@ -413,15 +428,17 @@ ob_flush();flush();
     $ptr_cnt = 0;
     foreach($unresolved_pointers as $rec_id=>$pntdata)
     {
+// pntdata = array of  detail id in main record => record id of resource => detail id in resource OR simialr array for next level  => value
+//  $dt_id=>$resource_rt_id=>$resource_details
+
+
 //debug print $rec_id."   ".print_r($pntdata, true)."<br/><br/>";
 
-            foreach($pntdata as $dt_id=>$recdata){
+            foreach($pntdata as $dt_id=>$recdata){  //detail id in main record
 
-                    foreach($recdata as $resource_rt_id=>$resource_details){
+                    foreach($recdata as $resource_rt_id=>$resource_details){ //recordtype
 
-                        if(@$resource_details[0]){ //these are creators
-
-
+                        if(array_key_exists(0, $resource_details)){ //@$resource_details[0]){ //these are creators
 
                             foreach($resource_details as $idx=>$creator){
 
@@ -432,6 +449,7 @@ ob_flush();flush();
 
                                    $recource_recid = createResourceRecord($resource_rt_id, $creator);
 
+                                   //update main record
                                    $inserts = array($rec_id, $dt_id, $recource_recid, 1);
                                    $query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values (" . join(",", $inserts).")";
                                    mysql_query($query);
@@ -441,6 +459,7 @@ ob_flush();flush();
                         }else{
 
                             $recource_recid = createResourceRecord($resource_rt_id, $resource_details);
+                            //update main record
                             $inserts = array($rec_id, $dt_id, $recource_recid, 1);
                             $query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values (" . join(",", $inserts).")";
                             mysql_query($query);
@@ -449,10 +468,6 @@ ob_flush();flush();
                         }
 
                    }
-
-
-
-
             }
 
     }
@@ -464,58 +479,171 @@ ob_flush();flush();
 
 }
 
-// try to find resource record, create it if not found
-// returns resource record ID
-function  createResourceRecord($resource_rt_id, $resource_details){
+//
+// parse resource pamming (recursive)
+//
+function getResourceMapping($dt_code){
 
-       global $alldettypes, $fi_dettype;
+        $arrdt = explode(".",$dt_code);
+        if(count($arrdt)>2){
+            $dt_code = array_shift($arrdt); // $arrdt[0];
+            $resource_rt_id = array_shift($arrdt); //$arrdt[1]; //resource record type
+            $resource_dt_id = $arrdt[0];
+        }else{
+            return "  wrong resource mapping ".$dt_code;
+        }
+
+        $dt_id = getDetailTypeLocalID($dt_code);
+        if($dt_id == null){
+            return " detail type not found ".$dt_code;
+        }
+
+
+        $res_rt_id = getRecTypeLocalID($resource_rt_id);
+        if($res_rt_id == null){
+            return " resource rectype not recognized: ".$resource_rt_id;
+        }
+
+        $res_dt_id = getDetailTypeLocalID($resource_dt_id);
+        if($res_dt_id == null){
+            return " detail type for resource not recognized ".$resource_dt_id;
+        }
+
+
+        if(count($arrdt)>1){
+            // next level
+            $subres = getResourceMapping( implode(".",$arrdt) );
+            if(is_array($subres)){
+                $res = array($dt_id, $res_rt_id, $subres);
+            }else{
+                return $subres;
+            }
+        }else{
+            //pointer detail type and detail type in resource record
+            $res = array($dt_id, $res_rt_id, $res_dt_id);
+        }
+
+        return $res;
+}
+
+/**
+* put your comment there...
+*
+* @param mixed $unresolved
+* @param mixed $key
+* @param mixed $value
+*/
+function assignUnresolvedPointer(&$unresolved, $key, $value){
+
+    $detail_id      = $key[0];
+    $resource_rt_id = $key[1];
+    $resource_dt_id = $key[2];
+
+    if(!@$unresolved[$detail_id]){
+        $unresolved[$detail_id] = array();
+    }
+    if(!@$unresolved[$detail_id][$resource_rt_id]){
+        $unresolved[$detail_id][$resource_rt_id] = array();
+    }
+    if(is_array($resource_dt_id)){
+
+        assignUnresolvedPointer($unresolved[$detail_id][$resource_rt_id], $resource_dt_id, $value);
+
+    }else{
+        //array_push($unresolved_records[$key][$resource_rt_id], array($resource_dt_id => $value) );
+        $unresolved[$detail_id][$resource_rt_id][$resource_dt_id] = $value;
+    }
+}
+
+//
+// try to find resource record, create it if not found
+//
+// $resource_rt_id - recordtype for resource
+// $resource_details - array of dt_id=>value
+//
+// returns resource record ID
+/**
+* put your comment there...
+*
+* @param mixed $dt_code
+*/
+function createResourceRecord($record_type, $recdetails){
+
+    global $alldettypes, $fi_dettype;
 
        $query = "";
        $details = "";
        $dcnt = 1;
-       $recource_recid = null;
+       $recource_recid = null; //returned value
 
-       foreach($resource_details as $resource_dt_id=>$value)
-       {
-                    if(!@$alldettypes['typedefs'][$resource_dt_id]) continue;
+//DEBUG error_log(">>>>".print_r($recdetails, true));
 
-                    $dt_type = $alldettypes['typedefs'][$resource_dt_id]['commonFields'][$fi_dettype];
-                    if($dt_type=='enum' || $dt_type=='relationtype'){
-                          $trm_value = resolveTermValue($dt_type, $value);
-                          if($trm_value==null){
-                            $report_log = $report_log."<br> term not found for ".$value;
-                            continue;
-                          }
-                          $value = $trm_value;
+    foreach($recdetails as $dt_id=>$recdata){  //detail id in main record
 
-                    }else if ($dt_type=='resource'){ //2d level of reference
+        if(!@$alldettypes['typedefs'][$dt_id]) continue;  //detail type not found
 
-                        $resource2_rt_id =  getConstrainedRecordType($resource_dt_id);
-                        if($resource2_rt_id){
-                            $value = createResourceRecord($resource2_rt_id, array(DT_NAME=>$value));
-                        }else{
-                            $report_log = $report_log."<br> resource record type unconstrained for detail type: ".$resource_dt_id;
-                            continue;
-                        }
-                    }
+        $dt_type = $alldettypes['typedefs'][$dt_id]['commonFields'][$fi_dettype];
+        if($dt_type=='enum' || $dt_type=='relationtype'){
 
-                    if($value){
-                        $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".$resource_dt_id." and d$dcnt.dtl_Value='".mysql_escape_string($value)."'";
-                        $dcnt++;
+              $trm_value = resolveTermValue($dt_type, $recdata);
+              if($trm_value==null){
+                $report_log = $report_log."<br> term not found for ".$recdata;
+                continue;
+              }
+              $value = $trm_value;
 
-                        $details["t:".$resource_dt_id] = array("0"=>$value);
-                    }
+        }else if ($dt_type=='resource'){ //next level of reference
 
-       }
+            if(!is_array($recdata)){
 
-       if($query){
+                $record_type_2 =  getConstrainedRecordType($dt_id);
+                if($record_type_2){
+                    $recdata = array(DT_NAME=>$recdata);
+                    $value = createResourceRecord($record_type_2, $recdata);
+                }else{
+                    $report_log = $report_log."<br> resource record type unconstrained for detail type: ".$dt_id;
+                    continue;
+                }
+
+            }else{
+                foreach($recdata as $record_type_2=>$recdata_nextlevel){ //recordtype
+                       $value = createResourceRecord($record_type_2, $recdata_nextlevel); //return rec_id
+                       break;
+                }
+            }
+        }else{
+            $value = $recdata;
+        }
+
+
+
+        if($value){
+            //query to search similar record
+            $details["t:".$dt_id] = array("0"=>$value);
+            $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".$dt_id." and d$dcnt.dtl_Value='".mysql_escape_string($value)."'";
+            $dcnt++;
+        }
+
+        /*new
+        foreach($recdata as $resource_rt_id=>$recdetails_nextlevel){ //recordtype
+                $recource_recid = createResourceRecord($rec_id, $recdetails_nextlevel);
+
+                //add pointer detail type
+                $inserts = array($rec_id, $dt_id, $recource_recid, 1);
+                $query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values (" . join(",", $inserts).")";
+                mysql_query($query);
+        }*/
+    }
+
+    // try to find the existing record
+    if($query){
            $qd = "";
-           for ($idx=1; $idx<$dcnt; $idx++){
+           for ($idx=1; $idx<$dcnt; $idx++){ //count of details
                 $qd = $qd.",recDetails d$idx ";
            }
 
            //find resouce record , if not found create new one
-           $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".$resource_rt_id.$query;
+           $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".$record_type.$query;
 
 //debug print $query."<br>";
 
@@ -526,14 +654,14 @@ function  createResourceRecord($resource_rt_id, $resource_details){
                     $recource_recid = $row[0];
                 }
            }
-       }
+     }
 
-       if($recource_recid==null){
+     if($recource_recid==null){
            //such record not found - create new one
-           $recource_recid = addRecordFromZotero(null, $resource_rt_id, null, $details, null);
-       }
+           $recource_recid = addRecordFromZotero(null, $record_type, null, $details, null);
+     }
 
-       return $recource_recid;
+     return $recource_recid;
 
 }
 
@@ -598,7 +726,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
     $new_recid = null;
 
-                if(count($details)>0){
+                if( count($details)>0){
 
                         if($zotero_itemid){
                             $details["t:".DT_ZOTERKEY] = array("0"=>$zotero_itemid);
@@ -609,8 +737,14 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
                         if($recId){
                             //sice we do not know dtl_ID - remove all details for updated record
-                            $query = "delete from recDetails where dtl_recId=".$recId;
+                            $query = "DELETE FROM recDetails where dtl_RecID=".$recId;
                             $res = mysql_query($query);
+
+                            if(!$res){
+                                $syserror = mysql_error();
+                                print "<div style='color:red'> Error: Can not delete record details ".$syserror."</div>";
+                                return;
+                            }
                         }
 
                         //add-update Heurist record
