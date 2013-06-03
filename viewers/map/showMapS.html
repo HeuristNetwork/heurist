@@ -27,7 +27,6 @@
 * @subpackage  Viewers/Map
 */
 
-
 -->
 
 <html>
@@ -54,7 +53,9 @@
 <script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
 
 
-<!-- timemap/timeline scripts -->
+<!--
+timemap/timeline scripts
+-->
 
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 
@@ -249,7 +250,6 @@ body {
 	var installDir = window.location.protocol+"//"+window.location.host+
 		window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	var HRST = {
-		VERSION: "3.1.0",
 		basePath: installDir,
 		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
 		external_publish: true,

@@ -47,7 +47,7 @@ function ShowMap() {
 		//squery_all,		squery_sel,		squery_main,
 		currentQuery,
 		_menu = null,
-		systemAllLayers; //all image layers (3-6) and kml layers (3-24) in the system with detail type 3-679 true
+		systemAllLayers; //all image layers (2-11) and kml layers (3-1014) in the system with detail type 3-679 true
 
 	/**
 	* Initialization
@@ -573,9 +573,9 @@ function ShowMap() {
 		if(isNaN(val) || val < 0){
 			RelBrowser.Mapping.addLayers([], 0);
 			if(!Hul.isempty(currentBackgroundLayer)){
-				top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
-				top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
-				top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main.replace(","+currentBackgroundLayer,"");
+				if(top.HEURIST.currentQuery_all) top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
+				if(top.HEURIST.currentQuery_sel) top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
+				if(top.HEURIST.currentQuery_main) top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main.replace(","+currentBackgroundLayer,"");
 			}
 			currentBackgroundLayer = '';
 		}else{
@@ -583,9 +583,9 @@ function ShowMap() {
 			//that's required that map panel will be visible in case there are no more other map objects
 			if(Hul.isempty(errors)){
 				currentBackgroundLayer = systemAllLayers[val].rec_ID;
-				top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
-				top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
-				top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main + "," + currentBackgroundLayer;
+				if(top.HEURIST.currentQuery_all) top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
+				if(top.HEURIST.currentQuery_sel) top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
+				if(top.HEURIST.currentQuery_main) top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main + "," + currentBackgroundLayer;
 			}else{
 				currentBackgroundLayer = '';
 			}
@@ -655,7 +655,7 @@ function ShowMap() {
 
 			var baseurl = HRST.basePath + "viewers/map/showMap.php";
 			var callback = _updateLayersList;
-			var params =  "ver=1&layers="+mode+"&db="+HRST.database.name;
+			var params =  "ver=1&limit=25&layers="+mode+"&db="+HRST.database.name;
 			Hul.getJsonData(baseurl, callback, params);
 	}
 
