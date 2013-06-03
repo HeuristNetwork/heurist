@@ -25,7 +25,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Common  
+* @subpackage  Common
 */
 
 
@@ -44,11 +44,10 @@ if (! top.HEURIST) {
      */
     top.HEURIST = {
         /**
-         * current version
-         *
+         * current version - it will be overwritten by setting in loadCommonInfo.php
          * @type String
          */
-        VERSION: "3.1.3",
+        VERSION: "*.*.*",
 
         basePath: installDir,
 /**

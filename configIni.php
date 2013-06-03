@@ -26,6 +26,8 @@
 * @package     Heurist academic knowledge management system
 */
 
+// Set the version number of the Heurist program
+$version = "3.1.4"; // required - DO NOT CHANGE
 
 // if a heuristConfigIni.php file exists in the parent directory of the installation,
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
