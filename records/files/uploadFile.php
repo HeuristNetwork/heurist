@@ -15,16 +15,15 @@
 */
 
 /**
-* set of functions
-*   upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
-*   register_file - registger the existing file on the server in recUploadedFiles (used in import)
-*   get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
-*   getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
-*   is_image - detect if resource is image
+ set of functions
+*     upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
+*     register_file - registger the existing file on the server in recUploadedFiles (used in import)
+*     get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
+*     getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
+*     is_image - detect if resource is image
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -65,7 +64,7 @@
 
 		if ($size <= 0  ||  $error) {
 			error_log("size is $size, error is $error");
-			return $error;
+			return "File size recognized as 0. Either file size more than php upload_max_filesize or file is corrupted. Error: $error";
 		}
 
 		/* clean up the provided file name -- these characters shouldn't make it through anyway */
@@ -122,7 +121,7 @@
 		$file_id = mysql_insert_id();
 		$filename = "ulf_".$file_id."_".$name;
 		mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
-			'", ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			'", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 		/*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
 		$pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);
@@ -196,8 +195,8 @@
 
 		//check if such file is already registered
 		$res = mysql_query('select ulf_ID from recUploadedFiles '.
-			'where ulf_FilePath = "'.mysql_real_escape_string($dirname).
-			'" and ulf_FileName = "'.mysql_real_escape_string($filename).'"');
+			'where ulf_FilePath = "'.addslashes($dirname).
+			'" and ulf_FileName = "'.addslashes($filename).'"');
 
 		if (mysql_num_rows($res) == 1) {
 			$row = mysql_fetch_assoc($res);
@@ -226,7 +225,7 @@
 
 			$file_id = mysql_insert_id();
 
-			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
 			return $file_id;
 
@@ -438,7 +437,7 @@
 		if($mimetypeExt){
 			$mimetypeExt = strtolower($mimetypeExt);
 
-			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.mysql_real_escape_string($mimetypeExt).'"');
+			$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
 			if (mysql_num_rows($fres) == 1) {
 				$res = mysql_fetch_assoc($fres);
 				$mimeType = $res['fxm_Mimetype'];
@@ -527,7 +526,7 @@
 			//2. find duplication (the same url)
 			if(array_key_exists('remoteSource', $filedata) && $filedata['remoteSource']!='heurist'){
 				$res = mysql_query('select ulf_ID from recUploadedFiles '.
-					'where ulf_ExternalFileReference = "'.mysql_real_escape_string($filedata['remoteURL']).'"');
+					'where ulf_ExternalFileReference = "'.addslashes($filedata['remoteURL']).'"');
 
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
@@ -563,7 +562,7 @@
 
 			$file_id = mysql_insert_id();
 
-			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . mysql_real_escape_string(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+			mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
 		}
 
@@ -674,7 +673,7 @@
 			from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
 			where '.(is_numeric($fileID)
 				?'ulf_ID = '.intval($fileID)
-				:'ulf_ObfuscatedFileID = "'.mysql_real_escape_string($fileID).'"') );
+				:'ulf_ObfuscatedFileID = "'.addslashes($fileID).'"') );
 
 		if (mysql_num_rows($fres) == 1) {
 
