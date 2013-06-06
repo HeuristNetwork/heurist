@@ -116,6 +116,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 foreach ($_REQUEST["records"] as $nonce => $record) {
 // FIXME?  should we perhaps index these by the nonce
 	if ($nonces[$nonce] != -1) {
+
 		$savedRecord =  saveRecord(@$record["id"],
 									@$record["type"],
 									@$record["url"],

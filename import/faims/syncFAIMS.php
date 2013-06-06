@@ -15,34 +15,15 @@
 */
 
 /**
-* brief description of file
+*   Sync h3 database with FAIMS sqlite
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @link        http://sydney.edu.au/heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-
-	/* getRecordsFromDB.php - gets all records in a specified database (later, a selection) and write directly to current DB
-	* Reads from either H2 or H3 format databases
-	* Ian Johnson Artem Osmakov 25 - 28 Oct 2011
-	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
-	* @link: http://HeuristScholar.org
-	* @license http://www.gnu.org/licenses/gpl-3.0.txt
-	* @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions
-	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
-	* @todo
-	*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -423,7 +404,42 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
                     }
 
             }//for add details for structure
+
+            //verify spatial data for this record type
+            if(isset($dt_Geo) && $dt_Geo>0)
+            {
+                $row = mysqli__select_array($mysqli,
+                            "select rst_DetailTypeID, rst_DisplayName from defRecStructure r ".
+                            "where r.rst_RecTypeID=$rtyId and r.rst_DetailTypeID".$dt_Geo."'");
+
+                if($row){  //such detal in structure already exists
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br/>";
+                }else{
+
+                    $query3 = "SELECT count(*) FROM archentity ae where ae.AEntTypeID="
+                                .$attrID." and asText(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
+                    $hasgeo = $dbfaims->query($query3);
+                    $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
+
+        print "HAS GEO : ".$hasgeo[0]." entries<br>";
+
+                    if($hasgeo[0]>0){
+                        $row3 = mysqli__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_ID=".$dt_Geo);
+                        if($row3){
+                                        $query = "INSERT INTO defRecStructure (rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText) VALUES (?,?,?, '')";
+                                        $stmt = $mysqli->prepare($query);
+                                        $stmt->bind_param('iis', $rtyId, $row3[0], $row3[1] );
+                                        $stmt->execute();
+                                        $stmt->close();
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."<br/>";
+                        }
+                    }
+                }
+            }
+
     }//for AEntTypes
+
+//exit();
 
 //----------------------------------------------------------------------------------------
 /* */

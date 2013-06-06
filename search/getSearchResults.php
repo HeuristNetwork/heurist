@@ -174,15 +174,17 @@
 		return $record;
 	}
 
-
 	function updateCachedRecord($id) {
 		global $memcache;
 		$key = DATABASE . ":record:" . $id;
-		$record = $memcache->get($key);
-		if ($record) {	// will only update if previously cached
-			$record = loadBareRecordFromDB($id);
-			$memcache->set($key, $record);
-		}
+        try{
+		    $record = $memcache->get($key);
+		    if ($record) {	// will only update if previously cached
+			    $record = loadBareRecordFromDB($id);
+			    $memcache->set($key, $record);
+		    }
+        }catch(Exception $e){
+        }
 	}
 
 	function loadRecordStub($id) {
