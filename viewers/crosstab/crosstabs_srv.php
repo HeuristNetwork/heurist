@@ -1,5 +1,30 @@
 <?php
 
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+*   Corsstabs server side DB requests
+*
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://sydney.edu.au/heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+*/
+
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
@@ -29,10 +54,10 @@ print json_encode($response);
 exit();
 
 /**
-* put your comment there...
+* find min amd max value for given detail type
 *
 * @param mixed $mysqli
-* @param mixed $params
+* @param mixed $params : dt - detail type id
 */
 function recordSearchMinMax($mysqli, $params){
 
@@ -71,10 +96,10 @@ function recordSearchMinMax($mysqli, $params){
 }
 
 /**
-* put your comment there...
+* finds the list of distict record IDs for given detail type "record pointer"
 *
 * @param mixed $mysqli
-* @param mixed $params
+* @param mixed $params:  dt
 */
 function recordSearchDistictPointers($mysqli, $params){
 
@@ -108,7 +133,18 @@ function recordSearchDistictPointers($mysqli, $params){
    return $response;
 }
 
-
+/**
+* main request to find crosstab data
+* 
+* @param mixed $mysqli
+* @param mixed $params
+*               dt_page - detail type for page/groups
+*               dt_col - detail type for columns
+*               dt_row - detail type for rows
+*               agg_mode - aggreagation mode: sum, avg, count   
+*               agg_field - field for avg or sum mode
+*               q - current Heurist query
+*/
 function getCrossTab($mysqli, $params){
 
     $dt_page = @$params['dt_page'];

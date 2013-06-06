@@ -60,9 +60,15 @@
 		<link rel="stylesheet" type="text/css" href="../common/css/global.css">
 
 		<script type="text/javascript">
-				function onrowclick(rt_ID){
-					window.open("search.html?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID, "_blank");
-
+				function onrowclick(rt_ID, innewtab){
+                    var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                    if(innewtab){
+					    window.open("search.html?"+query, "_blank");
+                        return false;
+                    }else{
+                        top.HEURIST.search.executeQuery(query);
+                        window.close();
+                    }
 				}
 		</script>
 		<style>
@@ -90,7 +96,7 @@
 	<body class="popup">
 		<table class="tbcount" cellpadding="4" cellspacing="1" width="100%">
 		 	<tr>
-				<th>ID</th><th>&nbsp;</th><th align='left' style="padding-left: 10px;">Record type</th><th>Count</th>
+				<th>ID</th><th>&nbsp;</th><th align='left' style="padding-left: 10px;">Record type</th><th width="20" align="center"></th><th>Count</th>
 			</tr>
 <?php
 	/*****DEBUG****///print("QUERY:".$query);
@@ -105,7 +111,7 @@
 
 		$img = "<img src='../common/images/16x16.gif' title='$rectypeTitle' ".$rectypeImg." class='rft' />";
 
-		echo "<tr class='row' onclick='{onrowclick($rt_ID)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td align='center'>".$row[1]."</td></tr>";
+		echo "<tr class='row' onclick='{onrowclick($rt_ID, false)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td><a href='#' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td><td align='center'>".$row[1]."</td></tr>";
 
 	}//end while
 ?>
