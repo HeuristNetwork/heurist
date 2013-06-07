@@ -47,16 +47,16 @@ $dbHost = ""; // leave blank for localhost
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
-$dbAdminUsername = ""; // required
-$dbAdminPassword = ""; //required
+$dbAdminUsername = "root"; // required
+$dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
 // MySQL user with readonly access on this database server
 // For example, if there is a user account "readonly" with a password "readonlypwd", then you would use:
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
 // Password cannot be null
-$dbReadonlyUsername = ""; // required
-$dbReadonlyPassword = ""; //required
+$dbReadonlyUsername = "root"; // required
+$dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
 // from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
