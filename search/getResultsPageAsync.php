@@ -119,6 +119,7 @@ if (@$collected) {
 list($usec, $sec) = explode(' ', microtime());
 $ptime = $sec + $usec;//parse time
 /*****DEBUG****///error_log("query from asynch ".print_r($query,true));
+
 $res = mysql_query($query);
 if (mysql_error()) {
 	error_log("queryError in getResultsPageAsync -".mysql_error());

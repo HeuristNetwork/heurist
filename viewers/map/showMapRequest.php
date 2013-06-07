@@ -55,13 +55,17 @@
 	if (array_key_exists('layers', $request)) { //special mode - load ALL image layers and kml records only - for general drop down list on map
 
 		$request['ver'] = "1";
-		$request['q'] = "type:".$imagelayerRT.",".$KMLlayerRT;
+		$request['q'] = "type:".$imagelayerRT;
+        if($KMLlayerRT){
+            $request['q'] = $request['q'].",".$KMLlayerRT;
+        }
 		$search_type = BOTH;
 
 	}else{
 
-		if (! @$request['q']  ||  (@$request['ver'] && intval(@$request['ver']) < SEARCH_VERSION))
-		construct_legacy_search();      // migration path
+		if (! @$request['q']  ||  (@$request['ver'] && intval(@$request['ver']) < SEARCH_VERSION)){
+		        construct_legacy_search();      // migration path
+        }
 
 		if (@$request['w'] && ($request['w'] == 'B'  ||  $request['w'] == 'bookmark'))
 			$search_type = BOOKMARK;	// my bookmarks
@@ -82,9 +86,9 @@
 
 	// find all matching records
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
-	$query = REQUEST_to_query("select $cols ", $search_type);
+	$query = REQUEST_to_query("select $cols ", $search_type, $request);
 
-/*****DEBUG****/// error_log("query=".$query);
+/*****DEBUG****///error_log("query=".$query);
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>".$search_type."<<<<<<".$query);
 	$res = mysql_query($query);
@@ -324,11 +328,16 @@ if(mysql_error()) {
 
 	}//count($imageLayers)>0
 
+
+    $timeObjects = array();
+
+    if(!@$request['layers'])
+    {
+
 	// Find time extents -- must have at least a start time (end time is optional)
 
 	// check for specific details first
 	//saw TODO; modify this for handle durations with a start or end date
-	$timeObjects = array();
 	if (defined('DT_START_DATE') && defined('DT_END_DATE') && $bibIDs && count($bibIDs)>0){
 
 		$squery = "select START.dtl_RecID, START.dtl_Value, END.dtl_Value ".
@@ -347,12 +356,6 @@ if(mysql_error()) {
 		}
 	}
 
-
-//	$timeObjects = array();
-	//"
-	//select d.dtl_RecID, min(d.dtl_Value), max(d.dtl_Value), min(y.dtl_Value), max(y.dtl_Value)
-	//from recDetails b, recDetails y
-	//"
 	$anyDateBibIDs = array();  //no date enabled
 	foreach($bibIDs as $bibID) {
 		if (!array_key_exists($bibID, $timeObjects) ){
@@ -422,6 +425,8 @@ if(mysql_error()) {
 			$timeObjects[$bibID] = array($s, $e);
 		}
 	}//if
+
+    }//if not layer request
 
 	//sort($geoBibIDs);
 

@@ -1,13 +1,38 @@
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+*  Corsstabs UI class
+*
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://sydney.edu.au/heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+*/
+
 var crosstabsAnlysis;
 
 //aliases
 var Hul = top.HEURIST.util;
 
 /**
-* MimetypeManager - class for listing and searching of mime types
+*  CrosstabsAnlysis - class for crosstab analysis                                           b
 *
 * @author Artem Osmakov <osmakov@gmail.com>
-* @version 2012.1217
+* @version 2013.0530
 */
 function CrosstabsAnlysis(_database, _query, _query_domain) {
 
@@ -46,7 +71,9 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
     }
 
-    //update list of fields
+    /**
+    * update list of fields
+    */
     function _onRectypeChange(event){
 
         needServerRequest = true;
@@ -83,7 +110,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
 
     /**
-    *
+    * collapse/expand intervals
     */
     function showHideIntervals(name){
 
@@ -103,7 +130,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
     }
 
     /**
-    *
+    * remove all intervals for given type (page,col,row)
     */
     function clearIntervals(name){
          var $container = $('#'+name+'Intervals');
@@ -114,7 +141,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
     }
 
     /**
-    * create fortm specific for particular detail type
+    * create set of intervals specific for particular detail type
     */
     function _resetIntervals(event){
 
@@ -235,6 +262,9 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
          renderIntervals(name);
     }
 
+    /**
+    * create intervals
+    */
     function calculateIntervals(name, count)
     {
         if(fields3[name].type=="float" || fields3[name].type=="integer")
@@ -309,8 +339,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
     }
 
     /**
-    *
-    *
+    * render intervals (create divs)
     */
     function renderIntervals(name){
 
@@ -601,6 +630,9 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
     }
 
+    /**
+    * request to server for crosstab data
+    */
     function _doRetrieve(){
 /*
 use `hdb_dos_3`;
@@ -763,7 +795,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
     }
 
     /**
-    *
+    * render crosstab data as set of tables
     */
     function doRender(){
 
@@ -857,6 +889,9 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
             that.setMode(2);
     }
 
+    /**
+    * render particular page (group)
+    */
     function doRenderPage(pageName, records){
 
 //fields3 {column:{field:0, type:'', values:[], intervals:[]}
@@ -1405,6 +1440,9 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
         return selObj;
     }
 
+    /**
+    *
+    */
     function getPlainTermsList(datatype, termIDTree, headerTerms) {
         //var selObj = Hul.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 

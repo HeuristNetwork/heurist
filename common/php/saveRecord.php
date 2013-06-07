@@ -317,6 +317,7 @@
 
             $firstDetail = true;
             foreach ($pairs as $bdID => $val) {
+
                 if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
                     if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid (non integer) id so skip it
                     // check detail exist for the given record
@@ -334,13 +335,16 @@
                         $bdID = false; // fail test differently to signal translate
                     }
                 }else {	// simple case: this is a new detail (no existing dtl_ID) it assumes an array index number
-                    if ($bdID != intval($bdID)) continue;  //bd155  is not equal to 155 while if this is an array index $bdID is numeric
+
+                    if ($bdID != intval($bdID)) {
+                            continue;  //bd155  is not equal to 155 while if this is an array index $bdID is numeric
+                    }
                     $bdID = "";//signal insert
                 }
                 $val = trim($val);
 
                 $bdVal = $bdFileID = $bdGeo = "NULL";
-                if($modeImport!=2){ //import without check of record type structure
+                if(false && $modeImport!=2){ //import without check of record type structure
                     //check max limit constraints
                     if ( ! array_key_exists($bdtID, $repeats)) {//if no entry in repeats then extra detail
                         /*****DEBUG****///error_log("non rectype detail type $bdtID found");
@@ -357,6 +361,7 @@
                         }
                     }
                 }
+
 
                 switch ($dtyVarieties[$bdtID]) {
                     case "integer":  // these should no logner exist, retained for backward compatibility
@@ -385,6 +390,7 @@
                             if ($bdID) array_push($ignoreIDs, $bdID);
                             continue;
                         }
+
                         $bdVal = "'" . mysql_real_escape_string($val) . "'";
                         break;
 

@@ -760,7 +760,9 @@ class FieldPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true)." type = ".print_r($this->field_type,true));
 
-		$match_value = is_numeric($this->value)? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
+        $isnumericvalue = is_numeric($this->value);
+
+		$match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
 
 		if ($this->parent->exact  ||  $this->value === "") {	// SC100
 			$match_pred = " = $match_value";
@@ -771,6 +773,11 @@ class FieldPredicate extends Predicate {
 		} else {
 			$match_pred = " like '%".mysql_real_escape_string($this->value)."%'";
 		}
+        if($isnumericvalue){
+            $match_pred_for_term = " = $match_value";
+        }else{
+            $match_pred_for_term = " = trm.trm_ID";
+        }
 
 		$timestamp = strtotime($this->value);
 		if ($timestamp) {
@@ -793,12 +800,12 @@ class FieldPredicate extends Predicate {
 		return $not . 'exists (select * from recDetails rd '
 		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
 		                        . 'left join Records link on rd.dtl_Value=link.rec_ID '
-		                        . 'left join defTerms trm on trm.trm_Label '. $match_pred . " "
+		                        . (($isnumericvalue)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
 		                            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
 		                            . ' and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
 		                                      .'link.rec_Title ' . $match_pred . ', '
 		                                      .'if(rdt.dty_Type in ("enum","relationtype"), '
-		                                      .'rd.dtl_Value = trm.trm_ID, '
+		                                      .'rd.dtl_Value '.$match_pred_for_term.', '
 		                       . ($timestamp ? 'if(rdt.dty_Type = "date", '
 		                                         .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.dtl_Value ' . $match_pred . ')'
