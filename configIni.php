@@ -17,6 +17,7 @@
 /**
 * configutration file for a heurist installation
 *
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -64,12 +65,7 @@ $dbPrefix = "hdb_"; // strongly recommended
 // If the users of this server nearly always use a shared database eg. a workgroup database of web bookmarks, bibliographic or other research data,
 // specify its name here. DO NOT include the prefix, this will be added automatically.
 // If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
-$defaultDBname = ""; // may be left blank, should not include prefix (see previous))
-
-// enter the server name or IP address of your Memcached server, blank --> localhost
-$memcachedHost = ""; // required
-// enter the port of your Memcached server, blank --> 11211
-$memcachedPort = ""; // required
+$defaultDBname = "ExampleDB"; // may be left blank, should not include prefix (see previous))
 
 // The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
 // this address will allow heurist to request content through the firewall for general Internet URI's
