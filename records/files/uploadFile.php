@@ -460,11 +460,14 @@
 	*/
 	function register_external($filejson)
 	{
+        if($filejson){
+            $filejson = str_replace('\\"','"',$filejson);
+        }
 		$filedata = json_decode($filejson, true);
 
 		//DEBUG
 		/*****DEBUG****///error_log("1.>>>>>".$filedata);
-		/*****DEBUG****///error_log("2.>>>>>".print_r($filedata, true));
+		/*****DEBUG****///error_log("is_array".is_array($filedata)." 2.>>>>>".print_r($filedata, true));
 
 
 		if(!is_array($filedata)){ //can't parse - assume this is URL - old way

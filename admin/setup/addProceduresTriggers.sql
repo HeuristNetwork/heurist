@@ -67,7 +67,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 
 		select rec_RecTypeID into rectype from Records where rec_ID = recID;
 
-		select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
 			from Details, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
@@ -114,7 +114,7 @@ DROP function IF EXISTS `simple_hash`$$
 		declare non_resource_fields varchar(4095);
 		declare author_fields varchar(4095);
 		select rec_RecTypeID into rectype from Records where rec_ID = recID;
-		select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
 			from Details, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
@@ -438,7 +438,7 @@ DELIMITER $$
 	TRIGGER `insert_Details_precis_trigger`
 	BEFORE INSERT ON `recDetails`
 	FOR EACH ROW
-		begin set NEW.dtl_ValShortened = ifnull(liposuction(NEW.dtl_Value), ''); end$$
+		begin set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), ''); end$$
 
 DELIMITER ;
 DELIMITER $$
@@ -492,7 +492,7 @@ DELIMITER $$
 		if asbinary(NEW.dtl_Geo)=asbinary(OLD.dtl_Geo) then
 			set NEW.dtl_Geo = OLD.dtl_Geo;
 		end if;
-		set NEW.dtl_ValShortened = ifnull(liposuction(NEW.dtl_Value), '');
+		set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), '');
 	end$$
 
 DELIMITER ;

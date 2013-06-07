@@ -771,6 +771,7 @@
     }
     class BibDetailFileInput extends BibDetailInput {
         function convertPostToMysql($postVal) {
+
             //artem
             if(is_numeric($postVal)){  //this is old way - ulf_ID
                 return array("dtl_UploadedFileID" => $postVal);
