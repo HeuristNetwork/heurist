@@ -131,7 +131,7 @@ $memcache = new Memcache;
 $memcache->addServer($memcachedHost,MEMCACHED_PORT);
 
 define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/"); // Heurist Installation which contains reference structure definitions (registered DB # 3)
-define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3-dev/"); //@todo: CHANGE TP h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
+define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/"); //@todo: CHANGE TO h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 define('HEURIST_SYS_GROUP_ID', 1); // ID of Heurist System User Group which has special privileges - deprecated, although more generally group 1 on every database is the Database Managers group
 /*****DEBUG****///error_log("in initialise dbHost = $dbHost");
 //test db connect valid db

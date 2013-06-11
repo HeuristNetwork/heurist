@@ -15,7 +15,7 @@
 */
 
 /**
-* getCurrentVersion.php - requests code and database version from HeuristScholar.org   
+* getCurrentVersion.php - requests code and database version from HeuristScholar.org
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -41,7 +41,11 @@
         exit();
     }
 
-//
+/**
+* return the date of last check if it is less than 7 days, otherwise it returns null
+*
+* @param mixed $date_and_version
+*/
 function getLastCheckedVersion($date_and_version){
 
     if($date_and_version){
@@ -52,18 +56,39 @@ function getLastCheckedVersion($date_and_version){
                 $version_last_check = $arr[1];
 
                 //debug  $date_last_check = "2013-02-10";
+                if(strtotime($date_last_check) && checkVersionValid($version_last_check)){
+                    $days =intval((time()-strtotime($date_last_check))/(3600*24));
 
-                $days =intval((time()-strtotime($date_last_check))/(3600*24));
-
-                if(intval($days)<7){
-                    return $date_and_version;
+                    if(intval($days)<7){
+                        return $date_and_version;
+                    }
                 }
             }
     }
     return null; //version check is outdated or not performed at all
 }
-
 //
+function checkVersionValid($version){
+
+    $current_version = explode("|", $version);
+
+    if (count($current_version)>0)
+    {
+                $curver = explode(".", $current_version[0]);
+                if( count($curver)>=2 && intval($curver[0])>0 && is_numeric($curver[1]) && intval($curver[1])>=0 ){
+                    return true;
+                }
+    }
+
+    return false;
+
+}
+
+/**
+* request for last version on INDEX server and compare it with current version
+*
+* @param mixed $version_in_session
+*/
 function checkVersionOnMainServer($version_in_session)
 {
         $version_last_check = getLastCheckedVersion($version_in_session);
@@ -87,13 +112,14 @@ function checkVersionOnMainServer($version_in_session)
 
         if($rawdata){
             //parse result
-            $current_version = explode("|", $rawdata);
-            if(count($current_version)>0)
+            if(checkVersionValid($rawdata))
             {
                 //debug $current_version[0] = "5.9.1 RC2";
 
+                $current_version = explode("|", $rawdata);
+
                 $curver = explode(".", $current_version[0]);
-                if(count($curver)>2){
+                if(count($curver)>=2){
                     $major = intval($curver[0]);
                     $subver = intval($curver[1]);
 

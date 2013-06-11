@@ -170,7 +170,7 @@ if (HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
 
     $current_stable_version = checkVersionOnMainServer(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['current_stable_version']);
 
-    if($current_stable_version!=@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['current_stable_version']){
+    if($current_stable_version && $current_stable_version!=@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['current_stable_version']){
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['current_stable_version'] = $current_stable_version;
     }
 }
