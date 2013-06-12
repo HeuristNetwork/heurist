@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>State Loading Example</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/param.js" type="text/javascript"></script>
+    <script src="../src/state.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+var tm;
+$(function() {
+    
+    // If you include the state.js file (or use timemap_full.pack.js)
+    // and have state information in the hash, it will be used for the configuration
+    
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                id: "artists",
+                title: "Artists",
+                theme: "orange",
+                // note that the lines below are now the preferred syntax
+                type: "basic",
+                options: {
+                    items: [
+                        {
+                          "start" : "1449",
+                          "end" : "1494-01-11",
+                          "point" : {
+                              "lat" : 43.7717,
+                              "lon" : 11.2536
+                           },
+                          "title" : "Domenico Ghirlandaio",
+                          "options" : {
+                            // set the full HTML for the info window
+                            "infoHtml": "<div class='custominfostyle'><b>Domenico Ghirlandaio</b> was a visual artist of some sort.</div>"
+                          }
+                        },
+                        {
+                          "start" : "1475",
+                          "end" : "1564",
+                          "point" : {
+                              "lat" : 43.6433,
+                              "lon" : 11.9875
+                           },
+                          "title" : "Michelangelo",
+                          "options" : {
+                            // use the default title/description info window
+                            "description": "Renaissance Man",
+                            "theme": "yellow"
+                          }
+                        }
+                    ]
+                }
+            }
+        ],
+        bandIntervals: [
+            Timeline.DateTime.DECADE, 
+            Timeline.DateTime.CENTURY
+        ]
+    });
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 300px; }
+    div#mapcontainer{ height: 300px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Loading State from the URL</h1>
+    In this example, we're getting the timemap state from the hash portion of the URL (the part after the "#"). This should work in all browsers the first time you come to the page, and in browsers that support the "onhashchange" event (IE8, FF3, Chrome), you should be able to use in-page links to set the state as well, e.g. <a href="#zoom=9&center=43.83,11.06&date=1500-01-21T12:15:49Z&selected=artists-1">#zoom=9&amp;center=43.83,11.06&amp;date=1500-01-21T12:15:49Z&amp;selected=1</a> (if you're using another browser, try clicking this link then reloading).<br><br>
+    You can also <a href="javascript:alert(tm.getStateUrl());">get the URL for the current state</a>.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

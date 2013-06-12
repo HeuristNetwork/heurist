@@ -1,0 +1,1707 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+		<title>Timemap.js 
+                v.2.0.1
+                : TimeMapTheme : JsDoc Reference</title>
+
+		<style type="text/css">
+			/* default.css */
+body {
+	font: 13px Verdana, Arial, sans-serif;
+    padding: 0;
+    margin: 15px;
+}
+
+.header {
+	clear: both;
+	background-color: #ccc;
+	padding: 8px;
+}
+a:link, a:visited {
+    color: #00A;
+}
+a:hover, a:active {
+    color: #00F;
+}
+h1 {
+	font-size: 150%;
+	font-weight: bold;
+	padding: 0;
+}
+h3.projectTitle {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+}
+h1.classTitle {
+	font-size:170%;
+	line-height:130%;
+}
+
+hr {
+	border: none 0;
+	border-top: 1px solid #627C9D;
+	height: 1px;
+    margin: 1em 0;
+}
+
+pre.code {
+	display: block;
+	padding: 8px;
+	border: 1px dashed #ccc;
+    overflow: auto;
+}
+
+#index {
+	float: left;
+	width: 220px;
+	position: absolute;
+    margin-bottom: 15px;
+	left: 8px;
+	background-color: #F3F3F3;
+	padding: 8px;
+}
+
+#content {
+	margin-left: 260px;
+	width: 600px;
+}
+
+#index img {
+    margin: 15px 0;
+    border: 1px solid #627C9D;
+}
+
+ul.classList {
+	list-style-type: none;
+	padding: 0;
+    margin: 0;
+	font-size: 11px;
+}
+
+ul.classList li {
+	padding: 0;
+	margin: 0 0 8px 0;
+}
+
+h2 , div.sectionTitle { 
+    font-weight: bold;
+	font-size: 18px;
+	padding: 15px 0 10px 0;
+    margin: 0;
+}
+div.sectionTitle {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #627C9D;
+}
+
+code {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+pre {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+div.toplinks {
+    font-size: 11px;
+    padding-top: 8px;
+}
+
+td.attributes, .fixedFont
+{
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+
+/* tables */
+.summaryTable {
+    text-align: left;
+	margin: 10px 0;
+	border: 1px solid #999999;
+	width: 100%;
+}
+.summaryTable th {
+	color: #FFFFFF;
+	background-color: #627C9D;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable th.param {
+	color: #000;
+	background-color: #F2F2F2;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable td {
+	border-top: #999999 1px solid;
+	vertical-align: top;
+    padding: 5px 10px;
+}
+.summaryTable.params {
+    width: auto;
+}
+.row0 {
+	background-color: #F2F2F2;
+}
+.row1 {
+	background-color: #FFFFFF;
+}
+
+ul.inheritsList
+{
+	list-style: square;
+	margin-left: 20px;
+	padding-left: 0;
+}
+
+.detailList dt
+{
+    float: left;
+    clear: both;
+	font-weight: bold;
+	margin-left: 0;
+}
+.detailList dd { 
+	padding-bottom: .5em;
+    margin-left: 7em; 
+}
+.detailList dd.tight {
+    padding-bottom: 0;
+}
+.membertitle {
+    font-size: 1.2em;
+    padding: .5em;
+    margin: 2.5em 0px 0.2em;
+    background: #EEF;
+    border-bottom: 3px double #999;
+}
+.membername {
+    font-weight: bold;
+}
+.datatype {
+    color: #999;
+}
+.paramname {
+    font-weight: bold;
+}
+.paramconfig {
+    color: #999;
+}
+.optional {
+	font-style: italic;
+}
+.defaultvalue {
+	font-style: italic;
+}
+
+.light, td.attributes, .light a:link, .light a:visited
+{
+	color: #777;
+	font-style: italic;
+}
+
+div.indexClass {
+    border-top: 1px solid #7F8FB1;
+    margin-bottom: .5em;
+}
+
+/* syntax coloring for examples */
+.KEYW {color: #339; font-weight: bold;}
+.COMM {color: #999; font-style: italic;}
+.NUMB {color: #933;}
+.STRN {color: #393;}
+.REGX {color: #993;}
+
+.fineprint
+{
+	text-align: right;
+	font-size: 10px;
+}
+		</style>
+	</head>
+
+	<body>
+<!-- ============================== header ================================= -->	
+		<!-- begin static/header.html -->
+		<div id="header">
+</div>
+		<!-- end static/header.html -->
+
+<!-- ============================== classes index ============================ -->
+		<div id="index">
+            <h3 class="projectTitle">Timemap.js 
+                v.2.0.1
+            </h3>
+            <div class="toplinks"><a href="../index.html">Class Index</a>
+| <a href="../files.html">File Index</a></div>
+            
+                <img src="../timemap_sq.jpg">
+            
+            
+			<!-- begin publish.classesIndex -->
+			<ul class="classList">
+	
+	<li><a href="../symbols/TimeMap.html">TimeMap</a></li>
+	
+	<li><a href="../symbols/TimeMap.dateParsers.html">TimeMap.dateParsers</a></li>
+	
+	<li><a href="../symbols/TimeMap.filters.html">TimeMap.filters</a></li>
+	
+	<li><a href="../symbols/TimeMap.intervals.html">TimeMap.intervals</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.html">TimeMap.loaders</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base.html">TimeMap.loaders.base</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base%23params.html">TimeMap.loaders.base#params</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.basic.html">TimeMap.loaders.basic</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.flickr.html">TimeMap.loaders.flickr</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.georss.html">TimeMap.loaders.georss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.gss.html">TimeMap.loaders.gss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.json.html">TimeMap.loaders.json</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.jsonp.html">TimeMap.loaders.jsonp</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.kml.html">TimeMap.loaders.kml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.metaweb.html">TimeMap.loaders.metaweb</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.progressive.html">TimeMap.loaders.progressive</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.remote.html">TimeMap.loaders.remote</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.xml.html">TimeMap.loaders.xml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loadManager.html">TimeMap.loadManager</a></li>
+	
+	<li><a href="../symbols/TimeMap.mapTypes.html">TimeMap.mapTypes</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.html">TimeMap.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.ExtendedDataParam.html">TimeMap.params.ExtendedDataParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.OptionParam.html">TimeMap.params.OptionParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.Param.html">TimeMap.params.Param</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.html">TimeMap.state</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.params.html">TimeMap.state.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.themes.html">TimeMap.themes</a></li>
+	
+	<li><a href="../symbols/TimeMap.util.html">TimeMap.util</a></li>
+	
+	<li><a href="../symbols/TimeMapDataset.html">TimeMapDataset</a></li>
+	
+	<li><a href="../symbols/TimeMapFilterChain.html">TimeMapFilterChain</a></li>
+	
+	<li><a href="../symbols/TimeMapItem.html">TimeMapItem</a></li>
+	
+	<li><a href="../symbols/TimeMapTheme.html">TimeMapTheme</a></li>
+	
+</ul>
+			<!-- end publish.classesIndex -->
+		</div>
+		
+		<div id="content">
+<!-- ============================== class title ============================ -->
+			<h1 class="classTitle">
+				
+				Class TimeMapTheme
+			</h1>
+
+<!-- ============================== class summary ========================== -->			
+            <dl class="detailList">
+            
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                    <dt>Defined in:</dt>
+                    <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_timemap.js.html">timemap.js</a></dd>
+                
+            
+                
+            </dl>
+
+            <p class="description">
+				Predefined visual themes for datasets, defining colors and images for
+map markers and timeline events. Note that theme is only used at creation
+time - updating the theme of an existing object won't do anything.
+			</p>
+            
+            
+
+<!-- ============================== constructor summary ==================== -->			
+			
+            <h2>Constructor</h2>
+                <div class="fixedFont">
+                    <b><a href="../symbols/TimeMapTheme.html#constructor">TimeMapTheme</a></b>(options)
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                </div>
+			
+            
+            
+
+
+<!-- ============================== static properties summary ===================== -->
+			
+				
+				
+			
+
+<!-- ============================== static methods summary ======================== -->
+			
+				
+				
+                    <h2>Static Methods</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Method</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                TimeMapTheme.<b><a href="../symbols/TimeMapTheme.html#.create">create</a></b>(theme, options)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Create a theme, based on an optional new or pre-set theme
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+
+
+<!-- ============================== instance properties summary ===================== -->
+			
+				
+				
+                    <h2>Fields</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Field</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#classicTape">classicTape</a></b>
+                <span class="datatype">:{Boolean}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Whether to use the "classic" style timeline event tape
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#color">color</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Default color in hex
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#eventColor">eventColor</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Background color for duration events
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#eventIcon">eventIcon</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Full URL for instant event icons
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#eventIconImage">eventIconImage</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Filename of instant event icon image
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#eventIconPath">eventIconPath</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Path to instant event icon directory
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#eventTextColor">eventTextColor</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Text color for duration events
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#fillColor">fillColor</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Fill color for polygons
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#fillOpacity">fillOpacity</a></b>
+                <span class="datatype">:{Number}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Opacity for polygon fill
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#icon">icon</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Icon image for marker placemarks
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#iconAnchor">iconAnchor</a></b>
+                <span class="datatype">:{Number[]}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Icon anchor for marker placemarks
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#iconShadow">iconShadow</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Icon shadow image for marker placemarks
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#iconShadowSize">iconShadowSize</a></b>
+                <span class="datatype">:{Number[]}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Icon shadow size for marker placemarks
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#iconSize">iconSize</a></b>
+                <span class="datatype">:{Number[]}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Icon size for marker placemarks
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#lineColor">lineColor</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Line color for polylines/polygons
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#lineOpacity">lineOpacity</a></b>
+                <span class="datatype">:{Number}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Opacity for polylines/polygons
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapTheme.html#lineWeight">lineWeight</a></b>
+                <span class="datatype">:{Number}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Line weight in pixels for polylines/polygons
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+
+<!-- ============================== instance methods summary ======================== -->
+			
+				
+				
+			
+            
+<!-- ============================== events summary ======================== -->
+			
+
+<!-- ============================== constructor details ==================== -->		
+			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Class Detail
+				</div>
+				
+				<div class="fixedFont membername">
+						<b>TimeMapTheme</b>(options)
+				</div>
+                
+                
+				
+                
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">options</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                A container for optional arguments
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>icon</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Icon image for marker placemarks
+                
+                    <div class="defaultvalue">Default: http://www.google.com/intl/en_us/mapfiles/ms/icons/red-dot.png</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>iconSize</td>
+            <td class="datatype">
+                
+                    {Number[]}
+                
+            </td>
+            <td width="100%">
+                Array of two integers indicating marker icon size as
+                                                     [width, height] in pixels
+                
+                    <div class="defaultvalue">Default: [32,32]</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>iconShadow</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Icon image for marker placemarks
+                
+                    <div class="defaultvalue">Default: http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>iconShadowSize</td>
+            <td class="datatype">
+                
+                    {Number[]}
+                
+            </td>
+            <td width="100%">
+                Array of two integers indicating marker icon shadow
+                                                     size as [width, height] in pixels
+                
+                    <div class="defaultvalue">Default: [59,32]</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>iconAnchor</td>
+            <td class="datatype">
+                
+                    {Number[]}
+                
+            </td>
+            <td width="100%">
+                Array of two integers indicating marker icon anchor
+                                                     point as [xoffset, yoffset] in pixels
+                
+                    <div class="defaultvalue">Default: [16,33]</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>color</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Default color in hex for events, polylines, polygons.
+                
+                    <div class="defaultvalue">Default: #FE766A</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>lineColor</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Color for polylines/polygons.
+                
+                    <div class="defaultvalue">Default: color</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>lineOpacity</td>
+            <td class="datatype">
+                
+                    {Number}
+                
+            </td>
+            <td width="100%">
+                Opacity for polylines/polygons.
+                
+                    <div class="defaultvalue">Default: 1</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>lineWeight</td>
+            <td class="datatype">
+                
+                    {Number}
+                
+            </td>
+            <td width="100%">
+                Line weight in pixels for polylines/polygons.
+                
+                    <div class="defaultvalue">Default: 2</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>fillColor</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Color for polygon fill.
+                
+                    <div class="defaultvalue">Default: color</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>fillOpacity</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Opacity for polygon fill.
+                
+                    <div class="defaultvalue">Default: 0.25</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>eventColor</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Background color for duration events.
+                
+                    <div class="defaultvalue">Default: color</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>eventTextColor</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Text color for events (null=Timeline default).
+                
+                    <div class="defaultvalue">Default: null</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>eventIconPath</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Path to instant event icon directory.
+                
+                    <div class="defaultvalue">Default: timemap/images/</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>eventIconImage</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Filename of instant event icon image.
+                
+                    <div class="defaultvalue">Default: red-circle.gif</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>eventIcon</td>
+            <td class="datatype">
+                
+                    {URL}
+                
+            </td>
+            <td width="100%">
+                URL for instant event icons.
+                
+                    <div class="defaultvalue">Default: eventIconPath+eventIconImage</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options.</span>classicTape</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to use the "classic" style timeline event tape
+                                                     (needs additional css to work - see examples/artists.html).
+                
+                    <div class="defaultvalue">Default: false</div>
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+                
+                
+                <dl class="detailList">
+					
+					
+					
+					
+                </dl>
+
+			</div>
+			
+
+<!-- ============================== static field details ========================== -->		
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+                
+				
+                    <div class="sectionTitle">Static Method Details</div>
+                    
+    <a name=".create"> </a>
+    <div class="fixedFont membertitle">
+    <span class="parent">TimeMapTheme.</span><span class="membername">create</span><span class="membersignature">(theme, options)</span>
+    
+    <span class="datatype">:{<a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Create a theme, based on an optional new or pre-set theme
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">theme</td>
+            <td class="datatype">
+                
+                    {<a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>|String}
+                
+            </td>
+            <td width="100%">
+                Existing theme to clone, or string key in <a href="../symbols/TimeMap.themes.html">TimeMap.themes</a>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional">options</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                Optional settings to overwrite - see <a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{<a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>}</span> Configured theme</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+            
+<!-- ============================== instance field details ========================== -->		
+			
+                
+				
+                    <div class="sectionTitle">Field Details</div>
+                    
+    <a name="classicTape"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">classicTape</span>
+    
+    <span class="datatype">:{Boolean}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Whether to use the "classic" style timeline event tape
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="color"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">color</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Default color in hex
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventColor"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventColor</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Background color for duration events
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventIcon"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventIcon</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Full URL for instant event icons
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventIconImage"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventIconImage</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Filename of instant event icon image
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventIconPath"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventIconPath</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Path to instant event icon directory
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventTextColor"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventTextColor</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Text color for duration events
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="fillColor"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">fillColor</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Fill color for polygons
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="fillOpacity"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">fillOpacity</span>
+    
+    <span class="datatype">:{Number}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Opacity for polygon fill
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="icon"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">icon</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Icon image for marker placemarks
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="iconAnchor"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">iconAnchor</span>
+    
+    <span class="datatype">:{Number[]}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Icon anchor for marker placemarks
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="iconShadow"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">iconShadow</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Icon shadow image for marker placemarks
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="iconShadowSize"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">iconShadowSize</span>
+    
+    <span class="datatype">:{Number[]}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Icon shadow size for marker placemarks
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="iconSize"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">iconSize</span>
+    
+    <span class="datatype">:{Number[]}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Icon size for marker placemarks
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="lineColor"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">lineColor</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Line color for polylines/polygons
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="lineOpacity"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">lineOpacity</span>
+    
+    <span class="datatype">:{Number}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Opacity for polylines/polygons
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="lineWeight"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">lineWeight</span>
+    
+    <span class="datatype">:{Number}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Line weight in pixels for polylines/polygons
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+			
+<!-- ============================== event details ========================= -->		
+			
+		
+<!-- ============================== footer ================================= -->
+		<div class="fineprint" style="clear:both">
+			&copy;2010 Nick Rabinowitz<br />
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Sat Aug 06 2011 13:40:08 GMT-0700 (PDT)
+		</div>
+	</body>
+</html>

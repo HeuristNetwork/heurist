@@ -1,0 +1,62 @@
+.context .highlight { background: #FFFF70; }
+.searchheading { font-size: 130%; font-weight: bold; }
+.summary { float: right; font-style: italic; width: 300px; margin-left: 10px; }
+.suggestion { font-size: 100%; padding: 0 0 15px 0; }
+.results { font-size: 100%; }
+.category { color: #999999; }
+.sorting { text-align: right; }
+
+.result_title { font-size: 100%; font-weight: bold; }
+.description { font-size: 100%; color: #008000; }
+.context { font-size: 100%; color: #808080; }
+.infoline { font-size: 80%; font-style: normal; color: #808080;}
+
+.zoom_searchform { font-size: 100%; }
+.zoom_results_per_page { font-size: 80%; margin-left: 10px; }
+.zoom_match { font-size: 80%; margin-left: 10px;}
+.zoom_categories { font-size: 80%; }
+.zoom_categories ul { display: inline; margin: 0px; padding: 0px;}
+.zoom_categories li { display: inline; margin-left: 15px; list-style-type: none; }
+
+.cat_summary ul { margin: 0px; padding: 0px; display: inline; }
+.cat_summary li { display: inline; margin-left: 15px; list-style-type: none; }
+
+input.zoom_button {  }
+input.zoom_searchbox {  }
+
+.result_image { float: left; display: block; }
+.result_image img { margin: 10px; width: 80px; border: 0px; }
+
+.result_block, .result_altblock {
+	clear: left;
+	padding: 4px 0 15px 50px;
+}
+
+.result_pages {
+	font-size: 100%;
+	margin: 15px 0;
+}
+.result_pagescount { font-size: 100%; }
+
+.searchtime { font-size: 80%; }
+
+.recommended
+{
+	background: #DFFFBF;
+	border-top: 1px dotted #808080;
+	border-bottom: 1px dotted #808080;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+.recommended_heading { float: right; font-weight: bold; }
+.recommend_block { margin-top: 15px; margin-bottom: 15px; clear: left; }
+.recommend_title { font-size: 100%; }
+.recommend_description { font-size: 100%; color: #008000; }
+.recommend_infoline { font-size: 80%; font-style: normal; color: #808080;}
+.recommend_image { float: left; display: block; }
+.recommend_image img { margin: 10px; width: 80px; border: 0px; }
+
+.result_metaname_class, .result_metavalue_class,
+.result_metaname_id, .result_metavalue_id {
+	display: none;
+}

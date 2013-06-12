@@ -122,13 +122,13 @@ define('READONLY_DBUSERPSWD', $dbReadonlyPassword);
 define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix'] ? $_REQUEST['prefix'] : $dbPrefix)); //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
 
 // set up memcached server(s) connection defines
-define('MEMCACHED_HOST', $memcachedHost ? $memcachedHost : "localhost");
-define('MEMCACHED_PORT', $memcachedPort ? $memcachedPort : "11211");
+define('MEMCACHED_HOST', isset($memcachedHost) && $memcachedHost ? $memcachedHost : "localhost");
+define('MEMCACHED_PORT', isset($memcachedPort) && $memcachedPort ? $memcachedPort : "11211");
 // this was a global already anyway (in getSearchResults.php)
 $memcache = new Memcache;
 // with addServer, connection is not established until actually used
 // the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
-$memcache->addServer($memcachedHost,MEMCACHED_PORT);
+$memcache->addServer(MEMCACHED_HOST, MEMCACHED_PORT);
 
 define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/"); // Heurist Installation which contains reference structure definitions (registered DB # 3)
 define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/"); //@todo: CHANGE TO h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)

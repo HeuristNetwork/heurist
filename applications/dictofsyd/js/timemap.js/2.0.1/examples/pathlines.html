@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Flickr Photos with Pathlines</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/loaders/json.js" type="text/javascript"></script>
+    <script src="../src/loaders/flickr.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    
+var tm;
+
+$(function() {
+
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                title: "Photos",
+                id: "photos",
+                theme: "green",
+                // load JSON data from Flickr - see the Flickr API for more info
+                type: "flickr",
+                options: {
+                    // Thanks to Ken-ichi for his geotagged photos
+                    url: "http://www.flickr.com/services/feeds/geo/?format=json&id=18024068@N00&jsoncallback=?"
+                }
+            }
+        ], 
+        bandIntervals: [
+            Timeline.DateTime.DAY, 
+            Timeline.DateTime.WEEK
+        ],
+        // make pathlines. This is accomplished by adding a new filter chain with a new filter
+        dataDisplayedFunction: function(tm) {
+            // new filter chain for map lines
+            tm.addFilterChain("pathlines",
+                // true condition: add a pathline
+                function(item) {
+                    if (!item.pathline && !item.skip) {
+                        // obviously this is Google-specific, but I think it could be abstracted
+                        item.pathline = new GPolyline([
+                            item.opts.infoPoint.toProprietary('google'), 
+                            item.next.opts.infoPoint.toProprietary('google')
+                        ], "#0000CC");
+                        tm.getNativeMap().addOverlay(item.pathline);
+                    }
+                },
+                // false condition: remove a pathline
+                function(item) {
+                    if (item.pathline) {
+                        tm.getNativeMap().removeOverlay(item.pathline);
+                        item.pathline = null;
+                    }
+                }
+            );
+            // define the filter that creates the pathlines
+            tm.addFilter("pathlines", function(item) {
+                if (!item.next && item.event && !item.skip) {
+                    // use the Timeline sequential iterator
+                    var i = tm.timeline.getBand(0).getEventSource().getEventIterator(item.event.getStart(), new Date());
+                    FINDNEXT: {
+                        while (!item.next) {
+                            if (i.hasNext()) {
+                                var next = i.next().item;
+                                // if the next one's taken we can skip
+                                if (next.taken) {
+                                    item.skip = true;
+                                    break FINDNEXT;
+                                }
+                                // skip missing placemarks at the same location
+                                if (next.placemark && !item.opts.infoPoint.equals(next.opts.infoPoint)) {
+                                    item.next = next;
+                                    next.taken = true;
+                                }
+                            }
+                            else break FINDNEXT;
+                        }
+                    }
+                }
+                return (item.next && item.placemarkVisible && item.next.placemarkVisible);
+            });
+            // invoke the filter once data is displayed
+            tm.filter("pathlines");
+            // update map on timeline scroll
+            tm.timeline.getBand(0).addOnScrollListener(function() {
+                tm.filter("pathlines");
+            });
+        }
+    });
+    
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 300px; }
+    div#mapcontainer{ height: 400px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Flickr Photos with Pathlines</h1>
+    This example loads geotagged Flickr photos (thanks, <a href="http://flickr.com/photos/ken-ichi/">Ken-ichi</a>!), displays them on the map and timeline, and draws lines between them sequentially, creating a rough route map (you may need to zoom in to see the effect). The lines are created using a filter that creates the line elements and shows or hides them based on the timeline location.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,103 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/* 
+<span class='line'>  2</span>  * Timemap.js Copyright 2010 Nick Rabinowitz.
+<span class='line'>  3</span>  * Licensed under the MIT License (see LICENSE.txt)
+<span class='line'>  4</span>  */</span><span class="WHIT">
+<span class='line'>  5</span> 
+<span class='line'>  6</span> </span><span class="COMM">/**
+<span class='line'>  7</span>  * @fileOverview
+<span class='line'>  8</span>  * Flickr Loader
+<span class='line'>  9</span>  *
+<span class='line'> 10</span>  * @author Nick Rabinowitz (www.nickrabinowitz.com)
+<span class='line'> 11</span>  */</span><span class="WHIT">
+<span class='line'> 12</span> </span><span class="WHIT"> 
+<span class='line'> 13</span> </span><span class="COMM">// for JSLint</span><span class="WHIT">
+<span class='line'> 14</span> </span><span class="COMM">/*global TimeMap */</span><span class="WHIT">
+<span class='line'> 15</span> 
+<span class='line'> 16</span> </span><span class="COMM">/**
+<span class='line'> 17</span>  * @class
+<span class='line'> 18</span>  * Flickr loader: Load JSONP data from Flickr. 
+<span class='line'> 19</span>  *
+<span class='line'> 20</span>  * &lt;p>This is a loader for Flickr data. You probably want to use it with a
+<span class='line'> 21</span>  * URL for the Flickr Geo Feed API: &lt;a href="http://www.flickr.com/services/feeds/geo/">http://www.flickr.com/services/feeds/geo/&lt;/a>&lt;/p>
+<span class='line'> 22</span>  *
+<span class='line'> 23</span>  * &lt;p>The loader takes a full URL, minus the JSONP callback function.&lt;/p>
+<span class='line'> 24</span>  *
+<span class='line'> 25</span>  * @augments TimeMap.loaders.jsonp
+<span class='line'> 26</span>  * @requires loaders/json.js
+<span class='line'> 27</span>  *
+<span class='line'> 28</span>  * @example
+<span class='line'> 29</span> TimeMap.init({
+<span class='line'> 30</span>     datasets: [
+<span class='line'> 31</span>         {
+<span class='line'> 32</span>             title: "Flickr Dataset",
+<span class='line'> 33</span>             type: "flickr",
+<span class='line'> 34</span>             options: {
+<span class='line'> 35</span>                 // This is just the latest geotagged photo stream - try adding
+<span class='line'> 36</span>                 // an "id" or "tag" or "photoset" parameter to get what you want
+<span class='line'> 37</span>                 url: "http://www.flickr.com/services/feeds/geo/?format=json&jsoncallback=?"
+<span class='line'> 38</span>             }
+<span class='line'> 39</span>         }
+<span class='line'> 40</span>     ],
+<span class='line'> 41</span>     // etc...
+<span class='line'> 42</span> });
+<span class='line'> 43</span>  * @see &lt;a href="../../examples/pathlines.html">Flickr Pathlines Example&lt;/a>
+<span class='line'> 44</span>  *
+<span class='line'> 45</span>  * @param {Object} options          All options for the loader
+<span class='line'> 46</span>  * @param {String} options.url          Full JSONP url of Flickr feed to load
+<span class='line'> 47</span>  * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.jsonp})
+<span class='line'> 48</span>  */</span><span class="WHIT">
+<span class='line'> 49</span> </span><span class="NAME">TimeMap.loaders.flickr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">options</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 50</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">TimeMap.loaders.jsonp</span><span class="PUNC">(</span><span class="NAME">options</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 51</span> </span><span class="WHIT">    </span><span class="WHIT">
+<span class='line'> 52</span> </span><span class="WHIT">    </span><span class="COMM">// set ajax settings for loader</span><span class="WHIT">
+<span class='line'> 53</span> </span><span class="WHIT">    </span><span class="NAME">loader.opts.jsonp</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'jsoncallback'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 54</span> </span><span class="WHIT">    
+<span class='line'> 55</span>     </span><span class="COMM">/**
+<span class='line'> 56</span>      * Preload function for Flickr feeds
+<span class='line'> 57</span>      * @name TimeMap.loaders.flickr#preload
+<span class='line'> 58</span>      * @function
+<span class='line'> 59</span>      * @parameter {Object} data     Data to preload
+<span class='line'> 60</span>      * @return {Array} data         Array of item data
+<span class='line'> 61</span>      */</span><span class="WHIT">
+<span class='line'> 62</span> </span><span class="WHIT">    </span><span class="NAME">loader.preload</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">data</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 63</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">data.items</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 65</span> </span><span class="WHIT">    
+<span class='line'> 66</span>     </span><span class="COMM">/**
+<span class='line'> 67</span>      * Transform function for Flickr feeds
+<span class='line'> 68</span>      * @name TimeMap.loaders.flickr#transform
+<span class='line'> 69</span>      * @function
+<span class='line'> 70</span>      * @parameter {Object} data     Data to transform
+<span class='line'> 71</span>      * @return {Object} data        Transformed data for one item
+<span class='line'> 72</span>      */</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="WHIT">    </span><span class="NAME">loader.transform</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">data</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="WHIT">        </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">item</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 75</span> </span><span class="WHIT">            </span><span class="NAME">title</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data.title</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 76</span> </span><span class="WHIT">            </span><span class="NAME">start</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data.date_taken</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 77</span> </span><span class="WHIT">            </span><span class="NAME">point</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="WHIT">                </span><span class="NAME">lat</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data.latitude</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 79</span> </span><span class="WHIT">                </span><span class="NAME">lon</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data.longitude</span><span class="WHIT">
+<span class='line'> 80</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="WHIT">            </span><span class="NAME">options</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT">                </span><span class="NAME">description</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">data.description</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="WHIT">                    </span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/&gt;/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">">"</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 84</span> </span><span class="WHIT">                    </span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/&lt;/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"&lt;"</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 85</span> </span><span class="WHIT">                    </span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/&quot;/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'"'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 86</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 87</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 88</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">options.transformFunction</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="WHIT">            </span><span class="NAME">item</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">options.transformFunction</span><span class="PUNC">(</span><span class="NAME">item</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">item</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 93</span> 
+<span class='line'> 94</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 96</span> </span></pre></body></html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Basic Example</title><script src="http://openlayers.org/api/OpenLayers.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(openlayers)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+var tm;
+$(function() {
+    
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                id: "artists",
+                title: "Artists",
+                theme: "orange",
+                // note that the lines below are now the preferred syntax
+                type: "basic",
+                options: {
+                    items: [
+                        {
+                          "start" : "1449",
+                          "end" : "1494-01-11",
+                          "point" : {
+                              "lat" : 43.7717,
+                              "lon" : 11.2536
+                           },
+                          "title" : "Domenico Ghirlandaio",
+                          "options" : {
+                            // set the full HTML for the info window
+                            "infoHtml": "<div class='custominfostyle'><b>Domenico Ghirlandaio</b> was a visual artist of some sort.</div>"
+                          }
+                        },
+                        {
+                          "start" : "1452",
+                          "end" : "1519",
+                          "point" : {
+                              "lat" : 43.8166666667,
+                              "lon" : 10.7666666667
+                           },
+                          "title" : "Leonardo da Vinci",
+                          "options" : {
+                            // load HTML from another file via AJAX
+                            // Note that this may break in IE if you're running it with
+                            // a local file, due to cross-site scripting restrictions
+                            "infoUrl": "ajax_content.html",
+                            "theme": "red"
+                          }
+                        },
+                        {
+                          "start" : "1475",
+                          "end" : "1564",
+                          "point" : {
+                              "lat" : 43.6433,
+                              "lon" : 11.9875
+                           },
+                          "title" : "Michelangelo",
+                          "options" : {
+                            // use the default title/description info window
+                            "description": "Renaissance Man",
+                            "theme": "yellow"
+                          }
+                        }
+                    ]
+                }
+            }
+        ],
+        bandIntervals: [
+            Timeline.DateTime.DECADE, 
+            Timeline.DateTime.CENTURY
+        ]
+    });
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer { height: 300px; }
+    div#mapcontainer { height: 300px; }
+    div.olFramedCloudPopupContent { width: 300px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Basic Example, OpenLayers</h1>
+    This is the basic example using the OpenLayers API. OpenLayers is (in my opinion) neither as robust nor as fast as some of the commercial map providers, but it's very flexible and you can run it locally if you have your own tilesets.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

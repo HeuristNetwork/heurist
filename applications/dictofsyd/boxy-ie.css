@@ -1,0 +1,11 @@
+/* IE6+7 hacks for the border. IE7 should support this natively but fails in conjuction with modal blackout bg. */
+/* NB: these must be absolute paths or URLs to your images */
+.boxy-wrapper .top-left { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/relbrowser-kj/images/bg-picbox-top-left.png'); }
+.boxy-wrapper .top-right { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/relbrowser-kj/images/bg-picbox-top-right.png'); }
+.boxy-wrapper .bottom-right { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/relbrowser-kj/images/bg-picbox-bottom-right.png'); }
+.boxy-wrapper .bottom-left { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/relbrowser-kj/images/bg-picbox-bottom-left.png'); }
+
+.boxy-wrapper .top { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale',src='/relbrowser-kj/images/bg-picbox-top.png'); }
+.boxy-wrapper .bottom { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale',src='/relbrowser-kj/images/bg-picbox-bottom.png'); }
+.boxy-wrapper .left { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale',src='/relbrowser-kj/images/bg-picbox-left.png'); }
+.boxy-wrapper .right { background: none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale',src='/relbrowser-kj/images/bg-picbox-right.png'); }
