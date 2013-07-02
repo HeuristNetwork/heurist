@@ -2356,7 +2356,9 @@ s
     top.HEURIST.edit.inputs.BibDetailDropdownInput = function() {top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments);};
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
-    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { return input? (input.selectedIndex !== -1 && input.options[input.selectedIndex].value) : ""; };
+    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { 
+            return (input && input['selectedIndex']!=undefined && input.selectedIndex !== -1)? (input.options[input.selectedIndex].value) : ""; 
+    };
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.setReadonly = function(readonly) {

@@ -112,6 +112,13 @@
                 <button style="width:60px;" onclick="window.close(null)">Cancel</button>
                 <br>&nbsp;<br>&nbsp;<br>
             </div>
+            <div style="text-align:left; padding-top:10px; padding-left: 10px;display: none;" >
+                Canonical Mask:&nbsp;
+                <input maxlength="500" id="rty_CanonincalMask" style="width:350;"/> &nbsp;&nbsp;
+                <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(2)">make canonic</button>
+                <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(3)">make text</button>
+                <br>&nbsp;<br>&nbsp;<br>
+            </div>
 
             <hr>
 
@@ -141,8 +148,10 @@
             //
             function onSave()
             {
-                var edMask = document.getElementById('rty_TitleMask');
-                window.close(edMask.value);
+                window.editRectypeTitle.doCheck(function(){
+                    var edMask = document.getElementById('rty_TitleMask');
+                    window.close(edMask.value);
+                });
             }
 
             //

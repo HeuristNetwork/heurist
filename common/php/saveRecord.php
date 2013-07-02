@@ -169,9 +169,10 @@
 
         // calculate title, do an update
         //	$log .= "- filling titlemask ";
-        $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$rectype");  $mask = $mask[0];
+        $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$rectype");  
+        $mask = $mask[0];
+        
         $title = fill_title_mask($mask, $recordID, $rectype);
-
         /*****DEBUG****///error_log("DEBUG >>>>>>MASK=".$mask."=".$title);
 
         if ($title) {

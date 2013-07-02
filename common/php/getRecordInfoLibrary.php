@@ -91,6 +91,8 @@
 */
 require_once (dirname(__FILE__) . '/imageLibrary.php');
 require_once (dirname(__FILE__) . '/../../records/files/uploadFile.php');
+require_once('utilsTitleMask.php');
+
 $lastModified = null;
 $dbID = intval(HEURIST_DBID);
 /**
@@ -892,6 +894,11 @@ function getRectypeDef($rtID) {
                         " where rty_ID=$rtID".
                         " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
     $rtDef = mysql_fetch_row($res);
+    
+    //special behaviour for rty_TitleMask
+    //it stores as cocept codes - need to convert it to human readable string
+    $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
+    
     return $rtDef;
 }
 /**
@@ -1064,11 +1071,15 @@ function getAllRectypeStructures($useCachedData = false) {
     $query.= " from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID" . " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
     $res = mysql_query($query);
     while ($row = mysql_fetch_row($res)) {
-        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'], $row[0]);
+        $rtID = $row[0];
+        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'], $rtID);
         if ($row[14]) { //rty_ShowInList
-            array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'], $row[0]);
+            array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'], $rtID);
         }
         $commonFields = array_slice($row, 3);
+        
+        $commonFields = makeTitleMaskHumanReadable($commonFields, $rtID);
+        
         $rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
         $rtStructs['names'][$row[0]] = $row[3];
         $rtStructs['pluralNames'][$row[0]] = $row[8];
@@ -1077,6 +1088,24 @@ function getAllRectypeStructures($useCachedData = false) {
     setCachedData($cacheKey, $rtStructs);
     return $rtStructs;
 }
+
+/*
+* special behaviour for rty_TitleMask
+* it stores as cocept codes - need to convert it to human readable string
+*/
+function makeTitleMaskHumanReadable($fields, $rtID)
+{
+    $cols = getRectypeColNames();
+    $ind1 = array_search('rty_TitleMask', $cols);
+    //$ind2 = array_search('rty_Type', $cols);
+/*if($rtID==26){
+error_log(">>>> ".$ind1."  ".$fields[$ind1]."  ".$rtID);//$ind2."  ".$fields[$ind2].print_r($fields, true));
+error_log(">>>> ".$fields[$ind1]);
+}*/
+    $fields[$ind1] = titlemask_make($fields[$ind1], $rtID, 2, null, _ERR_REP_SILENT);
+    return $fields;
+}
+
 //
 // After addition of new record - update this value
 //

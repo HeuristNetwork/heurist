@@ -119,10 +119,11 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 		$mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
 		$mask=$mask[0];
 	}
+    /* deprecated
 	if (!@$coMask && @$rtID) {
 		$coMask= mysql__select_array("defRecTypes","rty_CanonicalTitleMask","rty_ID=$rtID");
 		$coMask=$coMask[0];
-	}
+	}*/
 
 	//echo print_r($_REQUEST,true);
 	if($check > 0 || !$recID)
@@ -132,6 +133,18 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 				<h3>Checking rectype "<b><i><?=$rtName?></i></b>"[<?=$rtID?>]</h3>
 			</div>
 <?php
+
+        $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+        echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
+        echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
+        if(is_array($res)){
+            echo "<div class='errorCell'>".$res[0]."</div>";
+        }else if(strcasecmp($res,$mask)!=0){
+            echo "<div>Decoded mask: $res</div>";
+        }
+        echo "</div>";
+
+    /* deprecated
 		$retMaskCheck = check_title_mask2($mask, $rtID, true);
 		echo "<div class='resultsRow'><div class='statusCell ".($retMaskCheck == "" ? "valid'>":"invalid'>in")."valid</div>";
 		echo "<div class='maskCell'>mask = <i>$mask</i></div>";
@@ -139,7 +152,6 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 			echo "<div class='errorCell'>".$retMaskCheck."</div>";
 		}
 		echo "</div>";
-
 		$retCoMaskCheck = check_title_mask2($coMask, $rtID, true);
 		echo "<div class='resultsRow'><div class='statusCell ".($retCoMaskCheck == "" ? "valid'>":"invalid'>in")."valid</div>";
 		echo "<div class='maskCell'>canonical mask = <i>$coMask</i></div>";
@@ -149,7 +161,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 		echo "</div>";
 
 		if ($retCoMaskCheck !== "" && $retMaskCheck == "") {
-			$coMask = make_canonical_title_mask($mask, $rtID);
+			$coMask = titlemask_make($mask, $rtID, 1); //make canonical
 			if ($check != 2) {
 				echo "<div class='resultsRow'><div class='statusCell'></div><div class='maskCell'>Correct canonical mask = <span class='valid'>$coMask</span></div></div>";
 			}else{ // repair canonical
@@ -160,6 +172,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 				echo ( $error ? "<div class='errorCell invalid'> Error : ".$error."</div>":"")."</div>";
 			}
 		}
+    */
 		echo "<hr>\n";
 	}else{
 		echo "checking type mask $mask for recType $rtID and rec $recID <br/>";

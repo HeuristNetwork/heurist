@@ -301,7 +301,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				print "Source database: <b>$sourcedb</b> <br>\n";
 
 				if($is_h2){
-					$res=mysql_query("select * from `$sourcedb`.Users");
+					$res=mysql_query("select * from `$sourcedb`.records limit 1");
 				}else{
 					$res=mysql_query("select * from $sourcedb.sysIdentification");
 				}
@@ -449,10 +449,10 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				createTermsOptions($config, 'enum');
 				createTermsOptions($config, 'relation');
-                
+
                 // --------------------------------------------------------------------------------------------------------------
-                createTagsOptions($config);                
-                
+                createTagsOptions($config);
+
 				print "</form>";
 
 			}
@@ -524,15 +524,15 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				} // loop through terms
 				print "</table>";
 			}
-            
-            
+
+
             function getUsers($database=USERS_DATABASE){
-                $res = mysql_query("select usr.ugr_ID, usr.ugr_Name, 
+                $res = mysql_query("select usr.ugr_ID, usr.ugr_Name,
                 concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
         from `".$database."`.`sysUGrps` usr
-        where usr.ugr_Enabled='y' and 
-        usr.ugr_Type='user' and 
-        usr.ugr_FirstName is not null and 
+        where usr.ugr_Enabled='y' and
+        usr.ugr_Type='user' and
+        usr.ugr_FirstName is not null and
         usr.ugr_LastName is not null and
         usr.ugr_IsModelUser=0
         order by fullname");
@@ -555,7 +555,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 
                 print "<h3>User mappings for tag(keyword) import"."</h3>".
-                    "[User id] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";                
+                    "[User id] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
                 // Get users with tags
                 if($is_h2){
                     $query1 = "select usr.Id, usr.Username, usr.Realname as fullname, count(kwl_rec_id)
@@ -566,11 +566,11 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
                 }else{
 
-                    $query1 = "select usr.ugr_ID, usr.ugr_Name, 
-                            concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname, 
+                    $query1 = "select usr.ugr_ID, usr.ugr_Name,
+                            concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname,
                             count(rtl_RecID)
                             from `$sourcedb`.`sysUGrps` usr, `$sourcedb`.`usrTags` kwd, `$sourcedb`.`usrRecTagLinks` kwl
-                            where usr.ugr_Enabled='y' and usr.ugr_Type='user' and 
+                            where usr.ugr_Enabled='y' and usr.ugr_Type='user' and
                             usr.ugr_IsModelUser=0 and kwd.tag_UGrpID=usr.ugr_ID and kwl.rtl_TagID=kwd.tag_ID
                             group by usr.ugr_ID
                             order by fullname";
@@ -604,7 +604,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                     $selopts."</select></td></tr>\n";
                 } // loop through terms
                 print "</table>";
-            }            
+            }
 			// ---- Create options for HTML select -----------------------------------------------------------------
            function createOptionsDt($alldettypes){
                $pref = "od";
@@ -1185,7 +1185,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                                 group by kwd.kwd_id
                                 order by kwd.kwd_id";
 
-                    }else{                
+                    }else{
 
                         $query1 = "select kwd.tag_ID, kwd.tag_Text, count(rtl_RecID)
                                 from `$sourcedb`.`usrTags` kwd, `$sourcedb`.`usrRecTagLinks` kwl
@@ -1219,7 +1219,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                         $query1 = "select kwl.rtl_TagID
                                 from `$sourcedb`.`usrRecTagLinks` kwl
                                 where kwl.rtl_RecID=".$oldid;
-                    }                
+                    }
                    $res1 = mysql_query($query1);
                     while ($row1 = mysql_fetch_array($res1)) {
 

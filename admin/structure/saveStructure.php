@@ -80,7 +80,7 @@
 		"rty_OrderInGroup"=>"i",
 		"rty_Description"=>"s",
 		"rty_TitleMask"=>"s",
-		"rty_CanonicalTitleMask"=>"s",
+		"rty_CanonicalTitleMask"=>"s", //not used anymore
 		"rty_Plural"=>"s",
 		"rty_Status"=>"s",
 		"rty_OriginatingDBID"=>"i",
@@ -459,13 +459,13 @@
 				$rv['detailTypes'] = getAllDetailTypeStructures();
 				break;
 
-			case 'checkDTusage':
+			case 'checkDTusage': //used in editRecStructure to prevent detail type delete
 
 
 				$rtyID = @$_REQUEST['rtyID'];
 				$dtyID = @$_REQUEST['dtyID'];
 
-				$rv = findCanonicalTitleMaskEntries($rtyID, $dtyID);
+				$rv = findTitleMaskEntries($rtyID, $dtyID);
 
 				break;
 
@@ -601,18 +601,23 @@
 
 			$parameters = array("");
 			$titleMask = null;
+            $colNames = "";
 			$query = "";
 			foreach ($commonNames as $colName) {
 				$val = array_shift($rt[0]['common']);
-				if($query!="") $query = $query.",";
-				$query = $query."?";
-				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
-				array_push($parameters, $val);
 
-				//keep value of text title mask to create canonical one
-				if($colName == "rty_TitleMask"){
-					$titleMask = $val;
-				}
+                //keep value of text title mask to create canonical one
+                if($colName == "rty_TitleMask"){
+                    $titleMask = $val;
+                }
+
+				    if($query!="") {
+                        $query = $query.",";
+                    }
+				    $query = $query."?";
+				    $parameters[0] = $parameters[0].$rtyColumnNames[$colName];
+				    array_push($parameters, $val);
+
 			}
 
 			$query = "insert into defRecTypes ($colNames) values ($query)";
@@ -628,9 +633,9 @@
 				if($isAddDefaultSetOfFields){
 					//add default set of detail types
 					addDefaultFieldForNewRecordType($rtyID);
-					//create canonical title mask
-					updateCanonicalTitleMask($rtyID, $titleMask);
 				}
+                //create canonical title mask
+                updateTitleMask($rtyID, $titleMask);
 				//create icon and thumbnail
 				getRectypeIconURL($rtyID);
 				getRectypeThumbURL($rtyID);
@@ -813,16 +818,21 @@
 					$query = $query."$colName = ?";
 
 					$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
 
-					if($colName == "rty_TitleMask"){ //update canonical
-						$val = make_canonical_title_mask($val, $rtyID);
+                    //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
+					if($colName == "rty_TitleMask"){
+                        //array_push($parameters, ""); //empty title mask - store only canonical!
+						$val = titlemask_make($val, $rtyID, 1, null, _ERR_REP_SILENT); //make canonical
 
+                        array_push($parameters, $val);
+                        /*    DEPRECATED
 						$colName = "rty_CanonicalTitleMask";
 						$query = $query.",".$colName." = ?";
 						$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
-						array_push($parameters, $val);
-					}
+						array_push($parameters, $val);*/
+					}else{
+                        array_push($parameters, $val);
+                    }
 				}
 			}
 
@@ -855,21 +865,25 @@
 	}
 
 	//
-	// update canonical title mask
+	// conerts titlemask to concept codes
 	//
-	function updateCanonicalTitleMask($rtyID, $mask) {
-		global $rtyColumnNames, $db;
+	function updateTitleMask($rtyID, $mask) {
+		global $db;
 
 		$ret = 0;
 		if($mask){
-				$val = make_canonical_title_mask($mask, $rtyID);
+				$val = titlemask_make($mask, $rtyID, 1, null, _ERR_REP_SILENT); //make coded
+                $parameters = array("s");
+                array_push($parameters, $val);
 
+                /* DEPRECATED
 				$colName = "rty_CanonicalTitleMask";
-				$parameters = array("");
-				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
+				$parameters[0] = "ss";//$parameters[0].$rtyColumnNames[$colName];
 				array_push($parameters, $val);
+                rty_CanonicalTitleMask = ?,
+                */
 
-				$query = "update defRecTypes set $colName = ? where rty_ID = $rtyID";
+				$query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rtyID";
 
 				$res = execSQL($db, $query, $parameters, true);
 				if(!is_numeric($res)){
@@ -880,15 +894,22 @@
 	}
 
 	//
+	// used in editRecStructure to prevent detail type delete
 	//
-	//
-	function findCanonicalTitleMaskEntries($rtyID, $dtyID) {
+	function findTitleMaskEntries($rtyID, $dtyID) {
 
 		global $db;
 
+        $dtyID = getDetailTypeConceptID($lclDtyID);
+
 		$ret = array();
 
-		$query = "select rty_ID, rty_Name from defRecTypes where (rty_CanonicalTitleMask LIKE '%[{$dtyID}]%') OR (rty_CanonicalTitleMask LIKE '%.{$dtyID}]%')";
+		$query = "select rty_ID, rty_Name from defRecTypes where "
+        ."((rty_TitleMask LIKE '%[{$dtyID}]%') OR "
+        ."(rty_TitleMask LIKE '%.{$dtyID}]%') OR"
+        ."(rty_TitleMask LIKE '%[{$dtyID}.%') OR"
+        ."(rty_TitleMask LIKE '%.{$dtyID}.%'))";
+
 		if($rtyID){
 			$query .= " AND (rty_ID=".$rtyID.")";
 		}

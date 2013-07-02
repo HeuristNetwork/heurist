@@ -847,7 +847,7 @@
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
                     var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-                    var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1";
+                    var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
 
                     top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                             var obj = xhr.responseText;

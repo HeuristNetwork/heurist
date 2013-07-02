@@ -13,7 +13,7 @@
 */
 
 /**
-*  pop-up window to define recordtype title mask 
+*  pop-up window to define recordtype title mask
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -355,7 +355,6 @@ function EditRectypeTitle() {
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-
         var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check=1";
 
@@ -381,6 +380,60 @@ function EditRectypeTitle() {
             }, squery);
     }
 
+    /**
+     *
+     */
+    function _doCheck(callback)
+    {
+        var mask = document.getElementById('rty_TitleMask').value;
+        var rec_type = top.HEURIST.parameters.rectypeID;
+
+        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+        var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+        var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check=1";
+
+        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+                var obj = xhr.responseText;
+                if(obj===""){
+                    if(callback){
+                        callback.call();   
+                    }
+               }else{
+                    alert(obj);
+                }
+
+            }, squery);
+    }
+    
+    /**
+    *
+    */
+    function _doCanonical(mode){
+
+        var mask = (mode==2)?document.getElementById('rty_TitleMask').value :document.getElementById('rty_CanonincalMask').value;
+        var rec_type = top.HEURIST.parameters.rectypeID;
+
+        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+
+        var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+        var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check="+mode;
+
+        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+                var obj = xhr.responseText;
+
+                if(mode==2){
+                    document.getElementById('rty_CanonincalMask').value = obj;
+                }else{
+                    document.getElementById('rty_TitleMask').value = obj;
+                }
+            }, squery);
+
+    }
+
     //
     // utility function - move to HEURIST.utils
     //
@@ -404,7 +457,7 @@ function EditRectypeTitle() {
     }
 
     /**
-     *
+     * Insert field into title mask input field
      */
     function _doInsert(){
 
@@ -453,6 +506,9 @@ function EditRectypeTitle() {
         doTest:function(){
             _doTest();
         },
+        doCheck:function(callback){
+            _doCheck(callback);
+        },
         doInsert:function(){
             _doInsert();
         },
@@ -463,6 +519,10 @@ function EditRectypeTitle() {
 
         isA: function (strClass) {
             return (strClass === _className);
+        },
+
+        doCanonical:function(mode){
+            _doCanonical(mode);
         }
 
     };

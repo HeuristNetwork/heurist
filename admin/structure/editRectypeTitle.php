@@ -15,7 +15,7 @@
 */
 
 /**
-*  Generates the title from mask, recid and rectype 
+*  Generates the title from mask, recid and rectype
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -35,6 +35,7 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
+    //require_once(dirname(__FILE__).'/../../common/php/utilsTitleMaskOld.php');
 
     mysql_connection_select(DATABASE);
 
@@ -43,13 +44,35 @@
 
     if(array_key_exists("check",@$_REQUEST))
     {
-        $check = check_title_mask2($mask, $rectypeID, true);
-        if(!empty($check)){
-            echo $check;
+        if($_REQUEST["check"]==2){ //get coded mask
+
+            $res = titlemask_make($mask, $rectypeID, 1, null, _ERR_REP_MSG);
+            echo is_array($res)?$res[0]:$res;
+
+        }else if($_REQUEST["check"]==3){ //get human readable mask
+
+            $res = titlemask_make($mask, $rectypeID, 2, null, _ERR_REP_MSG);
+            echo is_array($res)?$res[0]:$res;
+
+        }else{ ///verify text title mask
+
+            $check = check_title_mask2($mask, $rectypeID, true);
+            if(!empty($check)){
+                echo $check;
+            }
         }
     }else{
         $recID = @$_REQUEST['rec_id'];
-        echo fill_title_mask($mask, $recID, $rectypeID);
+        echo titlemask_value($mask, $recID);//."<br><br>".fill_title_mask_old($mask, $recID, $rectypeID);
+
+        //echo fill_title_mask_old($mask, $recID, $rectypeID);
+        /* it works - but beforehand verification is already done on client side
+        $check = check_title_mask2($mask, $rectypeID, true);
+        if(empty($check)){
+            echo titlemask_value($mask, $recID); // fill_title_mask($mask, $recID, $rectypeID);
+        }else{
+           echo array("error"=>$check);
+        }*/
     }
     exit();
 ?>

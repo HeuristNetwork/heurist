@@ -127,18 +127,18 @@ function update_counts2(processed, total) {
 
 $blanks = array();
 $reparables = array();
-foreach ($recs as $rec_id => $bib) {
+foreach ($recs as $rec_id => $rec) {
 	if ($rec_id % 10 == 0) {
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();
 		flush();
 	}
 
-	$mask = $masks[$bib['rec_RecTypeID']];
-	$new_title = trim(fill_title_mask($mask, $rec_id, $bib['rec_RecTypeID']));
+	$mask = $masks[$rec['rec_RecTypeID']];
+	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
 	++$processed_count;
-	$bib_title = trim($bib['rec_Title']);
-	if ($new_title && $bib_title && $new_title == $bib_title && strstr($new_title, $bib_title) )  continue;
+	$rec_title = trim($rec['rec_Title']);
+	if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
 
 	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
 		$updates[$rec_id] = $new_title;
@@ -153,15 +153,15 @@ foreach ($recs as $rec_id => $bib) {
 	}
 	continue;
 /*
-	if (substr($new_title, 0, strlen($bib['rec_Title']) == $bib['rec_Title']))
-		print '<li><b>' . htmlspecialchars($bib['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($bib['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+	if (substr($new_title, 0, strlen($rec['rec_Title']) == $rec['rec_Title']))
+		print '<li><b>' . htmlspecialchars($rec['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($rec['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 */
-	if ($new_title == preg_replace('/\\s+/', ' ', $bib['rec_Title']))
-		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
+		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 	else
-		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
 	print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 

@@ -15,7 +15,7 @@
 */
 
 /**
-* administration menu and framwork. 
+* administration menu and framwork.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -240,9 +240,9 @@ if (is_admin()) {
 						<li><a href="#"
 								onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
 								title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
-						<li><a href="#"
+						<!-- <li><a href="#"
 							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=<?=HEURIST_DBNAME?>')"
-							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li>
+							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li> -->
 						<li><a href="#"
 							onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=<?=HEURIST_DBNAME?>')"
 							title="Fuzzy search to identify records which might contain duplicate data">Find Duplicate Records</a></li>

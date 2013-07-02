@@ -449,12 +449,7 @@
 
         if ($updatedRowCount > 0  ||  $insertedRowCount > 0  ||  $deletedRowCount > 0  ||  $biblioUpdated) {
             /* something changed: update the records title and commit all changes */
-            $title_check = check_title_mask2($record["rty_TitleMask"], $record["rec_RecTypeID"], true);
-            if($title_check!=''){
-                $new_title = "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type";
-            }else{
-                $new_title = fill_title_mask($record["rty_TitleMask"], $record["rec_ID"], $record["rec_RecTypeID"]);
-            }
+            $new_title = fill_title_mask($record["rty_TitleMask"], $record["rec_ID"], $record["rec_RecTypeID"]);
 
             mysql_query("update Records
                 set rec_Title = '" . mysql_real_escape_string($new_title) . "'
