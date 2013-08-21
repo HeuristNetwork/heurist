@@ -382,6 +382,9 @@ $mtime0 = explode(' ', microtime());
 function createAndFillFactoidsCache(){
 /*
 
+	Do this before generation becuase it improves performance
+
+
   use hdb_dos_3;
   DROP TABLE IF EXISTS `recFacctoidsCache`;
   CREATE TABLE `recFacctoidsCache` (

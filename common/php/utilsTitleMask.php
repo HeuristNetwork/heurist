@@ -38,9 +38,9 @@
 
 require_once('Temporal.php');
 
-define(_ERR_REP_WARN, 0); // returns general message that titlemask is invalid - default
-define(_ERR_REP_MSG, 1);  // retuns detail error message
-define(_ERR_REP_SILENT, 2); // returns empty string
+define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid - default
+define('_ERR_REP_MSG', 1);  // retuns detail error message
+define('_ERR_REP_SILENT', 2); // returns empty string
 
 /**
 * Check that the given title mask is well-formed for the given reference type

@@ -242,7 +242,6 @@
 			case 'saveRectype':
 
 			case 'saveRT': // Record type
-
 				if (!array_key_exists('rectype',$data) ||
 					!array_key_exists('colNames',$data['rectype']) ||
 					!array_key_exists('defs',$data['rectype'])) {
@@ -253,7 +252,7 @@
 				$rv = array();
 				$rv['result'] = array(); //result
 				$definit = @$_REQUEST['definit'];
-
+                
 				foreach ($data['rectype']['defs'] as $rtyID => $rt) {
 					if ($rtyID == -1) {	// new rectypes
 						array_push($rv['result'], createRectypes($commonNames, $rt, ($definit=="1")));
@@ -601,8 +600,8 @@
 
 			$parameters = array("");
 			$titleMask = null;
-            $colNames = "";
 			$query = "";
+            
 			foreach ($commonNames as $colName) {
 				$val = array_shift($rt[0]['common']);
 
@@ -621,6 +620,7 @@
 			}
 
 			$query = "insert into defRecTypes ($colNames) values ($query)";
+            
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if($rows == "1062"){
@@ -634,11 +634,14 @@
 					//add default set of detail types
 					addDefaultFieldForNewRecordType($rtyID);
 				}
+
                 //create canonical title mask
                 updateTitleMask($rtyID, $titleMask);
+
 				//create icon and thumbnail
 				getRectypeIconURL($rtyID);
 				getRectypeThumbURL($rtyID);
+
 			}
 
 		}

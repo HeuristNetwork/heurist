@@ -32,11 +32,11 @@
 
 
 
-  function loadRemoteURLContent($url, $bypassProxy = false) {
+  function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
   }
 
-  function loadRemoteURLContentWithRange($url, $range, $bypassProxy = false) {
+  function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
@@ -52,14 +52,14 @@
       curl_setopt($ch, CURLOPT_RANGE, $range);
     }
 
-    if (defined("HEURIST_HTTP_PROXY")) {
+    if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
       curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
     }
-    //error_log(" url = ". $url);
+//DEBUG error_log(" url = ". $url);
 
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
-     //error_log(" data = ". $data);
+//DEBUG error_log(" data = ". $data);
 
     $error = curl_error($ch);
     if ($error) {

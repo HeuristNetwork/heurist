@@ -109,9 +109,29 @@ Click the database icon on the left to view available record types in that datab
 
 				// Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
 				$reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
-				$data = loadRemoteURLContent($reg_url);
+                
+//error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
+                
+				$data = loadRemoteURLContent($reg_url, true); //without proxy
+
+                if($data){                    
+                    $data = json_decode($data);
+                    if(!is_array($data)){
+                        if(defined("HEURIST_HTTP_PROXY")){
+                            $data = loadRemoteURLContent($reg_url, false); //with proxy
+                            if($data){                    
+                                $data = json_decode($data);
+                                if(!is_array($data)){
+                                    $data = null;
+                                }
+                            }
+                        }
+                    }
+                }
+     
 
 				if($data) {
+                    
 					// If data has been successfully received, write it to a javascript array, leave out own DB if found
 					$res = mysql_query("select sys_dbRegisteredID from sysIdentification where `sys_ID`='1'");
 					if($res) {
@@ -121,7 +141,7 @@ Click the database icon on the left to view available record types in that datab
 					} else {
 						$ownDBID = 0;
 					}
-					$data = json_decode($data);
+                    
 					foreach($data as $registeredDB) {
 
 						if($ownDBID != $registeredDB->rec_ID) {
@@ -171,7 +191,9 @@ Click the database icon on the left to view available record types in that datab
 
 						}
 					}
-				}
+				}else{
+                    echo 'alert("Can not access '.$reg_url.'\n\n Verify your proxy settings")';
+                }
 			?>
 
 			// Create a YUI DataTable

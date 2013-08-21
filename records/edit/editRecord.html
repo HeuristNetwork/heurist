@@ -34,7 +34,7 @@
 -->
 
 <html>
-	
+
 	<head>
 		<title>Heurist Reference Database - &copy; 2012 University of Sydney</title>
 		<link rel=stylesheet href="../../common/css/global.css">
@@ -157,7 +157,7 @@
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
 					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
-						if (!context) return;
+						if (!context || context.count<1) return;
 						document.getElementById("search-nav").innerHTML =
 						"<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
 						"<div>" +

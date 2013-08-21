@@ -78,6 +78,8 @@ if (array_key_exists('mode', $_REQUEST)) {
 		<script src="../common/js/utilsUI.js"></script><!-- core HEURIST functions -->
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 		<script>
+            top.HEURIST.VERSION = "<?=HEURIST_VERSION?>";
+        
 			$(function() {
 
 				var icons = {
@@ -271,10 +273,6 @@ if (is_admin()) {
                             onClick="loadContent('../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>
 
-                        <li><a href="#"
-                            onClick="loadContent('../import/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
-                                title="Import records and structure from FAIMS database">FAIMS sync</a></li>
-
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->
 						<!-- AO: remarked on 2013-02-18. This is one-off correction of db format in 2011
 						<li><a href="../import/direct/upgradeToNamedFiles.php?db=<?=HEURIST_DBNAME?>" target="_blank"
@@ -284,6 +282,27 @@ if (is_admin()) {
 							title="Add new / modify existing scheduled reports">Scheduled Reports</a></li>
 					</ul>
 				</div>
+                
+                
+                <h3><a href="#">FAIMS: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
+                <div class="adminSection">
+                    <ul>
+                        <li class="seperator"><a href="#"
+                                onClick="loadContent('../import/faims/about.html?db=<?=HEURIST_DBNAME?>')"
+                                title="Information about the FAIMS project">About</a></li>
+                                
+                        <li><a href="#"
+                            onClick="loadContent('../import/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Build FAIMS project / tablet application from the current Heurist database">Build Project</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('../import/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Import structure and data into the current Heurist database from a FAIMS project">Import Project</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('../import/faims/exportTDar.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Export the current database as tables and metadata ready for import into the tDAR repository">Export to tDAR</a></li>
+                                
+                    </ul>
+                </div>                
 				<!--</div>-->
 				<!-- end accordion -->
 			</div>

@@ -88,8 +88,28 @@
 		<script src="../../external/timeline/timeline_js/timeline-api.js" type="text/javascript"></script-->
 		<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+        <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
+        <script src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+        <style>
+            .calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+        </style>
 	</head>
-	<body class=" yui-skin-sam" style="background-color:rgb(240,240,240);" width=400 height=400 >
+	<body class=" yui-skin-sam" style="background-color:rgb(240,240,240);" width=440 height=420 >
 
 		<script type="text/javascript" src="../../common/js/calendarViewer.js"></script>
 		<script type="text/javascript" src="../../common/js/calendar.js"></script>
@@ -107,8 +127,8 @@
 					<div style="margin: 20px  0px 0px 50px">
 						<div>
 							<span title="Enter date in  y-m-d">
-							Date:&nbsp;<input type=text id="simpleDate" style="width:150px;" />
-							<input type=button class="date-button" id="calendar" onclick="calendarPopup(this);" />
+							Date:&nbsp;<input type=text id="simpleDate" style="width:150px;" class="withCalendarsPicker" />
+							<!-- <input type=button class="date-button" id="calendar" onclick="calendarPopup(this);" /> -->
 							</span>
 						</div>
 						<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
@@ -158,23 +178,23 @@
 					<div style="margin-left:30px;">
 						<div>
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
-								<input type=text id="TPQ" style="width:100px;" />
+								<input type=text id="TPQ" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
 							<span title="Press to set Probable begin equal to TPQ" style=" margin:0px 5px;">
 								<input type=button id="setPDB" value="set =>" onclick="setPDBtoTPQ();" style="font-size: 7pt; width:35px;" />
 							</span>
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
-								<input type=text id="PDB" style="width:100px;" />
+								<input type=text id="PDB" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
 							<img style="width:30px; height:1px; border-top: 2px solid grey; margin:0px 5px;"/>
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
-								<input type=text id="PDE" style="width:100px;" />
+								<input type=text id="PDE" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
 							<span title="Press to set Probable end equal to TAQ" style=" margin:0px 5px;">
-								<input type=button id="setPDE" value="<= set" onclick="setPDEtoTAQ();" style="font-size: 7pt; width:35px;" />
+								<input type=button id="setPDE" value="<= set" onclick="setPDEtoTAQ();" style="font-size: 7pt; width:35px;"/>
 							</span>
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
-								<input type=text id="TAQ" style="width:100px;" />
+								<input type=text id="TAQ" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
 						</div>
 						<div>
@@ -235,7 +255,7 @@
 						<div style="float:left; width:430px;">
 							<div>
 								<span title="Enter date in  y-m-d">
-								Approximate date&nbsp;<input type=text id="fDAT" style="width:150px;" />
+								Approximate date&nbsp;<input type=text id="fDAT" style="width:150px;" class="withCalendarsPicker"/>
 								</span>
 							</div>
 							<div style="font-size:8pt; color:grey; margin:5px 0px 15px 105px;">
@@ -327,425 +347,35 @@
 		</div>
 		<div style="border-top:1px solid grey; margin :10px 10px"></div>
 		<div style="margin: 10px 0px 0px 20px">
-			<div>
-				<span title="Enter comment for this temporal or " >Comment/original information:
-					<input type=text id="COM" tabindex="10" style="width:300px;" />
-				</span>
+            <div title="Select calendar">
+                <div style="width:200px;float:left;text-align:right;">Use calendar:</div>
+                    <select id="selectCLD">
+                        <option value="gregorian">Gregorian</option>
+                        <option value="taiwan">Taiwan</option>
+                        <option value="thai">Thai</option>
+                        <option value="julian">Julian</option>
+                        <option value="persian">Persian</option>
+                        <option value="islamic">Islamic</option>
+                        <option value="ummalqura">Umm al-Qura</option>
+                        <option value="hebrew">Hebrew</option>
+                        <option value="ethiopian">Ethiopian</option>
+                        <option value="coptic">Coptic</option>
+                        <option value="nepali">Nepali</option>
+                        <option value="mayan">Mayan</option>
+                    </select>
+                    <span id="dateGregorian"></span>
+            </div>
+			<div title="Enter comment for this temporal or ">
+				<div style="width:200px;float:left;text-align:right;">Comment/original information:</div>
+				<input type=text id="COM" tabindex="10" style="width:300px;" />
 			</div>
-				<div style="margin:5px 0px 15px 175px; font-size:8pt; color:grey;"  >
+				<div style="margin:5px 0px 15px 175px; font-size:7pt; color:grey;"  >
 					<span >Temporal objects are converted to a standard format.</span><br/>
 					<span >This field is stored in the temporal to record the original values entered.</span>
 				</div>
 		</div>
 		<script type="text/javascript" src="../js/temporalObjectLibrary.js"></script>
-<!-- <script type="text/javascript" src="../../external/jquery/jquery.js"></script> moved on top-->
-		<script type="text/javascript">
-
-			function switchDev (toAsym) {
-				if (toAsym) {
-					$("#DEV")[0].disabled = true;
-					$("#DVP")[0].disabled = false;
-					$("#DVN")[0].disabled = false;
-					$("input[name=stdDEV][value=asym]").attr("checked","checked");
-					$("input[name=stdDEV][value=sym]").attr("checked","");
-				}else{
-					$("#DEV")[0].disabled = false;
-					$("#DVP")[0].disabled = true;
-					$("#DVN")[0].disabled = true;
-					$("input[name=stdDEV][value=asym]").attr("checked","");
-					$("input[name=stdDEV][value=sym]").attr("checked","checked");
-				}
-			}
-/* old way
-			var windowRef = document.parentWindow  ||  document.defaultView  ||  this.document._parentWindow;
-			var popupOptions = {
-				callback: function(date) {
-					if (date) {
-						document.getElementById("simpleDate").value = date;
-					}
-				},
-				"close-on-blur": true,
-				"no-titlebar": true,
-				"no-resize": true
-			};
-*/
-
-			function calendarPopup(buttonElt) {
-/* old way
-				var buttonPos = top.HEURIST.getPosition(buttonElt, true);
-				popupOptions.x = buttonPos.x + 8 - 120;
-				popupOptions.y = buttonPos.y + 8 - 80;
-
-				top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/calendarTemplate.html#"+
-					document.getElementById("simpleDate").value, popupOptions);
-*/
-
-				var callback =	function(date)
-				{
-					if (date) {
-						document.getElementById("simpleDate").value = date;
-						if(top.HEURIST.util.setDisplayPreference){
-								top.HEURIST.util.setDisplayPreference("record-edit-date", date);
-						}
-						calendarViewer.close();
-					}
-				}
-				var date = document.getElementById("simpleDate").value;
-				if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
-					date = top.HEURIST.util.getDisplayPreference("record-edit-date");
-				}
-
-				calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback);
-			}
-
-			function setPDBtoTPQ () {
-				var tpq = document.getElementById("TPQ");
-				var pdb = document.getElementById("PDB");
-				if (typeof tpq == "object" && typeof pdb == "object" && tpq.value) {
-					pdb.value = tpq.value
-				}
-			}
-
-			function setPDEtoTAQ () {
-				var taq = document.getElementById("TAQ");
-				var pde = document.getElementById("PDE");
-				if (typeof taq == "object" && typeof pde == "object" && taq.value) {
-					pde.value = taq.value
-				}
-			}
-
-			function c14DevClick(id) {
-				if($("#"+id).attr("tabindex")> -1) return true; //if input is in tab path then pass click on
-				if (id == "DEV"){
-					$("#DEV").attr("tabindex","2");
-					$("#DEV").val($("#DVP").val());
-					$("#DVP").val("");
-					$("#DVN").val("");
-					$("#DVP").attr("tabindex","-1");
-					$("#DVN").attr("tabindex","-1");
-				}else{
-					$("#DEV").attr("tabindex","-1");
-					$("#DVP").attr("tabindex","2");
-					$("#DVP").val($("#DEV").val());
-					$("#DVN").val($("#DEV").val());
-					$("#DEV").val("");
-					$("#DVN").attr("tabindex","3");
-				}
-			}
-
-			function c14DateClick(id) {
-				if($("#"+id).attr("tabindex")> -1) return true; //if input is in tab path then pass click on
-				if (id == "BCE"){
-					$("#BCE").attr("tabindex","1");
-					$("#BCE").val($("#BPD").val());
-					$("#BPD").val("");
-					$("#BPD").attr("tabindex","-1");
-				}else{
-					$("#BPD").attr("tabindex","1");
-					$("#BPD").val($("#BCE").val());
-					$("#BCE").val("");
-					$("#BCE").attr("tabindex","-1");
-				}
-			}
-
-			function dRangeDraw() {
-				var canvas = document.getElementById("dRangeCanvas");
-				if (canvas.getContext) {
-					var ctx = canvas.getContext("2d");
-
-					ctx.fillStyle = "rgb(150,150,150)";
-					ctx.fillRect (135, 0, 260, 60);
-					var lingrad = ctx.createLinearGradient(75,0,135,0);
-					lingrad.addColorStop(0, 'rgba(0,0,150,0)');
-					lingrad.addColorStop(0.5, 'rgba(75,75,150,0.5)');
-					lingrad.addColorStop(1, 'rgba(150,150,150,0.9)');
-					var lingrad2 = ctx.createLinearGradient(455,0,395,0);
-					lingrad2.addColorStop(0, 'rgba(0,0,150,0)');
-					lingrad2.addColorStop(0.5, 'rgba(75,75,150,0.5)');
-					lingrad2.addColorStop(1, 'rgba(150,150,150,0.9)');
-
-					ctx.fillStyle = lingrad;
-					ctx.fillRect (75, 0, 60, 60);
-					ctx.fillStyle = lingrad2;
-					ctx.fillRect (395, 0, 60, 60);
-					ctx.beginPath();
-					ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
-					ctx.lineWidth = 5;
-					ctx.strokeStyle = "#808080";
-					ctx.moveTo(0,62.5);
-					ctx.lineTo(530,62.5);
-					ctx.moveTo(75.5,0);
-					ctx.lineTo(75.5,62.5);
-					ctx.moveTo(135.5,0);
-					ctx.lineTo(135.5,62.5);
-					ctx.moveTo(395.5,0);
-					ctx.lineTo(395.5,62.5);
-					ctx.moveTo(455.5,0);
-					ctx.lineTo(455.5,62.5);
-					ctx.stroke();
-					ctx.beginPath();
-					ctx.fillStyle = "rgb(50,50,50)";
-					ctx.font = "8pt Arial";
-					drawLabel(ctx,"TPQ",75,80,20);
-					drawLabel(ctx,"PB",135,80,20);
-					drawLabel(ctx,"PE",395,80,20);
-					drawLabel(ctx,"TAQ",455,80,20);
-					ctx.fillStyle = "rgb(250,250,250)";
-					ctx.font = "12pt Arial Bold";
-					drawLabel(ctx,"likely range",265,40,60);
-					ctx.stroke();
-				}
-			}
-
-			function drawLabel ( ctx, label, xPos, yPos, maxX) {
-				var pxLen = ctx.measureText(label).width;
-				ctx.fillText(label, xPos - pxLen/2, yPos, maxX);
-			}
-
-			var TemporalPopup = (function () {
-				//private members
-				var _className = "Applet";  // I know this is a singleton and the application object, but hey it matches the pattern.
-				var _tabView;
-				var _type2TabIndexMap = {};
-
-				function _init () {
-					if (location.search.length > 1) {		// the calling app passed a parameter string - save it
-						that.originalInputString = unescape(location.search.substring(1));
-					}
-					if ( Temporal.isValidFormat(that.originalInputString)) {
-						try {
-							that.origTemporal = Temporal.parse(that.originalInputString);
-						}
-						catch (e) {
-							return "Error creating temporal from valid input string : " + that.originalInputString + " : " + e;
-						}
-					} else if (that.originalInputString) { // non temporal non empty string
-						try {
-								var tDate = TDate.parse(that.originalInputString);
-								that.origTemporal = new Temporal();
-								that.origTemporal.setType("s");  // simple date
-								that.origTemporal.setTDate("DAT",tDate);
-								that.origTemporal.setField("COM",that.originalInputString);
-							}
-							catch(e) { // unknown string
-								that.origTemporal = new Temporal();
-								that.origTemporal.setType("s");  // simple date with no date
-								that.origTemporal.setField("COM",that.originalInputString);
-							}
-					} else { // empty string
-						that.origTemporal = new Temporal();
-						that.origTemporal.setType("s");  // simple date with no data
-					}
-					// set current temporal to original
-					try {
-						that.curTemporal = Temporal.cloneObj(that.origTemporal);
-					}
-					catch(e) {
-						that.curTemporal = new Temporal();
-						that.curTemporal.setType("s");  // simple date with no date
-						that.curTemporal.setField("COM",that.originalInputString);
-					}
-					// set display
-					_tabView = new YAHOO.widget.TabView('display-div');
-
-					// set up temporal type to tab index mapping
-					var tabs = _tabView.getAttributeConfig("tabs").value;
-					for (var i=0; i < tabs.length; i++) {
-						var type = tabs[i].getAttributeConfig("contentEl").value.id;
-						_type2TabIndexMap[type] = i;
-					}
-
-					// select the tab for the initial temporal's type and change the label to show the user this is where things started
-					_tabView.selectTab(_type2TabIndexMap[that.curTemporal.getType() ? that.curTemporal.getType():'s']);
-					var activeTab = _tabView.getAttributeConfig("activeTab").value;
-					activeTab.set("label", "<i>" + activeTab.get("label") + "</i>", false);
-					_updateUIFromTemporal(that.curTemporal);
-					_tabView.on('beforeActiveTabChange', function (ev) {
-						var curType = ev.prevValue._configs.contentEl.value.id,
-							newType = ev.newValue._configs.contentEl.value.id;
-						// grab all the data from the current tab using the
-						_updateTemporalFromUI(that.curTemporal);
-						that.curTemporal.setType(newType);
-						_updateUIFromTemporal(that.curTemporal);
-						return;} );
-					dRangeDraw();
-				};
-
-
-				function _updateUIFromTemporal (temporal) {
-					var type = temporal.getType();
-					if (!type) {
-						return;
-					}
-					if (type === "s") {
-						var tDate = temporal.getTDate("DAT");
-						// if DAT then separate Date, Time and TimeZone
-						if (tDate) {
-							$("#simpleDate").val(tDate.toString("yy-MM-dd"));
-							$("#simpleTime").val(tDate.toString("HH:mm:ss"));
-							$("#tzone").val(tDate.toString("z"));
-						}
-					}
-					var fields = Temporal.getFieldsForType(type);
-					for(var i =0; i< fields.length; i++) {
-						var code = fields[i];
-						var val = temporal.getStringForCode(code);
-						var elem = $( "#" + type + code);
-						if (elem.length == 0) {
-							elem = $("#" + code);
-						}
-						if (elem.length == 0) {
-							elem = $("input[name=" + type + code + "]:checked");
-						}
-						if (type === "c" && val && (code == "DEV" || code == "DVP" ||code == "DVN" )) {
-							var v = val.match(/P(\d+)Y/);
-							val = v[1] ? v[1] : val;
-						}
-						if (type === "f" && val && code == "RNG" ) {
-							var v = val.match(/P(\d+)(Y|M|D)/);
-							val = v[1] ? v[1] : val;
-							if (v[2]) $("#level").val(v[2]);
-						}
-						if (elem.length != 0) {
-							switch (elem[0].type) {
-								case "checkbox" :
-									if (val) {
-										elem.attr("checked","checked");
-									}
-									break;
-								case "radio" :
-									if (val) {
-										elem.attr("checked","");
-										elem = $("input[name=" + type + code + "][value=" + val + "]");
-										elem.attr("checked","checked");
-									}
-									break;
-								case "select-one" :
-									if (val) {
-										elem.val(val);
-									}
-									break;
-								default :
-									elem.val(val);
-							}
-						}
-					}
-				};
-
-				function _updateTemporalFromUI (temporal) {
-					var type = temporal.getType();
-					var fields = Temporal.getFieldsForType(type);
-					for(var i =0; i< fields.length; i++) {
-						var code = fields[i];
-						var elem = $( "#" + type + code);
-						if (elem.length == 0) {
-							elem = $("#" + code);
-						}
-						if (elem.length == 0) {
-							elem = $("input[name=" + type + code + "]:checked");  //radio button group
-						}
-						if (elem.length != 0) {
-							switch (elem[0].type) {
-								case "checkbox" :
-									if (elem.attr("checked")) {
-										temporal.addObjForString(code, "1");
-									}else {
-										temporal.removeObjForCode(code);
-									}
-									break;
-								default :
-									if (elem.val()) {
-										var val = elem.val();
-										if (code == "RNG") {
-											val = "P" + val + $("#level").val();
-										}
-										if (code == "DEV" || code == "DVP" ||code == "DVN" ) {
-											val = "P" + val + "Y";
-										}
-										temporal.addObjForString(code, val);  // FIXME  this should validate input from the user.
-									}else if (elem.length != 0) {
-										temporal.removeObjForCode(code);
-									}
-							}
-						}
-					}
-					if (type === "s") {
-						var strDate = ($("#simpleTime").val());
-						if (strDate && $("#tzone").val()) {
-							var zone = $("#tzone").val().match(/^\s*(?:UTC|GMT)?\s*([\+|\-]?\d?\d:?(?:\d\d)?)?/)[1];
-							if (zone) {
-								strDate += " " + zone;
-							}
-						}
-						if (strDate && $("#simpleDate").val()) {
-							strDate = $("#simpleDate").val() + " " + strDate;
-						}else{
-							strDate = $("#simpleDate").val();
-						}
-						if (strDate) temporal.addObjForString("DAT", strDate);
-					}
-				};
-
-				//public members
-				var that = {
-						originalInputString : "",
-						origTemporal : null,
-						curTemporal : null,
-						name : "App",
-						getTabView : function () {
-							return _tabView;
-						},
-						close : function () {
-							try{
-								_updateTemporalFromUI(that.curTemporal);
-							}catch(e) {	// save string in COM field and keep an empty simple date temporal
-								alert(e);
-								return;
-							}
-							var validity = Temporal.checkValidity(that.curTemporal);
-							if (validity[0]) {  // valid temporal
-								if (validity[2]) { //some extra code fields, so remove them
-									for (var i=0; i<validity[2].length; i++) {
-										that.curTemporal.removeObjForCode(validity[2][i]);
-									}
-								}
-								window.close( that.curTemporal.toString());
-							}else{
-								var msg = "";
-								for (var i = 0; i < validity[1].length; i++) {
-								 if (!msg){
-								 	msg = Temporal.getStringForCode(validity[1][i]);
-								 }else{
-								 	msg += ", " + Temporal.getStringForCode(validity[1][i]);
-								 }
-								}
-								msg = msg ? "The current temporal is missing the " + msg + " value(s)." : "";
-								msg +=  validity[3] ? " " + validity[3] : "";
-								if (!confirm( msg +
-										"Would you like to continue working? Press cancel to reset to the original string.")) {
-									window.close(that.originalInputString);
-								}else{
-									window.close("");
-								}
-							}
-						},
-						cancel : function () {
-							window.close(that.originalInputString);
-						},
-						getClass : function () {
-							return _className;
-						},
-						isA: function(strClass) {
-							if(strClass === _className) return true;
-							return false;
-						}
-				};
-
-				_init();
-				return that;
-			})();
-
-		</script>
+        <script type="text/javascript" src="editTemporalObject.js"></script>
 	</body>
 </html>
 

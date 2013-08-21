@@ -131,7 +131,12 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										el.style.display = "none";
 										el = Dom.get('btnApply2');
 										el.style.display = "none";
-									}
+									}else if (datatype==="select"){
+                                        Dom.get('btnApply1').value = "Select";
+                                        Dom.get('btnApply2').value = "Select";
+                                        //Dom.get('btnAllSelection').style.display = "block";
+                                        Dom.get('divDefineNew').style.display = "none";
+                                    }
 				}
 
 
@@ -540,6 +545,14 @@ oRecord.getData('description')+'"/>';}
 							return false;
 	}
 
+    /**
+    * Listener of btnAllSelection
+    * fill _arr_selection array with all rectypes
+    */
+    function _selectAll(){
+                            return false;
+    }
+    
 	/**
 	* Assign event listener for filte UI controls
 	* @see _init
@@ -562,6 +575,8 @@ oRecord.getData('description')+'"/>';}
 							lblSelect2 = Dom.get('lblSelect2');
 							var btnClear = Dom.get('btnClearSelection');
 							btnClear.onclick = _clearSelection;
+                            var btnSelectAll = Dom.get('btnAllSelection');
+                            btnSelectAll.onclick = _selectAll;
 
 	} //end init listener
 

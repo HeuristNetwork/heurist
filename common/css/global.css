@@ -842,7 +842,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	display:block;
 	background:transparent;
 	font-weight:normal;
-	padding:.6em .73em;
+    padding:.3em .73em;
 	margin:0;
 	height:auto;
 	border:none;

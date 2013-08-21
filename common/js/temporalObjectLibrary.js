@@ -350,7 +350,9 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "COD"	:	"Laboratory Code",
     "DET"	:	"Determination Type",
     "COM"	:	"Comment",
-    "EGP"	:	"Egyptian Date"
+    "EGP"	:	"Egyptian Date",
+    "CLD"   :   "Calendar",
+    "CL2"   :   "Non-gregorian value",  //value in calendar value 
 };
 
 Temporal.determination = {	0	:	"Unknown",
@@ -386,7 +388,7 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 Temporal._typeFieldMap = {	s : {
         req : [["DAT"]],
         //											[]],		// empty date allows to capture ill-formed date strings
-        opt : ["COM","DET"],
+        opt : ["COM","DET","CLD","CL2"],
         hdr : ["DAT"]
     },
     c :	{
@@ -399,17 +401,17 @@ Temporal._typeFieldMap = {	s : {
     },
     p :	{
         req : [["TPQ","TAQ"], ["PDB","PDE","TPQ","TAQ"]],
-        opt : ["DET","SPF","EPF","COM","SRT"],
+        opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
     f :	{
         req : [["DAT","RNG"]],
-        opt : ["DET","PRF","COM","SRT"],
+        opt : ["DET","PRF","COM","SRT","CLD","CL2"],
         hdr : ["DAT","RNG"]
     },
     d :	{
         req : [["DUR"]],
-        opt : ["DET","ERR","COM"],
+        opt : ["DET","ERR","COM","CLD","CL2"],
         hdr : ["DUR"]
     }
 };
@@ -702,7 +704,7 @@ var TDate = function (strDate) {
         getTimezoneOffset: function () {
             return "" + _tzOffset ;
         },
-
+        
         toString : function (format) {
             var frmPart = function (s,fillLength) {
                 if (!s) {
@@ -1727,19 +1729,48 @@ function isTemporal(str) {
     return res;
 }
 
+function formatGregJulian(val, isneed){
+    
+        if(isneed && val){
+
+            var tDate = TDate.parse(val);
+            var isbce = (tDate.getYear()<0);
+            return tDate.getDay()+' '+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            //toString('d MMM yyyy') - misses space!
+            //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
+            
+        }else{
+            return val;
+        }        
+}
+
 /**
  *
  */
 function temporalToHumanReadableString(inputStr) {
     var str = inputStr;
+    var cld = '';
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
+    
+        var cldname = 'gregorian';
+        if (str.match(/CLD=([^\|]+)/)){
+              cldname = str.match(/CLD=([^\|]+)/)[1].toLowerCase();
+        }
+    
+        if (str.match(/CL2=([^\|]+)/) && cldname!='gregorian') {
+            cld = str.match(/CL2=([^\|]+)/)[1] + ' '+
+                  str.match(/CLD=([^\|]+)/)[1];
+        }
+        
+        var isgj = (cldname=='gregorian' || cldname=='julian');
+    
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
-            str = str.match(/SRT=([^\|]+)/)[1];
+            str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
         }else if (str.search(/TYP=s/) != -1 ) {
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
                 }
-                str = str.match(/DAT=([^\|]+)/)[1];
+                str = formatGregJulian(str.match(/DAT=([^\|]+)/)[1], isgj);
             }else if (str.search(/COM=[^\|]+/) != -1) {
                 str = str.match(/COM=([^\|]+)/)[1];
             }
@@ -1766,14 +1797,17 @@ function temporalToHumanReadableString(inputStr) {
             pdb = pdb ? pdb[1]: (tpq ? tpq:"");
             var pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
-            str = pdb + " – " + pde;
+            str = formatGregJulian(pdb, isgj) + " to " + formatGregJulian(pde, isgj);
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             var dat = str.match(/DAT=([^\|]+)/);
-            dat = dat ? dat[1]: "";
+            dat = dat ? formatGregJulian(dat[1], isgj): "";
             var rng = str.match(/RNG=P(\d*)(Y|M|D)/);
             var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
             rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
             str = dat + rng;
+        }
+        if(cld!=''){
+            str = cld + ' (Gregorian '+str+')';
         }
     }
     return str;

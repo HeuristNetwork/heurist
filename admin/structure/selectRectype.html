@@ -151,9 +151,10 @@
 			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
 			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
 			<a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
+            <a href="#" id="btnAllSelection" style="min-width:7ex;display: none;" title="select all">all</a>
         </div>
         
-	  <div  style="float:right;text-align:right;">
+	  <div id="divDefineNew" style="float:right;text-align:right;">
 	    <input type="button" style="min-width:11ex;" value="Define New" onClick="{selectRecordType.onDefineNewType();}" title="Create a completely new record type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new record type." />
 	  </div>
         

@@ -199,17 +199,24 @@
 
 		$data = loadRemoteURLContent($source_url);
 
+
 		if (!$data || substr($data, 0, 6) == "unable") {
 
 			unlockDatabase();
-			die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline");
+			die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline or URL incorrect");
 		}
+
 	} // getting data from source database for import of definitions to an existing database
 
 
 	// Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
 	$startToken = ">>StartData>>"; // also defined in getDBStructure.php
+
+    if(!strpos($data, $startToken)){
+        die("<br>The data returned did not correspond with the expected format. Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,800)."</xmp>");
+    }
+
 
 	$splittedData = split($startToken, $data);
 	$tableNumber =1;
