@@ -1730,7 +1730,7 @@ s
         else required = "";
         this.required = required;
         var maxValue = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']];
-        this.repeatable = ( maxValue == null || maxValue > 1)? true : false; //saw TODO this really needs to check many exist
+        this.repeatable = ( Number(maxValue) != 1 );//saw TODO this really needs to check many exist
 
         this.row = this.document.createElement("div");
         parentElement.appendChild(this.row);
@@ -2356,8 +2356,8 @@ s
     top.HEURIST.edit.inputs.BibDetailDropdownInput = function() {top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments);};
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
-    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { 
-            return (input && input['selectedIndex']!=undefined && input.selectedIndex !== -1)? (input.options[input.selectedIndex].value) : ""; 
+    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) {
+            return (input && input['selectedIndex']!=undefined && input.selectedIndex !== -1)? (input.options[input.selectedIndex].value) : "";
     };
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
