@@ -355,7 +355,7 @@ function ShowReps() {
 			if(Hul.isnull(squery)){
 				alert('Please select some records in search results');
 			}else{
-				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
+				var baseurl = top.HEURIST.basePath + "admin/structure/recordTypeTree.php";
 				Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
 			}
 	}

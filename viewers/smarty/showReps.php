@@ -16,7 +16,7 @@
 
 /**
 * showReps.php
-* 
+*
 * parameters
 * 'template' or 'template_body' - template file name or template value as a text
 * 'replevel'  - 1 notices, 2 all, 3 debug mode
@@ -51,6 +51,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
+
 include_once('../../external/geoPHP/geoPHP.inc');
 
 require_once('libs.inc.php');
@@ -115,9 +116,11 @@ function executeSmartyTemplate($params){
 		}else{
 			$error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
 		}
+
 		if($isJSout){
 			$error = add_javascript_wrap4($error, null);
 		}
+
 		echo $error;
 
 		if($publishmode>0 && $outputfile!=null){ //save empty outpurt inot file

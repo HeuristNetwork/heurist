@@ -74,7 +74,7 @@ function EditRectypeTitle() {
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
             //find variables for given rectypeID and create variable tree
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php?mode=varsonly&rty_id="+_rectypeID+
+            var baseurl = top.HEURIST.basePath + "admin/structure/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
             "&ver=1&w=all&stype=&db="+db  + "&q=type:" + _rectypeID; //"&q=id:146433";
             top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
         }
@@ -398,7 +398,7 @@ function EditRectypeTitle() {
                 var obj = xhr.responseText;
                 if(obj===""){
                     if(callback){
-                        callback.call();   
+                        callback.call();
                     }
                }else{
                     alert(obj);
@@ -406,7 +406,7 @@ function EditRectypeTitle() {
 
             }, squery);
     }
-    
+
     /**
     *
     */
