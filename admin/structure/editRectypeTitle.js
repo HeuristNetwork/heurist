@@ -408,7 +408,7 @@ function EditRectypeTitle() {
     }
 
     /**
-    *
+    * not used
     */
     function _doCanonical(mode){
 
