@@ -15,7 +15,7 @@
 */
 
 /**
-*   Export to tDar
+*   Export to FAIMS tDar repository
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -29,7 +29,7 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 
-    if(isForAdminOnly("to sync FAIMS database")){
+    if(isForAdminOnly("to export to FAIMS tDAR repository")){
         return;
     }
 
@@ -53,7 +53,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 ?>
 <html>
 <head>
-  <title>Export to tDAR</title>
+  <title>Export to FAIMS tDAR Repository</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
   <link rel=stylesheet href="../../common/css/global.css" media="all">
@@ -63,13 +63,14 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
   <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
   <script type="text/javascript" src="selectRectype.js"></script>
 </head>
-<body style="padding:44px;" class="popup">
 
+<body style="padding:44px;" class="popup">
 
     <script src="../../common/php/loadCommonInfo.php"></script>
 
-    <div class="banner"><h2>Export to tDAR</h2></div>
-    <div id="page-inner" style="width:640px; margin:0px auto; padding: 0.5em;">
+    <div class="banner"><h2>Export to FAIMS tDAR Repository</h2></div>
+    <div id="page-inner" style="width:800px; margin:0px auto; padding: 0.5em;">
+    
 <?php
 
     $rt_toexport = @$_REQUEST['rt'];
@@ -78,10 +79,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     $host = @$_REQUEST['host'];
     $fusername = @$_REQUEST['username'];
     $fpwd = @$_REQUEST['pwd'];
-    if(!$host) $host = '115.146.85.232:8080';
-    if(!$fusername) $fusername = 'osmakov';
-    if(!$fpwd) $fpwd = 'faims199';
-    if(!$projectId) $projectId = 6813;
+    if(!$host) $host = '115.146.85.232:8080'; // the FAIMS tDAR repository
 
     $invalid = false; (!$projname || preg_match('[\W]', $str));
 
@@ -92,35 +90,47 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             if($invalid){
                 if($projname){
-                    print "<div style='color:red'>Only letters, numbers and underscores (_) are allowed in project name</div>";
+                    print "<div style='color:red'><br/>ONLY LETTERS, NUMBERS AND UNDERSCORES (_) ARE ALLOWED IN PROJECT NAME<hr/></div>";
                 }else {
-                    print "<div style='color:red'>Project name is mandatory</div>";
+                    print "<div style='color:red'><br/>PROJECT NAME IS MANDATORY<hr/></div>";
                 }
             }
             if(!$projectId){
-                print "<div style='color:red'>Project ID is mandatory</div>";
+                print "<div style='color:red'><br/>FAIMS PROJECT ID IS MANDATORY<hr/></div>";
             }
         }
 
-//print ">>>>>".(function_exists('HTTP_Request2')?"YES":"NO")."<br>";
+        //print ">>>>>".(function_exists('HTTP_Request2')?"YES":"NO")."<br>";
 
         print "<form name='startform' action='exportTDar.php' method='get'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input id='rt_selected' name='rt' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-        print "<div>FAIMS project ID: <input name='projid' value='".$projectId."' size='10'></div><div id='help-div'>to get it create the project in the FAIMS repository and read the id from description page</div>";
-        //print "<br><br><div>Project name: <input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='100'></div><br/>";
-        print "<br/><br/><div>Record types to include in project:";
+        
+        print "<div style='color:red'><br/><br/>FAIMS project ID: <input style='color:black' name='projid' value='".$projectId."' size='10'>";
+        print "<div style='color:black'><br/>To obtain the project ID, create the project in the FAIMS repository ".
+            "and read the FAIMS ID shown on the project description page</div>";
 
-        print "<span id='selectedRectypes' style='width:270px;padding:10px;font-weight:bold;'></span>";
-        print "<input type='button' value='Select Record Type' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/><br/><br/>";
+        // print "<br><br><div>Project name: <input name='projname' value='".($projname?$projname:HEURIST_DBNAME).
+        // "' size='100'></div><br/>";
+        
+        print "<div><table>";
+        print "<tr height=20 />";
+        print "<tr><td style='color:red' width=80>Host:</td><td><input name='host' value='".$host."' size='20'></td></tr>";
+        print "<tr><td style='color:red' width=80>Username:</td><td><input name='username' value='".$fusername."' size='20'></td></tr>";
+        print "<tr><td style='color:red' width=80>Password:</td><td><input name='pwd' value='".$fpwd."' size='20'></td></tr>";
+        print "<tr height=20></tr>";
+        print "</table></div>";
 
-        print "<br/><div>Host: <input name='host' value='".$host."' size='50'></div>";
-        print "<br/><div>Username: <input name='username' value='".$fusername."' size='30'></div>";
-        print "<br/><div>Password: <input name='pwd' value='".$fpwd."' size='30'></div>";
+        print "<div style='color:red'>Record types to include in export: &nbsp;&nbsp;"; 
+        print "<input type='button' value='Select Record Types' id='btnSelRecType1' ".
+            "onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/><br/><br/>";
+        print "<span id='selectedRectypes' style='width:270px;color:black;padding:10px;font-weight:bold;'></span></div>";
+           
+        print "<div><br/><br/><input type='submit' value='Start tDAR Export' /></div>";
+       
 
-        print "<br/><br/><div><input type='submit' value='Start Export' /></div>";
-        print "</form></div>";
+        print "</form>";
         if($rt_toexport){
             print "<script>showSelectedRecTypes('".$rt_toexport."')</script>";
         }
@@ -163,11 +173,12 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
         $mysqli = mysqli_connection_overwrite("hdb_".@$_REQUEST['db']);
 
+        // Note: enum fields are exported as 'coding sheets'
         $unsupported = array('relmarker','enum','relationtype','resource','separator','calculated','fieldsetmarker','urlinclude');
 
 
         /*
-        * Main LOOP for all slected record types
+        * Main LOOP for all selected record types
         */
         foreach ($rectyps as $rt) {
 
@@ -178,7 +189,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $res = $mysqli->query($query);
             if (!$res){
                 //die('Failed to obtain strcuture for record type: '.$rt);
-                print "<p class='error'>Failed to obtain strcuture for record type: ".$rt."</p>";
+                print "<p class='error'>Failed to obtain structure for record type: ".$rt."</p>";
                 continue;
             }else{
                 while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
@@ -197,7 +208,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             //get all records for specified recordtype
             $query = prepareQuery($params, $squery, BOTH, $detTable, $ourwhere, $order);
 
- //DEBUG print "<p>".$query."</p>";
+            //DEBUG print "<p>".$query."</p>";
             $filename;
 
             $res = $mysqli->query($query);
@@ -214,7 +225,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
                     if($recid!=$row[0]){ //new line
                         if($hasdetails){
-//print ">>>".$recid."  ADDED<br>";
+                        //print ">>>".$recid."  ADDED<br>";
                             $records[$recid] = $details;
                             $details = $dettypes;
                         }
@@ -291,7 +302,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 $res->close();
 
                 if($hasdetails){
-//print ">>>".$recid."  ADDED<br>";
+                //print ">>>".$recid."  ADDED<br>";
                      $records[$recid] = $details;
                 }
 
@@ -316,7 +327,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     foreach ($details as $detail) {
                         array_push($fields, implode("|", $detail));
                     }
-//DEBUG print implode(",", $fields)."<br>";
+                    //DEBUG print implode(",", $fields)."<br>";
                     fputcsv($fp, $fields);
                 }
 
@@ -414,7 +425,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     }else if($detail[3]=="boolean"){
                         $column->columnDataType = 'BOOLEAN';
                     }
-//ENUM('relmarker','enum','relationtype','resource','file','separator','calculated','fieldsetmarker','urlinclude')
+            //ENUM('relmarker','enum','relationtype','resource','file','separator','calculated','fieldsetmarker','urlinclude')
 
             }
 
@@ -437,15 +448,20 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
 
             //$resp = post_request($url, $fusername, $fpwd, $postdata);
+            
+            // TO DO: TEMPORARY VERSION FOR TESTING, REPLACE WITH PARAMETEREISERD VERSION ABOVE
             $resp = http_post("115.146.85.232","8080", "/api/upload", $fusername, $fpwd, $postdata);
 
             //$postdata = array("loginUsername"=>$fusername, "loginPassword"=>$fpwd);
             //$resp = http_post("115.146.85.232","8080", "/login/process", null, null, $postdata);
 
 
+            print "tDAR server response:";
             print "<xmp>".$resp."</xmp>";
             break;
-        }
+        } // end foreach ($rectyps as $rt)
+        
+        // END OF LOOP FOR EACH RECORD TYPE TO BE EXPORTED
 
 
         //copy images
