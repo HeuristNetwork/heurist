@@ -72,6 +72,7 @@ $defaultDBname = "ExampleDB"; // may be left blank, should not include prefix (s
 // The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
 // this address will allow heurist to request content through the firewall for general Internet URI's
 $httpProxy = ""; // blank = assumes direct internet access from server - ok for laptop installations.
+$httpProxyAuth = ""; // authorization for proxy server "username:password"
 
 // A simple challenge password for creation of new databases. If left blank, any logged in user can create a new database
 $passwordForDatabaseCreation=""; // blank = any logged in user can create

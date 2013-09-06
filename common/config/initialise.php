@@ -143,7 +143,9 @@ if (@$defaultDBname != '') {
 }
 if (@$httpProxy != '') {
 	define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
-
+    if (@$httpProxyAuth != '') {
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+    }
 }
 // upload path eg. /var/www/htdocs/HEURIST_FILESTORE
 if ($defaultRootFileUploadPath) {
