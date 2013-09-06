@@ -59,11 +59,25 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
   <link rel=stylesheet href="../../common/css/global.css" media="all">
   <link rel=stylesheet href="../../common/css/admin.css" media="all">
 
+  <style>
+    .err_message {
+        color:red;
+        border-bottom: 1px solid black;
+        text-transform:uppercase;
+        padding-top:5px;
+    }
+    .lbl_form{
+        width:180px;
+        display:inline-block;
+        text-align:right;
+        padding:14px;
+    }
+  </style>
 </head>
 <body style="padding:44px;" class="popup">
 
     <div class="banner"><h2>FAIMS sync</h2></div>
-    <div id="page-inner" style="width:640px; margin:0px auto; padding: 0.5em;">
+    <div id="page-inner" style="width:740px; margin:0px 5px; padding: 0.5em;">
 <?php
 
     $dbname_faims = @$_REQUEST['faims'];
@@ -71,7 +85,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     if( !$dbname_faims ||  !file_exists($dbname_faims)){
 
         if($dbname_faims && !file_exists($dbname_faims)){
-            print "<div style='color:red; font-weight:bold;padding:10px'>The specified database file does not found</div>";
+           print "<div class='err_message'>The specified database file does not found</div>";
         }
 
 
@@ -85,9 +99,9 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
         print "<form name='selectdb' action='syncFAIMS.php' method='get'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-        print "<div>FAIMS database: <input name='faims' value='".$dbname_faims."' size='100'></div><br/>";
-        print "<div>Show structure: <input name='showstr' value='1' type='checkbox'></div><br/>";
-        print "<div><input type='submit' value='Start' /></div>";
+        print "<div><div class='lbl_form'>FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
+        print "<div><div class='lbl_form'>Show structure:</div><input name='showstr' value='1' type='checkbox'></div>";
+        print "<div><div class='lbl_form'></div><input type='submit' value='Start' /></div>";
         print "</form></div></body></html>";
         exit();
     }
@@ -186,17 +200,6 @@ exit();
                 echo $row[0]."  ".$row[1]."  ".$row[2]."<br>";
         }
 
-
-       // Vocabulary  -> defTerms
-        print "<h3>Vocabulary (terms)</h3><br>";
-        $query =  "SELECT VocabID, AttributeID, VocabName FROM Vocabulary";
-        $rs = $dbfaims->query($query);
-        while ($row = $rs->fetchArray(SQLITE3_NUM))
-        {
-                echo $row[0]."  ".$row[2]."<br>";
-        }
-
-
         //AEntType - defRecTypes   IdealAEnt - defRecStrucutre
         print "<h3>Entity type (record types and structures)</h3><br>";
         $query =  "SELECT AEntTypeID, AEntTypeName, AEntTypeCategory, AEntTypeDescription FROM AEntType";
@@ -212,6 +215,28 @@ exit();
                       echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2]."</div>";
                 }
         }
+        
+        
+       // Vocabulary  -> defTerms
+        print "<h3>Vocabulary (terms)</h3><br>";
+        $query =  "SELECT VocabID, AttributeID, VocabName FROM Vocabulary";
+        $rs = $dbfaims->query($query);
+        while ($row = $rs->fetchArray(SQLITE3_NUM))
+        {
+                echo $row[0]."  ".$row[2]."<br>";
+        }
+
+       // Relationship types  -> defTerms
+        print "<h3>Relationship types (terms)</h3><br>";
+        $query =  "SELECT RelnTypeID, RelnTypeName, RelnTypeCategory, Parent, Child FROM RelnType";  //RelnTypeCategory='bidirectional'
+        
+        $rs = $dbfaims->query($query);
+        while ($row = $rs->fetchArray(SQLITE3_NUM))
+        {
+                echo $row[0]."  ".$row[1]."  ".$row[2]."  ".$row[3]."  ".$row[4]."<br>";
+        }
+
+        
     }
 
     print "<h3>Sync structure</h3><br>";
@@ -219,6 +244,7 @@ exit();
     $rectypeMap = array();
     $detailMap = array();
     $termsMap = array();
+    $reltypeMap = array();
 
     print "<h3>Details</h3><br>";
 
@@ -320,7 +346,85 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
 
 
     }//for attributes
+    
+//----------------------------------------------------------------------------------------
 
+    print "<h3>Relationship types</h3><br>";
+    
+    //find parent term for FAIMS relationships    
+    $parentTermID = null;
+    $row = mysqli__select_array($mysqli, "select distinct trm_ParentTermID from defTerms where trm_NameInOriginatingDB like 'FAIMS%'");
+    if($row){
+           $parentTermID = $row[0];
+    }else{
+            $query = "INSERT INTO defTerms (trm_Label, trm_Description, trm_Domain) VALUES (?,?,'relation')";
+            $stmt = $mysqli->prepare($query);
+            $flbl = 'FAIMS relationships';
+            $fdesc = 'Relationship types in FAIMS database';
+            $stmt->bind_param('ss', $flbl , $fdesc );
+            $stmt->execute();
+            $parentTermID = $stmt->insert_id;
+            $stmt->close();
+    }
+   
+    
+    $query1 =  "SELECT RelnTypeID, RelnTypeName, RelnTypeCategory, Parent, Child FROM RelnType";  //RelnTypeCategory='bidirectional'
+    
+    $rs = $dbfaims->query($query1);
+    while ($row_vocab = $rs->fetchArray(SQLITE3_NUM))
+    {
+                $is_hierarchy = ($row_vocab[2]=="hierarchy" && $row_vocab[3] && $row_vocab[4]);    
+                
+        
+                $row = mysqli__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
+                if($row){
+
+
+                        if($is_hierarchy){
+                            $parent = $row[0];
+                            $row = mysqli__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."_child'");
+                            $reltypeMap[$row_vocab[0]] = array($parent, $row[0]);
+                            print  "&nbsp;&nbsp;Reltype hierarchy ".$parent."=".$row_vocab[3]." and " .$row[0]."=".$row_vocab[4]."  =>".$row_vocab[0]."<br/>";
+                        }else{
+                            print  "&nbsp;&nbsp;Reltype ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
+                            $reltypeMap[$row_vocab[0]] = $row[0];
+                        }
+                        
+                        
+                }else{
+                        //add new detail type into HEURIST
+                        $query = "INSERT INTO defTerms (trm_Label, trm_Domain, trm_NameInOriginatingDB, trm_ParentTermID) VALUES (?,'relation',?, $parentTermID)";
+                        $stmt = $mysqli->prepare($query);
+                        $fid = 'FAIMS.'.$row_vocab[0];
+                        $stmt->bind_param('ss', $is_hierarchy?$row_vocab[3]:$row_vocab[1], $fid );
+                        $stmt->execute();
+                        $trm_ID = $stmt->insert_id;
+                        $stmt->close();
+
+                        if($is_hierarchy){
+                            
+                                $parent = $trm_ID;
+                            
+                                $query = "INSERT INTO defTerms (trm_Label, trm_Domain, trm_NameInOriginatingDB, trm_ParentTermID) VALUES (?,'relation',?, $parentTermID)";
+                                $stmt = $mysqli->prepare($query);
+                                $fid = 'FAIMS.'.$row_vocab[0];
+                                $stmt->bind_param('ss', $row_vocab[4], $fid );
+                                $stmt->execute();
+                                $trm_ID = $stmt->insert_id;
+                                $stmt->close();
+                            
+                                $reltypeMap[$row_vocab[0]] = array($parent, $trm_ID);
+                                print  "&nbsp;&nbsp;Reltype added. Hierarchy ".$parent."=".$row_vocab[3]." and " .$trm_ID."=".$row_vocab[4]."  based on ".$row_vocab[0]."<br/>";
+
+                        }else{
+                            $reltypeMap[$row_vocab[0]] = $trm_ID;
+                            print  "&nbsp;&nbsp;Reltype added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br/>";
+                        }
+
+        
+                }//add terms
+    }
+    
 //----------------------------------------------------------------------------------------
 
     print "<h3>Rectypes</h3><br>";
@@ -501,7 +605,7 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
                 $details["t:".$dt_SourceRecordID] = array('0'=>$faims_id);
 
                 //find the existing record in Heurist database
-                $recID = mysqli__select_value($mysqli, "select dtl_RecID from recDetails where dtL_DetailTypeID=$dt_SourceRecordID and dtl_Value=$faims_id");
+                $recID = getRecordByFaimsId($faims_id);
             }else{
                 $recID = 0;
             }
@@ -596,6 +700,94 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
     if($details && count($details)>0){
         insert_update_Record($recID, $rectype, $details, $faims_id);
     }
+
+    print "Inserted ".$cntInsterted."<br/>";
+    print "Updated ".$cntUpdated."<br/>";
+
+    
+//----------------------------------------------------------------------------------------
+
+    print "<h3>Update relationship records in H3 accoring to the most current relations in FAIMS</h3><br>";
+    
+    $query = 'select ar.RelationShipID, ae.UUID, ar.RelnTypeID 
+                from "latestNonDeletedRelationship" ar, "latestNonDeletedAentReln" ae 
+                where ar.RelationShipID=ae.RelationShipID  order by ar.RelationShipID';    
+
+    $faims_id = null;
+    $details = null;
+    $rectype = RT_RELATION;
+    $reltype = null;
+    $recID = null;
+    $skip_faimsrec = false;
+    $cntInsterted = 0;
+    $cntUpdated = 0;
+
+    $rs = $dbfaims->query($query);
+    while ($row = $rs->fetchArray(SQLITE3_NUM))
+    {
+        if($faims_id!=$row[0]){ 
+
+            //another relation - save previous
+            if($details && count($details)>0){
+                insert_update_Record($recID, $rectype, $details, $faims_id);
+            }
+
+            $details = array();
+
+            echo "Entity id:".$row[0]."  ".$row[1]."  ".$row[2]."<br>";
+            $faims_id = $row[0];
+            $faims_atype = $row[2];
+            $faims_relent_id = $row[1];
+
+            if(@$reltypeMap[$faims_atype]){
+                $reltype = $reltypeMap[$faims_atype];
+            }else{
+                $skip_faimsrec = true;
+                print "RELATION TYPE NOT FOUND for faims reltype ".$faims_atype."<br />";
+                continue;
+            }
+
+            $skip_faimsrec = false;
+
+            //add special detail type 2-589 - reference to original record id
+            if(isset($dt_SourceRecordID) && $dt_SourceRecordID>0){
+                $details["t:".$dt_SourceRecordID] = array('0'=>$faims_id);
+
+                //find the existing record in Heurist database
+                $recID = getRecordByFaimsId($faims_id);
+            }else{
+                $recID = 0;
+            }
+            
+             $details["t:".DT_NAME] = array('0'=>'Relationship');
+             $details["t:".DT_PRIMARY_RESOURCE] = array('0'=> getRecordByFaimsId($faims_relent_id) );
+             $details["t:".DT_RELATION_TYPE] = array('0'=> $reltype);
+
+        }else if($skip_faimsrec){
+            $details = null;
+        }else {
+            $faims_relent_id = $row[1];
+            $details["t:".DT_TARGET_RESOURCE] = array('0'=> getRecordByFaimsId($faims_relent_id) );
+            $faims_id = null;
+        }
+
+    }//loop all faims records
+
+    if($details && count($details)>0){
+        insert_update_Record($recID, $rectype, $details, $faims_id);
+    }
+    
+   
+/**
+* returns H3 record id by faims id
+*    
+* @param mixed $faims_id
+*/
+function getRecordByFaimsId($faims_id){
+    global $dt_SourceRecordID;
+    return mysqli__select_value($mysqli, "select dtl_RecID from recDetails where dtL_DetailTypeID=$dt_SourceRecordID and dtl_Value=$faims_id");
+}
+    
 
 /*
     $query = "SELECT  a1.uuid, a1.AEntTimestamp, a1.AEntTypeID FROM    ArchEntity a1 INNER JOIN ".
@@ -719,9 +911,6 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
 
     }//for records
 */
-
-    print "Inserted ".$cntInsterted."<br/>";
-    print "Updated ".$cntUpdated."<br/>";
 
 //insert or update records in H3 databse
 function insert_update_Record($recID, $rectype, $details, $faims_id)
