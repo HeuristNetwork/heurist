@@ -378,12 +378,12 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
         
                 $row = mysqli__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
                 if($row){
-
+                        //reltype already exists- fill $reltypeMap
 
                         if($is_hierarchy){
                             $parent = $row[0];
                             $row = mysqli__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."_child'");
-                            $reltypeMap[$row_vocab[0]] = array($parent, $row[0]);
+                            $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$row[0]);   // hierarchy - contains two heurist id - parent and child
                             print  "&nbsp;&nbsp;Reltype hierarchy ".$parent."=".$row_vocab[3]." and " .$row[0]."=".$row_vocab[4]."  =>".$row_vocab[0]."<br/>";
                         }else{
                             print  "&nbsp;&nbsp;Reltype ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
@@ -399,22 +399,29 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
                         $stmt->bind_param('ss', $is_hierarchy?$row_vocab[3]:$row_vocab[1], $fid );
                         $stmt->execute();
                         $trm_ID = $stmt->insert_id;
+                        $parent = $trm_ID;
                         $stmt->close();
 
-                        if($is_hierarchy){
+                        if($is_hierarchy){ //add child reltype
                             
                                 $parent = $trm_ID;
                             
-                                $query = "INSERT INTO defTerms (trm_Label, trm_Domain, trm_NameInOriginatingDB, trm_ParentTermID) VALUES (?,'relation',?, $parentTermID)";
+                                $query = "INSERT INTO defTerms (trm_Label, trm_Domain, trm_NameInOriginatingDB, trm_ParentTermID, trm_InverseTermId) '.
+                                        'VALUES (?,'relation',?, $parentTermID, $parent)";
                                 $stmt = $mysqli->prepare($query);
-                                $fid = 'FAIMS.'.$row_vocab[0];
+                                $fid = 'FAIMS.'.$row_vocab[0].'_child';
                                 $stmt->bind_param('ss', $row_vocab[4], $fid );
                                 $stmt->execute();
                                 $trm_ID = $stmt->insert_id;
                                 $stmt->close();
                             
-                                $reltypeMap[$row_vocab[0]] = array($parent, $trm_ID);
+                                $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$trm_ID);
                                 print  "&nbsp;&nbsp;Reltype added. Hierarchy ".$parent."=".$row_vocab[3]." and " .$trm_ID."=".$row_vocab[4]."  based on ".$row_vocab[0]."<br/>";
+                                
+                                $query = "UPDATE defTerms trm_InverseTermId=$trm_ID where trm_ID=".$parent;
+                                $stmt = $mysqli->prepare($query);
+                                $stmt->execute();
+                                $stmt->close();
 
                         }else{
                             $reltypeMap[$row_vocab[0]] = $trm_ID;
@@ -703,19 +710,177 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
 
     print "Inserted ".$cntInsterted."<br/>";
     print "Updated ".$cntUpdated."<br/>";
+    
+//----------------------------------------------------------------------------------------
+/*
+    print "<h3>Update special records  for FAIMS relationship category 'Container'</h3><br>";
+    
+    $query = "SELECT ae.uuid, ae.AEntTimestamp, ae.AEntTypeID, asText(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
+                    av.freeText, av.VocabID, av.AttributeID, av.Measure, av.Certainty
+    FROM aentvalue av
+    JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp, archentity.deleted as entDel, aentvalue.deleted as valDel
+            FROM aentvalue
+            JOIN archentity USING (uuid)
 
+        GROUP BY uuid, attributeid
+          HAVING MAX(ValueTimestamp)
+             AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
+    JOIN archentity ae using (uuid, aenttimestamp)
+    WHERE entDel is NULL
+      AND valDel is NULL
+ ORDER BY ae.uuid asc";
+
+    $faims_id = null;
+    $details = null;
+    $rectype = null;
+    $recID = null;
+    $skip_faimsrec = false;
+    $cntInsterted = 0;
+    $cntUpdated = 0;
+
+    $rs = $dbfaims->query($query);
+    while ($row = $rs->fetchArray(SQLITE3_NUM))
+    {
+        if($faims_id!=$row[0]){
+
+            if($details && count($details)>0){
+                insert_update_Record($recID, $rectype, $details, $faims_id);
+            }
+
+            $details = array();
+
+            echo "Entity id:".$row[0]."  ".$row[1]."  ".$row[2]."  ".$row[3]."<br>";
+            $faims_id = $row[0];
+            $faims_atype = $row[2];
+            $faims_time = $row[1];
+
+            if(@$rectypeMap[$faims_atype]){
+                $rectype = $rectypeMap[$faims_atype];
+            }else{
+                $skip_faimsrec = true;
+                print "RECORD TYPE NOT FOUND for Vocabulary ".$faims_atype."<br />";
+                continue;
+            }
+
+            $skip_faimsrec = false;
+
+            //add special detail type 2-589 - reference to original record id
+            if(isset($dt_SourceRecordID) && $dt_SourceRecordID>0){
+                $details["t:".$dt_SourceRecordID] = array('0'=>$faims_id);
+
+                //find the existing record in Heurist database
+                $recID = getRecordByFaimsId($faims_id);
+            }else{
+                $recID = 0;
+            }
+
+            if(isset($dt_Geo) && $dt_Geo>0 && $row[3]){
+
+                if(strpos($row[3],"POINT")===0){
+                    $pred = "p ";
+                }else if(strpos($row[3],"LINE")===0){
+                    $pred = "l ";
+                }else if(strpos($row[3],"POLY")===0){
+                    $pred = "pl ";
+                }else{
+                    $pred = " ";
+                }
+
+                $details["t:".$dt_Geo] = array('0'=>$pred.$row[3]);
+
+            }
+
+        }else if($skip_faimsrec){
+            $details = null;
+            continue;
+        }
+
+        //attr id, freetext, measure, certainity, vocabid
+        echo "<div style='padding-left:30px'>".$row[6]."  ".$row[4]."  ".$row[7]."  ".$row[8]."  ".$row[5]."  "."</div>";
+
+                  //get detailtype id in H3 by attrib id
+                  $key = -1;
+                  if(@$detailMap[$row[6]]){
+                       $key = intval($detailMap[$row[6]][0]);
+                       $detType = $detailMap[$row[6]][1];
+                  }
+                  if($key>0){
+
+                     if($detType=="file"){
+
+
+                        $filename = dirname($dbname_faims).DIRECTORY_SEPARATOR.$row[4];
+
+                        if(file_exists($filename)){
+                            //add-update the uploaded file
+                            $value = register_file($filename, null, false);
+                            if(!is_numeric($value)){
+                                print "<div style=\"color:red\">warning $filename failed to register, detail type ignored. $value</div>";
+                                $value = null;
+                            }
+                        }else{
+                            print "<div style=\"color:red\">warning $filename file not found, detail type ignored</div>";
+                            $value = null;
+                        }
+
+
+                     }else{
+
+                         $vocabID = $row[5];
+
+                         if($vocabID){ //vocabID
+                            if(@$termsMap[$vocabID]){
+                                $value = $termsMap[$vocabID];
+                            }else{
+                                print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
+                                continue;
+                            }
+                         }else if($row[4]){ //freetext
+                            $value = $row[4];
+                         }else if($row[7]){ //measure
+                            $value = $row[7];
+                         }else if($row[8]){ //Certainty
+                            $value = $row[8];
+                         }else{
+                             continue;
+                         }
+
+                     }
+
+                     if($value){
+                        if(!@$details["t:".$key]){
+                             $details["t:".$key] = array();
+                        }
+                        array_push($details["t:".$key], $value);
+                     }
+
+
+                  }else{
+                        print "DETAIL TYPE NOT FOUND for Attrubute ".$row[6]."<br />";
+                  }
+
+    }//loop all faims records
+
+    if($details && count($details)>0){
+        insert_update_Record($recID, $rectype, $details, $faims_id);
+    }
+
+    print "Inserted ".$cntInsterted."<br/>";
+    print "Updated ".$cntUpdated."<br/>";
+*/
     
 //----------------------------------------------------------------------------------------
 
     print "<h3>Update relationship records in H3 accoring to the most current relations in FAIMS</h3><br>";
     
-    $query = 'select ar.RelationShipID, ae.UUID, ar.RelnTypeID 
+    $query = 'select ar.RelationShipID, ae.UUID, ar.RelnTypeID, ae.ParticipatesVerb  
                 from "latestNonDeletedRelationship" ar, "latestNonDeletedAentReln" ae 
                 where ar.RelationShipID=ae.RelationShipID  order by ar.RelationShipID';    
 
     $faims_id = null;
     $details = null;
     $rectype = RT_RELATION;
+    $is_source_rec = true;
     $reltype = null;
     $recID = null;
     $skip_faimsrec = false;
@@ -729,10 +894,25 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
 
             //another relation - save previous
             if($details && count($details)>0){
-                insert_update_Record($recID, $rectype, $details, $faims_id);
+                //since hiearchy is a graph in faims - it may be many-to-many relationship
+                foreach ($details["t:".DT_PRIMARY_RESOURCE] as $idx=>$recId_Source) {
+                    foreach ($details["t:".DT_TARGET_RESOURCE] as $idx=>$recId_Target) {
+                        $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
+                                          "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
+                                          "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
+                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE]
+                                     );
+                        
+                        insert_update_Record($recID, $rectype, $details2, $faims_id);    
+                    }
+                }
             }
 
             $details = array();
+            $details["t:".DT_PRIMARY_RESOURCE]=array();
+            $details["t:".DT_TARGET_RESOURCE]=array();
+            
+            $is_source_rec = true;
 
             echo "Entity id:".$row[0]."  ".$row[1]."  ".$row[2]."<br>";
             $faims_id = $row[0];
@@ -740,7 +920,14 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
             $faims_relent_id = $row[1];
 
             if(@$reltypeMap[$faims_atype]){
-                $reltype = $reltypeMap[$faims_atype];
+                if(isarray($reltypeMap[$faims_atype])){
+                    //hiearchy
+                    $participatesVerb = $row[3];
+                    $reltype = reset($reltypeMap[$faims_atype]);
+                    $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
+                }else{
+                    $reltype = $reltypeMap[$faims_atype];
+                }
             }else{
                 $skip_faimsrec = true;
                 print "RELATION TYPE NOT FOUND for faims reltype ".$faims_atype."<br />";
@@ -759,15 +946,31 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
                 $recID = 0;
             }
             
-             $details["t:".DT_NAME] = array('0'=>'Relationship');
-             $details["t:".DT_PRIMARY_RESOURCE] = array('0'=> getRecordByFaimsId($faims_relent_id) );
+             array_push($details["t:".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)], getRecordByFaimsId($faims_relent_id) );
              $details["t:".DT_RELATION_TYPE] = array('0'=> $reltype);
 
         }else if($skip_faimsrec){
             $details = null;
         }else {
+            $faims_atype = $row[2];
             $faims_relent_id = $row[1];
-            $details["t:".DT_TARGET_RESOURCE] = array('0'=> getRecordByFaimsId($faims_relent_id) );
+            $is_source_rec = false;
+            
+            if(@$reltypeMap[$faims_atype]){
+                if(isarray($reltypeMap[$faims_atype])){
+                    //hiearchy
+                    $participatesVerb = $row[3];
+                    $reltype = reset($reltypeMap[$faims_atype]);
+                    $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
+                }
+            }else{
+                $details = true;
+                print "RELATION TYPE NOT FOUND for faims reltype ".$faims_atype."<br />";
+                continue;
+            }
+            
+            
+            array_push($details["t:".($is_source_rec?DT_TARGET_RESOURCE:DT_PRIMARY_RESOURCE)], getRecordByFaimsId($faims_relent_id) );
             $faims_id = null;
         }
 

@@ -28,6 +28,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+    require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
     if(isForAdminOnly("to sync FAIMS database")){
@@ -206,7 +207,8 @@ function generateSchema($projname, $rt_toexport){
 
 
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
-    $ind_rt_titlemask = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];//'rty_TitleMask'];
+    $ind_rt_titlemask = $rtStructs['typedefs']['commonNamesToIndex']['rty_TitleMask']; //names
+    $ind_rt_titlemask_canonical = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];// codes
     $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
     $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
     $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
@@ -223,6 +225,11 @@ function generateSchema($projname, $rt_toexport){
     if(count($rectyps)>0){
 
         $termLookup = $dtTerms['termsByDomainLookup']['relation'];
+        
+        $root->addChild('remark', 'In Heurist, relationships are stored in a single relationship record type and 
+        different types of relationship are distinguished by the relationship type field (attribute) whose values 
+        can be organised hierarchichally. In FAIMS, each type of relationship is a separate record type, organised 
+        into three classes - bidirectional, container and hierarchy');
 
         foreach ($termLookup as $termid=>$term) {
 
@@ -263,21 +270,29 @@ function generateSchema($projname, $rt_toexport){
 */
             }
         }
+        
+        $root->addChild('remark', 'Archaeological elements correspond with Heurist record types');
+        $root->addChild('remark', 'Properties correspond with Heurist base field types for this record type');
     }    
 
     foreach ($rectyps as $rt) {
         
         $rt_descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
+        $root->addChild('remark', strtoupper($rtStructs['names'][$rt])); 
         $arch_element = $root->addChild('ArchaeologicalElement');
 
         $arch_element->addAttribute('type', $rtStructs['names'][$rt] );
         $arch_element->description = "{".$rt_descr."}";
         $titlemask = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask];
+        $titlemask_canonical = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask_canonical];
+        
+        //backward capability - make sure that titlemask is canonical
+        $titlemask = titlemask_make($titlemask, $rt, 1, null, _ERR_REP_SILENT);
         
         add16n($rt_descr);
 
-//error_log("titlemask>>>>".$titlemask);
+        $has_identifier = false;
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
@@ -299,9 +314,10 @@ function generateSchema($projname, $rt_toexport){
 
             $ccode = $det[$int_dt_ccode];
 
-            $is_in_titlemask = ( strpos($titlemask, ".".$ccode."]")!=false || strpos($titlemask, "[".$ccode."]")!=false ) ;
+            $is_in_titlemask = (!( strpos($titlemask, ".".$ccode."]")===false && strpos($titlemask, "[".$ccode."]")===false )) ;
             if($is_in_titlemask){
                 $property->addAttribute('isIdentifier', 'true');
+                $has_identifier = true;
             }
 
             if($dt_type=='enum' || $dt_type=='relationtype'){
@@ -310,15 +326,24 @@ function generateSchema($projname, $rt_toexport){
                 getTermsTree($property, $dt_type, $terms);
             }
         }
+        
+        if(!$has_identifier){
+            $root->addChild('remark', 'ERROR!!!!! This ArchaeologicalElement does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
+            
+        }
 
     }//foreach
 
-    return utf8_encode(formatXML($root));
+    $out = $root->asXML();
+    $out = str_replace('<remark>','<!--',$out);
+    $out = str_replace('</remark>','-->',$out);
+
+    return utf8_encode(formatXML2($out));
 }
 
 /**
-* put your comment there...
-*
+* generate with simplexml
+* 
 * @param mixed $projname
 * @param mixed $rt_toexport
 */
@@ -342,8 +367,11 @@ function generate_UI_Schema($projname, $rt_toexport){
     $body = $root->addChild("body");
 
     $head->addChild("title", str_replace("_"," ",DATABASE));
+    $model = $head->addChild("remark",'model lists user interface tabgroups, tabs and content of tabs','http://www.w3.org/2002/xforms');
     $model = $head->addChild("model",'','http://www.w3.org/2002/xforms');
     $instance = $model->addChild("instance");
+    $model->addChild("remark",'list of numeric and blocktext(memo) attributes(fields)');
+
     $faims = $instance->addChild("faims");
     $faims->addAttribute('id', DATABASE);
 
@@ -355,6 +383,7 @@ function generate_UI_Schema($projname, $rt_toexport){
     //<devices/><login/>
     //$faims->addChild('user')->addChild('usertab')->addChild('users');
 
+    $body->addChild("remark",'describes controls for each tabgroup and its nested tab','http://www.w3.org/2002/xforms');
     $style = new SimpleXMLElement('<group ref="style">
       <label/>
       <group ref="orientation">
@@ -416,7 +445,6 @@ function generate_UI_Schema($projname, $rt_toexport){
     $item->value = 'dummy'; */
 
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
-    $ind_rt_titlemask = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];//'rty_TitleMask'];
     $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
     $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
     $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
@@ -427,6 +455,7 @@ function generate_UI_Schema($projname, $rt_toexport){
     $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
 
     
+    $faims->addChild("remark",'control tabgroup that contains button to manipulate entities: load, list, create');
     $tabgroup_control = $faims->addChild('control');
     $tab_buttonholder  = $tabgroup_control->addChild('buttonholder');
     $tab_data  = $tabgroup_control->addChild('data');
@@ -437,6 +466,7 @@ function generate_UI_Schema($projname, $rt_toexport){
               <stopsync/>
             </gps>');
     xml_adopt($tabgroup_control, $tab_gps);
+    $faims->addChild("remark",'list of tabgroups for entities');
 
     $rectyps = explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
@@ -452,9 +482,11 @@ function generate_UI_Schema($projname, $rt_toexport){
         $tab_data->addChild($rtnamex.'List');
         $tab_data->addChild($rtnamex.'Load');
 
+        $faims->addChild("remark", strtoupper($rtnamex) );        
         $tabgroup_head = $faims->addChild($rtnamex); //tabgroup for rectype
         $tab = $tabgroup_head->addChild('main');     //first tab
 
+        $body->addChild("remark", strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
         $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms'); //tabgroup for rectype
         $tabgroup_body->addChild('label', "{".$rtname."}");
         $tabgroup_body->addAttribute('ref', $rtnamex);
@@ -550,8 +582,12 @@ function generate_UI_Schema($projname, $rt_toexport){
         
 
     }//foreach
+    
+    $out = $root->asXML();
+    $out = str_replace('<remark>','<!--',$out);
+    $out = str_replace('</remark>','-->',$out);
 
-    return utf8_encode(formatXML($root));
+    return utf8_encode(formatXML2($out));
 }
 
 function getProperName($name){
@@ -643,8 +679,15 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
 
 function formatXML($simpleXml){
     $dom = dom_import_simplexml($simpleXml)->ownerDocument;
-    //$dom->preserveWhiteSpace = false;
+    $dom->preserveWhiteSpace = false;
     $dom->formatOutput = true;
+    return $dom->saveXML();
+}
+function formatXML2($sxml){
+    $dom = new DOMDocument();
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = true;
+    $dom->loadXML($sxml);
     return $dom->saveXML();
 }
 
