@@ -143,7 +143,7 @@
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
         file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
         file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport));
-        file_put_contents($folder."/arch16N.properties", arrToProps($content_a16n));
+        file_put_contents($folder."/arch16N.properties", arrToProps());
         //file_put_contents($folder."/ui_logic.bsh", "this is a Java beanshell file which provides the operational  logic for the tablet interface");
 
 
@@ -178,24 +178,44 @@ Or use pear install Archive_Tar
 http://stackoverflow.com/questions/333130/build-tar-file-from-directory-in-php-without-exec-passthru
 */
 
-function add16n($line){
+function getResStr($str, $val=null){
+    add16n($str, $val);
+    return "{".str_replace(' ','_',$str)."}";
+}
+
+function add16n($line, $val=null){
     global $content_a16n;
     if(!isset($content_a16n)){
         $content_a16n = array();
     }
-    if(isset($line) && !in_array($line, $content_a16n)){
-        array_push($content_a16n, $line);
+    if(isset($line) && !@$content_a16n[$line]){   //!in_array($line, $content_a16n)){
+        $content_a16n[$line] = $val?$val:$line;
     }
 }
+//generate a16n output
 function arrToProps(){
     global $content_a16n;
     $res = "";
-    foreach ($content_a16n as $prop){
-        $res = $res."{".str_replace(' ','_',$prop)."}=".$prop."\n";
+    foreach ($content_a16n as $prop=>$value){
+        $res = $res."{".str_replace(' ','_',$prop)."}=".$value."\n";
     }
     return $res;
 }
 
+function addComment($ele, $text, $ns=null){
+    if($ns){
+        $ele->addChild('remark____comment', $text, $ns);
+    }else{
+        $ele->addChild('remark____comment', $text);
+    }
+}
+function prepareXml($root){
+    $out = $root->asXML();
+    $out = str_replace('<remark____comment>','<!--',$out);
+    $out = str_replace('</remark____comment>','-->',$out);
+    return utf8_encode(formatXML2($out));
+}    
+    
 function generateSchema($projname, $rt_toexport){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
@@ -211,6 +231,7 @@ function generateSchema($projname, $rt_toexport){
     $ind_rt_titlemask_canonical = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];// codes
     $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
     $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
+    $int_dt_description = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Documentation'];
     $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
 
     $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
@@ -226,7 +247,7 @@ function generateSchema($projname, $rt_toexport){
 
         $termLookup = $dtTerms['termsByDomainLookup']['relation'];
         
-        $root->addChild('remark', 'In Heurist, relationships are stored in a single relationship record type and 
+        addComment($root, 'In Heurist, relationships are stored in a single relationship record type and 
         different types of relationship are distinguished by the relationship type field (attribute) whose values 
         can be organised hierarchichally. In FAIMS, each type of relationship is a separate record type, organised 
         into three classes - bidirectional, container and hierarchy');
@@ -271,26 +292,24 @@ function generateSchema($projname, $rt_toexport){
             }
         }
         
-        $root->addChild('remark', 'Archaeological elements correspond with Heurist record types');
-        $root->addChild('remark', 'Properties correspond with Heurist base field types for this record type');
+        addComment($root, 'Archaeological elements correspond with Heurist record types');
+        addComment($root, 'Properties correspond with Heurist base field types for this record type');
     }    
 
     foreach ($rectyps as $rt) {
         
         $rt_descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
-        $root->addChild('remark', strtoupper($rtStructs['names'][$rt])); 
+        addComment($root, strtoupper($rtStructs['names'][$rt])); 
         $arch_element = $root->addChild('ArchaeologicalElement');
 
         $arch_element->addAttribute('type', $rtStructs['names'][$rt] );
-        $arch_element->description = "{".$rt_descr."}";
+        $arch_element->description = getResStr($rt_descr);
         $titlemask = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask];
         $titlemask_canonical = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask_canonical];
         
         //backward capability - make sure that titlemask is canonical
         $titlemask = titlemask_make($titlemask, $rt, 1, null, _ERR_REP_SILENT);
-        
-        add16n($rt_descr);
 
         $has_identifier = false;
 
@@ -311,6 +330,9 @@ function generateSchema($projname, $rt_toexport){
 
             $property->addAttribute('type', $dt_type);
             $property->addAttribute('name', $det[$int_dt_name]);
+            if($det[$int_dt_description]){
+                $property->addChild('description', str_replace("&", "&amp;", $det[$int_dt_description]));
+            }                                         
 
             $ccode = $det[$int_dt_ccode];
 
@@ -328,17 +350,15 @@ function generateSchema($projname, $rt_toexport){
         }
         
         if(!$has_identifier){
-            $root->addChild('remark', 'ERROR!!!!! This ArchaeologicalElement does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
+            addComment($root, 'ERROR!!!!! This ArchaeologicalElement does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
             
         }
 
     }//foreach
 
-    $out = $root->asXML();
-    $out = str_replace('<remark>','<!--',$out);
-    $out = str_replace('</remark>','-->',$out);
+    $out = prepareXml($root);
 
-    return utf8_encode(formatXML2($out));
+    return $out;
 }
 
 /**
@@ -352,13 +372,10 @@ function generate_UI_Schema($projname, $rt_toexport){
     global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
 
 
-   add16n('{Users}'); 
-   add16n('{dummy}');
-   add16n('{User List}');
-   add16n('{Devices}');
-   add16n('{Start.Recording}');
-   add16n('{Save.Record}');
-   add16n('{Delete.Record}');
+   add16n('Users'); 
+   add16n('dummy');
+   add16n('Devices');
+   add16n('Start.Recording');
    
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?>
 <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" />');
@@ -367,10 +384,10 @@ function generate_UI_Schema($projname, $rt_toexport){
     $body = $root->addChild("body");
 
     $head->addChild("title", str_replace("_"," ",DATABASE));
-    $model = $head->addChild("remark",'model lists user interface tabgroups, tabs and content of tabs','http://www.w3.org/2002/xforms');
+    addComment($head, 'model lists user interface tabgroups, tabs and content of tabs', 'http://www.w3.org/2002/xforms');
     $model = $head->addChild("model",'','http://www.w3.org/2002/xforms');
     $instance = $model->addChild("instance");
-    $model->addChild("remark",'list of numeric and blocktext(memo) attributes(fields)');
+    addComment($model, 'list of numeric and blocktext(memo) attributes(fields)');
 
     $faims = $instance->addChild("faims");
     $faims->addAttribute('id', DATABASE);
@@ -383,7 +400,7 @@ function generate_UI_Schema($projname, $rt_toexport){
     //<devices/><login/>
     //$faims->addChild('user')->addChild('usertab')->addChild('users');
 
-    $body->addChild("remark",'describes controls for each tabgroup and its nested tab','http://www.w3.org/2002/xforms');
+    addComment($body, 'describes controls for each tabgroup and its nested tab', 'http://www.w3.org/2002/xforms');
     $style = new SimpleXMLElement('<group ref="style">
       <label/>
       <group ref="orientation">
@@ -402,9 +419,9 @@ function generate_UI_Schema($projname, $rt_toexport){
     xml_adopt($body, $style, 'http://www.w3.org/2002/xforms');
     
     $user = new SimpleXMLElement('<group ref="user">
-      <label>{User List}</label>
+      <label>'.getResStr('User List').'</label>
       <group ref="usertab">
-        <label>{User List}</label>
+        <label>'.getResStr('User List').'</label>
         <select1 ref="users">
           <label>{Users}:</label>
           <item>
@@ -455,7 +472,7 @@ function generate_UI_Schema($projname, $rt_toexport){
     $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
 
     
-    $faims->addChild("remark",'control tabgroup that contains button to manipulate entities: load, list, create');
+    addComment($faims, 'control tabgroup that contains button to manipulate entities: load, list, create');
     $tabgroup_control = $faims->addChild('control');
     $tab_buttonholder  = $tabgroup_control->addChild('buttonholder');
     $tab_data  = $tabgroup_control->addChild('data');
@@ -466,7 +483,7 @@ function generate_UI_Schema($projname, $rt_toexport){
               <stopsync/>
             </gps>');
     xml_adopt($tabgroup_control, $tab_gps);
-    $faims->addChild("remark",'list of tabgroups for entities');
+    addComment($faims, 'list of tabgroups for entities');
 
     $rectyps = explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
@@ -474,27 +491,24 @@ function generate_UI_Schema($projname, $rt_toexport){
         $rtname = $rtStructs['names'][$rt];
         $rtnamex = getProperName($rtname);
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
-        add16n($rtname);
-        add16n($descr);
-        $descr = '{'.$descr.'}';
         
         $tab_buttonholder->addChild($rtnamex);
         $tab_data->addChild($rtnamex.'List');
         $tab_data->addChild($rtnamex.'Load');
 
-        $faims->addChild("remark", strtoupper($rtnamex) );        
+        addComment($faims, strtoupper($rtnamex) );        
         $tabgroup_head = $faims->addChild($rtnamex); //tabgroup for rectype
         $tab = $tabgroup_head->addChild('main');     //first tab
 
-        $body->addChild("remark", strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
+        addComment($body, strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
         $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms'); //tabgroup for rectype
-        $tabgroup_body->addChild('label', "{".$rtname."}");
+        $tabgroup_body->addChild('label', getResStr($rtname) );
         $tabgroup_body->addAttribute('ref', $rtnamex);
         $tabgroup_body->addAttribute('faims_archent_type', $rtname);
         
         $group = $tabgroup_body->addChild('group'); //first tab
         $group->addAttribute('ref', 'main');
-        $group->addChild('label', $descr);
+        $group->addChild('label', getResStr($descr) );
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
@@ -512,8 +526,7 @@ function generate_UI_Schema($projname, $rt_toexport){
                 
                 $group = $tabgroup_body->addChild('group'); //first tab
                 $group->addAttribute('ref', $headername);
-                $group->addChild('label', "{".$detail[$int_dt_disp_name]."}");
-                add16n( $detail[$int_dt_disp_name] );    
+                $group->addChild('label', getResStr( $detail[$int_dt_disp_name] ) );
             }
             
             if(in_array($dt_type, $unsupported)){
@@ -528,14 +541,12 @@ function generate_UI_Schema($projname, $rt_toexport){
             $isvocab = ($dt_type=='enum');
 
             $input = $group->addChild($isvocab?'select1':'input');
-            $input->addChild('label', "{".$detail[$int_dt_disp_name]."}");
+            $input->addChild('label', getResStr( $detail[$int_dt_disp_name] ) );
             $input->addAttribute('ref', $dtnamex);
             $input->addAttribute('faims_attribute_name', $dtname);
             $input->addAttribute('faims_read_only', 'false');
             $input->addAttribute('faims_certainty', 'false');
             $input->addAttribute('appearance', 'compact');
-            
-            add16n( $detail[$int_dt_disp_name] );
 
             $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
 
@@ -575,19 +586,15 @@ function generate_UI_Schema($projname, $rt_toexport){
         
         $trigger = $group->addChild('trigger');
         $trigger->addAttribute('ref', 'Update');
-        $trigger->addChild('label', '{Save.Record}');
+        $trigger->addChild('label', getResStr('Save.Record') );
         $trigger = $group->addChild('trigger');
         $trigger->addAttribute('ref', 'Delete');
-        $trigger->addChild('label', '{Delete.Record}');
+        $trigger->addChild('label', getResStr('Delete.Record') );
         
 
     }//foreach
     
-    $out = $root->asXML();
-    $out = str_replace('<remark>','<!--',$out);
-    $out = str_replace('</remark>','-->',$out);
-
-    return utf8_encode(formatXML2($out));
+    return prepareXml($root);
 }
 
 function getProperName($name){
@@ -663,14 +670,34 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
 
     global $dtTerms, $ind_label;
     $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+    $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
+    $ind_label = $dtTerms['fieldNamesToIndex']['trm_Label'];
+    $ind_descr = $dtTerms['fieldNamesToIndex']['trm_Description'];
+    $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
 
     foreach ($termTree as $termid=>$child_terms){
 
-        $termName = @$termLookup[$termid][0];
+        $termName = @$termLookup[$termid][$ind_label];
+        
         if($termName){
-            $lbl = str_replace("&", "&amp;", $parentname.$termName);
-            add16n($lbl);
-            $meta->addChild('term', '{'.$lbl.'}');
+            $termCcode = @$termLookup[$termid][$ind_ccode];
+            $termDescr = @$termLookup[$termid][$ind_descr];
+            $termCode = @$termLookup[$termid][$ind_tcode];
+            if($termCode){
+                $termCode = "[".$termCode."]";
+            }else{
+                $termCode = "";
+            }
+            
+            if(strpos($termCcode,'-')==false) {
+                $termCcode = '0-'.$termCcode;
+            }
+            $term = $meta->addChild('term', getResStr($termCcode, $termName.$termCode) );
+            $term->addChild('description', str_replace("&", "&amp;", $termName).$termCode.($termDescr?":".str_replace("&", "&amp;", $termDescr):"") );
+            
+            //$lbl = str_replace("&", "&amp;", $parentname.$termName);
+            //$meta->addChild('term', getResStr($lbl) );
+            
             createSubTree($meta, $datatype, $child_terms, $parentname.$termName."-");
         }
     }

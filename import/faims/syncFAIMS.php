@@ -215,6 +215,22 @@ exit();
                       echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2]."</div>";
                 }
         }
+
+        print "<h3>'Container' reltype will be mapped to separate record type</h3><br>";
+        $query =  'SELECT "RelnTypeID", "RelnTypeName", "RelnTypeDescription" FROM RelnType where RelnTypeCategory="container"';
+        $rs = $dbfaims->query($query);
+        while ($row = $rs->fetchArray(SQLITE3_NUM))
+        {
+                echo $row[0]."  ".$row[1]."  (".$row[3].")<br>";
+
+                $query2 =  'SELECT "RelnTypeID", "AttributeID", "RelnDescription", "IsIdentifier", "MinCardinality", "MaxCardinality" FROM "IdealReln"
+ where RelnTypeID='.$row[0];
+                $rs2 = $dbfaims->query($query2);
+                while ($row2 = $rs2->fetchArray(SQLITE3_NUM))
+                {
+                      echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2]."</div>";
+                }
+        }
         
         
        // Vocabulary  -> defTerms
@@ -238,7 +254,7 @@ exit();
 
         
     }
-
+    
     print "<h3>Sync structure</h3><br>";
 
     $rectypeMap = array();
@@ -553,6 +569,121 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
 //exit();
 
 //----------------------------------------------------------------------------------------
+
+    print "<h3>Rectypes for Container reltypes</h3><br>";
+
+    //create/update defRecTypes/defRecStrucure on base of RelnType and IdealReln
+    $query1 =  'SELECT "RelnTypeID", "RelnTypeName", "RelnTypeDescription" FROM RelnType where RelnTypeCategory="container"';
+    $res1 = $dbfaims->query($query1);
+    while ($row1 = $res1->fetchArray(SQLITE3_NUM))
+    {
+            $attrID = $row1[0];
+            $rtyName = $row1[1]." [$attrID]";
+
+            //try to find correspondant rectype in Heurist
+            $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
+            if($row){ //already exists
+
+print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
+
+                $rtyId = $row[0];
+                $rtyName = $row[1];
+
+                $rectypeMap[$attrID] = $row[0];
+            }else{
+                //add new record type into HEURIST
+                $query = "INSERT INTO defRecTypes (rty_Name, rty_TitleMask, rty_Description, rty_NameInOriginatingDB) VALUES (?,'Record #[ID]',?,?)";
+                $stmt = $mysqli->prepare($query);
+                $fid = 'FAIMS.'.$attrID;
+
+                $stmt->bind_param('sss', $rtyName, $row1[2], $fid);
+                $stmt->execute();
+
+                $rtyId = $stmt->insert_id;
+                if($rtyId<1){
+                    print "ERROR - rectype is not added !!!  ".$mysqli->error;
+                    exit();
+                }
+
+                $stmt->close();
+
+                $rectypeMap[$attrID] = $rtyId;
+
+print  "RT added ".$rtyId."  based on RlnType ".$attrID." ".$rtyName." ".$row1[2]."<br/>";
+            }
+
+            //if AEntType has strucute described in IdealReln
+            $query2 =  'SELECT "AttributeID", "RelnDescription", "IsIdentifier", "MinCardinality", "MaxCardinality" FROM "IdealReln"
+ where RelnTypeID='.$attrID;
+
+            $recstructure = $dbfaims->query($query2);
+            while ($row_recstr = $recstructure->fetchArray(SQLITE3_NUM))
+            {
+
+                    $row = mysqli__select_array($mysqli,
+                        "select rst_DetailTypeID, rst_DisplayName from defDetailTypes d, defRecStructure r ".
+                        "where d.dty_ID=r.rst_DetailTypeID and r.rst_RecTypeID=$rtyId and d.dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
+
+                    if($row){  //such detal in structure already exists
+
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br/>";
+
+                    }else{
+
+                        $row3 = mysqli__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
+                        if($row3){
+                                //add new detail type into HEURIST
+                                $query = "INSERT INTO defRecStructure (rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText) VALUES (?,?,?, '')";
+                                $stmt = $mysqli->prepare($query);
+                                $stmt->bind_param('iis', $rtyId, $row3[0], $row3[1] );
+                                $stmt->execute();
+
+                                $stmt->close();
+
+
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."  based on ".$row_recstr[0]."<br/>";
+                        }else{
+                            print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
+                        }
+                    }
+
+            }//for add details for structure
+
+            //verify spatial data for this record type
+            if(isset($dt_Geo) && $dt_Geo>0)
+            {
+                $row = mysqli__select_array($mysqli,
+                            "select rst_DetailTypeID, rst_DisplayName from defRecStructure r ".
+                            "where r.rst_RecTypeID=$rtyId and r.rst_DetailTypeID".$dt_Geo."'");
+
+                if($row){  //such detal in structure already exists
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br/>";
+                }else{
+
+                    $query3 = "SELECT count(*) FROM Relationship ae where ae.RelnTypeID="
+                                .$attrID." and asText(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
+                    $hasgeo = $dbfaims->query($query3);
+                    $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
+
+        print "HAS GEO : ".$hasgeo[0]." entries<br>";
+
+                    if($hasgeo[0]>0){
+                        $row3 = mysqli__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_ID=".$dt_Geo);
+                        if($row3){
+                                        $query = "INSERT INTO defRecStructure (rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText) VALUES (?,?,?, '')";
+                                        $stmt = $mysqli->prepare($query);
+                                        $stmt->bind_param('iis', $rtyId, $row3[0], $row3[1] );
+                                        $stmt->execute();
+                                        $stmt->close();
+        print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."<br/>";
+                        }
+                    }
+                }
+            }
+
+    }//for RelnType
+
+//----------------------------------------------------------------------------------------
 /* */
 
     print "<h3>Update records in H3 accoring to the most current Record set in FAIMS</h3><br>";
@@ -712,24 +843,28 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
     print "Updated ".$cntUpdated."<br/>";
     
 //----------------------------------------------------------------------------------------
-/*
+
     print "<h3>Update special records  for FAIMS relationship category 'Container'</h3><br>";
     
-    $query = "SELECT ae.uuid, ae.AEntTimestamp, ae.AEntTypeID, asText(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
-                    av.freeText, av.VocabID, av.AttributeID, av.Measure, av.Certainty
-    FROM aentvalue av
-    JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp, archentity.deleted as entDel, aentvalue.deleted as valDel
-            FROM aentvalue
-            JOIN archentity USING (uuid)
+    $query = "SELECT ae.RelationshipID, ae.RelnTimestamp, ae.RelnTypeID, asText(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
+                    av.freeText, av.VocabID, av.AttributeID, null, av.Certainty
+    FROM RelnValue av
+    JOIN (SELECT RelationshipID, attributeid, max(RelnValueTimestamp) as RelnValueTimestamp, max(RelnTimestamp) as RelnTimestamp, Relationship.deleted as entDel, RelnValue.deleted as valDel
+            FROM RelnValue
+            JOIN Relationship USING (RelationshipID)
 
-        GROUP BY uuid, attributeid
-          HAVING MAX(ValueTimestamp)
-             AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-    JOIN archentity ae using (uuid, aenttimestamp)
+        GROUP BY RelationshipID, attributeid
+          HAVING MAX(RelnValueTimestamp)
+             AND MAX(RelnTimestamp)) USING (RelationshipID, attributeid, RelnValueTimestamp)
+    JOIN  Relationship ae using (RelationshipID, RelnTimestamp), 
+    RelnType rt on ae.RelnTypeID = rt.RelnTypeID and rt.RelnTypeCategory='container' 
     WHERE entDel is NULL
       AND valDel is NULL
- ORDER BY ae.uuid asc";
+ ORDER BY ae.RelationshipID asc";
 
+//     $query1 =  'SELECT "RelnTypeID", "RelnTypeName", "RelnTypeDescription" FROM RelnType where RelnTypeCategory="container"';
+
+ 
     $faims_id = null;
     $details = null;
     $rectype = null;
@@ -737,6 +872,8 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
     $skip_faimsrec = false;
     $cntInsterted = 0;
     $cntUpdated = 0;
+    
+    $containerRecords = array();
 
     $rs = $dbfaims->query($query);
     while ($row = $rs->fetchArray(SQLITE3_NUM))
@@ -744,7 +881,10 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
         if($faims_id!=$row[0]){
 
             if($details && count($details)>0){
-                insert_update_Record($recID, $rectype, $details, $faims_id);
+                $nrecid = $insert_update_Record($recID, $rectype, $details, $faims_id);
+                if($nrecid){
+                    $containerRecords[$faims_id] = $nrecid;
+                }
             }
 
             $details = array();
@@ -862,12 +1002,14 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
     }//loop all faims records
 
     if($details && count($details)>0){
-        insert_update_Record($recID, $rectype, $details, $faims_id);
+        $nrecid = insert_update_Record($recID, $rectype, $details, $faims_id);
+        if($nrecid){
+            $containerRecords[$faims_id] = $nrecid;
+        }
     }
 
     print "Inserted ".$cntInsterted."<br/>";
     print "Updated ".$cntUpdated."<br/>";
-*/
     
 //----------------------------------------------------------------------------------------
 
@@ -920,8 +1062,15 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
             $faims_relent_id = $row[1];
 
             if(@$reltypeMap[$faims_atype]){
-                if(isarray($reltypeMap[$faims_atype])){
-                    //hiearchy
+                
+                if(@$containerRecords[$faims_id]){ //container reltype
+                
+                    array_push( $details["t:".DT_PRIMARY_RESOURCE], $containerRecords[$faims_id] );
+                    $reltype = $reltypeMap[$faims_atype];
+                    $is_source_rec = false;
+                    
+                }else if(isarray($reltypeMap[$faims_atype])){ //hiearchy reltype
+                    
                     $participatesVerb = $row[3];
                     $reltype = reset($reltypeMap[$faims_atype]);
                     $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
@@ -957,8 +1106,10 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
             $is_source_rec = false;
             
             if(@$reltypeMap[$faims_atype]){
-                if(isarray($reltypeMap[$faims_atype])){
-                    //hiearchy
+                
+                if(@$containerRecords[$faims_id]){ //container reltype
+                
+                }else if(isarray($reltypeMap[$faims_atype])){ //hiearchy
                     $participatesVerb = $row[3];
                     $reltype = reset($reltypeMap[$faims_atype]);
                     $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
@@ -969,15 +1120,25 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
                 continue;
             }
             
-            
             array_push($details["t:".($is_source_rec?DT_TARGET_RESOURCE:DT_PRIMARY_RESOURCE)], getRecordByFaimsId($faims_relent_id) );
-            $faims_id = null;
+            //$faims_id = null;
         }
 
     }//loop all faims records
 
     if($details && count($details)>0){
-        insert_update_Record($recID, $rectype, $details, $faims_id);
+        
+                foreach ($details["t:".DT_PRIMARY_RESOURCE] as $idx=>$recId_Source) {
+                    foreach ($details["t:".DT_TARGET_RESOURCE] as $idx=>$recId_Target) {
+                        $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
+                                          "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
+                                          "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
+                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE]
+                                     );
+                        
+                        insert_update_Record($recID, $rectype, $details2, $faims_id);    
+                    }
+                }
     }
     
    
@@ -1126,7 +1287,7 @@ function insert_update_Record($recID, $rectype, $details, $faims_id)
         if(!$mysqli->query($query)){
             $syserror = $mysqli->error;
             print "<div style='color:red'> Error: Can not delete record details ".$syserror."</div>";
-            return;
+            return null;
         }
     }
 
@@ -1166,10 +1327,12 @@ function insert_update_Record($recID, $rectype, $details, $faims_id)
                                  print "UPDATED as #".$recID."<br/>";
                             }else{
                                 $cntInsterted++;
-                                 print "INSERTED as #".$out["bibID"]."<br/>";
+                                print "INSERTED as #".$out["bibID"]."<br/>";
+                                $recID = $out["bibID"];
                             }
                         }
-
+                        
+    return $recID;
 }
 
 
