@@ -26,7 +26,9 @@
         }else{
             $("#rt_selected").val("");
         }
-        $("#selectedRectypes").html(txt);                            
+        $("#selectedRectypes").html(txt);    
+        
+        $("#buttondiv").css('display',txt?'block':'none');                        
     }
       
     /**

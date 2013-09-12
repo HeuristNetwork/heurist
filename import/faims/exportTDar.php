@@ -28,6 +28,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+    require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
     if(isForAdminOnly("to export to FAIMS tDAR repository")){
         return;
@@ -142,7 +143,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             
         print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;font-weight:bold;'></div>";
            
-        print "<div id='buttondiv' style='display:".(($step=='1')?"none":"block")."'><div class='lbl_form'></div><input type='submit' value='Start tDAR Export' /></div>";
+        print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start tDAR Export' /></div>";
        
 
         print "</form><br><br>";
@@ -159,6 +160,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         $folder = HEURIST_UPLOAD_DIR."faims/tdar/".$projectId;
         $folders = null;
         $batch = "#!/bin/bash\ncd ".HEURIST_DOCUMENT_ROOT.INSTALL_DIR;
+        $data_toreg = array();
         $coding_sheet = array();
         $images = array();
         $documents = array();
@@ -180,13 +182,18 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         //cookie file 
         $cookie_file =  $folder."/cookies";
         //first of all try tp connect to tDAR server and keep cookie session id
+        
+        if(true){ //TEMP
+        
         $resp = post_request($protocol.$host."/login/process", $fusername, $fpwd, array("loginUsername"=>$fusername, "loginPassword"=>$fpwd), $cookie_file, true);
         
-        if(strpos($resp, 'Set-Cookie: crowd.token_key=""')>0){
+        if(strpos($resp, 'Set-Cookie: crowd.token_key=""')>0){  //not registered
             print "<script>document.getElementById('buttondiv').style.display = 'block';document.getElementById('buttondiv2').style.display = 'block';</script>";                  
             print "<div class='err_message'>Authentification to tDAR server is failed</div>";
             print "</div></body></html>";
             exit();
+        }
+        
         }
 
         //DEBUG print "tDAR server AUTHORIZATION response:";
@@ -194,9 +201,120 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         
 
         $rectyps = explode(",", $rt_toexport);
+        if (!in_array(RT_RELATION, $rectyps)) {
+            array_push($rectyps, RT_RELATION);
+        }
+        
         //DEBUG print "<p>".$rt_toexport."</p>";
+        
+        $rtStructs = getAllRectypeStructures(true);
+        $dtStructs = getAllDetailTypeStructures(true);
+        $dtTerms = getTerms(true);
+        $ind_label =  $dtTerms['fieldNamesToIndex']['trm_Label'];
+        $ind_descr =  $dtTerms['fieldNamesToIndex']['trm_Description'];
+        $ind_tcode =  $dtTerms['fieldNamesToIndex']['trm_Code'];
+        $ind_parentid =  $dtTerms['fieldNamesToIndex']['trm_ParentTermID'];
+        
+        $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
+        $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
+        
+        
+        //START OF TERMS-RELTYPES
+        
+        print "Prepare coding sheet for relation types<br>";
+        $termLookup = $dtTerms['termsByDomainLookup']['relation'];
+        
+        foreach ($termLookup as $termid=>$term) {
 
-        $squery = "select rec_ID, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt, trm_Label ";
+            if($term[$ind_parentid]>0){
+                $name = getFullTermName($term, 'relation');
+                $descr = $termid."-".$term[$ind_label].($term[$ind_descr]?"-".$term[$ind_descr]:"");
+                $coding_sheet[$termid] = array( $name, $descr);
+            }
+        }
+                
+        if(count($coding_sheet)>0){
+            
+            $rtfolder = $folder."/reltypes";
+            if (!mkdir($rtfolder, 0777, true)) {
+                print "<p class='error'>'Failed to create folder: ".$rtfolder."</p>";
+            }else{
+
+                    $filename = $rtfolder."/sheet.csv";
+                    $fp = fopen($filename, 'w');
+                    foreach ($coding_sheet as $term_id => $details) {
+                        $fields = array($term_id, $details[0], $details[1]);
+                        fputcsv($fp, $fields);
+                    }
+                    fclose($fp);
+                    
+                    $meta = getMetadata('Heurist relation types coding sheet', 'Heursit reltypes correspond to tDAR coding sheet', 'CODING_SHEET');
+                    $metadata_content = utf8_encode($meta->asXML());
+                    file_put_contents($rtfolder."/coding_sheet.xml", $metadata_content);
+                    
+                    addRegistration("Coding Sheet", $rtfolder."/coding_sheet.xml",  $metadata_content, $filename, "Reltypes");
+            }
+        }
+
+        
+        //find all terms used in selected rectypes
+        
+        print "Prepare coding sheet for enumerations (terms)<br>";
+        ob_flush();flush();
+        
+        foreach ($rectyps as $rt) {
+            $details =  $rtStructs['typedefs'][$rt]['dtFields'];
+            foreach ($details as $dtid=>$detail) {
+        
+                $det = $dtStructs['typedefs'][$dtid]['commonFields'];
+                $dt_type = $det[$int_dt_type];
+                if($dt_type=='enum'){ //} || $dt_type=='relationtype'){
+                    $terms = $detail[$int_dt_termtree];
+                    
+                    if(is_numeric($terms)){
+                        $termTree =  $dtTerms['treesByDomain'][$dt_type][$terms];
+                    }else{
+                        $termTree = json_decode($terms);
+                    }
+                    if(count($termTree)<1){
+                        continue;
+                    }
+                    
+                    $coding_sheet = array();
+                    fillTerms($dt_type, $termTree, "");
+                    
+                    if(count($coding_sheet)>0){
+                        
+                        $rtfolder = $folder."/terms".$dtid;
+                        if (!mkdir($rtfolder, 0777, true)) {
+                            print "<p class='error'>'Failed to create folder: ".$rtfolder."</p>";
+                        }else{
+
+                                $filename = $rtfolder."/sheet.csv";
+                                $fp = fopen($filename, 'w');
+                                foreach ($coding_sheet as $term_id => $details) {
+                                    $fields = array($term_id, $details[0], $details[1]);
+                                    fputcsv($fp, $fields);
+                                }
+                                fclose($fp);
+                                
+                                $meta = getMetadata('Heurist terms for field '.$dtStructs['names'][$dtid], 'Heursit terms correspond to tDAR coding sheet', 'CODING_SHEET');
+                                $metadata_content = utf8_encode($meta->asXML());
+                                file_put_contents($rtfolder."/coding_sheet.xml", $metadata_content);
+                                
+                                addRegistration("Coding Sheet", $rtfolder."/coding_sheet.xml",  $metadata_content, $filename, $dtid);
+                        }
+                    }
+                    
+                    
+                }
+            }
+        }
+        doRegistration();
+        
+        //END OF TERMS
+
+        $squery = "select rec_ID, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt, trm_Label "; //, trm_Description
         $ourwhere = " and (dtl_RecID=rec_ID) ";
         $detTable = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID left join defTerms on trm_ID = dtl_Value ";
         $order = "rec_ID, dtl_DetailTypeID";
@@ -205,17 +323,25 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         $mysqli = mysqli_connection_overwrite("hdb_".@$_REQUEST['db']);
 
         // Note: enum fields are exported as 'coding sheets'
-        $unsupported = array('relmarker','enum','relationtype','resource','separator','calculated','fieldsetmarker','urlinclude');
+        $unsupported = array('relmarker','separator','calculated','fieldsetmarker','urlinclude'); //'enum','resource','relationtype',
 
 
         /*
         * Main LOOP for all selected record types
         */
         foreach ($rectyps as $rt) {
-
+            
+            print "Prepare record type ".$rt." ".$rtStructs['names'][$rt]."<br>";
+            ob_flush();flush();
+            
             //get record type structure
             $dettypes = array();
             $recstruc = array();
+            
+            $dettypes[0] = array(); //for record ID 
+            $recstruc[0] = array(0, 'Heursit ID', 'Heurist Record ID', 'integer');   //keep detail defs
+            
+            
             $query =  "select rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, dty_Type from defRecStructure, defDetailTypes where rst_DetailTypeID=dty_ID and rst_RecTypeID=".$rt." order by rst_DisplayOrder";
             $res = $mysqli->query($query);
             if (!$res){
@@ -223,6 +349,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 print "<p class='error'>Failed to obtain structure for record type: ".$rt."</p>";
                 continue;
             }else{
+                
                 while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
 
                     if(in_array($row[3], $unsupported)){
@@ -233,7 +360,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     $recstruc[$row[0]] = $row;   //keep detail defs
                 }
             }
-
+            
             $params["q"] = "t:".$rt;
 
             //get all records for specified recordtype
@@ -253,12 +380,14 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 $records = array();
                 $details = $dettypes;
                 $hasdetails = false;
+                //loop for records/details
                 while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
                     if($recid!=$row[0]){ //new line
                         if($hasdetails){
                         //print ">>>".$recid."  ADDED<br>";
+                            array_push($details[0], $recid);
                             $records[$recid] = $details;
-                            $details = $dettypes;
+                            $details = $dettypes; //reset
                         }
                         $recid = $row[0];
                         $hasdetails = false;
@@ -270,13 +399,14 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     }else if($row[4]){ //file id
 
                         $dtype = null;
+                        $filename_orig = $row[7];
                         $value = $row[7]; //original filename
                         //array($row[5], $row[6], $row[7], 8); //path and name and origname, mimeext
                         if(in_array($row[8], $allowed_img_ext)){
-                            $images[$row[4]] =  $value;
+                            $images[$row[4]] =  $filename_orig;
                             $dtype = 'IMAGE';
                         }else if(in_array($row[8], $allowed_doc_ext)){
-                            $documents[$row[4]] =  $value;
+                            $documents[$row[4]] =  $filename_orig;
                             $dtype = 'DOCUMENT';
                         }else{
                             $value = null;
@@ -294,7 +424,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                         print "<p class='error'>'Failed to create folder: ".$imgfolder."</p>";
                                     }else{
                                         
-                                           $filename = $imgfolder."/".$value;
+                                           $filename = $imgfolder."/".$filename_orig;
                                            //copy file
                                            copy($row[5].$row[6], $filename);
                                            
@@ -321,7 +451,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                            //add command line to batch file
                                            $batch = $batch."\n java -cp  org.tdar.utils.CommandLineAPITool -http -username $fusername -password $fpwd -file ".$imgfolder."/ -host ".$host." -projectid ".$projectId;
                                            
-                                           doRegistration($metadata_file,  $metadata_content, $filename);
+                                           addRegistration($dtype, $metadata_file,  $metadata_content, $filename, $filename_orig);
                                     }
                                 }
                             }
@@ -332,10 +462,18 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     }else if($row[9]){ //term value
                         $value = $row[2];
                         //save into coding sheet
-                        $coding_sheet[$row[2]] = $row[9];
-
+                        //$coding_sheet[$row[2]] = array($row[9], $row[10]);
                     }else if($row[2]){
-                        $value = $row[2];   //add escape function
+                        
+                        if( $recstruc[$row[1]][3] == 'resource'  ) {   //
+                            //find title and record type name for pointer
+                            $pointer = mysqli__select_array($mysqli, 'select rec_ID, rty_Name, rec_Title  from Records, defRecTypes where rty_ID=rec_RecTypeID and rec_ID='.$row[2] );
+                            if($pointer){
+                                $value = implode(':',$pointer); // 'RESOURCE'.$row[2];                     
+                            }
+                        }else{
+                            $value = $row[2]; 
+                        }
                     }
 
 
@@ -353,7 +491,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 $res->close();
 
                 if($hasdetails){
-                //print ">>>".$recid."  ADDED<br>";
+                     array_push($details[0], $recid);
                      $records[$recid] = $details;
                 }
 
@@ -474,9 +612,20 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         $column->columnDataType = 'TEXT';
                     }else if($detail[3]=="boolean"){
                         $column->columnDataType = 'BOOLEAN';
+                    }else if($detail[3]=="enum" || $detail[3]=="relationtype"){
+                        $column->columnDataType = 'BIGINT';
+                        $column->columnEncodingType = 'CODED_VALUE';
                     }
                     
-                    $column->columnEncodingType = 'UNCODED_VALUE';
+                    if($detail[3]=="enum" || $detail[3]=="relationtype"){
+                        //find id of registered coding sheet
+                        $regid = ""; //IT DOES NOT WORK in TDAR findCodingSheetId(($detail[3]=="enum")?$dt_id:"Reltypes");
+                        
+                        $column->codingSheetRef = $regid;
+                    }else{
+                        $column->columnEncodingType = 'UNCODED_VALUE';
+                    }
+                        
                     /* @todo - to understand what does it mean
                     $column->codingSheetRef = '';
                     $column->delimiterValue = '';
@@ -510,13 +659,15 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             $folders = $rtfolder."/".(($folders!=null)?",":"").$folders;
                    
-            doRegistration($rtfolder."/dataset.xml",  $metadata_content, $filename);
+            addRegistration("Dataset", $rtfolder."/dataset.xml",  $metadata_content, $filename, $rt);
             
             //break;
         } // end foreach ($rectyps as $rt)
-        
         // END OF LOOP FOR EACH RECORD TYPE TO BE EXPORTED
-
+        
+        //print "Generation of output data have been completed<br/>";
+        //print "Start upload/registration<br/>";
+       
 
         //copy images
         //print "<p>Export images</p>";
@@ -526,28 +677,120 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
         file_put_contents($folder."/loadtotdar.sh", $batch);
 
-/*
-        file_put_contents($folder."/input.properties",
-"username=benben
-password=ben
-file=".$folders."
-host=localhost:8080
-projectid=".$projectId);
-*/
-
-            //print "<p>".$serverBaseURL."</p>";
-        print "<p>Export completed. You may revise the output files in $folder</p>";
-
-/**
-* put your comment there...
-* 
-*/                         
-function doRegistration($metadata_file, $metadata_content, $filename){
-    global  $projectId, $host, $cookie_file, $protocol;
+    // REGISTRATION    
+    if(count($data_toreg)<1){
+        print "No data to export<br>";
+        return;        
+    }
     
-            print "Send file : ".$filename."<br>";
-            ob_flush();flush();
+    $scount = array();
+    
+    foreach ($data_toreg as $regdata)
+    {
+        $dtype = $regdata[0];
+        if(@$scount[$dtype]){
+            $scount[$dtype]++;
+        }else{
+            $scount[$dtype] = 1;
+        }
+    }
+    print "<br><br>";
+    foreach ($scount as $dtype=>$cnt){
+        print strtoupper($dtype).": ".$cnt."<br>";
+    }
+    print "End of preparation data<br><br><br>";
+
+    doRegistration();
+  
+    
+    print "<b>End of export</b><br/><br/>";
+    
+    print '<b>tDAR Project Upload Summary: ID '.$projectId.'(created) <a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/project/'.$projectId.'"></a></b><br/><br/>';
+
+    print "<p>Heurist uploads individual record types, including relationships, as separate tDAR tables (storing the data as CSV files). However, not all metadata for uploaded tables can be pre-created, either because it does not exist in the Heurist database or because it is not handled by the tDAR API (programming interface).</p>";
+    print "<p>This is particularly the case for the metadata mapping which associates coding sheets and ontologies with columns in the tables. We therefore recommend that you edit the metadata for each of the uploaded tables through the web interface (you may wish to save this page for later reference):</p>";
+
+    $datasets = "";    
+    $codingsheet = "";
+    $images = "";
+    $documents = "";
+    foreach ($data_toreg as $regdata)
+    {
+        $dtype = $regdata[0];
+        $rt = $regdata[4];
+        $regid = $regdata[5];
+        
+        if($dtype == 'Dataset'){
             
+            $datasets = $datasets.'<tr><td>'.$rt.' '.$rtStructs['names'][$rt].'</td>';
+            if($regid>0){
+                $datasets = $datasets.
+                '<td><a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/dataset/'.$regid.'/edit"></a></td><td>'.
+                '<a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/dataset/'.$regid.'/columns"></a></td><td>'.
+                '<a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/dataset/'.$regid.'"></a></td></tr>';
+            }else{
+                $datasets = $datasets."<td colspan='3'>FAILURE</td></tr>";
+            }
+                
+            
+        }else if($dtype == 'Coding Sheet'){
+
+            $codingsheet = $codingsheet.'<tr><td>'.(is_numeric($rt)?'Terms for '.$dtStructs['names'][$rt]:$rt).'</td>';
+            if($regid>0){
+                $codingsheet = $codingsheet.
+                '<td><a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/coding-sheet/'.$regid.'/edit"></a></td><td>'.
+                '<a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/coding-sheet/'.$regid.'"></a></td></tr>';
+            }else{
+                $codingsheet = $codingsheet."<td colspan='2'>FAILURE</td></tr>";
+            }
+
+        }else if($dtype == 'IMAGE'){
+
+            $images = $images.'<tr><td>'.$rt.'</td>';
+            if($regid>0){
+                $images = $images.
+                '<td><a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/image/'.$regid.'/edit"></a></td><td>'.
+                '<a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/image/'.$regid.'"></a></td></tr>';
+            }else{
+                $images = $images."<td colspan='2'>FAILURE</td></tr>";
+            }
+            
+        }else if($dtype == 'DOCUMENT'){
+
+            $documents = $documents.'<tr><td>'.$rt.'</td>';
+            if($regid>0){
+                $documents = $documents.
+                '<td><a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/document/'.$regid.'/edit"></a></td><td>'.
+                '<a class="externalLink" title="Open in new window" target="_blank" href="http://'.$host.'/document/'.$regid.'"></a></td></tr>';
+            }else{
+                $documents = $documents."<td colspan='2'>FAILURE</td></tr>";
+            }
+            
+        }
+        
+    }
+    
+    print "<p><b>Datasets (recordtypes):</b><br><table><tr><td>name</td><td>metadata</td><td>columns map</td><td>general</td></tr>".$datasets."</table></p>";
+    print "<p><b>Coding sheets (terms and reltypes):</b><br><table>".$codingsheet."</table></p>";
+    print "<p><b>Images:</b><br><table>".$images."</table></p>";
+    print "<p><b>Documents:</b><br><table>".$documents."</table></p>";
+
+        
+//-----------------------------------------------------------------------------        
+function doRegistration(){
+    global $data_toreg,$projectId,$host,$protocol,$cookie_file;
+    
+    foreach ($data_toreg as $idx=>$regdata)
+    {
+        if($data_toreg[$idx][5]==0)  //not yet registred since coding sheets are registred before datasets
+        {
+            $metadata_file = $regdata[1];
+            $metadata_content = $regdata[2];
+            $filename = $regdata[3];
+        
+            print "Uploading file : ".$filename."<br>";
+            print "Send : ".(filesize($filename) % 1024)." kB ".date("F d Y H:i:s.", fileatime($filename))."<br>";
+            ob_flush();flush();
 
             $url = $protocol.$host."/api/upload?uploadedItem=".urlencode($metadata_file);
             $postdata = array(
@@ -566,11 +809,62 @@ function doRegistration($metadata_file, $metadata_content, $filename){
             //$postdata = array("loginUsername"=>$fusername, "loginPassword"=>$fpwd);
             //$resp = http_post("115.146.85.232","8080", "/login/process", null, null, $postdata);
 
+            $regid = 0;
 
-            print "tDAR server response:";
-            print "<xmp>".$resp."</xmp>";
+            //print "tDAR server response:";
+            //print "<xmp>".$resp."</xmp>";
+            
+            if($resp)
+            {
+                $resp = new SimpleXMLElement($resp);
+                if($resp->status == 'created') {
+                    $regid = $resp->recordId;
+                    print "Registred with id: ".$regid."<br><br>";
+                }else{
+                    $regid = -1;
+                    print "<p class='error'>'FAILURE:</p><xmp>".$resp->message."</xmp><br>";
+                }
+            }else{
+                $regid = -2;
+                print "<p class='error'>'Server does not return responce. It is assumed that registration is OK</p>";
+            }
             ob_flush();flush();
-}        
+            
+//<apiResult> <status>badrequest</status> <message            
+//<apiResult> <status>created</status> <recordId>6923</recordId> <message>created:6923</message> </apiResult>
+            
+            //add ID to result
+            $data_toreg[$idx][5] = $regid;
+        }
+    }
+}    
+
+/**
+* put your comment there...
+* 
+* @param mixed $metadata_file  - path to metadata file
+* @param mixed $metadata_content - metadata content
+* @param mixed $filename - path to file to b uploaded
+* 
+* $rt - recordtype, detailtype id, OR filename
+*/
+function addRegistration($type, $metadata_file, $metadata_content, $filename, $rt=null){    
+    global $data_toreg;
+    array_push($data_toreg, array($type, $metadata_file, $metadata_content, $filename, $rt, 0));
+}
+
+
+function findCodingSheetId($dtid){
+    global $data_toreg;
+    
+    foreach ($data_toreg as $idx=>$regdata){
+        if($regdata[0]=="Coding Sheet" && $regdata[4]==$dtid){
+             return ($regdata[5]>0) ?$regdata[5]: "";
+        }
+    }
+    return "";
+}
+        
 
 /**
 * put your comment there...
@@ -581,7 +875,15 @@ function doRegistration($metadata_file, $metadata_content, $filename){
 * @return SimpleXMLElement
 */
 function getMetadata($title, $description, $dtype){
-            $meta = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><tdar:'.strtolower($dtype).' xmlns:tdar="http://www.tdar.org/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://localhost:8180/schema/current schema.xsd" />');
+        
+            if($dtype=='CODING_SHEET'){
+                $ele_dtype = 'codingSheet';
+            }else{
+                $ele_dtype = strtolower($dtype);
+            }
+    
+    
+            $meta = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><tdar:'.$ele_dtype.' xmlns:tdar="http://www.tdar.org/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://localhost:8180/schema/current schema.xsd" />');
 
             $meta->description = $description?$description:'no description';
             $meta->resourceType = $dtype;
@@ -601,6 +903,12 @@ function getMetadata($title, $description, $dtype){
             $meta->inheritingSpatialInformation='false';
             $meta->inheritingTemporalInformation='false';
             $meta->relatedDatasetData='';
+            
+            
+            if($dtype=='CODING_SHEET'){
+                $meta->generated='false';
+            }
+            
             return $meta;
 }
 
@@ -761,6 +1069,48 @@ function mysqli__select_value($mysqli, $query) {
         return $result;
 }
 
+function fillTerms($datatype, $termTree, $parentname){
+
+    global $dtTerms, $ind_label, $ind_descr, $coding_sheet, $ind_tcode;
+    $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+
+    foreach ($termTree as $termid=>$child_terms){
+
+        $termName = @$termLookup[$termid][$ind_label];
+        
+        if($termName){
+            if(count($child_terms)>0){
+                createSubTree($datatype, $child_terms, $parentname.$termName."-");
+            }else{
+            
+                $termCode = @$termLookup[$termid][$ind_tcode];
+                $termDescr = @$termLookup[$termid][$ind_descr];
+                $termCode = ($termCode)?"[".$termCode."]":"";
+                
+                $coding_sheet[$termid] = array( $parentname.$termName.$termCode, $termDescr);
+            }   
+        }
+    }
+}
+
+//
+// dash separated list of term label and all its parents (similar in exportFAIMS.php)
+//
+function getFullTermName($term, $datatype){
+
+    global $dtTerms, $ind_parentid, $ind_label;
+
+    $name = "";
+
+    if($term){
+        if($term[$ind_parentid]>0){
+            $allterms = $dtTerms['termsByDomainLookup'][$datatype];
+            $name = getFullTermName( @$allterms[$term[$ind_parentid]], $datatype);
+        }
+        $name = ($name?$name."-":"").$term[$ind_label];
+    }
+    return $name;
+}
 ?>
   </div>
 </body>

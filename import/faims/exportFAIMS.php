@@ -304,7 +304,7 @@ function generateSchema($projname, $rt_toexport){
         $arch_element = $root->addChild('ArchaeologicalElement');
 
         $arch_element->addAttribute('type', $rtStructs['names'][$rt] );
-        $arch_element->description = getResStr($rt_descr);
+        $arch_element->description = str_replace("&", "&amp;", $rt_descr);
         $titlemask = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask];
         $titlemask_canonical = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask_canonical];
         
@@ -320,8 +320,8 @@ function generateSchema($projname, $rt_toexport){
         foreach ($details as $dtid=>$detail) {
 
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
-
             $dt_type = $det[$int_dt_type];
+            
             if(in_array($dt_type, $unsupported)){
                 continue;
             }
@@ -345,7 +345,9 @@ function generateSchema($projname, $rt_toexport){
             if($dt_type=='enum' || $dt_type=='relationtype'){
                 $terms = $detail[$int_dt_termtree];
                 //convert to tree
-                getTermsTree($property, $dt_type, $terms);
+                $cnt = getTermsTree($property, $dt_type, $terms);
+                
+                $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'] = $cnt;
             }
         }
         
@@ -354,7 +356,7 @@ function generateSchema($projname, $rt_toexport){
             
         }
 
-    }//foreach
+    }//foreach recordtype
 
     $out = prepareXml($root);
 
@@ -469,6 +471,8 @@ function generate_UI_Schema($projname, $rt_toexport){
 
     $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
     $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_dt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
+
     $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
 
     
@@ -514,6 +518,8 @@ function generate_UI_Schema($projname, $rt_toexport){
 
         foreach ($details as $dtid=>$detail) {
 
+            $is_repeatable = ($detail[$int_dt_repeat]!='1');
+            
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
 
             $dt_type = $det[$int_dt_type];
@@ -540,13 +546,16 @@ function generate_UI_Schema($projname, $rt_toexport){
 
             $isvocab = ($dt_type=='enum');
 
-            $input = $group->addChild($isvocab?'select1':'input');
+            $input = $group->addChild($isvocab?($is_repeatable?'select':'select1'):'input');
             $input->addChild('label', getResStr( $detail[$int_dt_disp_name] ) );
             $input->addAttribute('ref', $dtnamex);
             $input->addAttribute('faims_attribute_name', $dtname);
             $input->addAttribute('faims_read_only', 'false');
             $input->addAttribute('faims_certainty', 'false');
-            $input->addAttribute('appearance', 'compact');
+            if($isvocab) {
+                $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
+                $input->addAttribute('appearance', ($termsCount>4)?'compact':'full');
+            }
 
             $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
 
@@ -647,7 +656,7 @@ function getTermsTree($property, $datatype, $terms){
     if($datatype == "relmarker" || $datatype === "relationtype"){
         $datatype = "relation";
     }else if(!($datatype=="enum" || $datatype=="relation")){
-        return;
+        return 0;
     }
 
     if(is_numeric($terms)){
@@ -656,14 +665,14 @@ function getTermsTree($property, $datatype, $terms){
         $termTree = json_decode($terms);
     }
     if(count($termTree)<1){
-        return;
+        return 0;
     }
 
     $meta = $property->addChild('lookup');
 
 //error_log(">>>".print_r($termTree, true));
 
-    createSubTree($meta, $datatype, $termTree, "");
+    return createSubTree($meta, $datatype, $termTree, "");
 }
 
 function createSubTree($meta, $datatype, $termTree, $parentname){
@@ -674,6 +683,8 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
     $ind_label = $dtTerms['fieldNamesToIndex']['trm_Label'];
     $ind_descr = $dtTerms['fieldNamesToIndex']['trm_Description'];
     $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
+    
+    $cnt = 0;
 
     foreach ($termTree as $termid=>$child_terms){
 
@@ -694,14 +705,16 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
             }
             $term = $meta->addChild('term', getResStr($termCcode, $termName.$termCode) );
             $term->addChild('description', str_replace("&", "&amp;", $termName).$termCode.($termDescr?":".str_replace("&", "&amp;", $termDescr):"") );
+            $cnt++;
             
             //$lbl = str_replace("&", "&amp;", $parentname.$termName);
             //$meta->addChild('term', getResStr($lbl) );
             
-            createSubTree($meta, $datatype, $child_terms, $parentname.$termName."-");
+            $cnt = $cnt + createSubTree($meta, $datatype, $child_terms, $parentname.$termName."-");
         }
     }
-
+    
+    return $cnt;
 }
 
 function formatXML($simpleXml){

@@ -295,7 +295,7 @@ if (is_admin()) {
                             onClick="loadContent('../import/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Build FAIMS project / tablet application from the current Heurist database strucuture. No data to be exported">Build Project</a></li>
                         <li><a href="#"
-                            onClick="alert('To be implemented....')"
+                            onClick="loadContent('../import/faims/exportFAIMSwithdata.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Build FAIMS project / tablet application with data from the current Heurist database">Export Project</a></li>
                         <li><a href="#"
                             onClick="loadContent('../import/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
