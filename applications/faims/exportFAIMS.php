@@ -45,9 +45,10 @@
         exit();
     }
 ?>
+
 <html>
 <head>
-  <title>Build FAIMS Project</title>
+  <title>Create FAIMS Module files (db schema, ui schema, ui logic and a16n)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
   <link rel=stylesheet href="../../common/css/global.css" media="all">
@@ -79,12 +80,13 @@
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
     <div id="page-inner" style="width:740px; margin:0px 5%; padding: 0.5em;">   
+    
+    
 <?php
     
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
 
     //STEP 1 - define record types to be exported
-    //if( !$rt_toexport || $invalid ){
     
     if($step=='1'){
         if(!$rt_toexport){
@@ -98,6 +100,7 @@
             }
         }
     }
+    
         print "<div>This function writes a set of FAIMS project definition files ".
         "(db schema, ui schema, ui logic, A16N) to a zip file, based on the record types ".
         "selected from the Heurist database. <p/>These files can be loaded into ".
@@ -112,16 +115,16 @@
         print "<div id='buttondiv2' style='display:".(($step=='1')?"none":"block")."'><div class='lbl_form'>Record types to include in export:</div>"; 
         print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
 
+        // List of record types for export
         print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;font-weight:bold;'></div>";
-        
+ 
+        // Don't show Start Export button until record types have been selected       
         print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
 
         print "</form>";
         if($rt_toexport){
             print "<script>showSelectedRecTypes('".$rt_toexport."')</script>";
         }
-    //exit();
-    //}
 
     if( $rt_toexport && !$invalid ){
 
@@ -130,7 +133,7 @@
         //create export folder
         if(!file_exists($folder)){
             if (!mkdir($folder, 0777, true)) {
-                    die('Failed to create folder for '.$folder);
+                    die('Failed to create folder for '.$folder.' - check that file permissions are correctly set');
             }
         }else{ //clear folder
             array_map('unlink', glob($folder."/*"));
@@ -154,7 +157,6 @@
         copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
 
 
-        //CREATE TARBALL $cmdline = "tar -cvzf ".$folder.".tar.gz ".$folder."/*";
         //CREATE ZIPFILE
         unlink($folder.".zip");
         $cmdline = "zip -r -j ".$folder.".zip ".$folder;
@@ -166,10 +168,8 @@
                     echo $output;
                     echo "</p>";
         }else{
-            //print "<p>".$serverBaseURL."</p>";
-            //print "<p><a href='".$serverBaseURL."/faims/new/".$projname.".tar.gz' target='_blank'>Download FAIMS project definitions tarball</a></p>";
             print "<br><br><div class='lbl_form'></div>".
-            "<a href='exportFAIMS.php/$projname.zip?db=".HEURIST_DBNAME."&step=2&projname=".$projname."' target='_blank' style='color:blue; font-size:1.2em'>Click here to start download FAIMS project definitions zip archive</a>";
+            "<a href='exportFAIMS.php/$projname.zip?db=".HEURIST_DBNAME."&step=2&projname=".$projname."' target='_blank' style='color:blue; font-size:1.2em'>Click here to download FAIMS project definitions zip archive</a>";
         }
 
     }else{
@@ -191,6 +191,7 @@ function getResStr($str, $val=null){
     return "{".str_replace(' ','_',$str)."}";
 }
 
+// add an entry into the a16n (localisation) file
 function add16n($line, $val=null){
     global $content_a16n;
     if(!isset($content_a16n)){
@@ -200,7 +201,7 @@ function add16n($line, $val=null){
         $content_a16n[$line] = $val?$val:$line;
     }
 }
-//generate a16n output
+//generate a16n (localisation) file, providing translation of all terms and labels
 function arrToProps(){
     global $content_a16n;
     $res = "";
@@ -210,30 +211,39 @@ function arrToProps(){
     return $res;
 }
 
+// insert a comment into the XML (converted to comment on output by prepareXML)
 function addComment($ele, $text, $ns=null){
     if($ns){
-        $ele->addChild('remark____comment', $text, $ns);
+        $ele->addChild('CommentMarker', $text, $ns);
     }else{
-        $ele->addChild('remark____comment', $text);
+        $ele->addChild('CommentMarker', $text);
     }
 }
+
+// convert comment elements added with addComment into proper XML comments with <!-- and -->
 function prepareXml($root){
     $out = $root->asXML();
-    $out = str_replace('<remark____comment>','<!--',$out);
-    $out = str_replace('</remark____comment>','-->',$out);
+    $out = str_replace('<CommentMarker>','<!--',$out);
+    $out = str_replace('</CommentMarker>','-->',$out);
+    // Special handling for ui schema, where comemnts at top are prepended with h:
+    $out = str_replace('<h:CommentMarker>','<!--',$out);
+    $out = str_replace('</h:CommentMarker>','-->',$out);
     return utf8_encode(formatXML2($out));
 }    
     
+// Generate the database schema file (db_schema.xml)
 function generateSchema($projname, $rt_toexport){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
-
 
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?><dataSchema />');
     $root->addAttribute('name', DATABASE);
     $root->addAttribute('preparer', "Heurist user:".get_user_name());
 
-
+    addComment($root, ' ****** ');
+    addComment($root, 'FAIMS Database Schema generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A'));
+    addComment($root, ' ****** ');
+ 
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
     $ind_rt_titlemask = $rtStructs['typedefs']['commonNamesToIndex']['rty_TitleMask']; //names
     $ind_rt_titlemask_canonical = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];// codes
@@ -304,6 +314,7 @@ function generateSchema($projname, $rt_toexport){
         addComment($root, 'Properties correspond with Heurist base field types for this record type');
     }    
 
+    // Output specifications for each ArchEnt (Record type in Heurist)
     foreach ($rectyps as $rt) {
         
         $rt_descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
@@ -316,15 +327,14 @@ function generateSchema($projname, $rt_toexport){
         $titlemask = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask];
         $titlemask_canonical = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask_canonical];
         
-        //backward capability - make sure that titlemask is canonical
+        //backward capability - make sure that titlemask is canonical ie. uses internal codes not field names
         $titlemask = titlemask_make($titlemask, $rt, 1, null, _ERR_REP_SILENT);
 
         $has_identifier = false;
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
-//error_log(">>>".print_r($dtStructs['typedefs'][$dtid],true));
-
+        // Loop through the fields (details)
         foreach ($details as $dtid=>$detail) {
 
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
@@ -359,6 +369,7 @@ function generateSchema($projname, $rt_toexport){
             }
         }
         
+        // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
         if(!$has_identifier){
             addComment($root, 'ERROR!!!!! This ArchaeologicalElement does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
             
@@ -369,9 +380,13 @@ function generateSchema($projname, $rt_toexport){
     $out = prepareXml($root);
 
     return $out;
-}
+
+} // generation of DB schema
+
 
 /**
+* Generate the FAIMS user interface schema file
+* 
 * generate with simplexml
 * 
 * @param mixed $projname
@@ -381,14 +396,20 @@ function generate_UI_Schema($projname, $rt_toexport){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
 
-
    add16n('Users'); 
    add16n('dummy');
    add16n('Devices');
    add16n('Start.Recording');
    
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?>
-<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" />');
+    <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" 
+    xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:jr="http://openrosa.org/javarosa" />');
+
+    addComment($root, ' ****** ');
+    addComment($root, 'FAIMS UI Schema generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A'));
+    addComment($root, 'Database: '.DATABASE.'   Heurist user:'.get_user_name());
+    addComment($root, ' ****** ');
 
     $head = $root->addChild("head",'','http://www.w3.org/1999/xhtml');
     $body = $root->addChild("body");
@@ -497,6 +518,7 @@ function generate_UI_Schema($projname, $rt_toexport){
     xml_adopt($tabgroup_control, $tab_gps);
     addComment($faims, 'list of tabgroups for entities');
 
+    // Output specifications for each ArchEnt (Record type in Heurist)
     $rectyps = explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
 
@@ -524,6 +546,7 @@ function generate_UI_Schema($projname, $rt_toexport){
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
+        // Output for each field (attribtue) in the record type
         foreach ($details as $dtid=>$detail) {
 
             $is_repeatable = ($detail[$int_dt_repeat]!='1');
@@ -612,7 +635,8 @@ function generate_UI_Schema($projname, $rt_toexport){
     }//foreach
     
     return prepareXml($root);
-}
+    
+} // generation of user interface schema
 
 function getProperName($name){
         $goodname = preg_replace('~[^a-z0-9]+~i','_', $name);
@@ -637,7 +661,7 @@ function xml_adopt($root, $new, $ns=null) {
 }
 
 //
-// dash separated list of term label and all its parents
+// create a dash-separated string consisting of a term label and all its parents
 //
 function getFullTermName($term, $datatype){
 
@@ -655,11 +679,12 @@ function getFullTermName($term, $datatype){
     return $name;
 }
 
+
+//
+// 
 function getTermsTree($property, $datatype, $terms){
 
     global $dtTerms;
-
-//error_log(">>>terms=".$terms);
 
     if($datatype == "relmarker" || $datatype === "relationtype"){
         $datatype = "relation";
@@ -677,8 +702,6 @@ function getTermsTree($property, $datatype, $terms){
     }
 
     $meta = $property->addChild('lookup');
-
-//error_log(">>>".print_r($termTree, true));
 
     return createSubTree($meta, $datatype, $termTree, "");
 }
