@@ -65,6 +65,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         border-bottom: 1px solid black;
         text-transform:uppercase;
         padding-top:5px;
+        padding-bottom:5px;
     }
     .lbl_form{
         width:230px;
@@ -80,80 +81,91 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     <div id="page-inner" style="margin:0px 5px; padding: 0.5em;">
 <?php
 
+    $mode_dir = (@$_REQUEST['mode']=='0');
+
     $upload = @$_FILES["file"];
     $dbname_faims = null;
     
 //DEBUG echo print_r($upload, true)."<br>";
     
-    if ($upload["error"] > 0 && $upload["error"] < 4)
-    {
-        echo "<p class='error'>Upload error: ".$upload["error"]."</p>";
-        
-    }else if(@$upload["tmp_name"]){
-        //untar archive and place db in faims folder, or just copy database to this folder
-        
-        print "<h3>Exteract database from project tarball</h3><br>";
-        ob_flush();flush();
-        
-        $tmp_name = $upload["tmp_name"];
-        
-        $folder = HEURIST_UPLOAD_DIR."faims/import"; //.;
-        $folder_proj = $folder."/project";
-
-        //create export folder
-        if(!file_exists($folder)){
-            $old_umask = umask(0);
-            if (!mkdir($folder, 0777, true)) {
-                    umask($old_umask);
-                    die("Failed to create folder: ".$folder);
-            }
-            umask($old_umask);
-        }else{ //clear folder
-            array_map('unlink', glob($folder."/*"));
-        }
-        
-        if($upload["name"]=="db.sqlite3"){
-
-            $dbname_faims = $folder . "/" . $upload["name"];
+    if(!$mode_dir){
+    
+        if ($upload["error"] > 0 && $upload["error"] < 4)
+        {
+            echo "<p class='err_message'>Upload error: ".$upload["error"]."</p>";
             
-            if(copy($tmp_name, $dbname_faims)){
-                unlink($tmp_name);
-            }else{
-                die('Can not copy file '.$upload["name"].' to '.$folder);    
-            }
+        }else if(!@$upload["tmp_name"]){
             
+            echo "<p class='err_message'>You have to upload FAIMS project tar or sqlite database file</p>";
             
         }else{
-        
-            $tarfile = $folder . "/" . $upload["name"];
-            $tarfile = $folder . "/project.tar.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
-          
-    //echo  str_replace("(","\\(",$tarfile).">>>>".$tarfile."<br>";
+            //untar archive and place db in faims folder, or just copy database to this folder
             
-            if(copy($tmp_name, $tarfile)){
-                unlink($tmp_name);
+            $tmp_name = $upload["tmp_name"];
+            
+            $folder = HEURIST_UPLOAD_DIR."faims/import"; //.;
+            $folder_proj = $folder."/project";
+
+            //create export folder
+            if(!file_exists($folder)){
+                $old_umask = umask(0);
+                if (!mkdir($folder, 0777, true)) {
+                        umask($old_umask);
+                        die("Failed to create folder: ".$folder);
+                }
+                umask($old_umask);
+            }else{ //clear folder
+                array_map('unlink', glob($folder."/*"));
+            }
+            
+            if($upload["name"]=="db.sqlite3"){
+
+                $dbname_faims = $folder . "/" . $upload["name"];
+                
+                if(copy($tmp_name, $dbname_faims)){
+                    unlink($tmp_name);
+                }else{
+                    die('Can not copy file '.$upload["name"].' to '.$folder);    
+                }
+                
+                
             }else{
-                die('Can not copy file '.$upload["name"].' to '.$folder);    
-            }
             
-            //$cmdline = "tar --extract --file=".$tarfile." db.sqlite3";
-            //$cmdline = "tar -xvf ".$tarfile; //." #utar/project/db.sqlite3";
-            $cmdline = "tar -xvf ".$tarfile." -C ".$folder;
-            //tar --extract --file={tarball.tar} {file}
-            //tar -xvf {tarball.tar} {path/to/file}
-           
-            $res1 = 0;
-            $output1 = exec($cmdline, $output, $res1);
-            if ($res1 != 0 ) {
-                        echo "<p class='error'>Error code $res1: Unable to extract database from archive $tarfile<br><br>";
-                        //echo print_r($output1, true)."<br>out=";
-                        //echo print_r($output, true);
-                        echo "</p>";
+                $tarfile = $folder . "/" . $upload["name"];
+                $tarfile = $folder . "/project.tar.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
+
+
+                print "<h3>Extracting FAIMS database from tarball to ".$folder_proj."/db.sqlite3</h3><br>";
+                ob_flush();flush();
+
+              
+        //echo  str_replace("(","\\(",$tarfile).">>>>".$tarfile."<br>";
+                
+                if(copy($tmp_name, $tarfile)){
+                    unlink($tmp_name);
+                }else{
+                    die('Can not copy file '.$upload["name"].' to '.$folder);    
+                }
+                
+                //$cmdline = "tar --extract --file=".$tarfile." db.sqlite3";
+                //$cmdline = "tar -xvf ".$tarfile; //." #utar/project/db.sqlite3";
+                $cmdline = "tar -xvf ".$tarfile." -C ".$folder;
+                //tar --extract --file={tarball.tar} {file}
+                //tar -xvf {tarball.tar} {path/to/file}
+               
+                $res1 = 0;
+                $output1 = exec($cmdline, $output, $res1);
+                if ($res1 != 0 ) {
+                            echo "<p class='err_message'>Error code $res1: Unable to extract database from archive $tarfile<br><br>";
+                            //echo print_r($output1, true)."<br>out=";
+                            //echo print_r($output, true);
+                            echo "</p>";
+                }
+                
+                $dbname_faims = $folder_proj."/db.sqlite3";
             }
-            
-            $dbname_faims = $folder_proj."/db.sqlite3";
+
         }
-        
         
         
     }else{
@@ -163,7 +175,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     if( !$dbname_faims ||  !file_exists($dbname_faims)){
 
         if($dbname_faims && !file_exists($dbname_faims)){
-           print "<div class='err_message'>The specified database file does not found</div>";
+           print "<div class='err_message'>Database file: $dbname_faims was not found</div>";
         }
 
 
@@ -178,9 +190,9 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
         print "<form name='selectdb' action='syncFAIMS.php' method='post' enctype='multipart/form-data'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-        print "<div><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
-        print "<div><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
-        print "<div><div class='lbl_form'>Show structure only:</div><input name='showstr' value='1' type='checkbox'></div>";
+        print "<div><input type='radio' ".($mode_dir?"":"checked='true'")." name='mode' value='1'><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
+        print "<div><input type='radio' ".($mode_dir?"checked='true'":"")." name='mode' value='0'><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
+        print "<div><div class='lbl_form'>Check to verify structure (no data import):</div><input name='showstr' value='1' type='checkbox'></div>";
         print "<div><div class='lbl_form'></div><input type='submit' value='Start' /></div>";
         print "</form></div></body></html>";
         exit();
