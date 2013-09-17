@@ -15,7 +15,8 @@
 */
 
 /**
-*   Build faims tarball based on heurist projecct
+*   Write FAIMS project definition files (db schema, ui schema, a16N, ui logic
+*   based on the Heurist database
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -77,14 +78,14 @@
     <script src="../../common/php/loadCommonInfo.php"></script>
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
-    <div id="page-inner" style="width:740px; margin:0px 5%; padding: 0.5em;">
+    <div id="page-inner" style="width:740px; margin:0px 5%; padding: 0.5em;">   
 <?php
     
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
 
     //STEP 1 - define record types to be exported
     //if( !$rt_toexport || $invalid ){
-
+    
     if($step=='1'){
         if(!$rt_toexport){
             print "<div class='err_message'>Select record types for export</div>";
@@ -97,18 +98,24 @@
             }
         }
     }
+        print "<div>This function writes a set of FAIMS project definition files ".
+        "(db schema, ui schema, ui logic, A16N) to a zip file, based on the record types ".
+        "selected from the Heurist database. <p/>These files can be loaded into ".
+        "the FAIMS server to create a new module.<p/></div>";
+
         print "<form name='startform' action='exportFAIMS.php' method='get'>";
         print "<input id='rt_selected' name='rt' type='hidden'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
         print "<div><div class='lbl_form'>Project name:</div><input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='25'></div>";
 
-        print "<div><div class='lbl_form'>Record types to include in project:</div>";
-        print "<input type='button' value='Select Record Type' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
+        print "<div id='buttondiv2' style='display:".(($step=='1')?"none":"block")."'><div class='lbl_form'>Record types to include in export:</div>"; 
+        print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
 
         print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;font-weight:bold;'></div>";
         
         print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
+
         print "</form>";
         if($rt_toexport){
             print "<script>showSelectedRecTypes('".$rt_toexport."')</script>";
