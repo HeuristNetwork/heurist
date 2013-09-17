@@ -288,20 +288,20 @@ if (is_admin()) {
                 <div class="adminSection">
                     <ul>
                         <li class="seperator"><a href="#"
-                                onClick="loadContent('../import/faims/about.html?db=<?=HEURIST_DBNAME?>')"
+                                onClick="loadContent('../applications/faims/about.html?db=<?=HEURIST_DBNAME?>')"
                                 title="Information about the FAIMS project">About</a></li>
 
                         <li><a href="#"
-                            onClick="loadContent('../import/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
+                            onClick="loadContent('../applications/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Build FAIMS project / tablet application from the current Heurist database strucuture. No data to be exported">Build Project</a></li>
                         <li><a href="#"
-                            onClick="loadContent('../import/faims/exportFAIMSwithdata.php?db=<?=HEURIST_DBNAME?>')"
+                            onClick="loadContent('../applications/faims/exportFAIMSwithdata.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Build FAIMS project / tablet application with data from the current Heurist database">Export Project</a></li>
                         <li><a href="#"
-                            onClick="loadContent('../import/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
+                            onClick="loadContent('../applications/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Import structure and data into the current Heurist database from a FAIMS project">Import Project</a></li>
                         <li><a href="#"
-                            onClick="loadContent('../import/faims/exportTDar.php?db=<?=HEURIST_DBNAME?>')"
+                            onClick="loadContent('../applications/faims/exportTDar.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Export the current database as tables and metadata ready for import into the tDAR repository">Export to tDAR</a></li>
 
                     </ul>
