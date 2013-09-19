@@ -310,7 +310,7 @@ function _titlemask__get_enum_value($enum_id, $enum_param_name)
     $ret = null;
 
         if($enum_param_name==null){
-            $enum_param_name = "trm_label";
+            $enum_param_name = "label";
         }
 
         $ress = mysql_query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
