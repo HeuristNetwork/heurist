@@ -590,6 +590,12 @@ function DetailTypeEditor() {
 			Dom.get('div_dty_ConceptID').innerHTML = 'Concept ID: '+_detailType[fi.dty_ConceptID];
 		}
 
+         if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){
+            _detailType[fi.dty_JsonTermIDTree] = "0";
+            _detailType[fi.dty_TermIDTreeNonSelectableIDs] = "";
+            Dom.get('defineTerms').style.display = 'none';
+         }
+        
 
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];

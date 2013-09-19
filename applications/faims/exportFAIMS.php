@@ -323,7 +323,7 @@ function generateSchema($projname, $rt_toexport){
         addComment($root, strtoupper($rtStructs['names'][$rt])); 
         $arch_element = $root->addChild('ArchaeologicalElement');
 
-        $arch_element->addAttribute('type', $rtStructs['names'][$rt] );
+        $arch_element->addAttribute('name', $rtStructs['names'][$rt] );
         $arch_element->description = str_replace("&", "&amp;", $rt_descr);
         $titlemask = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask];
         $titlemask_canonical = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_titlemask_canonical];

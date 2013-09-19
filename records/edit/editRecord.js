@@ -2412,6 +2412,13 @@ s
         }
         var    disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
+        
+        var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+         if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour
+            allTerms = 0;
+            disabledTerms = "";
+         }
+        
         var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
                                                             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
                                                             (bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian doesn't want it (this.required!=="required"));

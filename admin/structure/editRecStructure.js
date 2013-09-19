@@ -862,9 +862,11 @@ function EditRecStructure() {
 	*/
 	function _fromArrayToUI(rst_ID, isAll)
 	{
+        var findex = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+        
 		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames,
 			values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID],
-			rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type],
+			rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_Type],
 			selstatus = Dom.get('ed'+rst_ID+'_rst_Status'),
 			dbId = Number(top.HEURIST.database.id);
 
@@ -919,9 +921,17 @@ function EditRecStructure() {
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value),//dty_TermIDTreeNonSelectableIDs
 					edt_def.value);
 */
+                    var allTerms = (Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_JsonTermIDTree]:edt2.value);
+                    var disabledTerms = (Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_TermIDTreeNonSelectableIDs]:edt.value);
+                    var _dtyID = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex['dty_ID']];
+                    if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour
+                        allTerms = 0;
+                        disabledTerms = "";
+                    }
+
 					recreateTermsPreviewSelector(rst_type,
-						(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree]:edt2.value),
-						(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs]:edt.value),
+						allTerms,
+						disabledTerms,
 						edt_def.value); //default value
 
 					//editedTermTree, editedDisabledTerms);
@@ -1956,7 +1966,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 
 				allTerms = Hul.expandJsonStructure(allTerms);
 				disabledTerms = Hul.expandJsonStructure(disabledTerms);
-
+                
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");
 				}

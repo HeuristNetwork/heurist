@@ -66,6 +66,7 @@
 <body class="popup">
 
         <script src="../../common/php/displayPreferences.php"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script>
 <!--
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
@@ -110,9 +111,11 @@
 	<div id="pnl_enum" class="input-row" style="display:block;">
 		<div class="input-header-cell">Vocabulary (terms):</div>
 		<div class="input-cell">
+        <div id="defineTerms">
 		<span class="dtyValue" id="termsVocab"></span>
 		<span id="divAddSelTerm" style="display:inline-block;"><input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:100px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/></span>
 		<span id="divAddVocab" style="display:none;"><input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/></span>
+        </div>
 		<div class="dtyValue" id="termsPreview"><span>preview:</span></div>
 		<div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
 		</div>
