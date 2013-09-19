@@ -81,12 +81,15 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     <div id="page-inner" style="margin:0px 5px; padding: 0.5em;">
 <?php
 
+    $step = @$_REQUEST['step'];
+
     $mode_dir = (@$_REQUEST['mode']=='0');
 
     $upload = @$_FILES["file"];
     $dbname_faims = null;
     
 //DEBUG echo print_r($upload, true)."<br>";
+    if($step=='1'){
     
     if(!$mode_dir){
     
@@ -171,6 +174,8 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     }else{
         $dbname_faims = @$_REQUEST['faims'];
     }
+    
+    }
 
     if( !$dbname_faims ||  !file_exists($dbname_faims)){
 
@@ -189,6 +194,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         }
 
         print "<form name='selectdb' action='syncFAIMS.php' method='post' enctype='multipart/form-data'>";
+        print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
         print "<div><input type='radio' ".($mode_dir?"":"checked='true'")." name='mode' value='1'><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
         print "<div><input type='radio' ".($mode_dir?"checked='true'":"")." name='mode' value='0'><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
@@ -561,15 +567,18 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
     {
             $attrID = $row1[0];
             $rtyName = $row1[1]." [$attrID]";
+            $currTitleMask = null;
+            $rtyId = null;
 
             //try to find correspondant rectype in Heurist
-            $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
+            $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name, rty_TitleMask from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
             if($row){ //already exists
 
 print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $rtyId = $row[0];
                 $rtyName = $row[1];
+                $currTitleMask = $row[2];
 
                 $rectypeMap[$attrID] = $row[0];
             }else{
@@ -590,12 +599,16 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $stmt->close();
 
+                $currTitleMask = "Record #[ID]";
+                
                 $rectypeMap[$attrID] = $rtyId;
 
 print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>";
             }
 
             //if AEntType has strucute described in IdealAEnt
+            
+            $titleMask = "";
 
             $query2 =  "SELECT AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".$attrID;
 
@@ -603,13 +616,15 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
             while ($row_recstr = $recstructure->fetchArray(SQLITE3_NUM))
             {
 
+                    $dt_Id = null;
 
                     $row = mysqli__select_array($mysqli,
-                        "select rst_DetailTypeID, rst_DisplayName from defDetailTypes d, defRecStructure r ".
+                        "select rst_DetailTypeID, rst_DisplayName, rst_DetailTypeID from defDetailTypes d, defRecStructure r ".
                         "where d.dty_ID=r.rst_DetailTypeID and r.rst_RecTypeID=$rtyId and d.dty_NameInOriginatingDB='FAIMS.".$row_recstr[0]."'");
 
                     if($row){  //such detal in structure already exists
 
+                            $dt_Id = $row[2];
         print  "&nbsp;&nbsp;&nbsp;&nbsp;detail ".$row[0]."  ".$row[1]."<br/>";
 
                     }else{
@@ -624,14 +639,29 @@ print  "RT added ".$rtyId."  based on ".$attrID." ".$rtyName." ".$row1[2]."<br/>
 
                                 $stmt->close();
 
+                                $dt_Id = $row3[0];
 
         print  "&nbsp;&nbsp;&nbsp;&nbsp;detail added ".$row3[0]."  ".$row3[1]."  based on ".$row_recstr[0]."<br/>";
                         }else{
                             print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
                         }
                     }
+                    
+                    if($dt_Id && $row_recstr[2]){ //isIdentifier
+                          $titleMask = $titleMask."[".$dt_Id."] ";
+                    }
 
             }//for add details for structure
+            
+            //update title mask
+            if($currTitleMask!=$titleMask){
+print "titlemask=".$titleMask."<br>";                
+                $query = "UPDATE defRecTypes set rty_TitleMask =? where rty_ID=".$rtyId;
+                $stmt = $mysqli->prepare($query);
+                $stmt->bind_param('s', $titleMask);
+                $stmt->execute();
+                $stmt->close();
+            }
 
             //verify spatial data for this record type
             if(isset($dt_Geo) && $dt_Geo>0)
@@ -696,7 +726,8 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
                 $query = "INSERT INTO defRecTypes (rty_Name, rty_TitleMask, rty_Description, rty_NameInOriginatingDB) VALUES (?,?,?,?)";
                 $stmt = $mysqli->prepare($query);
                 $fid = 'FAIMS.'.$attrID;
-                $rtyMask = 'Container Record #[ID] for '.$row1[1];
+                //$rtyMask = 'Container Record #[ID] for '.$row1[1];
+                $rtyMask = '[2-7.RecTitle] [2-6] [2-5.RecTitle]';
                 
                 $stmt->bind_param('ssss', $rtyName, $rtyMask, $row1[2], $fid);
                 $stmt->execute();
@@ -1136,7 +1167,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
 
     $rs = $dbfaims->query($query);
     while ($row = $rs->fetchArray(SQLITE3_NUM))
-    {
+    {                                           
         if($faims_id!=$row[0]){ 
 
             //another relation - save previous
@@ -1150,7 +1181,8 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                         $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
                                           "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
                                           "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
-                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE]
+                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE],
+                                          "t:".$dt_SourceRecordID => $details["t:".$dt_SourceRecordID]
                                      );
                         
 //DEBUG print ">>>".print_r($details2, true)."<br>";                                        
@@ -1210,7 +1242,8 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 //find the existing record in Heurist database
                 $recID = getRecordByFaimsId($faims_id);
                 
-//DEBUG print "RECID ".$recID." for ".$faims_id."<br>";
+//DEBUG 
+print "RECID ".$recID." for ".$faims_id."<br>";
                 
             }else{
                 $recID = 0;
@@ -1263,9 +1296,9 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                         $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
                                           "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
                                           "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
-                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE]
+                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE],
+                                          "t:".$dt_SourceRecordID => $details["t:".$dt_SourceRecordID]
                                      );
-                        
                         insert_update_Record($recID, $rectype, $details2, $faims_id);    
                     }
                 }

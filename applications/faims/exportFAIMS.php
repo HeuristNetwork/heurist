@@ -61,7 +61,8 @@
         color:red;
         border-bottom: 1px solid black;
         text-transform:uppercase;
-        padding:14px;
+        padding-top:5px;
+        padding-bottom:5px;
     }
     .lbl_form{
         width:180px;

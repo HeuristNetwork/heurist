@@ -69,6 +69,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         border-bottom: 1px solid black;
         text-transform:uppercase;
         padding-top:5px;
+        padding-bottom:5px;
     }
     .lbl_form{
         color:red;
