@@ -195,7 +195,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             
             if(strpos($resp, 'Set-Cookie: crowd.token_key=""')>0){  //not registered
                 print "<script>document.getElementById('buttondiv').style.display = 'block';document.getElementById('buttondiv2').style.display = 'block';</script>";                  
-                print "<div class='err_message'>Authentification to tDAR server is failed</div>";
+                print "<div class='err_message'>Authentification to tDAR server failed. Please check user name and password.</div>";
                 print "</div></body></html>";
                 exit();
             }

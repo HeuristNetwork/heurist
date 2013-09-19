@@ -723,7 +723,7 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
         $termName = @$termLookup[$termid][$ind_label];
         
         if($termName){
-            $termCcode = @$termLookup[$termid][$ind_ccode];
+            $termCcode = @$termLookup[$termid][$ind_ccode]; //concept code
             $termDescr = @$termLookup[$termid][$ind_descr];
             $termCode = @$termLookup[$termid][$ind_tcode];
             if($termCode){
@@ -733,7 +733,7 @@ function createSubTree($meta, $datatype, $termTree, $parentname){
             }
             
             if(strpos($termCcode,'-')==false) {
-                $termCcode = '0-'.$termCcode;
+                $termCcode = '0-'.$termid;
             }
             $term = $meta->addChild('term', getResStr($termCcode, $termName.$termCode) );
             $term->addChild('description', str_replace("&", "&amp;", $termName).$termCode.($termDescr?":".str_replace("&", "&amp;", $termDescr):"") );
