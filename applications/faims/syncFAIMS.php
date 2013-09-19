@@ -1304,6 +1304,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 }
     }
     
+    print "<br><h3>Module import completed</h3><br><br>";
    
 /**
 * returns H3 record id by faims id

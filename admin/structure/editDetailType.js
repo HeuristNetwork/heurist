@@ -302,7 +302,7 @@ function DetailTypeEditor() {
 		//btn_addsel.disabled = false;
 
 		if(el_sel.value > 0){ //individual selection
-			btn_addsel.value = "Add  term";
+			btn_addsel.value = "Add  terms";
 			editedTermTree = el_sel.value;
             divAddSelTerm.style.display = "inline-block";
 			divAddVocab.style.display = "inline-block";
@@ -422,9 +422,9 @@ function DetailTypeEditor() {
 		var allTerms = Dom.get("dty_JsonTermIDTree").value;
 		var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 
-		if(type!="enum"){
-			type="relation";
-		}
+        if(type!="enum"){
+            type="relation";
+        }
 
 		var el_sel = Dom.get("selVocab");
 		if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
@@ -957,6 +957,31 @@ function DetailTypeEditor() {
 			 */
 			onSelectRectype : _onSelectRectype,
 
+            showOtherTerms: function(){
+                
+                var allTerms = Dom.get("dty_JsonTermIDTree").value;
+                var type = Dom.get("dty_Type").value;
+                if(type!="enum"){
+                    type="relation";
+                }
+
+                var el_sel = Dom.get("selVocab");
+                var vocab_id =  el_sel.value>0?el_sel.value:'';
+                
+                top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+                    {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    height: 620,
+                    width: 900,
+                    callback: function(needTreeReload) {
+                        _recreateTermsPreviewSelector(type, vocab_id, "");
+                    }
+                    });
+                
+            },
+                    
+            
 			/**
 			 * Cancel form - checks if changes were made, shows warning and closes the window
 			 */

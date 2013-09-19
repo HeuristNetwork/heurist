@@ -114,9 +114,12 @@
         <div id="defineTerms">
 		<span class="dtyValue" id="termsVocab"></span>
 		<span id="divAddSelTerm" style="display:inline-block;"><input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:100px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/></span>
-		<span id="divAddVocab" style="display:none;"><input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/></span>
+		<span id="divAddVocab" style="display:none;">
+            <input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/>
+            <input type="submit" value="Edit terms" onClick="{window.detailTypeEditor.showOtherTerms();}"/>    
+        </span>
         </div>
-		<div class="dtyValue" id="termsPreview"><span>preview:</span></div>
+		<div class="dtyValue" id="termsPreview"><span>Preview:&nbsp;&nbsp;</span></div>
 		<div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
 		</div>
 	</div>

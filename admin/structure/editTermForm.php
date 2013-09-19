@@ -42,12 +42,64 @@ if (!is_admin()) {
     return;
 }
 
-$parent_id = @$_REQUEST['parent'];
+    $parent_id = @$_REQUEST['parent'];
+    $parent_name = "";
+    $term_name = @$_REQUEST['name'];
+    $term_desc = @$_REQUEST['description'];
+    $term_code = @$_REQUEST['code'];
+    $return_res = @$_REQUEST['return_res']?$_REQUEST['return_res']:""; 
+    
+
+    $return_res = "";
+    $meesage = "";
+
+    if(@$_REQUEST['domain']==null){
+        $meesage = "Terms domain is not defined";
+    }else if($parent_id==null){
+        $meesage = "Parent vocabulary is not defined";
+    }else if(@$_REQUEST['process']=="action"){
+
+        if(@$_REQUEST['name']==null || $_REQUEST['name']==""){
+            $meesage = "<div style='color:red'>Display name is mandatory!</div>";
+        }else{
+
+            $db = mysqli_connection_overwrite(DATABASE); //artem's
+
+            $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
+                    array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), null);
+
+            if(is_numeric($res)){
+
+                $meesage = "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>".
+                            "<div style='color:green'>New term '".$term_name."' has been added successfully. ID:".$res."</div>";
+                if($return_res==""){
+                    $return_res = ($parent_id==0)?$res:"ok";
+                }
+                if($parent_id==0){
+                    $parent_id = $res;
+                }
+                $term_name = "";
+                $term_desc = "";
+                $term_code = "";
+                
+            }else{
+                $meesage = "<div style='color:red'>".$res."</div>"; //error
+            }
+        }
+    }
+    
+    
+    if($parent_id!=0){
+        $terms = getTerms(true);
+        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['domain']][$parent_id][0];
+    }
+
+
 ?>
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Heurist - Add <?=($parent_id==0?"vocabulary":"term")?></title>
+<title>Add <?=($parent_id==0?"vocabulary":"term for ".$parent_name)?></title>
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
@@ -70,34 +122,7 @@ $parent_id = @$_REQUEST['parent'];
 <body class="popup">
 	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 <?php
-
-	$return_res = "";
-
-	if(@$_REQUEST['domain']==null){
-		echo "Terms domain is not defined";
-	}else if($parent_id==null){
-		echo "Parent vocabulary is not defined";
-	}else if(@$_REQUEST['process']=="action"){
-
-		if(@$_REQUEST['name']==null || $_REQUEST['name']==""){
-			echo "<div style='color:red'>Display name is mandatory!</div>";
-		}else{
-
-			$db = mysqli_connection_overwrite(DATABASE); //artem's
-
-			$res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
-					array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), null);
-
-			if(is_numeric($res)){
-
-				echo "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>";
-				echo "<div style='color:green'>New term has been added successfully</div>";
-				$return_res = ($parent_id==0)?$res:"ok";
-			}else{
-				echo "<div style='color:red'>".$res."</div>"; //error
-			}
-		}
-	}
+   echo $meesage;
 ?>
 <script type="text/javascript">
 
@@ -116,7 +141,7 @@ $parent_id = @$_REQUEST['parent'];
 		}
 		});
 	}
-
+    
 		setTimeout(function(){document.getElementById("trmName").focus();},500);
 </script>
 <div>
@@ -125,16 +150,17 @@ $parent_id = @$_REQUEST['parent'];
         	<input name="process" value="action" type="hidden" />
         	<input name="domain" value="<?=$_REQUEST['domain']?>" type="hidden" />
         	<input name="db" value="<?=HEURIST_DBNAME?>" type="hidden" />
-        	<input name="parent" value="<?=$_REQUEST['parent']?>" type="hidden" />
+            <input name="return_res" value="<?=$return_res?>" type="hidden" />
+        	<input name="parent" value="<?=$parent_id?>" type="hidden" />
 
-			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px" value="<?=@$_REQUEST['name'] ?>" /></div>
-			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px" value="<?=@$_REQUEST['description'] ?>" /></div>
-			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px" value="<?=@$_REQUEST['code'] ?>" /></div>
+			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px" value="<?=$term_name ?>" /></div>
+			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px" value="<?=$term_desc?>" /></div>
+			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px" value="<?=$term_code?>" /></div>
 
 			<div style="text-align: right; padding-top:8px;">
 					<input id="btnEditTree" type="button" value="Edit terms" onClick="{showOtherTerms();}"/>
 					<input id="btnSave" type="submit" value="Save"/>
-					<input id="btnCancel" type="button" value="Close" onClick="{window.close(return_res)}" />
+					<input id="btnCancel" type="button" value="Done" onClick="{window.close(return_res)}" />
 			</div>
 
 		</form>
