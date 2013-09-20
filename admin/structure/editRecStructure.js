@@ -453,9 +453,15 @@ function EditRecStructure() {
 			//
 			// Subscribe to a click event to bind to expand/collapse the row
 			//
+            var _actionInProgress = false;
+            
 			_myDataTable.subscribe( 'cellClickEvent', function(oArgs)
 			{
-
+                if(_actionInProgress){
+                    return;
+                }
+                
+                
 				var column = this.getColumn(oArgs.target);
 
 				//prevent any operation in case of opened popup
@@ -507,10 +513,13 @@ function EditRecStructure() {
 					}else{
 						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
 					}*/
-
+                    
+                    _actionInProgress = false;
 				}
 
 				if(!Hul.isnull(record_id)){
+                    _actionInProgress = true;
+                    
 					oRecord = this.getRecord(record_id);
 					var rst_ID = oRecord.getData("rst_ID");
 
