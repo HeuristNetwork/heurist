@@ -445,7 +445,7 @@ function DetailTypeEditor() {
 						}else if(!Hul.isempty(context)) { //after add new vocab
 							Dom.get("dty_JsonTermIDTree").value =  context;
 							Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
-							_recreateTermsVocabSelector(type);
+							_recreateTermsVocabSelector(type); //, context);
 							_recreateTermsPreviewSelector(type, null, null);
 						}
 					}

@@ -71,7 +71,7 @@ if (!is_admin()) {
             if(is_numeric($res)){
 
                 $meesage = "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>".
-                            "<div style='color:green'>New term '".$term_name."' has been added successfully. ID:".$res."</div>";
+                            "<div style='color:green;'>Added: ".$term_name." (".(($parent_id==0)?"vocabulary":"term").")</div>";
                 if($return_res==""){
                     $return_res = ($parent_id==0)?$res:"ok";
                 }
@@ -153,15 +153,18 @@ if (!is_admin()) {
             <input name="return_res" value="<?=$return_res?>" type="hidden" />
         	<input name="parent" value="<?=$parent_id?>" type="hidden" />
 
+            <div class="dtyField" style="padding-top:5px;"><?=($parent_id==0?"":"Vocabulary <b>".$parent_name."</b>") ?></div>
 			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px" value="<?=$term_name ?>" /></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px" value="<?=$term_desc?>" /></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px" value="<?=$term_code?>" /></div>
 
-			<div style="text-align: right; padding-top:8px;">
-					<input id="btnEditTree" type="button" value="Edit terms" onClick="{showOtherTerms();}"/>
-					<input id="btnSave" type="submit" value="Save"/>
+            <div style="padding-top: 5px;">
+                <div style="display: inline-block;"><input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"/></div>
+			    <div style="float:right;text-align: right; padding-top:8px;">
+					<input id="btnSave" type="submit" value="Save"/>&nbsp;&nbsp;
 					<input id="btnCancel" type="button" value="Done" onClick="{window.close(return_res)}" />
-			</div>
+			    </div>
+            </div>
 
 		</form>
 </div>
