@@ -387,7 +387,7 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
                 $detailMap[$attrID] = array($row[0], $row[3]);
             }else{
                 //add new detail type into HEURIST
-                $query = "INSERT INTO defDetailTypes (dty_Name, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?)";
+                $query = "INSERT INTO defDetailTypes (dty_Name, dty_HelpText, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?,?)";
                 $stmt = $mysqli->prepare($query);
                 if(!$stmt){
                     print "ERROR ".$mysqli->error;
@@ -396,9 +396,10 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
                 $fid = 'FAIMS.'.$attrID;
                 $ftype = faimsToH3_dt_mapping($row1[2]);
 //print ">>>>".$fid." ".$row1[1];
-                $fname = ($row1[1]." [$attrID]");
+                $dtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
+                $dtyDescr = trim($row1[3]." FAIMS ID ".$attrID);
 
-                $stmt->bind_param('ssss', $fname, $row1[3], $ftype, $fid);
+                $stmt->bind_param('sssss', $dtyName, $dtyDescr, $dtyDescr, $ftype, $fid);
                 if(!$stmt->execute()){
 print "ERROR! detail type not inserted ".$mysqli->error." ( based on ".$attrID." ".$row1[1]." ".$row1[3].").  ".$mysqli->error."<br/>";
 exit();
@@ -425,8 +426,8 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
                     //make shure that we have parent term in Heursit and our detail type refers to this vocabulary (parent term)
                     $query = "INSERT INTO defTerms (trm_Label, trm_Description, trm_Domain) VALUES (?,?,'enum')";
                     $stmt = $mysqli->prepare($query);
-                    $flbl = 'Vocab #'.$dtyId;
-                    $fdesc = 'Vocabulary for detailtype '.$dtyId;
+                    $flbl = $dtyName.' [vocab]';
+                    $fdesc = 'Vocabulary for detailtype '.$dtyName;
                     $stmt->bind_param('ss', $flbl , $fdesc );
                     $stmt->execute();
                     $vocabID = $stmt->insert_id;
@@ -450,7 +451,11 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
                         $query = "INSERT INTO defTerms (trm_Label, trm_Domain, trm_NameInOriginatingDB, trm_ParentTermID) VALUES (?,'enum',?, $vocabID)";
                         $stmt = $mysqli->prepare($query);
                         $fid = 'FAIMS.'.$row_vocab[0];
-                        $stmt->bind_param('ss', $row_vocab[1], $fid );
+                        $flbl = $row_vocab[1];
+                        if(strpos($flbl,"{")===0){
+                            $flbl = substr($flbl,1, strlen($flbl)-2 );
+                        }
+                        $stmt->bind_param('ss', $flbl, $fid );
                         $stmt->execute();
                         $trm_ID = $stmt->insert_id;
                         $stmt->close();
@@ -566,7 +571,9 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
     while ($row1 = $res1->fetchArray(SQLITE3_NUM))
     {
             $attrID = $row1[0];
-            $rtyName = $row1[1]." [$attrID]";
+            $rtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
+            $rtyDescr = $row1[2] ?$row1[2] :"FAIMS ID ".$attrID;
+            
             $currTitleMask = null;
             $rtyId = null;
 
@@ -587,7 +594,7 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
                 $stmt = $mysqli->prepare($query);
                 $fid = 'FAIMS.'.$attrID;
 
-                $stmt->bind_param('sss', $rtyName, $row1[2], $fid);
+                $stmt->bind_param('sss', $rtyName, $rtyDescr, $fid);
                 $stmt->execute();
 
                 $rtyId = $stmt->insert_id;
@@ -945,12 +952,12 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                                 print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
                                 continue;
                             }
-                         }else if($row[4]){ //freetext
-                            $value = $row[4];
                          }else if($row[7]){ //measure
                             $value = $row[7];
-                         }else if($row[8]){ //Certainty
-                            $value = $row[8];
+                         }else if($row[4]){ //freetext
+                            $value = $row[4];
+                         /*}else if($row[8]){ //Certainty
+                            $value = $row[8];*/
                          }else{
                              continue;
                          }
@@ -1111,12 +1118,12 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                                 print "TERM NOT FOUND for Vocabulary ".$vocabID."<br />";
                                 continue;
                             }
-                         }else if($row[4]){ //freetext
-                            $value = $row[4];
                          }else if($row[7]){ //measure
                             $value = $row[7];
-                         }else if($row[8]){ //Certainty
-                            $value = $row[8];
+                         }else if($row[4]){ //freetext
+                            $value = $row[4];
+                         /*}else if($row[8]){ //Certainty
+                            $value = $row[8];*/
                          }else{
                              continue;
                          }
