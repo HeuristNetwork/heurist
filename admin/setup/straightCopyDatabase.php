@@ -237,6 +237,16 @@
 			die ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
 				"<p>Please copy the directory manually or ask you sysadmin to help you</p>");
 		}
+        
+        
+        // Update file path in target database
+        $query1 = "update $newname.recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname."/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
+        $res1 = mysql_query($query1);
+        if (mysql_error())  { //(mysql_num_rows($res1) == 0)
+            print "<p><h4>Warning</h4><b>Unable to set files path to new path</b><br>Query was:".$query1."<br>Please consult the system administrator</p>";
+        }
+        
+        
 
 		echo "<h2>New database '$targetdbname' created successfully</h2>";
 
