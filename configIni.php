@@ -63,12 +63,6 @@ $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
 $dbPrefix = "hdb_"; // strongly recommended
 
-// The name of the default database which will be used if no db= is supplied in the URL.
-// If the users of this server nearly always use a shared database eg. a workgroup database of web bookmarks, bibliographic or other research data,
-// specify its name here. DO NOT include the prefix, this will be added automatically.
-// If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
-$defaultDBname = "ExampleDB"; // may be left blank, should not include prefix (see previous))
-
 // The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
 // this address will allow heurist to request content through the firewall for general Internet URI's
 $httpProxy = ""; // blank = assumes direct internet access from server - ok for laptop installations.

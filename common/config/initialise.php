@@ -62,7 +62,6 @@ require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 	$dbAdminUsername, $dbAdminPassword - read/write user and password
 	$dbReadonlyUsername, $dbReadonlyPassword - read-only user name and password
 	$dbPrefix - prepended to all database names
-	$defaultDBname - database to use if no ?db= specified
 	$memcachedHost - host for the memcached server
 	$memcachedPort - port for the memcached server
 	$defaultRootFileUploadPath - root location for uploaded files/record type icons/templates etc.
@@ -137,10 +136,7 @@ define('HEURIST_SYS_GROUP_ID', 1); // ID of Heurist System User Group which has 
 //test db connect valid db
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword) or returnErrorMsgPage(1, "Unable to connect to db server with admin account, set login in configIni.php. MySQL error: " . mysql_error());
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword) or returnErrorMsgPage(1, "Unable to connect to db server with readonly account, set login in configIni.php. MySQL error: " . mysql_error());
-if (@$defaultDBname != '') {
-	define('HEURIST_DEFAULT_DBNAME', $defaultDBname); //default dbname used when the URI is ambiguous about the db
 
-}
 if (@$httpProxy != '') {
 	define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
     if (@$httpProxyAuth != '') {
@@ -171,8 +167,6 @@ if (@$_REQUEST["db"]) { //if uri has DB then use it
 	$dbName = $_REQUEST["db"];
 } else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/", $_SERVER["HTTP_REFERER"], $refer_db)) { //else check refer
 	$dbName = $refer_db[1];
-} else if (defined("HEURIST_DEFAULT_DBNAME")) { //if enter at site root  index.php and default is set use it
-	$dbName = HEURIST_DEFAULT_DBNAME;
 }
 if (!@$dbName) {
 	define('HEURIST_DBNAME', '');
