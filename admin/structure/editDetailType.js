@@ -233,14 +233,14 @@ function DetailTypeEditor() {
 	* recreateTermsVocabSelector
 	* creates and fills selector with list of Vocabularies
 	*/
-	function _recreateTermsVocabSelector(datatype)  {
+	function _recreateTermsVocabSelector(datatype, toselect)  {
 
 			var prev = Dom.get("termsVocab");
 				prev.innerHTML = "";
 
 			if(Hul.isempty(datatype)) return;
 
-			var vocabId = Number(Dom.get("dty_JsonTermIDTree").value),
+			var vocabId = toselect ?toselect: Number(Dom.get("dty_JsonTermIDTree").value),
 				sel_index = -1;
 			if(isNaN(vocabId)){
 				vocabId = 0;
@@ -435,8 +435,8 @@ function DetailTypeEditor() {
 				"close-on-blur": false,
 				"no-resize": true,
                 "no-close": true,
-				height: 160,
-				width: 400,
+				height: 180,
+				width: 420,
 				callback: function(context) {
 					if(context!="") {
 
@@ -445,7 +445,7 @@ function DetailTypeEditor() {
 						}else if(!Hul.isempty(context)) { //after add new vocab
 							Dom.get("dty_JsonTermIDTree").value =  context;
 							Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
-							_recreateTermsVocabSelector(type); //, context);
+							_recreateTermsVocabSelector(type, context);
 							_recreateTermsPreviewSelector(type, null, null);
 						}
 					}
@@ -614,7 +614,7 @@ function DetailTypeEditor() {
 
 		// create preview for Terms Tree and record pointer
 
-		_recreateTermsVocabSelector(_detailType[fi.dty_Type]);
+		_recreateTermsVocabSelector(_detailType[fi.dty_Type], null);
 		_recreateTermsPreviewSelector(
 						_detailType[fi.dty_Type],
 						_detailType[fi.dty_JsonTermIDTree],
@@ -869,7 +869,7 @@ function DetailTypeEditor() {
 					Dom.get("dty_PtrTargetRectypeIDs").value = "";
 					Dom.get("dty_FieldSetRecTypeID").value = "";
 						that.keepType = el.value;
-						_recreateTermsVocabSelector(that.keepType);
+						_recreateTermsVocabSelector(that.keepType, null);
 						_recreateTermsPreviewSelector(that.keepType, null, null);
 						_recreateRecTypesPreview(that.keepType, null);
 				}

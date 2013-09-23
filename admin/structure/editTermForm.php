@@ -49,8 +49,6 @@ if (!is_admin()) {
     $term_code = @$_REQUEST['code'];
     $return_res = @$_REQUEST['return_res']?$_REQUEST['return_res']:""; 
     
-
-    $return_res = "";
     $meesage = "";
 
     if(@$_REQUEST['domain']==null){
@@ -126,7 +124,7 @@ if (!is_admin()) {
 ?>
 <script type="text/javascript">
 
-	var return_res = "<?=$return_res ?>";
+	var context_return_res = "<?=$return_res ?>";
 
 	function showOtherTerms(){
 
@@ -137,7 +135,7 @@ if (!is_admin()) {
 		height: 620,
 		width: 900,
 		callback: function(needTreeReload) {
-			return_res = 'ok';
+			context_return_res = 'ok';
 		}
 		});
 	}
@@ -162,7 +160,7 @@ if (!is_admin()) {
                 <div style="display: inline-block;"><input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"/></div>
 			    <div style="float:right;text-align: right; padding-top:8px;">
 					<input id="btnSave" type="submit" value="Save"/>&nbsp;&nbsp;
-					<input id="btnCancel" type="button" value="Done" onClick="{window.close(return_res)}" />
+					<input id="btnCancel" type="button" value="Done" onClick="{window.close(context_return_res)}" />
 			    </div>
             </div>
 
