@@ -341,7 +341,6 @@ function DetailTypeEditor() {
 						disabledTerms = disabledTerms.join(",");
 				}
 
-				if(!Hul.isnull(allTerms)) {
 					//remove old combobox
 					var prev = Dom.get("termsPreview"),
 						i;
@@ -351,6 +350,8 @@ function DetailTypeEditor() {
 							prev.removeChild(prev.childNodes[1]);
 						}
 					}
+                    
+                if(!Hul.isempty(allTerms)) {
 					var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
 						el_sel.style.backgroundColor = "#cccccc";
 						el_sel.onchange =  _preventSel;
@@ -446,7 +447,7 @@ function DetailTypeEditor() {
 							Dom.get("dty_JsonTermIDTree").value =  context;
 							Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
 							_recreateTermsVocabSelector(type, context);
-							_recreateTermsPreviewSelector(type, null, null);
+							_recreateTermsPreviewSelector(type, context, null);
 						}
 					}
 				}
