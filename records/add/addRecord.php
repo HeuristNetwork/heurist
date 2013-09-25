@@ -169,14 +169,22 @@ if (@$_REQUEST['recID'] == -1) { // signalled to create a new record
 
 $wg = "";
 
+if(is_numeric(@$_REQUEST['rec_owner'])){
+      $ownership = intval($_REQUEST['rec_owner']);
+}else{
+      $ownership = (@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+                                                        (defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)));
+}
+
 // check workgroup permissions
-if (@$_REQUEST['rec_owner'] && $_REQUEST['rec_owner'] != $usrID) {
-	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=".intval($_REQUEST['rec_owner'])." and ugl_UserID=$usrID");
+if ($ownership>0 && $ownership != $usrID) {
+	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=".$ownership." and ugl_UserID=$usrID");
 	if (mysql_num_rows($res) == 0) { // user not a member so add wg to parameters for editRecord
-		$wg = '&wg=' . intval($_REQUEST['rec_owner']);
+		$wg = '&wg=' . $ownership;
 //		unset($_REQUEST['rec_owner']); //remove wg request
 	}
 }
+
 
 //  Preprocess tags for workgroups ensuring that the user is a member of the workgroup
 if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
@@ -285,6 +293,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 			return;
 		}
+       
 
 		mysql__insert('Records', array('rec_URL' => $url,
 										'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
@@ -293,9 +302,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 										'rec_Modified' => date('Y-m-d H:i:s'),
 										'rec_AddedByUGrpID' => intval($usrID),
 										'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
-										'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
-															(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
-																(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
+										'rec_OwnerUGrpID' => $ownership,
 										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
@@ -344,9 +351,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 									'rec_Modified' => date('Y-m-d H:i:s'),
 									'rec_AddedByUGrpID' => intval($usrID),
 									'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
-									'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
-															(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
-																(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
+									'rec_OwnerUGrpID' => $ownership,
 									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
