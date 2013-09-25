@@ -87,21 +87,29 @@ global $usrID;
 	$tagString = join(",", $tags);
 
 	// if the tags to insert is the same as the existing tags (in order) Nothing to do
-	if (strtolower(trim($_POST["tagString"])) == strtolower(trim($tagString))) return;
+	if (mb_strtolower(trim($_POST["tagString"]), 'UTF-8') == mb_strtolower(trim($tagString), 'UTF-8')) return;
 
 	// create array of tags to be linked
 	$tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["tagString"]))));	// replace backslashes with forwardslashes
+    
 	//create a map of this user's personal tags to tagIDs
 	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(tag_Text))", "tag_ID",
 	                               "tag_UGrpID=$usrID and tag_Text in (\"".join("\",\"", array_map("mysql_real_escape_string", $tags))."\")");
-
+                                   
 	$tag_ids = array();
 	foreach ($tags as $tag) {
 		$tag = preg_replace('/\\s+/', ' ', trim($tag));
-		if (@$kwd_map[strtolower($tag)]) {// tag exist get it's id
-			$tag_id = $kwd_map[strtolower($tag)];
+        
+        $tag = mb_strtolower($tag, 'UTF-8');
+
+		if (@$kwd_map[$tag]) {// tag exist get it's id
+        
+			$tag_id = $kwd_map[$tag];
 		} else {// no existing tag so add it and get it's id
-			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)");
+        
+            $query = "insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)";
+            mysql_query($query);
+            
 			$tag_id = mysql_insert_id();
 		}
 		array_push($tag_ids, $tag_id);
@@ -117,6 +125,7 @@ global $usrID;
 			$query .= "($rec_id, ".($i+1).", ".$tag_ids[$i].")";
 		}
 		$query = "insert into usrRecTagLinks (rtl_RecID, rtl_Order, rtl_TagID) values " . $query;
+
 		mysql_query($query);
 	}
 

@@ -33,7 +33,8 @@
 
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+
+mysql_connection_select(DATABASE);
 
 $tags = null;
 
@@ -51,6 +52,7 @@ if(@$_REQUEST['recid']){
 ?>
 <html>
   <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel=stylesheet href="../../common/css/autocomplete.css">
   <link rel=stylesheet href="../../common/css/global.css">
   <link rel=stylesheet href="../../common/css/edit.css">
@@ -88,7 +90,7 @@ if(@$_REQUEST['recid']){
 			for ($i=0; $i < count($tags); ++$i) {
 				$tag = $tags[$i];
 				if ($i > 0) print ',&nbsp;';
-				print htmlspecialchars($tags[$i]);
+				print htmlspecialchars($tags[$i]); 
 			}
 ?>
 

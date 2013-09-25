@@ -579,7 +579,7 @@
         $existingTagString = join(",", $kwds);
 
         // if tags are already there Nothing to do
-        if (strtolower(trim($tagString)) == strtolower(trim($existingTagString))) return;
+        if (mb_strtolower(trim($tagString), 'UTF-8') == mb_strtolower(trim($existingTagString), 'UTF-8')) return;
 
 
         $tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $tagString))));     // replace backslashes with forwardslashes
@@ -590,10 +590,12 @@
         //create an ordered list of personal tag ids
         $tag_ids = array();
         foreach ($tags as $tag) {
-            if (@$tagMap[strtolower($tag)]) {// existing tag
-                $tag_id = $tagMap[strtolower($tag)];
+            $tag = mb_strtolower($tag, 'UTF-8');
+            if (@$tagMap[$tag]) {// existing tag
+                $tag_id = $tagMap[$tag];
             } else { // new tag so add it
-                mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)");
+                $query = "insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag) . "\", $usrID)";
+                mysql_query($query);
                 $tag_id = mysql_insert_id();
             }
             array_push($tag_ids, $tag_id);

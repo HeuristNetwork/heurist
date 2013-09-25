@@ -954,7 +954,8 @@
         }else if ($add) {
           // non-existent tag ... add it
           $tag_name = str_replace("\\", "/", $tag_name);	// replace backslashes with forwardslashes
-          mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag_name) . "\", " . $userid . ")");
+          $query = "insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag_name) . "\", " . $userid . ")";
+          mysql_query($query);
           if (mysql_error()) {
             error_log(">>>> Erorr adding tag ".mysql_error());
           }else{
