@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <title>Sucasa</title>
+
+  <style type="text/css">
+	/*margin and padding on body element
+	  can introduce errors in determining
+	  element position and are not recommended;
+	  we turn them off as a foundation for YUI
+	  CSS treatments. */
+	body {
+		margin:0;
+		padding:0;
+	}
+	#header, #left, #main {
+		padding: 10px;
+	}
+	#albums .yui-button {
+		display: block;
+		margin: 1em;
+	}
+
+  </style>
+
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/reset-fonts-grids/reset-fonts-grids.css" />
+  <!-- Skin CSS files resize.css must load before layout.css -->
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/assets/skins/sam/resize.css" />
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/assets/skins/sam/layout.css" />
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/button/assets/skins/sam/button.css">
+
+  <!-- Utility Dependencies -->
+  <script src="http://yui.yahooapis.com/2.5.2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+  <script src="http://yui.yahooapis.com/2.5.2/build/dragdrop/dragdrop-min.js"></script>
+  <script src="http://yui.yahooapis.com/2.5.2/build/element/element-beta-min.js"></script>
+  <!-- Optional Animation Support-->
+  <script src="http://yui.yahooapis.com/2.5.2/build/animation/animation-min.js"></script>
+  <!-- Optional Resize Support -->
+  <script src="http://yui.yahooapis.com/2.5.2/build/resize/resize-beta-min.js"></script>
+  <!-- Source file for the Layout Manager -->
+  <script src="http://yui.yahooapis.com/2.5.2/build/layout/layout-beta-min.js"></script>
+
+  <script src="http://yui.yahooapis.com/2.5.2/build/button/button-min.js"></script>
+
+
+  <script src="../../common/php/load-hapi.php"></script>
+  <script src="../../external/jquery/jquery.js"></script>
+
+  <script>
+
+(function() {
+    var Dom = YAHOO.util.Dom,
+        Event = YAHOO.util.Event;
+
+    Event.onDOMReady(function() {
+        var layout = new YAHOO.widget.Layout({
+            units: [
+                { position: 'top', header: 'Sucasa: Picasaweb to Heurist sucker', height: 80, body: 'header', gutter: '5px' },
+                { position: 'left', header: 'Albums', width: 200, resize: true, body: 'left', gutter: '5px', collapse: true, collapseSize: 30, scroll: true, animate: true },
+                { position: 'center', body: 'main', gutter: '5px' }
+            ]
+        });
+        layout.render();
+    });
+
+})();
+
+	var username;
+	var albums = {};
+
+	function submitUsername() {
+		$("#albums").text("loading...");
+		username = $("#username").val();
+		HAPI.XHR.sendRequest("picasaweb-proxy.php?feed=user&user="+username, function(response) {
+			if (response.error) { alert("error: " + response.error); }
+			if (response.feed) { showAlbums(response.feed.entry); }
+		});
+	}
+
+	function showAlbums(albums) {
+		$("#albums").empty();
+
+		var btnGroup = new YAHOO.widget.ButtonGroup({
+			id: "buttongroup",
+			name: "album",
+			container: "albums"
+		 });
+		for (var i = 0; i < albums.length; ++i) {
+			btnGroup.addButton({
+				type: "radio",
+				label: albums[i].title,
+				value: albums[i].id.replace(/.*\//, "")
+			});
+		}
+		btnGroup.addListener("checkedButtonChange", function(e) {
+			setTimeout(function() {
+				loadAlbum(e.newValue.getAttributeConfig("value").value);
+			}, 0);
+		});
+	}
+
+	function loadAlbum(albumid) {
+		if (albums[albumid]) {
+			showPhotos(albumid);
+		} else {
+			$("#main").text("loading...");
+			HAPI.XHR.sendRequest("picasaweb-proxy.php?feed=album&user="+username+"&album="+albumid, function(response) {
+				if (response.error) { alert("error: " + response.error); }
+				if (response.feed) {
+					albums[albumid] = response.feed;
+					showPhotos(albums[albumid]);
+				}
+			});
+		}
+	}
+
+	function showPhotos(feed) {
+	}
+
+
+  </script>
+ </head>
+
+ <body class=yui-skin-sam>
+
+  <div id=header>
+   <form onsubmit="submitUsername(); return false;">
+    Enter your Google Account username:
+    <input id=username></input>
+    <input type=submit value=submit></input>
+   </form>
+  </div>
+
+  <div id=left>
+   <div id=albums></div>
+  </div>
+
+  <div id=main></div>
+
+ </body>
+</html>
+
