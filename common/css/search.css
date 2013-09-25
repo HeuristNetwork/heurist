@@ -1959,6 +1959,17 @@ div.filter .showrelated a {
 	font-weight: bold !important;
 	padding-left: 20px;
 }
+#related-toggle{
+    border-top: 1px solid gray;
+    box-shadow: 0 2px 2px 1px gray;
+    text-align:left !important;
+    color: #6A7C99 !important;
+    font-weight: bold !important;
+    padding-top:10px;
+    padding-left: 20px;
+    margin: 7px 0;
+}
+
 div.filter .showrelated .relatedCount, #resource-count .recordCount {
 	margin:0;
 	background-color: #999999;

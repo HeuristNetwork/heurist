@@ -706,6 +706,15 @@ style="position:absolute;left:0;right:0;top:0;height:20px;"
 						</div>
 					</div>
 					<div id=results-level0 class="icons" level="0"></div>
+                    <div id=related-toggle>
+                        <div class="filter">
+                          Related Records 
+                          <a onclick="top.HEURIST.util.setDisplayPreference('loadRelatedOnSearch','true');$('#related-toggle').hide();top.HEURIST.search.loadLevelFilter(1);" href="#" 
+                                    title="Turns on search for records linked to the current search results by relationships or pointers. May be very slow for large, highly-connected subsets">
+                                    turn on 
+                          </a>
+                         </div> 
+                    </div>
 					<div id=results-level1 class="icons related-results" level="1"></div>
 				</div>
 			</div>
