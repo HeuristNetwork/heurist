@@ -179,6 +179,12 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
+        
+        if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true"){
+            $("#related-toggle").hide();
+        }else{
+            $("#related-toggle").show();
+        }
 
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
@@ -484,17 +490,20 @@ top.HEURIST.search = {
 					if (!$("#showrelated" + i).hasClass("loaded")){
 						$("#showrelated" + i).addClass("loaded");
 					}
+                    var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(i);
+                    
 					//filterRelated results with noPush
 					top.HEURIST.search.filterRelated(i,true,true);
 					// expand level
+                    
 					if (!(layoutSrch && layoutSrch[i][1] && layoutSrch[i][1].toLowerCase() == "c")) { // no c following the view designator so expand
 						$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
-						$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
+						$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>").append(sToggleoff);
 					}else{ // collapse level
 						if (!$("#results-level"+i).hasClass('collapsed')){// make sure collapsed class is on parent
 							$("#results-level"+i).addClass('collapsed');
 						};
-						$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>");
+						$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>").append(sToggleoff);
 					}
 				}
 				//if selids passed in then we need to set the selection.
@@ -676,6 +685,9 @@ top.HEURIST.search = {
 		expandSearchMenuItem.id = "showrelated"+level;
 		expandSearchMenuItem.className = "showrelated level" + level;
 		filterDiv.appendChild(expandSearchMenuItem);
+        
+        var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
+        $("#"+expandSearchMenuItem.id).append(sToggleoff);
 	},
 
 	loadLevelFilter: function(level,style){	// it's important that this function be called after results are completely loaded
@@ -728,11 +740,17 @@ top.HEURIST.search = {
 			filterDiv.appendChild(showSearchResults);
 		}
 		if(level>0){// create load-show-hide  with count banner for a related level
+        
+        
 			var showRelatedMenuItem = document.createElement("div");
 			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Load Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
+
+            var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
+            $("#"+showRelatedMenuItem.id).append(sToggleoff);
+            
 			if (!$(resultsDiv).hasClass('collapsed')) {
 				resultsDiv.className += " collapsed";
 			}
@@ -950,25 +968,39 @@ top.HEURIST.search = {
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
+        var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
+        
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {  //loaded
+        
 			if ($("#results-level" + level).hasClass("collapsed")) {
-				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>").append(sToggleoff);
 				top.HEURIST.search.setSelectedCount();
 			}else{
-				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>").append(sToggleoff);
 				top.HEURIST.search.setSelectedCount();
 			};
 		}else{  //not loaded yet
 			//This is where we load the next related level and it's important to load all parts (recDiv and Filters before filtering.
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
-			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>").append(sToggleoff);
 			top.HEURIST.search.setSelectedCount();
 			top.HEURIST.search.filterRelated(level);
 		}
 		top.HEURIST.search.updateMapRelated();
 	},
+    
+    getLink_toggleOff_loadRelatedRecords: function(level){
+        
+        if(level==1){
+            return "<a onclick=\"top.HEURIST.util.setDisplayPreference('loadRelatedOnSearch','false');top.HEURIST.search.clearRelatesRows();$('#related-toggle').show();\" "+
+                      " style='{background-image:none;}' href=\"#\" "+ 
+                      "title=\"Turns off searches for records linked to the current search results by relationships or pointers. Improves performance where display or navigation to related records is not needed\">turn off</a>";
+        }else{
+            return "<span></span>";
+        }
+    },
 
 	// toggle selection in filter menu
 	setAllFilterItems: function(filterMenu, level, toChecked){

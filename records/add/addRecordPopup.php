@@ -102,7 +102,7 @@
           showCurrentAccessSettings();
       });
 
-      function buildworkgroupTagselect(wgID,keyword) {
+      function buildworkgroupTagselect(wgID, keyword) {
         var i, l, kwd, val;
         $("#tag").empty();
         $("<option value='' selected></option>").appendTo("#tag"); //(select workgroup tag)
@@ -154,8 +154,8 @@
         var extra_parms = '';
         if (document.getElementById('restrict_elt').checked) {
           var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
-          if (wg_id) {
-            if ( wg_id != usrID) {
+          if (!isNaN(wg_id)) {
+            if ( wg_id != usrID) { //by default we use current user
               extra_parms = '&rec_owner=' + wg_id;
             }
             extra_parms += '&rec_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
@@ -332,8 +332,7 @@
             <div class="input-header-cell">Record owner</div>
             <div class="input-cell">
               <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onChange="buildworkgroupTagselect(options[selectedIndex].value)">
-                <option value="0" disabled selected>(select group)</option>
-
+                <option value="0">Everyone (no restriction)</option>
                 <?php
                   print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." </option>\n";
                   $res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
