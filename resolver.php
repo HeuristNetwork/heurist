@@ -33,7 +33,7 @@
 // called by applyCredentials  require_once(dirname(__FILE__).'/common/config/initialise.php');
 require_once(dirname(__FILE__).'/common/connect/applyCredentials.php');
 
-// Input is of the form .../resolver.php?db=sandpit5&recID=3456
+// Input is of the form .../resolver.php?db=mydatabase&recID=3456
 
 //$db = @$_REQUEST["db"];
 $id = @$_REQUEST["recID"];

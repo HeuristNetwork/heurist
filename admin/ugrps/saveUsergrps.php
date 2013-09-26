@@ -21,11 +21,11 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
+* @version     3.1.5
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
@@ -455,16 +455,12 @@
 				$email_text = "Your Heurist account registration has been approved.";
 			}
 
-			if (HEURIST_DBNAME == 'H3Sandpit') {
-				// If the registration was on the sandpit DB on main Heurist server, return to the project home page
-				// We don't bother to test for the Heurist server on the assumption it is very unlikely that anyone else
-				// will have or navigate to this database anywhere else
-				$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
-			} else {
-				// on any other server you give them a pointer to the search page of that database
-				$email_text = $email_text."\n\nHeurist database: ".HEURIST_DBNAME."\n".
-				"Login at: ".HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
-			}
+            // point them to the home page
+			$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
+	
+	        //give them a pointer to the search page for the database
+			$email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
+				HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 
 
 			if($tmp_password!=null){
@@ -472,17 +468,19 @@
 				"\n\nTo change your password go to My Profile -> My User Info in the top right menu";
 			}
 
-			$email_text = $email_text."\n\nWe recommend visiting the 'Take the Tour' section and also visiting the Help ".
-			"function, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
+			$email_text = $email_text."\n\nWe recommend visiting the Help ".
+			"pages, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
 
 			$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
 				"From: ".$dbowner_Email."\r\nCc: ".$dbowner_Email);
 			if (! $rv) {//TODO  SAW this should not fail silently
 				error_log("mail send failed: " . $ugr_eMail);
 			}
-		}
-        }
-	}
+	      }
+        } 
+    }  // sendApprovalEmail    
+    
+       
 
 	/**
 	* deleteUser - Helper function that delete a user and its group relations. It is not possible to delete user if it has record entries

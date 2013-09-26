@@ -32,15 +32,32 @@
 <html>
 
 <!--
- * index.html, Home page for the HeuristScholar.org project
- * @copyright (C) 2005-2012 University of Sydney Arts eResearch
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist Academic Knowledge Management System
- * @todo
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
 
- Note: This file is only intended for use on the HeuristScholar.org server as a startign point for Heurist
-       The H3Sandpit database is a 'playspace' for new users on the HeuristScholar server
+/**
+* index.html, Optional Heurist home page. if removed, Heurist will load directly
+*
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.5
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+*/
+
 -->
 
 <head>
@@ -69,7 +86,7 @@
 <div id=page style="padding: 20px;">
 
 <a id=home-link href='#'>
-<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+<div id=logo title="Click the logo at top left of any Heurist page to return to the search page"></div>
 </a>
 
 <div id='loginDiv'>
@@ -78,16 +95,18 @@
 
 <div class="separator_row"></div>
 <div class="options">
-    <div class="buttons"><button onclick="location.href='admin/ugrps/editUser.html?db=H3Sandpit'">Register as user</button></div>
-    <div class="description">A simple one minute registration allows you to use Heurist on this server.</div>
+    <div class="buttons"><button onclick="location.href='admin/ugrps/editUser.html?db=H3ExampleDB'">Register as user</button></div>
+    <div class="description">A simple one minute registration allows you to use Heurist on this server (if enabled by the administrator)</div>
 </div>
+<!-- Ian 26/9/13: With Vsn 3.0 we move away from the idea of a shared sandpit to giving users their own individual databases
 <div class="options">
     <div class="buttons"><button onclick="location.href='search/search.html?db=H3Sandpit'">Use Heurist public database</button></div>
     <div class="description">A simple one minute registration (above) allows you to try out Heurist on this shared 'sandpit' and, when you are ready, generate your own database(s) for real data.</div>
 </div>
+-->
 <div class="options">
-    <div class="buttons"><button onclick="location.href='admin/setup/createNewDB.php?db=H3Sandpit'">Create your own database <br>(must register first)</button></div>
-    <div class="description">Create a fresh database. Subsequent databases can be created with New Database from within an existing database</div>
+    <div class="buttons"><button onclick="location.href='admin/setup/createNewDB.php?db=H3ExampleDB'">Create your own database <br>(must register first)</button></div>
+    <div class="description">Create your first database. Subsequent databases can be created with New Database from within an existing database. You become the owner of the new databases created.</div>
 </div>
 <div class="separator_row"></div>
 
@@ -99,13 +118,15 @@
 <div class="separator_row small"></div>
 -->
 
+<!-- Broken images and outdated content (related to Heurist vsn 2) at Sep 2013. Would be worth reinstating.
 <div class="options">
-	<div class="buttons"><button onclick="location.href='http://heuristscholar.org/heurist/help/tour.html'">Introductory tour</button></div>
+	<div class="buttons"><button onclick="location.href='help/tour.html'">Introductory tour</button></div>
 	<div class="description">A quick overview of Heurist's field of application and capabilities</div>
 </div>
+-->
 
 <div class="options">
-	<div class="buttons"><button onclick="location.href='http://heuristscholar.org/help/'">Full documentation</button></div>
+	<div class="buttons"><button onclick="location.href='help/'">Full documentation</button></div>
 	<div class="description">Comprehensive end-user documentation is contained in the online help system. The system is structured into sections at different technical levels. It covers every aspect of Heurist from understanding its domain of application and the way it structures data to advanced topics in writing new output formats.</div>
 </div>
 
@@ -148,14 +169,14 @@
 
 <div class="options" >
 	<div class="buttons" style="text-align:right">Documentation:</div>
-	<div class="description">Ian Johnson, Vincent Sheehan, Steven Hayes</div>
+	<div class="description">Ian Johnson, Vincent Sheehan</div>
 </div>
 
 </div>
 
 <div class="resource" style="padding:3px; margin-top:10px">
 	<p>When installing Heurist on another system, you may replace this introductory page with your own, but please leave the following acknowledgement:<br>
-	<strong>Developed with Heurist (C) 2005 - 2010, Digital Innovation Unit, The University of Sydney</strong>
+	<strong>Developed with Heurist (C) 2005 - 2013, Arts eResearch, The University of Sydney</strong>
 </div>
 
 </div>

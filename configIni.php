@@ -15,24 +15,25 @@
 */
 
 /**
-* configutration file for a heurist installation
+* configuration file for a Heurist instance
 *
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
+* @version     3.1.5
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
 
 // Set the version number of the Heurist program
-$version = "3.1.4"; // required - DO NOT CHANGE
+$version = "3.1.5"; // required - DO NOT CHANGE
 
 // if a heuristConfigIni.php file exists in the parent directory of the installation,
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
-// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
+// in multiple experimental codebases on a single server and avoids the need for duplication of information or
+// the accidental distribution of passwords etc.
 
 // [server]
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
