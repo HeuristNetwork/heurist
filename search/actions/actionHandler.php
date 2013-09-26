@@ -43,8 +43,11 @@
 
   // decode and unpack data
   if(@$_REQUEST['data']){
-    $data = json_decode(urldecode(@$_REQUEST['data']), true);
+    //$data = json_decode(urldecode($_REQUEST['data']), true);
 
+    $str = $_REQUEST['data'];
+    $data = json_decode($str, true); 
+    
     switch (@$_REQUEST['action']) {
       case 'delete_bookmark':
         $result = delete_bookmarks($data);

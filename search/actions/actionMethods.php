@@ -794,17 +794,16 @@
   function save_search($data) {
 
     $result = array();
-
-    mysql_connection_overwrite(DATABASE);
+    
     $wg = intval(@$data['svs_UGrpID']);
-    $sID = $data['svs_ID'];
+    $sID = @$data['svs_ID'];
     //$publish = $data['publish'];
     $label = @$data['svs_Name'];
-
+    
     $now = date('Y-m-d');
     $cmb = Array(
-      'svs_Name'     => $data['svs_Name'],
-      'svs_Query'    => urldecode($data['svs_Query']),
+      'svs_Name'     => $label,
+      'svs_Query'    => @$data['svs_Query'], //urldecode
       'svs_UGrpID'   => ($wg>0?$wg:get_user_id()),
       'svs_Added'     => $now,
       'svs_Modified'  => $now);
@@ -814,6 +813,8 @@
     ' and svs_UGrpID='.$cmb['svs_UGrpID']);
     $row = mysql_fetch_row($res);*/
 
+    mysql_connection_overwrite(DATABASE);
+    
     if ($sID) {
       /*$row ||  if ($row ) {
       $ss = intval($row[0]);

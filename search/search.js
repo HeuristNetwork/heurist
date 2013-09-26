@@ -2671,7 +2671,11 @@ top.HEURIST.search = {
 
 	},
 
-
+     /**
+     * action - name of action
+     * _data - array of parameters
+     * cbAction - callback
+     */
 	executeAction: function(action, _data, cbAction){
 
 			function _requestCallBack(context) {
