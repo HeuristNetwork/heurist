@@ -1010,9 +1010,9 @@ function post_request($url, $fusername, $fpwd, $postdata, $cookie_file, $is_save
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 */        
-        if(defined(HEURIST_HTTP_PROXY)){
+        if(defined("HEURIST_HTTP_PROXY")){
             curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-            if(defined(HEURIST_HTTP_PROXY_AUTH)){
+            if(defined("HEURIST_HTTP_PROXY_AUTH")){
                 curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
             }
         }

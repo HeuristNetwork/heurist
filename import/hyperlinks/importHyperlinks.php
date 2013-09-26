@@ -72,15 +72,26 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
-		$ch = curl_init(@$_REQUEST['url']);
+		$ch = curl_init();
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0 );
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		if (defined("HEURIST_HTTP_PROXY")) {
-			curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-		}
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_URL, @$_REQUEST['url']);
+        
+        if(defined("HEURIST_HTTP_PROXY")){
+            curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+            if(defined("HEURIST_HTTP_PROXY_AUTH")){
+                curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+            }
+        }
+        
+		//curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        
 		$src = curl_exec($ch);
 		$error = curl_error($ch);
 		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
 		if (intval($code) >= 400)
 			$error = 'URL could not be retrieved. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
 		$srcname = @$_REQUEST['url'];
@@ -109,6 +120,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		else
 			$notes_src_str = " [source: ".$srcname."]";
 
+            
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
 
 		/* get a list of the link-texts that we are going to ignore */
@@ -138,8 +150,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$last_url = '';
 		for ($i=0; $i < count($matches[1]); ++$i) {
 			// ignore javascript links, mozilla 'about' links
-			if (preg_match('!^(javascript|about):!i', @$matches[2][$i]))
+			if (preg_match('!^(javascript|about):!i', @$matches[2][$i])) {
 				continue;
+            }
 
 			if (! preg_match('!^[-+.a-z]+:!i', @$matches[2][$i])) {	/* doesn't start with protocol -- a relative URL */
 				if (substr($matches[2][$i], 0, 1) == '/')	/* starts with a slash -- relative to root */
@@ -158,18 +171,25 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			$lcase = strtolower(html_entity_decode($matches[3][$i]));
 
 			$forbidden = 0;
-			if (@$ignored[$lcase]) $forbidden = 1;			// ignore forbidden links
+			if (@$ignored[$lcase]){
+                    $forbidden = 1;            // ignore forbidden links  
+            } 
 			else {
 				foreach ($wildcard_ignored as $wc => $len) {
 					if (substr($lcase, 0, $len) == $wc) { $forbidden = 1; break; }
 				}
 			}
 			if (! @$forbidden  and  substr($matches[3][$i], 0, 5) != 'http:') {
+                
 				if (($word_limit and ! $matches[3][$i])
-				 or (substr_count($matches[3][$i], ' ')+1 < $word_limit)) $forbidden = 1;	// ignore short links
+				 or (substr_count($matches[3][$i], ' ')+1 < $word_limit)) {
+                    $forbidden = 1;    // ignore short links   
+                 }
 			}
 			if (@$forbidden) {
-				if (@$last_url) $notes[$last_url] .= strip_tags(@$matches[1][$i]);
+				if (@$last_url) {
+                    $notes[$last_url] .= strip_tags(@$matches[1][$i]);   
+                }
 				continue;
 			}
 
