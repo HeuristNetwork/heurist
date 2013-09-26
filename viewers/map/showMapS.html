@@ -241,9 +241,10 @@ body {
 	}
 
 	var params = parseParams();
-	if(!params['db']){
-		params['db'] = 'sandpit5'; //HARDCODED
-	}
+    if(!params['db']){
+        params['db'] = '';
+    }
+    
 
 	var HEURIST = {tmap:null};
 
@@ -385,13 +386,20 @@ body {
 	//  starts initialization on load completion of this window
 	function loadHandler(){
 
-		RelBrowser.baseURL = HRST.basePath;
-		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
-		RelBrowser.database = HRST.database.name;
+        if(params['db']==''){
+           
+            $('#map').html('DATABASE IS NOT DEFINED');
+            
+        }else{
+        
+		    RelBrowser.baseURL = HRST.basePath;
+		    RelBrowser.iconBaseURL =  HRST.iconBaseURL;
+		    RelBrowser.database = HRST.database.name;
 
-		//Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
+		    //Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
 
-		window.showMap = new ShowMap();
+		    window.showMap = new ShowMap();
+        }
 	}
 
 	YAHOO.util.Event.addListener(window, "load", loadHandler );

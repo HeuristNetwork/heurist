@@ -134,7 +134,7 @@ if (@$_REQUEST['ulf_ID']){
 
 	var params = parseParams();
 	if(!params['db']){
-		params['db'] = 'sandpit5'; //HARDCODED
+		params['db'] = '';
 	}
 
 	//var HEURIST = {tmap:null};
@@ -268,6 +268,7 @@ if (@$_REQUEST['ulf_ID']){
 <script type="text/javascript" src="../../records/files/imageAnnotation.js"></script>
 
 <?php
+if(@$_REQUEST['db']){
 if(@$_REQUEST['annedit']=='yes'){
 	 echo '<div id="mediaviewer" style="position:absolute;top:0;bottom:22px;left:0px;right:0px;"></div>';
 ?>
@@ -282,5 +283,10 @@ if(@$_REQUEST['annedit']=='yes'){
 	onResize();
 </script>
 
+<?php
+}else{
+echo '<div style="margin: auto;position: absolute;bottom: 0;left: 0;top: 0;right: 0;">DATABASE IS NOT DEFINED</div>';
+}
+?>
 </body>
 </html>
