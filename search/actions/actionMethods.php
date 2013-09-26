@@ -44,14 +44,14 @@
 
   function add_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-//error_log("data ".print_r($data,true));
+    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['val'] || @$data['geo'] || @$data['ulfID']))){
-      $result['problem'] = "Database problem - insufficent data passed to add_detail service";
+      $result['problem'] = "Data problem: insufficent data passed to add_detail (field/value) service";
       return result;
     }
-//normalize recIDs to an array for code below
+    //normalize recIDs to an array for code below
     $recIDs = $data['recIDs'];
     if ($recIDs && ! is_array($recIDs)){
       $recIDs = array($recIDs);
@@ -61,7 +61,7 @@
       $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
       $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
     }
-// user chose add by rectype not recIDs so calc recID set
+    // user chose add by rectype not recIDs so calc recID set
     if (!$passedRecIDCnt && $data['rtyID']) {
       $rtyID = $data['rtyID'];
       if (is_array($rtyID)){
@@ -71,7 +71,7 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -83,11 +83,11 @@
     }else{
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
-//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
     $rtyLimits = mysql__select_assoc("defRecStructure","rst_RecTypeID","rst_MaxValues","rst_DetailTypeID = $dtyID and rst_RecTypeID in (".join(",",$rtyIDs).")");
-//error_log("rectypeLimits ".print_r($rtyLimits,true). " ".mysql_error());
+    //error_log("rectypeLimits ".print_r($rtyLimits,true). " ".mysql_error());
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_DetailTypeID'  => $dtyID,
@@ -116,7 +116,7 @@
                 "where rec_ID = $recID";
       $res = mysql_query($query);
       $row = mysql_fetch_row($res);
-//error_log("recID $recID - detailcount ".print_r($row,true). " ".mysql_error());
+      //error_log("recID $recID - detailcount ".print_r($row,true). " ".mysql_error());
       if (!array_key_exists($row[0],$rtyLimits)) {
           array_push($undefinedFieldsRecIDs, $recID);
           continue;
@@ -128,7 +128,7 @@
       $dtl['dtl_RecID'] = $recID;
       mysql__insert('recDetails', $dtl);
       if (mysql_error()) {
-        $insertErrors[$recID] = "Database problem - inserting field type $dtyName for record ($recID) error - ". mysql_error();
+        $insertErrors[$recID] = "MySQL error while inserting field type $dtyName for record ($recID): ". mysql_error();
         continue;
       }
       array_push($processedRecIDs, $recID);
@@ -164,7 +164,8 @@
             $result[$resIndex] = '';
       }
       $limittedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $limittedRecIDs, 'tagString' => $baseTag." limitted"));
-      $result[$resIndex] .= "Exceedeed limit for field type $dtyName in ".count($limittedRecIDs). " Record(s).\n\n";
+      $result[$resIndex] .= "Exceeded repeat values limit for field $dtyName in ".count($limittedRecIDs). 
+        " Record(s). The additional values have not been added to these records.\n\n";
       $result['count']['limitted'] = count($limittedRecIDs);
       $result['limitted'] = array('recIDs' => $limittedRecIDs, 'queryString' => "tag:\"$baseTag limitted\"", 'tagResults' => $limittedFieldsTagResult);
     }
@@ -181,16 +182,18 @@
     return $result;
   }
 
+  
+  
   function replace_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-//error_log("data ".print_r($data,true));
+    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && @$data['sVal'] && @$data['rVal'] )){
-      $result['problem'] = "Database problem - insufficent data passed to replace_detail service";
+      $result['problem'] = "Data problem: insufficent data passed to replace_detail (filed/value) service";
       return $result;
     }
-//normalize recIDs to an array for code below
+    //normalize recIDs to an array for code below
     $recIDs = @$data['recIDs'];
     if ($recIDs && ! is_array($recIDs)){
       $recIDs = array($recIDs);
@@ -200,7 +203,7 @@
       $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
       $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
     }
-// user chose add by rectype not recIDs so calc recID set
+    // user chose add by rectype not recIDs so calc recID set
     if (!$passedRecIDCnt && $data['rtyID']) {
       $rtyID = $data['rtyID'];
       if (is_array($rtyID)){
@@ -210,7 +213,7 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -221,7 +224,7 @@
     }else{
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
-//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
 
@@ -243,7 +246,7 @@
         $partialReplace = false;
         break;
       default:
-        $result['problem'] = "Detail Type Problem - $basetype details are not supported for replace service.";
+        $result['problem'] = "Value (detail) base type problem - $basetype fields are not supported by value-replace service";
         return $result;
     }
 
@@ -265,7 +268,7 @@
       //update the details
       $recDetailWasUpdated = false;
       while ($row = mysql_fetch_row($res)) {
-//error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
+      //error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
         $dtlID = @$row[0];
         if ($partialReplace) {// need to replace sVal with rVal
           $dtlVal = @$row[1];
@@ -274,10 +277,10 @@
           $newVal = $data['rVal'];
         }
         mysql_query("update recDetails set dtl_Value = '$newVal' where dtl_ID = $dtlID");
-//error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
+        //error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
         if (mysql_error()) {
           $detailErrorCnt++;
-          $updateErrors[$recID] = "Database problem - finding field type $dtyName for record ($recID) error - ". mysql_error();
+          $updateErrors[$recID] = "MySQL error finding base field $dtyName for record ($recID): ". mysql_error();
           continue;
         } else {
           $recDetailWasUpdated = true;
@@ -334,14 +337,14 @@
 
   function delete_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-//error_log("data ".print_r($data,true));
+    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['sVal'] || @$data['rAll']) )){
-      $result['problem'] = "Database problem - insufficent data passed to delete_detail service";
+      $result['problem'] = "Data problem: insufficent data passed to delete_detail (field/value) service";
       return $result;
     }
-//normalize recIDs to an array for code below
+    //normalize recIDs to an array for code below
     $recIDs = @$data['recIDs'];
     if ($recIDs && ! is_array($recIDs)){
       $recIDs = array($recIDs);
@@ -351,7 +354,7 @@
       $recIDs = mysql__select_array('Records','rec_ID',"rec_ID in (".join(",",$recIDs).") and rec_OwnerUGrpID in (".join(",",$ACCESSABLE_OWNER_IDS).")");
       $inAccessableRecCnt = $passedRecIDCnt - count(@$recIDs);
     }
-// user chose add by rectype not recIDs so calc recID set
+    // user chose add by rectype not recIDs so calc recID set
     if (!$passedRecIDCnt && $data['rtyID']) {
       $rtyID = $data['rtyID'];
       if (is_array($rtyID)){
@@ -361,7 +364,7 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-//error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
+    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -373,7 +376,7 @@
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
 
-//error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
+    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
 
@@ -391,7 +394,7 @@
         $searchClause = (array_key_exists("rAll",$data) || empty($data['sVal']) ? "1" : "dtl_Value = \"".$data['sVal']."\"");
         break;
       default:
-        $result['problem'] = "Detail Type Problem - $basetype details are not supported for delete service.";
+        $result['problem'] = "Field type problem - $basetype fields are not supported by deletion service.";
         return $result;
     }
 
@@ -417,15 +420,15 @@
       $errorDtlIDs = array();
       $mysqlErrorDtl = array();
       while ($row = mysql_fetch_row($res)) {
-//error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
+      //error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
         $dtlID = @$row[0];
         mysql_query("delete from recDetails where dtl_RecID = $recID and dtl_ID = $dtlID");
-//error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
+        //error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
         if (mysql_error() || ! mysql_affected_rows()) {
           $detailErrorCnt++;
           array_push($errorDtlIDs, $dtlID);
           array_push($mysqlErrorDtl, mysql_error());
-          $deleteErrors[$recID] = "Database problem - deleting field type $dtyName (dtlID=".join(",",$errorDtlIDs).") for record ($recID) error - ". join("- error -",$mysqlErrorDtl);
+          $deleteErrors[$recID] = "MySQL error deleting base field $dtyName (dtlID=".join(",",$errorDtlIDs).") for record ($recID): ". join("- error -",$mysqlErrorDtl);
           continue;
         } else {
           $recDetailWasDeleted = true;
@@ -454,7 +457,7 @@
             $resIndex = 'none';
             $result[$resIndex] = '';
       }
-      $result[$resIndex] .= "Skipped ".$inAccessibleRecCnt. " inaccessible Record(s) from selected action scope.\n\n";
+      $result[$resIndex] .= "Skipped ".$inAccessibleRecCnt. " inaccessible record(s) from selected action scope.\n\n";
     }
     if (count($nonMatchingFieldsRecIDs)) {
       if (!@$resIndex ) {
@@ -514,7 +517,7 @@
     $deleted_count = mysql_affected_rows();
 
     if (mysql_error()) {
-      $result['problem'] = "Database problem - no bookmarks deleted";
+      $result['problem'] = 'MySQL error: '. addslashes(mysql_error()) . ' : no bookmarks deleted';
     }else{
       $result['ok'] = "Deleted ". $deleted_count. " bookmark".($deleted_count>1?"s":"");
     }
@@ -538,7 +541,7 @@
       $tag_count = mysql_affected_rows();
 
       if (mysql_error()) {
-        $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no tags added';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no tags added';
       } else if ($tag_count == 0) {
 
         $result = bookmark_and_tag_record_ids($data);
@@ -572,7 +575,7 @@
       $wgTag_count = mysql_affected_rows();
 
       if (mysql_error()) {
-        $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags added';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no workgroup tags added';
       } else if ($wgTag_count == 0) {
         $result['none'] = 'No new workgroup tags needed to be added';
       } else {
@@ -607,7 +610,7 @@
       $wgTag_count = mysql_affected_rows();
 
       if (mysql_error()) {
-        $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags added';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no workgroup tags added';
       } else if ($wgTag_count == 0) {
         $result['none'] = 'No workgroup tags matched, none removed';
       } else {
@@ -642,7 +645,7 @@
         $tag_count = mysql_affected_rows();
       }
       if (mysql_error()) {
-        $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no tags removed';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no tags removed';
       } else if ($tag_count == 0) {
 
         $result['none'] = "No tags matched, none removed";
@@ -671,7 +674,7 @@
     $update_count = mysql_affected_rows();
 
     if (mysql_error()) {
-      $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - ratings not set';
+      $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : ratings not set';
     }else  if ($update_count == 0) {
       $result['none'] = "No changes made - ratings are up-to-date";
     } else {
@@ -707,7 +710,7 @@
     }
 
     if (mysql_error()) {
-      $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no bookmarks added';
+      $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added';
     }else  if ($inserted_count < 1  &&  count($existing_bkmk_ids) < 1) {
 
       //neither new bookmarks, nor existing ones - try to add tags in this case
@@ -760,7 +763,7 @@
       $bkmk_ids = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_recID in ('.join(',',$rec_ids).') and bkm_UGrpID = ' . get_user_id());
 
       if (mysql_error()) {
-        $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no bookmarks added';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added';
       } else if (count($bkmk_ids) < 1) {
         $result['none'] = 'No bookmark found or created for selected records.';
       } else {	//we have bookmarks lets add the tags
@@ -773,7 +776,7 @@
         $tag_count = mysql_affected_rows();
 
         if (mysql_error()) {
-          $result['problem'] = 'Database problem - ' . addslashes(mysql_error()) . ' - no tags added.';
+          $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no tags added.';
         } else {
           if ($tag_count == 0) {
             $message = 'No new tags needed to be added' ;
@@ -827,7 +830,7 @@
 
     if (mysql_error()) {
 
-      $result['problem'] = 'Database problem (' . addslashes(mysql_error()).') - search not saved';
+      $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()).' : search not saved';
     } else {// execute function in calling context insertSavedSearch(ssName, ssQuery, wg, ssID)
       $result['execute'] = array('insertSavedSearch', $data['svs_Name'], $data['svs_Query'] , $wg, $sID);
 
@@ -870,7 +873,7 @@
 
         mysql_query($query);
         if (mysql_error()) {
-          $result['problem'] = 'Database problem (' . addslashes(mysql_error()).')';
+          $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()).' : visibility not reset';
         }else{
           $result['ok'] = mysql_affected_rows().' records updated';
         }

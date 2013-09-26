@@ -209,7 +209,7 @@ function createInputElement(){
 function cbRemove(results){
   var html = "",i;
   if(top.HEURIST.util.isnull(results)){
-    alert("Failed to return results from replace detail action!");
+    alert("Failed to return results from replace detail (value) action!");
     return
   }
   if (results.none){
@@ -220,33 +220,33 @@ function cbRemove(results){
   if (results.count && (results.count.rtyRecs || results.count.passed)){
     if (results.count.processed > 0) {
       html += '<br><input type=\"button\" value=\"Requery\"'+
-              ' title=\"Click to force requery in order to show updated results\"'+
+              ' title=\"Click to force re-query in order to show updated results\"'+
               ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
     }
     html += "<div style=\"color: #DC8501; padding-top:5px\"> Results : </div><ul>";
     if (results.count.passed > 0) {
-      html += "<li> Passed Record IDs ............. "+results.count.passed+"</li>";
+      html += "<li> Records passed to process ............. "+results.count.passed+"</li>";
     }
     if (results.count.rtyRecs > 0) {
-      html += "<li> RecType Record IDs ........ "+results.count.rtyRecs+"</li>";
+      html += "<li> Records of correct type ........ "+results.count.rtyRecs+"</li>";
     }
     if (results.count.noAccess > 0) {
-      html += "<li> Unaccessable Record IDs ... "+results.count.noAccess+"</li>";
+      html += "<li> Inaccessible records (restricted access) ... "+results.count.noAccess+"</li>";
     }
     if (results.count.processed > 0) {
-      html += "<li><strong> Processed Record IDs ..... "+results.count.processed+"</strong>"+
+      html += "<li><strong> Records processed ..... "+results.count.processed+"</strong>"+
               "...<a target=_new title=\" View Delete results -tagged "+ results.deleted.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.deleted.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.deleted.queryString)+"\">view processed records</a></li>";
     }
     if (results.count.noMatch > 0) {
-      html += "<li> Non Matching Record IDs .... "+results.count.noMatch+
+      html += "<li> Records with no matching value .... "+results.count.noMatch+
               "...<a target=_new title=\" View no match results -tagged "+ results.nonMatching.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.nonMatching.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.nonMatching.queryString)+"\">view non-matching value records</a></li>";
     }
     if (results.count.error > 0) {
-      html += "<li> Delete error Record IDs ... "+results.count.error+
+      html += "<li> Records for which value could not be deleted ... "+results.count.error+
               "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view non-deletion records</a></li>";
       if (results.errors.byRecID) {
         html += "<ul>";
         for ( i in results.errors.byRecID) {

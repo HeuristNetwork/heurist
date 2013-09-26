@@ -202,7 +202,7 @@ function createInputElement(){
 function cbSave(results){
   var html = "",i;
   if(top.HEURIST.util.isnull(results)){
-    alert("Failed to return results from replace detail action!");
+    alert("Failed to return results from replace detail (value) action!");
     return
   }
   if (results.none){
@@ -213,38 +213,38 @@ function cbSave(results){
   if (results.count && (results.count.rtyRecs || results.count.passed)){
     if (results.count.processed > 0) {
       html += '<br><input type=\"button\" value=\"Requery\"'+
-              ' title=\"Click to force requery in order to show updated results\"'+
+              ' title=\"Click to force re-query in order to show updated results\"'+
               ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
     }
     html += "<div style=\"color: #DC8501; padding-top:5px\"> Results : </div><ul>";
     if (results.count.passed > 0) {
-      html += "<li> Passed Record IDs .............. "+results.count.passed+"</li>";
+      html += "<li> Records passed to process .............. "+results.count.passed+"</li>";
     }
     if (results.count.rtyRecs > 0) {
-      html += "<li> RecType Record IDs .......... "+results.count.rtyRecs+"</li>";
+      html += "<li> Records of correct type .......... "+results.count.rtyRecs+"</li>";
     }
     if (results.count.noAccess > 0) {
-      html += "<li> Unaccessable Record IDs .... "+results.count.noAccess+"</li>";
+      html += "<li> Inaccessible records (restricted access) .... "+results.count.noAccess+"</li>";
     }
     if (results.count.processed > 0) {
-      html += "<li><strong> Processed Record IDs ....... "+results.count.processed+"</strong>"+
+      html += "<li><strong> Records processed ....... "+results.count.processed+"</strong>"+
               "...<a target=_new title=\" View added results -tagged "+ results.added.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.added.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.added.queryString)+"\">view processed records</a></li>";
     }
     if (results.count.notDefined > 0) {
-      html += "<li> Undefined Field Record IDs ... "+results.count.notDefined+
+      html += "<li> Records with undefined field ... "+results.count.notDefined+
               "...<a target=_new title=\" View not defined results -tagged "+ results.notDefined.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.notDefined.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.notDefined.queryString)+"\">view undefiend field records</a></li>";
     }
     if (results.count.limitted > 0) {
-      html += "<li> Max Limit Record IDs ..... "+results.count.limitted+
+      html += "<li> Records exceeding field repeat limit ..... "+results.count.limitted+
               "...<a target=_new title=\" View max limit results -tagged "+ results.limitted.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.limitted.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.limitted.queryString)+"\">view repeat limit exceeded records</a></li>";
     }
     if (results.count.error > 0) {
-      html += "<li> Insert error Record IDs .... "+results.count.error+
+      html += "<li> Records with insert errors .... "+results.count.error+
               "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view</a></li>";
+              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view insert error records</a></li>";
       if (results.errors.byRecID) {
         html += "<ul>";
         for ( i in results.errors.byRecID) {
