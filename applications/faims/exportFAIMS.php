@@ -165,9 +165,9 @@
         $res1 = 0;
         $output1 = exec($cmdline, $output, $res1);
         if ($res1 != 0 ) {
-                    echo ("<p class='error'>Error code $res1: Unable to create archive $folder.tar.gz<br>&nbsp;<br>");
+                    echo ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;<br>");
                     echo $output;
-                    echo "</p>";
+                    echo "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
         }else{
             print "<br><br><div class='lbl_form'></div>".
             "<a href='exportFAIMS.php/$projname.zip?db=".HEURIST_DBNAME."&step=2&projname=".$projname."' target='_blank' style='color:blue; font-size:1.2em'>Click here to download FAIMS project definitions zip archive</a>";
