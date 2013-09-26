@@ -1400,7 +1400,7 @@ top.HEURIST.search = {
 			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+">log&nbsp;out</a>";
 		} else {
 
-			var registrationButton = "";
+			var registrationButton = "<div><p/>&nbsp;<br/>Online user registrations not permitted for this database</div>";
 			if(top.HEURIST.is_registration_allowed){
 				registrationButton = " <div id=register-button><a href=\"../admin/ugrps/editUser.html\" name=\"auto-popup\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n";
 			}
@@ -1410,8 +1410,8 @@ top.HEURIST.search = {
 				"<div style=\"padding: 10px;\">\n" +
 				" <br>Existing users:\n" +
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <br><br>New users:\n" +
-				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
+				// " <br><br>New users:\n" +
+				// " <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
 				registrationButton+
 				"</div>";
 
