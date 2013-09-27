@@ -49,6 +49,8 @@
 require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
 require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
+
+
 /*
 	the standard initialisation file configIni.php is in the root directory of the Heurist
 	distribution and contains (mostly) blank definitions. This file should be edited to set the configuration
@@ -114,6 +116,11 @@ if ($dbHost) {
 if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonlyPassword)) { //if these are not specified then we can't do anything
 	returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
 }
+if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
+    //die("MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
+    returnErrorMsgPage(1, "MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
+}
+
 define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('READONLY_DBUSERNAME', $dbReadonlyUsername); //readonly user for access to user and heurist databases
@@ -624,7 +631,11 @@ function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false,
 function returnErrorMsgPage($critical, $msg = null) {
 	$redirect = null;
 	if ($critical == 1) { // bad connection to MySQL server
-		echo "<p>&nbsp;Heurist initialisation error<p> ".$msg?$msg:""." <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+    
+		$msg2 = "<p>&nbsp;Heurist initialisation error<p> ".$msg?$msg:""." <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
+        $msg2 = rawurlencode($msg2);
+        $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
+        
 	} else if ($critical == 2) { //database not defined or can not connect to it
 		$redirect = HEURIST_BASE_URL . "common/connect/selectDatabase.php";
 		error_log("redirectURL = " . print_r($redirect, true));
