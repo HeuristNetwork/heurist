@@ -1,6 +1,10 @@
 #! /bin/sh
 
-# Preliminary installation script for Heurist, rev 7th June 2013
+# Preliminary installation script for Heurist, rev Sept 2013 by Brian Ballsun-Stanton
+
+# This script has not been verified as at 27/9/13
+# -----------------------------------------------
+
 # (https://code.google.com/p/heurist/)
 # This script is a bit of a hack to get us up and running
 
@@ -12,7 +16,8 @@ if [ -z $1 ]
    fi
  
 # Test download package is valid before we get half way and can't find it ...
-wget https://heurist.googlecode.com/files/$1.tar.bz2 > /dev/null 2>&1
+curl --range 0-100 https://heurist.googlecode.com/files/$1.tar.bz2 > /dev/null 2>&1
+
 rc=$?
 if [ $rc -ne 0 ]
      then 
@@ -26,6 +31,10 @@ if [ $rc -ne 0 ]
 echo -e "\n\n\n\n"  
 
 echo "---- Installing Heurist Version 3 (for Linux/Ubuntu) ----"
+
+echo -e "\n\n"
+echo "WARNING: 27 Sep 13 - THIS UPDATED SCRIPT HAS NOT YET BEEN TESTED"
+echo -e "\n\n"
 
 echo "This installation is fairly radical in upgrading all required software to latest versions"
 echo "Progress and errors go to terminal, other messages to file install.log"
@@ -44,13 +53,7 @@ echo -e "\n"
 
 echo "You may see a sudo error or two - unable to resolve host; do not panic"
 
-echo "127.0.0.1       " `sudo cat /etc/hostname` | sudo tee /etc/hosts
-
-# If errors are on, errors are output to the browser and stuff up Heurist interface
-echo "display_errors=Off" `sudo cat /etc/php5/apache2/php.ini` | sudo tee /etc/php5/apache2/php.ini
-# increase upload file size from default 2M
-echo "upload_max_filesize=30M" `sudo cat /etc/php5/apache2/php.ini` | sudo tee /etc/php5/apache2/php.ini
-echo "post_max_size=31M" `sudo cat /etc/php5/apache2/php.ini` | sudo tee /etc/php5/apache2/php.ini
+sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
 
 sudo apt-get update > install.log 
 
@@ -60,9 +63,13 @@ sudo apt-get install tasksel software-properties-common python-software-properti
 echo "Tasksel installed"
 
 # contains backports of spatialite 3.1.0 RC 2 (aka 3.0.1 as released)
-sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y > /dev/null
 
 echo "Repo added for spatiallite"
+if ! ls /etc/apt/sources.list.d/faims-mobile-web-*.list 2> /dev/null 1> /dev/null
+    then sudo add-apt-repository ppa:faims/mobile-web -y
+     sudo add-apt-repository ppa:ubuntugis/ppa -y 
+fi
+
 
 sudo apt-get update >> install.log
 sudo apt-get upgrade -y >> install.log
@@ -71,12 +78,34 @@ echo -e "\n"
 
 echo "System upgraded. I hope you wanted that done ..."
 
-# this doesn’t work to pause
+
+
+
+# this doesnâ€™t work to pause
 read -p "Press [Enter] key to start LAMP stack install..."
+
 
 sudo tasksel install lamp-server
 
-sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-dev php-pear memcached php5-memcached libspatialite3 -y >> install.log
+sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-dev php-pear memcached php5-memcached sqlite3 pv php5-sqlite -y >> install.log
+sudo apt-get build-dep libspatialite-dev -y >> install.log
+
+
+
+
+
+wget http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "downloads failed. exiting." ; exit 1; }
+cd /tmp/
+
+tar -xzf libspatialite-4.1.1.tar.gz
+
+cd /tmp/libspatialite-4.1.1
+
+sudo ./configure | pv -p -s 9656 -e > /tmp/compile1.log
+sudo make | pv -p -s 115351 -e > /tmp/compile2.log
+sudo make install | pv -p -s 15628 -e > /tmp/compile3.log
+
+sudo ldconfig
 
 echo "Main PHP libraries installed"
 
@@ -85,9 +114,19 @@ sudo apt-get build-dep php5 -y >> install.log
 
 echo "automakes installed"
 
-sudo ln -s /usr/lib/libspatialite.so.3 /usr/lib/libspatialite.so
+# sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/w /tmp/hostNew' /etc/hosts
+# sudo sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/lib/' /etc/php5/apache2/php.ini
 
-echo "sqlite3.extension_dir = /usr/lib" | sudo tee /etc/php5/apache2/php.ini
+sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/local\/lib/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/;extension=php_sqlite3.dll/extension=php_sqlite3.dll/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/^upload_max_filesize = .*/upload_max_filesize = 30M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/^post_max_size.*/post_max_size = 31M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+
+# If errors are on, errors are output to the browser and stuff up Heurist interface
+
+# increase upload file size from default 2M
+
 
 echo "hacking in sqlite3 and spatialite3 support"
 
@@ -152,7 +191,6 @@ sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/html-output
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/scratch
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/settings
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/backup
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/term-images
 
 sudo chown -R www-data:www-data /var/www/HEURIST_FILESTORE
 sudo chmod -R gu+rwx  /var/www/HEURIST_FILESTORE
