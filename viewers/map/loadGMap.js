@@ -100,6 +100,8 @@ function loadMap(options) {
 
 		var marker = null;
 		var polygon = null;
+        
+        //  symbology for polgons etc. on map is set in mapping.js using timemap.js fields
 		switch (geo.type) {
 			case "point":
 				var y = Math.round(geo.geo.y * 1000000)/1000000, x = Math.round(geo.geo.x * 1000000)/1000000;

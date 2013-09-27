@@ -571,10 +571,13 @@ if (typeof mxn.LatLonPoint == "function") {
 
 			var customIcon = basePath + "common/images/H3-favicon.png";// "heuristicon.png"; //TODO!!!! - deault marker
 
-    		var customTheme = new TimeMapTheme({
-        		"color": "#0000FF",
+    		// see http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMapTheme.html for fields
+            var customTheme = new TimeMapTheme({
+        		"color": "#FF0088",
         		"icon": customIcon,
-        		"iconSize": [16,16],
+                "lineWeight": 5, // lineweight of 5 retains visibility when zoomed out
+                "polygonLineWeight": 5,
+                "iconSize": [16,16],
         		"iconShadow": null,
         		"iconAnchor":[9,17]
     		});
