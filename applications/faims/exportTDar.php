@@ -193,7 +193,13 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         
             $resp = post_request($protocol.$host."/login/process", $fusername, $fpwd, array("loginUsername"=>$fusername, "loginPassword"=>$fpwd), $cookie_file, true);
             
-            if(strpos($resp, 'Set-Cookie: crowd.token_key=""')>0){  //not registered
+            if($resp=="ERROR"){
+                print "<script>document.getElementById('buttondiv').style.display = 'block';document.getElementById('buttondiv2').style.display = 'block';</script>";                  
+                print "<div class='err_message'>Unable to connect to the tDAR server - please check IP address and port</div>";
+                print "</div></body></html>";
+                exit();
+                
+            }else if(strpos($resp, 'Set-Cookie: crowd.token_key=""')>0){  //not registered
                 print "<script>document.getElementById('buttondiv').style.display = 'block';document.getElementById('buttondiv2').style.display = 'block';</script>";                  
                 print "<div class='err_message'>Authentification to tDAR server failed. Please check user name and password.</div>";
                 print "</div></body></html>";
@@ -1005,6 +1011,9 @@ function post_request($url, $fusername, $fpwd, $postdata, $cookie_file, $is_save
         
         curl_close($ch);
 //error_log(">>>>>".$statusCode."  ".$response);
+        if(!(strpos($statusCode,"2")===0 || strpos($statusCode,"3")===0)){ //success or redirect
+            $response = "ERROR";
+        }
 
         //return $statusCode."  ".$response;
         return $response;

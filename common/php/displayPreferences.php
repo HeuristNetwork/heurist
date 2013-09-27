@@ -98,7 +98,7 @@
 		"searchQueryInBrowser" => "false",
 
 		"favourites" => "Favourites", // standard spelling for default search
-		"loadRelatedOnSearch" => "true", // by default load related records, can be set in Preferences dialogue
+		"loadRelatedOnSearch" => "false", // by default load related records, can be set in Preferences dialogue
 		"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
 		"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
 		"showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
