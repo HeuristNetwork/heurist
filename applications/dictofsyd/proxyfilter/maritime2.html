@@ -1,0 +1,99 @@
+<style>
+/* disable all links in page */
+a{
+/*pointer-events:none;*/
+	cursor:default;
+	text-decoration:none !important;
+	color:black;
+}
+a:hover{
+	text-decoration:none;
+}
+.allowed{
+/*pointer-events:default;*/
+	cursor:pointer;
+	color:blue;
+}
+.allowed:hover{
+	text-decoration:underline !important;
+}
+.disabled{
+	color:#ff0000;
+}
+.menu{
+	display:none;
+}
+.menu.allowed{
+	display:block;
+}
+
+#right-col #connections li{
+    display: none;
+}
+#right-col #connections li.index-allowed{
+    display: block !important;
+}
+
+#right-col #connections li a:hover {
+    color: #F79219;
+}
+
+#connections ul {
+    border-bottom: none;
+    padding: 0 0 11px;
+}
+</style>
+<script type="text/javascript">
+
+function enableLinks(){
+}
+
+$(function(){
+
+	$(document).ready(function(){
+		$("#footer-content").css('display','none');
+		$("#search-bar").css('display','none');
+	});
+
+	// double check
+	// since content changed dynamically ("a" tags may be added)
+	// we have to detect click for entire document
+	$(document).bind("click", function(event) {
+
+		function _stopEvent(){
+				event.cancelBubble = true;
+				event.returnValue = false;
+				event.preventDefault();
+				if (event.stopPropagation) event.stopPropagation();
+		}
+
+		var ele = event.target;
+		if(ele && ele.nodeName == "IMG"){
+			ele = ele.parentNode;
+		}
+
+		if(ele && ele.nodeName == "A"){
+				var jele = $(ele);
+				var href = jele.attr('href');
+
+				if(href && href.indexOf("#")==0 && href.length>1 && ele.onclick==null){
+					//special treat for anchors
+					var new_position = $(href).offset();
+    				window.scrollTo(new_position.left, new_position.top);
+					_stopEvent();
+
+				}else if(!jele.hasClass('allowed')){
+					if(jele.hasClass('disabled')){ //@todo || !checkLink(href)){
+
+						_stopEvent();
+						//disableLinks();
+						return false;
+					}else {
+						//@todo  enableLinks();
+					}
+
+				}
+		}
+	});
+});
+</script>

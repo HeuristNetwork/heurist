@@ -1,0 +1,245 @@
+<style>
+/* disable all links in page */
+a{
+/*pointer-events:none;*/
+	cursor:default;
+	text-decoration:none !important;
+	color:black;
+}
+a:hover{
+	text-decoration:none;
+}
+.allowed{
+/*pointer-events:default;*/
+	cursor:pointer;
+	color:blue;
+}
+.allowed:hover{
+	text-decoration:underline !important;
+}
+.disabled{
+	color:#ff0000;
+}
+.menu{
+	display:none;
+}
+.menu.allowed{
+	display:block;
+}
+
+#right-col #connections li{
+    display: none;
+}
+#right-col #connections li.index-allowed{
+    display: block !important;
+}
+
+#right-col #connections li a:hover {
+    color: #F79219;
+}
+
+#connections ul {
+    border-bottom: none;
+    padding: 0 0 11px;
+}
+</style>
+<script type="text/javascript">
+/* maritime museum injection */
+
+var allowed = [];
+
+/*
+[
+'../natural_feature/cockatoo_island',
+'../entry/cockatoo_island',
+'../entry/balmain_power_station',
+'../place/darling_harbour',
+'../structure/circular_quay',
+'../structure/fitzroy_dry_dock'
+];
+*/
+
+function isempty(href){
+	return (href==null || href==undefined || href=="#" || href=="");
+}
+
+function checkLink(href){
+
+	if ( isempty(href) ||
+		(href.indexOf('browse/')==0))  //(href.indexOf('../citation/')==0))
+	{
+		return true;
+	}
+	if (href.match(/^https?\:/i) && !href.match(document.domain)) {
+		return false; //external link - disable
+	}
+
+	//remove hash
+	href = href.split('#')[0];
+
+	//check in list of allowed links
+	var len = allowed.length;
+	var i = 0;
+	for (; i < len; i++){
+      if (i in allowed &&
+          allowed[i] === href)
+        return true;
+	}
+	return false;
+}
+
+/* not used
+function disableLinks(){
+	var cnt = 0;
+	$('a').each(function() {
+		var href = $(this).attr('href');
+
+
+		if(!checkLink(href)){
+			// or replace all a tags to span
+			//var content = $(this).html();
+			//$(this).replaceWith($("<span />").html(content));
+
+  			// or remove attribute 		$(this).removeAttr('href');
+  			// or add disable css	$(this).addClass('disabled');
+  			$(this).css({'pointer-events':'none', 'cursor':'default'});
+  			cnt++;
+		}else if(!isempty(href)) {
+  			$(this).css({'font-weight':'bold','color':'red','background-color':'blue'});
+		}
+	});
+	//alert('disabled '+cnt+' links');
+}
+*/
+//
+// enable all 'good' links
+//
+function enableLinks(){
+	var cnt = 0;
+	$('a:not(.allowed)').not(".disabled").each(function() {   //.not(".popup")
+		var href = $(this).attr('href');
+
+		if(href && href.indexOf("#")==0){ //anchor
+			$(this).addClass('allowed');
+			return;
+		}
+		else if(href && href.indexOf('../')==0)
+		{
+  			href = href.substr(3);
+
+  			if(href==""){
+  				$(this).attr('href', 'http://www.anmm.gov.au');  //change reference instead of dictionaryofsydney home to martime museum home
+				$(this).addClass('allowed');
+				return;
+			}else if(href.indexOf('citation/')==0){
+				$(this).addClass('disabled');
+				$(this).css('display','none');
+				return;
+			}
+		}
+
+		if( (!(isempty(href) && $(this).hasClass("annotation"))) //for annotation pointer to images
+			 && checkLink(href))
+		{
+  			$(this).addClass('allowed');
+
+  			if(!isempty(href)){
+
+  				$(this).attr('href', baseURL+'&url='+href);
+
+  				// show allowed links in right-hand index
+  				if(this.parentNode.nodeName == "LI"){
+  					$(this.parentNode).addClass('index-allowed');
+  					var sdiv = this.parentNode.parentNode.parentNode;
+  					do{
+  						sdiv = sdiv.previousSibling;
+					}while (sdiv && sdiv.nodeName!='DIV');
+
+					if(sdiv && !$(sdiv).hasClass('allowed')){
+  						$(sdiv).addClass('allowed');
+					}
+				}
+			}
+  			cnt++;
+		}else{
+			$(this).addClass('disabled');
+			var txt = $(this).html();
+			if((txt=="more »") || (txt=="full record »")){
+				$(this).css('display','none');
+			}
+		}
+	});
+	//alert('enabled '+cnt+' links');
+}
+
+
+$(function(){
+
+	$(document).ready(function(){
+		$("#footer-content").css('display','none');
+		$("#search-bar").css('display','none');
+
+		$.ajax({
+		  url: 'http://heuristscholar.org/h3-ao/export/proxies/maritime_list.txt',
+		  data: null,
+		  success:  function(data, textStatus, jqXHR){
+  			  allowed = data.split('\n');
+
+  			  var delay = 1000;
+  			  if(DOS.Browse){
+			  		delay = 2000;
+  			  	  	allowed2 = data.split('\n');
+
+			  		DOS.Browse.excludeNotAllowed(allowed2);
+			  }
+  			  setTimeout(enableLinks, delay);
+		  },
+		  dataType: 'html'
+		});
+
+	});
+
+
+	// $('a').click(function(event){
+	// double check
+	// since content change dynamically ("a" tags may be added)
+	// we have to detect click for entire document
+	$(document).bind("click", function(event) {
+
+		function _stopEvent(){
+				event.cancelBubble = true;
+				event.returnValue = false;
+				event.preventDefault();
+				if (event.stopPropagation) event.stopPropagation();
+		}
+
+		var ele = event.target;
+		if(ele && ele.nodeName == "IMG"){
+			ele = ele.parentNode;
+		}
+
+		if(ele && ele.nodeName == "A"){
+				var jele = $(ele);
+				var href = jele.attr('href');
+
+				if(href && href.indexOf("#")==0 && href.length>1 && ele.onclick==null){
+					//special treat for anchors
+					var new_position = $(href).offset();
+    				window.scrollTo(new_position.left, new_position.top);
+					_stopEvent();
+
+				}else if(!jele.hasClass('allowed')){ // ele.not(".allowed") && ele.not(".disabled")){
+					if(jele.hasClass('disabled') || !checkLink(href)){
+
+						_stopEvent();
+						//disableLinks();
+						return false;
+					}else {
+						enableLinks();
+					}
+
+				}
+		}
+	});
+});
+</script>
