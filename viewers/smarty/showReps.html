@@ -417,17 +417,19 @@ if(isInited){
 		//$('.linkadmin').css('visibility', 'visible');
 
 
-		var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print</a></li>'+
-		'<li><a href="#" onClick="onFile()">Get URL</a></li>';
+		var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print report</a></li>'+
+		'<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
 
 		if(top.HEURIST.is_logged_in()){
-			s = s + '<li><a href="#" onClick="onPublish()">Publish</a></li>';
+			s = s + '<li><a href="#" onClick="onPublish()">Publish report</a></li>';
 
 			if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
 				s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
 				'<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
 				'<li><a href="#" onClick="onGenerate()">New Template</a></li>';
-			}
+			} else {
+                s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
+            }
 		}
 
 		var elem = document.getElementById('toolMenuItems');

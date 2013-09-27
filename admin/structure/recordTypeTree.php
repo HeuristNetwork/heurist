@@ -135,20 +135,24 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
             $resText  = $resText.$res['text'];
             */
             $resText = _maketext(array(
-            '{* ',
-            'Enter html for web pages or other text format.',
-            'Use tree on right to insert fields.',
-            'Use <!-- --> for html comments',
-            '*}',
-            '<h2>Title for report</h2>',
+            '{* This is a very simple Smarty report template which you can edit into something more sophisticated.',
+            '   Enter html for web pages or other text format. Use tree on right to insert fields.',
+            '   Use this format to include comments in your file, use <!-- --> for output of html comments.',
+            '   Smarty help describes many functions you can apply, loop counting/summing, custom fucntions et.*}',
+            '',
+            '<h2>Title for report</h2> {* Text here appears at start of report *}',
+            '',
             '<hr>',
             '{foreach $results as $r} {* Records loop, do not remove *}',
             '',
-            '{$r.recID} {$r.recTitle} {$r.recURL} {* add further sub-loops and fields here *}',
+            '   {$r.recID} {* the unique record ID *}',
+            '   {$r.recTitle} {* the constructed record title *}',
+            '   {* add further sub-loops and fields here *}',
             '',
-            '<hr>',
+            '   <br/> {* one record per line *}',
             '',
             '{/foreach} {* end records loop, do not remove *}',
+            '<hr/>',
             '',
             '<h2>End of report</h2> {* Text here appears at end of report *}'));
 
