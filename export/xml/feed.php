@@ -112,7 +112,7 @@ if($isAtom){
 				$limit = 1000; //default limit in dispPreferences
 		}
 
-		$squery = prepareQuery($squery, $search_type, $joinTable, "", $limit);
+		$squery = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
 
 /*****DEBUG****///error_log("1.>>>>".$squery);
 
@@ -221,22 +221,6 @@ print '</channel>';
 print '</rss>';
 }
 
-// the same in kml.php
-function prepareQuery($squery, $search_type, $joinTable, $where, $limit)
-{
-			$squery = REQUEST_to_query($squery, $search_type, '', null, false); //public only
-			//remove order by
-			$pos = strpos($squery," order by ");
-			if($pos>0){
-				$squery = substr($squery, 0, $pos);
-			}
 
-			//$squery = str_replace(" where ", $joinTable." where ", $squery);
-			$squery = preg_replace('/ where /', $joinTable." where ", $squery, 1);
 
-			//add our where clause and limit
-			$squery = $squery.$where." limit ".$limit;
-
-			return $squery;
-}
 ?>

@@ -180,7 +180,7 @@ top.HEURIST.search = {
 
 		top.HEURIST.search.updateRssFeedLink();
         
-        if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true"){
+        if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" || top.HEURIST.search.results.infoByDepth[0].count==0){
             $("#related-toggle").hide();
         }else{
             $("#related-toggle").show();
@@ -240,7 +240,9 @@ top.HEURIST.search = {
 	loadSearch: function() {
 		if (! top.HEURIST.parameters["q"]) {
 			top.HEURIST.registerEvent(window, "contentloaded",
-			function() { document.getElementById("search-status").className = "noquery"; });
+			function() { 
+                    document.getElementById("search-status").className = "noquery"; 
+            });
 			return;
 		}
 		var iframeElt = document.createElement("iframe");
@@ -1434,6 +1436,7 @@ top.HEURIST.search = {
 			$("#results-level0 div.filter").remove();
 		}
 		$("#results-level0 div.showrelated").html("<a>Search Results </a><span class=\"relatedCount\">0</span>");
+        $("#related-toggle").hide();
 	},
 
 	clearRelatesRows: function() {
@@ -1908,6 +1911,10 @@ top.HEURIST.search = {
 			document.getElementById("search-status").className = "noresult"
 				+ (top.HEURIST.parameters["w"] == "bookmark" ? "" : " all");
 			document.getElementById("resource-count").innerHTML = "";
+            
+            $("#related-toggle").hide();
+            
+            
 			return;
 		}
 

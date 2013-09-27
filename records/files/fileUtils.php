@@ -198,4 +198,24 @@
 
   }
 
+//
+// remove folder and all its content
+//
+function delFolderTree($dir, $rmdir) {
+    
+    array_map('unlink', glob($dir."/*"));
+    
+    /* OLD WAY
+    $files = array_diff(scandir($dir), array('.','..'));
+    foreach ($files as $file) {
+      (is_dir("$dir/$file")) ? delFolderTree("$dir/$file", true) : unlink("$dir/$file");
+    }
+    */
+    if($rmdir){
+        return rmdir($dir);
+    }else{
+        return true;
+    }
+}
+  
 ?>

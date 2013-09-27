@@ -29,6 +29,7 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+    require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
     if(isForAdminOnly("to export to FAIMS tDAR repository")){
         return;
@@ -181,8 +182,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     die('Failed to create folder for '.$folder);
             }
         }else{ //clear folder
-            array_map('unlink', glob($folder."/*"));
-            //rrmdir($folder);
+            delFolderTree($folder, false);
         }
         
         //cookie file 
@@ -330,7 +330,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         $order = "rec_ID, dtl_DetailTypeID";
         $params = array();
 
-        $mysqli = mysqli_connection_overwrite("hdb_".@$_REQUEST['db']);
+        $mysqli = mysqli_connection_overwrite(DATABASE); // "hdb_".@$_REQUEST['db']);
 
         // Note: enum fields are exported as 'coding sheets'
         $unsupported = array('relmarker','separator','calculated','fieldsetmarker','urlinclude'); //'enum','resource','relationtype',
@@ -956,25 +956,6 @@ function rrmdir($dir) {
         reset($objects);
         rmdir($dir);
   }
-}
-
-
-function prepareQuery($params, $squery, $search_type, $detailsTable, $where, $order)
-{
-            $squery = REQUEST_to_query($squery, $search_type, $params);
-            //remove order by
-            $pos = strpos($squery," order by ");
-            if($pos>0){
-                $squery = substr($squery, 0, $pos);
-            }
-
-            //$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
-            $squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
-
-            //add our where clause and limit
-            $squery = $squery.$where." order by ".$order; //." limit ".$limit;
-
-            return $squery;
 }
 
 function post_request($url, $fusername, $fpwd, $postdata, $cookie_file, $is_save_cookies){
