@@ -48,6 +48,7 @@ $dbHost = ""; // leave blank for localhost
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
+// IMPORTANT NOTE: MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 $dbAdminUsername = "root"; // required
 $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
@@ -56,6 +57,7 @@ $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
 // Password cannot be null
+// IMPORTANT NOTE: MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 $dbReadonlyUsername = "root"; // required
 $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 

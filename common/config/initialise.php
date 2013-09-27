@@ -118,8 +118,11 @@ if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonly
 }
 if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
     //die("MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
-    returnErrorMsgPage(1, "MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
+    returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
 }
+
+// refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/createNewDB.php
+
 
 define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
