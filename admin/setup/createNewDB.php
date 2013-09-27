@@ -499,12 +499,14 @@
 			$warnings =+ createFolder("scratch","used to store temporary files");
 			$warnings =+ createFolder("hml-output","used to write published records as hml files");
 			$warnings =+ createFolder("html-output","used to write published records as generic html files");
-			$warnings =+ createFolder("generated-reports","used to write generated reports");
+            $warnings =+ createFolder("generated-reports","used to write generated reports");
+            $warnings =+ createFolder("backup","used to write files for user data dump");
+            $warnings =+ createFolder("term-images","used for images illustrating terms");
 
 			if ($warnings > 0) {
 				echo "<h2>Please take note of warnings above</h2>";
-				echo "You must create the folders indicated or uploads, icons and templates will not work<br>";
-				echo "If upload folder is created but icons and template forlders are not, look at file permissions on new folder creation";
+				echo "You must create the folders indicated or uploads, icons, templates, publishing, term images etc. will not work<br>";
+				echo "If upload folder is created but icons and template folders are not, look at file permissions on new folder creation";
 			}
 
 			// Prepare to write to the newly created database

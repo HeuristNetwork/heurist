@@ -152,6 +152,7 @@ sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/html-output
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/scratch
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/settings
 sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/backup
+sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/term-images
 
 sudo chown -R www-data:www-data /var/www/HEURIST_FILESTORE
 sudo chmod -R gu+rwx  /var/www/HEURIST_FILESTORE
