@@ -28,6 +28,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
+    require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
     if(isForAdminOnly("to sync FAIMS database")){
         return;
@@ -118,7 +119,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 }
                 umask($old_umask);
             }else{ //clear folder
-                array_map('unlink', glob($folder."/*"));
+                delFolderTree($folder, false);
             }
             
             if($upload["name"]=="db.sqlite3"){

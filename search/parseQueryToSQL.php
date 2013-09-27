@@ -42,6 +42,32 @@ define('SORT_MODIFIED', 'm');
 define('SORT_ADDED', 'a');
 define('SORT_TITLE', 't');
 
+function prepareQuery($params, $squery, $search_type, $detailsTable, $where, $order=null, $limit=null)
+{
+            $squery = REQUEST_to_query($squery, $search_type, $params);
+            //remove order by
+            $pos = strpos($squery," order by ");
+            if($pos>0){
+                $squery = substr($squery, 0, $pos);
+            }
+
+            //$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
+            $squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
+
+            //add our where clause and limit
+            if($where){
+                $squery = $squery.$where;
+            }
+            if($order){
+                $squery = $squery." order by ".$order;
+            }
+            if($limit){
+                $squery = $squery." limit ".$limit;
+            }
+
+            return $squery;
+}
+
 
 function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted

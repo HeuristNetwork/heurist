@@ -128,9 +128,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 					$limit = 1000; //default limit in dispPreferences
 			}
 
-			$squery = prepareQuery($squery, $search_type, $detTable, $ourwhere, $limit);
+			$squery = prepareQuery(null, $squery, $search_type, $detTable, $ourwhere, null, $limit);
 			if($isSearchKml){
-				$squery2 = prepareQuery($squery2, $search_type, $detTable2, $ourwhere2, $limit);
+				$squery2 = prepareQuery(null, $squery2, $search_type, $detTable2, $ourwhere2, null, $limit);
 			}
 
 
@@ -229,22 +229,4 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 print '</Document>';
 print '</kml>';
 
-//
-function prepareQuery($squery, $search_type, $detailsTable, $where, $limit)
-{
-			$squery = REQUEST_to_query($squery, $search_type);
-			//remove order by
-			$pos = strpos($squery," order by ");
-			if($pos>0){
-				$squery = substr($squery, 0, $pos);
-			}
-
-			//$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
-			$squery = preg_replace('/ where /', $detailsTable." where ", $squery, 1);
-
-			//add our where clause and limit
-			$squery = $squery.$where." limit ".$limit;
-
-			return $squery;
-}
 ?>

@@ -40,8 +40,10 @@
     $projname = @$_REQUEST['projname'];
     $step = @$_REQUEST['step'];
     
-    if($step=='2' && $projname){
-        downloadFile('application/zip', HEURIST_UPLOAD_DIR."faims/new/".$projname.".zip");
+    $arc_filename = HEURIST_UPLOAD_DIR."faims/new/".$projname.".zip";
+    
+    if($step=='2' && $projname && file_exists($arc_filename)){
+        downloadFile('application/zip', $arc_filename);
         exit();
     }
 ?>
@@ -137,7 +139,7 @@
                     die('Failed to create folder for '.$folder.' - check that file permissions are correctly set');
             }
         }else{ //clear folder
-            array_map('unlink', glob($folder."/*"));
+            delFolderTree($folder, false);
         }
 
 
