@@ -133,7 +133,7 @@
         //	link += "&t=" + title;
         // }
         // added Ian 19/9/08 -  simple guidleine for user of URL - only on the link, not on the insert
-        link += "&t=" + "enter title here ...";
+        link += "&t=";
 
         if (! parseInt($("#rectype_elt").val())) {
           link = "";

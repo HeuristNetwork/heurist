@@ -40,7 +40,7 @@
     <title>Select record ...</title>
     <style>
       #search {height: 100px;left: 0;margin-bottom: 10px;position: relative;top: 0;}
-      #results {bottom: 26px;display: block;left: 0;overflow-y: auto;position: absolute;right: 0;top: 110px;}
+      #results {bottom: 26px;display: block;left: 0;overflow-y: auto;position: absolute;right: 0;top: 120px;}
       body.popup {padding: 0 !important; overflow: hidden;}
       .result_row {padding:1ex 10px 0 10px;}
       .result_row .id{width:10ex;display:inline-block;text-align: right;color:#999;}
@@ -63,7 +63,7 @@
 
         <table border=0 cellspacing=0 cellpadding=0 class=expander style="margin-bottom: 1em;">
           <tr>
-            <td style="width: 40px; text-align: right;"><b>Find</b>&nbsp;</td>
+            <td style="width: 40px; text-align: right;"><b>Find:</b>&nbsp;</td>
             <td style="padding: 2px 5px 5px 5px;">
               <div style="width: 98%;" class="searchInput">
                 <div><input autocomplete=off type=text name="q" id="q"
@@ -108,8 +108,12 @@
           <tr>
             <td colspan="5" rowspan="1">
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>or</b> &nbsp;&nbsp;&nbsp;
-              <a href="#" onClick=" return addRecord();"><img src="../../common/images/add-record-small.png" />&nbsp;&nbsp;Create a new record</a>
-              <div class="help prompt" style="float:right;padding-top:6px;padding-right:20px;">New or selected record becomes target of the current pointer field</div></td>
+              <a href="#" title="Create and edit target record" onClick=" return addRecord();"><img src="../../common/images/add-record-small.png" />&nbsp;&nbsp;Create a new record</a>
+              &nbsp;&nbsp;<i>New or selected record becomes target of the current pointer field</i>
+            </td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
           </tr>
         </table>
 
@@ -155,7 +159,7 @@
 
       /* If a rectype has been chosen then set a custom title -- need to do before onload so the popup code will catch it */
       if (recTypeName) {
-        document.title = "Find " + recTypeName + " records";
+        document.title = "Select / create: " + recTypeName;
       }
 
       /*
@@ -250,7 +254,7 @@
         }
 
         if (records.length == 0) {
-          resultsDiv.innerHTML = "<b style='padding: 1ex;'>No matching records</b>";
+          resultsDiv.innerHTML = "<b style='padding: 40px 40px;'><p/>No records matched search. Create and attach a new record with button above</b>";
         }
 
         document.body.cursor = "";
