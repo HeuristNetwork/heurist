@@ -20,11 +20,9 @@
 * for fields and allows to preview the record's entry form on-fly,
 * invokes selectDetailType.html - to add new detailtype into record structure
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
@@ -92,6 +90,7 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+
 		<style type="text/css">
 			.input-row div.input-header-cell {vertical-align:baseline; width:100px}
 			.dtyField {
@@ -182,7 +181,7 @@
 
 	<body class="popup yui-skin-sam" style="overflow: auto;">
 		<h2 id="recordTitle" style="margin:10px 0"></h2>
-        <div id="page-inner" style="top:50px; bottom:40px;">
+        <div id="page-inner" style="top:50px; bottom:60px;">
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
 		<script src="../../common/php/getMagicNumbers.php"></script>
@@ -206,9 +205,10 @@
 		</div>
 		<div style="bottom:10px;left:10px; right:10px;text-align:left; position:absolute;">
         	<span style="float:left">
-            We recommend using an appropriate existing field (Insert Field button above) if one is already defined:
-             <input type="button" value="Define new field type" title="Create a completely new field type - it is preferable to use an exsiting type (choose with Insert Field button above) before creating a new field type." onClick="onDefineNewType()"/>
-             <br>Click row to edit field specifications. Drag arrows at left to change the order in the form.
+              <i>Click row to edit field specifications. Drag arrows at left to change the order in the form.</i>
+              <br/>
+              To see the effects of record structure changes on the data entry form, keep a record open in the record edit form<br/>
+              and simply hit Reload to view the revised form - changes here take effect immediately, there is no need to hit [Done]
             </span>
 
             <span style="float:right; text-align:right">

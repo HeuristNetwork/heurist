@@ -73,19 +73,21 @@ function EditRecStructure() {
 		}
 
 		// buttons on top and bottom of design tab
-		var hToolBar = '<div style=\"text-align:right;float:right;\">'+
-		//<div style="display:inline-block; text-align:left">
-		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
-		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" style="margin:0" value="Insert heading" onClick="onAddSeparator()" class="add"/>'+
-		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
-		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
-		// Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
-		// '<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
-		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-		'Use existing fields where possible &nbsp;&nbsp;'+
-		'</div>';
+        var hToolBar = '<div style=\"text-align:right;float:right;\">'+
+        //<div style="display:inline-block; text-align:left">
+        //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
+        //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
+        '<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
+        '<input type="button" style="margin:0 5px" value="Define New Base Field" onClick="onDefineNewType()" '+
+        'title="Add a new base field which can be used by all record types - use an existing field (Add Field) if a suitable one exists" class="add"/>'+
+        '<input type="button" style="margin:0 5px" value="Add Section" onClick="onAddSeparator()" '+
+        'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
+        '<input type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
+        'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
+        // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
+        // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
+        // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
+        'Add existing fields where possible &nbsp;&nbsp; </div>';   
 
 		Dom.get("recordTitle").innerHTML += hToolBar;
 		Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';
@@ -1194,10 +1196,10 @@ function EditRecStructure() {
 				{
 					def_width = 0;
 				}else if (dt_type === "blocktext"){
-					def_width = 80;
+					def_width = 100;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
 							dt_type === "calculated") {
-					def_width = 15;
+					def_width = 10;
 				}else if (dt_type === "boolean") {
 					def_width = 4; break;
 				}
