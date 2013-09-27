@@ -137,6 +137,20 @@
 	</head>
 <body class="popup">
 
+<script type="text/javascript">
+    function setAsNonDuplication(){
+        var checkboxes = document.getElementsByName('dupeDiffHash[]');
+        for (var i=0; i<checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                document.forms[0].submit();
+                return;
+            }
+        }
+  
+        alert('Check several groups and then click any "not dupes" link to set this for multiple groups');
+    }
+</script>
+
 <div class="banner"><h2>Find Duplicate Records</h2></div>
 <div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
@@ -182,7 +196,7 @@
 
 				print '<p><hr><div><p>There are <b>' . $cnt . '</b> potential groups of duplicates</div>';
 
-				print "<p>Check several groups and then click any <b>not dupes</b> button to set this for multiple groups";
+				print "<p>Check several groups and then click any <b>not dupes</b> link to set this for multiple groups";
 
 				foreach ($dupes as $rectype => $subarr) {
 					foreach ($subarr as $index => $key) {
@@ -194,11 +208,13 @@
 						print '<input type="checkbox" name="dupeDiffHash[]" title="Check to idicate that all records in this set are unique." id="'.$key.
 						'" value="' . $diffHash . '">&nbsp;&nbsp;';
 						print '<label style="font-weight: bold;">'.$rectype .'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
-						print '<input type="submit" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';
+						//print '<input type="submit" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';
 
 						print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&bib_ids=' . join(',', array_keys($bibs[$key])) . '">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<a target="_new" href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">view as search</a>';
 
+                        print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">not dupes</a>';
+                        
 						print '</div>';
 						print '<ul>';
 						foreach ($bibs[$key] as $rec_id => $vals) {

@@ -125,6 +125,7 @@
 	<title>Merging records</title>
 </head>
 <body class="popup" width="600" height="400">
+<div style="max-width:600px;">
 	<form>
 
 		<div>
@@ -193,8 +194,8 @@
 							array_push($counts,0);
 						}
 						$details = array();
-						$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
-						from recDetails
+						$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo, trm_Label
+						from recDetails  left join defTerms on trm_ID = dtl_Value
 						where dtl_RecID = ' . $records[$index]['rec_ID'] . '
 						order by dtl_DetailTypeID, dtl_ID');
 						$records[$index]['details'] = array();
@@ -244,8 +245,15 @@
 								print '<td style="padding-left:10px;">';
 								foreach($detail as $i => $rg){
 									if ($rg['dtl_Value']) {
-										if ($rg['dtl_Geo']) $rd_temp = $rg['dtl_Geo'];
-										else $rd_temp =$rg['dtl_Value'];
+										if ($rg['dtl_Geo']) {
+                                            $rd_temp = $rg['dtl_Geo'];   
+                                        }
+                                        else if ($rg['trm_Label']){
+                                            $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")";   
+                                        }
+										else {
+                                            $rd_temp = $rg['dtl_Value'];   
+                                        }
 									}elseif ($rg['dtl_UploadedFileID']) {
 										$rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
 										$rd_temp = $rd_temp[0];
@@ -432,6 +440,7 @@
 		?>
 		<input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
 	</form>
+</div>    
 </body>
 </html>
 
