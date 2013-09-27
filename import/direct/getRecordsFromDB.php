@@ -129,7 +129,7 @@ Make sure the target records and field types are compatible. <b>If you get the c
 ?>
 <hr><b>Original record IDs</b>
 <p>
-This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-589) for each record
+This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-36) for each record
 <br/>This field does not exist in the database - please import it from the Heurist Core definitions database (db#2)
 <br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.
 <a href="../../admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME ?>" title="Import database structure elements"
@@ -352,7 +352,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				if (mysql_num_rows($res1) == 0) {
 					die ("<p><b>Sorry, there are no data records in this database, or database is bad format</b>");
 				}
-				print "<h3>Record type mappings</h3>[RT code] <b>$sourcedb</b> (use count) ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+				print "<h3>Record type mappings</h3> &nbsp;<b>$sourcedb</b> &nbsp;[RT code] &nbsp;n=use count ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 				print "<table>";
 				while ($row1 = mysql_fetch_array($res1)) {
 					$rt=$row1[0]; //0=rec_RecTypeID
@@ -384,7 +384,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr $bgcolor><td><label id='lblr$rt'>[ $rt ] ".$row1[1].(($is_h2)?"":"($cnt) ")."</label></td>".
+					print "<tr $bgcolor><td><label id='lblr$rt'>".$row1[1].(($is_h2)?"":" [$rt] n=$cnt ")."</label></td>".
 					"<td>==> <select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
 				} // loop through record types
 				print "</table>";
@@ -397,7 +397,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				$entnames = $alldettypes['names'];
 				$seloptions = createOptionsDt($alldettypes);
 
-				print "<h3>Field type mappings</h3>[FT code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+				print "<h3>Field type mappings</h3> &nbsp;<b>$sourcedb</b>  &nbsp;[FT code - type] ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 				if($is_h2){
 					$query1 = "SELECT DISTINCT `rd_type`,`rdt_name`,`rdt_type` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_types` ".
 					"where `rd_type`=`rdt_id`";
@@ -439,7 +439,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr $bgcolor><td><label id='lbld$ft'>[ $ft - ".$row1[2]." ] ".$row1[1]."</label></td>".  //2=dty_Type
+					print "<tr $bgcolor><td><label id='lbld$ft'>".$row1[1]." [ $ft - ".$row1[2]." ] </label></td>".  //2=dty_Type
 					"<td>==> <select id='cbd$ft' name='cbd$ft' class='detailTypes'><option id='od0' value='0'></option>".
 					$selopts."</select></td></tr>\n";
 				} // loop through field types
@@ -471,7 +471,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				$seloptions = createOptions("ot", $entnames);
 
 
-				print "<h3>Term mappings ($type"."s)"."</h3>[Term code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+				print "<h3>Term mappings ($type"."s)"."</h3> &nbsp;<b>$sourcedb</b> &nbsp;[Term code]  ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 				// Get the term mapping, by default assume that the code is unchanged so select the equivalent term if available
 				if($is_h2){
 					$query1 = "SELECT DISTINCT `rdl_id`,`rdl_id`,`rd_val` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_lookups` ".
@@ -518,7 +518,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr $bgcolor><td><label id='lblt$tt'>[ $tt ] ".$row1[2]."</label></td>".
+					print "<tr $bgcolor><td><label id='lblt$tt'>".$row1[2]." [ $tt ] </label></td>".
 					"<td>==> <select id='cbt$tt' name='cbt$tt' class='terms'><option id='ot0' value='0'></option>".
 					$selopts."</select></td></tr>\n";
 				} // loop through terms
@@ -554,8 +554,8 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                 $seloptions = createOptions("us", $allusers);
 
 
-                print "<h3>User mappings for tag(keyword) import"."</h3>".
-                    "[User id] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+                print "<h3>User mappings for tag (keyword) import"."</h3>".
+                    " &nbsp;<b>$sourcedb</b> &nbsp;[User id] ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
                 // Get users with tags
                 if($is_h2){
                     $query1 = "select usr.Id, usr.Username, usr.Realname as fullname, count(kwl_rec_id)
@@ -599,7 +599,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                         $selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
                     }
 
-                    print "<tr $bgcolor><td><label id='lblu$tt'>[ $tt ] ".$row1[1]."</label></td>".
+                    print "<tr $bgcolor><td><label id='lblu$tt'>".$row1[1]." &nbsp;[ $tt ] </label></td>".
                     "<td>==> <select id='cbu$tt' name='cbu$tt' class='users'><option id='ou0' value='0'></option>".
                     $selopts."</select></td></tr>\n";
                 } // loop through terms

@@ -35,6 +35,14 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+// --------------------------------------------------------------
+
+// NOTE: I BELIeVE THIS FILE MAY NO LOGNER BE USED - TO VERIFY
+
+// --------------------------------------------------------------
+
+
+
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
@@ -307,7 +315,7 @@
 				if (mysql_num_rows($res1) == 0) {
 					die ("<p><b>Sorry, there are no data records in this database, or database is bad format</b>");
 				}
-				print "<h3>Record type mappings</h3>[RT code] <b>$sourcedb</b> (use count) ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+				print "<h3>Record type mappings</h3> &nbsp;[RT code] <b>$sourcedb</b> &nbsp;(use count) ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 				print "<table>";
 				while ($row1 = mysql_fetch_array($res1)) {
 					$rt=$row1[0]; //0=rec_RecTypeID
@@ -322,7 +330,7 @@
 						$selopts = str_replace($repl, $repl." selected='selected' ", $selopts);
 					}
 
-					print "<tr><td>[ $rt ] ".$row1[1]."($cnt) </td>".
+					print "<tr><td>".$row1[1]." [ $rt ] n=($cnt) </td>".
 					"<td>==> <select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
 				} // loop through record types
 				print "</table>";
