@@ -38,7 +38,11 @@
 <html>
 
 	<head>
+        <script src="../../common/js/utilsUI.js"></script>
 		<script type=text/javascript>
+        
+            var Hul = top.HEURIST.util;
+
 			function open_selected() {
 				var cbs = document.getElementsByName('bib_cb');
 				if (!cbs  ||  ! cbs instanceof Array)
@@ -54,6 +58,25 @@
 				link.href = '../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
 				return true;
 			}
+            
+            function onEditFieldType(dty_ID){
+
+                var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                if(dty_ID>0){
+                    url = url + "&detailTypeID="+dty_ID; //existing
+                }else{
+                    return;
+                }
+
+                top.HEURIST.util.popupURL(top, url,
+                {   "close-on-blur": false,
+                    "no-resize": false,
+                    height: 680,
+                    width: 700,
+                    callback: function(context) {
+                    }
+                });
+            }
 		</script>
 
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
@@ -70,6 +93,11 @@
 	</head>
 
 	<body class="popup">
+    
+    
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/php/loadCommonInfo.php"></script>
+    
 		<?php
 
 			mysql_connection_select(DATABASE);
@@ -125,10 +153,13 @@
 					$termIDs = explode(",",$temp);
 				}
 				// Validate termIDs
+                
 				foreach ($termIDs as $trmID) {
 					// check that the term valid
-					if ( !$trmID ){ // invalid trm ID null or 0 is not allowed
-						array_push($invalidTermIDs,"blank");
+					if (!$trmID ){ // invalid trm ID null or 0 is not allowed
+                        if(count($termIDs)>1){
+                            array_push($invalidTermIDs,"blank");    
+                        }
 					}else if ( !$TL[$trmID]){ // invalid trm ID
 						array_push($invalidTermIDs,$trmID);
 					}
@@ -167,6 +198,7 @@
 					}
 				}
 				if ($dty['dty_TermIDTreeNonSelectableIDs']){
+error_log(">>>>".$dty['dty_TermIDTreeNonSelectableIDs']);
 					$invalidNonSelectableTerms = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs']);
 					if (count($invalidNonSelectableTerms)){
 						$dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
@@ -209,12 +241,12 @@
 						foreach ($dtysWithInvalidTerms as $row) {
 						?>
 					<tr>
-						<td><a target=_new href='../../admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>&detailTypeID=<?= $row['dty_ID'] ?>'><?= $row['dty_ID'] ?></a></td>
+						<td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
 						<td><?= $row['dty_Name'] ?></td>
 						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidTermIDs'])?> invalid term ID(s) <?= join(",",$row['invalidTermIDs'])?></td>
 					</tr>
 						<?php
-							}
+						}//for
 					}
 					?>
 			</table>
@@ -234,7 +266,7 @@
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
 						?>
 					<tr>
-						<td><a target=_new href='../../admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>&detailTypeID=<?= $row['dty_ID'] ?>'><?= $row['dty_ID'] ?></a></td>
+                        <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
 						<td><?= $row['dty_Name'] ?></td>
 						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID(s) <?= join(",",$row['invalidNonSelectableTermIDs'])?></td>
 					</tr>
@@ -262,7 +294,7 @@
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {
 						?>
 				<tr>
-					<td><a target=_new href='../../admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>&detailTypeID=<?= $row['dty_ID'] ?>'><?= $row['dty_ID'] ?></a></td>
+                    <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
 					<td><?= $row['dty_Name'] ?></td>
 					<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidRectypeConstraint'])?> invalid rectype ID(s) <?= join(",",$row['invalidRectypeConstraint'])?></td>
 				</tr>

@@ -58,6 +58,7 @@ if (is_logged_in() && @$_REQUEST["s"]  && @$_REQUEST["id"]) {
                                      "pos" => $i + 1,
                                      "count" => count($results));
                     print json_format($context);
+                    exit();
                 }
             }
         }

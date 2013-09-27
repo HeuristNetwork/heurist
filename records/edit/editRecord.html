@@ -156,7 +156,8 @@
 				}
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
+                    var surl = top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID;
+					top.HEURIST.util.getJsonData(surl, function(context) {
 						if (!context || context.count<1) return;
 						document.getElementById("search-nav").innerHTML =
 						"<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
