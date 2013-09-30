@@ -31,8 +31,9 @@
 */
 
 
+    define('SKIP_VERSIONCHECK2', 1);
+    define('SKIP_VERSIONCHECK', 1);
 	define('NO_DB_ALLOWED',1);
-
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

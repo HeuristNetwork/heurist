@@ -236,7 +236,8 @@ function mysql__update($table, $condition, $pairs_assoc) {
 		}
 		$stmt.= " WHERE $condition";
 	}
-	if (defined('T1000_DEBUG')) error_log($stmt);
+	//if (defined('T1000_DEBUG')) 
+    error_log($stmt);
 	return mysql_query($stmt); // Up to the user to check for error.
 
 }

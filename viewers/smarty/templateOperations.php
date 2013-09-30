@@ -32,7 +32,6 @@
 */
 
 
-// called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 define('ISSERVICE',1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

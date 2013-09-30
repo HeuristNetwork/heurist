@@ -30,6 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('SKIP_VERSIONCHECK2', 1);
 
 define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__).'/applyCredentials.php');

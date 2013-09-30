@@ -327,8 +327,11 @@ define('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
 define('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);
 define('HEURIST_DBVERSION', "" . $sysValues['sys_dbVersion'] . "." . $sysValues['sys_dbSubVersion'] . "." . $sysValues['sys_dbSubSubVersion']);
 /*****DEBUG****///error_log("initialise DBNAME ".HEURIST_DBNAME." ver ".HEURIST_DBVERSION." with code base from ".HEURIST_BASE_URL);
-if (HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
-	returnErrorMsgPage(0, "Heurist Code Version " . HEURIST_VERSION . " requires database schema version # " . HEURIST_MIN_DBVERSION . " or higher. " . HEURIST_DBNAME . " has version # " . HEURIST_DBVERSION . " - please update the schema of the database.");
+if (!defined('SKIP_VERSIONCHECK') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
+
+error_log("catch in INIT");
+    
+	returnErrorMsgPage(3, "Heurist Code Version " . HEURIST_VERSION . " requires database schema version # " . HEURIST_MIN_DBVERSION . " or higher. " . HEURIST_DBNAME . " has version # " . HEURIST_DBVERSION . " - please update the schema of the database.");
 }
 $path = @$sysValues['sys_hmlOutputDirectory'];
 if ($path) {
@@ -638,14 +641,19 @@ function returnErrorMsgPage($critical, $msg = null) {
 		$msg2 = "<p>&nbsp;Heurist initialisation error<p> ".$msg?$msg:""." <p><i>Please consult your sysadmin for help, or email: info - a t - heuristscholar.org </i></p>";
         $msg2 = rawurlencode($msg2);
         $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
-        
+
 	} else if ($critical == 2) { //database not defined or can not connect to it
 		$redirect = HEURIST_BASE_URL . "common/connect/selectDatabase.php";
 		error_log("redirectURL = " . print_r($redirect, true));
 		if ($msg) {
 			$redirect.= "?msg=" . rawurlencode($msg);
 		}
-	} else {
+        
+    } else if ($critical == 3) { // db required upgrade
+
+        $redirect = HEURIST_BASE_URL . "admin/setup/upgradeDatabase.php?db=".HEURIST_DBNAME;
+    
+    } else {
 		// gets to here if database not specified properly. This is an error if set up properly, but not at first initialisaiton of the system
 		// Test for existence of databases, if none then Heurist has not been set up yet
 		// Placed here rather than up-front test to avoid having to test this in every script
@@ -657,6 +665,9 @@ function returnErrorMsgPage($critical, $msg = null) {
 		}
 	}
 	if ($redirect) {
+        
+error_log("REDIRECT TO ".$redirect);        
+        
 		if (defined('ISSERVICE')) {
 			echo "/*DEBUG: it happens in " . $_SERVER['PHP_SELF'] . " */ location.replace(\"" . $redirect . "\");";
 		} else {

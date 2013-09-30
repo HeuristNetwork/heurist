@@ -29,7 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
+define('SKIP_VERSIONCHECK', 1);
 
 require_once(dirname(__FILE__)."/../config/initialise.php");
 
@@ -53,9 +53,15 @@ if (_is_logged_in()) {
 //	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
 //		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
 //	}
-
 }
 session_write_close();
+
+if (!defined('SKIP_VERSIONCHECK2') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
+    
+error_log(">>>>REDIRCT TO DB UPGRADE ".defined('ISSERVICE'));    
+    
+    returnErrorMsgPage(3, "Need DB upgrade");
+}
 
 function is_cookie_current_version() {
 	return (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] == COOKIE_VERSION);
@@ -90,7 +96,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 }else{
 	function is_logged_in() {
 		return _is_logged_in();
-	}
+    }
 
 	function is_admin($contx = 'database',$ug = 0) {
 		if (!is_logged_in()) return false;
@@ -292,7 +298,7 @@ function isForAdminOnly($message="", $redirect=true)
         <div id=errorMsg>
             <span>You must be logged in as database owner <?=$message ?></span>
             <p>
-                <a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a>
+                <a href="<?=HEURIST_BASE_URL?>common/connect/login.php?logout=1&amp;db=<?=HEURIST_DBNAME?>" target='_top'>Log out</a>
             </p>
         </div>
     </div>

@@ -32,7 +32,6 @@
 
 
 define('dirname(__FILE__)', dirname(__FILE__));    // this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-/* require_once(dirname(__FILE__)."/../../common/config/initialise.php"); */
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
