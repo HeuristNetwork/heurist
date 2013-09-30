@@ -188,7 +188,8 @@ function ShowReps() {
 					]
 				} );
 		mySimpleDialog.render(document.body);
-
+        
+        window.onbeforeunload = _onbeforeunload;
 	}
 
 	/**
@@ -270,6 +271,13 @@ function ShowReps() {
 			return isEditorVisible;
 		}
 	}
+    
+    function _onbeforeunload() {
+            if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
+                return "Template was changed. Are you sure you wish to exit and lose all modifications?";
+            }
+    }
+    
 
 	/**
 	* Creates new template from the given query
@@ -1607,3 +1615,19 @@ function ShowReps() {
 	_init();
 	return that;
 }
+
+/*
+$(function(){
+     * this swallows backspace keys on any non-input element.
+     * stops backspace -> back
+    var rx = /INPUT|SELECT|TEXTAREA/i;
+
+    $(document).bind("keydown keypress", function(e){
+        if( e.which == 8 ){ // 8 == backspace
+            if(!rx.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
+                e.preventDefault();
+            }
+        }
+    });
+});
+*/
