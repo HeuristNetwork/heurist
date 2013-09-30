@@ -15,8 +15,8 @@
 */
 
 /**
-*   Write FAIMS project definition files (db schema, ui schema, a16N, ui logic
-*   based on the Heurist database
+*   Write FAIMS project definition files (db schema, ui schema, a16N, ui logic)
+*   based on the Heurist database, allowing a FAIMS project to be built from Heurist
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -76,6 +76,7 @@
     }
   </style>  
 </head>
+
 <body style="padding:44px;" class="popup">
 
 
@@ -142,7 +143,6 @@
             delFolderTree($folder, false);
         }
 
-
         //load definitions (USE CACHE)
         $rtStructs = getAllRectypeStructures(true);
         $dtStructs = getAllDetailTypeStructures(true);
@@ -150,7 +150,10 @@
         $ind_parentid =  $dtTerms['fieldNamesToIndex']['trm_ParentTermID'];
         $ind_label =  $dtTerms['fieldNamesToIndex']['trm_Label'];
         $ind_descr =  $dtTerms['fieldNamesToIndex']['trm_Description'];
-        $unsupported = array('relmarker','relationtype','separator','resource','calculated','fieldsetmarker','urlinclude'); 
+        // $unsupported was original specification, but this will stuff up if new types are added
+        $supported = array ('freetext', 'blocktext', 'integer', 'date', 'year', 'boolean', 'enum', 'float', 'file');
+        //$unsupported = array('relmarker','relationtype','separator','resource','calculated','fieldsetmarker','urlinclude','geo');
+        // Note: Geos are supported, but FAIMS uses a different methodology for recording them, that is they are an implicit part of every record 
         $content_a16n = null;
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
@@ -158,7 +161,6 @@
         file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport));
         file_put_contents($folder."/arch16N.properties", arrToProps());
         copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
-
 
         //CREATE ZIPFILE
         unlink($folder.".zip");
@@ -237,9 +239,9 @@ function prepareXml($root){
 // Generate the database schema file (db_schema.xml)
 function generateSchema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
-
-    $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?><dataSchema />');
+    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported, $supported;
+                                                                        
+    $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?> <dataSchema />');
     $root->addAttribute('name', DATABASE);
     $root->addAttribute('preparer', "Heurist user:".mysql_real_escape_string(get_user_name()));
 
@@ -343,7 +345,7 @@ function generateSchema($projname, $rt_toexport){
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
             $dt_type = $det[$int_dt_type];
             
-            if(in_array($dt_type, $unsupported)){
+            if(!in_array($dt_type, $supported)){
                 continue;
             }
 
@@ -371,7 +373,7 @@ function generateSchema($projname, $rt_toexport){
                 
                 $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'] = $cnt;
             }
-        }//for 
+        } //for 
         
         // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
         if(!$has_identifier){
@@ -388,6 +390,8 @@ function generateSchema($projname, $rt_toexport){
 } // generation of DB schema
 
 
+
+
 /**
 * Generate the FAIMS user interface schema file
 * 
@@ -398,10 +402,10 @@ function generateSchema($projname, $rt_toexport){
 */
 function generate_UI_Schema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported;
+    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported, $supported;
 
    add16n('Users'); 
-   add16n('dummy');
+   add16n('placeholder');
    add16n('Devices');
    add16n('Start.Recording');
    
@@ -426,17 +430,75 @@ function generate_UI_Schema($projname, $rt_toexport){
 
     $faims = $instance->addChild("faims");
     $faims->addAttribute('id', DATABASE);
+    
 
+    // ---------------------------------------------------------------------------------------------------
+    // Header part 1
+    
+    // style 
     $style = new SimpleXMLElement('<style><orientation><orientation/></orientation><even><layout_weight/></even></style>');
     xml_adopt($faims, $style);
     
+    // user
     $user = new SimpleXMLElement('<user><usertab><users/></usertab></user>');
     xml_adopt($faims, $user);
+    
     //<devices/><login/>
     //$faims->addChild('user')->addChild('usertab')->addChild('users');
+    
+    
+    // ------------------------------------------------------------------------------------------------------------
+    
+    // Header part  2  
+    
+    // ARTEM: THIS SECTION WAS BELOW THE BODY SECTION, MOVED UP HERE 6.30PM 30/9/13
+         
+    addComment($faims, 'control tabgroup that contains button to manipulate entities: load, list, create');
 
-    addComment($body, 'describes controls for each tabgroup and its nested tab', 'http://www.w3.org/2002/xforms');
-    $style = new SimpleXMLElement('<group ref="style">
+    $tabgroup_control = $faims->addChild('control');
+    
+    $tab_buttonholder  = $tabgroup_control->addChild('buttonholder');
+    
+    $tab_map = new SimpleXMLElement(
+             '<map>
+                  <map/>
+                  <mapContainer>
+                      <child0>
+                        <zoomGPS/>
+                      </child0>
+                      <child1>
+                        <clear/>
+                      </child1>
+                      <child2>
+                        <create/>
+                      </child2>
+                  </mapContainer>
+              </map>');
+    xml_adopt($tabgroup_control, $tab_map);
+     
+    $tab_data  = $tabgroup_control->addChild('data');
+    
+    $tab_gps = new SimpleXMLElement('<gps>
+              <connectexternal/>
+              <connectinternal/>
+              <startsync/>
+              <stopsync/>
+              <startTimeLog/>
+              <startDistanceLog/>
+              <stopTrackLog/>
+            </gps>');
+    xml_adopt($tabgroup_control, $tab_gps);
+      
+      
+    // -------------------------------------------------------------------------------------------------------
+    
+    // Body section 3
+  
+    addComment($body, 'Describes controls for each tabgroup and its nested tabs', 'http://www.w3.org/2002/xforms');
+    
+    // Style
+    $style = new SimpleXMLElement(
+    '<group ref="style">
       <label/>
       <group ref="orientation">
         <label/>
@@ -444,6 +506,7 @@ function generate_UI_Schema($projname, $rt_toexport){
           <label>horizontal</label>
         </input>
       </group>
+      
       <group ref="even">
         <label/>
         <input ref="layout_weight">
@@ -453,21 +516,102 @@ function generate_UI_Schema($projname, $rt_toexport){
     </group>'); 
     xml_adopt($body, $style, 'http://www.w3.org/2002/xforms');
     
-    $user = new SimpleXMLElement('<group ref="user">
+    // User
+    $user = new SimpleXMLElement(
+    '<group ref="user">
       <label>'.getResStr('User List').'</label>
-      <group ref="usertab">
+      <group ref="usertab" faims_scrollable="false">
         <label>'.getResStr('User List').'</label>
-        <select1 ref="users">
+        <select1 appearance="compact" ref="users">
           <label>{Users}:</label>
           <item>
-            <label>{dummy}</label>
-            <value>dummy</value>
+            <label>placeholder</label>
+            <value>placeholder</value>
           </item>
         </select1>
       </group>
     </group>');
     xml_adopt($body, $user, 'http://www.w3.org/2002/xforms');
-/*
+    
+    // Maps and controls ADDED BY IAN
+     $map = new SimpleXMLElement(
+     '<group ref="control">  
+        <label>Maps and Controls</label>
+        <group faims_scrollable="false" ref="map">
+        <label>Map</label>
+        <input faims_certainty="false" faims_map="true" ref="map">
+          <label/>
+        </input>
+        <group faims_style="orientation" ref="mapContainer">
+          <label/>
+          <group faims_style="even" ref="child0">
+            <label/>
+            <trigger ref="zoomGPS">
+              <label>CenterMe</label>
+            </trigger>
+          </group>
+          <group faims_style="even" ref="child1">
+            <label/>
+            <trigger ref="clear">
+              <label>Remove</label>
+            </trigger>
+          </group>
+          <group faims_style="even" ref="child2">
+            <label/>
+            <trigger ref="create">
+              <label>Create</label>
+            </trigger>
+          </group>
+        </group>
+      </group>');
+    xml_adopt($body, $map, 'http://www.w3.org/2002/xforms');
+    
+    // Data ADDED BY IAN
+     $data = new SimpleXMLElement(
+     '<group ref="data" faims_scrollable="false">
+        <label>Saved Features</label>
+        <select1 faims_annotation="false" faims_certainty="false" ref="RS_FeatureList" appearance="compact">
+          <label>Saved Remote Sensing Features</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>');
+    xml_adopt($body, $data, 'http://www.w3.org/2002/xforms');
+        
+    // GPS ADDED BY IAN
+     $gps = new SimpleXMLElement(
+     '<group ref="gps">  
+        <label>Control</label>
+        <trigger ref="connectexternal">
+          <label>Connect To External GPS</label>
+        </trigger>
+        <trigger ref="connectinternal">
+          <label>Connect To Internal GPS</label>
+        </trigger>
+        <trigger ref="startsync">
+          <label>Start Synching</label>
+        </trigger>
+        <trigger ref="stopsync">
+          <label>Stop Synching</label>
+        </trigger>
+        <trigger ref="startTimeLog">
+          <label>Start Time Log</label>
+        </trigger>
+        <trigger ref="startDistanceLog">
+          <label>Start Distance Log</label>
+        </trigger>
+        <trigger ref="stopTrackLog">
+          <label>Stop Track Log</label>
+        </trigger>
+      </group>');
+    xml_adopt($body, $gps, 'http://www.w3.org/2002/xforms');   
+    
+
+    // ARTEM, CAN WE DELETE THIS STUFF, OR ELSE ADD COMMENTS WHAT IT'S FOR AND WHY IT HAS BEEN COMMENTED OUT
+    
+    /*
         <select1 ref="devices" appearance="full">
           <label>{Devices}:</label>
           <item>
@@ -507,22 +651,15 @@ function generate_UI_Schema($projname, $rt_toexport){
     $int_dt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
 
     $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
+    
 
     
-    addComment($faims, 'control tabgroup that contains button to manipulate entities: load, list, create');
-    $tabgroup_control = $faims->addChild('control');
-    $tab_buttonholder  = $tabgroup_control->addChild('buttonholder');
-    $tab_data  = $tabgroup_control->addChild('data');
-    $tab_gps = new SimpleXMLElement('<gps>
-              <connectexternal/>
-              <connectinternal/>
-              <startsync/>
-              <stopsync/>
-            </gps>');
-    xml_adopt($tabgroup_control, $tab_gps);
+    // --------------------------------------------------------------------------------------------------------
+    
+    // Output specifications for each ArchEnt (Record type in Heurist)
     addComment($faims, 'list of tabgroups for entities');
 
-    // Output specifications for each ArchEnt (Record type in Heurist)
+    // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
 
@@ -534,14 +671,14 @@ function generate_UI_Schema($projname, $rt_toexport){
         $tab_data->addChild($rtnamex.'List');
         $tab_data->addChild($rtnamex.'Load');
         
-        $headername = 'main'; //first tab
+        $headername = $rtnamex.'_GeneralInformation'; //first tab implied if no header at top of record
 
-        addComment($faims, strtoupper($rtnamex) );        
-        $tabgroup_head = $faims->addChild($rtnamex); //tabgroup for rectype
-        $tab = $tabgroup_head->addChild($headername);     //first tab
+        addComment($faims, 'ArchEnt / Record Type: '.strtoupper($rtnamex) );        
+        $tabgroup_head = $faims->addChild($rtnamex);  //tabgroup for this record type
+        $tab = $tabgroup_head->addChild($headername); //first tab for this record type
 
         addComment($body, strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
-        $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms'); //tabgroup for rectype
+        $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms');
         $tabgroup_body->addChild('label', mysql_real_escape_string(getResStr($rtname)) );
         $tabgroup_body->addAttribute('ref', $rtnamex);
         $tabgroup_body->addAttribute('faims_archent_type', mysql_real_escape_string($rtname));
@@ -552,7 +689,7 @@ function generate_UI_Schema($projname, $rt_toexport){
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
-        // Output for each field (attribtue) in the record type
+        // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
 
             $is_repeatable = ($detail[$int_dt_repeat]!='1');
@@ -560,28 +697,31 @@ function generate_UI_Schema($projname, $rt_toexport){
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
 
             $dt_type = $det[$int_dt_type];
+            $dtname = $det[$int_dt_name];  // the base field type name
+            $dtnamex = getProperName($dtname); // sanitised
             
-            if($dt_type=='separator'){
+            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this record type
+            $dtdisplaynamex = getProperName($dtdisplayname);
+            
+            if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
                 //create new tab
-               
-                $headername = 'header'.$rt.'_'.$dtid;
-                $tab = $tabgroup_head->addChild($headername);     //first tab
-                
+                $headername = $rtnamex.'_'.$dtdisplaynamex;
+                $tab = $tabgroup_head->addChild($headername); //first tab
                 $group = $tabgroup_body->addChild('group'); //first tab
                 $group->addAttribute('ref', $headername);
                 $group->addChild('label', mysql_real_escape_string(getResStr( $detail[$int_dt_disp_name] )) );
             }
             
-            if(in_array($dt_type, $unsupported)){
+            if(!in_array($dt_type, $supported)){
                 continue;
             }
-
-            $dtname = $det[$int_dt_name];
-            $dtnamex = getProperName($dtname);
 
             $tab->addChild($dtnamex); //add to strucsture
 
             $isvocab = ($dt_type=='enum');
+            
+            // TO LOOK AT  -  isIdentifier not defined (in logs, 5.20pnm 30/9/13)
+            
             $isIdentifier = $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'];
             
             if($isvocab){
@@ -613,8 +753,8 @@ function generate_UI_Schema($projname, $rt_toexport){
 
             if($isvocab){ //empty value for selection
                 $item = $input->addChild('item');
-                $item->label = '{dummy}';
-                $item->value = 'dummy';
+                $item->label = '{placeholder}';
+                $item->value = 'placeholder';
             }
 
             $ftype = null;
