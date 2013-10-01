@@ -534,10 +534,11 @@ function generate_UI_Schema($projname, $rt_toexport){
      '<group ref="control">  
         <label>Maps and Controls</label>
         <group faims_scrollable="false" ref="map">
-        <label>Map</label>
-        <input faims_certainty="false" faims_map="true" ref="map">
-          <label/>
-        </input>
+            <label>Map</label>
+            <input faims_certainty="false" faims_map="true" ref="map">
+                <label/>
+            </input>
+        </group>
         <group faims_style="orientation" ref="mapContainer">
           <label/>
           <group faims_style="even" ref="child0">
@@ -718,7 +719,7 @@ function generate_UI_Schema($projname, $rt_toexport){
             
             // TO LOOK AT  -  isIdentifier not defined (in logs, 5.20pnm 30/9/13)
             
-            $isIdentifier = $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'];
+            $isIdentifier = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'];
             
             if($isvocab){
                 $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
