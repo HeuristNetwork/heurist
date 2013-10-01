@@ -452,7 +452,7 @@ var HWorkgroup = function(id, name, longName, description, url) {
 	var _url = url;
 
 	if (HAPI.WorkgroupManager) {
-		throw "Cannot construct new HWorkgroup objects";
+		throw "Cannot construct new Heurist Workgroup objects";
 	}
 
 	this.getID = function() { return _id; };
@@ -473,7 +473,7 @@ var HRecordType = function(id, name, mask) {
 	var _mask = mask;
 
 	if (HAPI.RecordTypeManager) {
-		throw "Cannot construct new HRecordType objects";
+		throw "Cannot construct new Heurist Record Type objects";
 	}
 
 	this.getID = function() { return _id; };
@@ -505,7 +505,7 @@ var HUser = function(id, username, realname) {
 	var _realname = realname;
 
 	if (HAPI.UserManager) {
-		throw "Cannot construct new HUser objects";
+		throw "Cannot construct new Heurist User objects";
 	}
 
 	this.getID = function() { return _id; };
@@ -577,7 +577,7 @@ var HGeographicValue = function(type, wkt) {
 			case "pl": HAPI.GOI.PolygonValue.call(this, _wkt); break;
 			case "l": HAPI.GOI.PathValue.call(this, _wkt); break;
 			default:
-			throw new HAPI.GOI.InvalidGeographicValueException("unknown geographic type");
+			throw new HAPI.GOI.InvalidGeographicValueException("Unknown geographic object type");
 		}
 	}
 };
@@ -774,7 +774,7 @@ var HRecord = function() {
 
 	this.getRecordType = function() { return _type; };
 	this.setRecordType = function(type) {
-		/* PRE */ if (! HAPI.isA(type, "HRecordType")) { throw new HTypeException("HRecordType object required"); }
+		/* PRE */ if (! HAPI.isA(type, "HRecordType")) { throw new HTypeException("Heurist Record Type object required"); }
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		if (_type  &&  _type._isRelationship) {
 			// trying to change relationship to non-relationship
@@ -809,9 +809,9 @@ var HRecord = function() {
 	}
 
 	this.getDetail = function(detailType) {
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 
-		if (HDetailManager.getDetailRepeatable(_type, detailType)) { throw new HValueException("detail is repeatable"); }
+		if (HDetailManager.getDetailRepeatable(_type, detailType)) { throw new HValueException("Detail (field value) is repeatable"); }
 
 		var tmpDetails = _namedDetails[detailType.getID()];
 		if (! tmpDetails) { return null; }//saw CHECK:  why return null if no existing detail , could be a newly added one not yet saved.
@@ -824,7 +824,7 @@ var HRecord = function() {
 		}
 	};
 	this.getDetails = function(detailType) {
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 		var details = [], bdID, i;
 		var tmpDetails = _namedDetails[detailType.getID()];
 		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
@@ -865,19 +865,19 @@ var HRecord = function() {
 	};
 	this.addDetail = function(detailType, detailValue) {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 		// Don't add meaningless non-truthy values
 		if (! detailValue  &&  (detailValue !== 0  &&  detailValue !== false)) { return; }
 
 		// check validity of value
 		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
-			throw new HValueException("invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+			throw new HValueException("Invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		// check repeatability, if we can (if the record type isn't set yet, there's nothing we can do)
 		if (_type  &&  ! HDetailManager.getDetailRepeatable(_type, detailType)) {
 			if (_namedDetails[detailType.getID()]  ||  _details[detailType.getID()]) {
-				throw new HValueException("value already exists for non-repeatable detail");
+				throw new HValueException("Value already exists for non-repeatable field value");
 			}
 		}
 
@@ -893,15 +893,15 @@ var HRecord = function() {
 	};
 	this.changeDetail = function(detailType, oldValue, newValue) {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 
 		// check validity of value
 		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, newValue)) {
-			throw new HValueException("invalid new value ("+newValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+			throw new HValueException("Invalid new value ("+newValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, oldValue)) {
-			throw new HValueException("invalid old value ("+oldValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+			throw new HValueException("Invalid old value ("+oldValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		// reduce records to stubs for comparison
@@ -959,7 +959,7 @@ var HRecord = function() {
 	};
 	this.removeDetails = function(detailType) {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 		delete _namedDetails[detailType.getID()];
 		delete _details[detailType.getID()];
 		_modified = true;
@@ -967,7 +967,7 @@ var HRecord = function() {
 	this.setDetails = function(detailType, detailValues) {
 		// Convenience function equivalent to ::removeDetails followed by multiple ::addDetail
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object required"); }
 
 		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 		var newDetails = [];
@@ -977,7 +977,7 @@ var HRecord = function() {
 			if (! detailValue  &&  (detailValue !== 0  &&  detailValue !== false)) { continue; }
 			// check validity of value
 			if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
-				throw new HValueException("invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+				throw new HValueException("Invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 			}
 
 			newDetails.push(termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue);
@@ -994,7 +994,7 @@ var HRecord = function() {
 
 	this.getWorkgroup = function() { return _workgroup; };
 	this.setWorkgroup = function(workgroup) {
-		/* PRE */ if (! HAPI.isA(workgroup, "HWorkgroup")) { throw new HTypeException("HWorkgroup object required"); }
+		/* PRE */ if (! HAPI.isA(workgroup, "HWorkgroup")) { throw new HTypeException("Heurist Workgroup object required"); }
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		if (_workgroup  &&  ! HCurrentUser.isInWorkgroup(_workgroup)) {
 			// workgroup is already set for this record
@@ -1013,7 +1013,7 @@ var HRecord = function() {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		if (! _workgroup) { return; }
 		if (! HCurrentUser.isInWorkgroup(_workgroup)) {
-			throw new HPermissionException("Non-member cannot change non-workgroup visibility");
+			throw new HPermissionException("Non-member cannot change non-workgroup visibility of record");
 		}
 // saw removed 30/10/11		_nonOwnerVisible = visible? true : false;
 		_nonOwnerVisible = (typeof visible == 'string' &&
@@ -1200,10 +1200,10 @@ var HRecord = function() {
 
 	this.getWgTags = this.getKeywords = function() { return _wgTags.slice(0); };
 	this.addWgTag = this.addKeyword = function(tag) {
-		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("HWorkgroupTag object required"); }
+		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("Heurist Workgroup Tag object required"); }
 		if (! HCurrentUser.isInWorkgroup(tag.getWorkgroup())) {
 			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
-			throw new HInvalidWorkgroupException("User is not a member of tag's workgroup");
+			throw new HInvalidWorkgroupException("User is not a member of workgroup which owns this tag");
 		}
 
 		if (! _wgTagsMap[tag.getID()]) {
@@ -1213,10 +1213,10 @@ var HRecord = function() {
 		}
 	};
 	this.removeWgTag = this.removeKeyword = function(tag) {
-		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("HWorkgroupTag object required"); }
+		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("Heurist Workgroup Tag object required"); }
 		if (! HCurrentUser.isInWorkgroup(tag.getWorkgroup())) {
 			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
-			throw new HInvalidWorkgroupException("User is not a member of tag's workgroup");
+			throw new HInvalidWorkgroupException("User is not a member of workgroup which owns this tag");
 		}
 
 		var i;
@@ -1277,7 +1277,7 @@ var HRecord = function() {
 	};
 	this.addComment = function(comment) {
 		// Slightly byzantine method of checking that this function is only called by the Comment constructor
-		/* PRE */ if (that.addComment.caller !== comment.constructor) { throw "Do not call HRecord::addComment"; }
+		/* PRE */ if (that.addComment.caller !== comment.constructor) { throw "Program glitch: Should not be calling HRecord::addComment"; }
 		_addedComments.push(comment);
 		if (! comment.getParent()) {
 			_comments.push(comment);
@@ -1285,7 +1285,7 @@ var HRecord = function() {
 		_modified = true;
 	};
 	this.modifyComment = function(comment) {
-		/* PRE */ if (that.modifyComment.caller !== comment.setText) { throw "Do not call HRecord::modifyComment"; }
+		/* PRE */ if (that.modifyComment.caller !== comment.setText) { throw "Program glitch: Should not be calling HRecord::modifyComment"; }
 		_modifiedComments.push(comment);
 		_modified = true;
 	};
@@ -1477,7 +1477,7 @@ var HRecord = function() {
 		// setAll relies on the loadSearch ordering of record data
 	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, wgTags, readonly) {
 		// Set all the details (even the secret ones!) for a record in one place ... only available to the storage manager
-		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setAll"; }
+		if (! HAPI.isA(sm, "HStorageManager")) { throw "Program glitch: should not be calling HRecord::setAll"; }
 		// saw TODO add code to check irate and qrate are null as they are deprecated
 		var i;
 		_storageManager = sm;
@@ -1527,7 +1527,7 @@ var HRecord = function() {
 	};
 	this.setNotificationsAndComments = function(sm, notifications, comments) {
 		// Set some more details for a record in one place ... only available to the storage manager
-		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setNotificationsAndComments"; }
+		if (! HAPI.isA(sm, "HStorageManager")) { throw "Program glitch: should not be calling HRecord::setNotificationsAndComments"; }
 		_notifications = notifications;
 		_comments = comments;
 	};
@@ -1536,7 +1536,7 @@ var HRecord = function() {
 		// We assume that (e.g.) the actual values of the details were saved alright,
 		// but we need to know what their IDs are in their respective tables.
 
-		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setID"; }
+		if (! HAPI.isA(sm, "HStorageManager")) { throw "Program glitch: should not be calling HRecord::setID"; }
 		_id = id;
 		_version = version;
 		_bookmarkID = bkmkID;
@@ -1664,10 +1664,10 @@ var HRelationship = function(primaryRecord, relationshipType, secondaryRecord) {
 
 	if (arguments) {
 		try { this.addDetail(HRelationship.PrimaryRecordType, primaryRecord); }
-		catch (e) { throw new HTypeException("HRecord object required for argument #1"); }
+		catch (e) { throw new HTypeException("Heurist Record object required for argument #1"); }
 
 		try { this.addDetail(HRelationship.SecondaryRecordType, secondaryRecord); }
-		catch (e) { throw new HTypeException("HRecord object required for argument #3"); }
+		catch (e) { throw new HTypeException("Heurist Record object required for argument #3"); }
 
 		try { this.addDetail(HRelationship.RelationshipTypeType, relationshipType); }
 		catch (e) { throw new HTypeException("Valid relationship-type required for argument #2"); }
@@ -1795,7 +1795,7 @@ var HNotification = function(id, record, recipient, message, startDate, frequenc
 	var _frequency = frequency;
 
 	if (! HAPI.isA(record, "HRecord")  ||  HNotification.caller !== record.addNotification) {
-		throw "HNotification must be constructed using HRecord::addNotification";
+		throw "Program warning: HNotification must be constructed using HRecord::addNotification";
 	}
 	/* PRE */ if (! (HAPI.isA(recipient, "HUser")  ||  HAPI.isA(recipient, "HWorkgroup")  ||
 			("" + recipient).match(/^[-!#$%*\/?|&^{}`~&'+=_A-Za-z0-9]+@[-.A-Za-z0-9]+$/) /* patent-pending: very simple email address regexp */)) {
@@ -2102,10 +2102,10 @@ var HComment = function(parentObject, autoAdd) {
 				return;
 			}
 		}
-		throw new HCommentMismatchException("Supplied HComment is not a reply to this HComment");
+		throw new HCommentMismatchException("Supplied Heurist Comment is not a reply to this Heurist Comment");
 	};
 	this.addReply = function(child) {
-		if (that.addReply.caller !== HComment) { throw "Do not call HComment::addReply"; }
+		if (that.addReply.caller !== HComment) { throw "Program glitch: should not be calling HComment::addReply"; }
 		_children.push(child);
 	};
 	this.setAll = function(id, date, modDate, text, user) {
@@ -2308,7 +2308,7 @@ var HTagManager = new function(tags) {
 	};
 	this.addTag = function(tag) {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-		if (tag.indexOf(",") >= 0) { throw "Invalid tag name (tags cannot contain commas)"; }
+		if (tag.indexOf(",") >= 0) { throw "Invalid tag name encountered (tags cannot contain commas)"; }
 
 		var _tag = _tagsMap[canonicalForm(tag)];
 		if (! _tag) {
@@ -2531,96 +2531,96 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 	this.getDetailTypeById = function(id) { return (_typesById[id] || null); };
 	this.getDetailTypeByName = function(name) { return (_typesByName[name.toLowerCase()] || null); };
 	this.getDetailTypesForRecordType = function(recordType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object expected"); }
 		return (_detailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 	this.getRequiredDetailTypesForRecordType = function(recordType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object expected"); }
 		return (_requiredDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 	this.getRecommendedDetailTypesForRecordType = function(recordType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object expected"); }
 		return (_recommendedDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 	this.getOptionalDetailTypesForRecordType = function(recordType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object expected"); }
 		return (_optionalDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 	this.getMatchingDetailTypesForRecordType = function(recordType) {
 		// Internal function, this one ... use it to construct the HHash, for database
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object expected"); }
 		return (_matchingDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 
 	this.getDetailRequiremence = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return details? details[0] : HRequiremence.OPTIONAL;
 	};
 	this.getDetailRepeatable = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  && (details[1] && details[1] != 1 || !details[1]))? true : false;
 	};
 	this.getDetailMaxRepeat = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[1] > 0)? details[1] : 0;
 	};
 	this.getDetailMinRequired = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[9]>0)? details[9] : 0;
 	};
 	this.getDetailNameForRecordType = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[2])? details[2] : detailType.getName();
 	};
 	this.getDetailPromptForRecordType = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[3])? details[3] : detailType.getPrompt();
 	};
 	this.getDetailMatching = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[4])? true : false;
 	};
 	this.getDetailMatchingOrder = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[4])? details[4] : null;
 	};
 	this.getDetailInputSize = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[5])? details[5] : null;
 	};
 	this.getDetailOrder = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[6])? details[6] : null;
 	};
 	this.getDetailDefaultValue = function(recordType, detailType) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[8])? details[8] : null;
 	};
 	this.isValidDetailValue = function(recordType, detailType, detailValue) {
-		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("Heurist Record Type object for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("Heurist Detail Type (base field) object expected for argument #2"); }
 		if (! detailType.checkValue(detailValue)) {
 			throw new HDetailVarietyMismatchException("Unexpected value: '"+detailValue+"' for " + detailType.getVariety() + " value");
 		}
@@ -3202,8 +3202,8 @@ var HeuristScholarDB = new HStorageManager();
 		else { record.internalUnlock(); }
 	}
 	this.saveRecord = function(record, saver) {
-		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("HRecord object expected for argument #1"); }
-		/* PRE */ if (saver && ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("HSaver object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("Heurist Record object expected for argument #1"); }
+		/* PRE */ if (saver && ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("Heurist Saver object expected for argument #2"); }
 
 		if (! record.isValid()) {
 
@@ -3227,7 +3227,7 @@ var HeuristScholarDB = new HStorageManager();
 		var recordInfo, record;
 
 		if (! response) {
-			errorString = "internal Heurist error";
+			errorString = "Internal Heurist error, please advise Heurist support of circumstances";
 			if (saver  &&  saver.onerror) { callback = function() { saver.onerror(recordSet, errorString); }; }
 		} else if (response.error || recordSet.length == 1 && recordSet[0]['error']) {
 			errorString = response.error ? response.error : recordSet[0]['error'].join(',');
@@ -3271,9 +3271,9 @@ var HeuristScholarDB = new HStorageManager();
 	this.saveRecords = function(recordSet, saver) {
 		var i, j;
 		/* PRE */ for (i=0; i < recordSet.length; ++i) {
-		/* PRE */	if (! HAPI.isA(recordSet[i], "HRecord")) { throw new HTypeException("HRecord objects expected for argument #1"); }
+		/* PRE */	if (! HAPI.isA(recordSet[i], "HRecord")) { throw new HTypeException("Heurist Record objects expected for argument #1"); }
 		/* PRE */ }
-		/* PRE */ if (saver && ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("HSaver object expected for argument #2"); }
+		/* PRE */ if (saver && ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("Heurist Saver object expected for argument #2"); }
 
 		var recordData = {};
 		for (i=0; i < recordSet.length; ++i) {
@@ -3316,8 +3316,8 @@ var HeuristScholarDB = new HStorageManager();
 		else { record.internalUnlock(); }
 	}
 	this.deleteRecord = function(record, deletor) {
-		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("HRecord object expected for argument #1"); }
-		/* PRE */ if (deletor && ! HAPI.isA(deletor, "HDeletor")) { throw new HTypeException("HDeletor object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("Heurist Record object expected for argument #1"); }
+		/* PRE */ if (deletor && ! HAPI.isA(deletor, "HDeletor")) { throw new HTypeException("Heurist Deleter object expected for argument #2"); }
 
 		/* could check for refs here and avoid contacting the server */
 
@@ -3486,7 +3486,7 @@ var HeuristScholarDB = new HStorageManager();
 	}
 	this.setDefaultLoadRecordLimit = function (limit) {
 		if (!limit || parseInt(limit) == "NaN") {
-			throw new HTypeException("expected a number to be passed into setLoadRecordLimit");
+			throw new HTypeException("Expected a number to be passed into setLoadRecordLimit");
 		}
 		var temp = parseInt(limit);
 		if (temp>1000) {
@@ -3504,8 +3504,8 @@ var HeuristScholarDB = new HStorageManager();
 		var offset;
 		var matches;
 
-		/* PRE */ if (! HAPI.isA(searchSpec, "HSearch")) { throw new HTypeException("HSearch object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("HLoader object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(searchSpec, "HSearch")) { throw new HTypeException("Heurist Search object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("Heurist Loader object expected for argument #2"); }
 
 		searchData = {
 			ver: 1,
@@ -3578,8 +3578,8 @@ var HeuristScholarDB = new HStorageManager();
 		var recordData;
 		var t, i;
 
-		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("HRecord object expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("HLoader object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("Heurist Record object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("Heurist Loader object expected for argument #2"); }
 
 		details = record.toJSO().detail;
 		newDetails = {};
@@ -3633,7 +3633,7 @@ var HeuristScholarDB = new HStorageManager();
 	}
 	this.findFiles = function(searchSpec, loader) {
 		/* PRE */ if (! searchSpec  ||  typeof(searchSpec) !== "object") { throw new HTypeException("HFileSearchOptions expected for argument #1"); }
-		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("HLoader object expected for argument #2"); }
+		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("Heurist Loader object expected for argument #2"); }
 
 		// Could do this with a GET request, but IE tends to cache it
 		HAPI.XHR.sendRequest("getFileMetadata", function(response) { findFilesCallback(searchSpec, loader, response); }, searchSpec);
@@ -3647,10 +3647,10 @@ var HeuristScholarDB = new HStorageManager();
 		var description = opts.description || "";
 		var doc = fileInput.ownerDocument;
 
-		/* PRE */ if (! fileInput  ||  typeof(fileInput) !== "object"  ||  fileInput.type !== "file") { throw new HTypeException("file input expected for argument #1"); }
-		/* PRE */ if (saver  &&  ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("HSaver object expected for argument #2"); }
-		/* PRE */ if (progressCallback  &&  typeof(progressCallback) !== "function") { throw new HTypeException("callback function expected for argument #3"); }
-		/* PRE */ if (fileInput.value === "") { throw new HValueException("file input is empty"); }
+		/* PRE */ if (! fileInput  ||  typeof(fileInput) !== "object"  ||  fileInput.type !== "file") { throw new HTypeException("File input expected for argument #1"); }
+		/* PRE */ if (saver  &&  ! HAPI.isA(saver, "HSaver")) { throw new HTypeException("Heurist Saver object expected for argument #2"); }
+		/* PRE */ if (progressCallback  &&  typeof(progressCallback) !== "function") { throw new HTypeException("Callback function expected for argument #3"); }
+		/* PRE */ if (fileInput.value === "") { throw new HValueException("File input is empty"); }
 
 		/* WEB 2.0 FILE UPLOADING
 		 * The idea:
@@ -3811,7 +3811,7 @@ var HeuristScholarDB = new HStorageManager();
 			else if (++counter.value > 50) {	// It has taken too long!  Bail.
 				clearInterval(intervalID);
 				if (saver.onerror) {
-					saver.onerror(fileInput, "internal browser error while uploading file");
+					saver.onerror(fileInput, "Internal browser error while uploading file");
 				}
 				else {
 					alert("Internal browser error while uploading file");

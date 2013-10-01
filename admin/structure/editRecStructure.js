@@ -1189,16 +1189,16 @@ function EditRecStructure() {
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
 				// note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
-				var def_width = 40;
+				var def_width = 80;  // default width, used by single line text fields
 				var dt_type = arrs[fi.dty_Type];
 
-				if (_isNoWidth(dt_type))
+				if (_isNoWidth(dt_type))  // types which have no intrinsic width ie. adapt to content
 				{
 					def_width = 0;
-				}else if (dt_type === "blocktext"){
+				}else if (dt_type === "blocktext"){  // multi line text generally need to be wider
 					def_width = 100;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
-							dt_type === "calculated") {
+							dt_type === "calculated") { // numeric and date don't need much width by default
 					def_width = 10;
 				}else if (dt_type === "boolean") {
 					def_width = 4; break;

@@ -75,8 +75,8 @@
 		<div id="page-inner" style="overflow:auto">
 
 			<div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
-			<p>The list below shows available databases registered with the HeuristScholar.org Index database.<br />
-Older (or newer) format registered databases may not shown, as this list pny show databases with version number <?=HEURIST_DBVERSION?>.<br />
+			<p>The list below shows available databases registered with the HeuristScholar.org Index database which have the same major/minor version as the current database<br />
+            <h4>Older (or newer) format registered databases may not shown, as this list only shows databases with version number <?=HEURIST_DBVERSION?>.</h4><br />
 Use the filter to locate a specific term in the name or title. <br />
 Click the database icon on the left to view available record types in that database.<br />
 <b>Bolded</b> databases contain collections of schemas curated by the Heurist team or members of the Heurist community
