@@ -464,6 +464,7 @@
 	} // processTranslations
 
 	function unlockDatabase($isdroptemp=true) {
+        global $tempDBName;
 		if($isdroptemp && $tempDBName){
 			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
 		}

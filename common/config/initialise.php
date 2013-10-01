@@ -83,7 +83,7 @@ require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 define('HEURIST_VERSION', $version);
 define('HEURIST_MIN_DBVERSION', "1.1.0");
 // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-define('HEURIST_TOP_DIRS', "admin|common|export|external|hapi|help|import|records|search|viewers");
+define('HEURIST_TOP_DIRS', "admin|applications|common|export|external|hapi|help|import|records|search|viewers");
 if (!$serverName) {
 	$serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
 }
@@ -97,6 +97,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI
 	$installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
 
 }
+
 if ($installDir != @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
 	define('INSTALL_DIR', $installDir); //the subdir of the server's document directory where heurist is installed
 
@@ -106,6 +107,7 @@ if ($installDir != @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 define('HEURIST_SITE_PATH', INSTALL_DIR == '' ? '/' : INSTALL_DIR . '/'); // eg. /h3/
 define('HEURIST_BASE_URL', $serverBaseURL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
+
 //set up database server connection defines
 if ($dbHost) {
 	define('HEURIST_DBSERVER_NAME', $dbHost);
@@ -329,8 +331,6 @@ define('HEURIST_DBVERSION', "" . $sysValues['sys_dbVersion'] . "." . $sysValues[
 /*****DEBUG****///error_log("initialise DBNAME ".HEURIST_DBNAME." ver ".HEURIST_DBVERSION." with code base from ".HEURIST_BASE_URL);
 if (!defined('SKIP_VERSIONCHECK') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
 
-error_log("catch in INIT");
-    
 	returnErrorMsgPage(3, "Heurist Code Version " . HEURIST_VERSION . " requires database schema version # " . HEURIST_MIN_DBVERSION . " or higher. " . HEURIST_DBNAME . " has version # " . HEURIST_DBVERSION . " - please update the schema of the database.");
 }
 $path = @$sysValues['sys_hmlOutputDirectory'];

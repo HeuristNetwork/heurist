@@ -541,6 +541,7 @@ function directImportWarning(event){
 			<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."
 				onchange="directImportWarning(event)"><label for="noRecursion">&nbsp;&nbsp;Direct Record Types Import Only (without all related types - constrained pointers)</label><br />
 			<input type="checkbox" id="strict" title="Check this for strict import of types!" checked><label for="strict">&nbsp;&nbsp;Strict Import - only import if structure is entirely correct</label>
+            <input type="checkbox" id="importVocabs" checked><label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
 		</div>
 	</div>
 	<div id="topPagination"></div>
@@ -573,6 +574,7 @@ var importedRowID;
 var importPending = false;
 var strictImport = false;
 var noRecursion = false;
+var importVocabs = true;
 // Start an asynchronous call, sending the recordtypeID and action
 function processAction(rtyID, action, rectypeName) {
 	// Lock import, and set import icon to loading icon
@@ -584,6 +586,7 @@ function processAction(rtyID, action, rectypeName) {
 	}
 	strictImport = $("#strict").attr("checked");
 	noRecursion = $("#noRecursion").attr("checked");
+    importVocabs = $("#importVocabs").attr("checked");
 
 	//ARTEM: @todo all this to stuff to jquery ajax
 
@@ -675,6 +678,7 @@ function processAction(rtyID, action, rectypeName) {
 						"&importRtyID="+rtyID+
 						"&strict="+(strictImport?"1":"0")+
 						"&noRecursion="+(noRecursion?"1":"0")+
+                        "&importVocabs="+(importVocabs?"1":"0")+
 //						"&crwDefType="+crwDefType+
 //						"&crwLocalCode="+crwLocalCode+
 						"&replaceRecTypeName="+replaceRecTypeName+

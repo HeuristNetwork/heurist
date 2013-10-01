@@ -49,6 +49,7 @@ $sourceDBName = @$_GET["sourceDBName"];
 $importRtyID = @$_GET["importRtyID"];
 $sourceDBID = @$_GET["sourceDBID"];
 $importRefdRectypes = @$_GET["noRecursion"] && $_GET["noRecursion"] == 1 ? false:true;
+$importVocabs = (@$_GET["importVocabs"] == 1);
 $strictImport = @$_GET["strict"] && $_GET["strict"] == 1 ? true:false;
 $currentDate = date("d-m");
 $error = false;
@@ -576,26 +577,105 @@ function copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID){
 	}
 }
 
+//
+//
+//
+function getCompleteVocabulary($termId){
+    global $tempDBName;
+    
+    $query = "select a.trm_ID as pID, b.trm_ID as cID, b.trm_ChildCount as cCnt
+                from ".$tempDBName.".defTerms a
+                    left join ".$tempDBName.".defTerms b on a.trm_ID = b.trm_ParentTermID
+                where a.trm_ID = ".$termId;
+                
+    $res = mysql_query($query);    
+    $terms = array();
+   
+    array_push($terms, $termId);
+
+    // create array of parent => child arrays
+    while ($row = mysql_fetch_assoc($res)) {
+    
+        if(!in_array($row['cID'], $terms)){
+            array_push($terms, $row['cID']);
+        }
+        if($row['cCnt']>0){
+            $terms = array_unique( array_merge( $terms , getCompleteVocabulary($row['cID']) ) );
+        }
+    }
+    
+    return $terms;
+    
+}
+//
+//
+//
+function getTopMostParentTerm($termId){
+    global $tempDBName;
+
+    $query = "select trm_ParentTermID from ".$tempDBName.".defTerms where trm_ID = ".$termId;
+
+    $parentId = mysql_fetch_array(mysql_query($query));
+    if($parentId && @$parentId[0]){
+        return getTopMostParentTerm($parentId[0]);
+    }else{
+        return $termId;
+    }
+}
+
 // function that translates all term ids in the passed string to there local/imported value
 function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntryString) {
-	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID,$importVocabs;
 	if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
 		return "";
 	}
 	makeLogEntry("Term Translation", -1, "Translating $contextString terms $formattedStringOfTermIDs for $forEntryString");
 	$retJSonTermIDs = $formattedStringOfTermIDs;
-	if (strpos($retJSonTermIDs,"{")!== false) {
-/*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
-		$temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
-		if (strrpos($temp,":") == strlen($temp)-1) {
-			$temp = substr($temp,0, strlen($temp)-1);
-		}
-		$termIDs = explode(":",$temp);
-	} else {
-/*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
-		$temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
-		$termIDs = explode(",",$temp);
-	}
+    
+    if("term tree"==$contextString){ //ARTEM: new way
+
+        //new way    
+        if(is_numeric($retJSonTermIDs)){ //this is vocabulary - take all children terms
+            $termIDs = getCompleteVocabulary($retJSonTermIDs);
+            
+        }else{
+            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+            if (strrpos($temp,":") == strlen($temp)-1) {
+                $temp = substr($temp,0, strlen($temp)-1);
+            }
+            $termIDs = explode(":",$temp);
+            //$termTree = json_decode($retJSonTermIDs);
+            if($importVocabs){
+                $allterms = array();
+                foreach ($termIDs as $importTermID){
+                    if(!in_array($importTermID, $allterms)){
+                        $parentID = getTopMostParentTerm($importTermID);                    
+                        if(!in_array($parentID, $allterms)){
+                            $allterms = array_unique( array_merge($allterms, getCompleteVocabulary($parentID)));
+                        }
+                    }
+                }
+                $termIDs = $allterms;
+            }
+        }
+        
+    }else{
+    
+	    if (strpos($retJSonTermIDs,"{")!== false) {
+    /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
+		    $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+		    if (strrpos($temp,":") == strlen($temp)-1) {
+			    $temp = substr($temp,0, strlen($temp)-1);
+		    }
+		    $termIDs = explode(":",$temp);
+	    } else {
+    /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
+		    $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
+		    $termIDs = explode(",",$temp);
+	    }
+    
+    }
+
 
 	// Import terms
 	foreach ($termIDs as $importTermID) {
@@ -616,6 +696,7 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 
 function importTermID($importTermID) {
 	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
+    
 /*****DEBUG****///error_log( "import termID = ". $importTermID);
 	if (!$importTermID){
 		return "";

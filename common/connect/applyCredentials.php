@@ -57,9 +57,7 @@ if (_is_logged_in()) {
 session_write_close();
 
 if (!defined('SKIP_VERSIONCHECK2') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
-    
-error_log(">>>>REDIRCT TO DB UPGRADE ".defined('ISSERVICE'));    
-    
+   
     returnErrorMsgPage(3, "Need DB upgrade");
 }
 
