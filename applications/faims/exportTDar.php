@@ -314,7 +314,8 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                 }
                                 fclose($fp);
                                 
-                                $meta = getMetadata('Heurist terms for field '.$dtStructs['names'][$dtid], 'Heursit terms correspond to tDAR coding sheet', 'CODING_SHEET');
+                                $meta = getMetadata('Coding sheet for Heursit field: '.$dtStructs['names'][$dtid], 
+                                'This coding sheet contains terms exported from Heurist corresponding with field'.$dtStructs['names'][$dtid], 'CODING_SHEET');
                                 $metadata_content = utf8_encode($meta->asXML());
                                 file_put_contents($rtfolder."/coding_sheet.xml", $metadata_content);
                                 

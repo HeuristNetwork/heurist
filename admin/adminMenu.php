@@ -130,7 +130,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 		<div id="sidebar">
 			<div class="banner" style="padding-left:20px;padding-top:4px;border-bottom:1px solid #696969;">
 				<button id="link_admin" onclick="{location.href='../index.php?db=<?=HEURIST_DBNAME?>';}"
-					title="Click to return to the main search page" class="button"><b>USER VIEW</b></button>
+					title="Click to return to the main search page" class="button"><b>go to USER VIEW</b></button>
 			</div>
 
 			<div id="sidebar-inner" style="padding-top: 25px;">

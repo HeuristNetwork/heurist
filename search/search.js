@@ -284,9 +284,9 @@ top.HEURIST.search = {
 				if (params["w"] === "bookmark") {
 					msg = "Records sorted by date of modification of Private info"
 						+ sdest
-						+ "To sort by date of modification of Public info, use 'All records' search";
+						+ "To sort by date of modification of Shared info, use 'All records' search";
 				} else {
-					msg = "Records sorted by date of modification of Public info"
+					msg = "Records sorted by date of modification of Shared info"
 						+ sdest
 						+ "To sort by date of modification of Private info, use 'my bookmarks' search";
 				}
