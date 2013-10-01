@@ -30,7 +30,7 @@
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
-    if(isForAdminOnly("to sync FAIMS database")){
+    if(isForAdminOnly("to sync (import FAIMS --> Heurist) FAIMS database")){
         return;
     }
 /*

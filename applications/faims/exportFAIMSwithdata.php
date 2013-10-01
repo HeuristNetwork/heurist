@@ -11,7 +11,7 @@
 
     <div class="banner"><h2>Build FAIMS Project with data</h2></div>
     <div id="page-inner" style="width:740px; margin:0px 5%; padding: 0.5em;">
-            to be implemented.....
+            not yet implemented.....
     </div>
 </body>
 </html>

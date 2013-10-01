@@ -21,7 +21,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://sydney.edu.au/heurist
-* @version     3.1.0
+* @version     3.1.5
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
@@ -31,10 +31,6 @@
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
-
-    if(isForAdminOnly("to sync FAIMS database")){
-        return;
-    }
 
     $rt_toexport = @$_REQUEST['rt'];
     $projname = @$_REQUEST['projname'];

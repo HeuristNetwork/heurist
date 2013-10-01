@@ -292,12 +292,13 @@ if (is_admin()) {
                                 title="Information about the FAIMS project">About FAIMS</a></li>
 
                         <li><a href="#"
-<<<<<<< Updated upstream
                             onClick="loadContent('../applications/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Create FAIMS module / tablet application structure from the current Heurist database strucuture. No data is exported">Create Module (no data)</a></li>
+                        <!-- todo: not yet implemented
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/exportFAIMSwithdata.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Export a FAIMS format tarball (module including data) from the current Heurist database">Export Module (w. data)</a></li>
+                        -->
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/syncFAIMS.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">Import Module (w. data)</a></li>
