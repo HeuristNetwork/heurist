@@ -4959,10 +4959,10 @@ top.HEURIST.search = {
                     var subver_local = Number(locver[1]);
                     var message = null;
                     if(major_local<major){
-                        message = "Outdated version: please ask system administrator to upgrade Heurist to version "+major;
+                        message = "THIS SERVER IS RUNNING AN OUTDATED VERSION OF HEURIST: please ask system administrator to upgrade to version "+major;
 
                     }else if(major_local == major && subver_local<subver){
-                        message = "Please ask system administrator to update Heurist to version "+curver2[1];
+                        message = "Heurist on this server is not up-to-date; please ask system administrator to update to version "+curver2[1];
                     }
                     if(message!=null){
                         $("#message_version").html(message);

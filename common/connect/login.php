@@ -290,11 +290,16 @@ If you did not specifically request the login page, you may be seeing this page<
 because you don't have sufficient access level for the function requested,<br>
 or do not belong to the group of users who own it.
 </p>
-<p>
-Please log in as an administrator or contact
-<a href="mailto:info@heuristscholar.org">Ian Johnson</a> to request a higher<br>
-level of access or membership of the group of owners of this function.
-</p>
+
+<?php                                                                                                                                                                                                       ?>$query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
+$details = mysql_fetch_row($query);
+$fullName = $details[0] . " " . $details[1];
+$eMail = $details[2];
+print "<p>Please log in as an administrator or contact <a href="mailto:$email">$fullname</a>". 
+      "to request a higher<br> level of access or membership of the group of owners of this function.".
+      "<br>If you have lost access rights that you think you should have, please log out and log back in again.</p>"        
+?>
+
 </td></tr>
 </table>
 
