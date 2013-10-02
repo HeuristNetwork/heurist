@@ -146,6 +146,7 @@
         $ind_parentid =  $dtTerms['fieldNamesToIndex']['trm_ParentTermID'];
         $ind_label =  $dtTerms['fieldNamesToIndex']['trm_Label'];
         $ind_descr =  $dtTerms['fieldNamesToIndex']['trm_Description'];
+        
         // $unsupported was original specification, but this will stuff up if new types are added
         $supported = array ('freetext', 'blocktext', 'integer', 'date', 'year', 'boolean', 'enum', 'float', 'file');
         //$unsupported = array('relmarker','relationtype','separator','resource','calculated','fieldsetmarker','urlinclude','geo');
@@ -187,9 +188,14 @@ Or use pear install Archive_Tar
 http://stackoverflow.com/questions/333130/build-tar-file-from-directory-in-php-without-exec-passthru
 */
 
-function getResStr($str, $val=null){
+function getResStrA16n($str, $val=null){
     add16n($str, $val);
     return "{".str_replace(' ','_',$str)."}";
+}
+
+function getResStrNoA16n($str, $val=null){
+    add16n($str, $val);
+    return str_replace(' ','_',$str);
 }
 
 // add an entry into the a16n (localisation) file
@@ -263,12 +269,10 @@ function generateSchema($projname, $rt_toexport){
     
     ///create RelationshipElement if there are 1 or more record types to export
     if(count($rectyps)>0){
-
-       
-        $termLookup = $dtTerms['termsByDomainLookup']['relation'];
+ 
+        $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only seelect relationship terms
         $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
-        $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
-        
+        $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];    
         
         addComment($root, 'In Heurist, relationships are stored in a single relationship record type and 
         different types of relationship are distinguished by the relationship type field (attribute) whose values 
@@ -284,18 +288,22 @@ function generateSchema($projname, $rt_toexport){
                 if(!$termCode){
                     $termCode = "";
                 }
-                if(strpos($termCcode,'-')===false) {
-                    $termCcode = '0-'.$termid;
+                if(strpos($termCcode,'-')===false) { // check to see if registered database, insert 0 if not
+                    $termCcode = '0-'.$termid;       // TODO: Artem, this shoudl be using original concept code NOT the internal code
                 }
                 
-                $rel = $root->addChild('RelationshipElement', getResStr(getFullTermName($term, 'relation')) );
+                $rel = $root->addChild('RelationshipElement');
                 $rel->addAttribute('type', 'bidirectional');
-                $rel->addAttribute('HeuristID', $termCcode);
-                $rel->addAttribute('StandardCode', $termCode);
+                $rel->addAttribute('HeuristID', $termCcode);   // ignored by FAIMS oct 2013
+                $rel->addAttribute('StandardCode', $termCode); // ignored by FAIMS oct 2013
+                // getFullTermName gets a dash-separate hieerachy
+                $rel->addAttribute('name',getResStrNoA16n(getFullTermName($term, 'relation')));  // required
                 //$rel->addAttribute('pictureURL', '');
                 //$rel->addAttribute('semanticMapURL', '');
                 
-                $rel->description = prepareText( $term[$ind_descr]?"-".$term[$ind_descr]:"" );
+                // Artem, why are you adding a dash at the start of the descriptions if the y exist, and l;eavign them null if they don't??
+                // I think you meant to do it the other way round (I've changed it) but this is horrible!
+                $rel->description = prepareText( $term[$ind_descr]?$term[$ind_descr]:"-" );
                 //$rel->description = prepareText($termid."-".$term[$ind_label].($term[$ind_descr]?"-".$term[$ind_descr]:""));
 /*
                 // NAME
@@ -334,6 +342,7 @@ function generateSchema($projname, $rt_toexport){
     }    
 
     // Output specifications for each ArchEnt (Record type in Heurist)
+    
     foreach ($rectyps as $rt) {
         
         $rt_descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
@@ -354,6 +363,7 @@ function generateSchema($projname, $rt_toexport){
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
 
         // Loop through the fields (details)
+        
         foreach ($details as $dtid=>$detail) {
 
             $det = $dtStructs['typedefs'][$dtid]['commonFields'];
@@ -391,7 +401,7 @@ function generateSchema($projname, $rt_toexport){
         
         // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
         if(!$has_identifier){
-            addComment($root, 'ERROR!!!!! This ArchaeologicalElement does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
+            addComment($root, 'ERROR!!!!! This ArchaeologicalEntity does not have identifiers!!! Verify TitleMask in Heurist recordtype!'); 
             
         }
 
@@ -533,9 +543,9 @@ function generate_UI_Schema($projname, $rt_toexport){
     // User
     $user = new SimpleXMLElement(
     '<group ref="user">
-      <label>'.getResStr('User List').'</label>
+      <label>'.getResStrA16n('User List').'</label>
       <group ref="usertab" faims_scrollable="false">
-        <label>'.getResStr('User List').'</label>
+        <label>'.getResStrA16n('User List').'</label>
         <select1 appearance="compact" ref="users">
           <label>{Users}:</label>
           <item>
@@ -694,13 +704,13 @@ function generate_UI_Schema($projname, $rt_toexport){
 
         addComment($body, strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
         $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms');
-        $tabgroup_body->addChild('label',  getResStr(prepareText($rtname)) );
+        $tabgroup_body->addChild('label',  getResStrA16n(prepareText($rtname)) );
         $tabgroup_body->addAttribute('ref', $rtnamex);
         $tabgroup_body->addAttribute('faims_archent_type', prepareText($rtname));
         
         $group = $tabgroup_body->addChild('group'); //first tab
         $group->addAttribute('ref', $headername);
-        $group->addChild('label', getResStr(prepareText($descr)) );
+        $group->addChild('label', getResStrA16n(prepareText($descr)) );
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         
@@ -736,7 +746,7 @@ function generate_UI_Schema($projname, $rt_toexport){
                 $tab = $tabgroup_head->addChild($headername); //first tab
                 $group = $tabgroup_body->addChild('group'); //first tab
                 $group->addAttribute('ref', $headername);
-                $group->addChild('label', getResStr( prepareText($detail[$int_dt_disp_name] )) );
+                $group->addChild('label', getResStrA16n( prepareText($detail[$int_dt_disp_name] )) );
             }
            
             
@@ -762,19 +772,16 @@ function generate_UI_Schema($projname, $rt_toexport){
                 addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": ($termsCount<4)?"Radiogroup":"Dropdown")  );
                 $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
             }else if($dt_type=='file'){
-                 $inputtype = 'select';
-                 
-//<select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-//<select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-//<select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-//<select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false"    faims_certainty="false">
-            
+                 $inputtype = 'select';               
+            //<select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+            //<select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+            //<select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+            //<select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false"    faims_certainty="false">
             }
-
 
             $input = $group->addChild($inputtype); 
             
-            $input->addChild('label', getResStr( prepareText($detail[$int_dt_disp_name] )) );
+            $input->addChild('label', getResStrA16n( prepareText($detail[$int_dt_disp_name] )) );
             $input->addAttribute('ref', $dtnamex);
             $input->addAttribute('faims_attribute_name', prepareText($dtname));
             $input->addAttribute('faims_certainty', $isIdentifier?'false':'true');
@@ -794,11 +801,11 @@ function generate_UI_Schema($projname, $rt_toexport){
             
             if($dt_type=='file'){
                 
-/*                
-If the field name contains the substring 'photo', 'picture', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
-set the field to the approriate type - take picture, shoot video, record audio (prioritise photo, picture, video, movie, sound and audio    
-over the verbs             
-*/
+                /*                
+                If the field name contains the substring 'photo', 'picture', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
+                set the field to the approriate type - take picture, shoot video, record audio (prioritise photo, picture, video, movie, sound and audio    
+                over the verbs             
+                */
                 $name1 = strtolower($dtname);
                 $name2 = strtolower($detail[$int_dt_disp_name]);
                 $actionlabel = 'Attach File';
@@ -826,6 +833,7 @@ over the verbs
                     $hasattachfile = true;
                 }else if($filetype == 'camera'){
                     $input->addAttribute('faims_sync', 'true');
+                    // absence of attribute = false, which is appropriate for video and audio
                 }
                 
                 $input->addAttribute('type', $filetype);
@@ -838,10 +846,9 @@ over the verbs
                 $input->addAttribute('faims_read_only', 'false');    
             }
             
-
-            if($isvocab){ //empty value for selection
+            if (($isvocab) || ($dt_type=='file')) { //empty value for selection
                 $item = $input->addChild('item');
-                $item->label = '{placeholder}';
+                $item->label = 'placeholder';
                 $item->value = 'placeholder';
             }
 
@@ -883,10 +890,10 @@ over the verbs
         
         $trigger = $group->addChild('trigger');
         $trigger->addAttribute('ref', 'Update');
-        $trigger->addChild('label', getResStr('Save.Record') );
+        $trigger->addChild('label', getResStrA16n('Save.Record') );
         $trigger = $group->addChild('trigger');
         $trigger->addAttribute('ref', 'Delete');
-        $trigger->addChild('label', getResStr('Delete.Record') );
+        $trigger->addChild('label', getResStrA16n('Delete.Record') );
         
 
     }//foreach
@@ -1004,7 +1011,7 @@ function createSubTree($parent, $datatype, $termTree, $parentname){
             if(strpos($termCcode,'-')===false) {
                 $termCcode = '0-'.$termid;
             }
-            $term = $parent->addChild('term', getResStr(prepareText($termName)) );
+            $term = $parent->addChild('term', getResStrA16n(prepareText($termName)) );
             
             $term->addAttribute('HeuristID', $termCcode);
             $term->addAttribute('StandardCode', $termCode);
