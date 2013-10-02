@@ -1256,14 +1256,14 @@ FlexImport = (function () {
 						for (var v = 0; v < l; ++v) {
 							var temp = vals[v];
 							if(parseInt(vals[v])<1){// invalid recID
-								logError(j," Record id "+temp+"is not defined");
+								logError(j,"<b>"+temp + "</b><br/>&nbsp;<br/>Record ID invalid");
                                 vals.splice(v,1);    // remove the val in order to ignore it
                                 v--;
                                 l = vals.length;
 							}else{
 								vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v]));
 								if (!vals[v]) { //there was an error loading the referenced record so mark it
-									logError(j," Record id:" + temp + " was not found.");
+									logError(j,"<b>"+temp + "</b><br/>&nbsp;<br/>Record ID invalid or not found");
 									vals.splice(v,1);	// remove the val in order to ignore it
 									v--;
 									l = vals.length;
@@ -1276,7 +1276,7 @@ FlexImport = (function () {
 									for ( index = 0; index < hRecTypes.length; index++) {
 										typeList += hRecTypes[index].getName();
 									}
-									logError(j,"Constraint error - Record id:" + temp + " is not of type(s): " + typeList );
+									logError(j,"<b>" + temp + "</b><br/>&nbsp;<br/>Record ID not of appropriate type: " + typeList );
 								}
 							}
 						}

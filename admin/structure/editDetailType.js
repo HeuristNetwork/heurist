@@ -627,7 +627,7 @@ function DetailTypeEditor() {
 
 		if (_dtyID<0){
 			Dom.get("dty_ID").innerHTML = '<span style="color:#999">will be automatically assigned</span>';
-			document.title = "Create new field type";
+			document.title = "Create new base field type";
 		}else{
 			Dom.get("dty_ID").innerHTML =  _dtyID;
 			document.title = "Field Type # " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
