@@ -123,6 +123,9 @@ sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini |
 sed 's/^upload_max_filesize = .*/upload_max_filesize = 30M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 sed 's/^post_max_size.*/post_max_size = 31M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
+# TODO: PROBLEM @ 2/10/13 - php.ini is ending up empty. Need to copy a valid php.ini into /etc/php5/apache2/php.ini
+# otherwise the search interface fails to load completely and a memcached error shows up in the database summary popup
+
 # If errors are on, errors are output to the browser and stuff up Heurist interface
 
 # increase upload file size from default 2M
@@ -205,3 +208,6 @@ echo -e "\n\n"
 echo "Now do this:    cd /var/www/h3"
 echo "                sudo nano configIni.php       and set MySQL passwords"
 echo -e "\n\n"
+echo "WARNING: Bug in creation of php.ini at 2/10/13 - please check whether /etc/php5/apache2/php.ini is blank"
+echo "         If so, copy a valid php.ini file into this location, otherwise the search interface fails to "
+echo "         load completely and a memcached error shows up in the Database Summary popup"
