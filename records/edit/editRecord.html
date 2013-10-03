@@ -170,6 +170,7 @@
 						"<div style=\"clear:both\"></div></div>";
 					});
 				}
+                
 			});
 		</script>
 		<script src="../../common/php/loadHAPI.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
@@ -177,6 +178,21 @@
 		<script>
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
 				document.getElementById("home-link").href = top.HEURIST.basePath + "?db=" +top.HEURIST.database.name;
+                
+            //verify terms and record contraints
+            setTimeout(function(){
+                var surl = top.HEURIST.basePath+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&rt="+top.HEURIST.edit.record.rectypeID;
+                top.HEURIST.util.getJsonData(surl, function(context) {
+                    if( !top.HEURIST.util.isEmptyVar(context) ){
+                        var surl = top.HEURIST.basePath+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&data="+ JSON.stringify(context);
+                        top.HEURIST.util.popupURL(top, surl, {width:420, height:420});     
+                    }
+                    
+                });
+            },1000);
+        
+            
+                
 			});
 
 			top.HEURIST.whenLoaded([recordEvent, "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);

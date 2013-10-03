@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* listFieldTypeDefinitionErrorsCompact.php - list for editRecord
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,57 +29,30 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
     require_once('getFieldTypeDefinitionErrors.php');
     
-    $lists = getInvalidFieldTypes(null);
+    if(@$_REQUEST['data']){
+        $lists = json_decode($_REQUEST['data'], true);
+    }else{
+        $lists = getInvalidFieldTypes(@$_REQUEST['rt']);
+        if(!@$_REQUEST['show']){
+            if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0 && count($lists["rt_contraints"])==0){
+                $lists = array();   
+            }
+            print json_encode($lists);
+            exit();
+        }
+    }
+    
     $dtysWithInvalidTerms = $lists["terms"];
     $dtysWithInvalidNonSelectableTerms = $lists["terms_nonselectable"];
     $dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
-?>
+?>    
 <html>
 
 	<head>
-        <script src="../../common/js/utilsUI.js"></script>
-		<script type=text/javascript>
-        
-            var Hul = top.HEURIST.util;
-
-			function open_selected() {
-				var cbs = document.getElementsByName('bib_cb');
-				if (!cbs  ||  ! cbs instanceof Array)
-				return false;
-				var ids = '';
-				for (var i = 0; i < cbs.length; i++) {
-					if (cbs[i].checked)
-					ids = ids + cbs[i].value + ',';
-				}
-				var link = document.getElementById('selected_link');
-				if (!link)
-				return false;
-				link.href = '../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
-				return true;
-			}
-            
-            function onEditFieldType(dty_ID){
-
-                var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>";
-                if(dty_ID>0){
-                    url = url + "&detailTypeID="+dty_ID; //existing
-                }else{
-                    return;
-                }
-
-                top.HEURIST.util.popupURL(top, url,
-                {   "close-on-blur": false,
-                    "no-resize": false,
-                    height: 680,
-                    width: 700,
-                    callback: function(context) {
-                    }
-                });
-            }
-		</script>
-
+        <title>Invalid Field Type Definition check</title>
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 		<style type="text/css">
@@ -93,22 +66,17 @@
 		</style>
 	</head>
 
-	<body class="popup">
+	<body class="popup" style="width:400;height:400;">
     
-    
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/loadCommonInfo.php"></script>
-    
-		<div class="banner">
-			<h2>Invalid Field Type Definition check</h2>
-		</div>
 		<div id="page-inner">
-
-			These checks look for invalid references within the Heurist database structure for Field Type Definitions. These should arise rarely.
-			Click the hyperlinked number at the start of each row to open an edit form on that Field Type definition. Look edit and save the Terms or Pointer definitions.
-
+			Record type has invalid references within the Heurist database structure for Field Type Definitions. 
+            <br><br>
+            Please edit the definitions for these fields by clicking "Edit record type" link at top right of edit record form
+            <br><br>
 			<hr/>
-
+<?php
+if (count($dtysWithInvalidTerms)>0){
+?>
 			<div>
 				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid terms definitions</h3>
 			</div>
@@ -124,7 +92,7 @@
 						foreach ($dtysWithInvalidTerms as $row) {
 						?>
 					<tr>
-						<td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
+						<td><?= $row['dty_ID'] ?></td>
 						<td><?= $row['dty_Name'] ?></td>
 						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidTermIDs'])?> invalid term ID(s) <?= join(",",$row['invalidTermIDs'])?></td>
 					</tr>
@@ -133,7 +101,11 @@
 					}
 					?>
 			</table>
-			<hr/>
+            <hr/>
+<?php
+}
+if (count($dtysWithInvalidNonSelectableTerms)>0){
+?>
 			<div>
 				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid non-selectable terms definitions</h3>
 			</div>
@@ -149,7 +121,7 @@
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
 						?>
 					<tr>
-                        <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
+                        <td><?= $row['dty_ID'] ?></td>
 						<td><?= $row['dty_Name'] ?></td>
 						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID(s) <?= join(",",$row['invalidNonSelectableTermIDs'])?></td>
 					</tr>
@@ -158,9 +130,11 @@
 					}
 				?>
 			</table>
-			[end of list]
-
-			<hr/>
+            <hr/>
+<?php
+}
+if (count($dtysWithInvalidRectypeConstraint)>0){
+?>
 
 			<div>
 				<h3>Reference/Resource Pointer or Relmarker Field Types with invalid rectype(s) in constraint definitions</h3>
@@ -177,7 +151,7 @@
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {
 						?>
 				<tr>
-                    <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
+                    <td><?= $row['dty_ID'] ?></td>
 					<td><?= $row['dty_Name'] ?></td>
 					<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidRectypeConstraint'])?> invalid rectype ID(s) <?= join(",",$row['invalidRectypeConstraint'])?></td>
 				</tr>
@@ -186,8 +160,10 @@
 					}
 				?>
 			</table>
-			[end of list]
 			<hr/>
+<?php
+}
+?>
 
 		</div>
 	</body>

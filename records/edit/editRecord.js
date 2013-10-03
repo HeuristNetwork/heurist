@@ -259,7 +259,7 @@ if (! top.HEURIST.edit) {
             if (firstName) {
                 top.HEURIST.edit.showModule(firstName);
             }
-
+            
         },
 
         userCanEdit: function() {
