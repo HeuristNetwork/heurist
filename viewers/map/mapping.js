@@ -247,6 +247,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				M.keepMinNaxDate = true;
 			}, 1000);
 		}
+        RelBrowser.Mapping.map.resizeTo(0,0); //fix google map glitch on vertical resize
 	},
 
 	/**
