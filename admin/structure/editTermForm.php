@@ -151,14 +151,14 @@ if (!is_admin()) {
             <input name="return_res" value="<?=$return_res?>" type="hidden" />
         	<input name="parent" value="<?=$parent_id?>" type="hidden" />
 
-            <div class="dtyField" style="padding-top:5px;"><?=($parent_id==0?"":"Vocabulary <b>".$parent_name."</b>") ?></div>
+            <div class="dtyField" style="padding-top:1px;"><?=($parent_id==0?"":"Vocabulary <b>".$parent_name."</b>") ?></div>
 			<div class="dtyField"><label class="dtyLabel" style="color: red;">Display name:</label><input id="trmName" name="name" style="width:300px" value="<?=$term_name ?>" /></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input name="description" style="width:300px" value="<?=$term_desc?>" /></div>
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input name="code" style="width:80px" value="<?=$term_code?>" /></div>
 
-            <div style="padding-top: 5px;">
-                <div style="display: inline-block;"><input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"/></div>
-			    <div style="float:right;text-align: right; padding-top:8px;">
+            <div style="padding-top: 2px;">
+                <div style="display:inline-block;"><input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"/></div>
+			    <div style="float:right;text-align: right; padding-top:0px;">
 					<input id="btnSave" type="submit" value="Save"/>&nbsp;&nbsp;
 					<input id="btnCancel" type="button" value="Done" onClick="{window.close(context_return_res)}" />
 			    </div>

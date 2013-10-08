@@ -62,6 +62,7 @@
     function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
         global $msgInfoSaveRec;
         $msgInfoSaveRec = array(); // reset the message array
+        
         mysql_query("start transaction");
         //	$log = " saving record ($recordID) ";
         $recordID = intval($recordID);

@@ -2414,7 +2414,7 @@ s
 
         
         var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
-         if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour
+         if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour - show all
             allTerms = 0;
             disabledTerms = "";
          }
@@ -2451,10 +2451,16 @@ s
 
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+        
+        var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+        if(Number(_dtyID)==top.HEURIST.magicNumbers['DT_RELATION_TYPE']) //specific behaviour - do not allow edit
+        {
+            return;
+        }
 
         var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
         var isVocabulary = !isNaN(Number(sAllTerms));
-
+        
         var urlSpan = this.document.createElement("span");
         //urlSpan.style.paddingLeft = "1em";
         urlSpan.style.color = "blue";

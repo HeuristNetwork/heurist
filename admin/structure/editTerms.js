@@ -369,11 +369,19 @@ function EditTerms() {
 						Dom.get('edInverseTermId').value = node_invers.data.id;
 						Dom.get('edInverseTerm').value = getParentLabel(node_invers);
 						Dom.get('btnInverseSetClear').value = 'clear';
+                        
+                        Dom.get('divInverse').style.display = (node_invers.data.id==node.data.id)?'none':'block';
+                        Dom.get('cbInverseTermItself').checked = (node_invers.data.id==node.data.id)?'checked':'';
+                        Dom.get('cbInverseTermOther').checked = (node_invers.data.id==node.data.id)?'':'checked';
 				}else{
 						node.data.inverseid = null;
 						Dom.get('edInverseTermId').value = '0';
 						Dom.get('edInverseTerm').value = '';
 						Dom.get('btnInverseSetClear').value = 'set';
+                        
+                        Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
+                        Dom.get('cbInverseTermItself').checked = '';
+                        Dom.get('cbInverseTermOther').checked = 'checked';
 				}
 
 				if(isExistingNode(node)){
@@ -386,8 +394,7 @@ function EditTerms() {
 						Dom.get('btnSave').value = "Save Term";
 				}
 
-				Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
-
+                Dom.get('divInverseType').style.display = (_currTreeView === _termTree2)?"block":"none";
 
 				var dbId = Number(top.HEURIST.database.id),
 					original_dbId = Number(node.data.original_db),
@@ -449,11 +456,33 @@ function EditTerms() {
 			if(disable){
 				Dom.get("btnDelete").onclick = _disableWarning;
 				Dom.get("btnInverseSetClear").onclick = _disableWarning2;
+                
+                Dom.get("cbInverseTermItself").onclick= _disableWarning2;
+                Dom.get("cbInverseTermOther").onclick= _disableWarning2;
 			}else{
 				Dom.get("btnDelete").onclick = _doDelete;
 				Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
+                
+                Dom.get("cbInverseTermItself").onclick= _onInverseTypeClick;
+                Dom.get("cbInverseTermOther").onclick= _onInverseTypeClick;
 			}
 	}
+    
+    /**
+    *         
+    */
+    function _onInverseTypeClick(){
+                
+        if(Dom.get("cbInverseTermItself").checked){
+            Dom.get('edInverseTermId').value = Dom.get('edId').value;    
+            Dom.get('divInverse').style.display = 'none';
+        }else{
+            Dom.get('edInverseTermId').value = "0";    
+            Dom.get('divInverse').style.display = 'block';
+            Dom.get('btnInverseSetClear').value = 'set';
+            Dom.get('edInverseTerm').value = "";
+        }
+    }
 
 	/**
 	* Clear button listener
@@ -871,7 +900,7 @@ function EditTerms() {
 		if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
 			var nodeid = sel.options[sel.selectedIndex].value;
-			if(_currentNode.data.id===nodeid){
+			if(false && _currentNode.data.id===nodeid){
 				alert("Not possible to inverse on itself");
 			}else{
 				Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
@@ -1190,7 +1219,7 @@ function EditTerms() {
 				showFieldUpdater: function(){
 					_showFieldUpdater();
 				},
-
+                
 				getClass: function () {
 					return _className;
 				},

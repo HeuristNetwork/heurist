@@ -152,10 +152,15 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 			<div class="dtyField"><label class="dtyLabel">Code:</label><input id="edCode" style="width:80px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
 
-			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
-				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
-				<input id="edInverseTermId" type="hidden"/>
+            <div id="divInverseType">
+                 <input id="cbInverseTermItself" type="radio" name="rbInverseType"/><label for="cbInverseTermItself">Term is non-directional (term is inverse of itself)</label>
+                 <input id="cbInverseTermOther" type="radio" name="rbInverseType"/><label for="cbInverseTermItself">Term is inverse of another term</label>
+            </div>
+			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label>
+                    <input id="edInverseTerm" readonly="readonly" style="width:250px"/>
+				    <input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
 			</div>
+            <input id="edInverseTermId" type="hidden"/>
 
 <!--
 				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>

@@ -223,6 +223,7 @@
         }
         /*****DEBUG****///error_log("save record isValidID rtFields = ".print_r($rtFieldDefs,true));
         /*****DEBUG****///error_log("save record isValidID rdtyDefs = ".print_r($dtyIDDefs,true));
+        
         if ($rtyID && array_key_exists($dtyID, $rtFieldDefs)) {
             return $rtFieldDefs[$dtyID] === "all" || in_array($id,$rtFieldDefs[$dtyID]);
         } else if (array_key_exists($dtyID, $dtyIDDefs)) {
@@ -756,7 +757,7 @@
             if (! @$labelToID) {
                 $labelToID = mysql__select_assoc("defTerms", "trm_Label", "trm_ID", "1");
             }
-            /*****DEBUG****///error_log("postvalue = ".print_r($postVal,true));
+            /*****DEBUG****///
             // if value is term label
             if (!is_numeric($postVal) && array_key_exists($postVal,$labelToID)) {
                 $postVal = $labelToID[$postVal];

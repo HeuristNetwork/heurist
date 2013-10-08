@@ -847,7 +847,7 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
                 array_push($offspring, $subTermID);
-                if ($row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
+                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
                     $offspring = array_merge($offspring, getTermOffspringList($subTermID));
                 }
             }
