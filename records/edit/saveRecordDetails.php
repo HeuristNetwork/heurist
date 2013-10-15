@@ -192,6 +192,10 @@
                 if (is_numeric($row[2])) {
                     $rtFieldDefs['max'][$row[0]] = $row[2];
                 }
+/*                
+These fields are never defined in UI. Thus, they should aleays be null. It was for overwrite of base field constraints by further contraints within the recstructure, 
+which is one step too many and has been removed from design by Ian in approx 2011
+                
                 if ( $row[1] === 'enum' || $row[1] === 'relationtype') {
                     //create term Id list and term list.
                     $terms = getTermsFromFormat($row[3]);
@@ -219,6 +223,7 @@
                             $rtFieldDefs[$row[0]] = "all";
                     }
                 }
+*/                
             }
         }
         /*****DEBUG****///error_log("save record isValidID rtFields = ".print_r($rtFieldDefs,true));
@@ -706,13 +711,18 @@
     class BibDetailResourceInput extends BibDetailInput {
         function inputOK($postVal, $dtyID, $rtyID) {
             $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$postVal);
+            
+error_log("select rec_RecTypeID from Records where rec_ID = ".$postVal);
             if ($res){
                 $tempRtyID = mysql_fetch_row($res);
                 $tempRtyID = $tempRtyID[0];
+error_log("RES=".$tempRtyID);
             } else {
                 return false;
             }
-            return isValidID($tempRtyID,$dtyID,$rtyID);
+            $res = isValidID($tempRtyID,$dtyID,$rtyID);
+error_log("VALID ID=".$res);
+            return $res;
         }
     }
     class BibDetailBooleanInput extends BibDetailInput {
