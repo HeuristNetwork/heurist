@@ -35,6 +35,10 @@
 -- The rest of this file is a MySQLDump dump of hdb_H3ExampleDB
 -- Login is guest+guest
 
+-- *** IMPORTANT *** You MUST use -R or --routines so that stored fuinctions are added to the database
+
+--  mysqldump -u... -p.... -R hdb_H3ExampleDB > hdb_H3ExampleDB.sql
+
 -- ---------------------------------------------------------
 
 -- MySQL dump 10.11
@@ -809,7 +813,7 @@ UNLOCK TABLES;
 
 DELIMITER ;;
 /*!50003 SET SESSION SQL_MODE="" */;;
-/*!50003 CREATE */ /*!50017 DEFINER=`root`@`localhost` */ /*!50003 TRIGGER `insert_Details_precis_trigger` BEFORE INSERT ON `recDetails` FOR EACH ROW begin set NEW.dtl_ValShortened = ifnull(new_liposuction(NEW.dtl_Value), ''); end */;;
+/*!50003 CREATE */ /*!50017 DEFINER=`root`@`localhost` */ /*!50003 TRIGGER `insert_Details_precis_trigger` BEFORE INSERT ON `recDetails` FOR EACH ROW begin set NEW.dtl_ValShortened = ifnull(liposuction(NEW.dtl_Value), ''); end */;;
 
 /*!50003 SET SESSION SQL_MODE="" */;;
 /*!50003 CREATE */ /*!50017 DEFINER=`root`@`localhost` */ /*!50003 TRIGGER `insert_Details_trigger` AFTER INSERT ON `recDetails` FOR EACH ROW begin
@@ -828,11 +832,11 @@ DELIMITER ;;
 
 /*!50003 SET SESSION SQL_MODE="" */;;
 /*!50003 CREATE */ /*!50017 DEFINER=`root`@`localhost` */ /*!50003 TRIGGER `pre_update_Details_trigger` BEFORE UPDATE ON `recDetails` FOR EACH ROW begin
-		if asbinary(NEW.dtl_Geo)=asbinary(OLD.dtl_Geo) then
-			set NEW.dtl_Geo = OLD.dtl_Geo;
-		end if;
-		set NEW.dtl_ValShortened = ifnull(new_liposuction(NEW.dtl_Value), '');
-	end */;;
+        if asbinary(NEW.dtl_Geo)=asbinary(OLD.dtl_Geo) then
+            set NEW.dtl_Geo = OLD.dtl_Geo;
+        end if;
+        set NEW.dtl_ValShortened = ifnull(liposuction(NEW.dtl_Value), '');
+    end */;;
 
 /*!50003 SET SESSION SQL_MODE="" */;;
 /*!50003 CREATE */ /*!50017 DEFINER=`root`@`localhost` */ /*!50003 TRIGGER `update_Details_trigger` AFTER UPDATE ON `recDetails` FOR EACH ROW begin
@@ -1135,7 +1139,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `sysIdentification` WRITE;
 /*!40000 ALTER TABLE `sysIdentification` DISABLE KEYS */;
-INSERT INTO `sysIdentification` VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'An empty database top act as a starting point for Heurist','','C-C Share Alike','',NULL,'0',0,0,NULL,'','',0,'viewable',0,'locktypetotype',1,NULL,'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff');
+INSERT INTO `sysIdentification` VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'An empty database top act as a starting point for Heurist','','C-C Share Alike','',NULL,'0',0,0,NULL,'/var/www/htdocs/HEURIST_FILESTORE/vin_startingpoint/hml-output','/var/www/htdocs/HEURIST_FILESTORE/vin_startingpoint/html-output',0,'viewable',0,'locktypetotype',1,NULL,'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff');
 /*!40000 ALTER TABLE `sysIdentification` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1184,7 +1188,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `sysTableLastUpdated` WRITE;
 /*!40000 ALTER TABLE `sysTableLastUpdated` DISABLE KEYS */;
-INSERT INTO `sysTableLastUpdated` VALUES ('defCalcFunctions','0000-00-00 00:00:00',1),('defCrosswalk','0000-00-00 00:00:00',1),('defDetailTypeGroups','2012-09-27 13:52:36',1),('defDetailTypes','2012-09-27 13:52:36',1),('defFileExtToMimetype','0000-00-00 00:00:00',1),('defLanguages','0000-00-00 00:00:00',1),('defOntologies','0000-00-00 00:00:00',1),('defRecStructure','2012-09-27 13:52:36',1),('defRecTypeGroups','2012-09-27 13:52:35',1),('defRecTypes','2012-09-27 13:52:36',1),('defRelationshipConstraints','0000-00-00 00:00:00',1),('defTerms','2012-09-27 13:52:36',1),('defTranslations','0000-00-00 00:00:00',1),('defURLPrefixes','0000-00-00 00:00:00',1),('sysDBNameCache','0000-00-00 00:00:00',1),('sysIdentification','0000-00-00 00:00:00',1),('sysUGrps','2013-05-25 10:55:12',1),('sysUsrGrpLinks','2013-04-15 07:35:47',1),('usrHyperlinkFilters','0000-00-00 00:00:00',1),('usrTags','0000-00-00 00:00:00',1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defCalcFunctions','0000-00-00 00:00:00',1),('defCrosswalk','0000-00-00 00:00:00',1),('defDetailTypeGroups','2012-09-27 13:52:36',1),('defDetailTypes','2012-09-27 13:52:36',1),('defFileExtToMimetype','0000-00-00 00:00:00',1),('defLanguages','0000-00-00 00:00:00',1),('defOntologies','0000-00-00 00:00:00',1),('defRecStructure','2012-09-27 13:52:36',1),('defRecTypeGroups','2012-09-27 13:52:35',1),('defRecTypes','2012-09-27 13:52:36',1),('defRelationshipConstraints','0000-00-00 00:00:00',1),('defTerms','2012-09-27 13:52:36',1),('defTranslations','0000-00-00 00:00:00',1),('defURLPrefixes','0000-00-00 00:00:00',1),('sysDBNameCache','0000-00-00 00:00:00',1),('sysIdentification','0000-00-00 00:00:00',1),('sysUGrps','2013-09-26 15:26:03',1),('sysUsrGrpLinks','2013-04-15 07:35:47',1),('usrHyperlinkFilters','0000-00-00 00:00:00',1),('usrTags','0000-00-00 00:00:00',1);
 /*!40000 ALTER TABLE `sysTableLastUpdated` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1224,7 +1228,7 @@ CREATE TABLE `sysUGrps` (
   PRIMARY KEY  (`ugr_ID`),
   UNIQUE KEY `ugr_Name` (`ugr_Name`),
   UNIQUE KEY `ugr_eMail` (`ugr_eMail`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='Users/Groups diff. by ugr_Type. May defer to similar table i';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='Users/Groups diff. by ugr_Type. May defer to similar table i';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1233,7 +1237,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `sysUGrps` WRITE;
 /*!40000 ALTER TABLE `sysUGrps` DISABLE KEYS */;
-INSERT INTO `sysUGrps` VALUES (0,'workgroup','Everyone','Group 0 represents all logged in users. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','every','user',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(2,'user','admin','',NULL,'fsPZnsdpMIWNQ','admin@xyz.corp','Admin','Istrater','Archaeology','University of Sydney','','','','Knowledge Management','y','2013-04-15 07:40:54',3,8,0,NULL,NULL,NULL,0,'2013-04-14 21:40:54'),(3,'workgroup','Other users','Another group, can be used eg. for guests',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=3','other','users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(6,'user','guest',NULL,'','NwD.1JAiinjzE','guest@null','guest','guest','','USyd','','','','N/A','y','2013-05-25 10:55:12',3,2,0,'undefined',NULL,'',0,'2013-05-25 00:55:12');
+INSERT INTO `sysUGrps` VALUES (0,'workgroup','Everyone','Group 0 represents all logged in users. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','every','user',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(2,'user','admin','',NULL,'fsPZnsdpMIWNQ','admin@xyz.corp','Admin','Istrater','Archaeology','University of Sydney','','','','Knowledge Management','y','2013-04-15 07:40:54',3,8,0,NULL,NULL,NULL,0,'2013-04-14 21:40:54'),(3,'workgroup','Other users','Another group, can be used eg. for guests',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=3','other','users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'2012-09-27 03:52:30'),(6,'user','guest',NULL,'','NwD.1JAiinjzE','guest@null','guest','guest','','USyd','','','','N/A','y','2013-09-26 15:26:03',3,4,0,'undefined',NULL,'',0,'2013-09-26 05:26:03');
 /*!40000 ALTER TABLE `sysUGrps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1266,7 +1270,7 @@ CREATE TABLE `sysUsrGrpLinks` (
   KEY `ugl_GroupID` (`ugl_GroupID`),
   CONSTRAINT `fk_ugl_GroupID` FOREIGN KEY (`ugl_GroupID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_ugl_UserID` FOREIGN KEY (`ugl_UserID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1414,6 +1418,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `usrRecentRecords` WRITE;
 /*!40000 ALTER TABLE `usrRecentRecords` DISABLE KEYS */;
+INSERT INTO `usrRecentRecords` VALUES (6,1,'2013-09-26 05:26:54');
 /*!40000 ALTER TABLE `usrRecentRecords` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1659,6 +1664,290 @@ LOCK TABLES `woots` WRITE;
 /*!40000 ALTER TABLE `woots` DISABLE KEYS */;
 /*!40000 ALTER TABLE `woots` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'hdb_H3ExampleDB'
+--
+DELIMITER ;;
+/*!50003 DROP FUNCTION IF EXISTS `getTemporalDateString` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8
+    DETERMINISTIC
+begin
+            declare temporalType char;
+            declare iBegin integer;
+            declare iEnd integer;
+            declare dateString varchar(4095);
+        
+        set @iBegin := LOCATE('TYP=',strDate);
+        if iBegin = 0 THEN
+            RETURN strDate;
+        else
+            set @iBegin := @iBegin + 4;
+        end if;
+        set @temporalType = SUBSTRING(strDate,@iBegin,1);
+        CASE @temporalType
+            WHEN 's' THEN 
+                begin
+                    set @iBegin := INSTR(strDate,'DAT=');
+                    if @iBegin = 0 THEN 
+                        RETURN '';
+                    else
+                        set @iBegin := @iBegin + 4;
+                    end if;
+                    set @iEnd := LOCATE('|', strDate, @iBegin);
+                    if @iEnd = 0 THEN 
+                        begin
+                            set @dateString =  substring(strDate,@iBegin);
+                        end;
+                    else    
+                        begin
+                            set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+                        end;
+                    end if;
+                end;
+            WHEN 'f' THEN 
+                begin
+                    set @iBegin := INSTR(strDate,'DAT=');
+                    if @iBegin = 0 THEN 
+                        RETURN '';
+                    else
+                        set @iBegin := @iBegin + 4;
+                    end if;
+                    set @iEnd := LOCATE('|', strDate, @iBegin);
+                    if @iEnd = 0 THEN 
+                        begin
+                            set @dateString =  substring(strDate,@iBegin);
+                        end;
+                    else    
+                        begin
+                            set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+                        end;
+                    end if;
+                end;
+            WHEN 'c' THEN 
+                begin
+                    set @iBegin := INSTR(strDate,'BPD=');
+                    if @iBegin = 0 THEN 
+                        set @iBegin := INSTR(strDate,'BCE=');
+                    end if;
+                    if @iBegin = 0 THEN 
+                        RETURN '';
+                    else
+                        set @iBegin := @iBegin + 4;
+                    end if;
+                    set @iEnd := LOCATE('|', strDate, @iBegin);
+                    if @iEnd = 0 THEN 
+                        begin
+                            set @dateString =  substring(strDate,@iBegin);
+                        end;
+                    else    
+                        begin
+                            set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+                        end;
+                    end if;
+                end;
+            WHEN 'p' THEN 
+                begin
+                    set @iBegin := INSTR(strDate,'TPQ=');
+                    if @iBegin = 0 THEN 
+                        set @iBegin := INSTR(strDate,'PDB=');
+                    end if;
+                    if @iBegin = 0 THEN 
+                        set @iBegin := INSTR(strDate,'PDE=');
+                    end if;
+                    if @iBegin = 0 THEN 
+                        set @iBegin := INSTR(strDate,'TAQ=');
+                    end if;
+                    if @iBegin = 0 THEN 
+                        RETURN '';
+                    else
+                        set @iBegin := @iBegin + 4;
+                    end if;
+                    set @iEnd := LOCATE('|', strDate, @iBegin);
+                    if @iEnd = 0 THEN 
+                        begin
+                            set @dateString =  substring(strDate,@iBegin);
+                        end;
+                    else    
+                        begin
+                            set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
+                        end;
+                    end if;
+                end;
+            ELSE
+                set @dateString = strDate;
+        END CASE;
+        return @dateString;
+    end */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+/*!50003 DROP FUNCTION IF EXISTS `hhash` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 FUNCTION `hhash`(recID int) RETURNS varchar(4095) CHARSET utf8
+    READS SQL DATA
+    DETERMINISTIC
+begin
+        declare rectype int;
+        declare non_resource_fields varchar(4095);
+        declare resource_fields varchar(4095);
+        select rec_RecTypeID into rectype from Records where rec_ID = recID;
+        select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+            into non_resource_fields
+            from Details, Records, defDetailTypes, defRecStructure
+            where dtl_RecID=rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RecordMatchOrder and
+                    dty_Type != "resource" and
+                    rec_ID = recID;
+        select group_concat(DST.rec_Hhash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
+            into resource_fields
+            from Details, Records SRC, defDetailTypes, defRecStructure, Records DST
+            where dtl_RecID=SRC.rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    SRC.rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RequirementType = 'required' and
+                    dty_Type = "resource" and
+                    dtl_Value = DST.rec_ID and
+                    dtl_RecID=recID;
+        return concat(ifnull(rectype,'n'), ':',
+        if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''),
+        if(resource_fields is not null and resource_fields != '', concat('^', resource_fields, '$'), ''));
+    end */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+/*!50003 DROP FUNCTION IF EXISTS `NEW_LEVENSHTEIN` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 FUNCTION `NEW_LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+   RETURN (c);
+  END */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+/*!50003 DROP FUNCTION IF EXISTS `NEW_LIPOSUCTION` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 FUNCTION `NEW_LIPOSUCTION`(s VARCHAR(20480) CHARACTER SET utf8) RETURNS varchar(20480) CHARSET utf8
+    DETERMINISTIC
+BEGIN
+    DECLARE i, len INT;
+    DECLARE c CHAR CHARACTER SET utf8;
+    DECLARE s2 VARCHAR(20480) CHARACTER SET utf8;
+    IF (s IS NULL) THEN
+       RETURN (NULL);
+    END IF;
+    SET i = 1,
+        len = CHAR_LENGTH(s),
+        s2 = '';
+    WHILE (i <= len) DO
+        SET c = SUBSTRING(s, i, 1);
+        IF (ORD(c) > 32 && LOCATE(c, '!\"#%&\'();<=>?[\\]*+,-./:^_{|}~') = 0) THEN
+          SET s2 = CONCAT(s2, c);
+        END IF;
+        SET i = i + 1;
+    END WHILE;
+    RETURN (s2);
+  END */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+/*!50003 DROP FUNCTION IF EXISTS `simple_hash` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 FUNCTION `simple_hash`(recID int) RETURNS varchar(4095) CHARSET utf8
+    READS SQL DATA
+    DETERMINISTIC
+begin
+        declare rectype int;
+        declare non_resource_fields varchar(4095);
+        declare author_fields varchar(4095);
+        select rec_RecTypeID into rectype from Records where rec_ID = recID;
+        select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+            into non_resource_fields
+            from Details, Records, defDetailTypes, defRecStructure
+            where dtl_RecID=rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RecordMatchOrder and
+                    dty_Type != "resource" and
+                    rec_ID = recID;
+        return concat(ifnull(rectype,'n'), ':',
+        if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''));
+    end */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+/*!50003 DROP PROCEDURE IF EXISTS `set_all_hhash` */;;
+/*!50003 SET SESSION SQL_MODE=""*/;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`root`@`localhost`*/ /*!50003 PROCEDURE `set_all_hhash`()
+begin
+        create temporary table t (rec_ID int);
+        repeat
+            begin
+            truncate t;
+            insert into t select rec_ID
+                            from Records A
+                            where A.rec_Hhash is null
+                                and not exists (select *
+                                                from Details, defDetailTypes, defRecStructure, Records B
+                                                where dtl_RecID=A.rec_ID and
+                                                        dtl_DetailTypeID=dty_ID and
+                                                        dty_Type="resource" and
+                                                        B.rec_ID=dtl_Value and
+                                                        B.rec_Hhash is null and
+                                                        rst_RecTypeID=A.rec_RecTypeID and
+                                                        rst_DetailTypeID=dty_ID and
+                                                        rst_RequirementType="Required");
+            set @tcount := row_count();
+            update Records
+                set rec_Hhash = hhash(rec_ID)
+                where rec_ID in (select * from t);
+            end;
+            until @tcount = 0
+        end repeat;
+        drop table t;
+    end */;;
+/*!50003 SET SESSION SQL_MODE=@OLD_SQL_MODE*/;;
+DELIMITER ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1669,4 +1958,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-05-25  0:56:29
+-- Dump completed on 2013-10-17  1:42:36
