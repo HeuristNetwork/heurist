@@ -33,12 +33,14 @@ echo -e "\n\n\n\n"
 echo "---- Installing Heurist Version 3 (for Linux/Ubuntu) ----"
 
 echo -e "\n\n"
-echo "WARNING: 27 Sep 13 - THIS UPDATED SCRIPT HAS NOT YET BEEN TESTED"
+echo "WARNING: 27 Sep 13 - THIS UPDATED SCRIPT HAS NOT YET BEEN FULLY TESTED"
 echo -e "\n\n"
 
 echo "This installation is fairly radical in upgrading all required software to latest versions"
+echo "We do not recommend using it on servers which depend on old versions of software for existing applications to work"
+echo "It should be fine on new servers without much in the way of exsiting applications."
 echo "Progress and errors go to terminal, other messages to file install.log"
-echo "Typical install time on a virtual server is about 15 minutes"
+echo "Typical install time on a virtual server is about 15 - 30 minutes"
 
 echo -e "\n"  
 
@@ -51,7 +53,7 @@ echo "Do not let your session time out or you will need to start over"
 
 echo -e "\n"  
 
-echo "You may see a sudo error or two - unable to resolve host; do not panic"
+echo "You may see a sudo error or two below - unable to resolve host - do not panic, this is expected"
 
 sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
 
