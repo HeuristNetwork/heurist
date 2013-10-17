@@ -122,14 +122,14 @@
             */
             function init(e) // Initialise the application
             {
-                utils.isOnline = true;
-                init_continue_2(null);
+                //utils.isOnline = true;
+                //init_continue_2(null);
                 
-                //utils.checkNetworkStatus(init_continue_1);
+                utils.checkNetworkStatus(init_continue_1);
             }                
                 
             function init_continue_1(){
-                if(true && !utils.isOnline){
+                if(!utils.isOnline){
                     init_continue_2(null);    
                 }else{
                     utils.getCurrentPosition(init_continue_2)  

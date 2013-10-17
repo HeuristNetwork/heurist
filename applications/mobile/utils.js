@@ -163,13 +163,37 @@ utils = {
     
     getCurrentPosition: function(callback){
         //position.coords.latitude, position.coords.longitude
+        /*
         if (navigator.geolocation)
         {
             navigator.geolocation.getCurrentPosition(callback);
         }else{
             //browser does not support geolocation
             callback.call(this, null);
-        }
+        }*/
+             function errorCallback() {
+                  callback.call(this, null);
+             }
+        
+        
+            var geolocation = navigator.geolocation;
+
+            if (geolocation) {
+                // We have a real geolocation service.
+                try {
+                  geolocation.watchPosition(callback, errorCallback, {
+                    enableHighAccuracy: true,
+                    maximumAge: 5000 // 5 sec.
+                  });
+                } catch (err) {
+                    //browser does not support geolocation
+                    errorCallback();
+                }
+            } else {
+                //browser does not support geolocation
+                errorCallback();
+            }        
+        
     },
 
 	// localStorage with image
