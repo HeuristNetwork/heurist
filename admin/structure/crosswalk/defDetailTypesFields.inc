@@ -6,4 +6,8 @@ $flds = "  `dty_ID`, `dty_Name`, `dty_Documentation`,
             `dty_DetailTypeGroupID`, `dty_OrderInGroup`,
             `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`,
             `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified` ";
+                        
+            // Note: You must also add any new fields to the print format statement
+            
+
 ?>

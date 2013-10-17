@@ -6,4 +6,8 @@ $flds = "`crw_ID`,
 `crw_DefType`,
 `crw_LocalCode`,
 `crw_Modified` ";
+            
+            // Note: You must also add any new fields to the print format statement
+            
+
 ?>

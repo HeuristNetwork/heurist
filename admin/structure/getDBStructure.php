@@ -92,7 +92,7 @@
     print "-- $flds \n";
     $query = "select $flds from defRecTypeGroups";
     $res = mysql_query($query);
-    $fmt = 'defRecTypeGroups';
+    $fmt = 'defRecTypeGroups';   // update format if fields added
 
     print "<p>";
     print "\n$startToken\n";
@@ -109,7 +109,7 @@
     print "-- $flds \n";
     $query = "select $flds from defDetailTypeGroups";
     $res = mysql_query($query);
-    $fmt = 'defDetailTypeGroups';
+    $fmt = 'defDetailTypeGroups'; // update format if fields added
 
     print "<p>";
     print "\n$startToken\n";
@@ -126,7 +126,7 @@
     print "-- $flds \n";
     $query = "select $flds from defOntologies";
     $res = mysql_query($query);
-    $fmt = 'defOntologies';
+    $fmt = 'defOntologies'; // update format if fields added
 
     print "<p>";
     print "\n$startToken\n";
@@ -144,7 +144,7 @@
     print "-- $flds \n";
     $query = "select $flds from defTerms";
     $res = mysql_query($query);
-    $fmt = 'defTerms';
+    $fmt = 'defTerms';  // update format if fields added
 
     print "<p>";
     print "\n$startToken\n";
@@ -162,7 +162,7 @@
     print "-- $flds \n";
     $query = "select $flds from defRecTypes";
 	$res = mysql_query($query);
-	$fmt = 'defRecTypes';
+	$fmt = 'defRecTypes'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -180,7 +180,7 @@
     print "-- $flds \n";
     $query = "select $flds from defDetailTypes";
 	$res = mysql_query($query);
-	$fmt = 'defDetailTypes';
+	$fmt = 'defDetailTypes';  // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -198,7 +198,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defRecStructure";
 	$res = mysql_query($query);
-	$fmt = 'defRecStructure';
+	$fmt = 'defRecStructure'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -215,7 +215,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defRelationshipConstraints";
 	$res = mysql_query($query);
-	$fmt = 'defRelationshipConstraints';
+	$fmt = 'defRelationshipConstraints'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -232,7 +232,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defFileExtToMimetype";
 	$res = mysql_query($query);
-	$fmt = 'defFileExtToMimetype';
+	$fmt = 'defFileExtToMimetype'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -251,7 +251,7 @@
 	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
 	// filters to only definition (not data) translations - add others as required
 	$res = mysql_query($query);
-	$fmt = 'defTranslations';
+	$fmt = 'defTranslations'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -268,7 +268,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defCalcFunctions";
 	$res = mysql_query($query);
-	$fmt = 'defCalcFunctions';
+	$fmt = 'defCalcFunctions'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -285,7 +285,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defCrosswalk";
 	$res = mysql_query($query);
-	$fmt = 'defCrosswalk';
+	$fmt = 'defCrosswalk'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -302,7 +302,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defLanguages";
 	$res = mysql_query($query);
-	$fmt = 'defLanguages';
+	$fmt = 'defLanguages';  // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -319,7 +319,7 @@
     print "-- $flds \n";
 	$query = "select $flds from defURLPrefixes";
 	$res = mysql_query($query);
-	$fmt = 'defURLPrefixes';
+	$fmt = 'defURLPrefixes';  // update format if fields added
 
 	print "<p>";
 	print "\n$startToken\n";
@@ -345,7 +345,7 @@
     print "-- $flds \n";
 	$query = "select $flds from sysUGrps";
 	$res = mysql_query($query);
-	$fmt = 'sysUGrps';
+	$fmt = 'sysUGrps'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -362,7 +362,7 @@
     print "-- $flds \n";
 	$query = "select $flds from sysUsrGrpLinks";
 	$res = mysql_query($query);
-	$fmt = 'sysUsrGrpLinks';
+	$fmt = 'sysUsrGrpLinks'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -379,7 +379,7 @@
     print "-- $flds \n";
 	$query = "select $flds from usrHyperlinkFilters";
 	$res = mysql_query($query);
-	$fmt = 'usrHyperlinkFilters';
+	$fmt = 'usrHyperlinkFilters'; // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -396,7 +396,7 @@
     print "-- $flds \n";
 	$query = "select $flds from UsrTags";
 	$res = mysql_query($query);
-	$fmt = 'UsrTags';
+	$fmt = 'UsrTags';  // update format if fields added
 
 	print "<p>";
     print "\n$startToken\n";
@@ -485,7 +485,8 @@
                 '$trm_Description','$row[trm_Status]',
                 '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
 			    '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
-			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_LocallyModified]'),";
+			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_LocallyModified]',
+                '$row[trm_Code]','$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // added 1/10/13 db version 1.2.0
 			break;
 
 			case 'defOntologies': // Data from Ontologies table

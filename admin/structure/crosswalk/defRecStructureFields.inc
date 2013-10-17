@@ -9,4 +9,8 @@ $flds = "`rst_ID`, `rst_RecTypeID`,
             `rst_MaxValues`, `rst_MinValues`, `rst_DisplayDetailTypeGroupID`,
             `rst_FilteredJsonTermIDTree`, `rst_PtrFilteredIDs`,
             `rst_OrderForThumbnailGeneration`, `rst_TermIDTreeNonSelectableIDs`, `rst_LocallyModified` ";
+                        
+            // Note: You must also add any new fields to the print format statement
+            
+
 ?>

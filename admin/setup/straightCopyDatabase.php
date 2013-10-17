@@ -104,7 +104,7 @@
 			<p>The script will take a long time to execute for large databases (more than 5 - 10,000 records) and may fail on the reload of the dumped data.
 			<p>In this case we recommend the following steps from the command line interface:
 			<ul>
-				<li><span>Dump the existing database with mysqldump:  mysqldump -u... -p... hdb_xxxxx > filename</span></li>
+				<li><span>Dump the existing database with mysqldump:  mysqldump -u... -p... -R hdb_xxxxx > filename</span></li>
 				<li><span>Create database, switch to database: mysqldump -u... -p... -e 'create database hdb_yyyyy'</span></li>
 				<li><span>Load the dumped database: mysqldump -u... -p... hdb_yyyyyy < filename </span></li>
 				<li><span>Change to <?HEURIST_UPLOAD_DIR?> and copy the following directories and contents:</span>
@@ -188,7 +188,7 @@
 		echo ("Execution log:<p>");
 
 		$msg=explode(ADMIN_DBUSERPSWD,$dump_command); // $msg[1] strips out the password info ...
-		print " processing: <i>mysqldump -u... -p... $msg[1]</i><br>";
+		print " processing: <i>mysqldump --routines --triggers -u... -p... $msg[1]</i><br>";
 		exec("$dump_command". ' 2>&1', $output, $res1);
 		if ($res1 != 0 ) {
 			die ("<h2>Error</h2>Unable to process database dump: <i>mysqldump -u... -p... $msg[1]</i>".
