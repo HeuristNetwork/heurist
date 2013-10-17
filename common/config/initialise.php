@@ -168,8 +168,11 @@ if ($defaultRootFileUploadPath) {
 	testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, false, true);
 }
 //upload root not defined, default to DocRoot/HEURIST_FILESTORE/
+
+$DIR_FILESTORE = "/HEURIST_FILESTORE/";
+
 if (!defined('HEURIST_UPLOAD_ROOT')) {
-	testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT . "/HEURIST_FILESTORE/", false, true);
+	testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE, false, true);
 }
 if (!defined('HEURIST_UPLOAD_ROOT')) {
 	error_log('No upload root defined that is a writable directory');
@@ -257,46 +260,24 @@ if (!defined('HEURIST_UPLOAD_DIR') && defined('HEURIST_UPLOAD_ROOT')) { //defaul
 }
 if (!defined('HEURIST_UPLOAD_DIR')) {
 	error_log('No upload directory defined that is a writable directory');
-}
-if (@$siteRelativeIconUploadBasePath) {
-	if ($siteRelativeIconUploadBasePath != "/" && !preg_match("/[^\/]\/$/", $siteRelativeIconUploadBasePath)) { //check for trailing /
-		$siteRelativeIconUploadBasePath.= "/"; // append trailing /
-
-	}
-	if ($siteRelativeIconUploadBasePath != "/" && !preg_match("/^\/[^\/]/", $siteRelativeIconUploadBasePath)) { //check for leading /
-		$siteRelativeIconUploadBasePath = "/" . $siteRelativeIconUploadBasePath; // prepend leading /
-
-	}
-	//if value contains DocRoot, remove as this needs to be site relative
-	if (($pos = strpos($siteRelativeIconUploadBasePath, HEURIST_DOCUMENT_ROOT)) !== false) {
-		$siteRelativeIconUploadBasePath = substr($siteRelativeIconUploadBasePath, $pos + strlen(HEURIST_DOCUMENT_ROOT));
-	}
-	testDirWriteableAndDefine('HEURIST_ICON_BASE_SITE_PATH', $siteRelativeIconUploadBasePath, true, true);
-}
-if (!defined('HEURIST_ICON_BASE_SITE_PATH') && defined('HEURIST_UPLOAD_ROOT') && ($pos = strpos(HEURIST_UPLOAD_ROOT, HEURIST_DOCUMENT_ROOT)) !== false) {
-	testDirWriteableAndDefine('HEURIST_ICON_BASE_SITE_PATH', substr(HEURIST_UPLOAD_ROOT, $pos + strlen(HEURIST_DOCUMENT_ROOT)), true, true); // uploaded-heurist-files to 14 Nov 2011
 
 }
-if (!defined('HEURIST_ICON_BASE_SITE_PATH')) {
-	testDirWriteableAndDefine('HEURIST_ICON_BASE_SITE_PATH', "/HEURIST_FILESTORE/", true, true); // uploaded-heurist-files to 14 Nov 2011
 
-}
-if (defined('HEURIST_ICON_BASE_SITE_PATH')) {
-	define('HEURIST_URL_BASE_UPLOAD_DIR', HEURIST_DOCUMENT_ROOT . HEURIST_ICON_BASE_SITE_PATH);
+	define('HEURIST_URL_BASE_UPLOAD_DIR', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE);
 	// Define the site relative path for rectype icons
-	if (testDirWriteableAndDefine('HEURIST_ICON_SITE_PATH', HEURIST_ICON_BASE_SITE_PATH . $dbName . "/rectype-icons/", true, true)) {
+	if (testDirWriteableAndDefine('HEURIST_ICON_SITE_PATH', $DIR_FILESTORE . $dbName . "/rectype-icons/", true, true)) {
 		if (!testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_DOCUMENT_ROOT . HEURIST_ICON_SITE_PATH, false, true)) {
 			error_log("icon dir " . HEURIST_DOCUMENT_ROOT . HEURIST_ICON_SITE_PATH . " is not writable and might not exist");
 		}
 	} else {
-		error_log("icon site path " . HEURIST_ICON_BASE_SITE_PATH . $dbName . "/rectype-icons/ is not writable and might not exist");
+		error_log("icon site path " . $DIR_FILESTORE . $dbName . "/rectype-icons/ is not writable and might not exist");
 	}
-	if (!testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_DOCUMENT_ROOT . HEURIST_ICON_BASE_SITE_PATH . $dbName . "/filethumbs/", false, true)) {
-		error_log("thumb dir " . HEURIST_DOCUMENT_ROOT . HEURIST_ICON_BASE_SITE_PATH . $dbName . "/filethumbs/ is not writable and might not exist");
+	if (!testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE . $dbName . "/filethumbs/", false, true)) {
+		error_log("thumb dir " . HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE . $dbName . "/filethumbs/ is not writable and might not exist");
 	} else {
-		define('HEURIST_THUMB_BASE_URL', $serverBaseURL . HEURIST_ICON_BASE_SITE_PATH . $dbName . "/filethumbs/");
+		define('HEURIST_THUMB_BASE_URL', $serverBaseURL . $DIR_FILESTORE . $dbName . "/filethumbs/");
 	}
-}
+
 // smarty template path  - note code now assumes that this is within the fielstore for the database
 define('HEURIST_SMARTY_TEMPLATES_DIRNAME', "smarty-templates/");
 testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . HEURIST_SMARTY_TEMPLATES_DIRNAME);

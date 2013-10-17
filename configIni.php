@@ -84,16 +84,6 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // Then, when running Heurist with db=xyz, uploaded files will be loaded into /var/www/myUploadDir/xyz/
 $defaultRootFileUploadPath = ""; // recommended, defaults to <web root>/HEURIST_FILESTORE/<dbname>
 
-// The pathname relative to the document root of a directory where Heurist can store uploaded
-// icons eg. .png for rectypes. PHP must be able to create subdirectories off this directory
-// for each Heurist database and write files within them. Record type icons are stored in the rectype-icons subdirectory.
-// For instance, if you would like to upload to /var/www/htdocs/myUploadDir/<dbname>/rectype-icons/
-// assuming that /var/www/htdocs is the sites http document root then use
-// $siteRelativeIconUploadBasePath = "/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
-// Then, when running Heurist with db=xyz, uploaded icons will be loaded
-// into /var/www/htdocs/myUploadDir/xyz/rectype-icons/
-$siteRelativeIconUploadBasePath = ""; // recommended, defaults /HEURIST_FILESTORE/
-
 // [email]
 
 // email address for the system administrator/installer of Heurist
