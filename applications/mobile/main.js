@@ -113,18 +113,18 @@ function Tours(_mainurl, _cachedtours) {
 			return;
 		}
 
-
-		function ___checkStop(stops, newstop){
-			return (newstop && (stops.length==0 || newstop.id!=stops[stops.length-1].id));
+		function ___checkStop(stops_order, newstop){
+            return (newstop && (stops_order.length==0 || newstop.id!=stops_order[stops_order.length-1]));
 		}
 
 		//preparation: sort connections by order, get bbox for tour
 		var k, j, stops = [], connection, bounds;
 		for (k=0; k<_tours.length; k++){
+            
+            var stops_order = [];
 			if(_tours[k].connections.length>0){
 
 				_tours[k].connections.sort(function(a,b){return a.order - b.order; });
-				var stops = [];
                 bounds = null;
 				//sort points
 				for (j=0; j<_tours[k].connections.length; j++){
@@ -132,8 +132,9 @@ function Tours(_mainurl, _cachedtours) {
                     connection = _tours[k].connections[j];
 					var s1 = _getStopById(_tours[k], connection.stop_id_first);
 					var s2 = _getStopById(_tours[k], connection.stop_id_last);
-					if(___checkStop(stops, s1)) { stops.push(s1); }
-					if(___checkStop(stops, s2)) { stops.push(s2); }
+                    
+					if(___checkStop(stops_order, s1)) { stops_order.push(s1.id); }
+					if(___checkStop(stops_order, s2)) { stops_order.push(s2.id); }
                     
                     var s = "";
                     if(connection.geo != null){
@@ -161,8 +162,15 @@ function Tours(_mainurl, _cachedtours) {
 				}
                 
                 _tours[k].bounds = bounds;
-				_tours[k].stops = stops;
-			}
+				_tours[k].stops_order = stops_order;
+			}else{ //there is no connection 
+                 
+                for (j=0; j<_tours[k].stops.length; j++){
+                    stops_order.push(_tours[k].stops[j].id);
+                }
+                _tours[k].stops_order = stops_order;
+                
+            }
 		}
 
 	}
@@ -334,8 +342,8 @@ function Tours(_mainurl, _cachedtours) {
 	*/
 	function _getStopIndex(tour, stopid){
 		var k;
-		for (k=0; k<tour.stops.length; k++){
-			if(tour.stops[k].id==stopid){
+		for (k=0; k<tour.stops_order.length; k++){
+			if(tour.stops_order[k]==stopid){
 				return k;
 			}
 		}

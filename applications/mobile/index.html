@@ -129,14 +129,18 @@
             }                
                 
             function init_continue_1(){
-                if(!utils.isOnline){
+                if(true || !utils.isOnline){
                     init_continue_2(null);    
                 }else{
+                    $("#nearbyTours").html("<strong>Detecting geolocation...</strong>");
+                    
                     utils.getCurrentPosition(init_continue_2)  
                 }
             }
             
             function init_continue_2(position){
+
+                $("#nearbyTours").html("<strong>Loading tours......</strong>");
                 
                 //parse parameters (dbname) and load configuration file
                 var params = utils.parseParams(null);
@@ -448,7 +452,7 @@
             */
             function gotoStop(stopid){
 
-                if(utils.isnull(_curr_tour) ||  _curr_tour.stops.length<1) {
+                if(utils.isnull(_curr_tour) ||  utils.isnull(_curr_tour.stops_order) || _curr_tour.stops_order.length<1) {
                     showPage("list");
                     return;
                 }
@@ -457,21 +461,25 @@
 
                 var cindex = 0;
 
-                if(stopid>0){
+                if(stopid>0){ //search by id
                     cindex = tours.getStopIndex(_curr_tour, stopid);
-                }else if(stopid<0 && !utils.isnull(_curr_stop)){
+                    
+                }else if(stopid<0 && !utils.isnull(_curr_stop)){ //next or prev
+                    
                     cindex = tours.getStopIndex(_curr_tour, _curr_stop.id);
                     cindex = cindex + stopid + 2;
                 }
-                if(cindex<0  || cindex>_curr_tour.stops.length-1) {
+                if(cindex<0  || cindex>_curr_tour.stops_order.length-1) {
                     cindex=0;
                 }
+                
+                var new_stopid =  _curr_tour.stops_order[cindex];
 
-                if(_curr_stop && _curr_tour.stops[cindex].id == _curr_stop.id){
+                if(_curr_stop && new_stopid == _curr_stop.id){ //the same
                     return;
                 }
 
-                _curr_stop = _curr_tour.stops[cindex];
+                _curr_stop =  tours.getStopById(_curr_tour, new_stopid);
 
                 $(function() {
                     $( "#tabs" ).tabs();
@@ -493,7 +501,7 @@
                 }
 
 
-                document.getElementById("activeStopTitle").innerHTML = _curr_stop.title+"  "+_curr_stop.id; //_curr_tour.title;
+                document.getElementById("activeStopTitle").innerHTML = _curr_stop.title; //+"  "+_curr_stop.id; //_curr_tour.title;
                 //document.getElementById("activeStopTitle").innerHTML ="<i><strong>(" + _curr_stop.title + ")</strong></i><br/>";
                 var stopTitle = ""; //"<div class='activeStopTitle2'>(" + _curr_stop.title + ")</div>";
 

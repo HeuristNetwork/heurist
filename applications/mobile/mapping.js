@@ -18,7 +18,7 @@ OpenLayers.Layer.OSM.H3LocalProxy = OpenLayers.Class(OpenLayers.Layer.OSM, {
     initialize: function(name, options) {
         var basePath = utils.getBasePath();
         var url = [
-        	basePath+"viewers/mobile/proxy.php?z=${z}&x=${x}&y=${y}&r=mapnik"
+        	basePath+"applications/mobile/proxy.php?z=${z}&x=${x}&y=${y}&r=mapnik"
         ];
         options = OpenLayers.Util.extend({ numZoomLevels: 18 }, options);
         var newArguments = [name, url, options];
