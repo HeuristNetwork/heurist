@@ -4641,7 +4641,7 @@ top.HEURIST.search = {
 				context: ["my-heurist-menu-link", "tl", "bl", ["beforeShow", "windowResize"]]
 			});
 			top.HEURIST.search.myHeuristMenu.render();
-			document.getElementById("my-heurist-menu").style.display = "block";
+			//document.getElementById("my-heurist-menu").style.display = "block";
 			$("#my-heurist-menu-link a").bind("click mouseover", function() {
 				top.HEURIST.search.myHeuristMenu.show(); return false;
 			});

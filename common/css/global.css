@@ -798,7 +798,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	background-color:none;
 	background:RGBA(0,0,0,0.7);
 	-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;
-	display:block;
+	display:none;
 	z-index:9;
 	position:absolute;
 	text-align:left!important;
@@ -811,13 +811,13 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	margin-left:-6px;
 	opacity:0;
 	overflow:hidden;
-	visibility:hidden;
+	/*visibility:hidden;*/
 }
 
 #tabs li:hover>ul, ul.menu li:hover>ul, #quicklink-cell li:hover>ul, #views li:hover>ul {
-	/*display:block;*/
+	display:block;
 	opacity: 1;
-	visibility: visible;
+	/*visibility: visible;*/
 }
 
 #quicklink-cell li ul {
