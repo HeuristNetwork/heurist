@@ -28,7 +28,9 @@
 */
 
 // Set the version number of the Heurist program
+
 $version = "3.1.5"; // required - DO NOT CHANGE
+                    // 3.1.5 beta Published 11 Oct 2013
 
 // if a heuristConfigIni.php file exists in the parent directory of the installation,
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
@@ -48,7 +50,8 @@ $dbHost = ""; // leave blank for localhost
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
-// IMPORTANT NOTE: MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
+// IMPORTANT NOTE: 
+// MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 $dbAdminUsername = "root"; // required
 $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
@@ -57,14 +60,15 @@ $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
 // Password cannot be null
-// IMPORTANT NOTE: MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
-$dbReadonlyUsername = "root"; // required
+// IMPORTANT NOTE: 
+// MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
+$dbReadonlyUsername = "root"; // required , could also use a username with universal read (select) access
 $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
 // from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
 // The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
-$dbPrefix = "hdb_"; // strongly recommended
+$dbPrefix = "hdb_"; // strongly recommended - we recommend leaving this as hdb_
 
 // The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
 // this address will allow heurist to request content through the firewall for general Internet URI's
