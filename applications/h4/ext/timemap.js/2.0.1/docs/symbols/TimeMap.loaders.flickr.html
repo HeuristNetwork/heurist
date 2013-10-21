@@ -1,0 +1,807 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+		<title>Timemap.js 
+                v.2.0.1
+                : TimeMap.loaders.flickr : JsDoc Reference</title>
+
+		<style type="text/css">
+			/* default.css */
+body {
+	font: 13px Verdana, Arial, sans-serif;
+    padding: 0;
+    margin: 15px;
+}
+
+.header {
+	clear: both;
+	background-color: #ccc;
+	padding: 8px;
+}
+a:link, a:visited {
+    color: #00A;
+}
+a:hover, a:active {
+    color: #00F;
+}
+h1 {
+	font-size: 150%;
+	font-weight: bold;
+	padding: 0;
+}
+h3.projectTitle {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+}
+h1.classTitle {
+	font-size:170%;
+	line-height:130%;
+}
+
+hr {
+	border: none 0;
+	border-top: 1px solid #627C9D;
+	height: 1px;
+    margin: 1em 0;
+}
+
+pre.code {
+	display: block;
+	padding: 8px;
+	border: 1px dashed #ccc;
+    overflow: auto;
+}
+
+#index {
+	float: left;
+	width: 220px;
+	position: absolute;
+    margin-bottom: 15px;
+	left: 8px;
+	background-color: #F3F3F3;
+	padding: 8px;
+}
+
+#content {
+	margin-left: 260px;
+	width: 600px;
+}
+
+#index img {
+    margin: 15px 0;
+    border: 1px solid #627C9D;
+}
+
+ul.classList {
+	list-style-type: none;
+	padding: 0;
+    margin: 0;
+	font-size: 11px;
+}
+
+ul.classList li {
+	padding: 0;
+	margin: 0 0 8px 0;
+}
+
+h2 , div.sectionTitle { 
+    font-weight: bold;
+	font-size: 18px;
+	padding: 15px 0 10px 0;
+    margin: 0;
+}
+div.sectionTitle {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #627C9D;
+}
+
+code {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+pre {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+div.toplinks {
+    font-size: 11px;
+    padding-top: 8px;
+}
+
+td.attributes, .fixedFont
+{
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+
+/* tables */
+.summaryTable {
+    text-align: left;
+	margin: 10px 0;
+	border: 1px solid #999999;
+	width: 100%;
+}
+.summaryTable th {
+	color: #FFFFFF;
+	background-color: #627C9D;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable th.param {
+	color: #000;
+	background-color: #F2F2F2;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable td {
+	border-top: #999999 1px solid;
+	vertical-align: top;
+    padding: 5px 10px;
+}
+.summaryTable.params {
+    width: auto;
+}
+.row0 {
+	background-color: #F2F2F2;
+}
+.row1 {
+	background-color: #FFFFFF;
+}
+
+ul.inheritsList
+{
+	list-style: square;
+	margin-left: 20px;
+	padding-left: 0;
+}
+
+.detailList dt
+{
+    float: left;
+    clear: both;
+	font-weight: bold;
+	margin-left: 0;
+}
+.detailList dd { 
+	padding-bottom: .5em;
+    margin-left: 7em; 
+}
+.detailList dd.tight {
+    padding-bottom: 0;
+}
+.membertitle {
+    font-size: 1.2em;
+    padding: .5em;
+    margin: 2.5em 0px 0.2em;
+    background: #EEF;
+    border-bottom: 3px double #999;
+}
+.membername {
+    font-weight: bold;
+}
+.datatype {
+    color: #999;
+}
+.paramname {
+    font-weight: bold;
+}
+.paramconfig {
+    color: #999;
+}
+.optional {
+	font-style: italic;
+}
+.defaultvalue {
+	font-style: italic;
+}
+
+.light, td.attributes, .light a:link, .light a:visited
+{
+	color: #777;
+	font-style: italic;
+}
+
+div.indexClass {
+    border-top: 1px solid #7F8FB1;
+    margin-bottom: .5em;
+}
+
+/* syntax coloring for examples */
+.KEYW {color: #339; font-weight: bold;}
+.COMM {color: #999; font-style: italic;}
+.NUMB {color: #933;}
+.STRN {color: #393;}
+.REGX {color: #993;}
+
+.fineprint
+{
+	text-align: right;
+	font-size: 10px;
+}
+		</style>
+	</head>
+
+	<body>
+<!-- ============================== header ================================= -->	
+		<!-- begin static/header.html -->
+		<div id="header">
+</div>
+		<!-- end static/header.html -->
+
+<!-- ============================== classes index ============================ -->
+		<div id="index">
+            <h3 class="projectTitle">Timemap.js 
+                v.2.0.1
+            </h3>
+            <div class="toplinks"><a href="../index.html">Class Index</a>
+| <a href="../files.html">File Index</a></div>
+            
+                <img src="../timemap_sq.jpg">
+            
+            
+			<!-- begin publish.classesIndex -->
+			<ul class="classList">
+	
+	<li><a href="../symbols/TimeMap.html">TimeMap</a></li>
+	
+	<li><a href="../symbols/TimeMap.dateParsers.html">TimeMap.dateParsers</a></li>
+	
+	<li><a href="../symbols/TimeMap.filters.html">TimeMap.filters</a></li>
+	
+	<li><a href="../symbols/TimeMap.intervals.html">TimeMap.intervals</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.html">TimeMap.loaders</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base.html">TimeMap.loaders.base</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base%23params.html">TimeMap.loaders.base#params</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.basic.html">TimeMap.loaders.basic</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.flickr.html">TimeMap.loaders.flickr</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.georss.html">TimeMap.loaders.georss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.gss.html">TimeMap.loaders.gss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.json.html">TimeMap.loaders.json</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.jsonp.html">TimeMap.loaders.jsonp</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.kml.html">TimeMap.loaders.kml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.metaweb.html">TimeMap.loaders.metaweb</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.progressive.html">TimeMap.loaders.progressive</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.remote.html">TimeMap.loaders.remote</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.xml.html">TimeMap.loaders.xml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loadManager.html">TimeMap.loadManager</a></li>
+	
+	<li><a href="../symbols/TimeMap.mapTypes.html">TimeMap.mapTypes</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.html">TimeMap.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.ExtendedDataParam.html">TimeMap.params.ExtendedDataParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.OptionParam.html">TimeMap.params.OptionParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.Param.html">TimeMap.params.Param</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.html">TimeMap.state</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.params.html">TimeMap.state.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.themes.html">TimeMap.themes</a></li>
+	
+	<li><a href="../symbols/TimeMap.util.html">TimeMap.util</a></li>
+	
+	<li><a href="../symbols/TimeMapDataset.html">TimeMapDataset</a></li>
+	
+	<li><a href="../symbols/TimeMapFilterChain.html">TimeMapFilterChain</a></li>
+	
+	<li><a href="../symbols/TimeMapItem.html">TimeMapItem</a></li>
+	
+	<li><a href="../symbols/TimeMapTheme.html">TimeMapTheme</a></li>
+	
+</ul>
+			<!-- end publish.classesIndex -->
+		</div>
+		
+		<div id="content">
+<!-- ============================== class title ============================ -->
+			<h1 class="classTitle">
+				
+				Class TimeMap.loaders.flickr
+			</h1>
+
+<!-- ============================== class summary ========================== -->			
+            <dl class="detailList">
+            
+                
+                
+                
+                
+                
+                    <dt>Extends:</dt> 
+                    <dd><a href="../symbols/TimeMap.loaders.jsonp.html">TimeMap.loaders.jsonp</a></dd>
+                
+                
+                
+                    <dt>Requires:</dt>
+                    
+                        <dd class="">loaders/json.js</dd>
+                    
+                
+                
+                
+                    <dt>Defined in:</dt>
+                    <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_loaders_flickr.js.html">flickr.js</a></dd>
+                
+            
+                
+                    <dt>See:</dt>
+                    
+                        <dd><a href="../../examples/pathlines.html">Flickr Pathlines Example</a></dd>
+                    
+                
+            </dl>
+
+            <p class="description">
+				Flickr loader: Load JSONP data from Flickr. <p>This is a loader for Flickr data. You probably want to use it with aURL for the Flickr Geo Feed API: <a href="http://www.flickr.com/services/feeds/geo/">http://www.flickr.com/services/feeds/geo/</a></p><p>The loader takes a full URL, minus the JSONP callback function.</p>
+			</p>
+            
+            
+				
+                    <pre class="code"><span class="WHIT">
+</span><span class="NAME">TimeMap.init</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+</span><span class="WHIT">    </span><span class="NAME">datasets</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="WHIT">
+</span><span class="WHIT">        </span><span class="PUNC">{</span><span class="WHIT">
+</span><span class="WHIT">            </span><span class="NAME">title</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"Flickr Dataset"</span><span class="PUNC">,</span><span class="WHIT">
+</span><span class="WHIT">            </span><span class="NAME">type</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"flickr"</span><span class="PUNC">,</span><span class="WHIT">
+</span><span class="WHIT">            </span><span class="NAME">options</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+</span><span class="WHIT">                </span><span class="COMM">// This is just the latest geotagged photo stream - try adding</span><span class="WHIT">
+</span><span class="WHIT">                </span><span class="COMM">// an "id" or "tag" or "photoset" parameter to get what you want</span><span class="WHIT">
+</span><span class="WHIT">                </span><span class="NAME">url</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"http://www.flickr.com/services/feeds/geo/?format=json&jsoncallback=?"</span><span class="WHIT">
+</span><span class="WHIT">            </span><span class="PUNC">}</span><span class="WHIT">
+</span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+</span><span class="WHIT">    </span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
+</span><span class="WHIT">    </span><span class="COMM">// etc...</span><span class="WHIT">
+</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span></pre>
+				
+            
+
+<!-- ============================== constructor summary ==================== -->			
+			
+            <h2>Constructor</h2>
+                <div class="fixedFont">
+                    <b><a href="../symbols/TimeMap.loaders.flickr.html#constructor">TimeMap.loaders.flickr</a></b>(options)
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                </div>
+			
+            
+            
+
+
+<!-- ============================== static properties summary ===================== -->
+			
+				
+				
+			
+
+<!-- ============================== static methods summary ======================== -->
+			
+				
+				
+			
+
+
+<!-- ============================== instance properties summary ===================== -->
+			
+				
+				
+                    <h2>Fields</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Field</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.remote.html#opts">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.remote">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.remote.html#opts">opts</a></b>
+                <span class="datatype">:{String}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Object to hold optional settings.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.base.html#scrollTo">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.base">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.base.html#scrollTo">scrollTo</a></b>
+                <span class="datatype">:{String|Date}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Date to scroll the timeline to on load
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+
+<!-- ============================== instance methods summary ======================== -->
+			
+				
+				
+                    <h2>Methods</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Method</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.base.html#cancel">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.base">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.base.html#cancel">cancel</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Cancel the callback function for this loader.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.base.html#getCallback">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.base">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.base.html#getCallback">getCallback</a></b>(dataset, callback)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Get a callback function that can be cancelled.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.base.html#getCallbackName">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.base">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.base.html#getCallbackName">getCallbackName</a></b>(dataset, callback)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Get the name of a callback function that can be cancelled.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.remote.html#load">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.remote">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.remote.html#load">load</a></b>(dataset, callback)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Load function for remote files.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+                    <a href="../symbols/TimeMap.loaders.base.html#parse">                         <img src="inherited.gif" alt="Inherited from TimeMap.loaders.base">                     </a>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.base.html#parse">parse</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Parser function to turn a string into a JavaScript array
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.flickr.html#preload">preload</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Preload function for Flickr feeds
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMap.loaders.flickr.html#transform">transform</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Transform function for Flickr feeds
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+            
+<!-- ============================== events summary ======================== -->
+			
+
+<!-- ============================== constructor details ==================== -->		
+			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Class Detail
+				</div>
+				
+				<div class="fixedFont membername">
+						<b>TimeMap.loaders.flickr</b>(options)
+				</div>
+                
+                
+				
+                
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname ">options</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                All options for the loader
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname "><span class="paramconfig">options.</span>url</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Full JSONP url of Flickr feed to load
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">options</span>[...]</td>
+            <td class="datatype">
+                
+                    {mixed}
+                
+            </td>
+            <td width="100%">
+                Other options (see <a href="../symbols/TimeMap.loaders.jsonp.html">TimeMap.loaders.jsonp</a>)
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+                
+                
+                <dl class="detailList">
+					
+					
+					
+					
+                </dl>
+
+			</div>
+			
+
+<!-- ============================== static field details ========================== -->		
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+            
+<!-- ============================== instance field details ========================== -->		
+			
+                
+				
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+                
+				
+                    <div class="sectionTitle">Method Details</div>
+                    
+    <a name="preload"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">preload</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Array}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Preload function for Flickr feeds
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Array}</span> data         Array of item data</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="transform"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">transform</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Object}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Transform function for Flickr feeds
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Object}</span> data        Transformed data for one item</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+			
+<!-- ============================== event details ========================= -->		
+			
+		
+<!-- ============================== footer ================================= -->
+		<div class="fineprint" style="clear:both">
+			&copy;2010 Nick Rabinowitz<br />
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Sat Aug 06 2011 13:40:07 GMT-0700 (PDT)
+		</div>
+	</body>
+</html>

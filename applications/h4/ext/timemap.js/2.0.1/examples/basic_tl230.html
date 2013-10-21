@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Basic Example, Local Timeline Library</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script src="../lib/timeline-2.3.0.js" type="text/javascript"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+var tm;
+$(function() {
+
+    tm = TimeMap.init({
+                mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                id: "artists",
+                title: "Artists",
+                theme: "orange",
+                // note that the lines below are now the preferred syntax
+                type: "basic",
+                options: {
+                    items: [
+                        {
+                          "start" : "1449",
+                          "end" : "1494-01-11",
+                          "point" : {
+                              "lat" : 43.7717,
+                              "lon" : 11.2536
+                           },
+                          "title" : "Domenico Ghirlandaio",
+                          "options" : {
+                            // set the full HTML for the info window
+                            "infoHtml": "<div class='custominfostyle'><b>Domenico Ghirlandaio</b> was a visual artist of some sort.</div>"
+                          }
+                        },
+                        {
+                          "start" : "1452",
+                          "end" : "1519",
+                          "point" : {
+                              "lat" : 43.8166666667,
+                              "lon" : 10.7666666667
+                           },
+                          "title" : "Leonardo da Vinci",
+                          "options" : {
+                            // load HTML from another file via AJAX
+                            // Note that this may break in IE if you're running it with
+                            // a local file, due to cross-site scripting restrictions
+                            "infoUrl": "ajax_content.html",
+                            "theme": "red"
+                          }
+                        },
+                        {
+                          "start" : "1475",
+                          "end" : "1564",
+                          "point" : {
+                              "lat" : 43.6433,
+                              "lon" : 11.9875
+                           },
+                          "title" : "Michelangelo",
+                          "options" : {
+                            // use the default title/description info window
+                            "description": "Renaissance Man",
+                            "theme": "yellow"
+                          }
+                        }
+                    ]
+                }
+            }
+        ],
+        bandIntervals: [
+            Timeline.DateTime.DECADE, 
+            Timeline.DateTime.CENTURY
+        ]
+    });
+    // manipulate the timemap further here if you like
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 300px; }
+    div#mapcontainer{ height: 300px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Basic Example, Timeline 2.3.0</h1>
+    This example uses the 2.3.0 version of the SIMILE Timeline API included with the timemap.js distribution. I recommend using this local version over the online API - among other things, it's been compressed and is much smaller than the SIMILE download. Timeline 2.3.0 has some more functionality than version 1.2, and fixes a few bugs, but is a much larger download, and you may find the earlier version quicker and simpler.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://earth.google.com/kml/2.0">
+<Document>
+	<Placemark>
+        <name>Vredefort</name>
+        <TimeStamp><when>2000-10-01</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>South Africa</value>
+          </Data>
+          <Data name="Diameter">
+            <value>300km (~186.4 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>2023 &#177; 4 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Vredefort_crater</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>27.5,-27,0</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Sudbury, Ontario</name>
+        <TimeStamp><when>2000-10-02</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>Canada</value>
+          </Data>
+          <Data name="Diameter">
+            <value>250km (~155.3 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>1850 &#177; 3 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Sudbury_Basin</value>
+          </Data>
+          <Data name="theme">
+            <value>red</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>-81.1833333333333,46.6,0</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Chicxulub, Yucatan</name>
+        <TimeStamp><when>2000-10-03</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>Mexico</value>
+          </Data>
+          <Data name="Diameter">
+            <value>170km (~105.6 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>64.98 &#177; 0.05 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Chicxulub_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>yellow</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>-89.5,21.3333333333333,0</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Manicouagan, Quebec</name>
+        <TimeStamp><when>2000-10-04</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>Canada</value>
+          </Data>
+          <Data name="Diameter">
+            <value>100km (~62.1 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>214 &#177; 1 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Manicouagan_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>blue</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>-68.7,51.3833333333333,0</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Popigai</name>
+        <TimeStamp><when>2000-10-05</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>Russia</value>
+          </Data>
+          <Data name="Diameter">
+            <value>100km (~62.1 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>35.7 &#177; 0.2 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Popigai_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>orange</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>111.183333333333,71.65,0</coordinates>
+        </Point>
+    </Placemark>
+    <Placemark>
+        <name>Acraman, South Australia</name>
+        <TimeStamp><when>2000-10-06</when></TimeStamp>
+        <ExtendedData>
+          <Data name="Country">
+            <value>Australia</value>
+          </Data>
+          <Data name="Diameter">
+            <value>90km (~55.9 mile)</value>
+          </Data>
+          <Data name="Age">
+            <value>~ 590 Million years</value>
+          </Data>
+          <Data name="Url">
+            <value>http://en.wikipedia.org/wiki/Acraman_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>purple</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+            <coordinates>135.45,-32.0166666666667,0</coordinates>
+        </Point>
+    </Placemark>
+</Document>
+</kml>

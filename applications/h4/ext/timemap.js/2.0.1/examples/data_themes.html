@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Data Themes Example</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="../lib/timeline-2.3.0.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/ext/circle_icons.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+var tm;
+$(function() {
+    // make some fake data
+    var items = [], x;
+    for (x=0; x<30; x++) {
+        items.push({
+            title: "Item " + x,
+            start: "" + (1900 + parseInt(Math.random()*100)),
+            point: {
+                lat: 32 + (Math.random() * 16),
+                lon: -117 + (Math.random() * 30)
+            },
+            options: {
+                size: parseInt(Math.random()*5),
+                awesomeness: parseInt(Math.random()*10)
+            }
+        })
+    }
+    // make some themes
+    var colors = ["090066", "6b0051", "ce003c", "ff0020", "ff0000"]
+    for (var size=0; size<5; size++) {
+        for (var awe=0; awe<colors.length;awe++) {
+            // Create a new theme and add it to the TimeMap.themes namespace
+            // (allowing your data to refer to it by string key). You could make 
+            // other kinds of themes with a new TimeMapTheme() instead
+            // if you wanted - the concept is the same.
+            TimeMap.themes['theme' + size + '-' + awe] = TimeMapTheme.createCircleTheme({
+                size: 5 + (size * 8),
+                color: colors[awe]
+            });
+        }
+    }
+
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        datasets: [
+            {
+                type: "basic",
+                options: {
+                    items: items,
+                    infoTemplate: '<b>{{title}}</b><div>size: {{size}}</div>' + 
+                                  '<div>awesomeness: {{awesomeness}}</div>',
+                    // use the transformFunction to add the theme before loading
+                    transformFunction: function(item) {
+                        item.options.theme = "theme" + item.options.size + 
+                            "-" + parseInt(item.options.awesomeness / 2); // range 0-9, colors 0-5
+                        return item;
+                    }
+                }
+            }
+        ],
+        bandIntervals: 'dec'
+    });
+    // manipulate the timemap further here if you like
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 250px; }
+    div#mapcontainer{ height: 350px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Data Themes Example</h1>
+    In this example, we're setting the theme of each item based on data points in the item options. Note that this uses the ext/circle_icons.js script, not included in the packed files - but you could use the same techniques to set markers without it.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+/*! 
+ * TimeMap Copyright 2008 Nick Rabinowitz.
+ * Licensed under the MIT License (see LICENSE.txt)
+ */
+ 
+CHANGELOG (see the SVN commit log for more detail)
+-------------------------------------------------------------------------------
+
+Version 2.0.1
+-----------
+- Made multiple info windows an option, not the default, for Google v3 and OpenLayers
+- Added TimeMapItem#getInfoHtml and TimeMapItem#onVisibleTimeline
+- Refactored TimeMap selection functions (setSelected, getSelected)
+- Merged latest Mapstraction
+- Updated and tested newest jQuery (1.6.2), OpenLayers (2.10)
+- Added tests for info windows
+- Fixed a number of small bugs
+
+Version 2.0
+-----------
+- Removed dependency on Google Maps v2
+- Added dependencies on jQuery and Mapstraction
+- Refactored code to take advantage of jQuery
+- Added customized fork of Mapstraction library
+- Added support and tests for Google v2, Google v3, OpenLayers, and Bing Maps
+- Added ant build script
+
+Version 1.6
+-----------
+- Added progressive loader to easily load large datasets a little bit at a
+time, based on timeline location.
+- More changes to the loader architecture, allowing asynchronous loads to be 
+cancelled, a default loader to be used, and even easier creation of new loaders
+- Support for getting timemap state from the URL hash
+- Support for loading extra data from arbitrary Google Spreadsheet columns
+- Support for ExtendedData in KML
+- Support for loading arbitrary tags in XML (KML, GeoRSS)
+- Templating support for info window data
+- Timestamp support in TimeMapDataset.hybridParser
+- Additions and tweaks to documentation, including new template
+- Some tweaks for improved performance
+
+Version 1.5
+-----------
+- Fairly substantial changes to the loader architecture - should make everything a
+little cleaner, and allows implementation of service-specific loaders (e.g.
+Flickr, etc). IMPORTANT: Loader files have moved to the loaders/ directory.
+- Some changes to TimeMap.init() syntax - the only things not backwards-compatible
+are the preloadFunction and transformFunction params, which should now go in an
+options object within the dataset object.
+- Cleaned up theme namespace: changed TimeMapDatasetTheme to TimeMapTheme and put 
+pre-set theme functions into TimeMap.themes. Setting theme by string (e.g. "blue")
+is fully backwards-compatible, but the syntax for using functions has changed.
+- Cleaned up utility namespace: moved utility functions to TimeMap.util
+- Added documentation via jsdoc-toolkit, and cleaned up the comments to provide
+better documentation
+- Added loaders for JSON strings, Google Spreadsheets, and Flickr
+- Added polyline and polygon support to GeoRSS
+- Added support for multiple geometries in KML
+
+Version 1.4
+-----------
+- Added support, tests, and one example for Timeline v.2.2.0
+- Added local optimized copy of Timeline v.1.2
+- Added GeoRSS parser (points only)
+- Moved KML parser to separate file. NOTE: You now need to load kmlparser.js
+separately to load KML, unless you are using timemap_full.pack.js.
+- Improvements to default date parser
+- Added several new examples: Google spreadsheet, lines between points, polytween
+- New tests and small bugfixes
+
+Version 1.3
+-----------
+- Relicensing with the MIT license
+- some code refactoring - IMPORTANT: I removed timemapinit.js and made the init()
+function a static method on TimeMap. The timemapInit() function still works (I
+aliased it) but is deprecated. I also moved all post-initialization manipulation
+functions to their own file, manipulation.js.
+- adding json2 library and functions for exporting TimeMaps
+- first release of experimental editing UI (jQuery-dependent)
+- better filter chain handling
+- tweaks and bugfixes
+
+Version 1.2
+-----------
+- tweaks and bugfixes
+- code cleanup
+- a few new features, notably support for image overlays
+- several new hooks for custom functions
+
+Version 1.1
+-----------
+- tweaks and bugfixes
+- added timemapInit() function
+
+Version 1.0
+-----------
+- first release of the core library

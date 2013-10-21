@@ -1,0 +1,3106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+		<title>Timemap.js 
+                v.2.0.1
+                : TimeMapItem : JsDoc Reference</title>
+
+		<style type="text/css">
+			/* default.css */
+body {
+	font: 13px Verdana, Arial, sans-serif;
+    padding: 0;
+    margin: 15px;
+}
+
+.header {
+	clear: both;
+	background-color: #ccc;
+	padding: 8px;
+}
+a:link, a:visited {
+    color: #00A;
+}
+a:hover, a:active {
+    color: #00F;
+}
+h1 {
+	font-size: 150%;
+	font-weight: bold;
+	padding: 0;
+}
+h3.projectTitle {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+}
+h1.classTitle {
+	font-size:170%;
+	line-height:130%;
+}
+
+hr {
+	border: none 0;
+	border-top: 1px solid #627C9D;
+	height: 1px;
+    margin: 1em 0;
+}
+
+pre.code {
+	display: block;
+	padding: 8px;
+	border: 1px dashed #ccc;
+    overflow: auto;
+}
+
+#index {
+	float: left;
+	width: 220px;
+	position: absolute;
+    margin-bottom: 15px;
+	left: 8px;
+	background-color: #F3F3F3;
+	padding: 8px;
+}
+
+#content {
+	margin-left: 260px;
+	width: 600px;
+}
+
+#index img {
+    margin: 15px 0;
+    border: 1px solid #627C9D;
+}
+
+ul.classList {
+	list-style-type: none;
+	padding: 0;
+    margin: 0;
+	font-size: 11px;
+}
+
+ul.classList li {
+	padding: 0;
+	margin: 0 0 8px 0;
+}
+
+h2 , div.sectionTitle { 
+    font-weight: bold;
+	font-size: 18px;
+	padding: 15px 0 10px 0;
+    margin: 0;
+}
+div.sectionTitle {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #627C9D;
+}
+
+code {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+pre {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+div.toplinks {
+    font-size: 11px;
+    padding-top: 8px;
+}
+
+td.attributes, .fixedFont
+{
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+
+/* tables */
+.summaryTable {
+    text-align: left;
+	margin: 10px 0;
+	border: 1px solid #999999;
+	width: 100%;
+}
+.summaryTable th {
+	color: #FFFFFF;
+	background-color: #627C9D;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable th.param {
+	color: #000;
+	background-color: #F2F2F2;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
+.summaryTable td {
+	border-top: #999999 1px solid;
+	vertical-align: top;
+    padding: 5px 10px;
+}
+.summaryTable.params {
+    width: auto;
+}
+.row0 {
+	background-color: #F2F2F2;
+}
+.row1 {
+	background-color: #FFFFFF;
+}
+
+ul.inheritsList
+{
+	list-style: square;
+	margin-left: 20px;
+	padding-left: 0;
+}
+
+.detailList dt
+{
+    float: left;
+    clear: both;
+	font-weight: bold;
+	margin-left: 0;
+}
+.detailList dd { 
+	padding-bottom: .5em;
+    margin-left: 7em; 
+}
+.detailList dd.tight {
+    padding-bottom: 0;
+}
+.membertitle {
+    font-size: 1.2em;
+    padding: .5em;
+    margin: 2.5em 0px 0.2em;
+    background: #EEF;
+    border-bottom: 3px double #999;
+}
+.membername {
+    font-weight: bold;
+}
+.datatype {
+    color: #999;
+}
+.paramname {
+    font-weight: bold;
+}
+.paramconfig {
+    color: #999;
+}
+.optional {
+	font-style: italic;
+}
+.defaultvalue {
+	font-style: italic;
+}
+
+.light, td.attributes, .light a:link, .light a:visited
+{
+	color: #777;
+	font-style: italic;
+}
+
+div.indexClass {
+    border-top: 1px solid #7F8FB1;
+    margin-bottom: .5em;
+}
+
+/* syntax coloring for examples */
+.KEYW {color: #339; font-weight: bold;}
+.COMM {color: #999; font-style: italic;}
+.NUMB {color: #933;}
+.STRN {color: #393;}
+.REGX {color: #993;}
+
+.fineprint
+{
+	text-align: right;
+	font-size: 10px;
+}
+		</style>
+	</head>
+
+	<body>
+<!-- ============================== header ================================= -->	
+		<!-- begin static/header.html -->
+		<div id="header">
+</div>
+		<!-- end static/header.html -->
+
+<!-- ============================== classes index ============================ -->
+		<div id="index">
+            <h3 class="projectTitle">Timemap.js 
+                v.2.0.1
+            </h3>
+            <div class="toplinks"><a href="../index.html">Class Index</a>
+| <a href="../files.html">File Index</a></div>
+            
+                <img src="../timemap_sq.jpg">
+            
+            
+			<!-- begin publish.classesIndex -->
+			<ul class="classList">
+	
+	<li><a href="../symbols/TimeMap.html">TimeMap</a></li>
+	
+	<li><a href="../symbols/TimeMap.dateParsers.html">TimeMap.dateParsers</a></li>
+	
+	<li><a href="../symbols/TimeMap.filters.html">TimeMap.filters</a></li>
+	
+	<li><a href="../symbols/TimeMap.intervals.html">TimeMap.intervals</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.html">TimeMap.loaders</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base.html">TimeMap.loaders.base</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.base%23params.html">TimeMap.loaders.base#params</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.basic.html">TimeMap.loaders.basic</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.flickr.html">TimeMap.loaders.flickr</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.georss.html">TimeMap.loaders.georss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.gss.html">TimeMap.loaders.gss</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.json.html">TimeMap.loaders.json</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.jsonp.html">TimeMap.loaders.jsonp</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.kml.html">TimeMap.loaders.kml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.metaweb.html">TimeMap.loaders.metaweb</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.progressive.html">TimeMap.loaders.progressive</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.remote.html">TimeMap.loaders.remote</a></li>
+	
+	<li><a href="../symbols/TimeMap.loaders.xml.html">TimeMap.loaders.xml</a></li>
+	
+	<li><a href="../symbols/TimeMap.loadManager.html">TimeMap.loadManager</a></li>
+	
+	<li><a href="../symbols/TimeMap.mapTypes.html">TimeMap.mapTypes</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.html">TimeMap.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.ExtendedDataParam.html">TimeMap.params.ExtendedDataParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.OptionParam.html">TimeMap.params.OptionParam</a></li>
+	
+	<li><a href="../symbols/TimeMap.params.Param.html">TimeMap.params.Param</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.html">TimeMap.state</a></li>
+	
+	<li><a href="../symbols/TimeMap.state.params.html">TimeMap.state.params</a></li>
+	
+	<li><a href="../symbols/TimeMap.themes.html">TimeMap.themes</a></li>
+	
+	<li><a href="../symbols/TimeMap.util.html">TimeMap.util</a></li>
+	
+	<li><a href="../symbols/TimeMapDataset.html">TimeMapDataset</a></li>
+	
+	<li><a href="../symbols/TimeMapFilterChain.html">TimeMapFilterChain</a></li>
+	
+	<li><a href="../symbols/TimeMapItem.html">TimeMapItem</a></li>
+	
+	<li><a href="../symbols/TimeMapTheme.html">TimeMapTheme</a></li>
+	
+</ul>
+			<!-- end publish.classesIndex -->
+		</div>
+		
+		<div id="content">
+<!-- ============================== class title ============================ -->
+			<h1 class="classTitle">
+				
+				Class TimeMapItem
+			</h1>
+
+<!-- ============================== class summary ========================== -->			
+            <dl class="detailList">
+            
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                    <dt>Defined in:</dt>
+                    <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_timemap.js.html">timemap.js</a></dd>
+                
+            
+                
+            </dl>
+
+            <p class="description">
+				The TimeMapItem object holds references to one or more map placemarks and 
+an associated timeline event.
+			</p>
+            
+            
+
+<!-- ============================== constructor summary ==================== -->			
+			
+            <h2>Constructor</h2>
+                <div class="fixedFont">
+                    <b><a href="../symbols/TimeMapItem.html#constructor">TimeMapItem</a></b>(data, dataset)
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                </div>
+			
+            
+            
+
+
+<!-- ============================== static properties summary ===================== -->
+			
+				
+				
+			
+
+<!-- ============================== static methods summary ======================== -->
+			
+				
+				
+                    <h2>Static Methods</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Method</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                TimeMapItem.<b><a href="../symbols/TimeMapItem.html#.closeInfoWindowBasic">closeInfoWindowBasic</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Standard close window function, using the map window
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                TimeMapItem.<b><a href="../symbols/TimeMapItem.html#.openInfoWindowAjax">openInfoWindowAjax</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Open info window function using ajax-loaded text in map window
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                TimeMapItem.<b><a href="../symbols/TimeMapItem.html#.openInfoWindowBasic">openInfoWindowBasic</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Standard open info window function, using static text in map window
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+
+
+<!-- ============================== instance properties summary ===================== -->
+			
+				
+				
+                    <h2>Fields</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Field</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#dataset">dataset</a></b>
+                <span class="datatype">:{<a href="../symbols/TimeMapDataset.html">TimeMapDataset</a>}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    This item's parent dataset
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#event">event</a></b>
+                <span class="datatype">:{Timeline.Event}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    This item's timeline event
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#eventVisible">eventVisible</a></b>
+                <span class="datatype">:{Boolean}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Whether the item's event is visible
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#map">map</a></b>
+                <span class="datatype">:{Mapstraction}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    The timemap's map object
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#opts">opts</a></b>
+                <span class="datatype">:{Object}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Container for optional settings passed in through the "options" parameter
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#placemark">placemark</a></b>
+                <span class="datatype">:{Marker|Polyline|Array}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    This item's placemark(s)
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#placemarkVisible">placemarkVisible</a></b>
+                <span class="datatype">:{Boolean}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Whether the item's placemark is visible
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#timeline">timeline</a></b>
+                <span class="datatype">:{Timeline}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    The timemap's timeline object
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#visible">visible</a></b>
+                <span class="datatype">:{Boolean}</span>
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Whether the item is visible
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+
+<!-- ============================== instance methods summary ======================== -->
+			
+				
+				
+                    <h2>Methods</h2>
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" width="100%">Method</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#changeTheme">changeTheme</a></b>(theme, suppressLayout)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Change the theme for an item
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#clear">clear</a></b>(suppressLayout)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Delete placemark from map and event from timeline
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#closeInfoWindow">closeInfoWindow</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Close the info window for this item.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#createEvent">createEvent</a></b>(start, end)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Create a new event for the item.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getEnd">getEnd</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the end date of the item's event, if any
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getEndTime">getEndTime</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the timestamp of the end date of the item's event, if any
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getInfoHtml">getInfoHtml</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Get the HTML for the info window, filling in the template if necessary
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getInfoPoint">getInfoPoint</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the item's "info point" (the anchor for the map info window)
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getNativePlacemark">getNativePlacemark</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return this item's native placemark object (specific to map provider;
+undefined if this item has more than one placemark)
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getNext">getNext</a></b>(inDataset)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Find the next item chronologically
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getNextPrev">getNextPrev</a></b>(backwards, inDataset)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Find the next or previous item chronologically
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getPrev">getPrev</a></b>(inDataset)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Find the previous item chronologically
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getStart">getStart</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the start date of the item's event, if any
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getStartTime">getStartTime</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the timestamp of the start date of the item's event, if any
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getTitle">getTitle</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the title for this item
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#getType">getType</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Return the placemark type for this item
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#hide">hide</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Hide event and placemark
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#hideEvent">hideEvent</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Hide the timeline event.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#hidePlacemark">hidePlacemark</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Hide the map placemark(s)
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#isSelected">isSelected</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Whether the item is currently selected 
+(i.e.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#onVisibleTimeline">onVisibleTimeline</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Determine if this item's event is in the current visible area
+of the top band of the timeline.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#openInfoWindow">openInfoWindow</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Open the info window for this item.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#scrollToStart">scrollToStart</a></b>(animated)
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Scroll the timeline to the start of this item's event
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#show">show</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Show event and placemark
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row0">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#showEvent">showEvent</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Show the timeline event.
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="row1">
+            <td>
+                
+            </td>
+            <td class="nameDescription">
+                <div class="fixedFont">
+                <b><a href="../symbols/TimeMapItem.html#showPlacemark">showPlacemark</a></b>()
+                
+                </div>
+                <div class="description">
+                    
+                    
+                    
+                    Show the map placemark(s)
+                </div>
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+				
+			
+            
+<!-- ============================== events summary ======================== -->
+			
+
+<!-- ============================== constructor details ==================== -->		
+			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Class Detail
+				</div>
+				
+				<div class="fixedFont membername">
+						<b>TimeMapItem</b>(data, dataset)
+				</div>
+                
+                
+				
+                
+                    <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname ">data</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Object containing all item data
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>title</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Title of the item (visible on timeline)
+                
+                    <div class="defaultvalue">Default: Untitled</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>start</td>
+            <td class="datatype">
+                
+                    {String|Date}
+                
+            </td>
+            <td width="100%">
+                Start time of the event on the timeline
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>end</td>
+            <td class="datatype">
+                
+                    {String|Date}
+                
+            </td>
+            <td width="100%">
+                End time of the event on the timeline (duration events only)
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>point</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                Data for a single-point placemark:
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.point.</span>lat</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Latitude of map marker
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.point.</span>lon</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Longitude of map marker
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>polyline</td>
+            <td class="datatype">
+                
+                    {Object[]}
+                
+            </td>
+            <td width="100%">
+                Data for a polyline placemark, as an array in "point" format
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>polygon</td>
+            <td class="datatype">
+                
+                    {Object[]}
+                
+            </td>
+            <td width="100%">
+                Data for a polygon placemark, as an array "point" format
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>overlay</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                Data for a ground overlay:
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.overlay.</span>image</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                URL of image to overlay
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.overlay.</span>north</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Northern latitude of the overlay
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.overlay.</span>south</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Southern latitude of the overlay
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.overlay.</span>east</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Eastern longitude of the overlay
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.overlay.</span>west</td>
+            <td class="datatype">
+                
+                    {Float}
+                
+            </td>
+            <td width="100%">
+                Western longitude of the overlay
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>placemarks</td>
+            <td class="datatype">
+                
+                    {Object[]}
+                
+            </td>
+            <td width="100%">
+                Array of placemarks, e.g. [{point:{...}}, {polyline:[...]}]
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.</span>options</td>
+            <td class="datatype">
+                
+                    {Object}
+                
+            </td>
+            <td width="100%">
+                A container for optional arguments
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>description</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Plain-text description of the item
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>infoPoint</td>
+            <td class="datatype">
+                
+                    {LatLonPoint}
+                
+            </td>
+            <td width="100%">
+                Point indicating the center of this item
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>infoHtml</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Full HTML for the info window
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>infoUrl</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                URL from which to retrieve full HTML for the info window
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>infoTemplate</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                HTML for the info window content, with variable expressions
+                                                 (as "{{varname}}" by default) to be replaced by option data
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>templatePattern</td>
+            <td class="datatype">
+                
+                    {String}
+                
+            </td>
+            <td width="100%">
+                Regex pattern defining variable syntax in the infoTemplate
+                
+                    <div class="defaultvalue">Default: /{{([^}]+)}}/g</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>openInfoWindow</td>
+            <td class="datatype">
+                
+                    {Function}
+                
+            </td>
+            <td width="100%">
+                Function redefining how info window opens
+                
+                    <div class="defaultvalue">Default: <a href="../symbols/TimeMapItem.html#.openInfoWindowBasic">TimeMapItem.openInfoWindowBasic</a></div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>closeInfoWindow</td>
+            <td class="datatype">
+                
+                    {Function}
+                
+            </td>
+            <td width="100%">
+                Function redefining how info window closes
+                
+                    <div class="defaultvalue">Default: <a href="../symbols/TimeMapItem.html#.closeInfoWindowBasic">TimeMapItem.closeInfoWindowBasic</a></div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options.</span>theme</td>
+            <td class="datatype">
+                
+                    {String|<a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>}
+                
+            </td>
+            <td width="100%">
+                Theme applying to this item, overriding dataset theme
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional"><span class="paramconfig">data.options</span>[...]</td>
+            <td class="datatype">
+                
+                    {mixed}
+                
+            </td>
+            <td width="100%">
+                Any of the options for <a href="../symbols/TimeMapTheme.html">TimeMapTheme</a> may be set here
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname ">dataset</td>
+            <td class="datatype">
+                
+                    {<a href="../symbols/TimeMapDataset.html">TimeMapDataset</a>}
+                
+            </td>
+            <td width="100%">
+                Reference to the parent dataset object
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+                
+                
+                <dl class="detailList">
+					
+					
+					
+					
+                </dl>
+
+			</div>
+			
+
+<!-- ============================== static field details ========================== -->		
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+                
+				
+                    <div class="sectionTitle">Static Method Details</div>
+                    
+    <a name=".closeInfoWindowBasic"> </a>
+    <div class="fixedFont membertitle">
+    <span class="parent">TimeMapItem.</span><span class="membername">closeInfoWindowBasic</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Standard close window function, using the map window
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name=".openInfoWindowAjax"> </a>
+    <div class="fixedFont membertitle">
+    <span class="parent">TimeMapItem.</span><span class="membername">openInfoWindowAjax</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Open info window function using ajax-loaded text in map window
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name=".openInfoWindowBasic"> </a>
+    <div class="fixedFont membertitle">
+    <span class="parent">TimeMapItem.</span><span class="membername">openInfoWindowBasic</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Standard open info window function, using static text in map window
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+            
+<!-- ============================== instance field details ========================== -->		
+			
+                
+				
+                    <div class="sectionTitle">Field Details</div>
+                    
+    <a name="dataset"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">dataset</span>
+    
+    <span class="datatype">:{<a href="../symbols/TimeMapDataset.html">TimeMapDataset</a>}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        This item's parent dataset
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="event"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">event</span>
+    
+    <span class="datatype">:{Timeline.Event}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        This item's timeline event
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="eventVisible"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">eventVisible</span>
+    
+    <span class="datatype">:{Boolean}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Whether the item's event is visible
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="map"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">map</span>
+    
+    <span class="datatype">:{Mapstraction}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        The timemap's map object
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="opts"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">opts</span>
+    
+    <span class="datatype">:{Object}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Container for optional settings passed in through the "options" parameter
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="placemark"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">placemark</span>
+    
+    <span class="datatype">:{Marker|Polyline|Array}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        This item's placemark(s)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="placemarkVisible"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">placemarkVisible</span>
+    
+    <span class="datatype">:{Boolean}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Whether the item's placemark is visible
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="timeline"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">timeline</span>
+    
+    <span class="datatype">:{Timeline}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        The timemap's timeline object
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="visible"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">visible</span>
+    
+    <span class="datatype">:{Boolean}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Whether the item is visible
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+
+<!-- ============================== static method details ========================= -->		
+			
+                
+				
+                    <div class="sectionTitle">Method Details</div>
+                    
+    <a name="changeTheme"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">changeTheme</span><span class="membersignature">(theme, suppressLayout)</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Change the theme for an item
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname ">theme</td>
+            <td class="datatype">
+                
+                    {<a href="../symbols/TimeMapTheme.html">TimeMapTheme</a>|String}
+                
+            </td>
+            <td width="100%">
+                New theme, or string key in <a href="../symbols/TimeMap.themes.html">TimeMap.themes</a>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional">suppressLayout</td>
+            <td class="datatype">
+                
+            </td>
+            <td width="100%">
+                Whether to suppress laying out the timeline                              (e.g. for batch operations)
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="clear"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">clear</span><span class="membersignature">(suppressLayout)</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Delete placemark from map and event from timeline
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">suppressLayout</td>
+            <td class="datatype">
+                
+            </td>
+            <td width="100%">
+                Whether to suppress laying out the timeline                              (e.g. for batch operations)
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="closeInfoWindow"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">closeInfoWindow</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Close the info window for this item.
+By default this is the map infoWindow, but you can set custom functions
+for whatever behavior you want.
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="createEvent"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">createEvent</span><span class="membersignature">(start, end)</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Create a new event for the item.
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname ">start</td>
+            <td class="datatype">
+                
+                    {Date}
+                
+            </td>
+            <td width="100%">
+                Start date for the event
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional">end</td>
+            <td class="datatype">
+                
+                    {Date}
+                
+            </td>
+            <td width="100%">
+                End date for the event
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="getEnd"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getEnd</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Date}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the end date of the item's event, if any
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Date}</span> Item end dateor undefined</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getEndTime"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getEndTime</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Number}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the timestamp of the end date of the item's event, if any
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Number}</span> Item end date timestamp or undefined</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getInfoHtml"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getInfoHtml</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Get the HTML for the info window, filling in the template if necessary
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{String}</span> Info window HTML</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getInfoPoint"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getInfoPoint</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{GLatLng}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the item's "info point" (the anchor for the map info window)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{GLatLng}</span> Info point</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getNativePlacemark"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getNativePlacemark</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Object}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return this item's native placemark object (specific to map provider;
+undefined if this item has more than one placemark)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Object}</span> The native placemark object (e.g. GMarker)</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getNext"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getNext</span><span class="membersignature">(inDataset)</span>
+    
+    <span class="datatype">:{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Find the next item chronologically
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">inDataset</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to only look in this item's dataset
+                
+                    <div class="defaultvalue">Default: false</div>
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span> Next item, if any</dd>
+            
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="getNextPrev"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getNextPrev</span><span class="membersignature">(backwards, inDataset)</span>
+    
+    <span class="datatype">:{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Find the next or previous item chronologically
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">backwards</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to look backwards (i.e. find previous)
+                
+                    <div class="defaultvalue">Default: false</div>
+                
+            </td>
+        </tr>
+    
+        <tr>
+            
+            <td class="paramname optional">inDataset</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to only look in this item's dataset
+                
+                    <div class="defaultvalue">Default: false</div>
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span> Next/previous item, if any</dd>
+            
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="getPrev"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getPrev</span><span class="membersignature">(inDataset)</span>
+    
+    <span class="datatype">:{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Find the previous item chronologically
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">inDataset</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to only look in this item's dataset
+                
+                    <div class="defaultvalue">Default: false</div>
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+            <dt>Requires:</dt>
+            
+                <dd>Timeline v.2.2.0 or greater</dd>
+            
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{<a href="../symbols/TimeMapItem.html">TimeMapItem</a>}</span> Next item, if any</dd>
+            
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="getStart"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getStart</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Date}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the start date of the item's event, if any
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Date}</span> Item start date or undefined</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getStartTime"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getStartTime</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Number}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the timestamp of the start date of the item's event, if any
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Number}</span> Item start date timestamp or undefined</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getTitle"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getTitle</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the title for this item
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{String}</span> Item title</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="getType"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">getType</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{String}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Return the placemark type for this item
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{String}</span> Placemark type</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="hide"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">hide</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Hide event and placemark
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="hideEvent"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">hideEvent</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Hide the timeline event.
+NB: Will likely require calling timeline.layout(),
+AND calling eventSource._events._index()  (ugh)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="hidePlacemark"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">hidePlacemark</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Hide the map placemark(s)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="isSelected"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">isSelected</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Whether the item is currently selected 
+(i.e., the item's info window is open)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd> Boolean</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="onVisibleTimeline"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">onVisibleTimeline</span><span class="membersignature">()</span>
+    
+    <span class="datatype">:{Boolean}</span>
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Determine if this item's event is in the current visible area
+of the top band of the timeline. Note that this only considers the
+dates, not whether the event is otherwise hidden.
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+            <dt>Returns:</dt>
+            
+                <dd><span class="datatype">{Boolean}</span> Whether the item's event is visible</dd>
+            
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="openInfoWindow"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">openInfoWindow</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Open the info window for this item.
+By default this is the map infoWindow, but you can set custom functions
+for whatever behavior you want when the event or placemark is clicked
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="scrollToStart"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">scrollToStart</span><span class="membersignature">(animated)</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Scroll the timeline to the start of this item's event
+    </div>
+    
+    
+
+    
+        <table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="table" colspan="3" class="param">Parameters (<span class="optional">optional</span>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="paramname optional">animated</td>
+            <td class="datatype">
+                
+                    {Boolean}
+                
+            </td>
+            <td width="100%">
+                Whether to do an animated scroll, rather than a jump.
+                
+            </td>
+        </tr>
+    
+    </tbody>
+</table>
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="show"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">show</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Show event and placemark
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+            <dt>Defined in:</dt>
+            <dd><a href="../symbols/src/c__Users_nick_Documents_timemap_timemap_src_manipulation.js.html">manipulation.js</a></dd>
+        
+    </dl>
+
+    <a name="showEvent"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">showEvent</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Show the timeline event.
+NB: Will likely require calling timeline.layout()
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+    <a name="showPlacemark"> </a>
+    <div class="fixedFont membertitle">
+    <span class="membername">showPlacemark</span><span class="membersignature">()</span>
+    
+    
+    </div>
+    
+    <div class="description">
+        
+        
+        
+        Show the map placemark(s)
+    </div>
+    
+    
+
+    
+        
+        
+    <dl class="detailList">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dl>
+
+				
+			
+			
+<!-- ============================== event details ========================= -->		
+			
+		
+<!-- ============================== footer ================================= -->
+		<div class="fineprint" style="clear:both">
+			&copy;2010 Nick Rabinowitz<br />
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Sat Aug 06 2011 13:40:08 GMT-0700 (PDT)
+		</div>
+	</body>
+</html>

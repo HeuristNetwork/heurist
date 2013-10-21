@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Placemarks Example</title>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(googlev3)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+var tm;
+$(function() {
+
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {
+            mapType: "physical",
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                type: "basic",
+                options: {
+                    items: [
+                        {
+                            start : "2010-01-01",
+                            point : {
+                                lat : 43.7717,
+                                lon : 11.2536
+                            },
+                            title : "Marker Placemark",
+                            options : {
+                                description: "Just a plain old marker",
+                                theme: "purple"
+                            }
+                        },
+                        {
+                            start : "2010-02-01",
+                            polygon : [
+                                {lat: 46.34692761055676, lon: 6.1083984375},
+                                {lat: 47.54687159892238, lon: 6.8115234375},
+                                {lat: 47.66538735632654, lon: 9.404296875},
+                                {lat: 47.18971246448421, lon: 9.4482421875},
+                                {lat: 46.9502622421856, lon: 10.37109375},
+                                {lat: 46.37725420510028, lon: 9.931640625},
+                                {lat: 45.89000815866184, lon: 7.0751953125},
+                                {lat: 46.34692761055676, lon: 6.1083984375}
+                            ],
+                            title : "Polygon Placemark",
+                            options : {
+                                description: "I'm shaped vaguely like Switzerland!",
+                                theme: "orange"
+                            }
+                        },
+                        {
+                            start : "2010-04-01",
+                            overlay : {
+                                north: 51.45115,
+                                south: 42.088787,
+                                east: 9.349365,
+                                west: -5.657959,
+                                image: "http://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Flag-map_of_France.svg/500px-Flag-map_of_France.svg.png"
+                            },
+                            title : "Overlay Placemark",
+                            options : {
+                                description: "Unfortunately, I cannot be hidden at this time, so you're stuck with me. Also I don't register click events. Basically, I am rudely in the way but unwilling to pay attention to you. Vive la France!"
+                            }
+                        },
+                        {
+                            start : "2010-03-01",
+                            polyline : [
+                                {lat: 48.86471476180277, lon: 2.28515625},
+                                {lat: 45.82879925192134, lon: 4.74609375},
+                                {lat: 45.49094569262732, lon: 9.140625},
+                                {lat: 41.934976500546604, lon: 12.392578125}
+                            ],
+                            title : "Polyline Placemark",
+                            options : {
+                                description: "I'm a series of straight lines! My info window is anchored at the middle point of the polyline.",
+                                theme: "red",
+                                // any additional theme settings can go here
+                                lineWeight: 5
+                            }
+                        },
+                        {
+                            start : "2010-05-01",
+                            placemarks: [
+                                {
+                                    polyline: [
+                                        {lat: 48.22467264956519, lon: 16.32568359375},
+                                        {lat: 47.517200697839414, lon: 18.984375},
+                                        {lat: 45.84410779560204, lon: 15.9521484375},
+                                        {lat: 48.22467264956519, lon: 16.32568359375}
+                                    ],
+                                },
+                                {
+                                    point: {
+                                        lat: 48.22467264956519, 
+                                        lon: 16.32568359375
+                                    }
+                                },
+                                {
+                                    point: {
+                                        lat: 47.517200697839414,
+                                        lon: 18.984375
+                                    }
+                                },
+                                {
+                                    point: {
+                                        lat: 45.84410779560204,
+                                        lon: 15.9521484375
+                                    }
+                                }
+                            ],
+                            title : "Multiple Placemark Item",
+                            options : {
+                                description: "&quot;I am large, I contain multitudes.&quot;&mdash;Walt Whitman<br>My info window is anchored based on the first loaded item.",
+                                theme: "blue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        bandIntervals: "mon"
+    });
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 200px; }
+    div#mapcontainer{ height: 400px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Placemarks Example</h1>
+    This example demonstrates the different placemarks you can load on the map. Sadly, at the moment, overlay images are pretty much stuck there once you put them on the map, and don't support hide/show or click events - eventually I'll extend Mapstraction to fix this.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Kenya KML Example</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/param.js" type="text/javascript"></script>
+    <script src="../src/loaders/xml.js" type="text/javascript"></script>
+    <script src="../src/loaders/kml.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+var tm;
+$(function() {
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                title: "Violence in Kenya",
+                theme: "red",
+                type: "kml",     // Data to be loaded in KML - must be a local URL
+                options: {
+                    url: "kenya.kml" // KML file to load
+                }
+            }
+        ],
+        bandInfo: [
+            {
+               width:          "85%", 
+               intervalUnit:   Timeline.DateTime.DAY, 
+		       intervalPixels: 210
+            },
+            {
+               width:          "15%", 
+               intervalUnit:   Timeline.DateTime.WEEK, 
+		       intervalPixels: 150,
+               showEventText:  false,
+               trackHeight:    0.2,
+               trackGap:       0.2
+            }
+        ]
+    });
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 310px; }
+    div#mapcontainer{ height: 300px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>KML Dataset</h1>
+    In this example, we're loading a KML file of reports of violence in Kenya (data courtesy <a href="http://www.ushahidi.com">www.ushahidi.com</a>, though it looks like the links no longer work). The bandInfo setting allows us to set a custom layout the timeline, and we've resized the timeline and map with CSS. (Note that some browsers will throw an error if if you're viewing this locally, due to cross-site scripting restrictions.)
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

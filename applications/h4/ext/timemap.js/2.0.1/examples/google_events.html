@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Events Example</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/loaders/json.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+$(function() {
+    TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                title: "Developer Community Calendar",
+                theme: "green",
+                type: "jsonp",    // Data to be loaded in JSON from a remote URL
+                options: {
+                    url: "http://www.google.com/calendar/feeds/" +
+                          "dev-community-calendar@google.com/public/full?futureevents=true" +
+                          "&orderby=starttime&sortorder=ascending&singleevents=true" +
+                          "&alt=json-in-script&callback=?",
+                    preloadFunction: preloadGCal,
+                    transformFunction: transformGCal
+                }
+            },
+            {
+                title: "Developer Calendar",
+                theme: "blue",
+                type: "jsonp",    // Data to be loaded in JSON from a remote URL
+                options: {
+                    url: "http://www.google.com/calendar/feeds/" +
+                          "developer-calendar@google.com/public/full?futureevents=true" +
+                          "&orderby=starttime&sortorder=ascending&singleevents=true" +
+                          "&alt=json-in-script&callback=?",
+                    preloadFunction: preloadGCal,
+                    transformFunction: transformGCal
+                }
+            }
+        ]   
+    });
+});
+
+
+// Preload function for the calendar events feed
+// The preloadFunction should leave you with an array of
+// elements, stripping off outer envelopes, etc.
+function preloadGCal(result) {
+    var entries = (result.feed.entry);
+    var events = [];
+    // delete events without geotags
+    for (var x=0; x<entries.length; x++) {
+        entry = entries[x];
+        var location = entry['gd$where'][0].valueString;
+        var pattern = new RegExp(/@\s*([\-0-9.]+)\s*,\s*([\-0-9.]+)\s*/);
+        var matches = pattern.exec(location);
+        if (matches != null) events.push(entry);
+    }
+    return events;
+}
+
+// Transform function for a single calendar entry
+// The transformFunction should transform a single element from
+// your JSON format to the format required by loadItem().
+function transformGCal(entry) {
+    var newData = {};
+    newData["title"] = entry.title.$t;
+    newData["options"] = {};
+    // html for info window
+    if (entry.content.$t.length > 120)
+        var content = entry.content.$t.substring(0,120) + '...';
+    else var content = entry.content.$t;
+    newData["options"]["infoHtml"] = '<p class="content"><strong>' + entry.title.$t 
+        + '</strong></p><p class="content">' + content + ' ' +
+        '<a href="' + entry.link[0].href + '" target=_blank>more &gt;&gt;</a></p>';
+    newData["start"] = entry['gd$when'][0].startTime;
+    // get geolocation
+    var location = entry['gd$where'][0].valueString;
+    var pattern = new RegExp(/@\s*([\-0-9.]+)\s*,\s*([\-0-9.]+)\s*/);
+    var matches = pattern.exec(location);
+    if (matches != null) {
+        var lat = parseFloat(matches[1]);
+        var lon = parseFloat(matches[2]);
+        newData["point"] = {
+    		"lat" : lat,
+            "lon" : lon
+        };
+    }
+    return newData;
+}
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Two JSON Datasets</h1>
+    In this example, we're loading two JSON datasets from public Google Calendar feeds. <em>Note: this relied on a lat/lon string in the gd$where attribute - looks like the person managing the calendars stopped adding that. :(<em>
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

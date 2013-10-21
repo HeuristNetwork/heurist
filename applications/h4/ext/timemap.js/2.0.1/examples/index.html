@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Timemap.js Examples</title>
+	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    
+    <style type="text/css">
+        dt {
+            font-weight: bold;
+            margin-top: 1.5em;
+        }
+        dd {
+            margin-top: 0.5em;
+        }
+        p {
+            margin-top: 2em;
+        }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+        <h1>Timemap.js Examples</h1>
+        
+        <h2>Basic Examples</h2>
+        <p>How to load and display data using different map providers and Timeline versions.</p>
+        <dl>
+            
+            <dt><a href="basic_googlev2.html">Basic Example, Google v2</a></dt>
+            <dt><a href="basic_googlev3.html">Basic Example, Google v3</a></dt>
+            <dt><a href="basic_openlayers.html">Basic Example, OpenLayers</a></dt>
+            <dt><a href="basic_microsoft.html">Basic Example, Bing Maps</a></dt>
+            <dt><a href="basic_tl230.html">Basic Example, Timeline v2.3.0</a></dt>
+        </dl>
+        
+        <h2>Other Loaders</h2>
+        <p>How to load data from external files.</p>
+        <dl>
+            <dt><a href="kenya.html">Kenya KML Example</a></dt>
+            <dd>Demonstrates: Loading data using KML, setting bandInfo to customize the timeline.</dd>
+            
+            <dt><a href="google_spreadsheet.html">Google Spreadsheet Example</a></dt>
+            <dd>Demonstrates: Loading data from a Google Spreadsheet</dd> 
+            
+            <dt><a href="earthquake_georss.html">Earthquake GeoRSS Example</a></dt>
+            <dd>Demonstrates: Loading data using GeoRSS</dd>
+        </dl>
+        
+        <h2>More Involved Examples</h2>
+        <p>How to do more interesting stuff with loaded data.</p>
+        <dl>
+            <dt><a href="placemarks.html">Placemarks Example</a></dt>
+            <dd>Demonstrates: Loading various types of placemarks.</dd>
+            
+            <dt><a href="google_spreadsheet_columns.html">Google Spreadsheet Example, Arbitrary Columns</a></dt>
+            <dd>Demonstrates: Loading Google Spreadsheet data with additional non-standard columns.</dd>
+            
+            <dt><a href="kml_extendeddata.html">KML Example: Loading ExtendedData</a></dt>
+            <dd>Demonstrates: Loading arbitrary data in KML using ExtendedData elements, setting themes in KML.</dd>
+            
+            <dt><a href="artists.html">Renaissance Artists and Authors Example</a></dt>
+            <dd>Demonstrates: Loading data from Freebase.com, hiding and showing datasets</dd>
+            
+            <dt><a href="filter.html">Filter Example</a></dt>
+            <dd>Demonstrates: Using filter chains to filter on custom criteria</dd>
+            
+            <dt><a href="data_themes.html">Data Themes Example</a></dt>
+            <dd>Demonstrates: Using item data to define themes at load time</dd>
+            
+            <dt><a href="progressive.html">Progressive Loading</a></dt>
+            <dd>Demonstrates: Using the progressive loader to load additional data as the timeline is scrolled</dd>
+            
+            <dt><a href="state.html#zoom=8&center=44.04811573082351,13.29345703125&date=1500-01-21T12:17:37Z&selected=artists-0">State Loading</a></dt>
+            <dd>Demonstrates: Loading timemap state (map position, timeline position, etc) via the hash portion of the URL.</dd>
+         
+        </dl>
+        <h2>Advanced Examples</h2>
+        <p>Some complicated stuff to give you an idea of what the library can be used for.</p>
+        <dl>
+            
+            <dt><a href="google_spreadsheet_heatmap.html">Temporal Heatmap from a Google Spreadsheet</a></dt>
+            <dd>Demonstrates: Sizing icons over time according to a particular data element, consolidating rows from a Google Spreadsheet into single items.</dd>
+            
+            <dt><a href="google_earth_sync.html">Timemap Synchronized with Google Earth</a></dt>
+            <dd>Demonstrates: What it says :).</dd>
+            
+            <dt><a href="pathlines.html">Flickr Photos with Pathlines</a></dt>
+            <dd>Demonstrates: Loading JSON data from Flickr, using filters to add lines between points</dd>
+            
+            <dt><a href="polytween.html">Polygon Tweening</a></dt>
+            <dd>Demonstrates: Using filters to tween polygons over time</dd>
+            
+        </dl>
+    
+    <p>Note: Some browsers, notably Google Chrome 5+, will not run all of these examples locally, because of security restrictions around loading local files. Take a look at the <a href="http://timemap.googlecode.com/svn/trunk/examples/index.html">online version</a> if you have any problems.</p>
+    
+    </div>
+  </body>
+</html>

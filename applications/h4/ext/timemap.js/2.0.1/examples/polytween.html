@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Polygon Tweening</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+	<script type="text/javascript">
+var tm;
+$(function() {
+
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                title: "Photos",
+                id: "photos",
+                theme: "blue",
+                type: "basic",
+                options: {
+                    items: [
+                        { // polyline
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "polygon" : [{"lat":43.79488907226601,"lon":11.205711364746094},{"lat":43.812977041006626,"lon":11.228370666503906},{"lat":43.7859669617277,"lon":11.2664794921875},{"lat":43.8028187190472,"lon":11.279182434082031},{"lat":43.78819761422739,"lon":11.277122497558594},{"lat":43.78398408962279,"lon":11.294631958007812},{"lat":43.76464763976463,"lon":11.182365417480469},{"lat":43.79488907226601,"lon":11.205711364746094}],
+                          "title" : "Firenze",
+                          "options" : {
+                            "description": "Testing a polygon tween of Firenze",
+                            "endpoly": [{"lat":43.81025180712872,"lon":11.1566162109375},{"lat":43.84492732139371,"lon":11.22802734375},{"lat":43.81669306861421,"lon":11.2554931640625},{"lat":43.81669306861421,"lon":11.311111450195312},{"lat":43.799349628071965,"lon":11.337890625},{"lat":43.77506035122469,"lon":11.370162963867188},{"lat":43.7641517511446,"lon":11.35986328125},{"lat":43.81025180712872,"lon":11.1566162109375}]
+                          }
+                        },
+                    ]
+                }
+            }
+        ], 
+        bandIntervals: [
+            Timeline.DateTime.YEAR, 
+            Timeline.DateTime.DECADE
+        ],
+        // make pathlines
+        dataDisplayedFunction: function(tm) {
+            // new filter chain for poly tweening
+            tm.addFilterChain("polytween",
+                function(item) {
+                    // create tween if item is visible
+                    if (item.visible) {
+                        var theme = item.opts.theme || item.dataset.opts.theme;
+                        var pm = item.placemark;
+                        var ep = item.opts.endpoly;
+                        // get tween percent
+                        var now = item.dataset.timemap.timeline.getBand(0)
+                            .getCenterVisibleDate().getTime();
+                        var start = item.event.getStart().getTime();
+                        var end = item.event.getEnd().getTime();
+                        var percent;
+                        if (now < start) percent = 0;
+                        else if (now > end) percent = 1;
+                        else percent = 1 - ((end - now) / (end - start));
+                        // assume the same number of vertices
+                        var points=[], pt1, pt2;
+                        for (var x=0; x<pm.points.length; x++) {
+                            pt1 = pm.points[x];
+                            pt2 = ep[x];
+                            points.push(new mxn.LatLonPoint(
+                                (pt1.lat + ((parseFloat(pt2.lat) - pt1.lat) * percent)),
+                                (pt1.lng + ((parseFloat(pt2.lon) - pt1.lng) * percent))
+                            ));
+                            // remove the old tween
+                            if (item.tween) item.map.removePolyline(item.tween);
+                            // hide the real placemark
+                            item.placemark.hide();
+                            // show the new tween
+                            item.tween = new mxn.Polyline(points), 
+                            item.tween.addData({
+                                color: theme.lineColor, 
+                                width: theme.lineWeight, 
+                                opacity: theme.lineOpacity, 
+                                closed: true, 
+                                fillColor: theme.fillColor,
+                                fillOpacity: theme.fillOpacity
+                            });
+                            item.map.addPolyline(item.tween);
+                        }
+                    } else {
+                        // remove tween if any
+                        if (item.tween) {
+                            item.map.removePolyline(item.tween);
+                            item.tween = null;
+                        }
+                    }
+                },
+                function(item) {
+                }
+            );
+            tm.addFilter("polytween", function(item) {
+                return (item.event && item.placemark &&
+                    !item.event.isInstant() && item.getType() == 'polygon' && 
+                    item.opts.endpoly);
+            });
+            tm.filter("polytween");
+            // update map on timeline scroll
+            tm.timeline.getBand(0).addOnScrollListener(function() {
+                tm.filter("polytween");
+            });
+        }
+    });
+    
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 150px; }
+    div#mapcontainer{ height: 450px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>On-the-fly Polygon Tweening</h1>
+    This example uses a custom filter to smoothly tween a polygon between a beginning set of vertices and an ending set. I'm not sure I'd recommend this as an implementation - among other things it's rough on slow computers, especially as you increase the number of vertices - but you get the idea.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>

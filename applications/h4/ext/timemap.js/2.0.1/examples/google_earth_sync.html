@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Timemap Synchronized with Google Earth</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
+    <script src="../lib/timeline-2.3.0.js" type="text/javascript"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="http://www.google.com/jsapi?key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"></script>
+	<script type="text/javascript">
+// load google earth
+google.load("earth", "1", {'other_params': 'sensor=false' });
+    
+// convert GE lookAt range to GMap zoom 
+function getMapZoom(alt) {
+    var zoom = Math.round(Math.log(48000000/alt)/Math.log(2));
+    if (zoom < 0) zoom = 0;
+    else if (zoom > 19)zoom = 19;
+    return zoom;
+}
+
+// convert GMap zoom level to GE lookAt range
+function getGEZoom(zoom) {
+    return 48000000/(Math.pow(2,zoom))
+}
+
+
+var suppressMapListener = false, 
+    suppressEarthListener = false;
+
+// set Google Earth to sync with a map
+function setEarthView(ge, map) {
+    if (!suppressEarthListener) {
+        // to stop cyclical dependencies
+        suppressMapListener = true;
+        window.setTimeout(function() {
+            suppressMapListener = false;
+        }, 500);
+        // set view
+        var latlng = map.getCenter().toProprietary('google');
+        var la = ge.getView().copyAsLookAt(ge.ALTITUDE_ABSOLUTE);
+        la.setLatitude(latlng.lat());
+        la.setLongitude(latlng.lng());
+        la.setHeading(0);
+        la.setRange(getGEZoom(map.getZoom()));
+        ge.getView().setAbstractView(la);
+    }
+}
+
+// set the map to look at Google Earth
+function setMapView(ge, map) {
+    if (!suppressMapListener) {
+        // to stop cyclical dependencies
+        suppressEarthListener = true;
+        window.setTimeout(function() {
+            suppressEarthListener = false;
+        }, 500);
+        // set view
+        var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_CLAMP_TO_GROUND);
+        mapzoom = getMapZoom(lookAt.getRange());
+        map.setCenter(new mxn.LatLonPoint(lookAt.getLatitude(),lookAt.getLongitude()), mapzoom);
+    }
+}
+
+var tm, ge;
+$(function() {
+
+    // this is our callback, for whichever initializes last
+    function setListeners() { 
+        // get a reference to the timemap we've initialized
+        var map = tm.map;
+        // set earth view manually for the first time
+        setEarthView(ge, map);
+        // Add listeners
+        map.endPan.addHandler(function() {setEarthView(ge, map);});
+        //map.endZoom.addHandler(function() {setEarthView(ge, map);});
+        google.earth.addEventListener(ge.getView(), 'viewchange', function() {setMapView(ge, map)});
+        // tilt, because it looks cool :)
+        var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+        // Add 15 degrees to the current tilt
+        lookAt.setTilt(lookAt.getTilt() + 55.0);
+        // Update the view in Google Earth
+        ge.getView().setAbstractView(lookAt);
+    }
+    
+    // initialize Google Earth
+    google.earth.createInstance("gemap", 
+        function(instance) {
+            ge = instance;
+            ge.getWindow().setVisibility(true);
+ 
+            // GE options
+            ge.getNavigationControl().setVisibility(ge.VISIBILITY_SHOW);
+            ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
+            // looks like you have to teleport, or the map listeners will get messed up
+            ge.getOptions().setFlyToSpeed(ge.SPEED_TELEPORT);
+            ge.getOptions().setStatusBarVisibility(true);
+            
+            // callback
+            if (tm) setListeners();
+        }, 
+        function failureCB(errorCode) {
+            console.log("failed!");
+        }
+    );
+    
+    // initialize timemap
+    tm = TimeMap.init({
+        mapId: "map",
+        timelineId: "timeline",
+        options: {
+            eventIconPath: "../images/"
+        },
+        datasets: [
+            {
+                id: "artists",
+                title: "Artists",
+                theme: "orange",
+                // note that the lines below are now the preferred syntax
+                type: "basic",
+                options: {
+                    items: [
+                        {
+                          "start" : "1449",
+                          "end" : "1494-01-11",
+                          "point" : {
+                              "lat" : 43.7717,
+                              "lon" : 11.2536
+                           },
+                          "title" : "Domenico Ghirlandaio",
+                          "options" : {
+                            // set the full HTML for the info window
+                            "infoHtml": "<div class='custominfostyle'><b>Domenico Ghirlandaio</b> was a visual artist of some sort.</div>"
+                          }
+                        },
+                        {
+                          "start" : "1452",
+                          "end" : "1519",
+                          "point" : {
+                              "lat" : 43.8166666667,
+                              "lon" : 10.7666666667
+                           },
+                          "title" : "Leonardo da Vinci",
+                          "options" : {
+                            // load HTML from another file via AJAX
+                            // Note that this may break in IE if you're running it with
+                            // a local file, due to cross-site scripting restrictions
+                            "infoUrl": "ajax_content.html",
+                            "theme": "red"
+                          }
+                        },
+                        {
+                          "start" : "1475",
+                          "end" : "1564",
+                          "point" : {
+                              "lat" : 43.6433,
+                              "lon" : 11.9875
+                           },
+                          "title" : "Michelangelo",
+                          "options" : {
+                            // use the default title/description info window
+                            "description": "Renaissance Man",
+                            "theme": "yellow"
+                          }
+                        }
+                    ]
+                }
+            }
+        ],
+        bandIntervals: "dec",
+        // callback
+        dataDisplayedFunction: function(timemap) {
+            if (ge) setListeners();
+        }
+    });
+});
+    </script>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="http://gmaps-utility-library-dev.googlecode.com/svn/trunk/extinfowindow/examples/css/simpleExampleWindow.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 100px; }
+    div#mapcontainer{ height: 500px; }
+    div#map {width:50%; float:left}
+    div#gemap {margin-left:50%; height:100%;}
+    </style>
+  </head>
+
+  <body>
+    <div id="help">
+    <h1>Timemap Synchronized with Google Earth</h1>
+    This example syncs a timemap with the Google Earth browser plugin. You have to do some timeout juggling in order to avoid a cyclical listener setup, but it seems to work reasonably well.</div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+          <div id="gemap"></div>
+        </div>
+    </div>
+  </body>
+</html>
