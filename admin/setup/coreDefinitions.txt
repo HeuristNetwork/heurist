@@ -18,7 +18,6 @@
 -- -----------------------------------------------------------------------------------------------------
 
 -- Heurist Definitions Exchange File generated: 01 Mar 2013 @ 14:08
--- Installation = http://heuristscholar.org/h3-ao/
 -- Database = H3CoreDefinitions
 -- Program Version: 3.1.0
 -- Database Version: 1.1.0

@@ -382,8 +382,6 @@
 
 			<body>
 
-				<!-- <script src="http://heuristscholar.org/h3-ao/common/php/loadHAPI.php?db=dos_1"></script> -->
-
 				<xsl:if test="$record[type/@conceptID='2-13']">
 					<iframe id="yui-history-iframe" src="{$urlbase}images/minus.png"></iframe>
 					<input id="yui-history-field" type="hidden"/>

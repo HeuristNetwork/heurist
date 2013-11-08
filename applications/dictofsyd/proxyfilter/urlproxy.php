@@ -14,8 +14,8 @@ to test
 http://dictionaryofsydney.org/natural_feature/cockatoo_island
 http://dictionaryofsydney.org/entry/cockatoo_island
 
-http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?db=artem_todelete3&url=http://dictionaryofsydney.org/entry/cockatoo_island
-http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?db=artem_todelete3&url=organisation/historic_houses_trust_of_new_south_wales&js=sincity.html
+http://heuristscholar.org/h3-ao/applications/dictofsyd/urlJSProxy.php?db=artem_todelete3&url=http://dictionaryofsydney.org/entry/cockatoo_island
+http://heuristscholar.org/h3-ao/applications/dictofsyd/urlJSProxy.php?db=artem_todelete3&url=organisation/historic_houses_trust_of_new_south_wales&js=sincity.html
 
 
 Main script is urlJSProxy.php. It obtains the following parameters
@@ -69,29 +69,29 @@ $localFolder = "/var/www/htdocs/maritime/cache/";
 
 if(array_key_exists('htm', $_REQUEST)){
 
-		$addr = $_REQUEST['htm'];
-		$url = $baseURL.$addr;
-		$filename = $localFolder.str_replace("/","_",$addr);
+        $addr = $_REQUEST['htm'];
+        $url = $baseURL.$addr;
+        $filename = $localFolder.str_replace("/","_",$addr);
 
 //error_log(">>>".$filename."  ".$url);
 
-		getRemoteFile($filename, null, $url);
-		header('Content-Type: text/html');
+        getRemoteFile($filename, null, $url);
+        header('Content-Type: text/html');
 
 }else if(array_key_exists('kml', $_REQUEST)){
 
-		$kml = $_REQUEST['kml'];
-		$url = $baseURL."kml/full/".$kml;
-		$filename = $localFolder.$kml;
-		getRemoteFile($filename, null, $url);
+        $kml = $_REQUEST['kml'];
+        $url = $baseURL."kml/full/".$kml;
+        $filename = $localFolder.$kml;
+        getRemoteFile($filename, null, $url);
 
-		header('Content-Type: application/vnd.google-earth.kml+xml');
+        header('Content-Type: application/vnd.google-earth.kml+xml');
 }else{
-	exit;
+    exit;
 }
 
 if(file_exists($filename)){
-	readfile($filename);
+    readfile($filename);
 }
 exit;
 /**
@@ -103,25 +103,25 @@ exit;
 */
 function getRemoteFile($filename, $js_content, $url){
 
-	if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
+    if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
 
-		$raw = loadRemoteURLContent($url);
+        $raw = loadRemoteURLContent($url);
 
 //error_log(">>>".strlen($raw));
 
-		if ($raw) {
+        if ($raw) {
 
-				if(file_exists($filename)){
-					unlink($filename);
-				}
-				$fp = fopen($filename, "w");
-				//$fp = fopen($filename, "x");
-				fwrite($fp, $raw);
-				//fflush($fp);    // need to insert this line for proper output when tile is first requestet
-				fclose($fp);
+                if(file_exists($filename)){
+                    unlink($filename);
+                }
+                $fp = fopen($filename, "w");
+                //$fp = fopen($filename, "x");
+                fwrite($fp, $raw);
+                //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+                fclose($fp);
 
-		}
+        }
 
-	}
+    }
 }
 ?>

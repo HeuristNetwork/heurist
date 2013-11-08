@@ -34,13 +34,6 @@
 
     <script src="../../external/jquery/jquery-1.6.min.js"></script>
 
-<!--
-<div class="saved-search-edit">
-<img onclick="{top.HEURIST.search.savedSearchEdit(7);}" src="/h3-ao/common/images/edit_pencil_9x11.gif" title="edit">
-<img onclick="{top.HEURIST.search.savedSearchDelete(7);}" src="/h3-ao/common/images/delete6x7.gif" title="delete">
-</div>
--->
-
 </head>
 <body style="padding:5px;overflow-x:auto;" class="popup">
 

@@ -274,7 +274,7 @@ utils = {
     getBasePath: function()
     {
                 if(top.location.protocol=='file:'){
-                    return "http://heuristscholar.org/h3-ao/";
+                    return "http://heuristscholar.org/h3-ao/";   //not possible to define server URL (standalone usage on device) - use URL by default
                 }else{
                     var installDir = top.location.pathname.replace(/(((\?|admin|applications|common|export|import|records|search|viewers)\/.*)|(index.*))/, "");
                     return top.location.protocol + '//'+top.location.host + installDir;

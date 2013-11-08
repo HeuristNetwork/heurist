@@ -47,8 +47,6 @@ if (! is_logged_in()) {
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
 
-//require_once('libs.inc.php');
-//$dir = 'c:/xampp/htdocs/h3-ao/viewers/smarty/templates/';  //$smarty->template_dir
 $dir = HEURIST_SMARTY_TEMPLATES_DIR;
 
 $mode = $_REQUEST['mode'];

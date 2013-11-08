@@ -14,8 +14,8 @@ to test
 http://dictionaryofsydney.org/natural_feature/cockatoo_island
 http://dictionaryofsydney.org/entry/cockatoo_island
 
-http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?db=artem_todelete3&url=http://dictionaryofsydney.org/entry/cockatoo_island
-http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?db=artem_todelete3&url=organisation/historic_houses_trust_of_new_south_wales&js=sincity.html
+http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/urlJSProxy.php?db=artem_todelete3&url=http://dictionaryofsydney.org/entry/cockatoo_island
+http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/urlJSProxy.php?db=artem_todelete3&url=organisation/historic_houses_trust_of_new_south_wales&js=sincity.html
 
 
 Main script is urlJSProxy.php. It obtains the following parameters
@@ -70,53 +70,53 @@ $js_file = "maritime.html";
 
 if(array_key_exists('htm', $_REQUEST)){
 
-		$addr = $_REQUEST['htm'];
-		$url = $baseURL.$addr;
-		$filename = HEURIST_UPLOAD_DIR."proxyremote_".str_replace("/","_",$addr);
-		getRemoteFile($filename, null, $url);
-		header('Content-Type: text/html');
+        $addr = $_REQUEST['htm'];
+        $url = $baseURL.$addr;
+        $filename = HEURIST_UPLOAD_DIR."proxyremote_".str_replace("/","_",$addr);
+        getRemoteFile($filename, null, $url);
+        header('Content-Type: text/html');
 
 }else if(array_key_exists('kml', $_REQUEST)){
 
-		$kml = $_REQUEST['kml'];
-		$url = $baseURL."kml/full/".$kml;
-		$filename = HEURIST_UPLOAD_DIR."proxyremote_".$kml;
-		getRemoteFile($filename, null, $url);
+        $kml = $_REQUEST['kml'];
+        $url = $baseURL."kml/full/".$kml;
+        $filename = HEURIST_UPLOAD_DIR."proxyremote_".$kml;
+        getRemoteFile($filename, null, $url);
 
-		header('Content-Type: application/vnd.google-earth.kml+xml');
+        header('Content-Type: application/vnd.google-earth.kml+xml');
 
 }else if(array_key_exists('url', $_REQUEST)){
 
-		$url = $_REQUEST['url'];
-		$k = strpos($url, $baseURL);
-		if(!($k === 0)){
-			$name = preg_replace('/[^a-zA-Z0-9-_\.]/','', $url);
-			if(!(strpos($name,".html")==strlen($name)-5)){
-				$name = $name.".html";
-			}
-			$url = $baseURL.$url;
-		}else{
-			$name = "1.html";
-		}
-		$filename = HEURIST_UPLOAD_DIR."proxyremote_".$name;
+        $url = $_REQUEST['url'];
+        $k = strpos($url, $baseURL);
+        if(!($k === 0)){
+            $name = preg_replace('/[^a-zA-Z0-9-_\.]/','', $url);
+            if(!(strpos($name,".html")==strlen($name)-5)){
+                $name = $name.".html";
+            }
+            $url = $baseURL.$url;
+        }else{
+            $name = "1.html";
+        }
+        $filename = HEURIST_UPLOAD_DIR."proxyremote_".$name;
 
-		if(array_key_exists('js', $_REQUEST)){
-			$js_file = $_REQUEST['js'];
-		}else{
-			$js_file = "maritime.html";
-		}
+        if(array_key_exists('js', $_REQUEST)){
+            $js_file = $_REQUEST['js'];
+        }else{
+            $js_file = "maritime.html";
+        }
 
-		$js_content = file_get_contents($js_file)."</head>";
+        $js_content = file_get_contents($js_file)."</head>";
 
-		getRemoteFile($filename, $js_content, $url);
+        getRemoteFile($filename, $js_content, $url);
 
-		header('Content-Type: text/html');
+        header('Content-Type: text/html');
 }else{
-	exit;
+    exit;
 }
 
 if(file_exists($filename)){
-	readfile($filename);
+    readfile($filename);
 }
 exit;
 /**
@@ -128,53 +128,53 @@ exit;
 */
 function getRemoteFile($filename, $js_content, $url){
 
-	global $js_file;
+    global $js_file;
 
-	if($js_content!=null || !file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
+    if($js_content!=null || !file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
 
-	$raw = loadRemoteURLContent($url);
+    $raw = loadRemoteURLContent($url);
 
-	if ($raw) {
+    if ($raw) {
 
-			if($js_content!=null){
+            if($js_content!=null){
 
-				//repalce KEY for google map
-				$raw = str_replace("ABQIAAAA5wNKmbSIriGRr4NY0snaURTtHC9RsOn6g1vDRMmqV_X8ivHa_xSNBstkFn6GHErY6WRDLHcEp1TxkQ",
-									"ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w", $raw);
+                //repalce KEY for google map
+                $raw = str_replace("ABQIAAAA5wNKmbSIriGRr4NY0snaURTtHC9RsOn6g1vDRMmqV_X8ivHa_xSNBstkFn6GHErY6WRDLHcEp1TxkQ",
+                                    "ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w", $raw);
 
-				//to avoid cross domain issue - load kml via proxy
-				$raw = str_replace("../kml/full/", "http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?kml=", $raw);
+                //to avoid cross domain issue - load kml via proxy
+                $raw = str_replace("../kml/full/", "http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/urlJSProxy.php?kml=", $raw);
 
-				//to avoid issue with relative path - use global variable baseURL
-				$raw = str_replace("../js/popups.js", "http://heuristscholar.org/h3-ao/export/proxies/popups.js", $raw);
-				$raw = str_replace("../js/tooltip.js", "http://heuristscholar.org/h3-ao/export/proxies/tooltip.js", $raw);
-				$raw = str_replace("../js/browse.js", "http://heuristscholar.org/h3-ao/export/proxies/browse.js", $raw);
+                //to avoid issue with relative path - use global variable baseURL
+                $raw = str_replace("../js/popups.js", "http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/popups.js", $raw);
+                $raw = str_replace("../js/tooltip.js", "http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/tooltip.js", $raw);
+                $raw = str_replace("../js/browse.js", "http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/browse.js", $raw);
 
-				//add base path  $('base').attr('href')
-				$raw = str_replace("<head>", "<head><base href=\"http://dictionaryofsydney.org/\">".
-										"<script>var baseURL = 'http://heuristscholar.org/h3-ao/export/proxies/urlJSProxy.php?db=".HEURIST_DBNAME."&js=".$js_file."'; var dbname='".HEURIST_DBNAME."';</script>", $raw);
+                //add base path  $('base').attr('href')
+                $raw = str_replace("<head>", "<head><base href=\"http://dictionaryofsydney.org/\">".
+                                        "<script>var baseURL = 'http://heuristscholar.org/h3-ao/applications/dictofsyd/proxyfilter/urlJSProxy.php?db=".HEURIST_DBNAME."&js=".$js_file."'; var dbname='".HEURIST_DBNAME."';</script>", $raw);
 
-				//inject main style and javascript
-				$raw = str_replace("</head>", $js_content, $raw);
+                //inject main style and javascript
+                $raw = str_replace("</head>", $js_content, $raw);
 
-				//remove
-				$raw = str_replace("<div id=\"browser\"></div>","",$raw);
-			}
+                //remove
+                $raw = str_replace("<div id=\"browser\"></div>","",$raw);
+            }
 
-			if(file_exists($filename)){
-				unlink($filename);
-			}
-			$fp = fopen($filename, "w");
-			//$fp = fopen($filename, "x");
-			fwrite($fp, $raw);
-			//fflush($fp);    // need to insert this line for proper output when tile is first requestet
-			fclose($fp);
+            if(file_exists($filename)){
+                unlink($filename);
+            }
+            $fp = fopen($filename, "w");
+            //$fp = fopen($filename, "x");
+            fwrite($fp, $raw);
+            //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+            fclose($fp);
 
-	}
+    }
 
-	/*if(file_exists($filename)){
-		getRemoteFile($mimeType, $filename);
-	}*/
-	}
+    /*if(file_exists($filename)){
+        getRemoteFile($mimeType, $filename);
+    }*/
+    }
 }
 ?>
