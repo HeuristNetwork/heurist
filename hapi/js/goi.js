@@ -43,6 +43,7 @@ HAPI.inherit(HInvalidGeographicValueException, HException);
 
 var _r = function(x) { return Math.round(x*10) / 10; };
 
+//strip any spaces match(/^(\s*)(\S)(\s*)/)[2]
 
 var HPointValue = function() {
 	var x, y;
@@ -51,21 +52,36 @@ var HPointValue = function() {
 
 	if (arguments.length === 1) {	// assume WKT
 		wkt = arguments[0];
-		if (!wkt || ! (xy = wkt.match(/POINT[(]([^ ]+) ([^ ]+)[)]/))) {
+		if (!wkt || ! (xy = wkt.match(/POINT[ ]*[(]([ ]*[^ ]+)[ ]+([^ ]+)[ ]*[)]/))) {
 			throw new HInvalidGeographicValueException("invalid point data");
 		}
 		x = parseFloat(xy[1]);
 		y = parseFloat(xy[2]);
+        
+        if(isNaN(x)){
+            throw new HInvalidGeographicValueException("invalid point data long: "+xy[1]);
+        }else if(isNaN(y)){
+            throw new HInvalidGeographicValueException("invalid point data lat: "+xy[2]);
+        }        
 		this.constructor = HPointValue;
 	}
 	else if (arguments.length === 2) {	// x, y
 		x = parseFloat(arguments[0]);
 		y = parseFloat(arguments[1]);
 
+        if(isNaN(x)){
+            throw new HInvalidGeographicValueException("invalid point data long: "+arguments[0]);
+        }else if(isNaN(y)){
+            throw new HInvalidGeographicValueException("invalid point data lat: "+arguments[1]);
+        }
+            
 		HGeographicValue.call(this, "p", "POINT(" + x + " " + y +")");
 	}
 	else { throw new HInvalidGeographicValueException("invalid point data"); }
 
+
+    
+    
 	this.getX = function() { return x; };
 	this.getY = function() { return y; };
 	this.toString = function() { return "Point: X (" + _r(x) + ") - Y (" + _r(y) + ")"; };
@@ -81,7 +97,8 @@ var HBoundsValue = function() {
 
 	if (arguments.length === 1) {	// assume WKT
 		wkt = arguments[0];
-		if (! (coords = wkt.match(/POLYGON[(][(]([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^)]+)[)][)]/))) {
+		if (! (coords = wkt.match(/POLYGON[ ]*[(][(][ ]*([^ ]+)[ ]+([^,]+)[ ]*,[ ]*([^ ]+)[ ]+([^,]+)[ ]*,[ ]*([^ ]+)[ ]+([^,]+)[ ]*,[ ]*([^ ]+)[ ]+([^)]+)[ ]*[)][)]/))) {
+        //(/POLYGON[(][(]([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^)]+)[)][)]/))) {
 			throw new HInvalidGeographicValueException("invalid rectangle data");
 		}
 		xMin = parseFloat(coords[1]);
@@ -116,7 +133,8 @@ var HCircleValue = function() {
 
 	if (arguments.length === 1) {	// assume WKT
 		wkt = arguments[0];
-		if (! (coords = wkt.match(/LINESTRING[(]([^ ]+) ([^,]+),([^ ]+) /))) {
+		if (! (coords = wkt.match(/LINESTRING[ ]*[(][ ]*([^ ]+)[ ]+([^,]+)[ ]*,[ ]*([^ ]+)[ ]*/))) {
+        // (/LINESTRING[(]([^ ]+) ([^,]+),([^ ]+) /))) {
 			throw new HInvalidGeographicValueException("invalid circle data");
 		}
 		x = parseFloat(coords[1]);
@@ -151,12 +169,13 @@ var HPolygonValue = function() {
 
 	if (arguments.length === 1  &&  typeof(arguments[0]) === "string") {	// assume WKT
 		wkt = arguments[0];
-		if (! (pointData = wkt.match(/POLYGON[(][(](.+)[)][)]/))) {
+		if (! (pointData = wkt.match(/POLYGON[ ]*[(][ ]*[(][ ]*(.+)[ ]*[)][ ]*[)]/))) {
+        //(/POLYGON[(][(](.+)[)][)]/))) {
 			throw new HInvalidGeographicValueException("invalid polygon data");
 		}
 		pointData = pointData[1].split(/,/);
 		for (i=0; i < pointData.length; ++i) {
-			xy = pointData[i].split(/ /);
+			xy = pointData[i].trim().split(/ /);
 			points.push([parseFloat(xy[0]), parseFloat(xy[1])]);
 		}
 		this.constructor = HPolygonValue;
@@ -210,12 +229,13 @@ var HPathValue = function() {
 
 	if (arguments.length === 1  &&  typeof(arguments[0]) === "string") {	// assume WKT
 		wkt = arguments[0];
-		if (! (pointData = wkt.match(/LINESTRING[(](.+)[)]/))) {
+		if (! (pointData = wkt.match(/LINESTRING[ ]*[(][ ]*(.+)[ ]*[)]/))) {
+        // (/LINESTRING[(](.+)[)]/))) {
 			throw new HInvalidGeographicValueException("invalid path data");
 		}
 		pointData = pointData[1].split(/,/);
 		for (i=0; i < pointData.length; ++i) {
-			xy = pointData[i].split(/ /);
+			xy = pointData[i].trim().split(/ /);
 			points.push([parseFloat(xy[0]), parseFloat(xy[1])]);
 		}
 		this.constructor = HPathValue;

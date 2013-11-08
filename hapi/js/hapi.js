@@ -554,6 +554,7 @@ HAPI.UserManager = HUserManager;
 var HGeographicValue = function(type, wkt) {
 	var _type = HGeographicType.typeForAbbreviation(type);
 	var _wkt = wkt;
+    var _isValid = false;
 
 	if(_wkt){
 		_wkt = _wkt.trim().toUpperCase();
@@ -566,7 +567,9 @@ var HGeographicValue = function(type, wkt) {
 
 	this.getType = function() { return _type; };
 	this.getWKT = function() { return _wkt; };
-	this.toString = function() { return "geographic value"; };
+	this.toString = function() { 
+            return "geographic value"; 
+    };
 
 	// We use the generic HGeographicValue constructor as a factory for specific Geographic values if GOI is loaded
 	if (HAPI.GOI && type) {
@@ -580,6 +583,7 @@ var HGeographicValue = function(type, wkt) {
 			throw new HAPI.GOI.InvalidGeographicValueException("Unknown geographic object type");
 		}
 	}
+    _isValid = true;
 };
 HGeographicValue.getClass = function() { return "HGeographicValue"; };
 HAPI.inherit(HGeographicValue, HObject);
@@ -603,11 +607,11 @@ var HGeographicType = {
 	getTypeFromValue: function(wkt){
 		if (wkt){
 			wkt = wkt.trim().toUpperCase();
-		  if (wkt.match(/POINT[(]([^ ]+) ([^ ]+)[)]/)) {
+		  if (wkt.match(/POINT/)){ // /POINT[(]([^ ]+) ([^ ]+)[)]/)) {
 		  		return HGeographicType.POINT;
-		  }else if (wkt.match(/POLYGON[(][(]([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^)]+)[)][)]/)) {
+		  }else if (wkt.match(/POLYGON/)) { //   /POLYGON[(][(]([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^,]+),([^ ]+) ([^)]+)[)][)]/)) {
 		  		return HGeographicType.POLYGON;
-		  }else  if (wkt.match(/LINESTRING[(]([^ ]+) ([^,]+),([^ ]+) /)) {
+		  }else  if (wkt.match(/LINESTRING/)){ //   /LINESTRING[(]([^ ]+) ([^,]+),([^ ]+) /)) {
 		  		return HGeographicType.PATH;
 		  }
 		}
@@ -625,7 +629,8 @@ var HRecord = function() {
 	var _nonce = HAPI.getNonce(this);
 	var _type = null;
 	var _title = null;
-	var _namedDetails = {}, _details = {};
+	var _namedDetails = {}; //details with db id
+    var _details = {};      //new details (without id) 
 	var _url = null;
 	var _notes = null;
 
@@ -653,6 +658,7 @@ var HRecord = function() {
 
 
 	this.getID = function() { return _id; };
+    this.setID = function(val) { _id = val; };
 	this.getVersion = function() { return _version; };
 
 	this.getNonce = function() { return _nonce; };
@@ -843,6 +849,18 @@ var HRecord = function() {
 		}
 		return (details  ||  null);
 	};
+    this.markDetailsForDelete = function(){
+        //add spcial marker for named detail - all exisiting details will be removed before insert new ones
+        var i, type;
+        for (type in _namedDetails) {
+            _namedDetails[type] = {'delete':'delete'};
+        }
+        for (type in _details) {
+            if(!_namedDetails[type] || !_namedDetails[type]['delete']){
+                    _namedDetails[type] = {'delete':'delete'};
+            }
+        }
+    };
 	this.getAllDetails = function() {
 		var i, j, detailType, termTranslate, details = {};
 		for (i in _namedDetails) {

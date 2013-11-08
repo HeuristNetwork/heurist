@@ -296,7 +296,7 @@
             if (! ($bdtID = intval(substr($dtyID, 2)))) continue;
             array_push($dtyIDs, $bdtID);
         }
-        $dtyVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($dtyIDs, ",") . ")");
+        $dtyVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . implode($dtyIDs, ",") . ")");
         if($modeImport!=2){ //import without check of record type structure
             //TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
             $repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_RecTypeID=" . $recordType);
@@ -312,6 +312,30 @@
         $ignoreIDs = array();
         $translated = array();
         $translatedIDs = array();
+        
+        //special case - remove the specified field types
+        $fieldtypesToDelete = array();
+        foreach ($details as $dtyID => $pairs) {
+            if (substr($dtyID, 0, 2) != "t:") continue;    // skip any non t: or non type designators
+            if (! ($bdtID = intval(substr($dtyID, 2)))) continue;    // invalid (non integer) type id so skip it
+            foreach ($pairs as $bdID => $val) {
+                if($bdID=="bd:delete"){
+                        array_push($fieldtypesToDelete, $bdtID);
+                        //unset($details[$dtyID][$bdID]);
+                        break; 
+                }
+            }
+        }
+        if(count($fieldtypesToDelete)>0){
+            $deleteDetailsQuery = "delete from recDetails where dtl_RecID=".$recordID." and dtl_DetailTypeId in (" . implode(",", $fieldtypesToDelete) . ")";
+
+            mysql_query($deleteDetailsQuery);
+            if (mysql_error()) {
+                errSaveRec("db error while deleteing details for field types (" . implode(",", $fieldtypesToDelete) . ") for record ID ".$recordID." error : ".mysql_error());
+                return array("error" => "recordID = $recordID rectype = $recordType ");
+            }
+        }
+        
         // second pass to divide the work up in to inserts, updates, deletes, translates and ignores
         foreach ($details as $dtyID => $pairs) {
             if (substr($dtyID, 0, 2) != "t:") continue;	// skip any non t: or non type designators
@@ -319,7 +343,13 @@
 
             $firstDetail = true;
             foreach ($pairs as $bdID => $val) {
-
+               
+                if(strcmp($bdID , "bd:delete")==0){
+                    continue;
+                }else if(@$fieldtypesToDelete[$bdtID]){
+                   $bdID = "";//signal insert
+                }
+                
                 if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
                     if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid (non integer) id so skip it
                     // check detail exist for the given record
@@ -492,8 +522,9 @@
         }//end dty loop
         //delete all details except the one that are being updated
         $deleteDetailIDsQuery = "select dtl_ID from recDetails where dtl_RecID=$recordID";
-        if (count($updateIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . join(",", $updateIDs) . ")";
-        if (count($ignoreIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . join(",", $ignoreIDs) . ")";
+        if (count($updateIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . implode(",", $updateIDs) . ")";
+        if (count($ignoreIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . implode(",", $ignoreIDs) . ")";
+        
         $resDel = mysql_query($deleteDetailIDsQuery);
         if (mysql_error()) {
             errSaveRec("db error while finding details to be deleted for record ID ".$recordID." error : ".mysql_error());
@@ -521,10 +552,12 @@
         }
         //update all details to be kept
         if (count($deleteIDs)) {
-            $deleteDetailsQuery = "delete from recDetails where dtl_ID in (" . join(",", $deleteIDs) . ")";
+            // DELETE IS DISABLED!!!!!!
+            
+            $deleteDetailsQuery = "delete from recDetails where dtl_ID in (" . implode(",", $deleteIDs) . ")";
 //            mysql_query($deleteDetailsQuery);
             if (mysql_error()) {
-                errSaveRec("db error while deleteing details (" . join(",", $deleteIDs) . ") for record ID ".$recordID." error : ".mysql_error());
+                errSaveRec("db error while deleteing details (" . implode(",", $deleteIDs) . ") for record ID ".$recordID." error : ".mysql_error());
                 return array("error" => "recordID = $recordID rectype = $recordType ");
             }
 //            $retval["deleted"] = $deleteIDs;
@@ -545,7 +578,7 @@
 
         if (count($insertQueryValues)) {//insert all new details
             /*****DEBUG****///error_log("in DoInserts inserting details ".print_r($inserts,true));
-            mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . join(",", $insertQueryValues));
+            mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . implode(",", $insertQueryValues));
             $first_bd_id = mysql_insert_id();
             if (mysql_error()) {
                 errSaveRec("db error while inserting '" . $insertQueryValues . "' for record ID ".$recordID." error : ".mysql_error());
@@ -577,7 +610,7 @@
         //get all existing personal tags for this record
         $kwds = mysql__select_array("usrRecTagLinks, usrTags",
             "tag_Text", "rtl_RecID=$recordID and tag_ID=rtl_TagID and tag_UGrpID=$usrID order by rtl_Order, rtl_ID");
-        $existingTagString = join(",", $kwds);
+        $existingTagString = implode(",", $kwds);
 
         // if tags are already there Nothing to do
         if (mb_strtolower(trim($tagString), 'UTF-8') == mb_strtolower(trim($existingTagString), 'UTF-8')) return;
@@ -635,7 +668,7 @@
         }
 
         if ($newKeywordIDs) {
-            mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) select tag_ID, $recordID from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
+            mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) select tag_ID, $recordID from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id()." and tag_ID in (" . implode(",", $newKeywordIDs) . ")");
             if (mysql_error()) jsonError("database error - " . mysql_error());
         }
     }
@@ -645,7 +678,7 @@
         // removals are encoded as just the notification ID# ... easy!
         $removals = array_map("intval", $removals);
         if ($removals) {
-            mysql_query("delete from usrReminders where rem_ID in (" . join(",",$removals) . ") and rem_RecID=$recordID and rem_OwnerUGrpID=" . get_user_id());
+            mysql_query("delete from usrReminders where rem_ID in (" . implode(",",$removals) . ") and rem_RecID=$recordID and rem_OwnerUGrpID=" . get_user_id());
         }
 
         // additions have properties
@@ -711,7 +744,7 @@
         if ($removals) {
             $removals = array_map("intval", $removals);
             mysql_query("update recThreadedComments set cmt_Deleted=1
-                where cmt_OwnerUGrpID=".get_user_id()." and cmt_RecID=$recordID and cmt_ID in (".join(",",$removals).")");
+                where cmt_OwnerUGrpID=".get_user_id()." and cmt_RecID=$recordID and cmt_ID in (".implode(",",$removals).")");
         }
 
         // modifications have the values

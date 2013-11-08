@@ -57,8 +57,10 @@ FlexImport = (function () {
 	workgroupSelect: null,
 	workgroups: {},
 	workgroupTags: {},
-	colSelectors: [],
-	cols: [],
+	colSelectors: [], //select html elements with list of detail types
+    colKeys: [],  //detail type id - that gives unique key - for update purpose 
+	cols: [],   //DetailType Id - selected dt for cvs columns
+    cols_uniqkey: [], //array of dt id that compose unique key, or has the only value 'recId'
 	subTypes: [],
 	records: [],
 	lineRecordMap: {},
@@ -424,7 +426,7 @@ FlexImport = (function () {
 		//create row of field type selectors
 		var tr = tbody.appendChild(document.createElement("tr"));
 		tr.id = "col-select-row";
-		var td, sel, opt;
+		var td, sel, opt, cbkey;
 
 		tr = tbody.appendChild(document.createElement("tr"));
 		tr.id = "col-select-row";
@@ -434,7 +436,14 @@ FlexImport = (function () {
 		for (i = 0; i < l; ++i) {
 			// add column select header for selecting detail type for this column
 			td = tr.appendChild(document.createElement("td"));
+            cbkey = td.appendChild(document.createElement("input"));
+            cbkey.title = 'key field';
+            cbkey.type = 'checkbox';
+            FlexImport.colKeys[i] = cbkey;
+            td.appendChild(document.createElement("br"));
+            
 			sel = td.appendChild(document.createElement("select"));
+            
 			sel.onchange = function() {
 				if (this.value != "tags"  &&  this.value != "wgTags") {
 					//search if this detail is in another column and remove it from the other column if it is
@@ -444,14 +453,14 @@ FlexImport = (function () {
 						var s = FlexImport.colSelectors[j];
 						if (s != this  &&  s.value == this.value) {
 							s.selectedIndex = 0;
-							if (s.subTypeSelect) { alert("Warning: you've selected the same target field for more than one soruce field");
+							if (s.subTypeSelect) { alert("Warning: you've selected the same target field for more than one source field");
 								// s.parentNode.removeChild(s.subTypeSelect);
 							}
 						}
 					}
 				}
 				// for types that have subtypes show select for subtypes
-				if (this.value != "url"  &&  this.value != "scratchpad"  &&
+				if (this.value != "record id" && this.value != "url"  &&  this.value != "scratchpad"  &&
 					this.value != "tags"  &&  this.value != "wgTags"  &&
 					HDetailManager.getDetailTypeById(this.value) &&
 					HDetailManager.getDetailTypeById(this.value).getVariety() == HVariety.GEOGRAPHIC) {
@@ -475,6 +484,7 @@ FlexImport = (function () {
 					}
 				}
 			};
+            
 
 			// fill in comlumn selector options for recType
 			FlexImport.colSelectors[i] = sel;
@@ -491,6 +501,7 @@ FlexImport = (function () {
 			var grp = sel.appendChild(document.createElement("optgroup"));
 			grp.label = (navigator.userAgent.indexOf('Firefox')>0)?" ":"---";
 
+            _addOpt(sel, "record id", "Record ID", columnName == "record id(s)");
 			_addOpt(sel, "tags", "Tag(s)", columnName == "tag(s)");
 			_addOpt(sel, "wgTags", "Workgroup Tag(s)", columnName == "workgroup tag(s)");
 
@@ -527,9 +538,10 @@ FlexImport = (function () {
 					}
 
 					//since HAPI returns generic field names rather than record specific - take the correct name from top.HEURIST
-					rdName = recStructure[det_id][dtyName_ind];
-
-					alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
+                    if(recStructure[det_id]){
+					    rdName = recStructure[det_id][dtyName_ind];
+                        alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
+                    }
 				}
 			}
 
@@ -769,31 +781,51 @@ FlexImport = (function () {
 		}
 	},
 
+    //
 	// This function preloads all records necessary for REFERENCE detail types
+    // clicked by Prepare Records
 	loadReferencedRecords: function ()
 	{
+        if(top.HEURIST.util.isnull(FlexImport.recType)){
+           alert('Select record type');
+           return;
+        }
+        
+        
 		var detailType;
 		var refCols = [];
 		var recIDs = [];
 		var recID = "";
 		var valCheck = {};
+        
 
 		//get list of required field types
 		var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
 		var k;
+        
+        FlexImport.cols_uniqkey = [];
 
 		//detect what fields to be imported
 		var i, l = FlexImport.colSelectors.length;
 		for (i = 0; i < l; ++i) {
 			if (FlexImport.colSelectors[i].selectedIndex > 0) {
 				FlexImport.cols[i] = FlexImport.colSelectors[i].value;
+                
+                //@todo checkbox for tags and wgTags must be invisible
+                if(FlexImport.cols[i]=="record id" ||
+                    (FlexImport.colKeys[i].checked && FlexImport.cols[i]!=="tags"  &&  FlexImport.cols[i]!== "wgTags"))
+                {
+                     FlexImport.cols_uniqkey.push(FlexImport.colSelectors[i].value);
+                }               
+                
 			}else if(i<FlexImport.cols.length){
 				FlexImport.cols[i] = undefined;
 			}
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
 			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "scratchpad") {
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[i]);
-
+                if(detailType)    
+                {
 					for (k = 0; k < reqDetailTypes.length; ++k) {
 						if(detailType.getID() == reqDetailTypes[k].getID()){
 							reqDetailTypes.splice(k,1);
@@ -802,14 +834,15 @@ FlexImport = (function () {
 					}
 
 
-				//mark which columns have the REFERENCE identifying data
-				if (detailType.getVariety() == HVariety.REFERENCE) {
-					if (HDetailManager.getDetailRepeatable(FlexImport.recType, detailType)) {
-						refCols[i]=2;//mark as repeatable  todo:SAW should store max value and constrain against that.
-					} else {
-						refCols[i]=1;//mark as single value
-					}
-				}
+				    //mark which columns have the REFERENCE identifying data
+				    if (detailType.getVariety() == HVariety.REFERENCE) {
+					    if (HDetailManager.getDetailRepeatable(FlexImport.recType, detailType)) {
+						    refCols[i]=2;//mark as repeatable  todo:SAW should store max value and constrain against that.
+					    } else {
+						    refCols[i]=1;//mark as single value
+					    }
+				    }
+                }
 			}
 		}
 
@@ -970,11 +1003,15 @@ FlexImport = (function () {
 		// header row
 		tr = tbody.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
+        td = tr.appendChild(document.createElement("td"));
+        td.innerHTML = "ID";
 		var tags = false;
 		var kwds = false;
 		var j, l = FlexImport.cols.length;
 		for (j = 0; j < l; ++j) {
-			if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
+			if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" || 
+              (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
+             
 			td = tr.appendChild(document.createElement("td"));
 			if (FlexImport.cols[j] == "url") {
 				td.innerHTML = "URL";
@@ -1071,10 +1108,14 @@ FlexImport = (function () {
 			}
 			td = tr.appendChild(document.createElement("td"));
 			td.innerHTML = i;
+            td = tr.appendChild(document.createElement("td")); //record id
+            td.id = "tdrecid"+i;
+            td.innerHTML = record.getID();
 
 			tags = false; kwds = false;
 			for (var j = 0; j < FlexImport.fields[i].length; ++j) {
-				if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
+				if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" || 
+                        (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
 
 				var inputRow = FlexImport.fields[i];
 
@@ -1124,34 +1165,127 @@ FlexImport = (function () {
 			} // for j in FlexImport.fields loop
 		} // for i = 0 loop
 
-		FlexImport.gotoStep(3);
-
-		// show command button for saving records
-		var e = $("#records-div-info")[0];
-
-		$("#btn_correct").show();
-		$("#btn_save").hide();
-		$("#btn_prepare").hide();
-		$("#step3-info").html("Unrecognised values in imported data. Click 'Correct the Data' to change the values");
-		$("#prepare-info-div").html("");
-
-		if(FlexImport.num_err_values>0){
-			$("#prepare-info-div").html("<div class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
-							FlexImport.num_err_columns+" columns. </div>");
-			//e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
-			//				FlexImport.num_err_columns+" columns. "+
-			//				"<input type=button value=\"Correct the data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
-		}else if ( FlexImport.num_invalid_records > 0){
-//			e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
-		}else{
-			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
-			$("#step3-info").html("Records appear OK. Click 'Save records' to update database");
-			$("#btn_correct").hide();
-			$("#btn_save").show();
-		}
+        FlexImport.findExistingRecordsForUpdateMode(0);
+        
 		},200);
-	},
+        
+    },
+    
+    findExistingRecordsForUpdateMode:function(index){
+   
+        if(index>=FlexImport.records.length || FlexImport.cols_uniqkey.length<1){
+        
+            //setTimeout(function() {              }, 200);
+            FlexImport.gotoStepSaveRecords();
+            
+            
+        }else{
+        
+            // in case of UPDATE mode 
+            // 1. create query string for each record 
+            // 2. find the record 
+            // 3. 
+        
+            //HRecord
+            var record = FlexImport.records[index];
+            var i, dtid, dt;
+            var query = "";
+            
+            //1. compose search string based on markerd columns colKeys
+            var l= FlexImport.cols_uniqkey.length;    //array of detaio type ids
+            for(i=0; i<l; ++i){
+                dtid = FlexImport.cols_uniqkey[i];
+                if(dtid == "record id"){
+                    if(!top.HEURIST.util.isempty(record.getID())){
+                        query = "ids:"+record.getID();
+                    }else{
+                        record.setID(null);
+                    }
+                    break;
+                }else             
+                if (dtid != "url"  &&  dtid != "scratchpad"  &&
+                    dtid != "tags"  &&  dtid != "wgTags"){
+                        dt = HDetailManager.getDetailTypeById(dtid);
+                        if(dt && dt.getVariety() != HVariety.GEOGRAPHIC && dt.getVariety() != HVariety.FILE){
+                            var vals = record.getDetails(dt);           
+                            if(vals && vals.length>0 && vals[0] && !top.HEURIST.util.isempty(vals[0])){
+                                query = query + " f:"+dtid+":"+vals[0].substr(0,50);
+                            }
+                        }
+                }
+            }
+            
+            if(dtid != "record id" && !top.HEURIST.util.isempty(query)){
+                query = 't:'+FlexImport.recTypeSelect.value+query;
+            }
+            
+            //2. perform search
+            if(query){
+                var baseSearch = new HSearch(query, null);
+                var myLoader = new HLoader(
+                    function(s, r) {    // onload
+                        var ss = "", recID = null;
+                        if (r.length == 1) { //exact found
+                            var record_found = r[0];
+                            recID = record_found.getID();
+                            ss = recID;
+                            //add special marker for all named details - to delete the existing ones
+                            record.markDetailsForDelete();
+                            
+                        } else if (r.length > 1) {// more than 1
+                            ss = "ambiguity: "+r.length+" recs";
+                        }
+                        record.setID(recID);
+                        var td = document.getElementById("tdrecid"+index);
+                        td.innerHTML = ss;
+                        FlexImport.findExistingRecordsForUpdateMode(index+1);
+                    },
+                    function(r,e) {
+                        var td = document.getElementById("tdrecid"+index);
+                        td.innerHTML = "error search";
+                        FlexImport.findExistingRecordsForUpdateMode(index+1);
+                    }                    
+                );
+                HeuristScholarDB.loadRecords(baseSearch, myLoader);                
+                
+            }else{
+                FlexImport.findExistingRecordsForUpdateMode(index+1);
+            }
+        }
+        
+        
+    },
+    
+    gotoStepSaveRecords:function(){
 
+        FlexImport.gotoStep(3);
+
+        // show command button for saving records
+        var e = $("#records-div-info")[0];
+
+        $("#btn_correct").show();
+        $("#btn_save").hide();
+        $("#btn_prepare").hide();
+        $("#step3-info").html("Unrecognised values in imported data. Click 'Correct the Data' to change the values");
+        $("#prepare-info-div").html("");
+
+        if(FlexImport.num_err_values>0){
+            $("#prepare-info-div").html("<div class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
+                            FlexImport.num_err_columns+" columns. </div>");
+            //e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
+            //                FlexImport.num_err_columns+" columns. "+
+            //                "<input type=button value=\"Correct the data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+        }else if ( FlexImport.num_invalid_records > 0){
+//            e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
+        }else{
+            e.innerHTML += "<p><b>Records prepared for import:</b></p>";
+            $("#step3-info").html("Records appear OK. Click 'Save records' to update database");
+            $("#btn_correct").hide();
+            $("#btn_save").show();
+        }
+    
+    },
+        
 	startSaveRecords:function(){
 
 		var e = $("#records-div-info")[0];
@@ -1177,7 +1311,8 @@ FlexImport = (function () {
 				err[key] += "\n" + msg;
 			}
 		}
-
+        
+        
 		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_RELATION'] && recType.getID() == top.HEURIST.magicNumbers['RT_RELATION']) {//MAGIC NUMBER
 			hRec = new HRelationship();
 		}
@@ -1207,7 +1342,9 @@ FlexImport = (function () {
 			}
 			try {
 				// set records detail value
-				if (FlexImport.cols[j] == "url") {
+                if (FlexImport.cols[j] == "record id") {
+                    hRec.setID(val);
+                }else if (FlexImport.cols[j] == "url") {
 					hRec.setURL(val);
 				} else if (FlexImport.cols[j] == "scratchpad") {
 					hRec.setNotes(val);
@@ -1261,7 +1398,7 @@ FlexImport = (function () {
                                 v--;
                                 l = vals.length;
 							}else{
-								vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v]));
+								vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v])); //get record from cache
 								if (!vals[v]) { //there was an error loading the referenced record so mark it
 									logError(j,"<b>"+temp + "</b><br/>&nbsp;<br/>Record ID invalid or not found");
 									vals.splice(v,1);	// remove the val in order to ignore it
@@ -1283,13 +1420,15 @@ FlexImport = (function () {
 					}
 					// FIXME now we should also validate against constraints table for enum values.
 					if (vals) {
+                        //replace all details
 						hRec.setDetails(detailType, vals);
 					}
-				}
+				}   
 			}catch(e) {
 				logError(j,e);
 			}
 		}
+         
 		if ((!err || !err.invalidRecord) && !hRec.isValid()) { // if record is invalid and hasn't been flagged yet, must be a missing req detail
 			logError("invalidRecord", " Missing required field(s).");
 		}
@@ -1379,25 +1518,27 @@ FlexImport = (function () {
 })();
 
 
+
+
 FlexImport.Loader = (function () {
 	// helper function to load all records for a given query
 	// this is necessary because of the page limit set in HAPI
 	function _loadAllRecords (query, options, loader) {
-		var records = [];
+		var loadedrecords = [];
 		var baseSearch = new HSearch(query, options);
 		var bulkLoader = new HLoader(
 			function(s, r) {	// onload
-				records.push.apply(records, r);
+				loadedrecords.push.apply(loadedrecords, r);
 				if (r.length < 100) {
 					// we've loaded all the records: invoke the original loader's onload
-					$("#results").html('<b>Loaded ' + records.length + ' records </b>');
+					$("#results").html('<b>Loaded ' + loadedrecords.length + ' records </b>');
 					loader.onload(baseSearch, records);
 				}
 				else { // more records to retrieve
-					$("#results").html('<b>Loaded ' + records.length + ' records so far ...</b>');
+					$("#results").html('<b>Loaded ' + loadedrecords.length + ' records so far ...</b>');
 
 					//  do a search with an offset specified for retrieving the next page of records
-					var search = new HSearch(query + " offset:"+records.length, options);
+					var search = new HSearch(query + " offset:"+loadedrecords.length, options);
 					HeuristScholarDB.loadRecords(search, bulkLoader);
 				}
 			},
