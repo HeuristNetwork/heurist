@@ -439,19 +439,33 @@ FlexImport = (function () {
             cbkey = td.appendChild(document.createElement("input"));
             cbkey.title = 'key field';
             cbkey.type = 'checkbox';
+            cbkey.style.visibility = 'hidden';
+            cbkey.id = "cb"+i;
             FlexImport.colKeys[i] = cbkey;
             td.appendChild(document.createElement("br"));
             
 			sel = td.appendChild(document.createElement("select"));
+            sel.id = "sel"+i;
             
 			sel.onchange = function() {
+
+                var isRecHeaderFlds = (this.value == "url"  ||  this.value == "scratchpad"  ||
+                    this.value == "tags"  ||  this.value == "wgTags");
+                var  variety = null;    
+                if(!isRecHeaderFlds){
+                    var dt = HDetailManager.getDetailTypeById(this.value);
+                    if(dt){
+                        variety = dt.getVariety();    
+                    }
+                }
+                
 				if (this.value != "tags"  &&  this.value != "wgTags") {
 					//search if this detail is in another column and remove it from the other column if it is
 					// todo: should we stop people putting data from two columns into the same field? I think not. Maybe popup an alert
 					var j, m = FlexImport.colSelectors.length;
 					for (j = 0; j < m; ++j) {
 						var s = FlexImport.colSelectors[j];
-						if (s != this  &&  s.value == this.value) {
+						if (s != this  &&  s.value == this.value && variety != HVariety.GEOGRAPHIC) {
 							s.selectedIndex = 0;
 							if (s.subTypeSelect) { alert("Warning: you've selected the same target field for more than one source field");
 								// s.parentNode.removeChild(s.subTypeSelect);
@@ -459,18 +473,27 @@ FlexImport = (function () {
 						}
 					}
 				}
+                
+                
+                cbkey = document.getElementById("cb"+this.id.substr(3));
+                    
+                if (isRecHeaderFlds || variety == HVariety.GEOGRAPHIC || variety == HVariety.FILE) {
+                    cbkey.style.visibility = 'hidden';
+                }else{
+                    cbkey.style.visibility = 'visible';    
+                }
 				// for types that have subtypes show select for subtypes
-				if (this.value != "record id" && this.value != "url"  &&  this.value != "scratchpad"  &&
-					this.value != "tags"  &&  this.value != "wgTags"  &&
-					HDetailManager.getDetailTypeById(this.value) &&
-					HDetailManager.getDetailTypeById(this.value).getVariety() == HVariety.GEOGRAPHIC) {
+				if (!isRecHeaderFlds &&
+					variety == HVariety.GEOGRAPHIC) {
 					this.subTypeSelect = this.parentNode.appendChild(document.createElement("select"));
 					var vals = [
 						[ HGeographicType.POINT, "POINT" ],
 						[ HGeographicType.BOUNDS, "BOUNDS" ],
 						[ HGeographicType.POLYGON, "POLYGON" ],
 						[ HGeographicType.PATH, "PATH" ],
-						[ HGeographicType.CIRCLE, "CIRCLE"]
+						[ HGeographicType.CIRCLE, "CIRCLE"],
+                        [ "lng", "POINT longitude (X)" ],
+                        [ "lat", "POINT latitude (Y)" ],
 					];
 					var v, m = vals.length;
 					for (v = 0; v < m; ++v) {
@@ -1323,13 +1346,17 @@ FlexImport = (function () {
 		hRec.addToPersonalised();
 		hRec.addTag(importTag);
 
+        var geoLat = null,
+            geoLng = null,
+            geoDt;
+
 		for (var j = 0; j < fields.length; ++j) {
 
 			// skip unassigned columns
 			if (! FlexImport.cols[j]  ||  FlexImport.cols[j] == "") {
 				continue;
 			}
-
+            
 			// get detail value
 			val = fields[j];
 			if (! val) {
@@ -1382,9 +1409,18 @@ FlexImport = (function () {
 
 
 					} else if (detailType.getVariety() == HVariety.GEOGRAPHIC) {
-						for (var v = 0; v < vals.length; ++v) {
-							vals[v] = new HGeographicValue(HGeographicType.abbreviationForType(FlexImport.subTypes[j]), vals[v]);
-						}
+                        if(FlexImport.subTypes[j]=="lat"){
+                            geoLat = vals;
+                            geoDt = detailType; 
+                            continue;
+                        }else if(FlexImport.subTypes[j]=="lng"){
+                            geoLng = vals;
+                            continue;
+                        }else{
+						    for (var v = 0; v < vals.length; ++v) {
+						    	vals[v] = new HGeographicValue(HGeographicType.abbreviationForType(FlexImport.subTypes[j]), vals[v]);
+						    }
+                        }
 					} else if (detailType.getVariety() == HVariety.REFERENCE) {
 						if (vals.length == 1 && vals[0].indexOf(",",0) != -1) {	// This is to capture the case of the user not understanding verticle bar as we train them to use comma ids:345,456,567
 							vals = vals[0].split(",");
@@ -1428,6 +1464,25 @@ FlexImport = (function () {
 				logError(j,e);
 			}
 		}
+        
+        if(geoLat && geoLng){
+            var vals = [];
+            var lat, lng;
+            for (var v = 0; v < geoLat.length; ++v) {
+                
+                lat = parseFloat(geoLat[v]);
+                lng = (v<geoLng.length)?parseFloat(geoLng[v]):NaN;
+                if(!(isNaN(lat) || isNaN(lng))){
+                    vals.push( new HGeographicValue("p", "POINT("+lng+" "+lat+")") );    
+                }
+                
+            }
+            if (vals.length>0) {
+                hRec.setDetails(geoDt, vals);
+            }
+        }
+        
+        
          
 		if ((!err || !err.invalidRecord) && !hRec.isValid()) { // if record is invalid and hasn't been flagged yet, must be a missing req detail
 			logError("invalidRecord", " Missing required field(s).");

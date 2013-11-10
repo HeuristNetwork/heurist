@@ -472,7 +472,7 @@ var TemporalPopup = (function () {
         
         $('.withCalendarsPicker').calendarsPicker({
             calendar: $.calendars.instance('gregorian'),
-            showOnFocus: true,
+            showOnFocus: false,
             //defaultDate: convert($(this)), //null, defaultDate),
             dateFormat: 'yyyy-mm-dd',
             pickerClass: 'calendars-jumps',
