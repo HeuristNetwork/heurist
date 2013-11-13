@@ -2176,6 +2176,7 @@ top.HEURIST.search = {
 		return keepVal;
 	},
 
+    // if record type is not selected show all utilized detail types 
 	createUsedDetailTypeSelector: function (useIDs) {
 		var detailTypes = top.HEURIST.detailTypes;
 		var fieldValSelect = document.getElementById("field-select");
@@ -2226,6 +2227,7 @@ top.HEURIST.search = {
 	},
 
 
+    // if record type is selected show only its detail types
 	createRectypeFieldSelector: function (rt,useIDs) {
 		var fields = top.HEURIST.rectypes.typedefs[rt].dtFields;
 		var fieldValSelect = document.getElementById("field-select");
@@ -2238,18 +2240,28 @@ top.HEURIST.search = {
 		sortbyValSelect.appendChild(grp);
 
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
+        
+        //sort field by name - Ian's request by 2013/11/12
+        var fld = [];
+        for (var dtID in fields){
+            fld.push({dtID:dtID, name: fields[dtID][0]});
+        }
+        fld.sort(function(a,b){return (a.name < b.name)?-1:1});
 
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var dtID in fields){
-			var name = fields[dtID][0];
+		for (var ind in fld){
+            if(ind){
+            var dtID = fld[ind].dtID;
+			var name = fld[ind].name;
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
 			var sortValue =  "" + (useIDs ? dtID : '"'+name+'"');
-            var opt = new Option(name,value);
+            var opt = new Option(name, value);
             $(opt).attr("title","id = "+dtID);
             fieldValSelect.appendChild(opt);
             opt = new Option(name,sortValue);
             $(opt).attr("title","id = "+dtID);
             sortbyValSelect.appendChild(opt);
+            }
 		}
 
 		sortbyValSelect.value = keepVal;
