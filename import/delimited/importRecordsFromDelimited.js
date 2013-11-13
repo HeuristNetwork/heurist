@@ -432,15 +432,15 @@ FlexImport = (function () {
 		tr.id = "col-select-row";
 
 		td = tr.appendChild(document.createElement("td"));
-		td.innerHTML = "row number";
+		td.innerHTML = "<div id='lblKeyFields' style='width:100%;text-align:right;visibility:hidden'>Select key fields:</div><br>row number";
 		for (i = 0; i < l; ++i) {
 			// add column select header for selecting detail type for this column
 			td = tr.appendChild(document.createElement("td"));
             cbkey = td.appendChild(document.createElement("input"));
-            cbkey.title = 'key field';
             cbkey.type = 'checkbox';
             cbkey.style.visibility = 'hidden';
             cbkey.id = "cb"+i;
+            
             FlexImport.colKeys[i] = cbkey;
             td.appendChild(document.createElement("br"));
             
@@ -449,7 +449,7 @@ FlexImport = (function () {
             
 			sel.onchange = function() {
 
-                var isRecHeaderFlds = (this.value == "url"  ||  this.value == "scratchpad"  ||
+                var isRecHeaderFlds = (this.value == "null" || this.value == "url"  ||  this.value == "scratchpad"  ||
                     this.value == "tags"  ||  this.value == "wgTags");
                 var  variety = null;    
                 if(!isRecHeaderFlds){
@@ -476,12 +476,40 @@ FlexImport = (function () {
                 
                 
                 cbkey = document.getElementById("cb"+this.id.substr(3));
+                var lbl = document.getElementById('lblKeyFields');
+                $allcbs = $('[type="checkbox"][id^="cb"]');
                     
                 if (isRecHeaderFlds || variety == HVariety.GEOGRAPHIC || variety == HVariety.FILE) {
                     cbkey.style.visibility = 'hidden';
+                    lbl.style.visibility = 'hidden';
+                    $allcbs.each(function() {
+                        if(this.style.visibility == 'visible'){
+                            lbl.style.visibility = 'visible';
+                            return false;
+                        }
+                    });
                 }else{
-                    cbkey.style.visibility = 'visible';    
+                    cbkey.checked = false;
+                    cbkey.style.visibility = 'visible';  
+                    lbl.style.visibility = 'visible';  
                 }
+                //if one of selection is record id disable all checkboxes
+                
+                $allcbs.attr('disabled', false);
+                $allcbs.attr('title', 'Use as key field: Heurist will attempt to match key fields to identify existing records for update rather than addition of a new record');
+                var $sels = $('select[id^="sel"]');
+                $sels.each(function() {
+                    if(this.value=='record id'){
+                        $allcbs.attr('disabled', true);
+                        $allcbs.attr('checked', false);
+                        $allcbs.attr('title', 'De-select Record ID matching if you wish to match records based on other key fields');
+                        var cbkey = document.getElementById("cb"+this.id.substr(3));
+                        cbkey.checked = true;
+                        return false;
+                    }
+                });
+                
+                
 				// for types that have subtypes show select for subtypes
 				if (!isRecHeaderFlds &&
 					variety == HVariety.GEOGRAPHIC) {
@@ -580,6 +608,7 @@ FlexImport = (function () {
 			for (d = 0; d < alist.length; ++d) {
 				var opt = _addOpt(sel, alist[d].id, alist[d].name, alist[d].selected);
 				if(alist[d].req){
+                    
 					opt.className = "required";
 				}
 			}
@@ -613,8 +642,9 @@ FlexImport = (function () {
 			if(i<FlexImport.cols.length &&  FlexImport.cols[i]){
 				sel.value = FlexImport.cols[i];
 			}
-		}
-
+		}//for
+        
+        
 		// create rest of table filling it with the csv analysed data
 		for (var i = FlexImport.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
@@ -667,6 +697,12 @@ FlexImport = (function () {
 		FlexImport.gotoStep(2);
 		if(applyMapping) { applyMapping.call(FlexImport); }
 
+        for (var i = 0; i<FlexImport.colSelectors.length; ++i) {
+            FlexImport.colSelectors[i].onchange();
+        }
+
+        
+        
 		},200);
 	}, //end createColumnSelectors
 
@@ -1215,7 +1251,7 @@ FlexImport = (function () {
             var query = "";
             
             //1. compose search string based on markerd columns colKeys
-            var l= FlexImport.cols_uniqkey.length;    //array of detaio type ids
+            var l= FlexImport.cols_uniqkey.length;    //array of detail type ids
             for(i=0; i<l; ++i){
                 dtid = FlexImport.cols_uniqkey[i];
                 if(dtid == "record id"){
@@ -1257,6 +1293,8 @@ FlexImport = (function () {
                             
                         } else if (r.length > 1) {// more than 1
                             ss = "ambiguity: "+r.length+" recs";
+                        } else {
+                            ss = "not found. insert"
                         }
                         record.setID(recID);
                         var td = document.getElementById("tdrecid"+index);
@@ -1310,6 +1348,11 @@ FlexImport = (function () {
     },
         
 	startSaveRecords:function(){
+
+       if (! confirm("This will attempt to save all the displayed records to " +
+        (HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ".\nAre you sure you want to continue?")){
+            return;  
+        } 
 
 		var e = $("#records-div-info")[0];
 		e.innerHTML = "";
@@ -1671,9 +1714,6 @@ FlexImport.Saver = (function () {
 
 	return {
 		saveRecords: function () {
-			if (! confirm("This will attempt to save all the displayed records to " +
-					(HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ".\nAre you sure you want to continue?")) return;
-
 			_getChunk();
 		}
 	};
