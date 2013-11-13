@@ -639,8 +639,9 @@ class Predicate {
 		}
 		else {
 			// it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
-			if (preg_match('!^\d{4}$!', $this->value)) {
-				$date = date('Y', $timestamp);
+            $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+			if (@$matches[0]) {
+				$date = $matches[0];
 			}
 			else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
 				$date = date('Y-m', $timestamp);
@@ -1332,7 +1333,8 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-/*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
+/*****DEBUG****/// 
+error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 
