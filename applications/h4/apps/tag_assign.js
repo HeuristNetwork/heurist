@@ -93,7 +93,7 @@ $.widget( "heurist.tag_assign", {
                         if(!top.HAPI.currentUser.usr_Tags){
                             top.HAPI.currentUser.usr_Tags = {};
                         }
-                        top.HAPI.currentUser.usr_Tags[val] = response.data;
+                        top.HAPI.currentUser.usr_Tags[val] = response.data[val];
                         that._renderTags();
                     }else{
                         top.HEURIST.util.showMsgErr(response);
@@ -173,7 +173,7 @@ $.widget( "heurist.tag_assign", {
     // list of groups for current user
     var selObj = this.select_ugrp.get(0);
     top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
-            [{key:top.HAPI.currentUser.ugr_ID, title:top.HR('Personal')}],
+            [{key:top.HAPI.currentUser.ugr_ID, title:top.HR('Personal Tags')}], 
          function(){
                 that.select_ugrp.val(top.HAPI.currentUser.ugr_ID);
                 that.select_ugrp.change();
@@ -457,6 +457,9 @@ $.widget( "heurist.tag_assign", {
 
                                 if(!top.HAPI.currentUser.usr_Tags){
                                     top.HAPI.currentUser.usr_Tags = {};
+                                }
+                                if(!top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID]){
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID] = {};
                                 }
                                 top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc];
 

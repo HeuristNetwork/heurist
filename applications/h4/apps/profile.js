@@ -1,3 +1,8 @@
+/**
+*  Login Button (if status is log off) 
+*  or 
+*  Add New Record, Profile and Option Buttons with drop down menu 
+*/
 $.widget( "heurist.profile", {
 
   // default options
@@ -16,7 +21,7 @@ $.widget( "heurist.profile", {
       // prevent double click to select text
       .disableSelection();
 
-    //---------------------
+    //---------------------  OPTIONS BUTTON WITH DROPDOWN MENU
     this.btn_options = $( "<button>", {text: "options"} )
             .css('float','right')
             .appendTo( this.element )
@@ -87,6 +92,7 @@ $.widget( "heurist.profile", {
                 }})
             .hide();
 
+    //show/hide menu on button click        
     this._on( this.btn_options, {
         click: function() {
           $('.menu-or-popup').hide(); //hide other
@@ -98,7 +104,7 @@ $.widget( "heurist.profile", {
         }
     });
 
-    //---------------------
+    //---------------------  LOGIN BUTTON
     this.btn_login = $( "<button>", {
                     text: top.HR('Login')
             })
@@ -109,7 +115,7 @@ $.widget( "heurist.profile", {
                         primary: "ui-icon-key"
                     }});
 
-    //---------------------
+    //--------------------- PROFILE BUTTON
     this.btn_user = $( "<button>",{
                     text: "username"
             })
@@ -151,6 +157,7 @@ $.widget( "heurist.profile", {
                 }})
             .hide();
 
+    //show/hide menu on button click        
     this._on( this.btn_user, {
         click: function() {
           $('.menu-or-popup').hide(); //hide other
@@ -163,7 +170,7 @@ $.widget( "heurist.profile", {
         }
     });
 
-    //---------------------
+    //---------------------  ADD NEW RECORD BUTTON
     this.select_rectype = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .attr("size","15")
@@ -199,9 +206,10 @@ $.widget( "heurist.profile", {
 
           var recordtype = event.target.value;
 
-          if(!top.HEURIST.editing){
+          if(!top.HEURIST.editing){ //create new object
                 top.HEURIST.editing = new hEditing();
           }
+          // add new record
           top.HEURIST.editing.add(recordtype);
 
           /* open in new window
@@ -237,16 +245,20 @@ $.widget( "heurist.profile", {
 
   }, //end _create
 
-  /* private function */
+  /* 
+  * private function 
+  * show/hide buttons depends on current login status
+  */
   _refresh: function(){
 
-      if(top.HAPI.currentUser.ugr_ID>0){
+      if(top.HAPI.currentUser.ugr_ID>0){ 
             $(this.element).find('.logged-in-only').show(); //.css('visibility','visible');
             $(this.element).find('.logged-out-only').hide(); //.css('visibility','hidden');
             this.btn_user.button( "option", "label", top.HAPI.currentUser.ugr_FullName);
             $('#menu-options li.logged-in-only').css('display','block');
             $('#menu-options li.logged-out-only').css('display','none');
       }else{
+            //not logged -guest
             $(this.element).find('.logged-in-only').hide(); //.css('visibility','hidden');
             $(this.element).find('.logged-out-only').show(); //.css('visibility','visible');
             $('#menu-options li.logged-in-only').css('display','none');
@@ -301,6 +313,11 @@ $.widget( "heurist.profile", {
         //load login dialogue
         $dlg.load("apps/profile_login.html", function(){
 
+            //find all labels and apply localization
+            $dlg.find('label').each(function(){
+                 $(this).html(top.HR($(this).html()));
+            })
+            
             var allFields = $dlg.find('input');
             var message = $dlg.find('.messages');
 
@@ -340,6 +357,7 @@ $.widget( "heurist.profile", {
                   }
             }
 
+            //start login on enter press
             allFields.on("keypress",function(event){
                   var code = (event.keyCode ? event.keyCode : event.which);
                   if (code == 13) {
@@ -347,7 +365,7 @@ $.widget( "heurist.profile", {
                   }
             });
 
-
+            // login dialog definition
             $dlg.dialog({
               autoOpen: false,
               height: 220,
@@ -374,6 +392,9 @@ $.widget( "heurist.profile", {
     }
   },
 
+  /**
+  * Open Edit Preferences dialog
+  */
   editPreferences: function()
   {
         var $dlg = $("#heurist-dialog");
@@ -393,7 +414,11 @@ $.widget( "heurist.profile", {
             var prefs = top.HAPI.currentUser['ugr_Preferences'];
             var allFields = $dlg.find('input,select');
 
-            var themeSwitcher = $("#layout_theme").themeswitcher({currentTheme:prefs['layout_theme']});
+            var currentTheme = prefs['layout_theme'];
+            var themeSwitcher = $("#layout_theme").themeswitcher({currentTheme:currentTheme,
+                    onSelect: function(){
+                        currentTheme = this.currentTheme;
+                    }});
             
             //form prefs to ui
             allFields.each(function(){
@@ -417,7 +442,7 @@ $.widget( "heurist.profile", {
                                         request[this.id] = $(this).val();
                                     }
                                 });
-                                request.layout_theme = themeSwitcher.getCurrentTheme();
+                                request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
                                 //$('#layout_theme').themeswitcher.
 
 

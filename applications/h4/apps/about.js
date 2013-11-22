@@ -1,3 +1,6 @@
+/**
+*  Button - logo that opens heurist-about dialogue
+*/
 $.widget( "heurist.about", {
 
   // default options

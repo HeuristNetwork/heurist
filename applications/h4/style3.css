@@ -52,7 +52,7 @@ body {
 
 /* layout toggler icon from jquery ui */
 .ui-layout-toggler {
-    background-color: #FFF;
+    /* background-color: #FFF; */
     opacity:        .60;
     filter: alpha(opacity=60); /* IE 8,9 */
 }
@@ -487,7 +487,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     width:95%;
     display:inline-block;
     cursor: pointer;
-    color:#515151;
+    /*color:#515151;*/
 }
 .saved-search .name:hover{
     text-decoration:underline;

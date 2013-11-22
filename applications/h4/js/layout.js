@@ -301,6 +301,8 @@ function appAddContent($container, app, options){
                     $content.append('<iframe id="'+app.id+'_'+app_counter+'" src="'+app.url+'"></iframe>');
                 }else if (app.script && app.widgetname) {
 
+                    //this is debug mode to init widgets 
+                    // app javascript are loaded in index.php header
                     if(app.widgetname=='rec_viewer'){
                         //DEBUG
                         $content.rec_viewer();
@@ -309,14 +311,20 @@ function appAddContent($container, app, options){
                         //DEBUG
                         $content.search_links( ); //options
                     }else
+                    if(app.widgetname=='profile'){
+                        //DEBUG
+                        $content.profile( ); //options
+                    }else    
                     {
+                     //this is notmal way of widget initialization   
+                     // script is loaded dynamically and init function is widget name
+                        
                      $.getScript(app.script, function() {
                          if($.isFunction($content[app.widgetname])){
                               $content[app.widgetname]( options );
                          }else{
                              top.HEURIST.util.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                          }
-                           //$content.profile();
                      });
                     }
 

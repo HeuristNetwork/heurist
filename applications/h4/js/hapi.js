@@ -519,13 +519,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         }*/
 
         /**
-        * returns function to string resouce according to current region setting
+        * Returns function to string resouce according to current region setting
         */
         setLocale: function( region ){
                 if(_regional && _regional[region]){
                         _region = region;
                 }
-                return _key;  //this is function
+                return _key;  //_key is function
         }
     }
 

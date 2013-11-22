@@ -47,6 +47,7 @@ function tagGetByName($system, $tag_names, $ugrID=null){
 }
 
 /**
+* not used
 * Get tags for given usergroup ID
 * 
 * @param mixed $system
@@ -93,7 +94,7 @@ function tagGetByUser($system, $isfull, $ugrID=null){
 * @param mixed $system
 * @param mixed $isfull if true returns name and description 
 * @param mixed $recIDs - array of record ids
-* @param mixed $ugrIDs - cs list of user/groups
+* @param mixed $ugrIDs - cs list of user/groups or 'all' - all groups of current user
 */
 function tagGetByRecords($system, $isfull, $recIDs, $ugrIDs=null){
 
@@ -133,10 +134,10 @@ error_log(">>>".print_r($recIDs,true)."<<<");
         $recs = "";
     }
 
-    $query = "SELECT tag_ID ".$supinfo.", count(rtl_RecID) as tag_Usage "
+    $query = "SELECT tag_UGrpID, tag_ID ".$supinfo.", count(rtl_RecID) as tag_Usage "
             ." FROM usrTags left join usrRecTagLinks on rtl_TagID = tag_ID ".$recs
             ." WHERE tag_UGrpID in (".implode(",", $ugrIDs)
-            .") group by tag_ID".$supinfo
+            .") group by tag_UGrpID, tag_ID".$supinfo
             ." order by tag_UGrpID";            
 
 //error_log(">>>".$query);
@@ -145,9 +146,15 @@ error_log(">>>".print_r($recIDs,true)."<<<");
 
     if ($res){
         $result = array();
+        $cur_usr_id = null;
         while ($row = $res->fetch_row()){
+                $usr_id = array_shift($row);
+                if($cur_usr_id!=$usr_id){
+                    $cur_usr_id = $usr_id;
+                    $result[$usr_id] = array();
+                }
                 $id = array_shift($row);
-                $result[$id] = $row;
+                $result[$usr_id][$id] = $row;
         }
         $res->close();
         return $result;

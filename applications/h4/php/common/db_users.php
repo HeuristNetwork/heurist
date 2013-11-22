@@ -35,7 +35,7 @@ define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 */
 $prefs = array(
  "layout_config" => "layout_defaults",
- "layout_language" => "en",
+ "layout_language" => "ru",
  "layout_theme" => "base",
 
  "edit_open_in_new_window" => "0",

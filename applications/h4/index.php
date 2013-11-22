@@ -51,6 +51,7 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="apps/tag_assign.js"></script>
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
     <script type="text/javascript" src="apps/search_links.js"></script>
+    <script type="text/javascript" src="apps/profile.js"></script>
   <!-- DEBUG
   -->
 

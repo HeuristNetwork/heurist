@@ -396,7 +396,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     },
     
     /**
-    * 
+    *  Fills give SELECT selObj with list of current user groups
     */
     createUserGroupsSelect: function(selObj, groups, topOptions, callback) {
 
@@ -418,7 +418,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
         
         var idx;
-        if(topOptions){
+        var addedontop = [];
+        if(topOptions){  //list of options that must be on top of list
             for (idx in topOptions)
             {
                 if(idx){
@@ -427,6 +428,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     if(!top.HEURIST.util.isnull(title))
                     {
                          top.HEURIST.util.addoption(selObj, key, title);
+                         addedontop.push(key);
                     }
                 }
             }
@@ -435,13 +437,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
             for (var idx in groups)
             {
-                if(idx){
-                    var groupID = idx;
-                    var name = groups[idx][1];
-                    if(!top.HEURIST.util.isnull(name))
-                    {
-                         top.HEURIST.util.addoption(selObj, groupID, name);
-                    }
+                if(idx && addedontop.indexOf(idx)<0){
+                        var groupID = idx;
+                        var name = groups[idx][1];
+                        if(!top.HEURIST.util.isnull(name))
+                        {
+                            top.HEURIST.util.addoption(selObj, groupID, name);
+                        }
                 }
             }
         }

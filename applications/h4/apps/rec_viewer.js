@@ -114,6 +114,7 @@ $.widget( "heurist.rec_viewer", {
               this.div_toolbar.show();
               this.div_content.show();
 
+              //reload tags for selected record
               if(this.recIDloaded!=this.options.recID){
                     this.recIDloaded = this.options.recID;
                     this.div_content.empty();
@@ -121,16 +122,16 @@ $.widget( "heurist.rec_viewer", {
                     this._renderHeader(); 
 
                     var that = this;
-                    //load all tags for current user and his groups with usagecount for current record
-                    top.HAPI.currentUser.usr_Tags = {};//reset
+                    that.options.user_Tags = {}; //reset
+                    //load all tags for current user and this groups with usagecount for current record
                     top.HAPI.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                     function(response) {
                         if(response.status == top.HAPI.ResponseStatus.OK){
-                            that.options.current_UGrpID = val;
-                            if(!top.HAPI.currentUser.usr_Tags){
-                                top.HAPI.currentUser.usr_Tags = {};
+                            for(uGrpID in response.data) {
+                                if(uGrpID){
+                                      that.options.user_Tags[uGrpID] = response.data[uGrpID];  
+                                }
                             }
-                            top.HAPI.currentUser.usr_Tags[val] = response.data;
                             that._renderTags();
                         }else{
                             top.HEURIST.util.showMsgErr(response);
@@ -180,13 +181,14 @@ $.widget( "heurist.rec_viewer", {
       
       var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
       
-      if(top.HAPI.currentUser.usr_Tags)
+      //if(top.HAPI.currentUser.usr_Tags)
+      if(this.options.user_Tags)
       {
           
             var groups = top.HAPI.currentUser.usr_GroupsList
             
             //groups.unshift(34);
-            groups[top.HAPI.currentUser.ugr_ID] = top.HR('Personal Tags');
+            groups[top.HAPI.currentUser.ugr_ID] = [ "admin", top.HR('Personal Tags')];
 
             for (var idx in groups)
             {
@@ -194,14 +196,14 @@ $.widget( "heurist.rec_viewer", {
                     var groupID = idx;
                     var groupName = groups[idx][1];
                     
-                    var tags = top.HAPI.currentUser.usr_Tags[groupID];
+                    var tags = this.options.user_Tags[groupID]; //top.HAPI.currentUser.usr_Tags[groupID];
                     var tags_list = "";
                     
                     var tagID;
                     for(tagID in tags) {
                         var tag = tags[tagID];
                         if(tag && tag[2]>0){
-                                tags_list = tags_list + "<a href='#'>"+tag[1]+"</a> ";
+                            tags_list = tags_list + "<a href='#' "+(top.HEURIST.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
                         }
                     }
                     
