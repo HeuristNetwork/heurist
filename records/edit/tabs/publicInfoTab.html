@@ -469,7 +469,7 @@ document.forms[0].heuristSubmit = function() {
 			checkSimilarElement.id = "check-similar";
 			document.forms[0].appendChild(checkSimilarElement);
 		}
-		checkSimilarElement.value = 1;
+		checkSimilarElement.value = top.HEURIST.util.getDisplayPreference("findFuzzyMatches")==='true'?1:0;
 	}
 	else if (checkSimilarElement) {
 		checkSimilarElement.parentNode.removeChild(checkSimilarElement);

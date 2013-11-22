@@ -49,8 +49,8 @@
     mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 
-    $checkSimilar = array_key_exists("check-similar", $_POST);
-    if ($checkSimilar) {
+    //$checkSimilar = array_key_exists("check-similar", );
+    if (@$_POST["check-similar"]=="1") {
         $rec_id = intval(@$_POST["recID"]);
         $rec_types = array(intval(@$_POST["rectype"]));
 
@@ -60,9 +60,10 @@
                 $fields["t:".$matches[1]] = $val;
             }
         }
+        
         $matches = findFuzzyMatches($fields, $rec_types, $rec_id);
 
-        if (count($matches)) {
+        if ($matches && count($matches)) {
             print '({ matches: ' . json_format($matches) . ' })';
             return;
         }
@@ -710,19 +711,23 @@ which is one step too many and has been removed from design by Ian in approx 201
     }
     class BibDetailResourceInput extends BibDetailInput {
         function inputOK($postVal, $dtyID, $rtyID) {
+            if($postVal){
             $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$postVal);
             
-error_log("select rec_RecTypeID from Records where rec_ID = ".$postVal);
-            if ($res){
-                $tempRtyID = mysql_fetch_row($res);
-                $tempRtyID = $tempRtyID[0];
-error_log("RES=".$tempRtyID);
-            } else {
+    error_log("select rec_RecTypeID from Records where rec_ID = ".$postVal);
+                if ($res){
+                    $tempRtyID = mysql_fetch_row($res);
+                    $tempRtyID = $tempRtyID[0];
+    error_log("RES=".$tempRtyID);
+                } else {
+                    return false;
+                }
+                $res = isValidID($tempRtyID,$dtyID,$rtyID);
+    error_log("VALID ID=".$res);
+                return $res;
+            }else{
                 return false;
             }
-            $res = isValidID($tempRtyID,$dtyID,$rtyID);
-error_log("VALID ID=".$res);
-            return $res;
         }
     }
     class BibDetailBooleanInput extends BibDetailInput {

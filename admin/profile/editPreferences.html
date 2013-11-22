@@ -52,7 +52,7 @@
 
 </head>
 
-<body class="popup" onLoad="showPreferences()" width="640" height="640">
+<body class="popup" onLoad="showPreferences()" width="640" height="660">
 
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
@@ -74,6 +74,9 @@
 		var rec = top.HEURIST.util.getDisplayPreference("defaultRecentPointerSearch"); // pointer field editing
 		document.getElementById("defaultRecentPointerSearch").checked
 			= (rec==='true');
+        var rec2 = top.HEURIST.util.getDisplayPreference("findFuzzyMatches"); // search similar on rec addition
+        document.getElementById("findFuzzyMatches").checked
+            = (rec2==='true');
 		var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
 		document.getElementById("defaultMyBookmarksSearch").checked
 			= (bkm==='true');
@@ -115,6 +118,7 @@
 		var fav = document.getElementById("favourites").value;
 		var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
 		var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
+        var rec2 = (document.getElementById("findFuzzyMatches").checked)?'true':'false';
 		var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
 		var asr = (document.getElementById("autoSelectRelated").checked)?'true':'false';
 		var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
@@ -164,6 +168,7 @@
 		"favourites",
 		"loadRelatedOnSearch",
 		"defaultRecentPointerSearch",
+        "findFuzzyMatches",
 		"defaultMyBookmarksSearch",
 		"showMyBookmarks",
 		"autoSelectRelated",
@@ -174,7 +179,7 @@
 		"showFavouritesSearch",
 		"report-output-limit",
 		"searchQueryInBrowser"],
-		[rpp,def,fav,rel,rec,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery]);
+		[rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery]);
 
 		/*
 		top.HEURIST.util.setDisplayPreference("defaultSearch", def);
@@ -252,6 +257,10 @@
   <div class="input-row">
     <div class="input-header-cell">When exiting record edit, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
 	<div class="input-header-cell">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+  </div>
+  <div class="input-row">
+    <div class="input-header-cell">Check for similar records on creation (can slow down new record save significantly)</div><div  class="input-cell"><input type="checkbox" id="findFuzzyMatches"></div>
+    <div class="input-header-cell"></div>
   </div>
 
   <div id="buttons" class="actionButtons">
