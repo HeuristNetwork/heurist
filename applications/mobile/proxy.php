@@ -1,4 +1,11 @@
 <?php
+    require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
+    if (@$httpProxy != '') {
+        define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+        if (@$httpProxyAuth != '') {
+            define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+        }
+    }
 
     $ttl = 86400; //cache timeout in seconds
 
@@ -95,8 +102,13 @@
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
 
     curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT'] );
-    curl_setopt($ch, CURLOPT_PROXY, "www-cache.usyd.edu.au:8080");
-    curl_setopt($ch, CURLOPT_PROXYUSERPWD, "aosmakov:3xwpcWfV");
+    
+    if ( defined("HEURIST_HTTP_PROXY") ) {
+      curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+      if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+          curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+      }
+    }
     curl_setopt($ch, CURLOPT_URL, $url);
     $raw = curl_exec($ch);
 

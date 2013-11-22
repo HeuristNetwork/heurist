@@ -54,6 +54,9 @@
 
     if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
       curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+      if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+          curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+      }
     }
 //DEBUG error_log(" url = ". $url);
 
