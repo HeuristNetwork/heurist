@@ -12,7 +12,9 @@ $.widget( "heurist.tag_assign", {
       current_UGrpID: null,
       // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
-      record_ids: null //array of record ids the tag selection will be applied for
+      record_ids: null, //array of record ids the tag selection will be applied for
+      
+      current_order: 0  // order by name
   },
 
   // the constructor
@@ -69,7 +71,7 @@ $.widget( "heurist.tag_assign", {
         this.wcontainer.addClass('ui-widget-content ui-corner-all').css('padding','0.4em').appendTo( this.element );
     }
 
-    //----------------------------------------
+    //---------------------------------------- HEADER
     // user group selector
     this.select_ugrp = $( "<select>", {width:'96%'} )
             .addClass("text ui-widget-content ui-corner-all")
@@ -104,8 +106,8 @@ $.widget( "heurist.tag_assign", {
     });
 
 
-    //----------------------------------------
-    this.input_search = $( "<input>", {width:'96%'} )
+    //---------------------------------------- SEARCH
+    this.input_search = $( "<input>", {width:'46%'} )
             .addClass("text ui-widget-content ui-corner-all")
             .appendTo( this.wcontainer );
 
@@ -119,6 +121,25 @@ $.widget( "heurist.tag_assign", {
           });
       }
     });
+    
+    //---------------------------------------- ORDER
+    this.select_order = $( "<select><option value='0'>"+
+    top.HR("by name")+"</option><option value='3'>"+
+    top.HR("by usage")+"</option><option value='2'>"+
+    top.HR("by date")+"</option><option value='5'>"+
+    top.HR("marked")+"</option></select>", {'min-width':'46%', 'padding-left':'10px'} )
+    
+            .addClass("text ui-widget-content ui-corner-all")
+            .appendTo( this.wcontainer );
+    this._on( this.select_order, {
+      change: function(event) {
+         var val = Number(event.target.value); //order
+         this.options.current_order = val;
+         this._renderTags();
+      }
+    });
+      
+    
             
     //----------------------------------------
     this.div_content = $( "<div>" )
@@ -159,7 +180,7 @@ $.widget( "heurist.tag_assign", {
         
         this.btn_assign = $( "<button>", {
                         id: 'assignTags',
-                        disabled: 'disabled',
+                        //disabled: 'disabled',
                         text: top.HR("Assign"),
                         title: top.HR("Assign selected tags")
                 })
@@ -197,6 +218,8 @@ $.widget( "heurist.tag_assign", {
     // remove generated elements
     this.input_search.remove();
     this.select_ugrp.remove();
+    this.select_order.remove();
+    
 
     if(this.edit_dialog){
         this.edit_dialog.remove();
@@ -221,16 +244,45 @@ $.widget( "heurist.tag_assign", {
             this.div_content.empty();  //clear
        }
 
+       /*var btn = $('#assignTags');
+       btn.addClass('ui-button-disabled ui-state-disabled');
+       btn.attr('disabled','disabled');       */
+
+
        if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID])
        {
                var that = this;
-               var tags = top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID];
-
+               var tags2 = top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID];
                var tagID;
-               for(tagID in tags) {
-                 if(tagID){
+               var tags = [];
+               for(tagID in tags2) {
+                    if(tagID){
+                        var tag = tags2[tagID];
+                        if(tag.length<5){
+                            tag.push(tagID);
+                            tag.push( !(that.options.isdialog || tag[3]<1) );
+                        }
+                        tags.push(tag);
+                    }
+               }
+               
+               tags.sort(function (a,b){
+                    var val = that.options.current_order;
+                    /*if(val==5){
+                        return 0;
+                    }else */
+                    if(val==0){
+                        return a[val]<b[val]?-1:1;
+                    }else{
+                        return a[val]<b[val]?1:-1;
+                    }
+               });               
+               
+               var i;
+               for(i=0; i<tags.length; ++i) {
 
-                    var tag = tags[tagID];
+                    var tag = tags[i];
+                    tagID = tag[4];
 
                     $tagdiv = $(document.createElement('div'));
 
@@ -243,13 +295,16 @@ $.widget( "heurist.tag_assign", {
                     $('<input>')
                             .attr('type','checkbox')
                             .attr('tagID', tagID )
-                            .attr('usage', tag[2])
-                            .attr('checked', (that.options.isdialog && tag[2])>0?true:false )
+                            .attr('usage', tag[3])
+                            .attr('checked', tag[5] )  //?false:true ))
                             .addClass('recordIcons')
                             .css('margin','0.4em')
-                            .click(function(){
+                            .click(function(event){
                                 
-                                if(that.options.isdialog){                                
+                                top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][$(this).attr('tagID')][5] = event.target.checked;
+                                //event.target.keepmark = event.target.checked; 
+                                
+                                if(that.options.isdialog){  //tag management                               
                                     var checkboxes = $(that.element).find('input:checked'); 
                                     var btns = $('.tags-actions');
                                     if(checkboxes.length>0){
@@ -265,13 +320,13 @@ $.widget( "heurist.tag_assign", {
                                     // and vs  usage==0 and checked
                                     var t_added = $(that.element).find('input[type="checkbox"][usage="0"]:checked');
                                     var t_removed = $(that.element).find('input[type="checkbox"][usage!="0"]:not(:checked)');
-                                    if(t_added.length>0 || t_removed.length>0){
+                                    /*if(t_added.length>0 || t_removed.length>0){
                                         btn.removeAttr('disabled');
                                         btn.removeClass('ui-button-disabled ui-state-disabled');
                                     }else{
                                         btn.addClass('ui-button-disabled ui-state-disabled');
                                         btn.attr('disabled','disabled');
-                                    }
+                                    }*/
                                     
                                 }
                                 //alert(this.checked);
@@ -294,7 +349,7 @@ $.widget( "heurist.tag_assign", {
                             //.addClass('recordIcons')
                             .css({'margin':'0.4em', 'height':'1.4em', 'position':'absolute','right':'60px'})
                             .css('display','inline-block')
-                            .html( tag[2] )
+                            .html( tag[3] )
                             .appendTo($tagdiv);
                         
                     if(this.options.isdialog){
@@ -320,8 +375,7 @@ $.widget( "heurist.tag_assign", {
                     }
 
 
-                 }
-               }
+               }//for
 
                /*$allrecs = this.div_content.find('.recordDiv');
                this._on( $allrecs, {
@@ -352,7 +406,7 @@ $.widget( "heurist.tag_assign", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
         
-        top.HEURIST.util.showMsgDlg("Delete? Please confirm", function(){
+        top.HEURIST.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
         
                     top.HAPI.RecordMgr.tag_delete(request,
                         function(response){
@@ -373,6 +427,21 @@ $.widget( "heurist.tag_assign", {
                     );
         }, "Confirmation");
   },
+  
+  // show edit dialog   
+  _mergeTag: function(){
+
+        var tagIDs = [];
+        
+        var checkboxes = $(this.element).find('input:checked'); 
+        checkboxes.each(function(i,e){ tagIDs.push($(e).attr('tagID')); });
+        
+        if(tagIDs.length<1) return;
+
+        this._editTag( null, tagIDs );
+      
+  },
+  
 
  /**
   * Assign values to UI input controls
@@ -403,8 +472,10 @@ $.widget( "heurist.tag_assign", {
 
   /**
   * Show dialogue to add/edit tag
+  * 
+  * if tagIDs is defined - replace old tags in this list to new one
   */
-  _editTag: function(tagID){
+  _editTag: function(tagID, tagIDs){
 
     if(  this.edit_dialog==null )
     {
@@ -461,7 +532,7 @@ $.widget( "heurist.tag_assign", {
                                 if(!top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID]){
                                     top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID] = {};
                                 }
-                                top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc];
+                                top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
 
                                 $dlg.dialog( "close" );
                                 that._renderTags();
@@ -518,7 +589,8 @@ $.widget( "heurist.tag_assign", {
   * Open itself as modal dialogue to manage all tags
   */
   _manageTags: function(){
-    showManageTags();
+        this.element.hide();
+        showManageTags();
   },
 
   /**
@@ -528,10 +600,10 @@ $.widget( "heurist.tag_assign", {
     
         //find checkbox that has usage>0 and unchecked 
         // and vs  usage==0 and checked
-        var t_added = $(that.element).find('input[type="checkbox"][usage="0"]:checked');
-        var t_removed = $(that.element).find('input[type="checkbox"][usage!="0"]:not(:checked)');
+        var t_added = $(this.element).find('input[type="checkbox"][usage="0"]:checked');
+        var t_removed = $(this.element).find('input[type="checkbox"][usage!="0"]:not(:checked)');
         
-        if(t_added.length>0 || t_removed.length>0)
+        if ((t_added.length>0 || t_removed.length>0) && this.options.current_UGrpID)
         {
         
             var toassign = [];
@@ -539,10 +611,10 @@ $.widget( "heurist.tag_assign", {
             var toremove = [];
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             
-             top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:val, recIDs:this.options.record_ids},
+             top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_UGrpID, recIDs:this.options.record_ids},
                 function(response) {
                     if(response.status == top.HAPI.ResponseStatus.OK){
-                        that.hide();
+                        this.element.hide();
                     }else{
                         top.HEURIST.util.showMsgErr(response);
                     }

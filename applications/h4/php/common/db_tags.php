@@ -113,7 +113,7 @@ function tagGetByRecords($system, $isfull, $recIDs, $ugrIDs=null){
 
     $mysqli = $system->get_mysqli();
     
-    $supinfo = $isfull?", tag_Text, tag_Description ":"";
+    $supinfo = $isfull?", tag_Text, tag_Description, tag_Modified ":"";
 
 /*    
     $query = "SELECT tag_ID ".$supinfo.", count(*) as tag_Usage"
@@ -228,7 +228,7 @@ function tagDelete($system, $tag_ids, $ugrID=null){
 
             if($res){
                 $cnt = $mysqli->affected_rows;
-                return array("status"=>HEURIST_OK, "data"=> $cnt);
+                return $cnt;
             }else{
                 $system->addError(HEURIST_DB_ERROR,"Can not delete tag", $mysqli->error );
                 return false;
@@ -313,6 +313,8 @@ function tagsAssign($system, $record_ids, $tag_ids, $tag_names=null, $ugrID=null
             return false;
         }
 
+        $mysqli = $system->get_mysqli();
+        
         //assign links
         $res = $mysqli->query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                       . 'select rec_ID, tag_ID from usrTags, Records '
@@ -353,7 +355,7 @@ function tagsAssign($system, $record_ids, $tag_ids, $tag_names=null, $ugrID=null
             $bookmarks_added = $mysqli->affected_rows;
         }
 
-        return array("status"=>HEURIST_OK, "data"=>array('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added));
+        return array('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added);
     }
 }
 
@@ -389,6 +391,8 @@ function tagsRemove($system, $record_ids, $tag_ids=null, $tag_names=null, $ugrID
         if($tag_ids){
             $query = $query. ' and tag_ID in (' . join(',', $tag_ids) . ')';
         }
+        
+        $mysqli = $system->get_mysqli();
 
         $res = $mysqli->query($query);
         if(!$res){
@@ -397,7 +401,7 @@ function tagsRemove($system, $record_ids, $tag_ids=null, $tag_names=null, $ugrID
         }
         $tag_count = $mysqli->affected_rows;
 
-        return array("status"=>HEURIST_OK, "data"=>array('tags_removed'=>$tag_count) );
+        return array('tags_removed'=>$tag_count);
     }
 }
 
@@ -420,6 +424,8 @@ function bookmarkRemove($system, $record_ids, $ugrID=null){
             $system->addError(HEURIST_INVALID_REQUEST);
             return false;
         }
+        
+        $mysqli = $system->get_mysqli();
 
         $res = $mysqli->query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_RecID where bkm_RecID in ('.join(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
         if(!$res){
@@ -432,7 +438,7 @@ function bookmarkRemove($system, $record_ids, $ugrID=null){
             return false;
         }
         $bookmarks_removed = $mysqli->affected_rows;
-        return array("status"=>HEURIST_OK, "data"=> $bookmarks_removed);
+        return $bookmarks_removed;
 
     }
 }
@@ -460,6 +466,7 @@ function bookmarkRating($system, $record_ids, $rating, $ugrID=null)
         }
         $rating = intval($rating);
 
+        $mysqli = $system->get_mysqli();
         $res = $mysqli->query('update usrBookmarks set bkm_Rating='
                     .$rating
                     .' where bkm_RecID in ('.join(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
@@ -468,7 +475,7 @@ function bookmarkRating($system, $record_ids, $rating, $ugrID=null)
             return false;
         }
         $bookmarks_updated = $mysqli->affected_rows;
-        return array("status"=>HEURIST_OK, "data"=> $bookmarks_updated);
+        return $bookmarks_updated;
 
     }
 }

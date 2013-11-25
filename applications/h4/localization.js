@@ -49,6 +49,11 @@ language: 'Русский',
 'more': 'ещё',
 'edit': 'править',
 
+'by name': 'по имени',
+'by usage': 'по использованию',
+'by date': 'по дате',
+'marked': 'отмеченные',
+
 'Manage tags': 'Управление ярлыками',
 'Create new tag': 'Создать ярлык',
 'Name': 'Название',
@@ -72,7 +77,9 @@ language: 'Русский',
 'Recent changes': 'Свежие записи',
 'All (date order)': 'Все (сорт по дате)',
 'Edit saved search': 'Редактировать поиск',
-'Delete saved search': 'Удалить сохраненный поиск'
+'Delete saved search': 'Удалить сохраненный поиск',
+
+'Delete? Please confirm': 'Удалить? Подвтердите'
 };
 
 regional['de'] = {

@@ -45,6 +45,9 @@ if( ! $system->init(@$_REQUEST['db']) ){
         } else if ($action=="search" && @$_REQUEST['UGrpID'] ) {
 
             $res = tagGetByRecords($system, true, @$_REQUEST['recIDs'], $_REQUEST['UGrpID']);
+            if ( is_array($res) ) {
+                $res['recIDs'] = @$_REQUEST['recIDs'];
+            }
             /*
                 $res = tagGetByUser($system, false, $_REQUEST['UGrpID']);
             */
@@ -52,15 +55,17 @@ if( ! $system->init(@$_REQUEST['db']) ){
         } else if ($action=="set") {  // assign/remove tags to records
 
             if(@$_REQUEST['assign']){
-                $res = tagsAssign($system, @$_REQUEST['recs'], @$_REQUEST['assign'], null, @$_REQUEST['UGrpID']);
+                $res = tagsAssign($system, @$_REQUEST['recIDs'], @$_REQUEST['assign'], null, @$_REQUEST['UGrpID']);
+            }else{
+                $res = array();
             }
 
-            if($res['status']==HEURIST_OK && @$_REQUEST['remove']){
-                $res2 = tagsRemove($system, @$_REQUEST['recs'], @$_REQUEST['remove'], null, @$_REQUEST['UGrpID']);
-                if($res2['status']==HEURIST_OK){
-                    $res['data'] = array_merge($res['data'], $res2['data']);
+            if(!is_bool($res) && @$_REQUEST['remove']){
+                $res2 = tagsRemove($system, @$_REQUEST['recIDs'], @$_REQUEST['remove'], null, @$_REQUEST['UGrpID']);
+                if(is_bool($res) && !$res){
+                    $res = false;       
                 }else{
-                    $res = $res2;
+                    $res = array_merge($res, $res2);
                 }
             }
 
@@ -69,7 +74,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
             $system->addError(HEURIST_INVALID_REQUEST, "KUKU");
         }
 
-        if(is_bool($res) && !$res){
+        if( is_bool($res) && !$res ){
             $response = $system->getError();
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);

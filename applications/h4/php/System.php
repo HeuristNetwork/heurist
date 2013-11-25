@@ -168,7 +168,7 @@ class System {
     }
     
     /**
-    * Returns arrray of all current user groups and user id 
+    * Returns array of ID of all groups for current user plus current user ID
     */
     public function get_user_group_ids(){
 

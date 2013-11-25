@@ -24,6 +24,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     isempty: function(obj){
         return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
     },
+    
+    isNumber: function (n) {
+        //return typeof n === 'number' && isFinite(n);
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    },
 
     getUrlQueryAndDomain: function(qsearch)            
     {
@@ -172,7 +177,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //prepare tree
         //
-        if(!isNaN(Number(termIDTree))){
+        if(!top.HEURIST.util.isNumber(termIDTree)){
             //this is vocabulary id - show list of all terms for this vocab
             var tree = terms.treesByDomain[datatype];
             termIDTree = tree[termIDTree];

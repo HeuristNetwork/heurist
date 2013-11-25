@@ -115,7 +115,7 @@ $.widget( "heurist.rec_viewer", {
               this.div_content.show();
 
               //reload tags for selected record
-              if(this.recIDloaded!=this.options.recID){
+              if(this.recIDloaded != this.options.recID){
                     this.recIDloaded = this.options.recID;
                     this.div_content.empty();
                     //alert('show '+this.options.recID);
@@ -127,12 +127,17 @@ $.widget( "heurist.rec_viewer", {
                     top.HAPI.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                     function(response) {
                         if(response.status == top.HAPI.ResponseStatus.OK){
-                            for(uGrpID in response.data) {
-                                if(uGrpID){
-                                      that.options.user_Tags[uGrpID] = response.data[uGrpID];  
+                            
+                            if(that.options.recID == response.data['recIDs']){ //not outdated
+                            
+                                for(uGrpID in response.data) {
+                                    if(uGrpID && top.HEURIST.util.isNumber(uGrpID)){
+                                          that.options.user_Tags[uGrpID] = response.data[uGrpID];  
+                                    }
                                 }
+                                that._renderTags();
+                            
                             }
-                            that._renderTags();
                         }else{
                             top.HEURIST.util.showMsgErr(response);
                         }
@@ -202,7 +207,7 @@ $.widget( "heurist.rec_viewer", {
                     var tagID;
                     for(tagID in tags) {
                         var tag = tags[tagID];
-                        if(tag && tag[2]>0){
+                        if(tag && tag[3]>0){ //usage
                             tags_list = tags_list + "<a href='#' "+(top.HEURIST.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
                         }
                     }
