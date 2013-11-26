@@ -192,7 +192,7 @@ function tagSave($system, $tag){
         }
 
         $res = mysql__insertupdate($system->get_mysqli(), "usrTags", "tag", $tag);
-        if(is_numeric($res)>0){
+        if(is_numeric($res) && $res>0){
             return $res; //returns affected record id
         }else{
             $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
@@ -224,7 +224,7 @@ function tagDelete($system, $tag_ids, $ugrID=null){
         //$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
         if (is_array($tag_ids) && count($tag_ids)>0) {
             $mysqli = $system->get_mysqli();
-            $res = $mysqli->query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. join(', ', $tag_ids) .') and tag_UGrpID='.$ugrID);
+            $res = $mysqli->query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. implode(', ', $tag_ids) .') and tag_UGrpID='.$ugrID);
 
             if($res){
                 $cnt = $mysqli->affected_rows;
@@ -243,15 +243,73 @@ function tagDelete($system, $tag_ids, $ugrID=null){
 }
 
 /**
-* NOT USED 
-* put your comment there...
+* Replace old tags with new one and delete old ones
 *
 * @param mixed $system
-* @param mixed $tag_id_old
+* @param mixed $tag_ids - to be replaced and deleted
 * @param mixed $tag_id_new
 * @param mixed $ugrID
 */
-function tagReplace($system, $tag_id_old, $tag_id_new, $ugrID=null){
+function tagReplace($system, $tag_ids, $tag_id_new, $ugrID=null)
+{
+    
+   
+    $ugrID = $system->is_admin2($ugrID);
+    if (!$ugrID) {
+        $system->addError(HEURIST_REQUEST_DENIED);
+        return false;
+    }else{
+        
+        if(is_string($tag_ids)){
+            $tag_ids = explode(",", $tag_ids);
+        }
+        if (is_array($tag_ids) && count($tag_ids)>0 && intval($tag_id_new)) {
+            
+            $mysqli = $system->get_mysqli();
+            
+            $query = 'select count(*) from usrTags where tag_ID in ('.$tag_id_new.','.implode(', ', $tag_ids).') and tag_UGrpID='.$ugrID;
+            $cnt = mysql__select_value($mysqli, $query);
+            
+           
+            if($cnt!=(count($tag_ids)+1)){
+                $system->addError(HEURIST_INVALID_REQUEST, "Not found all tags");
+                return false;
+            }
+
+            //add new links                
+            $query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
+                      . 'select distinct rtl_RecId, '.$tag_id_new.' from usrRecTagLinks where rtl_TagID in ('. implode(', ', $tag_ids) .')';
+            
+            $res = $mysqli->query($query);
+           
+//error_log(">>>".$query);
+
+            $res = $mysqli->query($query);
+            if($res){
+                $cnt = $mysqli->affected_rows;
+//error_log(">>>".$cnt);                
+                //delete old ones
+                $res = tagDelete($system, $tag_ids, $ugrID);
+                if(is_numeric($res) && $res>0){
+                    return array('tags_deleted'=>$res, 'taglinks_replased'=>$cnt);
+                }else{
+                    return false;
+                }
+            }else{
+                $system->addError(HEURIST_DB_ERROR,"Can not replase tag links", $mysqli->error );
+                return false;
+            }
+            
+        }else{
+            $system->addError(HEURIST_INVALID_REQUEST);
+            return false;
+        }
+
+    }
+}
+
+//
+function tagReplace_OLD_TODELETE($system, $tag_id_old, $tag_id_new, $ugrID=null){
     $ugrID = $system->is_admin2($ugrID);
     if (!$ugrID) {
         $system->addError(HEURIST_REQUEST_DENIED);
@@ -260,7 +318,7 @@ function tagReplace($system, $tag_id_old, $tag_id_new, $ugrID=null){
         if(intval($tag_id_old) && intval($tag_id_new) && $tag_id_new!=$tag_id_old)
         {
             $mysqli = $system->get_mysqli();
-            $cnt = mysql__select_value($mysqli, 'select count() from usrTags where tag_ID in ('.$tag_id_new.','.$tag_id_old.') and tag_UGrpID='.$ugrID);
+            $cnt = mysql__select_value($mysqli, 'select count(*) from usrTags where tag_ID in ('.$tag_id_new.','.$tag_id_old.') and tag_UGrpID='.$ugrID);
             if($cnt==2){
                 $res = $mysqli->query('update usrRecTagLinks set rtl_TagID = '.$tag_id_new.' where rtl_TagID = '.$tag_id_old);
                 if($res){
@@ -318,8 +376,8 @@ function tagsAssign($system, $record_ids, $tag_ids, $tag_names=null, $ugrID=null
         //assign links
         $res = $mysqli->query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                       . 'select rec_ID, tag_ID from usrTags, Records '
-                      . ' where rec_ID in (' . join(',', $record_ids) . ') '
-                      . ' and tag_ID in (' . join(',', $tag_ids) . ')'
+                      . ' where rec_ID in (' . implode(',', $record_ids) . ') '
+                      . ' and tag_ID in (' . implode(',', $tag_ids) . ')'
                       . ' and tag_UGrpID = '.$ugrID);
         if(!$res){
             $system->addError(HEURIST_DB_ERROR,"Can not assign tags", $mysqli->error );
@@ -342,7 +400,7 @@ function tagsAssign($system, $record_ids, $tag_ids, $tag_names=null, $ugrID=null
                     .' (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)'
                     .' select ' . $ugrID . ', now(), now(), rec_ID from Records '
                     .' left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.$ugrID
-                    .' where bkm_ID is null and rec_ID in (' . join(',', $record_ids) . ')';
+                    .' where bkm_ID is null and rec_ID in (' . implode(',', $record_ids) . ')';
 
             //$stmt = $mysqli->query($query);
 
@@ -386,10 +444,10 @@ function tagsRemove($system, $record_ids, $tag_ids=null, $tag_names=null, $ugrID
 
         $query = 'delete usrRecTagLinks from usrRecTagLinks'
                  . ' left join usrTags on tag_ID = rtl_TagID'
-                 . ' where rtl_RecID in (' . join(',', $record_ids) . ')'
+                 . ' where rtl_RecID in (' . implode(',', $record_ids) . ')'
                  . ' and tag_UGrpID = ' . $ugrID;
         if($tag_ids){
-            $query = $query. ' and tag_ID in (' . join(',', $tag_ids) . ')';
+            $query = $query. ' and tag_ID in (' . implode(',', $tag_ids) . ')';
         }
         
         $mysqli = $system->get_mysqli();
@@ -427,12 +485,12 @@ function bookmarkRemove($system, $record_ids, $ugrID=null){
         
         $mysqli = $system->get_mysqli();
 
-        $res = $mysqli->query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_RecID where bkm_RecID in ('.join(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
+        $res = $mysqli->query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_RecID where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
         if(!$res){
             $system->addError(HEURIST_DB_ERROR,"Can not remove tags", $mysqli->error );
             return false;
         }
-        $res = $mysqli->query('delete from usrBookmarks where bkm_RecID in ('.join(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
+        $res = $mysqli->query('delete from usrBookmarks where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
         if(!$res){
             $system->addError(HEURIST_DB_ERROR,"Can not remove bookmarks", $mysqli->error );
             return false;
@@ -469,7 +527,7 @@ function bookmarkRating($system, $record_ids, $rating, $ugrID=null)
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query('update usrBookmarks set bkm_Rating='
                     .$rating
-                    .' where bkm_RecID in ('.join(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
+                    .' where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
         if(!$res){
             $system->addError(HEURIST_DB_ERROR,"Can not remove bookmarks", $mysqli->error );
             return false;

@@ -59,6 +59,7 @@ $.widget( "heurist.rec_list", {
           if(this.menu_tags){
 
               var menu = $( this.menu_tags )
+                    .tag_assign( 'option', 'record_ids', null )
                     .show()
                     .position({my: "left top", at: "left bottom", of: this.btn_tags });
 

@@ -211,7 +211,7 @@ $.widget( "heurist.rec_actions", {
 
        this.menu_tags = $('#heurist-tags');
 
-       if(this.menu_tags.length<1){
+       if(this.menu_tags.length<1){  //create new widget
            this.menu_tags = $('<div id="heurist-tags">')
                 .addClass('menu-or-popup')
                 .css('position','absolute')

@@ -383,6 +383,15 @@ function hAPI(_db, _oninit) { //, _currentUser
                  if(request) request.a = 'set';
                  _callserver('record_tags', request, callback);
             }
+            
+            // remove tag
+            // request  a: replace
+            //          ids - list of tag ids to be replaced and deleted
+            //          new_id - new tag id
+            ,tag_replace: function(request, callback){
+                 if(request) request.a = 'replace';
+                 _callserver('record_tags', request, callback);
+            }
 
 
         }

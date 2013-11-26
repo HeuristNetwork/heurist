@@ -206,11 +206,20 @@ $.widget( "heurist.tag_assign", {
       this._super( key, value );
 
       if(key=='record_ids'){
-            top.HAPI.currentUser.usr_Tags = {}; //clear all  
-            this.options.current_UGrpID = null;
-            this.select_ugrp.change();
+            this._reloadTags();
       }
-  },  
+  },     
+  
+  _reloadTags: function(uGrpID){
+      if(uGrpID){
+          top.HAPI.currentUser.usr_Tags[uGrpID] = null;
+      }else{
+          top.HAPI.currentUser.usr_Tags = {}; //clear all  
+      }      
+      this.options.current_UGrpID = null;
+      this.select_ugrp.change();
+  },
+  
   /* private function */
   // events bound via _on are removed automatically
   // revert other modifications here
@@ -438,7 +447,7 @@ $.widget( "heurist.tag_assign", {
         
         if(tagIDs.length<1) return;
 
-        this._editTag( null, tagIDs );
+        this._editTag( null, tagIDs.join(",") );
       
   },
   
@@ -446,7 +455,7 @@ $.widget( "heurist.tag_assign", {
  /**
   * Assign values to UI input controls
   */
-  _fromDataToUI: function(tagID){
+  _fromDataToUI: function(tagID, tagIDs){
 
       var $dlg = this.edit_dialog;
       if($dlg){
@@ -464,9 +473,12 @@ $.widget( "heurist.tag_assign", {
                tag_name.val(tag[0]);
                tag_desc.val(tag[1]);
             }else{ //add new saved search
-                $dlg.find('input').val('');
+                $dlg.find('input').val('');  //clear all 
                 tag_name.val(this.input_search.val());
             }
+            
+            var tag_ids = $dlg.find('#tag_IDs_toreplace');
+            tag_ids.val(tagIDs);
       }
   },
 
@@ -476,14 +488,18 @@ $.widget( "heurist.tag_assign", {
   * if tagIDs is defined - replace old tags in this list to new one
   */
   _editTag: function(tagID, tagIDs){
-
+      
+    var sTitle = top.HR(top.HEURIST.util.isnull(tagIDs)
+                                    ?(top.HEURIST.util.isempty(tagID)?"Add Tag":"Edit Tag")
+                                    :"Define new tag that replaces old ones");
+      
     if(  this.edit_dialog==null )
     {
         var that = this;
         var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
         //load edit dialogue
-        $dlg.load("apps/tag_edit.html", function(){
+        $dlg.load("apps/tag_edit2.html", function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -494,7 +510,7 @@ $.widget( "heurist.tag_assign", {
 
             var allFields = $dlg.find('input');
 
-            that._fromDataToUI(tagID);
+            that._fromDataToUI(tagID, tagIDs);
 
             function __doSave(){
 
@@ -508,6 +524,7 @@ $.widget( "heurist.tag_assign", {
                     var tag_id = $dlg.find('#tag_ID').val();
                     var tag_text = $dlg.find('#tag_Text').val();
                     var tag_desc = $dlg.find('#tag_Description').val();
+                    var tag_ids = $dlg.find('#tag_IDs_toreplace').val();
 
                     var request = {tag_Text: tag_text,
                             tag_Description: tag_desc,
@@ -532,10 +549,39 @@ $.widget( "heurist.tag_assign", {
                                 if(!top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID]){
                                     top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID] = {};
                                 }
-                                top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                
+                                if(isEdit){
+                                    var oldtag = top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID];
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                }else{
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                }
 
-                                $dlg.dialog( "close" );
-                                that._renderTags();
+                                if(!top.HEURIST.util.isnull(tag_ids)){ 
+                                    //send request to replace selected tags with new one
+                                    var request = {ids: tag_ids,
+                                                   new_id: tagID,
+                                                   UGrpID: that.options.current_UGrpID};
+                                    
+                                    top.HAPI.RecordMgr.tag_replace(request, function(response){
+                                            if(response.status == top.HAPI.ResponseStatus.OK){
+                                                $dlg.dialog( "close" );
+                                                
+                                                that._reloadTags(that.options.current_UGrpID);
+                                                
+                                                //that._renderTags();
+                                            }else{
+                                                message.addClass( "ui-state-highlight" );
+                                                message.text(response.message);
+                                            }
+                                    });
+                                    
+                                }else{
+                                    $dlg.dialog( "close" );
+                                    that._renderTags();    
+                                }
+                                
+                                
                             }else{
                                 message.addClass( "ui-state-highlight" );
                                 message.text(response.message);
@@ -560,7 +606,7 @@ $.widget( "heurist.tag_assign", {
               width: 350,
               modal: true,
               resizable: false,
-              title: top.HR('Edit tag'),
+              title: sTitle,
               buttons: [
                 {text:top.HR('Save'), click: __doSave},
                 {text:top.HR('Cancel'), click: function() {
@@ -577,12 +623,18 @@ $.widget( "heurist.tag_assign", {
 
         });
     }else{
+
+        var message = this.edit_dialog.find('.messages');        
+        message.removeClass( "ui-state-highlight" );
+        message.text("");
+        
         //show dialogue
-        this._fromDataToUI(tagID);
+        this._fromDataToUI(tagID, tagIDs);
+        this.edit_dialog.dialog( "option", "title", sTitle )
         this.edit_dialog.dialog("open");
         this.edit_dialog.zIndex(991);
     }
-
+    
   },
 
   /**
@@ -610,11 +662,12 @@ $.widget( "heurist.tag_assign", {
             t_added.each(function(i,e){ toassign.push($(e).attr('tagID')); });
             var toremove = [];
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
+            var that = this;
             
              top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_UGrpID, recIDs:this.options.record_ids},
                 function(response) {
                     if(response.status == top.HAPI.ResponseStatus.OK){
-                        this.element.hide();
+                        that.element.hide();
                     }else{
                         top.HEURIST.util.showMsgErr(response);
                     }
@@ -625,6 +678,7 @@ $.widget( "heurist.tag_assign", {
   
   show: function(){
     if(this.options.isdialog){
+        this._reloadTags();
         this.element.dialog("open");
     }else{
         //fill selected value this.element

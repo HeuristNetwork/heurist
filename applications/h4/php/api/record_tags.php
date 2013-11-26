@@ -52,6 +52,10 @@ if( ! $system->init(@$_REQUEST['db']) ){
                 $res = tagGetByUser($system, false, $_REQUEST['UGrpID']);
             */
 
+        } else if ($action=="replace" && @$_REQUEST['UGrpID'] ) {
+            
+            $res = tagReplace($system, $_REQUEST['ids'], $_REQUEST['new_id'], @$_REQUEST['UGrpID']);
+            
         } else if ($action=="set") {  // assign/remove tags to records
 
             if(@$_REQUEST['assign']){
@@ -71,7 +75,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
 
         } else {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "KUKU");
+            $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         }
 
         if( is_bool($res) && !$res ){
