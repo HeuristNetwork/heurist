@@ -136,8 +136,10 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }else{
             
                 $tarfile = $folder . "/" . $upload["name"];
-                $tarfile = $folder . "/module.tar.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
+                $tarfile = $folder . "/project.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
 
+/*debug print "<br>temp :".$tmp_name;
+print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
 
                 print "<h3>Extracting FAIMS database from tarball to ".$folder_proj."/db.sqlite3</h3><br>";
                 ob_flush();flush();
@@ -156,6 +158,8 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 $cmdline = "tar -xvf ".$tarfile." -C ".$folder;
                 //tar --extract --file={tarball.tar} {file}
                 //tar -xvf {tarball.tar} {path/to/file}
+
+/*debug print "<br>cmdline :".$cmdline; */
                
                 $res1 = 0;
                 $output1 = exec($cmdline, $output, $res1);
