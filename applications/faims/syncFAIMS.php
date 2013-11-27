@@ -108,7 +108,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $tmp_name = $upload["tmp_name"];
             
             $folder = HEURIST_UPLOAD_DIR."faims/import"; //.;
-            $folder_proj = $folder."/project";
+            $folder_proj = $folder."/module";
 
             //create export folder
             if(!file_exists($folder)){
@@ -136,7 +136,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }else{
             
                 $tarfile = $folder . "/" . $upload["name"];
-                $tarfile = $folder . "/project.tar.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
+                $tarfile = $folder . "/module.tar.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
 
 
                 print "<h3>Extracting FAIMS database from tarball to ".$folder_proj."/db.sqlite3</h3><br>";
