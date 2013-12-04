@@ -64,11 +64,14 @@ require_once('libs.inc.php');
 	$dtTerms3 = null;
 
 	$gparams = null;
+    $loaded_recs = array();
+    $max_allowed_depth = 2;
 
 
 	if(array_key_exists("q", $_REQUEST) &&
 			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 	{
+
 			executeSmartyTemplate($_REQUEST);
 	}
 
@@ -79,7 +82,7 @@ require_once('libs.inc.php');
 */
 function executeSmartyTemplate($params){
 
-	global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams;
+	global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth;
 
 	mysql_connection_overwrite(DATABASE); //AO: mysql_connection_select - does not work since there is no access to stored procedures(getTemporalDateString) Steve uses in some query
 											//TODO SAW  grant ROuser EXECUTE on getTemporalDate and any other readonly procs
@@ -123,7 +126,7 @@ function executeSmartyTemplate($params){
 
 		echo $error;
 
-		if($publishmode>0 && $outputfile!=null){ //save empty outpurt inot file
+		if($publishmode>0 && $outputfile!=null){ //save empty output into file
 			save_report_output2("<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
 		}
 
@@ -134,6 +137,25 @@ function executeSmartyTemplate($params){
 	$template_file = (array_key_exists('template',$params)?$params['template']:null);
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);
+    
+    if($template_file){
+        $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
+    }else{
+        $content = $template_body; 
+    }
+
+    $k = strpos($content, "{*depth");
+    $kp = 8;
+    if(is_bool($k) && !$k){
+        $k = strpos($content, "{* depth");
+        $kp = 9;
+    }
+    if(is_numeric($k) && $k>=0){
+        $nd = substr($content,$k+$kp, 1); //strpos($content,"*}",$k)-$k-8);
+        if(is_numeric($nd) && $nd<3){
+          $max_allowed_depth = $nd;  
+        } 
+    }
 
 	//convert to array that will assigned to smarty variable
 	$records =  $qresult["records"];
@@ -144,7 +166,7 @@ function executeSmartyTemplate($params){
 		$res1 = getRecordForSmarty($rec, 0, $k);
 		$k++;
 		array_push($results, $res1);
-	}
+    }   
 	//activate default template - generic list of records
 
 	$smarty->assign('results', $results);
@@ -532,7 +554,8 @@ function _add_term_val($res, $val){
 // @todo - implement as method
 function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $recID){
 
-	global $dtStructs, $dtTerms, $rtStructs;
+	global $dtStructs, $dtTerms, $rtStructs, $loaded_recs, $max_allowed_depth;
+    
 	$dtNames = $dtStructs['names'];
 	$rtNames = $rtStructs['names'];
 	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
@@ -716,6 +739,9 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 			case 'relmarker':
 			case 'resource': // link to another record type
 
+//error_log("dtValue>>>>>".print_r($dtValue,true));
+//break;            
+            
 				//@todo - parsing will depend on depth level
 				// if there are not mentions about this record type in template (based on obtained array of variables)
 				// we will create href link to this record
@@ -729,7 +755,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 				foreach ($dtValue as $key => $value){
 
-					if($recursion_depth<2 && (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
+					if($recursion_depth<$max_allowed_depth && (array_key_exists('id',$value) || array_key_exists('RelatedRecID',$value)))
 					{
 
 						//this is record ID
@@ -741,52 +767,59 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 						}
 
 						//get full record info
-						$record = loadRecord($recordID); //from search/getSearchResults.php
+                        if(@$loaded_recs[$recordID]){
+                            //already loaded
+                            array_push($res, $loaded_recs[$recordID]);
+                            
+                        }else{
+                        
+						    $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
 
-						$res0 = null;
-						if(true){  //64719  45171   48855    57247
-							$res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
-							$order++;
-						}
+						    $res0 = null;
+						    if(true){  //64719  45171   48855    57247
+							    $res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
+							    $order++;
+						    }
 
-						if($res0){
+						    if($res0){
 
-							if($rectypeID==null && @$res0['recRecTypeID']){
-								$rectypeID = $res0['recRecTypeID'];
-								/* TEMP DEBUG
-								if(array_key_exists($rectypeID, $rtNames))
-								{
-									$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
-									$isunconstrained = ($pointerIDs=="");
-if($isunconstrained){
-/*****DEBUG****///error_log($dt_label.">>>>>>>");
-/*}
-								}            */
-							}
+							    if($rectypeID==null && @$res0['recRecTypeID']){
+								    $rectypeID = $res0['recRecTypeID'];
+								    /* TEMP DEBUG
+								    if(array_key_exists($rectypeID, $rtNames))
+								    {
+									    $pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
+									    $isunconstrained = ($pointerIDs=="");
+    if($isunconstrained){
+    /*****DEBUG****///error_log($dt_label.">>>>>>>");
+    /*}
+								    }            */
+							    }
 
-							//add relationship specific variables
-							if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
-									$res0["recRelationType"] = $value['RelTerm'];
-									/*if(array_key_exists('interpRecID', $value)){
-										$record = loadRecord($value['interpRecID']);
-										$res0["recRelationInterpretation"] = getRecordForSmarty($record, $recursion_depth+2, $order);
-									}*/
-									if(array_key_exists('Notes', $value)){
-										$res0["recRelationNotes"] = $value['Notes'];
-									}
-									if(array_key_exists('StartDate', $value)){
-										$res0["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
-									}
-									if(array_key_exists('EndDate', $value)){
-										$res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
-									}
+							    //add relationship specific variables
+							    if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
+									    $res0["recRelationType"] = $value['RelTerm'];
+									    /*if(array_key_exists('interpRecID', $value)){
+										    $record = loadRecord($value['interpRecID']);
+										    $res0["recRelationInterpretation"] = getRecordForSmarty($record, $recursion_depth+2, $order);
+									    }*/
+									    if(array_key_exists('Notes', $value)){
+										    $res0["recRelationNotes"] = $value['Notes'];
+									    }
+									    if(array_key_exists('StartDate', $value)){
+										    $res0["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
+									    }
+									    if(array_key_exists('EndDate', $value)){
+										    $res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
+									    }
 
-/*****DEBUG****///error_log(">>>>RECID=".$recordID." >>>>>".print_r($res0, true));
-							}
+    /*****DEBUG****///error_log(">>>>RECID=".$recordID." >>>>>".print_r($res0, true));
+							    }
 
-							array_push($res, $res0);
-						}
-
+                                $loaded_recs[$recordID] = $res0;
+							    array_push($res, $res0);
+                            }
+                        }
 					}
 				}//for each repeated value
 
@@ -1094,5 +1127,4 @@ function smarty_function_wrap($params, &$smarty)
 		return '';
 	}
 }
-
 ?>
