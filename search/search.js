@@ -5054,11 +5054,11 @@ function layoutAppPanel(isToggle,newWidth){
 		layout.getUnitByPosition('right').collapse();
 		appPanelButton.className +=" closed";
 		//appPanelButton.style.width = "20px";
-		appPanelButton.title = "Show Applications";
+		appPanelButton.title = "Show Applications Panel";
 	}else{
 		layout.getUnitByPosition('right').expand();
 		appPanelButton.className = appPanelButton.className.replace(" closed", "");
-		appPanelButton.title = "Hide Applications";
+		appPanelButton.title = "Hide Applications Panel";
 	}
 	top.HEURIST.util.setDisplayPreference(["oldRightWidth","applicationPanel"], [oldRightWidth,status], null, null, true, true);
 	layout.resize();
