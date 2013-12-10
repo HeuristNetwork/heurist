@@ -156,6 +156,7 @@ function executeSmartyTemplate($params){
           $max_allowed_depth = $nd;  
         } 
     }
+    //end pre-parsing of template
 
 	//convert to array that will assigned to smarty variable
 	$records =  $qresult["records"];
@@ -400,7 +401,6 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 //
 // convert record array to array to be assigned to smarty variable
 //
-//
 // @todo - implement as method
 function getRecordForSmarty($rec, $recursion_depth, $order){
 
@@ -456,7 +456,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 		}
 
 		/* find related records */
-		if($relRT>0 && $relSrcDT>0 && $relTrgDT>0){
+		if($recursion_depth==0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
 
 			$dtValue = array();
 
@@ -485,7 +485,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 					}
 
 
-					$dt = getDetailForSmarty(-1, $dtValue, $recursion_depth, $recTypeID, $record["recID"]);
+					$dt = getDetailForSmarty(-1, $dtValue, 2, $recTypeID, $record["recID"]);
 					if($dt){
 						$record = array_merge($record, $dt);
 					}
@@ -571,6 +571,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 		if($dtKey<1){
 			$dt_label = "Relationship";
+            $dtname = "Relationship";
 /*****DEBUG****///error_log("111>>>>>".print_r($dtValue, true));
 /*****DEBUG****///error_log("222>>>>>".$recTypeID);
 
@@ -581,7 +582,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
 				//$dtname = getVariableNameForSmarty($dt_label);
 			}
-			$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
+			$dtname = "f".$dtKey; //ART 23013-12-09 getVariableNameForSmarty($dtNames[$dtKey]);
 		}
 
 
@@ -832,12 +833,18 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 					}else{
 						$recordTypeName = $rtNames[$rectypeID];
 					}*/
-                    if(@$dt_label){
-					    $recordTypeName = $dt_label;
+                    
 
+                    
+                    if(@$dt_label){
+                        /* ART 2013-012-09                    
+					    $recordTypeName = $dt_label;
 					    $recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
+                        */
+                        $res = array( $dtname =>$res );
                     }
+                    
 				}else{
 					$res = null;
 				}
@@ -1127,4 +1134,25 @@ function smarty_function_wrap($params, &$smarty)
 		return '';
 	}
 }
+//-----------------------------------------------------------------------
+
+function getSmartyVars($string){
+  // regexp
+  $fullPattern = '`{[^\\$]*\\$([a-zA-Z0-9]+)[^\\}]*}`';
+  $separateVars = '`[^\\$]*\\$([a-zA-Z0-9]+)`';
+
+  $smartyVars = array();
+  // We start by extracting all the {} with var embedded
+  if(!preg_match_all($fullPattern, $string, $results)){
+    return $smartyVars;
+  }
+  // Then we extract all smarty variables
+  foreach($results[0] AS $result){
+    if(preg_match_all($separateVars, $result, $matches)){
+      $smartyVars = array_merge($smartyVars, $matches[1]);
+    }
+  }
+  return array_unique($smartyVars);
+}
+
 ?>

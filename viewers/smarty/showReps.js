@@ -51,7 +51,7 @@ function ShowReps() {
 	var _className = "ShowReps",
 		_originalFileName,
 		//squery_all,squery_sel,squery_main,
-		_variables, //object with all variables
+		_variables, //object from server - record type tree
 		_varsTree, //treeview object
 		_needListRefresh = false, //if true - reload list of templates after editor exit
 		_keepTemplateValue,
@@ -291,40 +291,58 @@ function ShowReps() {
 			if(Hul.isnull(context)){
 				return;
 			}
-			if(context===false || Hul.isnull(context['text'])){
+			if(context===false){
 				alert('No template generated');
 				return;
 			}
 
 			if(isLoadGenerated){
 
-				if(_isEditorVisible()){
+				if(_isEditorVisible()){ //NOT USED
 					var ed = tinyMCE.get('edTemplateBody');
 					ed.setContent(context['text']);
 				}else if(true) {
 
 					//ApplyLineBreaks
-					var text = context['text'];
-					var k = text.indexOf("\\n");
+					var text = [
+            '{* This is a very simple Smarty report template which you can edit into something more sophisticated.',
+            '   Enter html for web pages or other text format. Use tree on right to insert fields.',
+            '   Use this format to include comments in your file, use <!-- --> for output of html comments.',
+            '   Smarty help describes many functions you can apply, loop counting/summing, custom fucntions et.*}',
+            '',
+            '<h2>Title for report</h2> {* Text here appears at start of report *}',
+            '',
+            '<hr>',
+            '{foreach $results as $r} {* Records loop, do not remove *}',
+            '',
+            '   {$r.recID} {* the unique record ID *}',
+            '   {$r.recTitle} {* the constructed record title *}',
+            '   {* add further sub-loops and fields here *}',
+            '',
+            '   <br/> {* one record per line *}',
+            '',
+            '{/foreach} {* end records loop, do not remove *}',
+            '<hr/>',
+            '',
+            '<h2>End of report</h2> {* Text here appears at end of report *}'];                    
+                    
+					var k;
 					var res = "";
-					while (k>=0){
-						res += text.substr(0, k) + "\n"; // + text.substr(k+2);
-						text = text.substr(k+2);
-						k = text.indexOf("\\n");
+                    for (k=0;k<text.length;k++){
+						res += text[k] + "\n"; // + text.substr(k+2);
 					}
-					res += text;
 
 					Dom.get("edTemplateName").innerHTML = name;
 					_initEditor(res);
 					_keepTemplateValue = codeEditor.getValue();
-				}else{
+				}else{ //NOT USED
 					Dom.get("edTemplateName").innerHTML = name;
 					ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
 					_keepTemplateValue = Dom.get("edTemplateBody").value;
 				}
 			}
 
-			_variables = context['vars'];
+			_variables = context;
 
 			/* fille selection box with the list of rectypes
 			var sel = Dom.get("selRectype");
@@ -747,94 +765,104 @@ function ShowReps() {
 
 
 		//internal function
-			function __createChildren(parentNode, parent_id, _prefix, parentEntry, varnames) { // Recursively get all children
+			function __createChildren(parentNode, rectypeTree, parent_id, parent_full) { // Recursively get all children
+            //  __createChildren(topLayerNode, _variables[i], "r", prefix_id+".r");
+            
 				var term,
 					childNode,
-					child;
+					child, id;
 
-				for(child in parentNode)
+				for(id in rectypeTree)
 				{
-				if(!Hul.isnull(child)){
+				if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' ) ){
+                    
+                    var label = null;
+                    
+                    //cases
+                    // common fields like recID, recTitle
+                    // detail fields  fNNN: name
+                    // detail fields ENUMERATION fNNN:array(termfield_name
+                    // unconstained pointers fNNN:array(rt_name
+                    // multi-contrained pointers fNNN:array(array(rt_id  - need another recursive loop
 
-					var fullid = parentNode[child],
-						_varnames = varnames.vars,
-						_detailtypes = varnames.detailtypes,
-						is_enum = false,
-						dt_type = '',
-						label = '';
+                    term = {};//new Object();
+                    term.id = parent_full+"."+id; //fullid;
+                    term.parent_id = parent_id;
+                    term.this_id = id;
+                    term.label = '<div style="padding-left:10px;">'; //???arVars[0];
+                    
+                    child = rectypeTree[id];
 
-					//check if child is related record
-					var is_record = ((typeof(fullid) == "object") &&
-									Object.keys(fullid).length > 0);
-
-
-					if(is_record)
-					{ //nodes - records or enum detail types
-
-							//check if child is enumeration detail type
-							is_enum = (_detailtypes && child.indexOf(parent_id+".")==0 && _detailtypes[child]==='enum');
-							if(is_enum){
-								dtype = 'enum';
-								label = child.substr(parent_id.length+1);
-							}else{
-								dtype = '';
-								label = child;
-							}
-
-					}else{ //usual variables
-						label = _varnames[fullid];
-						dtype = (_detailtypes)?_detailtypes[fullid]:'';
-					}
-
-
-					if(!Hul.isnull(label)){
-
-					term = {};//new Object();
-					term.id = _prefix+"."+child; //fullid;
-					term.parent_id = parent_id;
-					term.this_id = child;
-					term.label = '<div style="padding-left:10px;">'; //???arVars[0];
-					term.labelonly = label;
-					term.dtype = dtype;
-
-					if(is_enum){
-							term.label = term.label + label + '&nbsp;(enum)</div>';
-					}else if( is_record ){
-/* Ian's reuest 10-28
-							term.label = term.label +
-							'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
-											term.id+'\')">All</a>&nbsp;&nbsp';
-							term.href = "{javascript:void(0)}";
-*/
-							term.label = term.label + '<b>' + label + '</b>' +
-'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)</div>';
-/*
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">in</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">out</a>)</div>';
-*/
-					}else{
-						if(parent_id=="r" || parent_id.indexOf("r")==0){
-							term.label = term.label + label +
+                    var is_record = ((typeof(child) == "object") &&
+                                    Object.keys(child).length > 0);
+                                    
+                    var is_multicontstrained = false; 
+                                   
+                    if(!is_record){ //simple
+                    
+                        label = child;   
+                        
+                        if(parent_id=="r"){ // || parent_id.indexOf("r")==0){
+                            term.label = term.label + label +
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">insert</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
-						}else{
-							term.label = term.label + label +
+                        }else{
+                            term.label = term.label + label +
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
 '&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</div>';
+                        }
+                        
+                    }else{
+                         
+                         if(child['termfield_name']) {
+                             label = child['termfield_name'];
+                         }else{
+                             if ( typeof(child[0]) == "string" ) {
+                                is_multicontstrained = true;
+                                label = child[0];         
+                             }else{
+                                label = child['rt_name'];         
+                             }
+                         }
+                         
+                         term.label = term.label + '<b>' + label + '</b>' +
+'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)</div>';
 
-						}
-					}
+                    }
 
-					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+                    term.labelonly = label;
+                    //@todo? term.dtype = dtype;
+
+					childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
 					childNode.enableHighlight = false;
+                    
+                    if( is_multicontstrained ){
 
-					if( is_record ){
-						__createChildren(fullid, child, term.id, childNode, varnames); // createChildren() again for every child found
-					}
+                        var k;                        
+                        for(k=1; k<child.length; k++){
+                            
+                            var rt_term = {};//new Object();
+                            rt_term.id = term.id+"."+child[k].rt_id;  //record type
+                            
+                            rt_term.label = '<div style="padding-left:10px;">'+child[k].rt_name;
+                            rt_term.label =  '<b>' + rt_term.label + 
+                                        '</b>&nbsp;(<a href="javascript:void(0)" '+
+                                        'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
+                                        'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                                        
+                            rt_term.label =  rt_term.label + '</div>';
 
+                            rt_term.href = "javascript:void(0)";
 
+                            var rectypeNode = new YAHOO.widget.TextNode(rt_term, childNode, false);
+                            
+                            __createChildren(rectypeNode, child[k], term.this_id, term.id);
+                        }
+                        
+                    }else if( is_record ){ //next recursion
+                        __createChildren(childNode, child, term.this_id, term.id);
 					}
 				}
 				}//for
@@ -846,101 +874,44 @@ function ShowReps() {
 		var i, termid, term,
 			tv = _varsTree,
 			tv_parent = tv.getRoot(),
-			first_node,
 			varid,
 			varnames;
 
 		//clear treeview
 		tv.removeChildren(tv_parent);
 
-		for (i=1; i<_variables.length; i++){
+//    _variables    
+//   {rt_id: , rt_name, recID, recTitle ..... 
+//                  fNNN:'name', 
+//                  fNNN:array(termfield_name: , id, code:  )
+//                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer
+//                  fNNN:array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointer
+//
+        
 
+		for (i=0; i<_variables.length; i++){ //root elements - all rectypes in search result
 
 			varnames = _variables[i];  // && _variables[i].id===recTypeID
 
 			term = {};//new Object();
-			term.id = _variables[i].id;
+			term.id = _variables[i].rt_id;  //record type
 			term.this_id = 'r';
 			term.parent_id = null;
-			term.label = '<div style="padding-left:10px;">'+_variables[i].name;
-			if(i>0){
-				term.label =  '<b>' + term.label + '</b>&nbsp;(<a href="javascript:void(0)" title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" onClick="showReps.insertRectypeIf(\''+
-											_variables[i].name+'\')">if</a>)';
-			}else{
-				//DO NOT common section - keep reference and common header values in top of each record type
-				term.label =  term.label + '&nbsp;(<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a>)';
-			}
+            
+			term.label = '<div style="padding-left:10px;">'+_variables[i].rt_name;
+			term.label =  '<b>' + term.label + 
+                        '</b>&nbsp;(<a href="javascript:void(0)" '+
+                        'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
+                        'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                        
 			term.label =  term.label + '</div>';
 
 			term.href = "javascript:void(0)";
 
-			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-			if(!first_node) { first_node = topLayerParent;}
+			var topLayerNode = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
+            
+            __createChildren(topLayerNode, _variables[i], 'r', 'r');
 
-			var prefix_id = term.id; //rectype id
-
-		//first level terms
-		for (varid in varnames.tree)
-		{
-		if(!Hul.isnull(varid)){
-
-
-
-			if(varid==="r"){ //don't create additional level - add childeren to rectype directly
-				//common for all types
-				__createChildren(_variables[0].tree.r, "r", prefix_id+".r", topLayerParent, _variables[0]);
-
-				//specific for this type
-				__createChildren(varnames.tree.r, "r", prefix_id+".r", topLayerParent, varnames);
-				continue;
-			}
-
-			term = {};//new Object();
-			term.id = prefix_id+"."+varid; //unique id including rectype ID
-			term.parent_id = "r";  //uniques parent prefix
-			term.this_id = varid;
-			term.label = '<div style="padding-left:10px;">';//<a href="javascript:void(0)"></a>&nbsp;&nbsp;'+varid+'</div>';
-
-			term.href = "{javascript:void(0)}";
-			if( Object.keys(varnames.tree[varid]).length > 0){type:
-/*IAN's request 10-28
-					term.label = term.label +
-					'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
-											term.id+'\')">All</a>&nbsp;&nbsp;';
-*/
-					term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
-					if(varid!=="r"){
-
-						if(varnames.vars[varid]){
-							lbl = varnames.vars[varid];
-						}else{
-							lbl = varid;
-						}
-
-						term.label = term.label + '<b>' + lbl + '</b>' +
-'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)';
-					}else{
-						term.label = term.label + varid;
-//IAN's '+'(<a href="javascript:void(0)" title="Insert marked variables" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">ins</a>)&nbsp;';
-					}
-                    term.label = term.label + '</div>'
-			}else{
-					term.label = term.label + varid+ //to debug replace to term.id
-'&nbsp;<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">insert</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF opeartor for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
-
-			}
-
-			var rectypeLayer = new YAHOO.widget.TextNode(term, topLayerParent, false); // Create the node
-
-			var _parentNode = varnames.tree[varid];
-			rectypeLayer.enableHighlight = false;
-
-
-			__createChildren(_parentNode, varid, term.id, rectypeLayer, varnames); // Look for children of the node
-
-		}
-		}//for  varnames.tree
 		}//for  _variables
 
 		//TODO tv.subscribe("labelClick", _onNodeClick);
@@ -952,35 +923,50 @@ function ShowReps() {
 		//first_node.toggle();
 	}
 
-	function _addIfOperator(nodedata, prefix){
-		return "{if ($"+prefix+nodedata.this_id+")}\n\n{else}\n{/if} {* "+prefix+nodedata.this_id+" *}";
+	function _addIfOperator(nodedata, varname){
+        //var varname = nodedata.id; //was prefix+nodedata.this_id
+        
+		return "{if ($"+varname+")} {* "+  _getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id) + " *}\n\n{else}\n{/if}";
 	}
 	//
 	//
 	//
-	function _addVariable(nodedata, prefix){
+	function _addVariable(nodedata, varname){
 		var res= "",
 			insertMode = Dom.get("selInsertMode").value;
+            
+        //var varname = nodedata.id; //was prefix+nodedata.this_id
+        
+        var remark = (_getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id)).trim();
+            
 
 		if(insertMode==0){ //variable only
 
-			res = "{$"+prefix+nodedata.this_id+"} {*"+nodedata.labelonly+"*}";
+			res = "{$"+varname+"} {*" +  remark + "*}";
 
 		}else if (insertMode==1){ //label+field
 
-			res = nodedata.labelonly+": {$"+prefix+nodedata.this_id+"}";
+			res = nodedata.labelonly+": {$"+varname+"}";
 
 		}else{
+            var dtype = '';
+            var vartype = nodedata.this_id.substring(0,1);
+            var dtid = nodedata.this_id.substring(1);
+            
+            if(vartype=='f' && Hul.isNumber(dtid) ){
+                dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[3];
+            }
+            
 			//lbl="'+nodedata.labelonly+'"
-			res = '{wrap var=$'+prefix+nodedata.this_id;
-			if(nodedata.dtype === '' || nodedata.this_id === 'recURL'){
+			res = '{wrap var=$'+varname;
+			if(dtype === '' || nodedata.this_id === 'recURL'){
 				res = res + ' dt="url"';
-			}else if(nodedata.dtype === 'geo'){
+			}else if(dtype === 'geo'){
 
-				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
+				res = res + '_originalvalue dt="'+dtype+'"';
 
-			}else if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
-				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
+			}else if(dtype === 'file'){
+				res = res + '_originalvalue dt="'+dtype+'"';
 				res = res + ' width="300" height="auto"';
 			}else{
 			}
@@ -991,7 +977,7 @@ function ShowReps() {
 	}
 
 	//
-	// NOT USED?
+	// root loop
 	//
 	function _insertRootForEach(){
 		var textedit = Dom.get("edTemplateBody");
@@ -1000,189 +986,52 @@ function ShowReps() {
 		insertAtCursor(textedit, _text, false, -12);
 	}
 	//
-	// NOT USED?
+	// if for root rectypes
 	//
-	function _insertRectypeIf(rectypeName){
+	function _insertRectypeIf(parent, rectypeName){
 
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{if ($r.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';  //{* INSERT YOUR CODE HERE *}
+		var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';  //{* INSERT YOUR CODE HERE *}
 
 		insertAtCursor(textedit, _text, false, -7);
 	}
 
 	//
-	// inserts template section for selected record type (NOT USED)
-	//
-	function _insertRectypeSection(){
-		var	i,
-			textedit = Dom.get("edTemplateBody");
-
-
-		//function for each node in _varsTree - create the list
-		function __loopNodes2(node){
-				if(node.data.parent_id === null && node.highlightState===1){ //marked rectype
-
-					var recTypeID = node.data.id;
-
-					//find record type in _variables
-					for (i in _variables){
-						if(i!==undefined && _variables[i].id===recTypeID){
-
-							if(_isEditorVisible()){
-								var ed = tinyMCE.get('edTemplateBody');
-								ed.selection.setContent(_variables[i].text);
-							}else{
-								insertAtCursor(textedit, _variables[i].text+'<br/>', true, 0);
-							}
-
-							break;
-						}
-					}
-
-					node.highlightState=0;
-				}
-				return false;
-		}
-		//loop all nodes of tree
-		_varsTree.getNodesBy(__loopNodes2);
-
-
-	}
-
-	//
 	// inserts selected variables
 	//
-	function _insertSelectedVars( varid, inloop, isif ){
+    function _insertSelectedVars( varid, inloop, isif ){
 
-		var textedit = Dom.get("edTemplateBody"),
-			_text = "",
-			_varid = varid,
-			_inloop = inloop;
-			_prefix = "";
-
-
-		//function for each node in _varsTree - create the list
-		/*
-		function __loopNodes(node){
-				if(node.children.length===0 && node.highlightState===1){
-
-					_text = _text + _addVariable(node.data, _prefix);
-				}
-				return false;
-		}
-		//loop all nodes of tree
-		_varsTree.getNodesBy(__loopNodes);
-		*/
-		if(!_inloop){
-			_prefix = "r.";
-		}
+        var textedit = Dom.get("edTemplateBody"),
+            _text = "",
+            _varid = varid,
+            _inloop = inloop;
+            _varname = "";
 
 
-		function __loopNodes2(children){
-			var len = children.length;
-			var res = false;
+            var _nodep = _findNodeById(varid);
+            if(_nodep){
+                
+                    _nodep = _nodep.data;
+                
+                    if(_inloop){
+                        _varname = _nodep.parent_id+"."+_nodep.this_id;
+                    }else{
+                        _varname = _nodep.id;
+                    }
 
-			if( len > 0) {
-				var index = 0;
-				while(index < len) {
-
-					var node = children[index];
-
-					if(node.data.parent_id === null){
-
-						__loopNodes2(node.children);
-
-					}else if(node.highlightState===1){ //marked
-						node.highlightState = 0;
-						if(node.children.length>0){
-
-							if(node.data.parent_id!=="r"){
-								_prefix = _prefix + node.data.this_id + ".";
-							}
-
-							__loopNodes2(node.children);
-
-						}else {
-
-							if(isif){
-								_text = _text + _addIfOperator(node.data, _prefix);
-							}else{
-								_text = _text + _addVariable(node.data, _prefix);
-							}
-						}
-					}
-					index++;
-				}
-			}
-		}
-
-		if(varid==null){
-			//loop all nodes of tree
-			__loopNodes2(_varsTree.getRoot().children);
-		}else{
-
-			var _nodep = _findNodeById(varid);
-			if(_nodep){
-				if(!_inloop){
-					/*if(_nodep.data.parent_id!=="r"){
-						_prefix = _prefix + _nodep.data.this_id + ".";
-					}else{
-						_prefix = _nodep.data.this_id + ".";
-					}*/
-				}
-
-				if (_nodep.children &&	_nodep.children > 0)
-				{
-
-					if(_inloop){
-						_prefix = _nodep.data.this_id + ".";
-					}else{
-						var s = _nodep.data.id; //get all parents
-						s = s.substring(s.indexOf('.')+1);
-						if(s!=="r"){
-							s = "r."+s;
-						}
-						_prefix = s + ".";
-						/*if(_prefix!==_nodep.data.id){
-							_prefix = s_prefix + _nodep.data.id + ".";
-						}*/
-					}
-
-					__loopNodes2(_nodep.children);
-				}else{
-					if(_inloop){
-						_prefix = _nodep.data.parent_id + ".";
-					}else{
-						var s = _nodep.data.id; //get all parents
-						s = s.substring(s.indexOf('.')+1);
-						if(s!=="r"){
-							s = "r."+s;
-						}
-						s = s.substring(0,s.length-_nodep.data.this_id.length);
-						_prefix = s;
-					}
-
-					if(isif){
-						_text = _text + _addIfOperator(_nodep.data, _prefix);
-					}else{
-						_text = _text + _addVariable(_nodep.data, _prefix);
-					}
-				}
-			}
-		}
-
-		if(_text!=="")	{
-			if(_isEditorVisible()){
-				var ed = tinyMCE.get('edTemplateBody');
-				ed.selection.setContent(_text);
-			}else{
-				insertAtCursor(textedit, _text, false, 0);
-			}
-			_varsTree.render();
-		}else{
-			alert('You have to mark the desired variables in the tree');
-		}
-	}
+                
+                    if(isif){
+                        _text = _text + _addIfOperator(_nodep, _varname);
+                    }else{
+                        _text = _text + _addVariable(_nodep, _varname);
+                    }
+            }
+                
+            if(_text!=="")    {
+                insertAtCursor(textedit, _text, false, 0);
+            }
+    }
+    
 
 	//
 	function _insertSelectedVarsAsLoop( varid ){
@@ -1192,81 +1041,44 @@ function ShowReps() {
 			_text = "",
 			_prefix = "";
 
-		//function for each node in _varsTree - create the list
-		// returns false if there are not detail fields
-		function __loopNodes(children, indent){
-			var len = children.length;
-			var res = false;
 
-			if( len > 0) {
-				var index = 0;
-				while(index < len) {
-
-					var node = children[index];
-
-					if(node.data.parent_id === null){
-
-						__loopNodes(node.children, indent);
-
-					}else if(node.highlightState===1){ //marked
-						node.highlightState = 0;
-						if(node.children.length>0){
-
-							var arr_name = (node.data.this_id==="r")?"results":(node.data.parent_id+"."+node.data.this_id+"s");
-							_text = _text + "{foreach $"+arr_name+" as $"+node.data.this_id+"}\n";
-							_prefix = node.data.this_id + ".";
-
-							if(!__loopNodes(node.children, indent+1)){
-								_text = _text + "{* INSERT YOUR CODE HERE *}\n";
-							}
-							_text = _text + "{/foreach}\n";
-
-						}else if(_text!==""){
-							//_text = _text + "<div style='padding-left:"+(indent*20)+"px;'>{$"+node.data.id+"}</div>";
-							_text = _text + _addVariable(node.data, _prefix);
-							res = true;
-						}
-					}
-					index++;
-				}
-			}
-			return res;
+		var _nodep = _findNodeById(varid);
+		if(_nodep){
+			var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id;
+            var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
+               
+			_text = "{foreach $"+arr_name+" as $"+item_name+"} {* "+_getVariableName(_nodep.data.this_id)+" *}\n\t\n{/foreach}\n";
 		}
-
-		if(varid==null){
-			//loop all nodes of tree
-			__loopNodes(_varsTree.getRoot().children, 0);
-		}else{
-			var _nodep = _findNodeById(varid);
-			if(_nodep){
-				var arr_name = (_nodep.data.this_id==="r")?"results":(_nodep.data.parent_id+"."+_nodep.data.this_id+"s");
-				_text = _text + "{foreach $"+arr_name+" as $"+_nodep.data.this_id+"}\n";
-
-				_prefix = _nodep.data.this_id + ".";
-
-				if( !__loopNodes(_nodep.children, 0) ){
-						_text = _text + "\t\n"; //{* INSERT YOUR CODE HERE *}
-				}
-				_text = _text + "{/foreach}\n";
-			}
-		}
-
-		if(_text!=="")	{
-
-			if(_isEditorVisible()){
-					var ed = tinyMCE.get('edTemplateBody');
-					ed.selection.setContent(_text);
-			}else{
-				insertAtCursor(textedit, _text, false, -12);
-			}
-
-			_varsTree.render();
-
-		}else{
-			alert('To insert the loop for a particular rectord type, you first have to select one of the parent nodes');
-		}
+        
+        if(_text!=="")    {
+            insertAtCursor(textedit, _text, false, -12);
+        }
+       
 	}
 
+    function _getVariableName(id){
+        if(!Hul.isempty(id)){
+            
+                if (id=="r"){
+                    return "";
+                }else if( id=="Relationship" || !Hul.isNumber(id.substring(1)) ) {
+                    return id;
+                }else{
+                
+                    var type = id.substring(0,1);
+                    id  = id.substring(1);
+                    
+                    if(type=="r"){
+                        return top.HEURIST.rectypes.names[id];
+                    }else{
+                        return top.HEURIST.detailTypes.names[id];
+                    }
+                }
+        
+        }else{
+            return "";
+        }
+    }
 
 	function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
 		if(_isAceEditor){
@@ -1275,7 +1087,7 @@ function ShowReps() {
             var crs = codeEditor.getCursor();
 			codeEditor.replaceSelection("\n"+myValue);
 
-            if(myValue.indexOf("{if")>=0){
+            if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
                 crs.line = crs.line+2;
                 crs.ch = 0;
             }else{
@@ -1553,11 +1365,6 @@ function ShowReps() {
 				_onPublish(template_file);
 			},
 
-			//insert section type at the cursor position
-			insertRectypeSection:function(){
-				_insertRectypeSection();
-			},
-
 			//inserts selected variables inside the loop
 			insertSelectedVarsAsLoop:function(varid){
 				_insertSelectedVarsAsLoop(varid);
@@ -1568,8 +1375,8 @@ function ShowReps() {
 				_insertSelectedVars(varid, inloop, isif);
 			},
 
-			insertRectypeIf:function(rectypeName){
-				_insertRectypeIf(rectypeName);
+			insertRectypeIf:function(parent, rectypeName){
+				_insertRectypeIf(parent, rectypeName);
 			},
 			insertRootForEach:function(){
 				_insertRootForEach();
@@ -1631,3 +1438,4 @@ $(function(){
     });
 });
 */
+

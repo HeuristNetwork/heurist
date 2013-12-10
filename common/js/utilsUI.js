@@ -1844,6 +1844,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
       }
       return (obj.toString()).length == 0;
     },
+    
+    isNumber: function (n) {
+        //return typeof n === 'number' && isFinite(n);
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    },
 
     //validate numeric
     validate: function(evt) {
