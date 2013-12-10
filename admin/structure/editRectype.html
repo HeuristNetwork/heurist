@@ -263,8 +263,13 @@
             </div>
 
             <div class="actionButtons">
+                <!-- 10/12/13 The workflow here is a bit confusing, better to just have a single standard workflow through record structure
                 <input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
                 <div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
+                -->
+                Click Next save changes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Next >>" onClick="EditPopup.save(true);" /> <!-- true = open rec structure popup -->
+                
                 <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
             </div>
         </div>

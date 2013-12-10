@@ -394,7 +394,10 @@ function RectypeManager() {
                         }
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
                 }},
-                { key: "description", label: "Description", sortable:false, minWidth:200, width:200,
+                { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+                },
+                { key: "description", label: "Description", sortable:false, minWidth:200, 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -407,9 +410,6 @@ function RectypeManager() {
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><span title="'+tit+'">'+str+'</span></a>';
                 }},
 
-                { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
-                },
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
