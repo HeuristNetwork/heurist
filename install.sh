@@ -2,11 +2,8 @@
 
 # Preliminary installation script for Heurist, rev Sept 2013 by Brian Ballsun-Stanton
 
-# This script has not been verified as at 27/9/13
-# -----------------------------------------------
-
 # (https://code.google.com/p/heurist/)
-# This script is a bit of a hack to get us up and running
+# This script takes something of a brute force approach to making sure everythign is up-to-date. It could certainly be imporved.
 
 if [ -z $1 ] 
    then 
@@ -33,7 +30,7 @@ echo -e "\n\n\n\n"
 echo "---- Installing Heurist Version 3 (for Linux/Ubuntu) ----"
 
 echo -e "\n\n"
-echo "WARNING: 27 Sep 13 - THIS UPDATED SCRIPT HAS NOT YET BEEN FULLY TESTED"
+echo "WARNING: BEWARE OF TIMEOUT ON THE MYSQL PASSWORD REQUEST"
 echo -e "\n\n"
 
 echo "This installation is fairly radical in upgrading all required software to latest versions"
@@ -83,7 +80,7 @@ echo "System upgraded. I hope you wanted that done ..."
 
 
 
-# this doesnâ€™t work to pause
+# this does not work to pause
 read -p "Press [Enter] key to start LAMP stack install..."
 
 
