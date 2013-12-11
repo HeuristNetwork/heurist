@@ -394,7 +394,7 @@ function ShowReps() {
     			codeEditor.getSession().setMode("ace/mode/php");
     			codeEditor.setValue(content);
 			}else{
-				codeEditor = CodeMirror(Dom.get("templateCode"), {lineNumbers:true, });
+				codeEditor = CodeMirror(Dom.get("templateCode"), {lineNumbers:true, smartIndent:true});
 			}
 		}else if(!_isAceEditor){
 			$('.CodeMirror').hide();
@@ -762,15 +762,23 @@ function ShowReps() {
 							//_selectAllChildren(parentNode);
 					});
 		}
-
+        
+        
+        //top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+        var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
+        var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
 
 		//internal function
-			function __createChildren(parentNode, rectypeTree, parent_id, parent_full) { // Recursively get all children
+            // parent_single - true if recrod pointer or enum is not repeatable field type
+            //
+			function __createChildren(parentNode, rectypeTree, parent_id, parent_full, parent_single) { // Recursively get all children
             //  __createChildren(topLayerNode, _variables[i], "r", prefix_id+".r");
             
 				var term,
 					childNode,
 					child, id;
+                    
+                var rectype_id = rectypeTree.rt_id;
 
 				for(id in rectypeTree)
 				{
@@ -797,21 +805,34 @@ function ShowReps() {
                                     Object.keys(child).length > 0);
                                     
                     var is_multicontstrained = false; 
+                    var is_single = true; //non repeatable field
+                    
+                    var vartype = term.this_id.substring(0,1);
+                    var dtid = term.this_id.substring(1);
+                    if(vartype=='f' && Hul.isNumber(dtid) ){
+                        term.dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[idx_dtype];
+                        
+                        var maxval = top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
+                        is_single = (Number(maxval)===1);
+                    }else if (term.this_id=="Relationship") {
+                        is_single = false;
+                    }
+                    
                                    
                     if(!is_record){ //simple
                     
                         label = child;   
                         
-                        if(parent_id=="r"){ // || parent_id.indexOf("r")==0){
+                        if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
                             term.label = term.label + label +
-'&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">insert</a>'+
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">insert</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
                         }else{
                             term.label = term.label + label +
-'&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
-'&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</div>';
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
+'&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the repeat" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the repeat" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</div>';
                         }
                         
                     }else{
@@ -827,13 +848,15 @@ function ShowReps() {
                              }
                          }
                          
-                         term.label = term.label + '<b>' + label + '</b>' +
-'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)</div>';
-
+                         term.label = term.label + '<b>' + label + '</b>';
+                         if(!is_single){
+                            term.label = term.label + '&nbsp;(<a href="javascript:void(0)" '+
+                            'title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">repeat</a>)';    
+                         }
+                         term.label = term.label + '</div>';
                     }
 
                     term.labelonly = label;
-                    //@todo? term.dtype = dtype;
 
 					childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
 					childNode.enableHighlight = false;
@@ -845,12 +868,21 @@ function ShowReps() {
                             
                             var rt_term = {};//new Object();
                             rt_term.id = term.id+"."+child[k].rt_id;  //record type
+
+                            var _varname;
+                            if(is_single){
+                                _varname = term.parent_id+"."+term.id;
+                            }else{
+                                _varname = term.id;
+                            }
                             
                             rt_term.label = '<div style="padding-left:10px;">'+child[k].rt_name;
                             rt_term.label =  '<b>' + rt_term.label + 
                                         '</b>&nbsp;(<a href="javascript:void(0)" '+
                                         'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
-                                        'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                                        'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id + ', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                                        
+                                        //'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
                                         
                             rt_term.label =  rt_term.label + '</div>';
 
@@ -858,11 +890,11 @@ function ShowReps() {
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, childNode, false);
                             
-                            __createChildren(rectypeNode, child[k], term.this_id, term.id);
+                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single);
                         }
                         
                     }else if( is_record ){ //next recursion
-                        __createChildren(childNode, child, term.this_id, term.id);
+                        __createChildren(childNode, child, term.this_id, term.id, is_single);
 					}
 				}
 				}//for
@@ -902,7 +934,8 @@ function ShowReps() {
 			term.label =  '<b>' + term.label + 
                         '</b>&nbsp;(<a href="javascript:void(0)" '+
                         'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
-                        'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                        'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
+                        //'onClick="showReps.insertRectypeIf(\'r\', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
                         
 			term.label =  term.label + '</div>';
 
@@ -910,7 +943,7 @@ function ShowReps() {
 
 			var topLayerNode = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
             
-            __createChildren(topLayerNode, _variables[i], 'r', 'r');
+            __createChildren(topLayerNode, _variables[i], 'r', 'r', true);
 
 		}//for  _variables
 
@@ -925,8 +958,8 @@ function ShowReps() {
 
 	function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
-        
-		return "{if ($"+varname+")} {* "+  _getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id) + " *}\n\n{else}\n{/if}";
+        var remark = "{* "+  _getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id) + " *}";
+		return "{if ($"+varname+")}"+remark+"\n\n{else}\n{/if}"+remark;
 	}
 	//
 	//
@@ -942,24 +975,24 @@ function ShowReps() {
 
 		if(insertMode==0){ //variable only
 
-			res = "{$"+varname+"} {*" +  remark + "*}";
+			res = "{$"+varname+"}{*" +  remark + "*}";
 
 		}else if (insertMode==1){ //label+field
 
 			res = nodedata.labelonly+": {$"+varname+"}";
 
 		}else{
-            var dtype = '';
+            var dtype = nodedata.dtype;
+            /*
             var vartype = nodedata.this_id.substring(0,1);
             var dtid = nodedata.this_id.substring(1);
-            
             if(vartype=='f' && Hul.isNumber(dtid) ){
-                dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[3];
-            }
+               dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[3];
+            }*/
             
 			//lbl="'+nodedata.labelonly+'"
 			res = '{wrap var=$'+varname;
-			if(dtype === '' || nodedata.this_id === 'recURL'){
+			if(Hul.isempty(dtype) || nodedata.this_id === 'recURL'){
 				res = res + ' dt="url"';
 			}else if(dtype === 'geo'){
 
@@ -988,10 +1021,14 @@ function ShowReps() {
 	//
 	// if for root rectypes
 	//
-	function _insertRectypeIf(parent, rectypeName){
+	function _insertRectypeIf(parent, rectypeId, rectypeName){
 
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';  //{* INSERT YOUR CODE HERE *}
+		
+        //var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';
+        
+        var _text = '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}{* '+rectypeName+ ' *}\n\t\n{/if}{* '+rectypeName+ ' *}\n';  //{* INSERT YOUR CODE HERE *}
+        
 
 		insertAtCursor(textedit, _text, false, -7);
 	}
@@ -1046,8 +1083,9 @@ function ShowReps() {
 		if(_nodep){
 			var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id;
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
+            var remark = "{* "+_getVariableName(_nodep.data.this_id)+" *}";
                
-			_text = "{foreach $"+arr_name+" as $"+item_name+"} {* "+_getVariableName(_nodep.data.this_id)+" *}\n\t\n{/foreach}\n";
+			_text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n\t\n{/foreach}"+remark+"\n";
 		}
         
         if(_text!=="")    {
@@ -1056,6 +1094,11 @@ function ShowReps() {
        
 	}
 
+    function ucwords (str) {
+      return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function ($1) {
+        return $1.toUpperCase();
+      });
+    }    
     function _getVariableName(id){
         if(!Hul.isempty(id)){
             
@@ -1069,9 +1112,9 @@ function ShowReps() {
                     id  = id.substring(1);
                     
                     if(type=="r"){
-                        return top.HEURIST.rectypes.names[id];
+                        return ucwords(top.HEURIST.rectypes.names[id]);
                     }else{
-                        return top.HEURIST.detailTypes.names[id];
+                        return ucwords(top.HEURIST.detailTypes.names[id]);
                     }
                 }
         
@@ -1375,8 +1418,8 @@ function ShowReps() {
 				_insertSelectedVars(varid, inloop, isif);
 			},
 
-			insertRectypeIf:function(parent, rectypeName){
-				_insertRectypeIf(parent, rectypeName);
+			insertRectypeIf:function(parent, rectypeId, rectypeName){
+				_insertRectypeIf(parent, rectypeId, rectypeName);
 			},
 			insertRootForEach:function(){
 				_insertRootForEach();

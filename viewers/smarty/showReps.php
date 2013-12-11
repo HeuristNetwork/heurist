@@ -433,6 +433,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 
 				if($key=="rec_RecTypeID"){ //additional field
 					$recTypeID = $value;
+                    $record["recTypeID"] = $recTypeID;
 					$record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][ $rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
 				}else if ($key=="rec_ID"){ //load woottext once per record
 
@@ -559,6 +560,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 	$dtNames = $dtStructs['names'];
 	$rtNames = $rtStructs['names'];
 	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
+    $rt_structure = null;
+    $issingle = true;
 
 
 /*****DEBUG****///	if($dtKey==9){
@@ -572,27 +575,42 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 		if($dtKey<1){
 			$dt_label = "Relationship";
             $dtname = "Relationship";
+            $issingle = false;
+            $dtDef = "dummy";
 /*****DEBUG****///error_log("111>>>>>".print_r($dtValue, true));
 /*****DEBUG****///error_log("222>>>>>".$recTypeID);
 
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
-			$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+            $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
+			$dtlabel_index = $rst_fi['rst_DisplayName'];
+            $dtmaxval_index = $rst_fi['rst_MaxValues'];
 			if(array_key_exists($dtKey, $rt_structure)){
 				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
 				//$dtname = getVariableNameForSmarty($dt_label);
 			}
 			$dtname = "f".$dtKey; //ART 23013-12-09 getVariableNameForSmarty($dtNames[$dtKey]);
+            
+            $dtDef = @$dtStructs['typedefs'][$dtKey]['commonFields'];
 		}
 
 
 	if(is_array($dtValue)){ //complex type - need more analize
 		$res = null;
 
-		$dtDef = ($dtKey<1) ? "dummy" :$dtStructs['typedefs'][$dtKey]['commonFields'];
-
 		if($dtDef){
-			$detailType = ($dtKey<1) ?"relmarker" :$dtDef[ $dty_fi['dty_Type']  ];
+            
+            if($dtKey<1){
+                $detailType =  "relmarker";
+            }else{
+                $detailType =  $dtDef[ $dty_fi['dty_Type']  ];
+                //detect single or repeatable - if repeatabel add as array for enum and pointers
+                $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
+                if($dt_maxvalues){
+                    $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1);
+                }
+            }
+            
 
 			switch ($detailType) {
 			case 'enum':
@@ -603,7 +621,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 				$res_cid = "";
 				$res_code = "";
 				$res_label = "";
-
+                $res = array();
+                
 				foreach ($dtValue as $key => $value){
 					if(array_key_exists($value, $dtTerms['termsByDomainLookup']['enum'])){
 						$term = $dtTerms['termsByDomainLookup']['enum'][$value];
@@ -612,11 +631,18 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 						$res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
 						$res_code = _add_term_val($res_code, $term[ $fi['trm_Code'] ]);
 						$res_label = _add_term_val($res_label, $term[ $fi['trm_Label'] ]);
+                    
+                        array_push($res, array("id"=>$res_id, "code"=>$res_code, "label"=>$res_label, "conceptid"=>$res_cid));
 					}
 				}
 
-				$res = array("id"=>$res_id, "code"=>$res_code, "label"=>$res_label, "conceptid"=>$res_cid);
-				$res = array( $dtname=>$res );
+                if(count($res)>0){
+                        if($issingle){
+                            $res = array( $dtname =>$res[0] );    
+                        }else{
+                            $res = array( $dtname =>$res );    
+                        }
+                }
 
 				/*if(strlen($res)==0){ //no valid terms
 					$res = null;
@@ -842,7 +868,14 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 					    $recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
                         */
-                        $res = array( $dtname =>$res );
+
+error_log(">>>>>>".$dtKey ."   ".$issingle);
+                        
+                        if($issingle){
+                            $res = array( $dtname =>$res[0] );    
+                        }else{
+                            $res = array( $dtname =>$res );    
+                        }
                     }
                     
 				}else{

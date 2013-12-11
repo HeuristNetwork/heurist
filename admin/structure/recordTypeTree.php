@@ -169,18 +169,13 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
         foreach ($details as $dtKey => $dtValue){
 
             $res_dt = getDetailSection($dtKey, $dtValue, $recursion_depth);
-            if($res_dt && is_array($res_dt)){
-                   if( count($res_dt)>1 ){  //multi-constrained pointers
-                       
-                       $res["f".$dtKey] = $res_dt;
-                       /*
-                       foreach($res_dt as $res_rt){ 
-                           if(!@$res["r".$res_rt['rt_id']]){
-                                $res["r".$res_rt['rt_id']] = $res_rt;    
-                           }
-                       }*/
-                   }else{
+            if($res_dt){
+            
+                   if(is_array($res_dt) && count($res_dt)==1){
                        $res["f".$dtKey] = $res_dt[0];    
+                   }else{
+                       //multi-constrained pointers or simple variable
+                       $res["f".$dtKey] = $res_dt;
                    }
             }
         }//for
@@ -223,6 +218,9 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
             $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
         
+
+            //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
+            //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
 
             switch ($detailType) {
             /* @TODO
