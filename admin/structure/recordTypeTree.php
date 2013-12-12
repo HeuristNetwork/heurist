@@ -62,31 +62,14 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     if($isvarname){
 
         $rectypeID = @$_REQUEST['rty_id'];
-
-        $res0 = getRecordHeaderSection(null, 'r', 0); //from
-
-        $resVars = array_merge($resVars, $res0['vars']);
-
-        $res = getRecordTypeSection($rectypeID, 'r', 0, 0);
-
-        //text for rectypes fill be inserted manually:  $resText  = $resText.$res['text'];
-        $resVars = array_merge($resVars, $res['vars']); //whole list of variables without grouping by record type
-
-        $res['tree']['r'] = array_merge($res0['tree']['r'], $res['tree']['r']);
-
-        array_push($resVarsByType, array("id"=>$rectypeID,
-                                        "name"=>$rtStructs['names'][$rectypeID],
-                                        "vars"=>array_merge($res0['vars'], $res['vars']), //header+details
-                                        "detailtypes"=>$res['detailtypes'],
-                                        "tree"=>$res['tree']));
-
+        
+        $res = getRecordTypeTree($rectypeID, 0);
+        
         $qresult = loadSearch($_REQUEST);
-
+        
         header("Content-type: text/javascript");
-        echo json_format( array("vars"=>$resVarsByType,
-                                "vars2"=>$resVars,
+        echo json_format( array("vars"=>$res,
                                 "records"=>$qresult["records"]), true);
-
 
     }else{
 

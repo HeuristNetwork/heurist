@@ -85,13 +85,20 @@ function EditRectypeTitle() {
 
         if(!Hul.isnull(context))
             {
-            if(context===false || Hul.isnull(context['vars'])){
+            if(context===false || !context['vars']){
                 alert('No variables generated');
                 return;
             }
 
             _variables = context['vars'];
-
+//   {rt_id: , rt_name, recID, recTitle ..... 
+//                  fNNN:'name', 
+//                  fNNN:array(termfield_name: , id, code:  )
+//                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer
+//                  fNNN:array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointer
+//
+            
+            
             /*fille selection box with the list of templates
             var sel = Dom.get("selRectype");
             //celear selection list
@@ -159,17 +166,19 @@ function EditRectypeTitle() {
         */
         if(Hul.isnull(_variables) || _variables.length<1) return;
 
-        recTypeID = _variables[0].id;
+        recTypeID = _variables.rt_id;
 
 
         //find list of variables for current record type
         var i, j;
+/*ART 2013-12-11        
         for (i in _variables){
             if(i!==undefined && _variables[i].id===recTypeID){
                 varnames = _variables[i];
                 break;
             }
         }//for
+*/        
 
 
         if(Hul.isnull(_varsTree)){
@@ -193,14 +202,14 @@ function EditRectypeTitle() {
             });
         }
         //fill treeview with content
-        _fillTreeView(_varsTree, varnames);
+        _fillTreeView(_varsTree, _variables);
     }
 
     /**
      *	Fills the given treeview with the list of variables
      * 	varnames  - contains vars - flat array and tree - tree array
      */
-    function _fillTreeView (tv, varnames) {
+    function _fillTreeView (tv, _variables) {
 
         var termid,
         tv_parent = tv.getRoot(),
@@ -210,6 +219,105 @@ function EditRectypeTitle() {
         //clear treeview
         tv.removeChildren(tv_parent);
 
+        __createChildren(tv_parent, _variables, '', '');
+
+        function __createChildren(parentNode, rectypeTree, parent_id, parent_full) { // Recursively get all children
+        
+                var term,
+                    childNode,
+                    child, id;
+                    
+                var rectype_id = rectypeTree.rt_id;
+
+                for(id in rectypeTree)
+                {
+                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' || id=='recURL' || id=='recTitle' || id=='recWootText') ){
+                    
+                    var label = null;
+                    
+                    //cases
+                    // common fields like recID, recTitle
+                    // detail fields  fNNN: name
+                    // detail fields ENUMERATION fNNN:array(termfield_name
+                    // unconstained pointers fNNN:array(rt_name
+                    // multi-contrained pointers fNNN:array(array(rt_id  - need another recursive loop
+
+                    term = {};//new Object();
+                    term.id = parent_full+"."+id; //fullid;
+                    term.parent_id = parent_id;
+                    term.this_id = id;
+                    term.label = '<div style="padding-left:10px;">';
+                    
+                    
+                    child = rectypeTree[id];
+
+                    var is_record = ((typeof(child) == "object") &&
+                                    Object.keys(child).length > 0);
+                                    
+                    var is_multicontstrained = false; 
+                                   
+                    if(!is_record){ //simple
+                    
+                        label = child;   
+                        term.label = term.label + label + '</div>';
+                        
+                    }else{
+                         
+                         if(child['termfield_name']) {
+                             label = child['termfield_name']; //enumeration
+                         }else{
+                             if ( typeof(child[0]) == "string" ) {
+                                is_multicontstrained = true;
+                                label = child[0];         
+                             }else{
+                                label = child['rt_name'];         
+                             }
+                         }
+                         
+                         term.label = term.label + '<b>' + label + '</b></div>';
+                    }
+
+                    //term.labelonly = label;
+                    term.full_path = ((parent_full)?parent_full+".":"")+label;
+
+                    if( is_multicontstrained ){
+
+                        var k;                        
+                        for(k=1; k<child.length; k++){
+                            
+                            var rt_term = {};//new Object();
+                            rt_term.id = term.id+"."+child[k].rt_id;  //record type
+
+                            var _varname;
+                            if(is_single){
+                                _varname = term.parent_id+"."+term.id;
+                            }else{
+                                _varname = term.id;
+                            }
+                            
+                            rt_term.label =  '<div style="padding-left:10px;">'+child[k].rt_name + '</b></div>';
+                            //rt_term.href = "javascript:void(0)";
+
+                            var rectypeNode = new YAHOO.widget.TextNode(rt_term, parentNode, false);
+                            
+                            __createChildren(rectypeNode, child[k], term.this_id, parent_full);
+                        }
+                        
+                    }else{
+                        
+                         childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
+                         //childNode.enableHighlight = false;
+                        
+                         if( is_record ){ //next recursion
+                            __createChildren(childNode, child, term.this_id, term.full_path);
+                         }
+                    }
+                }
+                }//for        
+        }
+        
+        
+/*        
         //first level terms
         for (varid in varnames.tree)
         {
@@ -334,7 +442,7 @@ function EditRectypeTitle() {
 
             }
         }//for
-
+*/
         //TODO tv.subscribe("labelClick", _onNodeClick);
         //tv.singleNodeHighlight = true;
         //TODO tv.subscribe("clickEvent", tv.onEventToggleHighlight);
@@ -469,13 +577,7 @@ function EditRectypeTitle() {
             if(node.children.length===0 && node.highlightState===1){
                 node.highlightState=0;
 
-                var parent = (node.data.parent_id=='r')?'':(node.data.parent_id+'.');
-
-                while(parent.indexOf('r.')==0){
-                    parent = parent.substring(2);
-                }
-
-                _text = _text + '['+parent + node.data.this_id+']';
+                _text = _text + '['+node.data.full_path+']';
             }
             return false;
         }

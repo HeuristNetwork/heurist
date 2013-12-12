@@ -161,7 +161,7 @@ if ($defaultRootFileUploadPath) {
 		$defaultRootFileUploadPath.= "/"; // append trailing /
 
 	}
-	if ($defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) { //check for leading /
+	if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) { //check for leading /
 		$defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
 
 	}
@@ -597,7 +597,9 @@ function detailtypeLocalIDLookup($dtID, $dbID = 2) {
 * @return   boolean true if successful define, false otherwise
 */
 function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false, $tryMakeDir = false) {
+    
 	$info = new SplFileInfo(($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
+    
 	if ($info->isDir() && $info->isWritable()) {
 		define($defString, $dir);
 		return true;

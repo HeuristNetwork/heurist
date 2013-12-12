@@ -876,8 +876,7 @@ function ShowReps() {
                                 _varname = term.id;
                             }
                             
-                            rt_term.label = '<div style="padding-left:10px;">'+child[k].rt_name;
-                            rt_term.label =  '<b>' + rt_term.label + 
+                            rt_term.label =  '<div style="padding-left:10px;"><b>' + child[k].rt_name + 
                                         '</b>&nbsp;(<a href="javascript:void(0)" '+
                                         'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
                                         'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id + ', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
@@ -930,8 +929,7 @@ function ShowReps() {
 			term.this_id = 'r';
 			term.parent_id = null;
             
-			term.label = '<div style="padding-left:10px;">'+_variables[i].rt_name;
-			term.label =  '<b>' + term.label + 
+			term.label =  '<div style="padding-left:10px;"><b>' +_variables[i].rt_name + 
                         '</b>&nbsp;(<a href="javascript:void(0)" '+
                         'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
                         'onClick="showReps.insertRectypeIf(\'r\', ' + _variables[i].rt_id + ', \'' + _variables[i].rt_name.replace("'", "\\'") + '\')">if</a>)';
