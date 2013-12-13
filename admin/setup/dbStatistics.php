@@ -99,12 +99,16 @@
         <!-- Source files -->
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
         <!-- END DATATABLE DEFS-->
-
+        
+        <!-- TOOLTIP -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">        
+        <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        
     </head>
 
     <body class="popup yui-skin-sam">
@@ -117,11 +121,14 @@
     
     <script type="text/javascript">
     
-        
+        var showTimer,hideTimer;
         var arr = [
 <?php
     $com = "";
     foreach ($dbs as $db){
+        
+        $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,', ',ugr_Department,' ',ugr_Organisation,' ',ugr_State,' ',ugr_Interests)"
+            ." FROM ".$db.".sysUGrps where ugr_id=2");        
     
         //Records     Values    RecTypes     Fields    Terms     Groups    Users     DB     Files     Modified    Access    
         
@@ -136,7 +143,8 @@
         mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1) FROM information_schema.tables where table_schema='".$db."'").",".
         round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",'".
         mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
-        mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."']";
+        mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
+        $owner."']";
         
         $com = ",\n";
     }//foreach
@@ -149,7 +157,7 @@
                                     responseSchema : {
                                         fields: ["dbname","cnt_recs", "cnt_vals", "cnt_rectype", 
                                         "cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", 
-                                        "size_db", "size_file", "date_mod", "date_login"]
+                                        "size_db", "size_file", "date_mod", "date_login","owner"]
                                     }});
     
         var myColumnDefs = [
@@ -165,9 +173,53 @@
         { key: "size_file", label: "Files", sortable:true, className:'right'},
         { key: "date_mod", label: "Modified", sortable:true},
         { key: "date_login", label: "Access", sortable:true}
+        /*{ key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
+            elLiner.innerHTML = "<div style='max-width:100px' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
+        }
+        }*/
         ];
    
-        var myDataTable = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
+        var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
+        
+        
+            var tt = new YAHOO.widget.Tooltip("myTooltip");
+            
+            dt.on('cellMouseoverEvent', function (oArgs) {
+                if (showTimer) {
+                    window.clearTimeout(showTimer);
+                    showTimer = 0;
+                }
+
+                var target = oArgs.target;
+                var column = this.getColumn(target);
+                if (column.key == 'dbname') {
+                    var record = this.getRecord(target);
+                    var description = record.getData('owner') || '';
+                    if(description!=''){
+                    var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
+
+                    showTimer = window.setTimeout(function() {
+                        tt.setBody(description);
+                        tt.cfg.setProperty('xy',xy);
+                        tt.show();
+                        hideTimer = window.setTimeout(function() {
+                            tt.hide();
+                        },5000);
+                    },500);
+                    }
+                }
+            });
+            dt.on('cellMouseoutEvent', function (oArgs) {
+                if (showTimer) {
+                    window.clearTimeout(showTimer);
+                    showTimer = 0;
+                }
+                if (hideTimer) {
+                    window.clearTimeout(hideTimer);
+                    hideTimer = 0;
+                }
+                tt.hide();
+            });        
     </script>
     
     </body>
