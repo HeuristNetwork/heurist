@@ -120,7 +120,7 @@
     </div>
     
     <script type="text/javascript">
-    
+ //v2   
         var showTimer,hideTimer;
         var arr = [
 <?php
@@ -129,6 +129,8 @@
         
         $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,', ',ugr_Department,' ',ugr_Organisation,' ',ugr_State,' ',ugr_Interests)"
             ." FROM ".$db.".sysUGrps where ugr_id=2");        
+        $owner = str_replace("'","\'",$owner);    
+        $owner = str_replace("\n","",$owner);    
     
         //Records     Values    RecTypes     Fields    Terms     Groups    Users     DB     Files     Modified    Access    
         
@@ -150,7 +152,7 @@
     }//foreach
 ?>        
         ];
-    
+        
     
         var myDataSource = new YAHOO.util.LocalDataSource(arr, {
                                     responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
