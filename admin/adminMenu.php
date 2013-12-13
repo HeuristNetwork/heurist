@@ -183,6 +183,9 @@ if (is_admin()) {
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=<?=HEURIST_DBNAME?>')"
 							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
+                        <li><a href="#" onClick="loadContent('setup/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Summary statistics for all Heurist databases on this server">Statistics</a></li>
+                            
 					</ul>
 				</div>
 

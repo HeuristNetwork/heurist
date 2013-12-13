@@ -1,0 +1,174 @@
+<?php
+  /*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* File: dbStatistics.php 
+*
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  Setup
+*/
+
+    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+
+    if(isForAdminOnly("to get databases statistics")){
+       return;
+    }
+    
+    mysql_connection_select();
+    
+    $dbs = mysql__getdatabases(true);
+    
+
+    function mysql__select_val($query) {
+        $res = mysql_query($query);
+        if (!$res) {
+            error_log($query);
+            error_log(mysql_error());
+            return 0;   
+        }
+        
+        $row = mysql_fetch_array($res);
+        if($row){
+            return $row[0];
+        }else{
+            0;
+        }
+    }
+    
+    
+    function dirsize($dir)
+    {
+      @$dh = opendir($dir);
+      $size = 0;
+      while ($file = @readdir($dh))
+      {
+        if ($file != "." and $file != "..") 
+        {
+          $path = $dir."/".$file;
+          if (is_dir($path))
+          {
+            $size += dirsize($path); // recursive in sub-folders
+          }
+          elseif (is_file($path))
+          {
+            $size += filesize($path); // add file
+          }
+        }
+      }
+      @closedir($dh);
+      return $size;
+    }    
+
+?>
+<html>
+    <head>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Databases statistics</title>
+
+        <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+        <!-- YUI -->
+        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+
+        <!-- DATATABLE DEFS -->
+        <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+        <!-- datatable Dependencies -->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+        <!-- Source files -->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+        <!-- END DATATABLE DEFS-->
+
+
+        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+    </head>
+
+    <body class="popup yui-skin-sam">
+
+    
+    <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
+    <div id="page-inner">
+        <div id="tabContainer"></div>
+    </div>
+    
+    <script type="text/javascript">
+    
+        
+        var arr = [
+<?php
+    $com = "";
+    foreach ($dbs as $db){
+    
+        //Records     Values    RecTypes     Fields    Terms     Groups    Users     DB     Files     Modified    Access    
+        
+        print $com."['". substr($db, 4) ."',".
+        mysql__select_val("select count(*) from ".$db.".Records").",".
+        mysql__select_val("select count(*) from ".$db.".recDetails").",".
+        mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
+        mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
+        mysql__select_val("select count(*) from ".$db.".defTerms").",".
+        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
+        mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
+        mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1) FROM information_schema.tables where table_schema='".$db."'").",".
+        round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",'".
+        mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
+        mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."']";
+        
+        $com = ",\n";
+    }//foreach
+?>        
+        ];
+    
+    
+        var myDataSource = new YAHOO.util.LocalDataSource(arr, {
+                                    responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+                                    responseSchema : {
+                                        fields: ["dbname","cnt_recs", "cnt_vals", "cnt_rectype", 
+                                        "cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", 
+                                        "size_db", "size_file", "date_mod", "date_login"]
+                                    }});
+    
+        var myColumnDefs = [
+        { key: "dbname", label: "Name", sortable:true, className:'left'},
+        { key: "cnt_recs", label: "Records", sortable:true, className:'right'},
+        { key: "cnt_vals", label: "Values", sortable:true, className:'right'},
+        { key: "cnt_rectype", label: "RecTypes", sortable:true, className:'right'},
+        { key: "cnt_fields", label: "Fields", sortable:true, className:'right'},
+        { key: "cnt_terms", label: "Terms", sortable:true, className:'right'},
+        { key: "cnt_groups", label: "Groups", sortable:true, className:'right'},
+        { key: "cnt_users", label: "Users", sortable:true, className:'right'},
+        { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
+        { key: "size_file", label: "Files", sortable:true, className:'right'},
+        { key: "date_mod", label: "Modified", sortable:true},
+        { key: "date_login", label: "Access", sortable:true}
+        ];
+   
+        var myDataTable = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
+    </script>
+    
+    </body>
+</html>

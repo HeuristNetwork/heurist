@@ -58,8 +58,6 @@ if(isForAdminOnly("to modify database structure")){
         <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
         <!-- datatable Dependencies -->
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-        <!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
         <!-- Source files -->
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
         <!-- END DATATABLE DEFS-->
