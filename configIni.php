@@ -54,7 +54,8 @@ $dbHost = ""; // leave blank for localhost
 // but you can specify another user and password with full access if preferred. Password cannot be null
 // IMPORTANT NOTE: 
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
-$dbAdminUsername = "root"; // required, need not be 'root'
+// @todo: allow MySQL password other than root - currently (Dec 2013) gives error if not root
+$dbAdminUsername = "root"; // required, MUST be 'root'
 $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
 // MySQL user with readonly access on this database server
@@ -82,11 +83,13 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 
 // [folders]
 // The default root pathname of a directory where Heurist can store uploaded files eg. images, pdfs, as well as record type icons, templates,
-// output files, scratch space and so forth. This directory need not be web accessible - leaving it off the web protects the uploaded data. 
+// output files, scratch space and so forth. This directory need not be web accessible - leaving it off the web protects the uploaded data, 
+// although filenames are obfuscated when uploaded.
+// Correction: Dec 2013 and @todo: needs to be web accessible b/c record type icons in these directories are accessed directly 
 // PHP must have permissions to be able to create subdirectories of this directory for each Heurist database and write files within them.
 // For instance, if you set $defaultRootFileUploadPath = "/srv/HeuristUploadDir/"; then, when running Heurist with db=xyz, uploaded files 
 // will be loaded into /srv/HeuristUploadDir/xyz/, and new databases will be created with a subdirectory in /srv/HeuristUploadDir
-$defaultRootFileUploadPath = ""; // recommended, defaults to <web root>/HEURIST_FILESTORE/ but may be better moved to a non-web location
+$defaultRootFileUploadPath = ""; // recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
 
 // [email]
 
