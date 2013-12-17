@@ -311,7 +311,7 @@ function RectypeManager() {
             var myDataSource = new YAHOO.util.LocalDataSource(arr,{
                     responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
                     responseSchema : {
-                        fields: [ "id", "active", "icon", "thumb", "name", "description", "status", "grp_id", "info", "conceptid"]
+                        fields: [ "id", "icon", "edit", "name", "description", "active", "status", "grp_id", "info", "conceptid"]
                     },
                     doBeforeCallback : function (req,raw,res,cb) {
                         // This is the filter function
@@ -368,7 +368,8 @@ function RectypeManager() {
                 },
                 // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
                 { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
-                { key: "icon", label: "Icon", className:'center', sortable:false,
+                
+                { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
 
@@ -384,35 +385,23 @@ function RectypeManager() {
                         "</div>";
                         elLiner.innerHTML = icon;
                 }},
-                { key: "thumb", label: "Thumb", className:'center', sortable:false,
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        var id = oRecord.getData("id");
-
-                        var str1 = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
-                        var thumb ="<div class=\"rectypeImages\">"+
-                        "<a href=\"#edit_thumb\">"+
-                        "<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
-                        "</a>"+
-                        "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
-                        "<a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
-                        "</div>"+
-                        "</div>";
-                        elLiner.innerHTML = thumb;
-                }},
-                { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        var str = oRecord.getData("name");
-                        var tit = "";
-                        if(str.length>25) {
-                            tit = str;
-                            str = str.substr(0,25)+"&#8230";
-                        }
-                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
-                }},
+                
                 { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
-                { key: "description", label: "Description", sortable:false, minWidth:200, 
+                
+                { key: "name", label: "Name", sortable:true, minWidth:200, maxAutoWidth:200, width:200, gutter:0,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        var str = oRecord.getData("name");
+                        var tit = "";
+                        if(str.length>30) { // limit maximum display length in chars and append elipsis
+                            tit = str;
+                            str = str.substr(0,30)+"&#8230";
+                        }
+                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
+                }},
+                
+                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -428,6 +417,7 @@ function RectypeManager() {
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
+                
                 { key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
@@ -435,13 +425,13 @@ function RectypeManager() {
                         'style="cursor:pointer;" onclick="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
                 },
                 { key: "usage", label: "Usage", hidden:true },
-                { key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
+                { key: "grp_id", label: "Group", sortable:false, minWidth:120, maxAutoWidth:120, width:120, className:'center',
                     formatter: YAHOO.widget.DataTable.formatDropdown,
                     dropdownOptions: _groups },
                 /*{ key: null, label: "Del", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                 elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
                 },*/
-                { key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
+                { key: "status", label: "Status", sortable:true, className:'center', minWidth:30, maxAutoWidth:30, width:30,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("status");
                         if (str === "reserved"){

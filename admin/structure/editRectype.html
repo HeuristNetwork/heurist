@@ -149,7 +149,18 @@
                 </div>
             </div>
 
-            <!-- OPTIONAL FIELDS -->
+            <div class="input-row">
+                <div class="input-header-cell" for="rty_ShowURLOnEditForm">Show record URL on edit form:</div>
+                <div class="input-cell">
+                    <input id="rty_ShowURLOnEditForm" type="checkbox"/>
+                    <div class="help prompt">Display URL at top of edit form for this record type.
+                        This is a special URL used to hyperlink search results.
+                        It is distinct from any URL fields in the record, which are not affected.
+                        Use only where a majority of records of this type will have one, and only one, principle URL eg. for internet bookmarks.</div>
+                </div>
+            </div>
+
+            <!-- OPTIONAL FIELDS - hidden behind a turndown arrow -->
             <div id="optional" class="togglepnl" style="margin-top: 20px; margin-bottom: 20px;"><a
                     style="margin-left: 40px;"
                     onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
@@ -185,16 +196,8 @@
                         </div>
                     </div>
 
-                    <div class="input-row">
-                        <div class="input-header-cell" for="rty_ShowURLOnEditForm">Show record URL on edit form:</div>
-                        <div class="input-cell">
-                            <input id="rty_ShowURLOnEditForm" type="checkbox"/>
-                            <div class="help prompt">Display URL at top of edit form for this record type.
-                                This is a special URL used to hyperlink search results.
-                                It is distinct from any URL fields in the record, which are not affected</div>
-                        </div>
-                    </div>
-
+                    <!-- Show URL on form moved from here b/coverly hidden -->
+ 
                     <div class="input-row">
                         <div class="input-header-cell" for="rty_ShowDescriptionOnEditForm">Show description on edit form:</div>
                         <div class="input-cell">
