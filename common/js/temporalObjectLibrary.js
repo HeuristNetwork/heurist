@@ -400,7 +400,7 @@ Temporal._typeFieldMap = {	s : {
         hdr : ["DVP","DVN","BCE","BPD","COD","DEV","DAT"]
     },
     p :	{
-        req : [["TPQ","TAQ"], ["PDB","PDE","TPQ","TAQ"]],
+        req : [["PDB","PDE","TPQ","TAQ"],["TPQ","TAQ"]],
         opt : ["DET","SPF","EPF","COM","SRT","CLD","CL2"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
@@ -491,6 +491,11 @@ Temporal.isValidFormat = function ( str ) {
     return false;
 };
 
+// returns array
+//  0 - valid
+//  1 - missed required fields
+//  2 - optional fields
+//  3 - error message
 Temporal.checkValidity = function ( temporal ) {
     if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>g_version) {
         return false;
@@ -508,17 +513,19 @@ Temporal.checkValidity = function ( temporal ) {
 
         for (j=0; j < map.req[i].length; j++) { // must have all require fields
             if (temp.search(map.req[i][j] + "=") !== -1) {
-                temp = temp.replace(map.req[i][j] + "=","");
+                temp = temp.replace(map.req[i][j] + "=","");//remove from search
             } else {
-                valid = false;
-                if (i < map.req.length -1){
-                    break;
+                //req field not found
+                valid = false;  
+                if (i < map.req.length-1){
+                    break;  //ignore if there are several sets
                 } else {
+                    //add missed fields for last set
                     ret[1].push(map.req[i][j]); // on min req set save any codes required to complete the min set
                 }
             }
         }
-
+    
         if (valid) {  // remove any optional fields
             for (j=0; j < map.opt.length; j++) {
                 temp = temp.replace(map.opt[j] + "=","");
@@ -527,6 +534,7 @@ Temporal.checkValidity = function ( temporal ) {
                 temp = temp.replace(/=$/,"");
                 ret[2] = temp.split("=");
             }
+            ret[1] =[];
             break;
         }
     }
