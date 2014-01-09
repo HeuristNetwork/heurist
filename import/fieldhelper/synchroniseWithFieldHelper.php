@@ -168,7 +168,7 @@ function update_counts(divid, processed, added, total) {
 					print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
 					print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
 					print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-					print "<input name='media' value='$mediaFolders' type='hidden'>";
+					print '<input name="media" value="'.$mediaFolders.'" type="hidden">';
 					print "<input name='exts' value='$mediaExts' type='hidden'>";
 					print "<input type='submit' value='Continue' />";
 				}
@@ -210,6 +210,8 @@ function update_counts(divid, processed, added, total) {
 			$rep_counter = 0;
 			$rep_issues = "";
 			$progress_divid = 0;
+            
+            set_time_limit(300);
 
 			doHarvest($dirs);
 
@@ -476,7 +478,7 @@ function update_counts(divid, processed, added, total) {
 								//set title by default
 								if (!array_key_exists("t:".$titleDT, $details)){
 									$details["t:".$titleDT] = array("1"=>$filename);
-									print "<div style=\"color:#ff8844\">warning $filename_base no title</div>";
+									print "<div style=\"color:#ff8844\">warning $filename_base No title recorded in XML manifest for this file, using file path + name</div>";
 								}
 
 								$new_md5 = null;
@@ -514,7 +516,7 @@ function update_counts(divid, processed, added, total) {
 									//update xml
 									if($recordId==null){
 										if($old_md5!=$new_md5){
-											print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
+											print "<div style=\"color:#ff8844\">warning $filename_base Checksum differs from value in manifest, data file may have been changed</div>";
 										}
 										$f_item->addChild("heurist_id", $out["bibID"]);
 										$f_item->addChild("md5", $new_md5);

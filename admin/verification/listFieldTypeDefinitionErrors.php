@@ -87,7 +87,7 @@
 				display: inline-block;
 				padding:0 0 10px 0;
 			}
-			Table tr td {
+			.msgline {
 				line-height:2em;
 			}
 		</style>
@@ -103,92 +103,48 @@
 			<h2>Invalid Field Type Definition check</h2>
 		</div>
 		<div id="page-inner">
-
-			These checks look for invalid references within the Heurist database structure for Field Type Definitions. These should arise rarely.
-			Click the hyperlinked number at the start of each row to open an edit form on that Field Type definition. Look edit and save the Terms or Pointer definitions.
-
+<?php
+    if (count($dtysWithInvalidTerms)>0 || count($dtysWithInvalidNonSelectableTerms)>0 || count($dtysWithInvalidRectypeConstraint)>0){
+?>
+        
+ The following field definitions have inconsistent data. To fix the problem please perform one of follwoing actions:<br /><br /> 
+Click hyperlinked name of field name to open an edit form on that Field Type definition. Look edit and save the Terms or Pointer definitions.
+<!-- <br />or<br />
+2. Click "Auto Repair" button. -->
+            <br />
 			<hr/>
+<?php
 
-			<div>
-				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid terms definitions</h3>
-			</div>
-			<table>
-				<?php
-					if (!count($dtysWithInvalidTerms)){
-					?>
-					<tr>
-						<td> All field type definition contain valid term IDs.</td>
-					</tr>
-					<?php
-					}else{
 						foreach ($dtysWithInvalidTerms as $row) {
-						?>
-					<tr>
-						<td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
-						<td><?= $row['dty_Name'] ?></td>
-						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidTermIDs'])?> invalid term ID(s) <?= join(",",$row['invalidTermIDs'])?></td>
-					</tr>
-						<?php
+?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
+<?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?> 
+(code: <?= join(",",$row['invalidTermIDs'])?>)
+                    </div>
+<?php
 						}//for
-					}
-					?>
-			</table>
-			<hr/>
-			<div>
-				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid non-selectable terms definitions</h3>
-			</div>
-			<table>
-					<?php
-					if (!count($dtysWithInvalidNonSelectableTerms)){
-					?>
-					<tr>
-						<td> All field type definition contain valid non-selectable term IDs.</td>
-					</tr>
-					<?php
-					}else{
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
-						?>
-					<tr>
-                        <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
-						<td><?= $row['dty_Name'] ?></td>
-						<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID(s) <?= join(",",$row['invalidNonSelectableTermIDs'])?></td>
-					</tr>
-						<?php
+?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
+<?= count($row['invalidTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
+(code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
+                    </div>
+<?php
 						}
-					}
-				?>
-			</table>
-			[end of list]
-
-			<hr/>
-
-			<div>
-				<h3>Reference/Resource Pointer or Relmarker Field Types with invalid rectype(s) in constraint definitions</h3>
-			</div>
-			<table>
-				<?php
-					if (!count($dtysWithInvalidRectypeConstraint)){
-					?>
-				<tr>
-					<td> All field type definition contain valid Rectype IDs.</td>
-				</tr>
-					<?php
-					}else{
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {
-						?>
-				<tr>
-                    <td><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_ID'] ?></a></td>
-					<td><?= $row['dty_Name'] ?></td>
-					<td> a(n) "<?= $row['dty_Type'] ?>" field type definition contains <?= count($row['invalidRectypeConstraint'])?> invalid rectype ID(s) <?= join(",",$row['invalidRectypeConstraint'])?></td>
-				</tr>
-						<?php
+?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
+<?= count($row['invalidTermIDs'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
+(code: <?= join(",",$row['invalidRectypeConstraint'])?>)
+                    </div>
+<?php
 						}
-					}
-				?>
-			</table>
-			[end of list]
-			<hr/>
 
+    }else{
+        print "All field type definitions are valid";
+    }
+?>            
+            
 		</div>
 	</body>
 </html>

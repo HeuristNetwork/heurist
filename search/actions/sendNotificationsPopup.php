@@ -241,8 +241,12 @@
 			mail($psn[USERS_EMAIL_FIELD], $email_subject, $email_text, $email_headers);
 			return 'Notification email sent to '.addslashes($psn['fullname']);
 		} else if ($_REQUEST['notify_email']) {
-			mail($_REQUEST['notify_email'], $email_subject, $email_text, $email_headers);
-			return 'Notification email sent to '.addslashes($_REQUEST['notify_email']);
+			$rv = mail($_REQUEST['notify_email'], $email_subject, $email_text, $email_headers);
+            if($rv){
+			    return 'Notification email sent to '.addslashes($_REQUEST['notify_email']);
+            }else{
+                return "Can not send email. Server error";
+            }
 		} else {
 			return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select a group, person, or enter an email address)</div>';
 		}
