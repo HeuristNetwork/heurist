@@ -288,12 +288,7 @@ function EditRectypeTitle() {
                             var rt_term = {};//new Object();
                             rt_term.id = term.id+"."+child[k].rt_id;  //record type
 
-                            var _varname;
-                            if(is_single){
-                                _varname = term.parent_id+"."+term.id;
-                            }else{
-                                _varname = term.id;
-                            }
+                            var _varname = term.id;
                             
                             rt_term.label =  '<div style="padding-left:10px;">'+child[k].rt_name + '</b></div>';
                             //rt_term.href = "javascript:void(0)";

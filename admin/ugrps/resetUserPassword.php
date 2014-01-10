@@ -36,6 +36,7 @@
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 
 ?>
 <html>
@@ -64,23 +65,6 @@ function hash_it ($passwd) {
 	return crypt($passwd, $salt);
 }
 
-function email_user ($user_id, $firstname, $email, $passwd, $username) {
-	$msg =
-"Dear ".$firstname.",
-
-Your Heurist password has been reset.
-
-Your username is: ".$username."
-Your new password is: ".$passwd."
-
-To change your password go to My Profile -> My User Info in the top right menu
-
-You will first be asked to log in with the new password above.
-";
-	mail($email, 'Heurist password reset', $msg, 'From: '.HEURIST_MAIL_TO_INFO);
-}
-
-
 if (@$_REQUEST['username']) {
 	mysql_connection_overwrite(USERS_DATABASE);
 
@@ -97,9 +81,20 @@ if (@$_REQUEST['username']) {
 		$new_passwd = generate_passwd();
 		mysql_query('update sysUGrps usr set ugr_Password = "'.hash_it($new_passwd).'" where ugr_ID = ' . $user_id);
 
-		email_user($user_id, $firstname, $email, $new_passwd, $username);
-
-		print '<p>Your password has been reset.  You should receive an email shortly with your new password.</p>'."\n";
+        $email_title = 'Password reset';
+        $email_text = "Dear ".$firstname.",\n\n".
+                      "Your Heurist password has been reset.\n\n".
+                      "Your username is: ".$username."\n".
+                      "Your new password is: ".$new_passwd."\n\n".
+                      "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+        $email_header = 'From: '.HEURIST_MAIL_TO_INFO;
+        
+        $rv = sendEmail($email, $email_title, $email_text, $email_header);
+        if($rv=="ok"){
+            print '<p>Your password has been reset. You should receive an email shortly with your new password.</p>'."\n";    
+        }else{
+            print '<p style="color: red;">'.$rv.'</p>'."\n";
+        }
 
 	} else {
 		$error = '<p style="color: red;">Username does not exist</p>'."\n";

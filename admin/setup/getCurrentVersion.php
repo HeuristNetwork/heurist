@@ -32,6 +32,7 @@
 
     require_once(dirname(__FILE__)."/../../common/config/initialise.php");
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
+    require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 
     $is_check = @$_REQUEST["check"];
 
@@ -147,12 +148,7 @@ function checkVersionOnMainServer($version_in_session)
                         "Beta versions of the software with new features may also be available at the Google Code repository, linked from the Heurist home page.";
 
                         //
-                        $rv = mail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, "From: root");
-                        if (! $rv) {//TODO  SAW this should not fail silently
-                            error_log("mail send failed: " . HEURIST_MAIL_TO_ADMIN);
-                            //to delete check file ?????
-                        }else{
-                        }
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
                     }
 
                     //save current date of check

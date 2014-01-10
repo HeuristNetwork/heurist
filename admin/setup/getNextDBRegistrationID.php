@@ -43,6 +43,7 @@
 	$error = "";
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 
 	mysql_connection_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
 
@@ -172,13 +173,9 @@
 			$serverURL;
 
             $dbowner_Email = get_dbowner_email();
-            if($dbowner_Email){
-			    $rv = mail($dbowner_Email, 'Heurist database registration: '.$dbTitle.' ['.$indexdb_user_id.']', $email_text,
-				    "From: root");
-			    if (! $rv) {//TODO  SAW this should not fail silently
-				    error_log("mail send failed: " . $dbowner_Email);
-			    }
-            }
+            $email_title = 'Database registration: '.$dbTitle.' ['.$indexdb_user_id.']';
+            
+            sendEmail($dbowner_Email, $email_title, $email_text, null);
 			//END email -----------------------------------
 
 

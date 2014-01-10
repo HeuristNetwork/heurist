@@ -36,6 +36,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
+    require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 	//require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 
@@ -420,12 +421,9 @@
 			"Go to the address below to review further details and approve the registration:\n".
 			HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
-
-			$rv = mail($dbowner_Email, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
-				"From: root");
-			if (! $rv) {//TODO  SAW this should not fail silently
-				error_log("mail send failed: " . $dbowner_Email);
-			}
+            $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
+            
+            sendEmail($dbowner_Email, $email_title, $email_text, null);
 
 		}
         }
@@ -471,11 +469,9 @@
 			$email_text = $email_text."\n\nWe recommend visiting the Help ".
 			"pages, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
 
-			$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']', $email_text,
-				"From: ".$dbowner_Email."\r\nCc: ".$dbowner_Email);
-			if (! $rv) {//TODO  SAW this should not fail silently
-				error_log("mail send failed: " . $ugr_eMail);
-			}
+			$email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
+            
+            sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
 	      }
         } 
     }  // sendApprovalEmail    

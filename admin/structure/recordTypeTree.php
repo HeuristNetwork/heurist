@@ -59,21 +59,19 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     
     $isvarname = ($mode=='varsonly');
 
+    $_REQUEST['limit'] = 100;
+    $qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
+    
     if($isvarname){
 
         $rectypeID = @$_REQUEST['rty_id'];
-        
         $res = getRecordTypeTree($rectypeID, 0);
-        
-        $qresult = loadSearch($_REQUEST);
         
         header("Content-type: text/javascript");
         echo json_format( array("vars"=>$res,
                                 "records"=>$qresult["records"]), true);
 
     }else{
-
-            $qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
 
             if(!array_key_exists('records',$qresult)){
                 echo "Empty query. Cannot generate template";
