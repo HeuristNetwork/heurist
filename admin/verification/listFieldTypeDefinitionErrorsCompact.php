@@ -55,6 +55,7 @@
         <title>Invalid Field Type Definition check</title>
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <script src="../../common/js/utilsUI.js"></script>
 		<style type="text/css">
 			h3, h3 span {
 				display: inline-block;
@@ -66,13 +67,54 @@
 		</style>
 	</head>
 
-	<body class="popup" style="width:96%;">
+	<body class="popup" style="width:95%;">
     
 		<div id="page-inner" style="top:5px;">
+        
+<script>
+function repairFieldTypes(){
+    
+    function _callback(context){
+        if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
+            top.HEURIST.util.showError(null);
+        }else{
+            alert(context['result']);
+        }
+    }
+    
+    var dt = [
+<?php   
+        $isfirst = true;
+        foreach ($dtysWithInvalidTerms as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']";
+            $isfirst = false;
+        }
+        foreach ($dtysWithInvalidNonSelectableTerms as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 1, '".$row['validNonSelTermsString']."']";
+            $isfirst = false;
+        }
+        foreach ($dtysWithInvalidRectypeConstraint as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 2, '".$row['validRectypeConstraint']."']";
+            $isfirst = false;
+        }
+?>];
+
+    var str = JSON.stringify(dt);
+    
+    var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
+    var callback = _callback;
+    var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+    top.HEURIST.util.getJsonData(baseurl, callback, params);
+}
+</script>
+        
+        
 The following field definitions have inconsistent data. To fix the problem and remove this message please perform one of follwoing actions:<br /><br /> 
-1. Close this popup, save your edits, then Navigate to Designer View > Structure > Manage Field Types, edit the fields indicated.<br />or<br />
+1. Close this popup, save your edits, then Navigate to Designer View > Structure > Manage Field Types, edit the fields indicated.
+<br />or<br />
 2. Close this popup, save your edits and click "Edit record type" link at top right of edit record form.
-<!-- <br />or<br />3. Click "Auto Repair" button, close this popup and the reload your edit record form. -->
+<br />or<br />
+3. Click <button onclick="repairFieldTypes()">Auto Repair</button>
             <br />
 			<hr/>
 <?php
@@ -102,7 +144,7 @@ if (count($dtysWithInvalidNonSelectableTerms)>0){
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
 						?>
                     <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has 
-<?= count($row['invalidTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
+<?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
 (code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
                     </div>
 <?php
@@ -118,7 +160,7 @@ if (count($dtysWithInvalidRectypeConstraint)>0){
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {
 ?>
                     <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has 
-<?= count($row['invalidTermIDs'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
+<?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
 (code: <?= join(",",$row['invalidRectypeConstraint'])?>)
                     </div>
                         

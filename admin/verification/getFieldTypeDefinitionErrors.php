@@ -86,26 +86,36 @@ function getInvalidFieldTypes($rectype_id){
             $dtysWithInvalidRectypeConstraint = array();
             foreach ( $DTT as $dtyID => $dty) {
                 if ($dty['dty_JsonTermIDTree']){
-                    $invalidTerms = getInvalidTerms($dty['dty_JsonTermIDTree']);
+                    $res = getInvalidTerms($dty['dty_JsonTermIDTree'], true);
+                    $invalidTerms = $res[0];
+                    $validTermsString = $res[1];
                     if (count($invalidTerms)){
                         $dtysWithInvalidTerms[$dtyID] = $dty;
                         $dtysWithInvalidTerms[$dtyID]['invalidTermIDs'] = $invalidTerms;
+                        $dtysWithInvalidTerms[$dtyID]['validTermsString'] = $validTermsString;
                     }
                 }
                 if ($dty['dty_TermIDTreeNonSelectableIDs'])
                 {
-                    $invalidNonSelectableTerms = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs']);
+                    
+                    $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
+                    $invalidNonSelectableTerms = $res[0];
+                    $validNonSelTermsString = $res[1]; 
                     if (count($invalidNonSelectableTerms)){
                         $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
                         $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
+                        $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
                     }
                 }
                 /*****DEBUG****///error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
                 if ($dty['dty_PtrTargetRectypeIDs']){
-                    $invalidRectypes = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
+                    $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
+                    $invalidRectypes = $res[0];
+                    $validRectypes   = $res[1];
                     if (count($invalidRectypes)){
                         $dtysWithInvalidRectypeConstraint[$dtyID] = $dty;
                         $dtysWithInvalidRectypeConstraint[$dtyID]['invalidRectypeConstraint'] = $invalidRectypes;
+                        $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
                     }
                 }
             }//for
@@ -114,20 +124,28 @@ function getInvalidFieldTypes($rectype_id){
 }
 
 // function that translates all term ids in the passed string to there local/imported value
-function getInvalidTerms($formattedStringOfTermIDs) {
+function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     global $TL;
     $invalidTermIDs = array();
     if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
-        return $invalidTermIDs;
+        return array($invalidTermIDs, "");
     }
+    
+    $isvocabulary = false;
+    $pos = strpos($formattedStringOfTermIDs,"{");
+    
+    if ($pos!==false){ //}is_numeric($pos) && $pos>=0) {
 
-    if (strpos($formattedStringOfTermIDs,"{")!== false) {
         /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
         $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
         if (strrpos($temp,":") == strlen($temp)-1) {
             $temp = substr($temp,0, strlen($temp)-1);
         }
         $termIDs = explode(":",$temp);
+    } else if ($is_tree){ //vocabulary
+
+        $isvocabulary = true;
+        $termIDs = array($formattedStringOfTermIDs); 
     } else {
         /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
         $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
@@ -139,32 +157,77 @@ function getInvalidTerms($formattedStringOfTermIDs) {
         // check that the term valid
         if (!$trmID ){ // invalid trm ID null or 0 is not allowed
             if(count($termIDs)>1){
-                array_push($invalidTermIDs,"blank");    
+                array_push($invalidTermIDs, "blank");    
             }
         }else if ( !@$TL[$trmID]){ // invalid trm ID
             array_push($invalidTermIDs,$trmID);
         }
     }
-    return $invalidTermIDs;
+
+    $validStringOfTerms = "";
+    //create valid set of terms    
+    if(count($invalidTermIDs)>0){
+
+        if($isvocabulary ){ //vocabulary
+            $validStringOfTerms =  "";
+        } else if($is_tree) {
+            $termTree = json_decode($formattedStringOfTermIDs);
+            $validStringOfTerms = createValidTermTree($termTree, $invalidTermIDs);
+            if($validStringOfTerms!=""){
+                $validStringOfTerms = "{".$validStringOfTerms."}";
+            }
+        } else {
+            $termIDs = array_diff($termIDs, $invalidTermIDs);
+            if(count($termIDs)>0){
+                $validStringOfTerms = '["'.implode('","',$termIDs).'"]';
+            }else{
+                $validStringOfTerms = "";
+            }
+        }
+    }
+    
+    return array($invalidTermIDs, $validStringOfTerms);
+}
+
+function createValidTermTree($termTree, $invalidTermIDs){
+    $validStringOfTerms = "";
+    $res = "";
+    foreach ($termTree as $termid=>$child_terms){
+        
+        $key = array_search($termid, $invalidTermIDs);
+//error_log($termid."=".$key);
+        if($key===false){
+            $res = $res.'"'.$termid.'":{'.createValidTermTree($child_terms, $invalidTermIDs).'},';
+//error_log($res);            
+        }else{ //invalid
+            //return "";            
+        }
+    }
+    return ($res=="")?"": substr($res,0,-1);
 }
 
 // function that check the existaance of all rectype ids in the passed string
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $RTN;
     $invalidRectypeIDs = array();
+    
     if (!$formattedStringOfRectypeIDs || $formattedStringOfRectypeIDs == "") {
-        return $invalidRectypeIDs;
+        return array($invalidRectypeIDs, "");
     }
 
+    $validRectypeIDs = array();
     $rtyIDs = explode(",",$formattedStringOfRectypeIDs);
     // Validate rectypeIDs
     foreach ($rtyIDs as $rtID) {
         // check that the rectype is valid
         if (!@$RTN[$rtID]){ // invalid rty ID
             array_push($invalidRectypeIDs,$rtID);
+        }else{
+            array_push($validRectypeIDs, $rtID);
         }
     }
-    return $invalidRectypeIDs;
+    
+    return array($invalidRectypeIDs, implode(",", $validRectypeIDs) );
 }
 
 ?>

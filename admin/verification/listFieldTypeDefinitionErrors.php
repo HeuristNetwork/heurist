@@ -95,9 +95,8 @@
 
 	<body class="popup">
     
-    
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/loadCommonInfo.php"></script>
+        <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+        <script type="text/javascript" src="../../common/php/loadCommonInfo.php"></script>
     
 		<div class="banner">
 			<h2>Invalid Field Type Definition check</h2>
@@ -106,15 +105,50 @@
 <?php
     if (count($dtysWithInvalidTerms)>0 || count($dtysWithInvalidNonSelectableTerms)>0 || count($dtysWithInvalidRectypeConstraint)>0){
 ?>
-        
+<script>
+function repairFieldTypes(){
+    
+    function _callback(context){
+        if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
+            top.HEURIST.util.showError(null);
+        }else{
+            alert(context['result']);
+        }
+    }
+    
+    var dt = [
+<?php   
+        $isfirst = true;
+        foreach ($dtysWithInvalidTerms as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']";
+            $isfirst = false;
+        }
+        foreach ($dtysWithInvalidNonSelectableTerms as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 1, '".$row['validNonSelTermsString']."']";
+            $isfirst = false;
+        }
+        foreach ($dtysWithInvalidRectypeConstraint as $row) {
+            print ($isfirst?"":",")."[".$row['dty_ID'].", 2, '".$row['validRectypeConstraint']."']";
+            $isfirst = false;
+        }
+?>];
+
+    var str = JSON.stringify(dt);
+    
+    var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
+    var callback = _callback;
+    var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
+    top.HEURIST.util.getJsonData(baseurl, callback, params);
+}
+</script>
+
  The following field definitions have inconsistent data. To fix the problem please perform one of follwoing actions:<br /><br /> 
-Click hyperlinked name of field name to open an edit form on that Field Type definition. Look edit and save the Terms or Pointer definitions.
-<!-- <br />or<br />
-2. Click "Auto Repair" button. -->
+1. Click hyperlinked name of field name to open an edit form on that Field Type definition. Look edit and save the Terms or Pointer definitions.
+<br />or<br />
+2. Click <button onclick="repairFieldTypes()">Auto Repair</button>
             <br />
 			<hr/>
 <?php
-
 						foreach ($dtysWithInvalidTerms as $row) {
 ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
@@ -126,7 +160,7 @@ Click hyperlinked name of field name to open an edit form on that Field Type def
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
 ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
-<?= count($row['invalidTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
+<?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
 (code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
                     </div>
 <?php
@@ -134,7 +168,7 @@ Click hyperlinked name of field name to open an edit form on that Field Type def
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {
 ?>
                     <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= $row['dty_ID'] ?>); return false}'><?= $row['dty_Name'] ?></a></b> field (code <?= $row['dty_ID'] ?>) has 
-<?= count($row['invalidTermIDs'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
+<?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
 (code: <?= join(",",$row['invalidRectypeConstraint'])?>)
                     </div>
 <?php
