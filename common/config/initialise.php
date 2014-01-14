@@ -278,12 +278,12 @@ if (!defined('HEURIST_UPLOAD_DIR')) {
 		define('HEURIST_THUMB_BASE_URL', $serverBaseURL . $DIR_FILESTORE . $dbName . "/filethumbs/");
 	}
 
-// smarty template path  - note code now assumes that this is within the fielstore for the database
-define('HEURIST_SMARTY_TEMPLATES_DIRNAME', "smarty-templates/");
-testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . HEURIST_SMARTY_TEMPLATES_DIRNAME);
-if (!defined('HEURIST_SMARTY_TEMPLATES_DIR')) {
-	error_log('No Smarty Template Directory defined that is a writable directory');
-}
+    // smarty template path  - note code now assumes that this is within the fielstore for the database
+    define('HEURIST_SMARTY_TEMPLATES_DIRNAME', "smarty-templates/");
+    if (!testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . HEURIST_SMARTY_TEMPLATES_DIRNAME)) {
+        error_log('No Smarty Template Directory defined that is a writable directory');
+    }
+
 // xsl templates path  - note code now assumes that this is within the fielstore for the database
 define('HEURIST_XSL_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . "xsl-templates/"); //TODO: ask Steven is we should ensure this is URL accessable
 
@@ -599,7 +599,7 @@ function detailtypeLocalIDLookup($dtID, $dbID = 2) {
 function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false, $tryMakeDir = false) {
     
 	$info = new SplFileInfo(($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
-    
+
 	if ($info->isDir() && $info->isWritable()) {
 		define($defString, $dir);
 		return true;

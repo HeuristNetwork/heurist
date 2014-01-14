@@ -121,9 +121,24 @@
   font-family: Courier, Monospace !important;
   font-size: 14px;
 }
+
+.insert-popup{
+  visibility:visible;  
+}
+.insert-intree{
+  display:none;  
+}
+
 </style>
 <script type="text/javascript">
-			var showReps, isEditorVisible=false;
+var showReps, isEditorVisible=false;
+
+function insertVar(isloop, isif){
+    if(showReps){
+        showReps.insertSelectedVars( null, isloop, isif );
+    }
+}            
+            
 </script>
 </head>
 
@@ -139,6 +154,24 @@
 	style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
 		<div id="layout"></div>
 -->
+
+<div id="insert-popup" style="display:none;">
+  <div style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;">
+    <div class="ins_isloop">Is the field or test you are insterting inside a repeat (either a repeat for child records or a repeat for a repeating field)?</div><br />
+    <table border="0">
+        <tr><td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, false )">Insert field</button></td>
+        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, true )">Test value</button></td></tr>
+        <tr class="ins_isloop"><td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, false )">Insert within repeat</button></td>
+        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, true )">Test value within repeat</button></td></tr>    
+    </table>
+    
+    <br />
+    <b>Note</b><br />
+    <div>For repeating value fields (including pointers) you should first insert a repeat by clicking "repeat" next to name of field</div><br />
+    <div>Then place further field specifications inside the {foreach}...{/foreach} </div>
+  </div>
+</div>
+
 
 <div id="viewercontainer">
 	<div id="toolbardiv" style="width:100%;height:30px;">
@@ -204,9 +237,11 @@
 				<option value="1">Field + Label</option>
 				<option value="2">Field + function wrapper</option>
 			</select></div>
-			<div><label>Insert</label><a href="javascript:void(0)" title="ForEach repeat to loop through all records in the current query or selection" onClick="showReps.insertRootForEach()">Records repeat</a><br>
+			<div><label>Insert</label><a href="javascript:void(0)" title="ForEach repeat to loop through all records in the current query or selection" onClick="showReps.insertRootForEach()">Records repeat</a>
+            <div style="float:right">in popup&nbsp;<input type="checkbox" checked="checked" onclick="insertMode(event)"/>&nbsp;</div><br>
 			</div>
 			<div><label></label><a href="../../help/smarty_reports.html" title="Read full documentation on the Smarty templating language" target="_blank">Smarty Help</a></div>
+            
 		</div>
 		<div id="treeContainer">
 			<div id="varsTree" class="ygtv"></div>
@@ -408,6 +443,19 @@ if(isInited){
 		var elem = event.target;
 		window.showReps.setQueryMode(elem.value);
 	}
+    
+    function insertMode(event){
+            //$(".insert-popup").css("visibility",event.target.checked?"visible":"hidden")
+//            $(".insert-intree").css("visibility",event.target.checked?"hidden":"visible")
+            
+            if(event.target.checked){
+                $(".insert-popup").show();    
+                $(".insert-intree").hide();
+            }else{
+                $(".insert-popup").hide();    
+                $(".insert-intree").show();
+            }
+    }
 
 	function onResize(){
 		window.showReps.onResize(this.innerWidth);

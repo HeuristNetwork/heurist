@@ -839,14 +839,18 @@ function ShowReps() {
                         
                         if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
                             term.label = term.label + label +
+'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', false)">insert</a>)</span>'+
+'<span class="insert-intree">'+                            
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">insert</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</div>';
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</span></div>';
                         }else{
                             term.label = term.label + label +
+'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', true)">insert</a>)</span>'+
+'<span class="insert-intree">'+                            
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
 '&nbsp;&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the repeat" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">out</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the repeat" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</div>';
+'&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable with parent prefix. To use outside the repeat" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, true)">if</a>)</span></div>';
                         }
                         
                     }else{
@@ -1044,11 +1048,34 @@ function ShowReps() {
 
 		insertAtCursor(textedit, _text, false, -7);
 	}
+    
+    var insertPopupID, insert_ID; 
 
+    function _showInsertPopup( varid, isloop ){
+    
+        var ele = document.getElementById("insert-popup");
+        
+        if(isloop){
+            $(".ins_isloop").show();
+        }else{
+            $(".ins_isloop").hide();
+        }
+        
+        insert_ID = varid;
+        var w = top.HEURIST.util.popupElement(top, ele,
+                            { "no-titlebar": false, "no-close": false, width: 420, height:220 });
+        insertPopupID = w.id;
+    }
+    
 	//
 	// inserts selected variables
 	//
     function _insertSelectedVars( varid, inloop, isif ){
+        
+        if(varid==null){
+            top.HEURIST.util.closePopup(insertPopupID);
+            varid = insert_ID;
+        }
 
         var textedit = Dom.get("edTemplateBody"),
             _text = "",
@@ -1454,6 +1481,10 @@ function ShowReps() {
 				_insertSelectedVarsAsLoop(varid);
 			},
 
+            showInsertPopup:function(varid, isloop){
+                _showInsertPopup(varid, isloop);
+            },
+            
 			//inserts selected variables
 			insertSelectedVars:function(varid, inloop, isif){
 				_insertSelectedVars(varid, inloop, isif);
@@ -1478,7 +1509,7 @@ function ShowReps() {
 			insertModifier:function(modname){
 				_insertModifier(modname);
 			},
-
+            
 			baseURL:  function (){
 				return top.HEURIST.basePath;
 			},
