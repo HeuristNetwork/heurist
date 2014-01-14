@@ -394,7 +394,21 @@ function ShowReps() {
     			codeEditor.getSession().setMode("ace/mode/php");
     			codeEditor.setValue(content);
 			}else{
-				codeEditor = CodeMirror(Dom.get("templateCode"), {lineNumbers:true, smartIndent:true});
+                
+				codeEditor = CodeMirror(Dom.get("templateCode"), {
+                    mode           : "smartymixed",
+                    tabSize        : 2,
+                    indentUnit     : 2,
+                    indentWithTabs : false,
+                    lineNumbers    : true,
+                    smartyVersion  : 3,
+                    matchBrackets  : true,                    
+                    smartIndent    : true,
+                    extraKeys: {
+                        "Enter": function(e){
+                                insertAtCursor(null, "");
+                           }                
+                    }});
 			}
 		}else if(!_isAceEditor){
 			$('.CodeMirror').hide();
@@ -957,7 +971,7 @@ function ShowReps() {
 	function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
         var remark = "{* "+  _getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id) + " *}";
-		return "{if ($"+varname+")}"+remark+"\n\n{else}\n{/if}"+remark;
+		return "{if ($"+varname+")}"+remark+"\n  \n{else}\n{/if}"+remark;
 	}
 	//
 	//
@@ -1012,7 +1026,7 @@ function ShowReps() {
 	//
 	function _insertRootForEach(){
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{foreach $results as $r}\n\n{if ($r.recOrder==0)}\n\n{elseif ($r.recOrder==count($results)-1)}\n\n{else}\n\n{/if}\n{/foreach}\n';  //{* INSERT YOUR CODE HERE *}
+		var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  {elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';  //{* INSERT YOUR CODE HERE *}
 
 		insertAtCursor(textedit, _text, false, -12);
 	}
@@ -1025,7 +1039,7 @@ function ShowReps() {
 		
         //var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';
         
-        var _text = '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}{* '+rectypeName+ ' *}\n\t\n{/if}{* '+rectypeName+ ' *}\n';  //{* INSERT YOUR CODE HERE *}
+        var _text = '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}{* '+rectypeName+ ' *}\n  \n{/if}{* '+rectypeName+ ' *}\n';  //{* INSERT YOUR CODE HERE *}
         
 
 		insertAtCursor(textedit, _text, false, -7);
@@ -1083,7 +1097,7 @@ function ShowReps() {
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
             var remark = "{* "+_getVariableName(_nodep.data.this_id)+" *}";
                
-			_text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n\t\n{/foreach}"+remark+"\n";
+			_text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
 		}
         
         if(_text!=="")    {
@@ -1121,16 +1135,45 @@ function ShowReps() {
         }
     }
 
+    
+    /**
+    * myField, isApplyBreaks, cursorIndent - not used
+    */
 	function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
 		if(_isAceEditor){
 			codeEditor.insert(myValue);
 		}else{
+            //for codemirror
             var crs = codeEditor.getCursor();
-			codeEditor.replaceSelection("\n"+myValue);
+            //calculate required indent
+            var l_no = crs.line;
+            var line = "";
+            var indent = 0;
+            
+            while (line=="" && l_no>0){
+                line = codeEditor.getLine(l_no);
+                
+                l_no--;
+                if(line=="") continue;
+                
+                indent = CodeMirror.countColumn(line, null, codeEditor.getOption("tabSize"));
+                
+                if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                    indent = indent + 2;
+                }
+            }
+            
+            var off = new Array(indent + 1).join(' ');
+            
+            myValue = "\n" + myValue;
+            myValue = myValue.replace(/\n/g, "\n"+off);
+            
+			codeEditor.replaceSelection(myValue);
 
             if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
                 crs.line = crs.line+2;
-                crs.ch = 0;
+                crs.ch = indent + 2;
+                //crs.ch = 0;
             }else{
                 crs = codeEditor.getCursor();
             }
