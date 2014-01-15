@@ -158,7 +158,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 			$is_h2 = (@$_REQUEST['h2']==1);
 
-			$db_prefix = $is_h2?"heuristdb-" :$dbPrefix;
+			$db_prefix = $is_h2?"heuristdb_" :$dbPrefix;
 
 			// ----FORM 1 - SELECT THE SOURCE DATABASE --------------------------------------------------------------------------------
 

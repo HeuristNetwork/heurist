@@ -189,13 +189,15 @@
 			$source_db_prefix = 'hdb_';
 			$source_url = "http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 			// parameters were ?prefix=hdb_&db=H3CoreDefinitions";
-			} else {
+		} else {
 			$source_db_id = $_REQUEST["dbID"];
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 			$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 		}
-/*****DEBUG****///error_log("source url ".print_r($source_url,true));
+/*****DEBUG****///
+
+error_log("source url ".print_r($source_url,true));
 
 		$data = loadRemoteURLContent($source_url);
 
@@ -218,7 +220,7 @@
     }
 
 
-	$splittedData = split($startToken, $data);
+	$splittedData = explode($startToken, $data);
 	$tableNumber =1;
 
 	if ($isExistingDB)
@@ -248,7 +250,7 @@
 		}
 		// TODO: this is a horrible approach to splitting out the data. Should be rewritten. Works, so for the moment if it ain't broke ...
 		if(sizeof($splittedData) > $tableNumber) { // what the hell does this do? fortunately it is always true!
-			$splittedData2 = split($endToken, $splittedData[$tableNumber]);
+			$splittedData2 = explode($endToken, $splittedData[$tableNumber]);
 			$i = 1;
 			$size = strlen($splittedData2[0]);
 			$testData = $splittedData2[0];

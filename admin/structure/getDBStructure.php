@@ -148,7 +148,7 @@
 
     print "<p>";
     print "\n$startToken\n";
-    while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+    while ($row = mysql_fetch_assoc($res)) {   @print_row($row, $fmt); }
     print "$endToken\n";
     print "<p>&nbsp;<p>&nbsp;<p>";
 
@@ -486,7 +486,8 @@
                 '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
 			    '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
 			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_LocallyModified]',
-                '$row[trm_Code]','$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // added 1/10/13 db version 1.2.0
+                '$row[trm_Code]','$row[trm_Modified]'),";
+                //WARNING! This need to updated with sync with new db strucutre  '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // added 1/10/13 db version 1.2.0
 			break;
 
 			case 'defOntologies': // Data from Ontologies table
