@@ -408,7 +408,8 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $result_fieldname='dty
 
     $rdr = _titlemask__get_rec_detail_types($rt);
 
-    $search_fieldname = strtolower($search_fieldname);
+    $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
+    //$search_fieldname = strtolower($search_fieldname);
 
     //search in record type structure
     if(@$rdr[$search_fieldname]){  //search by dty_ID, rst_DisplayName, dty_ConceptCode
@@ -448,10 +449,11 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
     }
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
+    
         $rdt_id = _titlemask__get_dt_field($rt, $field_name);  //get concept code
         if(!$rdt_id){
             //ERROR
-            return array("$field_name not found");
+            return array("Field $field_name not found");
         }else {
             return _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id );
         }

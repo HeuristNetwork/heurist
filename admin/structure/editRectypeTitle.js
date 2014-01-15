@@ -459,7 +459,7 @@ function EditRectypeTitle() {
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
         var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-        var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check=1";
+        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
@@ -468,7 +468,7 @@ function EditRectypeTitle() {
                     if (sel.selectedIndex>0){
 
                         var rec_id = sel.value;
-                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+mask+"&db="+db;
+                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+encodeURIComponent(mask)+"&db="+db;
                         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                                 var obj2 = xhr.responseText;
                                 document.getElementById('testResult').innerHTML = obj2;
@@ -495,7 +495,7 @@ function EditRectypeTitle() {
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
         var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-        var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check=1";
+        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
@@ -523,7 +523,7 @@ function EditRectypeTitle() {
 
 
         var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-        var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check="+mode;
+        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
