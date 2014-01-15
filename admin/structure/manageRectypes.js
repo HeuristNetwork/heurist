@@ -292,16 +292,17 @@ function RectypeManager() {
 
                     var td = top.HEURIST.rectypes.typedefs[rectypeID];
                     var rectype = td.commonFields;
-                    if (rectype && rectype[fi.rty_RecTypeGroupID] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
+                    if (rectype && Number(rectype[fi.rty_RecTypeGroupID]) === Number(grpID)) {  //(rectype[9].indexOf(grpID)>-1) {
                         arr.push([Number(rectypeID),
-                                (Number(rectype[fi.rty_ShowInLists])===1),
-                                '', //icon
+                                '', //icon 
+                                '', //edit
                                 rectype[fi.rty_Name],
-                                rectype[fi.rty_Description],
-                                rectype[fi.rty_Status],
-                                rectype[fi.rty_RecTypeGroupID],
+                                rectype[fi.rty_Description], 
+                                (Number(rectype[fi.rty_ShowInLists])===1),
+                                rectype[fi.rty_Status], 
+                                grpID, //rectype[fi.rty_RecTypeGroupID],
                                 null,
-                                rectype[fi.rty_ConceptID]]);
+                                rectype[fi.rty_ConceptID]]);   
 
                         /*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
                     }

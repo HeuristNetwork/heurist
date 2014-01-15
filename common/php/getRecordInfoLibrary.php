@@ -1060,6 +1060,10 @@ function getAllRectypeStructures($useCachedData = false) {
         }
         array_push($rtStructs['dtDisplayOrder'][$row[0]], $row[1]);
     }
+    
+    $rtnames = getRectypeColNames();
+    $rt_groupid_idx = array_search("rty_RecTypeGroupID", $rtnames) + 3;
+    
     // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
     $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", getRectypeColNames());
     $query = preg_replace("/rty_ConceptID/", "", $query);
@@ -1069,12 +1073,21 @@ function getAllRectypeStructures($useCachedData = false) {
         $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), '') as rty_ConceptID";
     }
     $query.= " from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID" . " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
+
     $res = mysql_query($query);
     while ($row = mysql_fetch_row($res)) {
         $rtID = $row[0];
-        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'], $rtID);
+            
+        $gidx = @$rtStructs['groups']['groupIDToIndex'][$row[1]];
+        if( $row[1]==null || !@$rtStructs['groups'][$gidx]){
+            $gidx = 0;
+            //error_log("GROUP DOES NOT EXISTS ".$row[1]."  rectype ".$rtID);
+            $row[$rt_groupid_idx] = $rtStructs['groups'][$gidx]['id'];
+        }
+        
+        array_push($rtStructs['groups'][$gidx]['allTypes'], $rtID);
         if ($row[14]) { //rty_ShowInList
-            array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'], $rtID);
+            array_push($rtStructs['groups'][$gidx]['showTypes'], $rtID);
         }
         $commonFields = array_slice($row, 3);
 
