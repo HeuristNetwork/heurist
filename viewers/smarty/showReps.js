@@ -809,6 +809,7 @@ function ShowReps() {
 
                     term = {};//new Object();
                     term.id = parent_full+"."+id; //fullid;
+                    term.parent_full_id = parent_full;
                     term.parent_id = parent_id;
                     term.this_id = id;
                     term.label = '<div style="padding-left:10px;">'; //???arVars[0];
@@ -974,7 +975,7 @@ function ShowReps() {
 
 	function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
-        var remark = "{* "+  _getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id) + " *}";
+        var remark = "{* "+  _getVariableName(nodedata.parent_full_id) + " " + _getVariableName(nodedata.id) + " *}"; //was this_id
 		return "{if ($"+varname+")}"+remark+"\n  \n{else}\n{/if}"+remark;
 	}
 	//
@@ -986,7 +987,7 @@ function ShowReps() {
             
         //var varname = nodedata.id; //was prefix+nodedata.this_id
         
-        var remark = (_getVariableName(nodedata.parent_id) + " " + _getVariableName(nodedata.this_id)).trim();
+        var remark = (_getVariableName(nodedata.parent_full_id) + " " + _getVariableName(nodedata.id)).trim(); //was this_id
             
 
 		if(insertMode==0){ //variable only
@@ -1120,9 +1121,9 @@ function ShowReps() {
 
 		var _nodep = _findNodeById(varid);
 		if(_nodep){
-			var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id;
+			var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id+'s';
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
-            var remark = "{* "+_getVariableName(_nodep.data.this_id)+" *}";
+            var remark = "{* "+_getVariableName(_nodep.data.id)+" *}";
                
 			_text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
 		}
@@ -1138,7 +1139,30 @@ function ShowReps() {
         return $1.toUpperCase();
       });
     }    
+    
     function _getVariableName(id){
+        if(!Hul.isempty(id)){
+            
+                if (id=="r"){
+                    return "";
+                }else if (id=="Relationship") {
+                    return id;
+                }else{
+                    
+                    var node = _findNodeById(id);
+                    if(node){
+                        return ucwords(node.data.labelonly);
+                    }else{
+                        return "notfound";
+                    }                  
+                }
+        
+        }else{
+            return "";
+        }
+    }
+    
+    function _getVariableName_old(id){
         if(!Hul.isempty(id)){
             
                 if (id=="r"){

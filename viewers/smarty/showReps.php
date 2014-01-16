@@ -607,8 +607,11 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                 //detect single or repeatable - if repeatabel add as array for enum and pointers
                 $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
                 if($dt_maxvalues){
-                    $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1);
+                    $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)===1);
+                }else{
+                    $issingle = false;
                 }
+                $issingle = false; //ARTEM 2014-01-16
             }
             
 
@@ -640,7 +643,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                         if($issingle){
                             $res = array( $dtname =>$res[0] );    
                         }else{
-                            $res = array( $dtname =>$res );    
+                            $res = array( $dtname =>$res[0], $dtname."s" =>$res );    
                         }
                 }
 
@@ -869,12 +872,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
                         */
 
-error_log(">>>>>>".$dtKey ."   ".$issingle);
+//error_log(">>>>>>".$dtKey ."   ".$dtname."   ".$issingle);
                         
                         if($issingle){
                             $res = array( $dtname =>$res[0] );    
                         }else{
-                            $res = array( $dtname =>$res );    
+                            $res = array( $dtname =>$res[0], $dtname."s" =>$res );    
                         }
                     }
                     
