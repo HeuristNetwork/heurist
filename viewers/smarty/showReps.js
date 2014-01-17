@@ -975,7 +975,11 @@ function ShowReps() {
 
 	function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
-        var remark = "{* "+  _getVariableName(nodedata.parent_full_id) + " " + _getVariableName(nodedata.id) + " *}"; //was this_id
+        var parname = _getVariableName(nodedata.parent_full_id);
+        if(parname!=""){
+           parname = parname + " >> ";
+        }
+        var remark = "{* "+ parname + _getVariableName(nodedata.id) + " *}"; //was this_id
 		return "{if ($"+varname+")}"+remark+"\n  \n{else}\n{/if}"+remark;
 	}
 	//
@@ -986,8 +990,12 @@ function ShowReps() {
 			insertMode = Dom.get("selInsertMode").value;
             
         //var varname = nodedata.id; //was prefix+nodedata.this_id
-        
-        var remark = (_getVariableName(nodedata.parent_full_id) + " " + _getVariableName(nodedata.id)).trim(); //was this_id
+         var parname = _getVariableName(nodedata.parent_full_id);
+        if(parname!=""){
+           parname = parname + " >> ";
+        }
+
+        var remark = (parname + _getVariableName(nodedata.id)).trim(); //was this_id
             
 
 		if(insertMode==0){ //variable only
