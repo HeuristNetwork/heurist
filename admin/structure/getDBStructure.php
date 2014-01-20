@@ -485,9 +485,10 @@
                 '$trm_Description','$row[trm_Status]',
                 '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
 			    '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
-			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_LocallyModified]',
-                '$row[trm_Code]','$row[trm_Modified]'),";
-                //WARNING! This need to updated with sync with new db strucutre  '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // added 1/10/13 db version 1.2.0
+			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_Modified]','$row[trm_LocallyModified]',
+                '$row[trm_Code]'),";
+                // WARNING! This needs to be updated in sync with new db structure to be added for DB Version 1.2.0 for FAIMS compatibility
+                // '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // for db version 1.2.0 @ 1/10/13
 			break;
 
 			case 'defOntologies': // Data from Ontologies table
