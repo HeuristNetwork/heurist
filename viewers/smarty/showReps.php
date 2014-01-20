@@ -165,6 +165,7 @@ function executeSmartyTemplate($params){
 	foreach ($records as $rec){
 
 		$res1 = getRecordForSmarty($rec, 0, $k);
+        $res1["recOrder"]  = $k;
 		$k++;
 		array_push($results, $res1);
     }   
@@ -607,8 +608,11 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                 //detect single or repeatable - if repeatabel add as array for enum and pointers
                 $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
                 if($dt_maxvalues){
-                    $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1);
+                    $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)===1);
+                }else{
+                    $issingle = false;
                 }
+                $issingle = false; //ARTEM 2014-01-16
             }
             
 
@@ -640,7 +644,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                         if($issingle){
                             $res = array( $dtname =>$res[0] );    
                         }else{
-                            $res = array( $dtname =>$res );    
+                            $res = array( $dtname =>$res[0], $dtname."s" =>$res );    
                         }
                 }
 
@@ -778,7 +782,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 				$rectypeID = null;
 				$prevID = null;
 /*****DEBUG****///error_log("dtValue>>>>>".print_r($dtValue,true));
-				$order = 0;
+				$order_sub = 0;
 
 				foreach ($dtValue as $key => $value){
 
@@ -796,7 +800,9 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 						//get full record info
                         if(@$loaded_recs[$recordID]){
                             //already loaded
-                            array_push($res, $loaded_recs[$recordID]);
+                            $rec0 = $loaded_recs[$recordID];
+                            $rec0["recOrder"] = count($res);
+                            array_push($res, $rec0);
                             
                         }else{
                         
@@ -804,8 +810,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 						    $res0 = null;
 						    if(true){  //64719  45171   48855    57247
-							    $res0 = getRecordForSmarty($record, $recursion_depth+1, $order); //@todo - need to
-							    $order++;
+							    $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
+							    $order_sub++;
 						    }
 
 						    if($res0){
@@ -844,6 +850,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 							    }
 
                                 $loaded_recs[$recordID] = $res0;
+                                $res0["recOrder"] = count($res);
 							    array_push($res, $res0);
                             }
                         }
@@ -869,12 +876,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
                         */
 
-error_log(">>>>>>".$dtKey ."   ".$issingle);
+//error_log(">>>>>>".$dtKey ."   ".$dtname."   ".$issingle);
                         
                         if($issingle){
                             $res = array( $dtname =>$res[0] );    
                         }else{
-                            $res = array( $dtname =>$res );    
+                            $res = array( $dtname =>$res[0], $dtname."s" =>$res );    
                         }
                     }
                     
