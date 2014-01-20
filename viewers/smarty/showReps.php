@@ -427,6 +427,8 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 
 		//loop for all record properties
 		foreach ($rec as $key => $value){
+           
+            
 			$pos = strpos($key,"rec_");
 			if(is_numeric($pos) && $pos==0){
 				//array_push($record, array(substr($key,4) => $value));
@@ -444,7 +446,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 			}
 			else  if ($key == "details")
 			{
-
+                
 				$details = array();
 				foreach ($value as $dtKey => $dtValue){
 					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $record['recID']);
@@ -804,6 +806,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                             $rec0["recOrder"] = count($res);
                             array_push($res, $rec0);
                             
+                            $rectypeID = $rec0['recTypeID'];
+                            
                         }else{
                         
 						    $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
@@ -852,16 +856,18 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                 $loaded_recs[$recordID] = $res0;
                                 $res0["recOrder"] = count($res);
 							    array_push($res, $res0);
+
                             }
                         }
 					}
-				}//for each repeated value
+                }//for each repeated value
 
 				if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
 				{
+                    /*                    
 					$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
 
-					/*if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
+					if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
 						$recordTypeName = $dt_label;
 					}else{
 						$recordTypeName = $rtNames[$rectypeID];
@@ -869,7 +875,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                     
 
                     
-                    if(@$dt_label){
+                    if(@$dtname){
                         /* ART 2013-012-09                    
 					    $recordTypeName = $dt_label;
 					    $recordTypeName = getVariableNameForSmarty($recordTypeName, false);
@@ -910,7 +916,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 			//it depends on detail type - need specific behaviour for each type
 			//foreach ($value as $dtKey => $dtValue){}
 		}//end switch
-
 
 		return $res;
 	}
