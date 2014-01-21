@@ -27,6 +27,11 @@ $.widget( "heurist.about", {
       click: function(){$( "#heurist-about" ).dialog("open");}
     });
 
+    this.div_dbname = $( "<span>")
+            .css({'font-size':'2em', 'font-style':'italic', 'padding-left':'15px'})
+            .html(top.HAPI.database)
+            .appendTo( this.element );
+    
     this._refresh();
 
   }, //end _create

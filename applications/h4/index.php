@@ -22,8 +22,9 @@ $system = new System();
 if(@$_REQUEST['db']){
     // connrect to given database
     if(! $system->init(@$_REQUEST['db']) ){
-        //@todo - redirect to error page
-        echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
+        //can not connect to given database
+        header('Location: php/databases.php');
+        //echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
         exit();
     }
 }else{
@@ -48,10 +49,12 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="js/hapi.js"></script>
     <script type="text/javascript" src="js/layout.js"></script>
 
-    <script type="text/javascript" src="apps/tag_assign.js"></script>
+    <!-- this scripts are loaded expicitely - for debug purposes -->
+    <script type="text/javascript" src="apps/file_manager.js"></script>
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
     <script type="text/javascript" src="apps/search_links.js"></script>
-    <script type="text/javascript" src="apps/profile.js"></script>
+    <script type="text/javascript" src="apps/search.js"></script>
+    <script type="text/javascript" src="apps/pagination.js"></script>
   <!-- DEBUG
   -->
 
@@ -170,12 +173,12 @@ if(@$_REQUEST['db']){
   <div id="heurist-about" title="About">
     <div class='logo'></div>
     <h4>Heurist academic knowledge management system</h4>
-    <p style="margin-top: 1em;">version     3.1.0</p>
+    <p style="margin-top: 1em;">version     <?=HEURIST_VERSION?></p>
     <p style="margin-top: 1em;">
         author: Dr Ian Johnson<br/>
         programmers: Stephen White and others...</p>
 
-    <p style="margin-top: 1em;">Copyright (C) 2005-2013 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
+    <p style="margin-top: 1em;">Copyright (C) 2005-2014 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
 
     <p style="font-size: x-small;margin-top: 1em;">
  Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except

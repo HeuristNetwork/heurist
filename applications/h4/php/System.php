@@ -1,4 +1,6 @@
 <?php
+require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+
 require_once (dirname(__FILE__).'/consts.php');
 require_once (dirname(__FILE__).'/common/dbutils.php');
 require_once (dirname(__FILE__).'/common/db_users.php');
@@ -15,10 +17,8 @@ require_once (dirname(__FILE__).'/common/db_users.php');
 * 
 * system constants:
 * 
-* HEURIST_TOP_DIRS
-* HEURIST_DOCUMENT_ROOT
+* HEURIST_THUMB_DIR
 * HEURIST_UPLOAD_DIR
-* HEURIST_DB_PREFIX
 */
 class System {
 /*
@@ -53,19 +53,11 @@ class System {
     * @return true on success
     */
     public function init($db, $dbrequired=true){
-
-        //@todo get server connection from config file
-        $dbPrefix = 'hdb_';
-        $dbHost = ''; //localhost:3306';
-        $dbUsername = 'root';
-        $dbPassword = 'smith18';
-
-        define('HEURIST_DB_PREFIX', $dbPrefix);
-
+        
         if($db){
             $this->dbname = $db;
             if(!(strpos($db, $dbPrefix)===0)){
-                $db = $dbPrefix.$db;
+                $db = HEURIST_DB_PREFIX.$db;
             }
             $this->dbname_full = $db;
 
@@ -76,7 +68,7 @@ class System {
         }
 
         //dbutils
-        $res = mysql_connection($dbHost, $dbUsername, $dbPassword, $this->dbname_full);
+        $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $this->dbname_full);
         if ( is_array($res) ){
             $this->addError($res[0], $res[1]);
             $this->mysqli = null;
@@ -93,16 +85,10 @@ class System {
                 $this->start_my_session();
                 $this->login_verify(); //load user info from session
 
-                define('HEURIST_TOP_DIRS', "admin|applications|common|export|external|hapi|help|import|records|search|viewers|php");
-
-                $installDir = preg_replace("/\/(" . HEURIST_TOP_DIRS . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
-                if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
-                }
-
-                define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"].'/'.$installDir. '/'); //  eg. /var/www/htdocs
-
+                
+                //@todo  - test upload and thumb folder exist and writeable
                 define('HEURIST_UPLOAD_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/');
+                define('HEURIST_THUMB_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/');
 
             }
             return true;

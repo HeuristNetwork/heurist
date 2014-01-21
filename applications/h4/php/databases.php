@@ -25,7 +25,7 @@ if(! $system->init(@$_REQUEST['db'], false) ){  //init with
 
 </head>
 <body style="padding:44px;">
-  <div class="ui-corner-all ui-widget-content" style="text-align:left; width:300px; margin:0px auto; padding: 0.5em;">
+  <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">
 
     <div class="logo"></div>
     <div style="padding: 0.5em;">Please select a database from the list</div>
@@ -40,7 +40,7 @@ if(! $system->init(@$_REQUEST['db'], false) ){  //init with
         array_push($list, "database".$i);
     }*/
     foreach ($list as $name) {
-            print("<li><a href='".HEURIST_SERVER_NAME."?db=$name'>$name</a></li>");
+            print("<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>");
     }
 
 ?>

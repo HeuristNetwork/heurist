@@ -1,5 +1,5 @@
 /**
-* Widget for input controls
+* Widget for input controls on edit form
 */
 $.widget( "heurist.editing_input", {
 
@@ -142,6 +142,12 @@ $.widget( "heurist.editing_input", {
       return rfrs[fi[fieldname]];
   },
   
+  /**
+  * add input according field type
+  * 
+  * @param value
+  * @param idx
+  */
   _addInput: function(value, idx) {
 
       if(!this.inputs){
@@ -200,7 +206,7 @@ $.widget( "heurist.editing_input", {
 
                   this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
 
-            }else if(false && detailType=="resource"){
+            }else if(detailType=="resource"){
 
                   if(!this.rec_search_dialog){
                         this.rec_search_dialog = this.element.rec_search({

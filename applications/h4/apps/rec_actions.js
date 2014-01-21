@@ -1,5 +1,5 @@
 /**
-* requires apps/tag_assign.js
+* requires apps/tag_manager.js
 *
 */
 $.widget( "heurist.rec_actions", {
@@ -45,7 +45,7 @@ $.widget( "heurist.rec_actions", {
           if(this.menu_tags){
 
               var menu = $( this.menu_tags )
-                    .tag_assign( 'option', 'record_ids', that.options.record_ids )
+                    .tag_manager( 'option', 'record_ids', that.options.record_ids )
                     .show()
                     .position({my: "left top", at: "left bottom", of: this.btn_tags });
 
@@ -65,10 +65,10 @@ $.widget( "heurist.rec_actions", {
 
           }else{
 
-              if($.isFunction($('body').tag_assign)){ //already loaded
+              if($.isFunction($('body').tag_manager)){ //already loaded
                   this._initTagMenu();
               }else{
-                  $.getScript(top.HAPI.basePath+'apps/tag_assign.js', function(){ that._initTagMenu(); } );
+                  $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ that._initTagMenu(); } );
               }
 
           }
@@ -216,7 +216,7 @@ $.widget( "heurist.rec_actions", {
                 .addClass('menu-or-popup')
                 .css('position','absolute')
                 .appendTo( this.document.find('body') )
-                .tag_assign( { record_ids: this.options.record_ids } )
+                .tag_manager( { record_ids: this.options.record_ids } )
                 .hide();
        }
 

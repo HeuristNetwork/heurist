@@ -31,7 +31,7 @@ $.widget( "heurist.rec_search", {
                                 height: 640,
                                 width: 640,
                                 modal: true,
-                                title: "Select record",
+                                title: top.HR("Select record"),
                                 // position: { my: "center", at: "center", of: window },
                                 resizeStop: function( event, ui ) {
                                     that.wcontainer.css('width','100%');

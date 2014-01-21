@@ -48,7 +48,7 @@ $.widget( "heurist.rec_viewer", {
         .appendTo( this.element ).hide();
 
     this.lbl_message = $( "<label>" )
-        .html('select record')
+        .html(top.HR('select record'))
         .appendTo( this.element ).hide();
 
     //-----------------------

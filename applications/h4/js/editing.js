@@ -7,7 +7,7 @@ function hEditing() {
      var _className = "Editing",
          _version   = "0.4";
 
-     var $container = null,
+     var $container = null,  //html to have edit form
          recdata = null,     //hRecordSet
          recID = null,
          rectypeID = null,
@@ -35,7 +35,7 @@ function hEditing() {
         }
         if($container.length==0){
             _isdialog = true;
-            $container = $("#heurist-dialog");
+            $container = $("#heurist-dialog"); //this div in index.php 
         }else{
             _isdialog = false;
         }
@@ -78,7 +78,7 @@ function hEditing() {
     * 
     * @param _recdata - either recordSet or  record id. 
     *           if it is record id, it performs the search         
-    * @param _container
+    * @param _container - element - edit form will be added in it, if null will be opened in popup dialog
     */
     function _edit(_recdata, _container){
 

@@ -1,5 +1,5 @@
 /**
-* requires apps/tag_assign.js
+* requires apps/tag_manager.js
 *
 */
 $.widget( "heurist.rec_list", {
@@ -27,14 +27,14 @@ $.widget( "heurist.rec_list", {
 
     this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
     this.div_content = $( "<div>" )
-        .css({'left':0,'right':0,'overflow-y':'auto','padding':'0.2em','position':'absolute','top':'5em','bottom':0})
+        .css({'left':0,'right':0,'overflow-y':'auto','padding':'0.2em','position':'absolute','top':'5em','bottom':'0'})
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
 
     this.btn_add = $( "<button>", {
-                    text: "add",
-                    title: "add new record"
+                    text: top.HR("add"),
+                    title: top.HR("add new record")
             })
             .addClass('logged-in-only')
             .appendTo( this.div_toolbar )
@@ -43,7 +43,7 @@ $.widget( "heurist.rec_list", {
                     }});
 
     //-----------------------
-    this.btn_tags = $( "<button>", {text: "tags"} )
+    this.btn_tags = $( "<button>", {text: top.HR("tags")} )
             .addClass('logged-in-only')
             .appendTo( this.div_toolbar )
             .button({icons: {
@@ -59,7 +59,7 @@ $.widget( "heurist.rec_list", {
           if(this.menu_tags){
 
               var menu = $( this.menu_tags )
-                    .tag_assign( 'option', 'record_ids', null )
+                    .tag_manager( 'option', 'record_ids', null )
                     .show()
                     .position({my: "left top", at: "left bottom", of: this.btn_tags });
 
@@ -77,10 +77,10 @@ $.widget( "heurist.rec_list", {
 
           }else{
 
-              if($.isFunction($('body').tag_assign)){
+              if($.isFunction($('body').tag_manager)){
                   this._initTagMenu();
               }else{
-                  $.getScript(top.HAPI.basePath+'apps/tag_assign.js', function(){ that._initTagMenu(); } );
+                  $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ that._initTagMenu(); } );
               }
 
           }
@@ -161,17 +161,17 @@ $.widget( "heurist.rec_list", {
     //-----------------------
     this.btn_view = $( "<button>", {text: "view"} )
             .css('float','right')
-            .css('width', '7em')
+            .css('width', '10em')
             .appendTo( this.div_toolbar )
             .button({icons: {
                         secondary: "ui-icon-triangle-1-s"
                     },text:true});
 
     this.menu_view = $('<ul>'+
-        '<li id="menu-view-list"><a href="#">list</a></li>'+
+        '<li id="menu-view-list"><a href="#">'+top.HR('list')+'</a></li>'+
         //'<li id="menu-view-detail"><a href="#">Details</a></li>'+
-        '<li id="menu-view-icons"><a href="#">icons</a></li>'+
-        '<li id="menu-view-thumbs"><a href="#">thumbs</a></li>'+
+        '<li id="menu-view-icons"><a href="#">'+top.HR('icons')+'</a></li>'+
+        '<li id="menu-view-thumbs"><a href="#">'+top.HR('thumbs')+'</a></li>'+
         '</ul>')
             .addClass('menu-or-popup')
             .css('position','absolute')
@@ -196,7 +196,7 @@ $.widget( "heurist.rec_list", {
     });
 
 
-    //-----------------------
+    //-----------------------     listener of global events
     var sevents = top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT;
     if(this.options.isapplication){
         sevents = sevents + ' ' + top.HAPI.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI.Event.ON_REC_SEARCHSTART;
@@ -255,7 +255,7 @@ $.widget( "heurist.rec_list", {
 
       // repaint current record set
       this._renderRecords();  //@todo add check that recordset really changed
-      this._applyViewMode()
+      this._applyViewMode();
 
       if(top.HAPI.currentUser.ugr_ID>0){
             $(this.div_toolbar).find('.logged-in-only').css('visibility','visible');
@@ -309,7 +309,7 @@ $.widget( "heurist.rec_list", {
             .addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( this.document.find('body') )
-            .tag_assign()
+            .tag_manager()
             .hide();
 
        this.btn_tags.click();
@@ -328,7 +328,7 @@ $.widget( "heurist.rec_list", {
         }
         this.div_content.addClass(newmode);
 
-        this.btn_view.button( "option", "label", newmode);
+        this.btn_view.button( "option", "label", top.HR(newmode));
   },
 
   // @todo move record related stuff to HAPI
@@ -372,7 +372,6 @@ $.widget( "heurist.rec_list", {
         var recset = this.options.recordset;
         function fld(fldname){
             return recset.fld(record, fldname);
-
         }
 
 /*
@@ -423,6 +422,7 @@ $.widget( "heurist.rec_list", {
             .attr('bkmk_id', fld('bkm_ID') )
             .appendTo($recdiv);
 
+        //record type icon
         $('<img>',{
                 src:  top.HAPI.basePath+'assets/16x16.gif',
                 title: '@todo rectypeTitle'.htmlEscape()
@@ -431,6 +431,7 @@ $.widget( "heurist.rec_list", {
             .css('background-image', 'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)')
             .appendTo($iconsdiv);
 
+        //bookmark icon - asterics
         $('<img>',{
                 src:  top.HAPI.basePath+'assets/13x13.gif'
             })

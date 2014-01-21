@@ -163,7 +163,9 @@ function mysql__select_array($mysqli, $query) {
 
 /**
 * insert or update record for given table
-*
+* 
+* returns record ID in case success or error message
+* 
 * @param mixed $mysqli
 * @param mixed $table_name
 * @param mixed $table_prefix
@@ -192,7 +194,7 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
     foreach($record as $fieldname => $value){
 
-            if(strpos($fieldname, $table_prefix)!==0){
+            if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
                 //$fieldname = $table_prefix.$fieldname;
                 continue;
             }

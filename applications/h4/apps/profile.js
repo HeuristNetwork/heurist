@@ -21,8 +21,23 @@ $.widget( "heurist.profile", {
       // prevent double click to select text
       .disableSelection();
 
+    //--------------------- HELP     
+    this.btn_help = $( "<button>", {text: top.HR("Help")} )
+            .css('float','right')
+            .appendTo( this.element )
+            .button({icons: {
+                        primary: "ui-icon-help"
+                    },text:false});
+      
+    this._on( this.btn_help, {
+        click: function() {
+          return false;
+        }
+    });
+
+      
     //---------------------  OPTIONS BUTTON WITH DROPDOWN MENU
-    this.btn_options = $( "<button>", {text: "options"} )
+    this.btn_options = $( "<button>", {text: top.HR("options")} )
             .css('float','right')
             .appendTo( this.element )
             .button({icons: {
@@ -63,7 +78,7 @@ $.widget( "heurist.profile", {
                             $dlg.dialog({
                                 autoOpen: true,
                                 height: 420,
-                                width: 220,
+                                width: 480,
                                 modal: true,
                                 resizable: false,
                                 draggable: false,
@@ -90,8 +105,10 @@ $.widget( "heurist.profile", {
                         });
                     }
                 }})
+            .position({my: "right top", at: "right bottom", of: this.btn_options })    
             .hide();
 
+    
     //show/hide menu on button click        
     this._on( this.btn_options, {
         click: function() {
@@ -99,6 +116,8 @@ $.widget( "heurist.profile", {
           var menu = $( this.menu_options )
                 .show()
                 .position({my: "right top", at: "right bottom", of: this.btn_options });
+                
+          //hide on click outside
           $( document ).one( "click", function() { menu.hide(); });
           return false;
         }
@@ -131,6 +150,7 @@ $.widget( "heurist.profile", {
         '<li id="menu-user-profile"><a href="#">'+top.HR('My User Info')+'</a></li>'+
         '<li id="menu-user-groups"><a href="#">'+top.HR('My Groups')+'</a></li>'+
         '<li id="menu-user-tags"><a href="#">'+top.HR('Manage Tags')+'</a></li>'+
+        '<li id="menu-user-files"><a href="#">'+top.HR('Manage Files')+'</a></li>'+
         '<li id="menu-user-reminders"><a href="#">'+top.HR('Manage Reminders')+'</a></li>'+
         '<li id="menu-user-logout"><a href="#">'+top.HR('Log out')+'</a></li>'+
         '</ul>')
@@ -146,15 +166,22 @@ $.widget( "heurist.profile", {
 
                         that.editPreferences();
                     }else if(action == "menu-user-tags"){
-                        if($.isFunction($('body').tag_assign)){ //already loaded
+                        if($.isFunction($('body').tag_manager)){ //already loaded
                             showManageTags();
                         }else{
-                            $.getScript(top.HAPI.basePath+'apps/tag_assign.js', function(){ showManageTags(); } );
+                            $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
+                        }
+                    }else if(action == "menu-user-files"){
+                        if($.isFunction($('body').file_manager)){ //already loaded
+                            showManageFiles();
+                        }else{
+                            $.getScript(top.HAPI.basePath+'apps/file_manager.js', function(){ showManageFiles(); } );
                         }
                     }
 
                     
                 }})
+            .position({my: "right top", at: "right bottom", of: this.btn_user })
             .hide();
 
     //show/hide menu on button click        
@@ -171,15 +198,6 @@ $.widget( "heurist.profile", {
     });
 
     //---------------------  ADD NEW RECORD BUTTON
-    this.select_rectype = $( "<select>" )
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
-                .attr("size","15")
-                .css({'position':'absolute'})   //,'border':'none'
-                .appendTo(this.document.find('body'))
-                .hide();
-
-    top.HEURIST.util.createRectypeSelect(this.select_rectype.get(0), null, false);
-
     this.btn_record = $( "<button>", {
                     text: top.HR("add new record")
             })
@@ -191,11 +209,23 @@ $.widget( "heurist.profile", {
                         secondary: "ui-icon-triangle-1-s"
                     }});
 
+    this.select_rectype = $( "<select>" )
+                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
+                .attr("size","15")
+                .css({'position':'absolute'})   //,'border':'none'
+                .appendTo(this.document.find('body'));
+    this.select_rectype.position({my: "right top", at: "right bottom", of: that.btn_record })
+                .hide();
+
+    top.HEURIST.util.createRectypeSelect(this.select_rectype.get(0), null, false);
+
+                    
 
     this._on( this.btn_record, {
       click: function() {
         $('.menu-or-popup').hide(); //hide other
-        that.select_rectype.show().position({my: "right top", at: "right bottom", of: that.btn_record });
+        that.select_rectype.show()
+                           .position({my: "right top", at: "right bottom", of: that.btn_record });
         $( document ).one( "click", function() { that.select_rectype.hide(); });
         return false;
           //window.open(top.HAPI.basePath + "php/recedit.php?db="+top.HAPI.database, "_blank");
@@ -507,6 +537,7 @@ $.widget( "heurist.profile", {
     this.btn_record.remove();
     this.btn_user.remove();
     this.btn_options.remove();
+    this.btn_help.remove();
     this.btn_login.remove();
 
     this.menu_user.remove();

@@ -311,9 +311,9 @@ function appAddContent($container, app, options){
                         //DEBUG
                         $content.search_links( ); //options
                     }else
-                    if(app.widgetname=='profile'){
+                    if(app.widgetname=='search'){
                         //DEBUG
-                        $content.profile( ); //options
+                        $content.search( ); //options
                     }else    
                     {
                      //this is notmal way of widget initialization   

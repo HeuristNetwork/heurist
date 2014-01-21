@@ -35,7 +35,7 @@ function tagGetByName($system, $tag_names, $ugrID=null){
         if(strlen($tag_name)>0){
 
             $res = mysql__select_value($system->get_mysqli(), 'select tag_ID from usrTags where lower(tag_Text)=lower("'.
-                        addslashes($tag_name).'") and tag_UGrpID='.$ugrID);
+                        mysqli_real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
             if($res){
                 array_push($tag_ids, $res);
             }
@@ -102,6 +102,9 @@ function tagGetByRecords($system, $isfull, $recIDs, $ugrIDs=null){
         $ugrIDs = $system->get_user_group_ids();
     }else if (!$ugrIDs) {
         $ugrIDs = $system->get_user_id();
+        if($ugrIDs){
+            $ugrIDs = array($ugrIDs);
+        }
     }else if(is_string($ugrIDs) && $ugrIDs!=""){
         $ugrIDs = explode(",", $ugrIDs);
     }

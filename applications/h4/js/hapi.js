@@ -274,7 +274,11 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   tag_delete
     *   tag_get
     *   tag_set
+    *   tag_replace
     * 
+    *   file_save
+    *   file_delete
+    *   file_get
     *
     * @returns {Object}
     */
@@ -369,6 +373,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             // get list of tags for sepcified userid
             // request  a: search
             //          UGrpID
+            //          recIDs - record ids  
+            // responce  recIDs
+            // 
             ,tag_get: function(request, callback){
                  if(request) request.a = 'search';
                  _callserver('record_tags', request, callback);
@@ -377,7 +384,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             // request  a: assign_remove
             //          assign: cs list of tag ids to be assigned
             //          remove: tags to be removed from records
-            //          recs: cs list of record ids
+            //          recIDs: cs list of record ids
             //          UGrpID
             ,tag_set: function(request, callback){
                  if(request) request.a = 'set';
@@ -394,6 +401,35 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
 
+            // add/save file
+            // request  a: save
+            //          ulf_ID (not specified if ADD)
+            //          ulf_OrigFileName
+            //          ulf_Description
+            //          ulf_UploaderUGrpID
+            //          ulf_ExternalFileReference
+            ,file_save: function(request, callback){
+                if(request) request.a = 'save';
+                 _callserver('record_files', request, callback);
+            }
+            // remove file
+            // request  a: delete
+            //          ids - list of file ids to be deleted
+            ,file_delete: function(request, callback){
+                if(request) request.a = 'delete';
+                 _callserver('record_files', request, callback);
+            }
+            // get list of files for sepcified userid, media type and records
+            // request  a: search
+            //          UGrpID
+            //          mediaType
+            //          recIDs
+            ,file_get: function(request, callback){
+                 if(request) request.a = 'search';
+                 _callserver('record_files', request, callback);
+            }
+           
+            
         }
         return that;
     }
@@ -501,7 +537,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             if( that.currentUser['ugr_Preferences'] ) {
                 return that.currentUser['ugr_Preferences'];
             }else{
-                return {layout_language:'en', layout_theme:'base'};
+                return {layout_language:'en', layout_theme:'cupertino'};
             }
         },
 

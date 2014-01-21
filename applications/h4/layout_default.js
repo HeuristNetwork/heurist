@@ -65,14 +65,14 @@ var widgets = [
 */ 
 var layouts = [
 {id:'l01', name:'h3 classic', theme:'smoothness',
-north:{size:85, resizable:false,
+north:{size:88, resizable:false,
         apps:[
-        {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'49%', border:'none'} },    //databases
+        {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'49%', border:'none'} },    //about
         {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'49%', border:'none'} },   //profile
-        {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'98%', border:'none'} }
+        {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,right:0, border:'none'} }    //search
             ]},
-west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none'} }]},
-center:{minsize:300, dropable:true, apps:[{appid:'ha21', dockable:true, dragable:false }]},
+west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none'} }]},  //saved searches
+center:{minsize:300, dropable:true, apps:[{appid:'ha21', dockable:true, dragable:false }]},  //search result 
 east:{size:'50%', minsize:300, dropable:true,
         tabs:[{dockable:true, dragable:true, resizable:true,
             apps:[                                      //or viewRecord or renderRecordData

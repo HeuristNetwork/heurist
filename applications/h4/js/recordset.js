@@ -23,7 +23,7 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
 
-        count_total = response.count;
+        count_total = Number(response.count);
         fields = response.fields;
         if ($.isArray(records)) { records = response.records };
         structures = response.structures;
@@ -374,6 +374,10 @@ function hRecordSet(initdata) {
             return records.length;
         },
 
+        count_total: function(){
+            return count_total;
+        },
+        
         /**
         * Get all records s
         */

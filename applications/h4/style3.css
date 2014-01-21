@@ -45,9 +45,9 @@ body {
 }
 
 .ui-layout-mask {
-    background:    #C00 !important;
-    opacity:    .20 !important;
-    filter:        alpha(opacity=20) !important;
+    background: #C00 !important;
+    opacity: .20 !important;
+    filter: alpha(opacity=20) !important;
 }
 
 /* layout toggler icon from jquery ui */
@@ -341,7 +341,7 @@ div .selected, div .selected:hover{
     border-collapse: collapse;
     border-radius: 6px 6px 6px 6px;
     box-shadow: 0 2px 4px #BBBBBB;
-    display: inline-block !important;
+    display: inline-block; /* !important; */
     font-size: 0.9em !important;
     margin: 6px;
 
@@ -385,7 +385,7 @@ div .selected, div .selected:hover{
     border-collapse: collapse;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 0 1px 2px #BBBBBB;
-    display: inline-block !important;
+    display: inline-block; /* !important; */
     font-size: 0.8em !important;
     height: 36px;
     margin: 6px;
@@ -436,7 +436,7 @@ div .selected, div .selected:hover{
     border-collapse: collapse;
     border-radius: 0 0 0 0;
     border-top: 1px solid #FFFFFF;
-    display: block !important;
+    display: block; /* !important; */
     height: 2.6em;
     left: 0;
     margin: 0;

@@ -5,7 +5,7 @@ $.widget( "heurist.search_links", {
     isapplication:true,  // send and recieve the global events
 
     searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-    limit: 200,
+    limit: 10,
 
     // callbacks
     onsearch: null,  //on start search
@@ -300,7 +300,6 @@ $.widget( "heurist.search_links", {
 
   _doSearch2: function(qsearch){
 
-
           if ( qsearch ) {
 
             var prms = top.HEURIST.util.getUrlQueryAndDomain(qsearch);
@@ -320,7 +319,7 @@ $.widget( "heurist.search_links", {
             }
             that._trigger( "onsearch");
 
-            //get hapi and perform login
+            //get hapi and perform search
             top.HAPI.RecordMgr.search(request,
                 function(response)
                 {

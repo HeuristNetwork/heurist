@@ -11,7 +11,7 @@ $.widget( "heurist.search", {
     isapplication:true,  // send and recieve the global events
 
     searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-    limit: 200,
+    limit: 10,
 
     // callbacks
     onsearch: null,  //on start search
@@ -34,7 +34,7 @@ $.widget( "heurist.search", {
             .appendTo( this.element );
 
     this.btn_search_as_guest = $( "<button>", {
-            text: "search"
+            text: top.HR("search")
             })
             .appendTo( this.div_search_as_guest )
             .button({icons: {
@@ -46,7 +46,7 @@ $.widget( "heurist.search", {
             .appendTo( this.element );
 
     this.btn_search_as_user = $( "<button>", {
-            text: "search"
+            text: top.HR("search")
             })
             .css('width', '12em')
             .appendTo( this.div_search_as_user )
@@ -55,7 +55,7 @@ $.widget( "heurist.search", {
                     }});
 
     this.btn_search_domain = $( "<button>", {
-            text: "search option"
+            text: top.HR("search option")
             })
             .appendTo( this.div_search_as_user )
             .button({icons: {
@@ -123,11 +123,23 @@ $.widget( "heurist.search", {
         keypress: function(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
-                    this.doSearch();
+                    that.doSearch();
                 }
         }
     });
 
+    this.div_paginator = $('<span>')
+                .css('display', 'inline-block')
+                .appendTo( this.element )
+                .pagination();
+    /*
+     $.getScript(top.HAPI.basePath+'apps/pagination.js', function() {
+         if($.isFunction('pagination')){
+         }else{
+             top.HEURIST.util.showMsgErr('Widget pagination not loaded!');
+         }        
+     });          */
+   
 
     //global listener
 

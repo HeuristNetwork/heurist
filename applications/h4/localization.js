@@ -24,8 +24,11 @@ language: 'Русский',
 'Save': 'Сохранить',
 'Close': 'Закрыть',
 'Assign': 'Присвоить',
+'Add': 'Добавить',
 'Create': 'Создать',
 'Manage': 'Управление',
+'Sort': 'Порядок',
+'Search': 'Поиск',
 
 'Username': 'Имя пользователя',
 'Password': 'Пароль',
@@ -36,11 +39,18 @@ language: 'Русский',
 'My Groups' : 'Мои группы',
 'Manage Tags' : 'Ярлыки',
 'Tags' : 'Ярлыки',
+'Manage Files': 'Файлы',
 'Manage Reminders' : 'Напоминания',
+
+'Name': 'Название',
+'Description': 'Описание',
+'Size': 'Размер',
+'Type': 'Тип',
 
 'search': 'искать',
 'all records': 'среди всех записей',
 'my bookmarks': 'среди закладок',
+'search option': 'варианты поиска',
 
 'add': 'добавить',
 'add new record' : 'добавить запись',
@@ -48,22 +58,35 @@ language: 'Русский',
 'share': 'доступ',
 'more': 'ещё',
 'edit': 'править',
+'options': 'опции',
 
 'by name': 'по имени',
 'by usage': 'по использованию',
 'by date': 'по дате',
+'by size': 'по размеру',
+'by type': 'по типу',
 'marked': 'отмеченные',
+
+'list':'список',
+'icons':'иконки',
+'thumbs':'миниатюры',
 
 'Manage tags': 'Управление ярлыками',
 'Create new tag': 'Создать ярлык',
 'Add Tag': 'Создать ярлык',
 'Edit Tag': 'Редактировать ярлык',
 'Define new tag that replaces old ones': 'Определите новый ярлык который заменит старые',
-'Name': 'Название',
-'Description': 'Описание',
 'Length of tag must be more than 2.': 'Ярлык должен быть больше чем два символа',
 'Assign selected tags': 'Присвоить отмеченные ярлыки',
 'Personal Tags':'Личные ярлыки',
+'Delete selected tags': 'Удалить отмеченные ярлыки',
+
+'Manage files': 'Управление файлами',
+'Upload/register new file': 'Загрузить или зарегистрировать файл',
+'Add File': 'Добавить файл',
+'Edit File': 'Редактировать файл',
+'Personal Files':'Личные файлы',
+'Delete selected files': 'Удалить отмеченные файлы',
 
 'Preferences' : 'Настройки',
 'Layout configuration file': 'Файл конфигурации интерфейса',
@@ -82,7 +105,9 @@ language: 'Русский',
 'Edit saved search': 'Редактировать поиск',
 'Delete saved search': 'Удалить сохраненный поиск',
 
-'Delete? Please confirm': 'Удалить? Подвтердите'
+'Delete? Please confirm': 'Удалить? Подвтердите',
+
+'select record': 'выберите запись'
 };
 
 regional['de'] = {

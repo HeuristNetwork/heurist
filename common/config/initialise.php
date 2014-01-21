@@ -100,10 +100,8 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI
 
 if ($installDir != @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
 	define('INSTALL_DIR', $installDir); //the subdir of the server's document directory where heurist is installed
-
 } else {
 	define('INSTALL_DIR', ''); //the default is the document root directory
-
 }
 define('HEURIST_SITE_PATH', INSTALL_DIR == '' ? '/' : INSTALL_DIR . '/'); // eg. /h3/
 define('HEURIST_BASE_URL', $serverBaseURL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
