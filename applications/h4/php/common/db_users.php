@@ -172,9 +172,9 @@ function user_getPreferences(){
 function user_setPreferences($dbname, $params){
     global $prefs;
     foreach ($params as $property => $value) {
-        if (array_key_exists($property, $prefs)) {
+        //if (array_key_exists($property, $prefs)) {
             @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;
-        }
+        //}
     }
 }
 

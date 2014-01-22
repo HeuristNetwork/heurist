@@ -476,13 +476,13 @@ $.widget( "heurist.profile", {
                                 //$('#layout_theme').themeswitcher.
 
 
-                    //get hapi and perform login
+                    //save preferences in session
                     top.HAPI.SystemMgr.save_prefs(request,
                         function(response){
                             if(response.status == top.HAPI.ResponseStatus.OK){
 
                                 var prefs = top.HAPI.currentUser['ugr_Preferences'];
-                                var askreload = (prefs['layout_language'] != request['layout_language'] ||
+                                var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
                                                  prefs['layout_theme'] != request['layout_theme']);
                                 
                                 top.HAPI.currentUser['ugr_Preferences'] = request;
@@ -492,7 +492,7 @@ $.widget( "heurist.profile", {
 
                                 $dlg.dialog( "close" );
                                 
-                                if(askreload){
+                                if(ask_reload){
                                     top.HEURIST.util.showMsgDlg('Reload page to apply new settings?',
                                     function(){
                                         window.location.reload();
@@ -505,7 +505,6 @@ $.widget( "heurist.profile", {
                                 message.text(response.message);
                             }
                         }
-
                     );
             }
 

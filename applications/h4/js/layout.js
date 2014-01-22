@@ -310,13 +310,13 @@ function appAddContent($container, app, options){
                     if(app.widgetname=='search_links'){
                         //DEBUG
                         $content.search_links( ); //options
-                    }else
-                    if(app.widgetname=='search'){
-                        //DEBUG
-                        $content.search( ); //options
+                    /*}else
+                     if(app.widgetname=='pagination'){
+                        
+                        $content.pagination( options );*/
                     }else    
                     {
-                     //this is notmal way of widget initialization   
+                     //this is normal way of widget initialization   
                      // script is loaded dynamically and init function is widget name
                         
                      $.getScript(app.script, function() {

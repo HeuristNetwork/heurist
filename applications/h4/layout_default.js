@@ -28,6 +28,7 @@ var widgets = [
 {id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
 {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
 {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
+{id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
 
 {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'apps/rec_list.js'},
 
@@ -67,9 +68,10 @@ var layouts = [
 {id:'l01', name:'h3 classic', theme:'smoothness',
 north:{size:88, resizable:false,
         apps:[
-        {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'49%', border:'none'} },    //about
-        {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'49%', border:'none'} },   //profile
-        {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,right:0, border:'none'} }    //search
+        {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none'} },    //about
+        {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'50%', border:'none'} },   //profile
+        {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none'}, options:{has_paginator:false} },   //search
+        {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none'} }  //pagination
             ]},
 west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none'} }]},  //saved searches
 center:{minsize:300, dropable:true, apps:[{appid:'ha21', dockable:true, dragable:false }]},  //search result 

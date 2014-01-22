@@ -19,6 +19,7 @@ $.widget( "heurist.about", {
     this.div_logo = $( "<div>")
             .addClass('logo')
             .css('width','150px')
+            .css('display','inline-block')
             .appendTo( this.element )
             .button();
 
@@ -27,8 +28,8 @@ $.widget( "heurist.about", {
       click: function(){$( "#heurist-about" ).dialog("open");}
     });
 
-    this.div_dbname = $( "<span>")
-            .css({'font-size':'2em', 'font-style':'italic', 'padding-left':'15px'})
+    this.div_dbname = $( "<div>")
+            .css({'font-size':'2em', 'font-style':'italic', 'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'})
             .html(top.HAPI.database)
             .appendTo( this.element );
     

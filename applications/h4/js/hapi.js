@@ -533,11 +533,17 @@ function hAPI(_db, _oninit) { //, _currentUser
         * 
         * @returns {Object}
         */
-        get_prefs: function(){
-            if( that.currentUser['ugr_Preferences'] ) {
-                return that.currentUser['ugr_Preferences'];
+        get_prefs: function(name){
+            if( !that.currentUser['ugr_Preferences'] ) {
+                //preferences by default
+                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'cupertino', 'search_limit':200};
+            }
+            if(top.HEURIST.util.isempty(name)){
+                return that.currentUser['ugr_Preferences'];    
             }else{
-                return {layout_language:'en', layout_theme:'cupertino'};
+                var res = that.currentUser['ugr_Preferences'][name]
+                if(!res && 'search_limit'==name) res = 200;
+                return res;
             }
         },
 

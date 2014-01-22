@@ -5,7 +5,6 @@ $.widget( "heurist.search_links", {
     isapplication:true,  // send and recieve the global events
 
     searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-    limit: 10,
 
     // callbacks
     onsearch: null,  //on start search
@@ -312,7 +311,8 @@ $.widget( "heurist.search_links", {
 
             var that = this;
 
-            var request = {q: qsearch, w: domain, f: this.options.searchdetails, l:this.options.limit, orig:'saved'};
+            var request = {q: qsearch, w: domain, f: this.options.searchdetails,
+                 l:top.HAPI.get_prefs('search_limit'), orig:'saved'};
 
             if(that.options.isapplication){
                 $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]);

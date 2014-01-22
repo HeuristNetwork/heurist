@@ -11,7 +11,8 @@ $.widget( "heurist.search", {
     isapplication:true,  // send and recieve the global events
 
     searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-    limit: 10,
+
+    has_paginator: false,
 
     // callbacks
     onsearch: null,  //on start search
@@ -128,17 +129,19 @@ $.widget( "heurist.search", {
         }
     });
 
-    this.div_paginator = $('<span>')
-                .css('display', 'inline-block')
-                .appendTo( this.element )
-                .pagination();
-    /*
-     $.getScript(top.HAPI.basePath+'apps/pagination.js', function() {
-         if($.isFunction('pagination')){
-         }else{
-             top.HEURIST.util.showMsgErr('Widget pagination not loaded!');
-         }        
-     });          */
+    if(this.options.has_paginator){
+        if($.isFunction($('body').pagination)){
+            this._initPagination();
+        }else{
+             $.getScript(top.HAPI.basePath+'apps/pagination.js', function() {
+                 if($.isFunction($('body').pagination)){
+                     that._initPagination();
+                 }else{
+                     top.HEURIST.util.showMsgErr('Widget pagination not loaded!');
+                 }        
+             });          
+        }
+    }
    
 
     //global listener
@@ -159,6 +162,13 @@ $.widget( "heurist.search", {
 
 
   }, //end _create
+  
+  _initPagination: function(){
+        this.div_paginator = $('<span>')
+                .css('display', 'inline-block')
+                .appendTo( this.element )
+                .pagination();
+  },
 
   _setOption: function( key, value ) {
       this._super( key, value );
@@ -223,7 +233,8 @@ $.widget( "heurist.search", {
 
             var that = this;
 
-            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, l:this.options.limit, orig:'main'};
+            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, 
+                            l:top.HAPI.get_prefs('search_limit'), orig:'main'};
 
             if(that.options.isapplication){
                 $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]);
@@ -267,6 +278,8 @@ $.widget( "heurist.search", {
 
     this.div_search_as_user.remove();
     this.div_search_as_guest.remove();
+    
+    if(this.div_paginator) this.div_paginator.remove();
 
   }
 
