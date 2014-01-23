@@ -76,6 +76,11 @@
 			.failure { font-weight: bold; color: red; margin-left: 3px; }
 			.input-row div.input-header-cell {width:90px; vertical-align:baseline; min-width:90px;}
 		</style>
+        <script>
+            function closewin(){
+                window.close(null);
+            }
+        </script>
 	</head>
 
 	<body class="popup">
@@ -100,13 +105,19 @@
 
 			<div class="input-row">
 				<div class="input-header-cell">Select new image</div>
-				<div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;"></div>
+				<div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
 			</div>
 			<div class="actionButtons" style="position:absolute; right:10px; bottom:10px">
-				<input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px">
-				<input type="button" value="Close window" onClick="window.close(null);"></div>
+				<!-- input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px" -->
+				<input type="button" value="Close window" onClick="closewin()">
 			</div>
 		</form>
+        
+<?php    if ($success_msg) { ?>
+                <script  type="text/javascript">
+                    setTimeout(closewin, 1000);
+                </script>
+<?php    } ?>        
 	</body>
 </html>
 <?php

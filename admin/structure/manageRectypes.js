@@ -402,7 +402,7 @@ function RectypeManager() {
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
                 }},
                 
-                 { key: "description", label: "Description7", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
+                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -420,6 +420,11 @@ function RectypeManager() {
                 },
                                                                             //minWidth:20, maxWidth:20, maxAutoWidth:20, 
                 { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+                { key: "info", label: "Dup", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+                        var rectypeID = oRecord.getData('id');
+                        elLiner.innerHTML = '<img src="../../common/images/Design-32.png"'+
+                        'style="cursor:pointer;" onclick="rectypeManager.duplicateType('+rectypeID+')"/>'; }
+                },
                 { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
                         elLiner.innerHTML = '<img src="../../common/images/info.png"'+
@@ -945,6 +950,48 @@ function RectypeManager() {
     }
 
     //
+    // duplicate record type and then call edit type dialogue
+    //
+    function _duplicateType(rectypeID) {
+        
+            var value = confirm("Do you really want to duplicate record type # "+rectypeID+"?"); //" '"+rt_name+"' ?");
+            if(value) {
+
+                function _editAfterDuplicate(context) {
+
+                    if(!Hul.isnull(context) && Number(context.id)>0){
+                        
+                        
+                            var rty_ID = Number(context.id);
+                        
+                            //refresh the local heurist
+                            top.HEURIST.rectypes = context.rectypes;
+                            _cloneHEU = null;
+
+                            //detect what group
+                            ind_grpfld = top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+                            var grpID = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
+
+                            var d = new Date();
+                            curtimestamp = d.getMilliseconds();
+
+                            _removeTable(grpID, true);
+                        
+                            _onAddEditRecordType(context.id, null);
+                    }
+                }
+
+
+                var baseurl = top.HEURIST.baseURL + "admin/structure/recordTypeDuplicate.php";
+                var callback = _editAfterDuplicate;
+                var params = "db=" + db + "&rtyID=" + rectypeID;
+                Hul.getJsonData(baseurl, callback, params);
+
+            }
+    }
+    
+    
+    //
     // edit strcuture (from image link in table)
     //
     function _editRecStructure(rty_ID) {
@@ -1346,6 +1393,7 @@ function RectypeManager() {
             _init();
         },
         editDetailType: _editDetailType,
+        duplicateType: function(rectypeID){ _duplicateType( rectypeID ); },
         doGroupSave: function(){ _doGroupSave(); },
         doGroupDelete: function(){ _doGroupDelete(); },
         doGroupCancel: function(){ _doGroupCancel(); },
