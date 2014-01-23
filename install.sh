@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Preliminary installation script for Heurist, rev Sept 2013 by Brian Ballsun-Stanton
+# Preliminary installation script for Heurist on Ubuntu, rev Sept 2013 by Brian Ballsun-Stanton
 
 # (https://code.google.com/p/heurist/)
 # This script takes something of a brute force approach to making sure everythign is up-to-date. It could certainly be imporved.
@@ -87,6 +87,10 @@ read -p "Press [Enter] key to start LAMP stack install..."
 sudo tasksel install lamp-server
 
 sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-dev php-pear memcached php5-memcached sqlite3 pv php5-sqlite -y >> install.log
+
+# Added from RedHat install 23/1/14 - may be superfluous, not yet tested
+sudo apt-get install php5-pdo php5-mbstring
+
 sudo apt-get build-dep libspatialite-dev -y >> install.log
 
 
@@ -202,6 +206,10 @@ echo -e "\n\n\n\n\n\n"
 
 echo "---- Installation complete -----"
 echo -e "\n"
+
+echo -e "You should probably rename the installation directory to /var/www/h3 rather than the specific version ID entered"
+echo -e "\n"
+
 echo "Please edit configIni.php to set your MySQL root user + password (twice, clearly documented in file)"
 echo -e "\n\n"
 echo "Now do this:    cd /var/www/h3"
