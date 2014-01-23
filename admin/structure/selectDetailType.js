@@ -571,7 +571,11 @@ function SelectDetailType() {
 						var _dtyID = Number(context.result[0]);
 						if(!isNaN(_dtyID)){
 							_arr_selection.push(""+Math.abs(_dtyID));
-						}
+
+                            //close after creation of new field                            
+                            var res = _arr_selection.join(",");
+                            window.close(res);
+                        }
 
 						//new field type to be added - refresh list
 						_init();
@@ -579,7 +583,6 @@ function SelectDetailType() {
 				}
 			});
 	}
-
 	//
 	//public members
 	//
