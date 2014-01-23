@@ -110,7 +110,7 @@ $(document).ready(function() {
 	function createUsedRectypeSelector(useIDs) {
 		var rectypes = top.HEURIST.rectypes;
 		var rectypeValSelect = document.getElementById("record-type");
-		rectypeValSelect.innerHTML = '<option value="" selected>Any rectype</option>';
+		rectypeValSelect.innerHTML = '<option value="" selected>Any record type</option>';
 		rectypeValSelect.onchange = function(){
 			if(user || group){
 				window.location.href = "?" + (user ? "u="+user.getID() : "g="+group.getID()) + "&t="+this.value +"db=" + HAPI.database;

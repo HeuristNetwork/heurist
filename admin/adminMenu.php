@@ -256,7 +256,7 @@ if (is_admin()) {
 							title="Find record pointer which point to an incorrect record type or to nothing at all">Check Invalid Pointers</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/listFieldTypeDefinitionErrors.php?db=<?=HEURIST_DBNAME?>')"
-							title="Find field types with invalid terms or rectypes">Check Invalid Field Types</a></li>
+							title="Find field types with invalid terms or pointer record types">Check Invalid Field Types</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/checkXHTML.php?db=<?=HEURIST_DBNAME?>')"
 							title="Check the wysiwyg text fields in records and blog entries for structural errors">Check Wysiwyg Texts</a></li>

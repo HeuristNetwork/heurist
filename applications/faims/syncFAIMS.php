@@ -319,7 +319,7 @@ exit();
                 }
         }
 
-        print "<h3>'Container' reltype will be mapped to separate record type</h3><br>";
+        print "<h3>'Container' relationship type will be mapped to separate record type</h3><br>";
         $query =  'SELECT "RelnTypeID", "RelnTypeName", "RelnTypeDescription" FROM RelnType where RelnTypeCategory="container"';
         $rs = $dbfaims->query($query);
         while ($row = $rs->fetchArray(SQLITE3_NUM))
@@ -523,10 +523,10 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
                                 $trm_ID = $row[0];
                             }
                             $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$trm_ID);   // hierarchy - contains two heurist id - parent and child
-                            print  "&nbsp;&nbsp;Reltype hierarchy tagID:".$parent."=".$row_vocab[3]." and tagID:" .$trm_ID."=".$row_vocab[4]."  =>".$row_vocab[0]."<br/>";
+                            print  "&nbsp;&nbsp;Relationship type hierarchy tagID:".$parent."=".$row_vocab[3]." and tagID:" .$trm_ID."=".$row_vocab[4]."  =>".$row_vocab[0]."<br/>";
                             
                         }else{
-                            print  "&nbsp;&nbsp;Reltype ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
+                            print  "&nbsp;&nbsp;Relationship type ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
                             $reltypeMap[$row_vocab[0]] = $row[0];
                         }
                         
@@ -553,11 +553,11 @@ print  "H3 DT added as ".$dtyId."  based on ".$attrID." ".$row1[1]." ".$row1[3].
                                 $trm_ID = addChildRelType($parentTermID, $parent, $row_vocab[0], $row_vocab[4]);
                                 
                                 $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$trm_ID);
-                                print  "&nbsp;&nbsp;Reltype added. Hierarchy ".$parent."=".$row_vocab[3]." and " .$trm_ID."=".$row_vocab[4]."  based on ".$row_vocab[0]."<br/>";
+                                print  "&nbsp;&nbsp;Relationship type added. Hierarchy ".$parent."=".$row_vocab[3]." and " .$trm_ID."=".$row_vocab[4]."  based on ".$row_vocab[0]."<br/>";
 
                         }else{
                             $reltypeMap[$row_vocab[0]] = $trm_ID;
-                            print  "&nbsp;&nbsp;Reltype added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br/>";
+                            print  "&nbsp;&nbsp;Relationship type added ".$trm_ID."  based on ".$row_vocab[0]." ".$row_vocab[1]."<br/>";
                         }
 
         
@@ -604,7 +604,7 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "ERROR - rectype is not added !!!  ".$mysqli->error;
+                    print "ERROR - record type was not added !!!  ".$mysqli->error;
                     exit();
                 }
 
@@ -713,7 +713,7 @@ print "titlemask=".$titleMask."<br>";
 
 //----------------------------------------------------------------------------------------
 
-    print "<h3>Rectypes for Container reltypes</h3><br>";
+    print "<h3>Record types for Container relationship types</h3><br>";
 
     //create/update defRecTypes/defRecStrucure on base of RelnType and IdealReln
     $query1 =  'SELECT "RelnTypeID", "RelnTypeName", "RelnTypeDescription" FROM RelnType where RelnTypeCategory="container"';
@@ -746,7 +746,7 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "ERROR - rectype is not added !!!  ".$mysqli->error;
+                    print "ERROR - record type was not added !!!  ".$mysqli->error;
                     exit();
                 }
 
@@ -1241,7 +1241,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 }
             }else{
                 $skip_faimsrec = true;
-                print "RELATION TYPE NOT FOUND for faims reltype ".$faims_atype."<br />";
+                print "RELATION TYPE NOT FOUND for FAIMS relationship type ".$faims_atype."<br />";
                 continue;
             }
 
@@ -1287,7 +1287,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 }
             }else{
                 $details = true;
-                print "RELATION TYPE NOT FOUND for faims reltype ".$faims_atype."<br />";
+                print "RELATION TYPE NOT FOUND for FAIMS relationship type ".$faims_atype."<br />";
                 continue;
             }
 

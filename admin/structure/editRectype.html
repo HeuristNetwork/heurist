@@ -315,7 +315,7 @@
                 }
                 if(newRectypeCode == 2) { // Give error message
                     document.getElementById("statusMsg").style.display = "block";
-                    document.getElementById("statusMsg").innerHTML = "<strong>Error: rectype could not be found. Clicking 'save' button will create a new rectype.</strong><br /><br />";
+                    document.getElementById("statusMsg").innerHTML = "<strong>Error: record type could not be found. Clicking 'save' button will create a new record type.</strong><br /><br />";
                 }
 
                 if(supressEditStructure){
@@ -484,7 +484,7 @@
                 if(el.value === "reserved") {
 
                     var changeToReserved = confirm("If you change the status to 'reserved'," +
-                        " some fields of this rectype will no longer be able to change.\n\nAre you sure?");
+                        " you will no longer be able to modify the definitions of some fields in this record type.\n\nAre you sure?");
                     if(changeToReserved) {
                         toggleAll(true, false);
                     } else {

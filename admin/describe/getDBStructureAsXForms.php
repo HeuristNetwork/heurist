@@ -117,7 +117,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 		</script>
 
 		<div style="" id="rectypesList"></div>
-		<input type="button" value="Select rectypes" onclick="_onSelectRectype()">
+		<input type="button" value="Select record types" onclick="_onSelectRectype()">
 		<br/>
 		<form id="form1" action="getDBStructureAsXForms.php" method="post">
 			<input name="db" value="<?=HEURIST_DBNAME?>" type="hidden">

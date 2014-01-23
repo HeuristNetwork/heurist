@@ -803,7 +803,7 @@ top.HEURIST.search = {
 							});
 			rtNames.sort();
 			var rectypeMenuItem = document.createElement("li");
-			(level == 0 ? rectypeMenuItem.innerHTML = "<span>Filter</span>" :  rectypeMenuItem.innerHTML = "<span>Filter by Rectype</span>") ;
+			(level == 0 ? rectypeMenuItem.innerHTML = "<span>Filter</span>" :  rectypeMenuItem.innerHTML = "<span>Filter by record type</span>") ;
 			var rectypeList = document.createElement("ul");
 			rectypeList.className = "rectype level"+level;
 			var li = document.createElement("li");
@@ -2119,7 +2119,7 @@ top.HEURIST.search = {
 	createUsedRectypeSelector: function (useIDs) {
 		var rectypes = top.HEURIST.rectypes;
 		var rectypeValSelect = document.getElementById("rectype-select");
-		rectypeValSelect.innerHTML = '<option value="" selected>Any rectype</option>';
+		rectypeValSelect.innerHTML = '<option value="" selected>Any record type</option>';
 		rectypeValSelect.onchange = function(){
 			if (this.selectedIndex) {
 				var rtID = $(this.options[this.selectedIndex]).attr("rectype");

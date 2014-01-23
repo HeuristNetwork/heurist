@@ -557,7 +557,7 @@ function getResourceMapping($dt_code){
 
         $res_rt_id = getRecTypeLocalID($resource_rt_id);
         if($res_rt_id == null){
-            return " resource rectype not recognized: ".$resource_rt_id;
+            return " resource record type not recognized: ".$resource_rt_id;
         }
 
         $res_dt_id = getDetailTypeLocalID($resource_dt_id);

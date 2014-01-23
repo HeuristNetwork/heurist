@@ -224,7 +224,7 @@
 				if($newkey){
 					$arr["type:".$newkey] = $value;
 				}else{
-					print '({"error":"Can\'t find the global concept ID for fieldtype #"'.$typeid.'"})';
+					print '({"error":"Can\'t find the global concept ID for field type #"'.$typeid.'"})';
 					exit();
 				}
 			}else{
@@ -239,7 +239,7 @@
 		if($newrectype){
 			$arr["rectype"] = $newrectype;
 		}else{
-			print '({"error":"Can\'t find the global concept ID for rectype #"'.$_POST["rectype"].'"})';
+			print '({"error":"Can\'t find the global concept ID for record type #"'.$_POST["rectype"].'"})';
 			exit();
 		}
 

@@ -41,7 +41,7 @@ if (!is_logged_in()) {
 }
 $rtyID = (@$_REQUEST['rtyID'] ? $_REQUEST['rtyID'] : null);
 if (!$rtyID) {
-	print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must supply a rectype ID</span><p></div></div></body></html>";
+	print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must supply a record type ID</span><p></div></div></body></html>";
 	return;
 }
 list($form, $rtName, $rtConceptID, $rtDescription, $report) = buildform($rtyID);

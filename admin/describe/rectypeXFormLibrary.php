@@ -299,7 +299,7 @@ function buildform($rt_id) {
  * @todo         need to accept a filter for reducing the recordset, currently you get all records of every type in the input list
  */
 function createRecordLookup($rtIDs) {
-	$emptyLookup = "<item>\n" . "<label>\"no records found for rectypes '$rtIDs'\"</label>\n" . "<value>0</value>\n" . "</item>\n";
+	$emptyLookup = "<item>\n" . "<label>\"no records found for record types '$rtIDs'\"</label>\n" . "<value>0</value>\n" . "</item>\n";
 	$recs = mysql__select_assoc("Records", "rec_ID", "rec_Title", "rec_RecTypeID in ($rtIDs) order by rec_Title");
 	if (!count($recs)) {
 		return $emptyLookup;

@@ -122,7 +122,7 @@ if (count($dtysWithInvalidTerms)>0){
 ?>
 <!--
 			<div>
-				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid terms definitions</h3>
+				<h3>Enumeration, Relationship type or Relationship marker field types with invalid terms definitions</h3>
 			</div>
 -->            
 <?php
@@ -138,7 +138,7 @@ if (count($dtysWithInvalidTerms)>0){
 if (count($dtysWithInvalidNonSelectableTerms)>0){
 ?>
 <!--			<div>
-				<h3>Enumeration, Relationtype or Relmarker Field Types with invalid non-selectable terms definitions</h3>
+				<h3>Enumeration, Relationship type or Relationship marker field types with invalid non-selectable terms definitions</h3>
 			</div> -->
 					<?php
 						foreach ($dtysWithInvalidNonSelectableTerms as $row) {
@@ -154,7 +154,7 @@ if (count($dtysWithInvalidRectypeConstraint)>0){
 ?>
 <!--
 			<div>
-				<h3>Reference/Resource Pointer or Relmarker Field Types with invalid rectype(s) in constraint definitions</h3> 
+				<h3>Record Pointer or Relationship Marker field types with invalid record type(s) in constraint definitions</h3> 
 			</div> -->
 <?php
 						foreach ($dtysWithInvalidRectypeConstraint as $row) {

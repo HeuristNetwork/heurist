@@ -92,15 +92,13 @@ $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 		</div>
 		<div id="page-inner">
 
-			These checks look for ill formed Title Masks for Record Types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
-			If the Title mask is invalid please edit the Record Type directly.<br/>
+			Title masks are used to construct a composite title for a record based on data fields in the record.<br/>
+            For many record types, they will jsut render the title field, or title with some additional contextual information.<br/>
+            For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
+            This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
+			If the title mask is invalid please edit the record type (see under Essentials in the menu on the left) and correct the title mask for the record type.<br/>
 		<?php
-			if ($check != 2) {
-				echo "If the Canonical Title mask is invalid please run 'Synchronise Canocnial Title Mask' command below\n";
-			}else{
-				echo "Canonical Title mask will synchronise to Title Mask and carries the same validity as the Title Mask\n";
-			}
-
+			
 			echo "<br/><hr>\n";
 
 $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_ID");
@@ -129,9 +127,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 	if($check > 0 || !$recID)
 	{
 ?>
-			<div>
-				<h3>Checking rectype "<b><i><?=$rtName?></i></b>"[<?=$rtID?>]</h3>
-			</div>
+			<h3><b> <?=$rtID?> : <i><?=$rtName?></i></b> <br/> </h3>
 <?php
 
         $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
@@ -140,7 +136,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
         if(is_array($res)){
             echo "<div class='errorCell'>".$res[0]."</div>";
         }else if(strcasecmp($res,$mask)!=0){
-            echo "<div>Decoded mask: $res</div>";
+            echo "<div><br/>&nbsp;Decoded Mask: $res</div>";
         }
         echo "</div>";
 
@@ -173,7 +169,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 			}
 		}
     */
-		echo "<hr>\n";
+		echo "\n";
 	}else{
 		echo "checking type mask $mask for recType $rtID and rec $recID <br/>";
 		echo fill_title_mask($mask, $recID, $rtID);

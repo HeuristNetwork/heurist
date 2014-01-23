@@ -437,7 +437,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (is_array($rt)){
         //ERROR
-        return array("$field_name was tested with Array of rectypes - bad parameter");
+        return array("$field_name was tested with Array of record types - bad parameter");
     }
 /*****DEBUG****///error_log("fieldname = $field_name and rt = $rt");
 

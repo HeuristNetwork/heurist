@@ -209,12 +209,12 @@ $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	
 // check filter string has restricted characters only
 $filterString = (@$_REQUEST['filters'] ? $_REQUEST['filters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
-	die(" error invalid json rectype filters string");
+	die(" error invalid json record type filters string");
 }
 //decode the json string to convert it to an array of rectypes for each level
 $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RECTYPE_FILTERS)) {
-	die(" error decoding json rectype filters string");
+	die(" error decoding json record type filters string");
 }
 
 // handle special case for collection where ids are stored in teh session.

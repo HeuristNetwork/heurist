@@ -272,11 +272,11 @@ $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
 $PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!is_logged_in() ? true : false));
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
 if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json rectype filters string");
+    die(" error invalid json record type filters string");
 }
 $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RECTYPE_FILTERS)) {
-    die(" error decoding json rectype filters string");
+    die(" error decoding json record type filters string");
 }
 /*****DEBUG****/
 //error_log("rt filters".print_r($RECTYPE_FILTERS,true));
@@ -304,7 +304,7 @@ if (!isset($PTRTYPE_FILTERS)) {
 //error_log("request depth".print_r($_REQUEST['depth'],true));
 $filterString = (@$_REQUEST['selids'] ? $_REQUEST['selids'] : null);
 if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json rectype filters string");
+    die(" error invalid json record type filters string");
 }
 $SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($SELIDS_FILTERS)) {

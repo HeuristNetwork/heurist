@@ -380,7 +380,7 @@
                     //check max limit constraints
                     if ( ! array_key_exists($bdtID, $repeats)) {//if no entry in repeats then extra detail
                         /*****DEBUG****///error_log("non rectype detail type $bdtID found");
-                        warnSaveRec("non rectype detail type $bdtID found");
+                        warnSaveRec("non record type detail type $bdtID found");
                     }else if (is_numeric($repeats[$bdtID])) {
                         if ($repeats[$bdtID] >= 1) {
                             $repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save

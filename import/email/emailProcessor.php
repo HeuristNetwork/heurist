@@ -209,7 +209,7 @@
 							$key_file = "type:".$newkey;
 						}
 					}else{
-						$email->setErrorMessage("Can't find the local id for fieldtype #".$typeid);
+						$email->setErrorMessage("Can't find the local id for field type #".$typeid);
 						$key_file = null; //avoid processing attachments
 						break;
 					}
@@ -230,7 +230,7 @@
 
 				}
 			}else{
-				$email->setErrorMessage("Can't find the local id for rectype #".$_POST["rectype"]);
+				$email->setErrorMessage("Can't find the local id for record type #".$_POST["rectype"]);
 				$key_file = null; //avoid processing attachments
 				exit();
 			}

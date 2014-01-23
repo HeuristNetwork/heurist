@@ -548,7 +548,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
  			}else{
 
 				if(Hul.isempty(src_id) && Hul.isempty(trg_id)){
-					alert("Define rectype for source or target");
+					alert("Define record type for source or target");
 					return;
 				}
 

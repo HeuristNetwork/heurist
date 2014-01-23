@@ -538,9 +538,9 @@ function directImportWarning(event){
 		<div style="display:inline-block; vertical-align:top;padding-right:20px;"><label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1" style="width:138px;height:16px"><option value="all">all groups</option></select></div>
 		<div style="display:inline-block;">
 			<input id="inputFilterByExist" type="checkbox"/><label for="inputFilterByExist">&nbsp;&nbsp;Show record types with same original source</label><br />
-			<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of rectypes."
-				onchange="directImportWarning(event)"><label for="noRecursion">&nbsp;&nbsp;Direct Record Types Import Only (without all related types - constrained pointers)</label><br />
-			<input type="checkbox" id="strict" title="Check this for strict import of types!" checked><label for="strict">&nbsp;&nbsp;Strict Import - only import if structure is entirely correct</label>
+			<input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of record types."
+				onchange="directImportWarning(event)"><label for="noRecursion">&nbsp;&nbsp;Direct record types import only (without all related types - constrained pointers)</label><br />
+			<input type="checkbox" id="strict" title="Check this for strict import of types!" checked><label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct</label>
             <input type="checkbox" id="importVocabs" checked><label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
 		</div>
 	</div>

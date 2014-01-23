@@ -646,7 +646,7 @@
 
 		}
 		if ($ret ==  null) {
-			$ret = "no data supplied for inserting rectype";
+			$ret = "no data supplied for inserting record type";
 		}
 		return $ret;
 	}
@@ -861,7 +861,7 @@
 		}
 
 		if ($ret == null) {
-			$ret = "no data supplied for updating rectype - $rtyID";
+			$ret = "no data supplied for updating record type - $rtyID";
 		}
 		return $ret;
 
