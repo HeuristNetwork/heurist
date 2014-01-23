@@ -402,7 +402,7 @@ function RectypeManager() {
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
                 }},
                 
-                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
+                 { key: "description", label: "Description7", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -418,8 +418,8 @@ function RectypeManager() {
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
-                
-                { key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+                                                                            //minWidth:20, maxWidth:20, maxAutoWidth:20, 
+                { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
                         elLiner.innerHTML = '<img src="../../common/images/info.png"'+
@@ -675,6 +675,10 @@ function RectypeManager() {
             };*/
 
 
+            //
+            $th = $( "span:contains('Show')" ).parent().parent(); //yui-dt-col-yui-dt-col23
+            $th.css('width','1%');
+            
             //$$('.ellipsis').each(ellipsis);
 
         }//if(dt==undefined || dt==null)

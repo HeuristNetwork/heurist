@@ -372,7 +372,7 @@ function DetailTypeManager() {
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, width:20, className:'right',resizeable:false },
             // 8/10/12 - removed Ian to make space for more important fields, these should be shown as rollovers
-            { key: "conceptid", label: "Concept", sortable:true, width:35, className:'right',resizeable:false, hidden:true },
+            { key: "conceptid", label: "Concept", sortable:true, className:'right',resizeable:false, hidden:true },
 			{ key: "order", hidden:true },
 			{ key: "name", label: "Name", sortable:true, className:'bold_column', width:120, minWidth:120,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -689,7 +689,10 @@ function DetailTypeManager() {
 			clearTimeout(filterTimeout);
 			setTimeout(updateFilter,600);
 			});    */
-
+            $th = $( "span:contains('Show')" ).parent().parent();
+            $th.css('width','1%');
+            $th = $( "span:contains('Edit')" ).parent().parent();
+            $th.css('width','1%');
 
 		} //if(dt==undefined || dt==null)
 		else if (needFilterUpdate) {
