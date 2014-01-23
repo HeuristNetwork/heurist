@@ -191,11 +191,11 @@ function EditRecStructure() {
 			var myColumnDefs = [
 			{
 				key:'rst_NonOwnerVisibility',
-				label: "<img src='../../common/images/blue-up-down-triangle.png' title='Drag to change order'>",
+				label: "<img src='../../common/images/up-down-arrow.png' title='Drag to change order'>",
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					if(Number(_expandedRecord) !== Number(oRecord.getData("rst_ID"))){
-						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png' style='cursor:pointer;'>";
+						elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png' style='cursor:pointer;'>";
 					}
 				}
 			},
@@ -513,7 +513,7 @@ function EditRecStructure() {
 					if(_expandedRecord != null){
 						elLiner.innerHTML = "";
 					}else{
-						elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>"
+						elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png'>"
 					}*/
                     
                     _actionInProgress = false;
@@ -730,7 +730,7 @@ function EditRecStructure() {
 		if(!Hul.isnull(record_id)){
 
 			var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
-			elLiner.innerHTML = "<img src='../../common/images/blue-up-down-triangle.png'>";
+			elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png'>";
 
 			if(needSave){
 				_fromUItoArray(rst_ID); //before collapse save from UI to HEURIST
