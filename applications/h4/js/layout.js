@@ -253,10 +253,11 @@ function appCreatePanel($container, app, needcontent){
             var application = appGetWidgetById(app.appid); //find in app array
 
             if(app.hasheader){
-                    var $header = $(document.createElement('div'));
-                    $header.append(app.anme  || application.name)
+                    var $header = $("<div>");
+                    $header.append(top.HR(app.name || application.name))
                         .addClass('ui-widget-header')
                         .addClass('ui-corner-all')
+                        .addClass('header'+app.appid+'_'+app_counter) 
                         .appendTo($d);
             }
 
@@ -310,10 +311,10 @@ function appAddContent($container, app, options){
                     if(app.widgetname=='search_links'){
                         //DEBUG
                         $content.search_links( ); //options
-                    /*}else
-                     if(app.widgetname=='pagination'){
+                    }else
+                     if(app.widgetname=='rec_list'){
                         
-                        $content.pagination( options );*/
+                        $content.rec_list( options );
                     }else    
                     {
                      //this is normal way of widget initialization   
@@ -379,7 +380,7 @@ function appCreateTabControl($container, apps, tabcfg){
                 content_id = app.id+'_'+app_counter;
             }
 
-            $ul.append('<li><a href="#'+content_id+'">'+ (_app.name || app.name) +'</a></li>')
+            $ul.append('<li><a class="header'+content_id+'" href="#'+content_id+'">'+ (top.HR(_app.name || app.name)) +'</a></li>')
 
             if(!_app.content_id){ //already exists
                 appAddContent($tab_ctrl, app, _app.options);

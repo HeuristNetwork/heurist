@@ -536,15 +536,20 @@ function hAPI(_db, _oninit) { //, _currentUser
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'cupertino', 'search_limit':200};
+                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'cupertino', layout_style:'johnson', 'search_limit':200};
             }
             if(top.HEURIST.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];    
             }else{
                 var res = that.currentUser['ugr_Preferences'][name]
                 if(!res && 'search_limit'==name) res = 200;
+                if(!res && 'layout_style'==name) res = 'johnson';
                 return res;
             }
+        },
+        
+        is_ui_normal: function(){
+            return (top.HAPI.get_prefs('layout_style')=='normal');
         },
 
         currentUser: _guestUser,

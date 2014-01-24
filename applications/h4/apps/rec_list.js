@@ -219,6 +219,12 @@ $.widget( "heurist.rec_list", {
 
         }else if(e.type == top.HAPI.Event.ON_REC_SEARCHSTART){
 
+            
+            var new_title = top.HR(data.qname || 'Search result');
+            var $header = $(".header"+that.element.attr('id'));
+            $header.html(new_title);
+            $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
+            
             that.option("recordset", null);
             that.loadanimation(true);
 

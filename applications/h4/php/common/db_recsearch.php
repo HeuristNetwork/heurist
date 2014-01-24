@@ -86,7 +86,8 @@ function recordSearch($system, $params, $need_structure, $need_details)
 
     $query = compose_sql_query($query, $params, $currentUser);
 
-//DEGUG print $query."<br>";
+//DEGUG print 
+error_log("AAA ".$query);
 
     $res = $mysqli->query($query);
     if (!$res){

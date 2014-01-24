@@ -4,6 +4,7 @@ language: 'English',
 Databases: 'Databases',
 'Design database': 'Design database',
 'Import data': 'Import data',
+'Please log in':'Please Log in or Register to use all features Heurist in full scale'
 };
 
 regional['ru'] = {
@@ -19,6 +20,7 @@ language: 'Русский',
 
 'Register': 'Регистрация',
 'Login': 'Войти',
+'Please log in': 'Зарегистрируйтесь, чтобы использовать все возможности Heurist',
 'Log out' : 'Выйти',
 'Cancel': 'Отмена',
 'Save': 'Сохранить',
@@ -29,6 +31,7 @@ language: 'Русский',
 'Manage': 'Управление',
 'Sort': 'Порядок',
 'Search': 'Поиск',
+'Search result':'Результаты поиска',
 
 'Username': 'Имя пользователя',
 'Password': 'Пароль',

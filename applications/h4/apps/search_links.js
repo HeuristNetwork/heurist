@@ -210,7 +210,7 @@ $.widget( "heurist.search_links", {
                                 if (qid && top.HAPI.currentUser.usr_SavedSearch){
                                     squery = top.HAPI.currentUser.usr_SavedSearch[qid][1];
                                 }
-                                that._doSearch2(squery);
+                                that._doSearch2(name, squery);
                                 } )
                          );
             if(qid && top.HAPI.currentUser.usr_SavedSearch){
@@ -297,7 +297,7 @@ $.widget( "heurist.search_links", {
           this._doSearch2(qsearch);
   },*/
 
-  _doSearch2: function(qsearch){
+  _doSearch2: function(qname, qsearch){
 
           if ( qsearch ) {
 
@@ -312,7 +312,7 @@ $.widget( "heurist.search_links", {
             var that = this;
 
             var request = {q: qsearch, w: domain, f: this.options.searchdetails,
-                 l:top.HAPI.get_prefs('search_limit'), orig:'saved'};
+                 l:top.HAPI.get_prefs('search_limit'), orig:'saved', qname:qname};
 
             if(that.options.isapplication){
                 $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]);

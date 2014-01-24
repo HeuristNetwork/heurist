@@ -125,6 +125,14 @@ $.widget( "heurist.profile", {
 
     //---------------------  LOGIN BUTTON
     this.btn_login = $( "<button>", {
+                    text: top.HR('Register')
+            })
+            .css('float','right')
+            .addClass('logged-out-only')
+            .appendTo( this.element )
+            .button();
+    
+    this.btn_login = $( "<button>", {
                     text: top.HR('Login')
             })
             .css('float','right')
@@ -133,7 +141,19 @@ $.widget( "heurist.profile", {
             .button({icons: {
                         primary: "ui-icon-key"
                     }});
-
+        
+    if(!top.HAPI.is_ui_normal()){            
+        this.login_welcome = $("<div>")
+                .html(top.HR("Please log in"))
+                .css({'color':'red','background-color':'white','font-size':'1.2em',
+                            'float':'right','width':'50%','text-align':'right', 'padding-right':'4px'})
+                .addClass('logged-out-only2').appendTo( this.element );
+                
+        this.blink_interval = setInterval(function(){ 
+                    that.login_welcome.is(":visible")?that.login_welcome.hide():that.login_welcome.show() 
+                    },500);
+    }
+                    
     //--------------------- PROFILE BUTTON
     this.btn_user = $( "<button>",{
                     text: "username"
@@ -282,8 +302,13 @@ $.widget( "heurist.profile", {
   _refresh: function(){
 
       if(top.HAPI.currentUser.ugr_ID>0){ 
+            if(this.blink_interval){ 
+                    clearInterval(this.blink_interval);
+                    this.blink_interval = null;
+            }
             $(this.element).find('.logged-in-only').show(); //.css('visibility','visible');
             $(this.element).find('.logged-out-only').hide(); //.css('visibility','hidden');
+            $(this.element).find('.logged-out-only2').hide(); //.css('visibility','hidden');
             this.btn_user.button( "option", "label", top.HAPI.currentUser.ugr_FullName);
             $('#menu-options li.logged-in-only').css('display','block');
             $('#menu-options li.logged-out-only').css('display','none');
@@ -544,6 +569,8 @@ $.widget( "heurist.profile", {
 
     this.login_dialog.remove();
 
+    if(this.login_welcome) {this.login_welcome.remove(); };
+    if(this.blink_interval){clearInterval(this.blink_interval);}
   }
 
 });

@@ -35,8 +35,10 @@ define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 */
 $prefs = array(
  "layout_config" => "layout_defaults",
- "layout_language" => "ru",
- "layout_theme" => "base",
+ "layout_language" => "en",
+ "layout_theme" => "cupertino",
+ 'layout_style' => 'johnson', 
+ 'search_limit' => 200,
 
  "edit_open_in_new_window" => "0",
  "edit_force_tags" => "1",
@@ -177,5 +179,8 @@ function user_setPreferences($dbname, $params){
         //}
     }
 }
+
+//edit, register 
+
 
 ?>
