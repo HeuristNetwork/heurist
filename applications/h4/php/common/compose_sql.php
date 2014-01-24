@@ -102,7 +102,11 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
     }
 
     if (! @$params['qq']  &&  ! preg_match('/&&|\\bAND\\b/i', @$params['q'])) {
-        $query .= parse_query($search_domain, @$params['q'], $currUserID, $wg_ids, @$params['s'], $publicOnly);
+        
+        
+        $qwhere = parse_query($search_domain, @$params['q'], $currUserID, $wg_ids, @$params['s'], $publicOnly);
+        $query .= $qwhere;
+        
     } else {
         // search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
 
@@ -117,8 +121,8 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
         $where_clause = '';
         $q_clauses = array();
         foreach ($q_bits as $q_bit) {
-            $q = parse_query($search_domain, $q_bit, $currUserID, $wg_ids, @$params['s'], $wg_ids, $publicOnly);
-//error_log("parsed q for qbits = ".print_r($q,true));
+            $q = parse_query($search_domain, $q_bit, $currUserID, $wg_ids, @$params['s'], $publicOnly);
+//error_log("parsed q for qbits = ".print_r($q, true));
             // for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
             preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*?) order by/s', $q, $matches);
             if ($matches[1]) {
@@ -129,8 +133,10 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
         $where_clause = join(' and ', $q_clauses);
         // check last qbits for form of owner/vis prefix and order by suffix, then capture and add them
         if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*?( order by.*)$/s', $q, $matches))
+        {
 //error_log("where_clauses matches for q = ".print_r($matches,true));
             $query .= $matches[1] . $where_clause . $matches[2];
+        }
     }
 
     if(true || @$params["l"] || @$params["limit"]){
