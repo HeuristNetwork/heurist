@@ -953,6 +953,19 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             top.HEURIST.util.closePopup(windowID);
         }
     },
+    closePopupAll: function() {
+        var origcnt = top.HEURIST.util.popups.list.length;
+        var cnt = 0;
+        while (top.HEURIST.util.popups && top.HEURIST.util.popups.list.length>0){
+            var pups = top.HEURIST.util.popups;
+            var windowID = pups.list[pups.list.length-1].id;
+            top.HEURIST.util.closePopup(windowID);
+            cnt++;
+            if(cnt>origcnt){
+                break;
+            }
+        }
+    },
 /**
 * close popup and cleanup structure
 *

@@ -528,7 +528,7 @@ function ShowReps() {
 						if(modeRef===1 || modeRef===3){
 							_needListRefresh = true;
 						}
-						if(modeRef===2 || modeRef===3){ //for close or delete
+						if(modeRef===3){ //for close or delete
 							_setLayout(true, false);
 						}
 						if(modeRef===2){
@@ -840,13 +840,13 @@ function ShowReps() {
                         
                         if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
                             term.label = term.label + label +
-'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', false)">insert</a>)</span>'+
+'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', false, this)">insert</a>)</span>'+
 '<span class="insert-intree">'+                            
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', false, false)">insert</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>)</span></div>';
                         }else{
                             term.label = term.label + label +
-'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', true)">insert</a>)</span>'+
+'&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+term.id+'\', true, this)">insert</a>)</span>'+
 '<span class="insert-intree">'+                            
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, false)">in</a>'+
 '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true, true)">if</a>'+
@@ -1060,7 +1060,7 @@ function ShowReps() {
     
     var insertPopupID, insert_ID; 
 
-    function _showInsertPopup( varid, isloop ){
+    function _showInsertPopup( varid, isloop, elt ){
     
         var ele = document.getElementById("insert-popup");
         
@@ -1069,11 +1069,25 @@ function ShowReps() {
         }else{
             $(".ins_isloop").hide();
         }
+
+        function __shownewpopup(){
+                var pos = top.HEURIST.getPosition(elt);
+                var scroll = document.getElementById("treeContainer").scrollTop;
+                insert_ID = varid;
+                
+                var w = top.HEURIST.util.popupTinyElement(top, ele, {x: pos.x + elt.offsetWidth, "no-close": false, y: pos.y-scroll, width: 400, height: 200});
+                                    // "no-titlebar": true
+                insertPopupID = w.id;
+        }
         
-        insert_ID = varid;
-        var w = top.HEURIST.util.popupElement(top, ele,
-                            { "no-titlebar": false, "no-close": false, width: 420, height:220 });
-        insertPopupID = w.id;
+        if(top.HEURIST.util.popups.list.length>0){ //close previous
+            top.HEURIST.util.closePopupAll();
+            //top.HEURIST.util.closePopup(insertPopupID);
+            insertPopupID = null;
+            //setTimeout(__shownewpopup, 2000);
+        }else{
+            __shownewpopup();
+        }
     }
     
 	//
@@ -1081,8 +1095,10 @@ function ShowReps() {
 	//
     function _insertSelectedVars( varid, inloop, isif ){
         
+        top.HEURIST.util.closePopupAll();
         if(varid==null){
-            top.HEURIST.util.closePopup(insertPopupID);
+            //top.HEURIST.util.closePopup(insertPopupID);
+            insertPopupID = null;
             varid = insert_ID;
         }
 
@@ -1513,8 +1529,8 @@ function ShowReps() {
 				_insertSelectedVarsAsLoop(varid);
 			},
 
-            showInsertPopup:function(varid, isloop){
-                _showInsertPopup(varid, isloop);
+            showInsertPopup:function(varid, isloop, elt){
+                _showInsertPopup(varid, isloop, elt);
             },
             
 			//inserts selected variables
