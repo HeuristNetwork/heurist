@@ -33,8 +33,9 @@
 -- Safety rating: SAFE
 -- Description: Add Certainty rating and Annotation text to every key-value (detail) pair
 
-    -- Addition of certainty and annotation fields for compatibility with FAIMS
-    -- This is also a potentially very useful function for us
+
+    -- Addition of certainty and annotation fields for alignment with NeCTAR/LIEF FAIMS project
+    -- This is also a potentially very useful function for broader use
     ALTER TABLE `recDetails` 
     ADD `dtl_Certainty` DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' 
     COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty' 
@@ -43,10 +44,20 @@
     ALTER TABLE `recDetails` ADD `dtl_Annotation` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL 
     COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value' 
     AFTER `dtl_Certainty` ;
+
+    -- Default behaviour is not to show these, for compatibility with DB version 1.1.0 and before
+    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailCertainty` TinyInt default 0 
+    COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)'; 
+    AFTER `rst_DefaultValue` ;
+    
+    ALTER TABLE `defRecStructure` ADD `rst_ShowDetailAnnotation` TinyInt default 0 
+    COMMENT 'When editing the field, allow editng of the dtl_Annotation value (off by default)'; 
+    AFTER `rst_ShowDetailCertainty`;
+
     
     -- Provision for an image or PDF or external URL to define or illustrate the term
     ALTER TABLE  `defTerms` 
-    ADD  `trm_ReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL 
+    ADD  `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL 
     COMMENT 'The URL to a semantic definition or web page describing the term' 
     AFTER  `trm_Code`;
      
@@ -54,3 +65,9 @@
     ADD  `trm_IllustrationURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL 
     COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory' 
     AFTER  `trm_Code` ;
+    
+    -- Provision for an external semantic URL to define the base field type
+    ALTER TABLE  `defDetailTypes` 
+    ADD  `dty_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL 
+    COMMENT 'The URL to a semantic definition or web page describing the base field type' 
+    AFTER  `dty_ExtendedDescription` ;

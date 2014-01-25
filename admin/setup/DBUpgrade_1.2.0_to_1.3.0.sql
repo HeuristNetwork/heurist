@@ -19,10 +19,19 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
-* @version     3.1.5
+* @version     3.1.7
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
+
+-- ------------------------------------------------------------------------------
+
+-- ****** IMPORTANT *******
+
+-- This is a holding pen for ideas about the next structure upgrade. 
+-- These changes might or might not be made, or might be made in modified form
+
+-- ------------------------------------------------------------------------------
 
 -- additional upgrades to future versions can be added as new files but should not be processed 
 -- until the software is updated to expect them
