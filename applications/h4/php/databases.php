@@ -33,7 +33,6 @@ if(! $system->init(@$_REQUEST['db'], false) ){  //init with
 
         <ul class="db-list">
 <?php
-    //get list of databases on this server (in dbutils.php)
     $list =  mysql__getdatabases($system->get_mysqli());
 
     /* DEBUG for($i=0;$i<100;$i++) {

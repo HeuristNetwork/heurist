@@ -139,33 +139,35 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
         }
     }
 
-    if(true || @$params["l"] || @$params["limit"]){
-/*****DEBUG****///error_log("params".print_r($params,true));
-        if (@$params["l"]) {
-            $limit = intval($params["l"]);
-            //??? unset($params["l"]);
-        }else if(@$params["limit"]) {
-            $limit = intval($params["limit"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
-        }else{
-            $limit = 1000;
-        }
-
-        if (!@$limit || $limit < 1){
-            $limit = 1000;
-        }
-
-        if (@$params["o"]) {
-            $offset = intval($params["o"]);
-            //???? unset($args["o"]);
-        }else if(@$params["offset"]) {
-            $offset = intval($params["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
-        }
-
-        $query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
+    if (@$params["l"]) {
+        $limit = intval($params["l"]);
+    }else if(@$params["limit"]) {
+        $limit = intval($params["limit"]);
     }
+
+    if (!@$limit || $limit < 1){
+        $limit = 1000;
+    }
+    
+    $offset = get_offset($params);
+
+    $query .=  " limit $limit" . ($offset>0? " offset $offset " : "");
 
 /*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
     return $query;
+}
+
+function get_offset($params){
+    $offset = 0;
+    if (@$params["o"]) {
+        $offset = intval($params["o"]);
+    }else if(@$params["offset"]) {
+        $offset = intval($params["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
+    }
+    if (!@$offset || $offset < 1){
+        $offset = 0;
+    }
+    return $offset;
 }
 
 /**

@@ -1,3 +1,6 @@
+/**
+* Accordeon: saved and predefined searches
+*/
 $.widget( "heurist.search_links", {
 
   // default options
@@ -406,7 +409,7 @@ $.widget( "heurist.search_links", {
         var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
         //load edit dialogue
-        $dlg.load("apps/svs_edit2.html", function(){
+        $dlg.load("apps/svs_edit.html", function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){

@@ -7,13 +7,12 @@ $.widget( "heurist.rec_list", {
   // default options
   options: {
     view_mode: 'list', // list|icons|thumbnails   @toimplement detail, condenced
-    recordset: null,
-
-    actionbuttons: "tags,share,more,sort,view", //list of visible buttons add, tag, share, more, sort, view
     multiselect: true,
-
-    isapplication:true,
-
+    isapplication: true,
+    showcounter: true,
+    
+    recordset: null,
+    actionbuttons: "tags,share,more,sort,view", //list of visible buttons add, tag, share, more, sort, view
     // callbacks
     onselect: null
   },
@@ -157,6 +156,11 @@ $.widget( "heurist.rec_list", {
           return false;
         }
     });
+    
+    //-----------------------
+    this.span_info = $("<label>").appendTo(
+            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'0 2em 0 2em'}).appendTo( this.div_toolbar ));
+    
 
     //-----------------------
     this.btn_view = $( "<button>", {text: "view"} )
@@ -281,6 +285,21 @@ $.widget( "heurist.rec_list", {
           }
       });
 
+      
+      // show current records range and total count
+      if(this.options.showcounter && this.options.recordset){
+            var offset = this.options.recordset.offset();
+            var len   = this.options.recordset.length();
+            var total = this.options.recordset.count_total();
+            if(total>0){
+                    this.span_info.show();
+                    this.span_info.html( (offset+1)+"-"+(offset+len)+"/"+total);
+            }else{
+                    this.span_info.html('');
+            }
+     }else{
+            this.span_info.hide();
+     }
 
   },
 

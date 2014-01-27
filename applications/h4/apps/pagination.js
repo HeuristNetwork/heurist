@@ -5,8 +5,10 @@ $.widget( "heurist.pagination", {
 
   // default options
   options: {
-    isapplication:true,  // send and recieve the global events
+    isapplication: true,  // send and recieve the global events
+    showcounter: false,
     
+    //move to vars
     current_page: 0,
     max_page: 0,
     count_total: null,
@@ -25,8 +27,9 @@ $.widget( "heurist.pagination", {
       // prevent double click to select text
       .disableSelection();
       
-    this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'0 2em 0 2em'}).appendTo( this.element ));
+    this.span_info = $( "<div>")
+                .css({'display':'inline-block','min-width':'10em','padding':'0 2em 0 2em'})
+                .appendTo( this.element );
     
     this.span_buttons = $( "<span>").appendTo( this.element );
             
@@ -56,7 +59,7 @@ $.widget( "heurist.pagination", {
                 title: top.HR('records per request')
             })
             //.css('width', '4em')
-            .appendTo( this.span_buttons )
+            .appendTo( this.element )
             .button({icons: { secondary: "ui-icon-triangle-1-s" }});
                     
     var smenu = '<li id="search-limit-10"><a href="#">10</a></li>'+
@@ -219,15 +222,21 @@ $.widget( "heurist.pagination", {
 
   },
   
+  // show current records range and total count
+  //
   _renderRecNumbers: function(){
-        var limit = this.options.limit;
-        if(this.options.count_total>0){
-                var rec_no_first = this.options.current_page*limit+1;
-                var rec_no_last =  rec_no_first+limit-1;
-                if (rec_no_last>this.options.count_total) { rec_no_last = this.options.count_total; }
-                this.span_info.html( rec_no_first+"-"+rec_no_last+"/"+this.options.count_total);
+        if(this.options.showcounter){
+            var limit = this.options.limit;
+            if(this.options.count_total>0){
+                    var rec_no_first = this.options.current_page*limit+1;
+                    var rec_no_last =  rec_no_first+limit-1;
+                    if (rec_no_last>this.options.count_total) { rec_no_last = this.options.count_total; }
+                    this.span_info.html( rec_no_first+"-"+rec_no_last+"/"+this.options.count_total);
+            }else{
+                    this.span_info.html('');
+            }
         }else{
-                this.span_info.html('');
+            this.span_info.css('display','none');
         }
   },
 
@@ -247,8 +256,8 @@ $.widget( "heurist.pagination", {
           if(top.HEURIST.util.isNumber(page)){
                 this.options.current_page = page;
           }
-          if(this.options.current_page>this.options.max_page){
-                this.options.current_page = this.options.max_page;
+          if(this.options.current_page>this.options.max_page-1){
+                this.options.current_page = this.options.max_page-1;
           }else if(this.options.current_page<0){
                 this.options.current_page = 0;
           }

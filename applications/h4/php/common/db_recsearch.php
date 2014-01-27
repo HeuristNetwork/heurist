@@ -86,8 +86,7 @@ function recordSearch($system, $params, $need_structure, $need_details)
 
     $query = compose_sql_query($query, $params, $currentUser);
 
-//DEGUG print 
-error_log("AAA ".$query);
+//DEGUG print error_log("AAA ".$query);
 
     $res = $mysqli->query($query);
     if (!$res){
@@ -167,6 +166,7 @@ error_log("AAA ".$query);
                 "data"=> array(
                         //"query"=>$query,
                         "count"=>$num_rows,
+                        "offset"=> get_offset($params),
                         "fields"=>$fields,
                         "records"=>$records,
                         "rectypes"=>$rectypes,

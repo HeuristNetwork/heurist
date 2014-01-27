@@ -28,6 +28,8 @@ define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
 define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 */
 
+require_once (dirname(__FILE__).'/utils_mail.php');
+
 /**
 * List of user preferences and their default values
 * 
@@ -79,6 +81,27 @@ function user_getById($mysqli, $ugr_ID){
         $res->close();
     }
     return $user;
+}
+
+/**
+* get db owner user or specific field of this user
+* 
+* @param mixed $field
+* @return mixed
+*/
+function user_getDbOwner($mysqli, $field=null)
+{
+    $user = user_getById(2);
+    if($user){
+        if($field){
+            if(@$user[$field]){
+                return $user[$field];
+            }
+        }else{
+            return $user;
+        }
+    }
+    return null;
 }
 
 /**
@@ -180,7 +203,217 @@ function user_setPreferences($dbname, $params){
     }
 }
 
-//edit, register 
+/**
+*  if user is not enabled and login count=0 - this is approvement operation
+*/
+function user_isApprovement( $system, $recID ) {
+
+    $ret = false;
+
+    if($system->is_admin() && $recID>0){
+        $res = mysql__select_array($system->get_mysqli(), 
+            "select ugr_Type, ugr_Enabled, ugr_LoginCount from sysUGrps  where ugr_ID=".$recID);
+        $ret = ($row[0]=="user" && $row[1]=="n" && $row[2]==0);
+    }
+
+    return $ret;
+}
+
+//CRUD methods
+function user_Delete($system, $recID){
+
+    $response = array("status"=>HEURIST_UNKNOWN_ERROR, "data"=>"action to be implemented");
+}
 
 
+function user_Update($system, $record){
+
+    if (user_Validate($record))
+    {
+        $recID = intval(@$record['ugr_ID']);
+        $rectype = $record['ugr_Type'];
+        $is_registration = ($rectype=='user' && $recID<1);
+        
+        if($is_registration && $system->get_system('sys_AllowRegistration')==0){
+            
+            $system->addError(HEURIST_REQUEST_DENIED, 'Registration is not allowed for current database');
+            
+        }else if ($is_registration || $system->is_admin2($recID)) {
+            
+            $mysqli = $system->get_mysqli();
+            
+            $res = mysql__select_value($mysqli, 
+            "select ugr_ID from sysUGrps  where ugr_Name='"
+                    .$mysqli->real_escape_string( $record['ugr_Enabled'])."' or ugr_Email='"
+                    .$mysqli->real_escape_string($record['ugr_Email'])."'");
+            if($res!=$recID){
+                $system->addError(HEURIST_INVALID_REQUEST, 'The provided name or email already exists');
+                return false;
+            }
+
+            //encrypt password            
+            $tmp_password = null;
+            if($rectype=='user'){
+                if(@$record['ugr_Password']){ 
+                    $tmp_password = $record['ugr_Password'];
+                    $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+                    $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+                    $record['ugr_Password'] = crypt($val, $salt);
+                }
+                if($system->get_user_id()<1){ //not logged in - always disabled
+                    $record['ugr_Enabled'] = "n";
+                }
+                if("y"==@$record['ugr_Enabled']){
+                    $is_approvement = user_isApprovement($system, $recID);
+                }
+            }
+            
+            $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr", $record);
+            if(is_numeric($res)>0){
+                
+                //actions on complete
+                if($rectype=='user'){
+                    if($recID<1 && $system->get_user_id()<1){
+                        user_EmailAboutNewUser($mysqli, $recID);
+                    }else if($is_approvement){
+                        user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement);
+                    }
+                    
+                }else if($recID<1){
+                    //this is addition of new group
+                    //add current user as admin for new group
+                    //changeRole($recID, get_user_id(), "admin", null, false, true);
+                }
+                
+                return $res; //returns affected record id
+            }else{
+                $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+            }
+        }else{   
+            $system->addError(HEURIST_REQUEST_DENIED);
+        }
+        
+    }  else {
+        $system->addError(HEURIST_INVALID_REQUEST, "All required fields are not defined");
+    }
+    
+    return false;
+}
+
+function user_Validate($record){
+    $res = false;
+    
+    if(@$record['ugr_Type']=='user'){
+        //required fields for user
+        $reqs = array('ugr_Name','ugr_eMail','ugr_FirstName','ugr_LastName','ugr_Organisation','ugr_Interests');
+        if(intval(@$record['ugr_ID'])<1){
+            array_push($reqs, 'ugr_Password');
+        }
+        
+    }else if (@$record['ugr_Type']=='workgroup'){
+        $reqs = array('ugr_Name','ugr_eMail');
+        
+    }else{
+        $system->addError(HEURIST_INVALID_REQUEST, "Wrong type for usergroup");
+        return false;
+    }
+    
+    $missed = array();
+    foreach ($reqs as $fld){
+        if(!@$record[$fld]){
+            array_push($missed, $fld);
+        }
+    }
+    
+    if(count($missed)>0){
+        $system->addError(HEURIST_INVALID_REQUEST, "Some required fields are not defined");
+    }else{
+        $res = true;
+    }
+    
+    
+    return $res;
+}
+
+// @todo - to be implemented
+function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck, $updateSession){
+}
+
+/**
+* Send email to admin about new user
+*/
+function user_EmailAboutNewUser($mysqli, $recID){
+
+        $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+        $user = user_getById($mysqli, $recID); //find user
+        if($dbowner_Email && $user)
+        {
+            $ugr_Name = $user['ugr_Name'];
+            $ugr_FullName = $user['ugr_FirstName'].' '.$user['ugr_LastName'];
+            $ugr_Organisation = $user['ugr_Organisation'];
+            $ugr_eMail = $user['ugr_eMail'];
+
+            //create email text for admin
+            $email_text =
+            "There is a Heurist user registration awaiting approval.\n".
+            "The user details submitted are:\n".
+            "Database name: ".HEURIST_DBNAME."\n".
+            "Full name:    ".$ugr_FullName."\n".
+            "Email address: ".$ugr_eMail."\n".
+            "Organisation:  ".$ugr_Organisation."\n".
+            "Go to the address below to review further details and approve the registration:\n".
+            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+
+            $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
+            
+            sendEmail($dbowner_Email, $email_title, $email_text, null);
+
+        }
+}
+
+/**
+*   Send approval message to user
+*/
+function user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement){
+
+        $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+        $user = user_getById($mysqli, $recID); //find user
+        if($dbowner_Email && $user)
+        {
+
+            $ugr_Name = $user['ugr_Name'];
+            $ugr_FullName = $user['ugr_FirstName'].' '.$user['ugr_LastName'];
+            $ugr_Organisation = $user['ugr_Organisation'];
+            $ugr_eMail = $user['ugr_eMail'];
+
+            if($is_approvement){
+                $email_text = "Your Heurist account registration has been approved.";
+            }else{
+                $email_text = "A new Heurist account has been created for you.";
+            }
+
+            // point them to the home page
+            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
+    
+            //give them a pointer to the search page for the database
+            $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
+                HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+
+
+            if($tmp_password!=null){
+                $email_text = $email_text." and password: ".$tmp_password.
+                "\n\nTo change your password go to My Profile -> My User Info in the top right menu";
+            }
+
+            $email_text = $email_text."\n\nWe recommend visiting the Help ".
+            "pages, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
+
+            $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
+            
+            sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+          
+        } 
+}  // sendApprovalEmail    
+    
+       
 ?>

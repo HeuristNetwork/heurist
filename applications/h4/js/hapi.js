@@ -191,12 +191,22 @@ function hAPI(_db, _oninit) { //, _currentUser
             * @param callback  
             */
             ,save_prefs: function(request, callback){
-                if(request) request.a = 'save_prefs';
+                if(request) request.a = 'usr_save';
                  _callserver('usr_info', request, callback);
             }
 
             /**
-            * Returns detailed description of current user groups
+            * Save user personal info/register new user
+            * @param request - object - user info
+            * @param callback  
+            */
+            ,save_prefs: function(request, callback){
+                if(request) request.a = 'save_prefs';
+                 _callserver('usr_info', request, callback);
+            }
+            
+            /**
+            * Returns detailed description of groupfs for current user
             * 
             * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
             */

@@ -56,7 +56,8 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="apps/rec_list.js"></script>
     <!-- script type="text/javascript" src="apps/search.js"></script>
     <script type="text/javascript" src="apps/profile.js"></script>
-    <script type="text/javascript" src="apps/pagination.js"></script -->
+    <script type="text/javascript" src="apps/pagination.js"></script>
+     -->
   <!-- DEBUG
   -->
 

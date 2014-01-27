@@ -1,5 +1,5 @@
 /**
-* Class for edit Heurist record. It has methods to add new or edit existing record (it can search and load beforehand) 
+* Class UI for edit Heurist record. It has methods to add new or edit (HAPI.RecordMgr) existing record (it can search and load beforehand) 
 * 
 * @see editing_input.js
 */

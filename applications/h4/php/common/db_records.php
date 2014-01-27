@@ -5,7 +5,6 @@
 */
 
 require_once (dirname(__FILE__).'/../System.php');
-//require_once (dirname(__FILE__).'/dbutils.php');
 require_once (dirname(__FILE__).'/db_users.php');
 require_once (dirname(__FILE__).'/db_structure.php');
 require_once (dirname(__FILE__).'/db_recsearch.php');
@@ -132,7 +131,7 @@ function recordAdd($system, $record, $return_id_only=false){
 * put your comment there...
 *
 * @param mixed $system
-* @param mixed $params
+* @param mixed $record
 *       [ID:, RecTypeID:, OwnerUGrpID:, NonOwnerVisibility:, AddedByImport:, URL:, FlagTemporary:,
 *               details:
 *            ]
@@ -213,7 +212,7 @@ function recordSave($system, $record){
         }
         $stmt->close();
 
-        //delete existing details
+        //delete ALL existing details
         $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
         if(!$mysqli->query($query)){
             $syserror = $mysqli->error;
@@ -285,6 +284,13 @@ function recordSave($system, $record){
 */
 }
 
+/**
+* @todo - to be implemented
+* 
+* @param mixed $mysqli
+* @param mixed $user
+* @param mixed $recids
+*/
 function recordDelete($mysqli, $user, $recids){
 
     $response = array("status"=>HEURIST_UNKNOWN_ERROR, "data"=>"action to be implemented");

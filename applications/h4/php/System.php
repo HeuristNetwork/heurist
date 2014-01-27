@@ -2,7 +2,7 @@
 require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
 
 require_once (dirname(__FILE__).'/consts.php');
-require_once (dirname(__FILE__).'/common/dbutils.php');
+require_once (dirname(__FILE__).'/common/utils_db.php');
 require_once (dirname(__FILE__).'/common/db_users.php');
 
 /**
@@ -56,7 +56,7 @@ class System {
         
         if($db){
             $this->dbname = $db;
-            if(!(strpos($db, $dbPrefix)===0)){
+            if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
                 $db = HEURIST_DB_PREFIX.$db;
             }
             $this->dbname_full = $db;
@@ -85,7 +85,8 @@ class System {
                 $this->start_my_session();
                 $this->login_verify(); //load user info from session
 
-                
+                define('HEURIST_DBNAME',$this->dbname);
+                define('HEURIST_DBNAME_FULL',$this->dbname_full);
                 //@todo  - test upload and thumb folder exist and writeable
                 define('HEURIST_UPLOAD_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/');
                 define('HEURIST_THUMB_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/');

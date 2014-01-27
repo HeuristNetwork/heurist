@@ -13,7 +13,7 @@ function hRecordSet(initdata) {
 
      var count_total = 0,   //number of records in query  - not match to  length()
          offset = 0,
-         limit = 1000,
+         //limit = 1000, use length()
          fields = [],       //array of field names
          records = [],      //array of values
          structures = null;  //record structure definitions for all rectypes in this record set
@@ -24,6 +24,7 @@ function hRecordSet(initdata) {
     function _init(response) {
 
         count_total = Number(response.count);
+        offset = Number(response.offset);
         fields = response.fields;
         if ($.isArray(records)) { records = response.records };
         structures = response.structures;
@@ -358,7 +359,8 @@ function hRecordSet(initdata) {
                 _records = [];
             }
             return new hRecordSet({
-                count_total: _records.length,
+                count_total: Object.keys(records).length, //$(_records).length,
+                offset: 0,
                 fields: fields,
                 structures: structures,
                 records: _records
@@ -371,11 +373,15 @@ function hRecordSet(initdata) {
         * @type Number
         */
         length: function(){
-            return records.length;
+            return Object.keys(records).length; //$(records).length;
         },
 
         count_total: function(){
             return count_total;
+        },
+
+        offset: function(){
+            return offset;
         },
         
         /**

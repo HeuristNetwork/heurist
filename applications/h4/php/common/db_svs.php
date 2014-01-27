@@ -60,28 +60,25 @@ function svsSave($system, $record){
 
     if(!@$record['svs_Name']){
         $system->addError(HEURIST_INVALID_REQUEST, "Name not defined");
-        return false;
-    }
-    if(!@$record['svs_Query']){
+    }else if(!@$record['svs_Query']){
         $system->addError(HEURIST_INVALID_REQUEST, "Query not defined");
-        return false;
-    }
-
-    $record['svs_UGrpID'] = $system->is_admin2(@$record['svs_UGrpID']);
-    if (!$record['svs_UGrpID']) {
-        $system->addError(HEURIST_REQUEST_DENIED);
-        return false;
     }else{
 
-        $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);
-        if(is_numeric($res)>0){
-            return $res; //returns affected record id
+        $record['svs_UGrpID'] = $system->is_admin2(@$record['svs_UGrpID']);
+        if (!$record['svs_UGrpID']) {
+            $system->addError(HEURIST_REQUEST_DENIED);
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
-            return false;
-        }
 
+            $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);
+            if(is_numeric($res)>0){
+                return $res; //returns affected record id
+            }else{
+                $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+            }
+
+        }
     }
+    return false;
 }
 
 /**

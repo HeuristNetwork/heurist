@@ -25,7 +25,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
     $action = @$_REQUEST['a']; //$system->getError();
 
     //no enough permission for guest
-    if ( $system->get_user_id()<1 && !($action=='login' || $action=="svs_get" || $action=="sysinfo") ) {
+    if ( $system->get_user_id()<1 && !($action=='login' || $action=="svs_get" || $action=="sysinfo"  || $action=="usr_save") ) {
 
          $response = $system->addError(HEURIST_REQUEST_DENIED);
 
@@ -59,17 +59,19 @@ if( ! $system->init(@$_REQUEST['db']) ){
             user_setPreferences($system->dbname_full(), $_REQUEST);
             $res = true;
 
+        } else if ($action=="usr_save") {
+            
+            $res = user_Update($system, $_REQUEST);
+            
         } else if ($action=="groups") {
 
             $ugr_ID = @$_REQUEST['UGrpID']?$_REQUEST['UGrpID']:$system->get_user_id();
 
             $res = user_getWorkgroups($system->get_mysqli(), $ugr_ID, true);
 
-
         } else if ($action=="members" && @$_REQUEST['UGrpID']) {
 
             $res = user_getWorkgroupMemebers($system->get_mysqli(), @$_REQUEST['UGrpID']);
-
 
         } else if ($action=="svs_save"){
 
