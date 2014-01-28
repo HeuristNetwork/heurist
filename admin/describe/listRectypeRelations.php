@@ -186,7 +186,7 @@ function get_rt_usage($rt_id){
 ?>
 <html>
  <head>
-  <title>Heurist record type relations</title>
+  <title>Heurist record type relations and pointers</title>
 
   <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
   <link rel="icon" href="../../favicon.ico" type="image/x-icon">
@@ -199,7 +199,10 @@ function get_rt_usage($rt_id){
     }
     .lvl0{
         padding-left: 0px;
-        font-weight: bold;
+        font-weight: normal;
+        font-size: 12px;
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
     .lvl1{
         padding-left: 20px;
@@ -220,77 +223,85 @@ function get_rt_usage($rt_id){
 
 
 <?php  
-/*
-27: Ship n=35
-    45: Captain ⇒  3: Person (req. single)  n=35
-    46: Purser   ⇒  3: Person (rec. repeat)  n=48
-    12: Other staff ⇔  3: Person  (opt. repeat) n=142
-        [Midshipman n=12, Sailor n=130, Cook n=0, Gunner n=0]
-*/
+
+print '<div class="lvl0">This listing shows the record pointers and relationship markers for each record type, along with internal codes and occurrence in the database.<br/>'.
+    'Pointer fields are indicated by <i>[pointer]</i>, relationship marker fields by <i>[relationship]</i>. Pointed-to record types are separated by ||<br/>'.
+    'For constrained pointers, all defined target record types are listed. For unconstrained pointers, target record types present are listed.<br/>'.
+    'Relationships not defined by a relationship marker are not included in the counts.&nbsp;</div>';
 
 foreach ($resrt  as $rt_id=>$rt){
     
-print '<div class="lvl0">'.$rt_id.": ".$rt['name']."  n=".$rt['count'].'</div>';
+    // Record type, including total count
+    print '<div class="lvl0"><b>'.$rt['name']."</b>  (id ".$rt_id.", n=".$rt['count'].')</div>';
     
+    // Loop through record details (fields) in record structure
     foreach ($rt['details']  as $details){
         
         $dt_id = $details['dt_id'];
         
+        // Pointer or relationship fields
         if(true || $details['type']=="resource"){
             
-            print '<div class="lvl1">'.$dt_id.": ".$details['dt_name'].(($details['type']=="resource")?" => ":" <=> ");
+            print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer]</i> ":" <i>[relationship]</i> ");
             
             $uncontrained = ($details['isconstrained']<1);
                         
             if($uncontrained){
-                print " uncontrained ";
+                print " unconstrained ";
             }
-            print " n=".$details['count'].'</div>';
+            print " (id ".$dt_id.", n=".$details['count'].') ';
             
+            // Usage count for each pointed-to record type
             foreach ($details['rels']  as $pt_rt_id=>$data){
                 if(!@$rtStructs['names'][$pt_rt_id]){
-                    print '<div class="lvl2  cerror">'.$pt_rt_id.": WRONG REC TYPE</div>";
+                    print '<div class="lvl2  cerror">'.$pt_rt_id.": INCORRECT RECORD TYPE</div>";
                 }else{
-                    print '<div class="lvl2'.(($uncontrained || $data[0]=="y")?"":" cerror").'">'.$pt_rt_id.": ".$rtStructs['names'][$pt_rt_id]." n=".$data[1]."</div>";
+                    print '&nbsp; || &nbsp;'; // separator between record types poitned to by pointer field
+                    // TODO: what is function of first part of thist print statement
+                    print (($uncontrained || $data[0]=="y")?"":" cerror").'<b>'.$rtStructs['names'][$pt_rt_id]."</b> (id ".$pt_rt_id.", n=".$data[1].") ";
+                    
                     
                     if(@$data[2]){ //terms
                         $notfirst = false;
-                        print '<div class="lvl3">[';
+                        print ' [ ';
                         foreach ($data[2]  as $term_id=>$cnt){
                             
                             if($notfirst) print ", ";
                             $notfirst = true;
                             
-                            print $rtTerms[$term_id][0]." n=".$cnt;
+                            print $rtTerms[$term_id][0]." (n=".$cnt.")";
                         }
-                        print ']</div>';
+                        print ' ]';
                     }
                 }
-            }
+            }         
+            print '</div>';
+        } // end Pointer field
+
+        else{ // 
+        
+        // TODO: what is this? Cleanup required
+        //             array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'type'=>$dt_type,
+        //                    'constraints'=>$constraints, 'count'=>$cnt, 'rels'=>$rels));
                 
-            
-            
-        }else{
-        
-//             array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'type'=>$dt_type,
-//                    'constraints'=>$constraints, 'count'=>$cnt, 'rels'=>$rels));
-        
         
         print '<div class="lvl1">'.$dt_id.": ".$details['dt_name'].($details['type']=="resource"?" => ":" <=> ").$details['pt_rt_id'].": ".$details['name']."  n=".$details['count'].'</div>';
 
+        // TODO: This appears never to be executed, at least not in Searle DB which is highly related
         if(@$details['rels']){
             $notfirst = false;
             print '<div class="lvl2">[';
             foreach ($details['rels']  as $term_id=>$cnt){
-                print $term_id." n=".$cnt;
+                print $term_id." (n=".$cnt.")";
                 if($notfirst) print ", ";
                 $notfirst = true;
             }
-            print ']</div>';
+           print ']</div>';
         }
         
         }
-    }
+    } // end record details (fields) loop
+    
 print "<br />";
 }
 ?>  
