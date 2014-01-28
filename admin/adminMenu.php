@@ -203,6 +203,8 @@ if (is_admin()) {
 								title="Direct access to the global field definitions">Manage field types</a></li>
 						<li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Pointers and relationship scheme">Scheme</a></li>
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 								title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
 						<li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"

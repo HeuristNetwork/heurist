@@ -212,7 +212,7 @@ function add16n($line, $val=null){
 function arrToProps(){
     global $content_a16n;
     $res = "";
-    foreach ($content_a16n as $prop=>$value){
+        foreach ($content_a16n as $prop=>$value){
         $res = $res.str_replace(' ','_',$prop)."=".$value."\n";
     }
     return $res;
