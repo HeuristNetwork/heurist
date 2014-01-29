@@ -25,7 +25,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
     $action = @$_REQUEST['a']; //$system->getError();
 
     //no enough permission for guest
-    if ( $system->get_user_id()<1 && !($action=='login' || $action=="svs_get" || $action=="sysinfo"  || $action=="usr_save") ) {
+    if ( $system->get_user_id()<1 && !( $action=='login' || $action=="svs_get" || $action=="usr_get" || $action=="sysinfo" ) ) {
 
          $response = $system->addError(HEURIST_REQUEST_DENIED);
 
@@ -62,6 +62,15 @@ if( ! $system->init(@$_REQUEST['db']) ){
         } else if ($action=="usr_save") {
             
             $res = user_Update($system, $_REQUEST);
+            
+        } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {
+            
+//error_log("KUKU ".$_REQUEST['UGrpID']);            
+            if($system->is_admin2($_REQUEST['UGrpID'])){
+                $res = user_getById($system->get_mysqli(), $_REQUEST['UGrpID']);    
+            }else{
+                $system->addError(HEURIST_REQUEST_DENIED);    
+            }
             
         } else if ($action=="groups") {
 

@@ -4,7 +4,8 @@ language: 'English',
 Databases: 'Databases',
 'Design database': 'Design database',
 'Import data': 'Import data',
-'Please log in':'Please Log in or Register to use all features Heurist in full scale'
+'Please log in':'Please Log in or Register to use all features Heurist in full scale',
+'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale'
 };
 
 regional['ru'] = {
@@ -19,8 +20,10 @@ language: 'Русский',
 'Confirmation':'Подтверждение',
 
 'Register': 'Регистрация',
+'Registration': 'Регистрация',
 'Login': 'Войти',
 'Please log in': 'Зарегистрируйтесь, чтобы использовать все возможности Heurist',
+'Please contact to register':'Для получения регистрации свяжитесь с администратором',
 'Log out' : 'Выйти',
 'Cancel': 'Отмена',
 'Save': 'Сохранить',
@@ -116,7 +119,15 @@ language: 'Русский',
 
 'Delete? Please confirm': 'Удалить? Подвтердите',
 
-'select record': 'выберите запись'
+'select record': 'выберите запись',
+
+'Passwords are different': 'Пароли различны',
+'Wrong email format': 'Неправильный формат адреса почты',
+'Wrong user name format': 'Недопустимы формат для имени пользовтеля',
+'Wrong password format': 'Недопустимый формат для пароля',
+'Missed required fields': 'Не опрделены обязательные поля',
+'length must be between': 'длина должна быть между',
+'required field': 'обязательное поле'
 };
 
 regional['de'] = {

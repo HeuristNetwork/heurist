@@ -54,6 +54,7 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
     <script type="text/javascript" src="apps/search_links.js"></script>
     <script type="text/javascript" src="apps/rec_list.js"></script>
+    <script type="text/javascript" src="apps/profile_edit.js"></script>
     <!-- script type="text/javascript" src="apps/search.js"></script>
     <script type="text/javascript" src="apps/profile.js"></script>
     <script type="text/javascript" src="apps/pagination.js"></script>
@@ -74,7 +75,7 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="layout_default.js"></script>
 
   <script type="text/javascript">
-
+ 
     $(function() {
 
         //overwrite the standard show method
@@ -118,7 +119,7 @@ if(@$_REQUEST['db']){
                 }
                 //add theme link to html header
                 $("head").append(cssLink);
-                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css">'));
+                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
 
 
                 //load database structure (record types, field types, terms) definitions

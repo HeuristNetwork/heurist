@@ -531,26 +531,52 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     redirectToError: function(message){
         top.HEURIST.util.showMsgDlg(message, null, 'Error');
     },
-    
+
     checkLength: function( input, title, message, min, max ) {
+       var message_text = top.HEURIST.util.checkLength2( input, title, min, max );
+       if(message_text!=''){
+           
+                if(message){
+                    message.text(message_text);
+                    message.addClass( "ui-state-highlight" );
+                        setTimeout(function() {
+                            message.removeClass( "ui-state-highlight", 1500 );
+                        }, 500 );
+                }
+                
+           return false;
+       }else{
+           return true;
+       }
+       
+    },
+
+    checkLength2: function( input, title, min, max ) {
         
         if ( (max>0 && input.val().length > max) || input.val().length < min ) {
                 input.addClass( "ui-state-error" );
                 if(max>0 && min>1){
-                    message.text(top.HR(title)+" "+top.HR("length must be between ") +
-                        min + " "+top.HR("and")+" " + max + "." );
+                    message_text = top.HR(title)+" "+top.HR("length must be between ") +
+                        min + " "+top.HR("and")+" " + max + ".";
                 }else if(min==1){
-                    message.text(top.HR(title)+" "+top.HR("required field"))
+                    message_text = top.HR(title)+" "+top.HR("required field");
                 }
-                message.addClass( "ui-state-highlight" );
-                setTimeout(function() {
-                        message.removeClass( "ui-state-highlight", 1500 );
-                }, 500 );
-                return false;
+                
+                return message_text; 
+                
         } else {
-                return true;
+                return '';
         }
-    }
+    },
+    
+    checkRegexp:function ( o, regexp ) {
+      if ( !( regexp.test( o.val() ) ) ) {
+        o.addClass( "ui-state-error" );
+        return false;
+      } else {
+        return true;
+      }
+    }    
 
     
 

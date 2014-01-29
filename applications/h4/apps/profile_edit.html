@@ -1,0 +1,87 @@
+<script type="text/javascript">
+</script>  
+  <form>
+  <fieldset>
+  
+    <div>
+        <div class="header"><label for="ugr_ID">User ID</label></div>
+        <input type="text" name="ugr_ID" id="ugr_ID" class="text ui-widget-content ui-corner-all" readonly="readonly"/>
+        <input type="hidden" name="ugr_Type" id="ugr_Type" value="user" />
+    </div>
+    <div>
+        <div class="header"><label for="ugr_FirstName">Given name</label></div>
+        <input type="text" name="ugr_FirstName" id="ugr_FirstName" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:20em"/>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_LastName">Family name</label></div>
+        <input type="text" name="ugr_LastName" id="ugr_LastName" class="text ui-widget-content ui-corner-all mandatory" maxlength="63" style="width:20em"/>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_eMail">Email</label></div>
+        <input type="text" name="ugr_eMail" id="ugr_eMail" class="text ui-widget-content ui-corner-all mandatory" style="width:20em" onblur="autofill_login(this.value)"/>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_Name">Login name</label></div>
+        <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" style="width:20em" maxlength="16" minlength="3"/>
+            <div class="prompt">
+                The login field is auto-populated with your email address. You may change it to a shorter version, such as your given name or family name
+            </div>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_Password">Password</label></div>
+        <input type="password" name="ugr_Password" id="ugr_Password" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" minlength="3"/>&nbsp;If editing, leave blank for no change
+            <div class="prompt">
+                Warning: non-encrypted, please don't use an important password such as institutional login
+            </div>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_Password2">Repeat password</label></div>
+        <input type="password" name="ugr_Password2" id="ugr_Password2" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16"/>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_Organisation">Institution/company</label></div>
+        <input type="text" name="ugr_Organisation" id="ugr_Organisation" class="text ui-widget-content ui-corner-all" style="width:200;" maxlength="120"/>
+            <div class="prompt">
+                Enter 'None' if not affiliated with an institution or company
+            </div>
+    </div>
+    <div>
+        <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research Interests</label></div>
+        <textarea id="ugr_Interests" name="ugr_Interests" rows="2" style="width:420;" maxlength="255"></textarea>
+            <div class="prompt">
+                Enter a concise description (up to 250 characters) of your research interests
+            </div>
+    </div>
+    <div>
+        <div class="header"><label for="ugr_Enabled">Enabled</label></div>
+        <input type="checkbox" id="ugr_Enabled" name="ugr_Enabled" class="text ui-widget-content ui-corner-all"/>
+            <div class="prompt">
+                Check to enable the user, unchecked users will not be able to log in
+            </div>
+    </div>
+
+<!--     
+     <div id="div-inpit-ugr_IsModelUser" class="input-row"  style="display: none;">
+         <div class="input-header-cell" for="ugr_IsModelUser">Model user</div>
+         <div class="input-cell"><input id="ugr_IsModelUser" type="checkbox"/>
+             <div class="help prompt">
+                 If checked, user's tags, searches and bookmarks will appear in My Profile &gt; Load Profiles
+             </div>
+         </div>
+     </div>    
+    <div>
+        <div class="header"><label for="layout_style">Style</label></div>
+        <select name="layout_style" id="layout_style" class="text ui-widget-content ui-corner-all" style="min-width:300px">
+            <option>johnson</option>
+            <option>normal</option>
+        </select>
+    </div>
+    <div>
+        <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
+        <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
+    </div-->
+
+  </fieldset>
+  </form>
+  <br />
+  <p class="messages"></p>

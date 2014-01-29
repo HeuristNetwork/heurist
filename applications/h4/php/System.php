@@ -119,12 +119,13 @@ class System {
 
             $user = $this->current_User;
             if($user) {
+                $user['ugr_Password'] = ''; // do not send password to client side
                 $user['ugr_Admin'] = $this->is_admin();
                 if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getPreferences();
             }
             $res = array(
                             "currentUser"=>$user,
-                            "registration_allowed"=>$this->get_system('sys_OwnerGroupID') );
+                            "registration_allowed"=>$this->get_system('sys_AllowRegistration') );
             return $res;
      }
 
@@ -341,11 +342,18 @@ class System {
                 user_updateLoginTime($this->mysqli, $user['ugr_ID']);
 
                 //keep current user info
+                $user['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
+                $user['ugr_Password'] = '';
+                $user['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $user['ugr_ID'] );
+                $user['ugr_Preferences'] = user_getPreferences();
+                $this->current_User = $user;
+                /*
                 $this->current_User = array(
                         'ugr_ID'=>$user['ugr_ID'],
                         'ugr_FullName'=>$user['ugr_FirstName'] . ' ' . $user['ugr_LastName'],
                         'ugr_Groups' => user_getWorkgroups( $this->mysqli, $user['ugr_ID'] ),
                         'ugr_Preferences' => user_getPreferences() );
+                */
 
                 //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 

@@ -186,12 +186,22 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             /**
-            * Save user preferences in session
-            * @param request - object with preperties - user preferences
+            * Save user profile info in db
+            * @param request
             * @param callback  
             */
-            ,save_prefs: function(request, callback){
+            ,user_save: function(request, callback){
                 if(request) request.a = 'usr_save';
+                 _callserver('usr_info', request, callback);
+            }
+            
+            /**
+            * Get user profile info form db - used in Admin part only?
+            * @param request
+            * @param callback  
+            */
+            ,user_get: function(request, callback){
+                if(request) request.a = 'usr_get';
                  _callserver('usr_info', request, callback);
             }
 

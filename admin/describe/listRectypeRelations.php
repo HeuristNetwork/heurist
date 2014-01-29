@@ -39,7 +39,6 @@ if (!is_logged_in()) {
 
 mysql_connection_select(DATABASE);
 $rtStructs = getAllRectypeStructures(true);
-//$dtStructs = getAllDetailTypeStructures(true);
 $rtTerms = getTerms(true);
 $rtTerms = $rtTerms['termsByDomainLookup']['relation'];
 
@@ -49,19 +48,6 @@ $idx_dt_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 $idx_dt_req = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
 
 $resrt = array();
-
-//for pointers
-$query = "select count(*) from Records, recDetails where rec_RecTypeID=$rt_id and dtl_RecID=rec_ID and dtl_DetailTypeID=$dt_id and dtl_Value=$pt_rt_id"; 
-
-//for relations - group by reltype value
-/*$query = 
-"SELECT rec1.rec_ID, rd1.dtl_Value, rd2.dtl_Value, rd3.dtl_Value FROM Records rec1
-left join recDetails rd2 on rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6 
-left join  recDetails rd3 on rec_ID = rd3.dtl_RecID and rd3.dtl_DetailTypeID=5, recDetails rd1  
-where rec1.rec_RecTypeID=1 and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=$rt_id)
-and rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7";
-*/
-
 
 foreach ($rtStructs['typedefs'] as $rt_id=>$rt) {
     
@@ -115,27 +101,6 @@ foreach ($rtStructs['typedefs'] as $rt_id=>$rt) {
                 }
             }
             $isconstrainded = count($rels);
-
-/*
-SELECT rec1.rec_ID, rd1.dtl_Value, rd2.dtl_Value as reltype, rd3.dtl_Value, rec3.rec_RecTypeID FROM Records rec1
-, recDetails rd2  
-, recDetails rd3  
-, recDetails rd1, Records rec3  
-where rec1.rec_RecTypeID=1 
-and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7 and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=38)
-and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6 
-and rec1.rec_ID = rd3.dtl_RecID and rd3.dtl_DetailTypeID=5 and rec3.rec_ID=rd3.dtl_Value
-
-SELECT rec3.rec_RecTypeID, rd2.dtl_Value as reltype, count(rec1.rec_ID) FROM Records rec1
-, recDetails rd2  
-, recDetails rd3  
-, recDetails rd1, Records rec3  
-where rec1.rec_RecTypeID=1 
-and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7 and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=38)
-and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6 
-and rec1.rec_ID = rd3.dtl_RecID and rd3.dtl_DetailTypeID=5 and rec3.rec_ID=rd3.dtl_Value
-group by rec3.rec_RecTypeID, rd2.dtl_Value
-*/                     
                      
             $query = "SELECT rec3.rec_RecTypeID, rd2.dtl_Value as reltype, count(rec1.rec_ID) FROM Records rec1
 , recDetails rd2  
@@ -237,11 +202,8 @@ foreach ($resrt  as $rt_id=>$rt){
     // Loop through record details (fields) in record structure
     foreach ($rt['details']  as $details){
         
-        $dt_id = $details['dt_id'];
+            $dt_id = $details['dt_id'];
         
-        // Pointer or relationship fields
-        if(true || $details['type']=="resource"){
-            
             print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer]</i> ":" <i>[relationship]</i> ");
             
             $uncontrained = ($details['isconstrained']<1);
@@ -276,30 +238,7 @@ foreach ($resrt  as $rt_id=>$rt){
                 }
             }         
             print '</div>';
-        } // end Pointer field
-
-        else{ // 
         
-        // TODO: what is this? Cleanup required
-        //             array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'type'=>$dt_type,
-        //                    'constraints'=>$constraints, 'count'=>$cnt, 'rels'=>$rels));
-                
-        
-        print '<div class="lvl1">'.$dt_id.": ".$details['dt_name'].($details['type']=="resource"?" => ":" <=> ").$details['pt_rt_id'].": ".$details['name']."  n=".$details['count'].'</div>';
-
-        // TODO: This appears never to be executed, at least not in Searle DB which is highly related
-        if(@$details['rels']){
-            $notfirst = false;
-            print '<div class="lvl2">[';
-            foreach ($details['rels']  as $term_id=>$cnt){
-                print $term_id." (n=".$cnt.")";
-                if($notfirst) print ", ";
-                $notfirst = true;
-            }
-           print ']</div>';
-        }
-        
-        }
     } // end record details (fields) loop
     
 print "<br />";

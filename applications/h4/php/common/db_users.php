@@ -79,6 +79,10 @@ function user_getById($mysqli, $ugr_ID){
     if($res){
         $user =$res->fetch_assoc();
         $res->close();
+        if(is_array($user)){
+            //$user['ugr_FullName'] = @$user['ugr_FirstName'] . ' ' . @$user['ugr_LastName'];
+            $user['ugr_Password'] = '';
+        }
     }
     return $user;
 }

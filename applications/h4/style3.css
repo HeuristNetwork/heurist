@@ -161,6 +161,10 @@ fieldset > div > .header{
     padding-top:0.4em;
     padding-right:0.4em;
 }
+div.prompt{
+    font-size:0.8em;
+    opacity: 0.55;
+}
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;

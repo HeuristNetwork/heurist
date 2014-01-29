@@ -85,7 +85,8 @@ $.widget( "heurist.profile", {
                                 title: top.HR("Select database")
                             })
                         });
-
+                    }else if(action == "menu-options-register"){
+                           that.editProfile();
                     }else if(action == "menu-options-about"){
                         $( "#heurist-about" ).dialog("open");
                     }else if(action == "menu-options-import-faims"){
@@ -124,7 +125,7 @@ $.widget( "heurist.profile", {
     });
 
     //---------------------  LOGIN BUTTON
-    this.btn_login = $( "<button>", {
+    this.btn_register = $( "<button>", {
                     text: top.HR('Register')
             })
             .css('float','right')
@@ -185,6 +186,9 @@ $.widget( "heurist.profile", {
                     }else if(action == "menu-user-preferences"){
 
                         that.editPreferences();
+                    }else if(action == "menu-user-profile"){
+
+                        that.editProfile();
                     }else if(action == "menu-user-tags"){
                         if($.isFunction($('body').tag_manager)){ //already loaded
                             showManageTags();
@@ -277,6 +281,9 @@ $.widget( "heurist.profile", {
     // bind click events
     this._on( this.btn_login, {
       click: "login"
+    });
+    this._on( this.btn_register, {
+      click: "editProfile"
     });
 
     /*this._on( this.btn_record, {
@@ -446,6 +453,28 @@ $.widget( "heurist.profile", {
         this.login_dialog.dialog("open");
     }
   },
+  
+  editProfile: function()
+  {
+        if($.isFunction($('body').profile_edit)){
+            
+            if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
+                this.div_profile_edit = $('<div>').appendTo( this.element );
+            }
+            this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI.currentUser.ugr_ID});
+            
+        }else{
+             var that = this;
+             $.getScript(top.HAPI.basePath+'apps/profile_edit.js', function() {
+                 if($.isFunction($('body').profile_edit)){
+                     that.editProfile();
+                 }else{
+                     top.HEURIST.util.showMsgErr('Widget profile edit not loaded!');
+                 }        
+             });          
+        }
+      
+  },
 
   /**
   * Open Edit Preferences dialog
@@ -563,6 +592,7 @@ $.widget( "heurist.profile", {
     this.btn_options.remove();
     this.btn_help.remove();
     this.btn_login.remove();
+    this.btn_register.remove();
 
     this.menu_user.remove();
     this.menu_options.remove();
@@ -571,6 +601,7 @@ $.widget( "heurist.profile", {
 
     if(this.login_welcome) {this.login_welcome.remove(); };
     if(this.blink_interval){clearInterval(this.blink_interval);}
+    if(this.div_profile_edit) {this.div_profile_edit.remove(); };
   }
 
 });
