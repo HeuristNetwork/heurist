@@ -291,7 +291,8 @@ because you don't have sufficient access level for the function requested,<br>
 or do not belong to the group of users who own it.
 </p>
 
-<?php                                                                                                                                                                                                       ?>$query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
+<?php
+$query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
 $details = mysql_fetch_row($query);
 $fullName = $details[0] . " " . $details[1];
 $eMail = $details[2];
