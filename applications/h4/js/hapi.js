@@ -59,7 +59,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                     var  success = (response.status == top.HAPI.ResponseStatus.OK);
                     if(success){
                         that.setCurrentUser(response.data.currentUser);
-                        that.registration_allowed = (response.registration_allowed==1);
+                        that.registration_allowed = (response.data.registration_allowed==1);
+                        that.dbowner_name = response.data.dbowner_name;
+                        that.dbowner_email = response.data.dbowner_email;
                     }else{
                         top.HEURIST.util.showMsgErr(response.message);
                     }
@@ -146,6 +148,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     * methods:
     *   login        - login and get current user info
     *   logout 
+    *   reset_password
     *   sys_info     - get current user info and database settings
     *   save_prefs   - save user preferences  in session
     *   mygroups     - description of current user groups
@@ -168,6 +171,11 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             login: function(request, callback){
                 if(request) request.a = 'login';
+                 _callserver('usr_info', request, callback);
+            }
+            
+            ,reset_password: function(request, callback){
+                if(request) request.a = 'reset_password';
                  _callserver('usr_info', request, callback);
             }
 

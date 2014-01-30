@@ -125,6 +125,7 @@ $.widget( "heurist.profile", {
     });
 
     //---------------------  LOGIN BUTTON
+    if(top.HAPI.registration_allowed){
     this.btn_register = $( "<button>", {
                     text: top.HR('Register')
             })
@@ -132,6 +133,7 @@ $.widget( "heurist.profile", {
             .addClass('logged-out-only')
             .appendTo( this.element )
             .button();
+    }
     
     this.btn_login = $( "<button>", {
                     text: top.HR('Login')
@@ -144,11 +146,12 @@ $.widget( "heurist.profile", {
                     }});
         
     if(!top.HAPI.is_ui_normal()){            
+        //'color':'red','background-color':'white',
         this.login_welcome = $("<div>")
-                .html(top.HR("Please log in"))
-                .css({'color':'red','background-color':'white','font-size':'1.2em',
-                            'float':'right','width':'50%','text-align':'right', 'padding-right':'4px'})
-                .addClass('logged-out-only2').appendTo( this.element );
+                .html(top.HR((top.HAPI.registration_allowed)?"Please log in":"Please contact to register"))
+                .css({'font-size':'1.2em', 'padding-right':'4px',
+                            'float':'right','width':'50%','text-align':'right', 'margin-right':'4px'})
+                .addClass('logged-out-only2 ui-state-error ui-corner-all').appendTo( this.element );
                 
         this.blink_interval = setInterval(function(){ 
                     that.login_welcome.is(":visible")?that.login_welcome.hide():that.login_welcome.show() 
@@ -282,9 +285,11 @@ $.widget( "heurist.profile", {
     this._on( this.btn_login, {
       click: "login"
     });
+    if(this.btn_register){
     this._on( this.btn_register, {
       click: "editProfile"
     });
+    }
 
     /*this._on( this.btn_record, {
       click: "logout"
@@ -373,7 +378,7 @@ $.widget( "heurist.profile", {
         var $dlg = this.login_dialog;
 
         //load login dialogue
-        $dlg.load("apps/profile_login.html", function(){
+        $dlg.load("apps/profile_login.html?t="+(new Date().getTime()), function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -382,40 +387,61 @@ $.widget( "heurist.profile", {
             
             var allFields = $dlg.find('input');
             var message = $dlg.find('.messages');
+            var isreset = false;
+            
+            $dlg.find('.messages');
 
             function __doLogin(){
 
                   allFields.removeClass( "ui-state-error" );
 
-                  var username = $dlg.find('#username');
-                  var password = $dlg.find('#password');
-                  var session_type = $dlg.find('input[name="session_type"]');
+                  if(isreset){
+                      var rusername = $dlg.find('#reset_username');
+                      if(top.HEURIST.util.checkLength( rusername, "username", message, 1, 0 ))
+                      {
+                         top.HAPI.SystemMgr.reset_password({username: rusername.val()}, function(response){
+                                if(response.status == top.HAPI.ResponseStatus.OK){
+                                    $dlg.dialog( "close" );
+                                    top.HEURIST.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
+                                }else{
+                                    top.HEURIST.util.showMsgErr(response.message);
+                                }
+                         });
+                      }
+                  }else{
+                  
+                      var username = $dlg.find('#username');
+                      var password = $dlg.find('#password');
+                      var session_type = $dlg.find('input[name="session_type"]');
 
-                  var bValid = top.HEURIST.util.checkLength( username, "username", message, 3, 16 )
-                           && top.HEURIST.util.checkLength( password, "password", message, 3, 16 );
+                      var bValid = top.HEURIST.util.checkLength( username, "username", message, 3, 16 )
+                               && top.HEURIST.util.checkLength( password, "password", message, 3, 16 );
 
-                  if ( bValid ) {
+                      if ( bValid ) {
 
-                    //get hapi and perform login
-                    top.HAPI.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
-                        function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                        //get hapi and perform login
+                        top.HAPI.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
+                            function(response){
+                                if(response.status == top.HAPI.ResponseStatus.OK){
 
-                                top.HAPI.setCurrentUser(response.data.currentUser);
-                                top.HAPI.registration_allowed = (response.registration_allowed==1);
+                                    top.HAPI.setCurrentUser(response.data.currentUser);
+                                    top.HAPI.registration_allowed = (response.data.registration_allowed==1);
+                                    top.HAPI.dbowner_name = response.data.dbowner_name;
+                                    top.HAPI.dbowner_email = response.data.dbowner_email;
 
-                                $(that.document).trigger(top.HAPI.Event.LOGIN, [top.HAPI.currentUser]);
+                                    $(that.document).trigger(top.HAPI.Event.LOGIN, [top.HAPI.currentUser]);
 
-                                $dlg.dialog( "close" );
-                                that._refresh();
-                            }else{
-                                message.addClass( "ui-state-highlight" );
-                                message.text(response.message);
+                                    $dlg.dialog( "close" );
+                                    that._refresh();
+                                }else{
+                                    message.addClass( "ui-state-highlight" );
+                                    message.text(response.message);
+                                }
                             }
-                        }
 
-                    );
+                        );
 
+                      }
                   }
             }
 
@@ -426,28 +452,44 @@ $.widget( "heurist.profile", {
                       __doLogin();
                   }
             });
+            
+            $dlg.find("#link_restore").on("click", function(){
+                isreset = true;
+                $dlg.dialog("option","title",top.HR('Reset password'));
+                $("#btn_login2").button("option","label",top.HR('Reset password'));
+                //$dlg.find("#btn_login2").button("option","label",top.HR('Reset password'));
+                $dlg.find("#fld_reset").show();
+                $dlg.find("#fld_login").hide();
+            });
 
             // login dialog definition
             $dlg.dialog({
               autoOpen: false,
-              height: 220,
+              height: 300,
               width: 350,
               modal: true,
               title: top.HR('Login'),
               buttons: [
-                {text:top.HR('Login'), click: __doLogin},
+                {text:top.HR('Login'), click: __doLogin, id:'btn_login2'},
                 {text:top.HR('Cancel'), click: function() {
                   $( this ).dialog( "close" );
                 }}
               ],
               close: function() {
                 allFields.val( "" ).removeClass( "ui-state-error" );
+              },
+              open: function() {
+                isreset = false;
+                $dlg.dialog("option","title",top.HR('Login'));
+                $("#btn_login2").button("option","label",top.HR('Login'));
+                //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
+                $dlg.find("#fld_reset").hide();
+                $dlg.find("#fld_login").show();
               }
             });
 
             $dlg.dialog("open");
-
-        });
+        });//load html
     }else{
         //show dialogue
         this.login_dialog.dialog("open");
@@ -592,7 +634,7 @@ $.widget( "heurist.profile", {
     this.btn_options.remove();
     this.btn_help.remove();
     this.btn_login.remove();
-    this.btn_register.remove();
+    if(this.btn_register) this.btn_register.remove();
 
     this.menu_user.remove();
     this.menu_options.remove();

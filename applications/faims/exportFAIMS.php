@@ -270,7 +270,7 @@ function generateSchema($projname, $rt_toexport){
     ///create RelationshipElement if there are 1 or more record types to export
     if(count($rectyps)>0){
  
-        $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only seelect relationship terms
+        $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only select relationship terms
         $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
         $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];    
         

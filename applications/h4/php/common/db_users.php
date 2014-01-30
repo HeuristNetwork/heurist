@@ -49,21 +49,22 @@ $prefs = array(
 
 
 /**
-* Get user/group by name 
+* Get user/group by field value 
 *
 * @param mixed $ugr_Name - user name
 */
-function user_getByName($mysqli, $ugr_Name){
-
+function user_getByField($mysqli, $field, $value){
+    
     $user = null;
-    $ugr_Name = $mysqli->real_escape_string($ugr_Name);
-    $query = 'select * from sysUGrps where ugr_Name = "'.$ugr_Name.'"';
+    $ugr_Name = $mysqli->real_escape_string($value);
+    $query = 'select * from sysUGrps where '.$field.' = "'.$value.'"';
     $res = $mysqli->query($query);
     if($res){
         $user =$res->fetch_assoc();
         $res->close();
     }
     return $user;
+
 }
 
 /**
@@ -72,19 +73,7 @@ function user_getByName($mysqli, $ugr_Name){
 * @param mixed $ugr_ID - user ID
 */
 function user_getById($mysqli, $ugr_ID){
-
-    $user = null;
-    $query = 'select * from sysUGrps where ugr_ID ='.$ugr_ID;
-    $res = $mysqli->query($query);
-    if($res){
-        $user =$res->fetch_assoc();
-        $res->close();
-        if(is_array($user)){
-            //$user['ugr_FullName'] = @$user['ugr_FirstName'] . ' ' . @$user['ugr_LastName'];
-            $user['ugr_Password'] = '';
-        }
-    }
-    return $user;
+    return user_getByField($mysqli, 'ugr_ID', $ugr_ID);
 }
 
 /**
@@ -95,7 +84,7 @@ function user_getById($mysqli, $ugr_ID){
 */
 function user_getDbOwner($mysqli, $field=null)
 {
-    $user = user_getById(2);
+    $user = user_getById($mysqli, 2);
     if($user){
         if($field){
             if(@$user[$field]){
@@ -106,6 +95,52 @@ function user_getDbOwner($mysqli, $field=null)
         }
     }
     return null;
+}
+
+/**
+* put your comment there...
+* 
+* @param mixed $system
+* @param mixed $ugr_Name
+*/
+function user_ResetPassword($system, $username){
+    if($username){
+         $user = user_getByField($system->get_mysqli(), 'ugr_Name', $username);
+         if(null==$user) $user = user_getByField($system->get_mysqli(), 'ugr_Name', $username);
+         if(null==$user) {
+            $system->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / email");
+             
+         }else{
+            $new_passwd = generate_passwd();
+            $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
+            mysql__insertupdate($system->get_mysqli(), "sysUGrps", "ugr_", $record);
+            if(is_numeric($res)>0){
+                
+                $email_title = 'Password reset';
+                $email_text = "Dear ".$user['ugr_FirstName'].",\n\n".
+                      "Your Heurist password has been reset.\n\n".
+                      "Your username is: ".$user['ugr_Name']."\n".
+                      "Your new password is: ".$new_passwd."\n\n".
+                      "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+    
+               $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+    
+               $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text, "From: ".$dbowner_Email);
+               if($rv=="ok"){
+                   return true;
+               }else{
+                   $system->addError(HEURIST_UNKNOWN_ERROR, $rv);
+               }
+                    
+            }else{
+                $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+            }
+         }
+            
+    }else{
+         $system->addError(HEURIST_INVALID_REQUEST, "Username / email not defined"); //INVALID_REQUEST
+    }
+    return false;
 }
 
 /**
@@ -232,7 +267,7 @@ function user_Delete($system, $recID){
 
 function user_Update($system, $record){
 
-    if (user_Validate($record))
+    if (user_Validate($system, $record))
     {
         $recID = intval(@$record['ugr_ID']);
         $rectype = $record['ugr_Type'];
@@ -248,21 +283,24 @@ function user_Update($system, $record){
             
             $res = mysql__select_value($mysqli, 
             "select ugr_ID from sysUGrps  where ugr_Name='"
-                    .$mysqli->real_escape_string( $record['ugr_Enabled'])."' or ugr_Email='"
-                    .$mysqli->real_escape_string($record['ugr_Email'])."'");
+                    .$mysqli->real_escape_string( $record['ugr_Enabled'])."' or ugr_eMail='"
+                    .$mysqli->real_escape_string($record['ugr_eMail'])."'");
             if($res!=$recID){
                 $system->addError(HEURIST_INVALID_REQUEST, 'The provided name or email already exists');
                 return false;
             }
 
+            $is_approvement = false;
             //encrypt password            
             $tmp_password = null;
             if($rectype=='user'){
                 if(@$record['ugr_Password']){ 
-                    $tmp_password = $record['ugr_Password'];
-                    $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-                    $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-                    $record['ugr_Password'] = crypt($val, $salt);
+                    if($record['ugr_Password']!=''){
+                        $tmp_password = $record['ugr_Password'];
+                        $record['ugr_Password'] = hash_it($tmp_password);
+                    }else{
+                        unset($record['ugr_Password']);
+                    }
                 }
                 if($system->get_user_id()<1){ //not logged in - always disabled
                     $record['ugr_Enabled'] = "n";
@@ -279,7 +317,7 @@ function user_Update($system, $record){
                 if($rectype=='user'){
                     if($recID<1 && $system->get_user_id()<1){
                         user_EmailAboutNewUser($mysqli, $recID);
-                    }else if($is_approvement){
+                    }else if($recID<1 || $is_approvement){
                         user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement);
                     }
                     
@@ -298,13 +336,13 @@ function user_Update($system, $record){
         }
         
     }  else {
-        $system->addError(HEURIST_INVALID_REQUEST, "All required fields are not defined");
+        //$system->addError(HEURIST_INVALID_REQUEST, "All required fields are not defined");
     }
     
     return false;
 }
 
-function user_Validate($record){
+function user_Validate($system, $record){
     $res = false;
     
     if(@$record['ugr_Type']=='user'){
@@ -318,7 +356,7 @@ function user_Validate($record){
         $reqs = array('ugr_Name','ugr_eMail');
         
     }else{
-        $system->addError(HEURIST_INVALID_REQUEST, "Wrong type for usergroup");
+        $system->addError(HEURIST_INVALID_REQUEST, "Wrong type for usergroup: ".@$record['ugr_Type']);
         return false;
     }
     
@@ -330,7 +368,7 @@ function user_Validate($record){
     }
     
     if(count($missed)>0){
-        $system->addError(HEURIST_INVALID_REQUEST, "Some required fields are not defined");
+        $system->addError(HEURIST_INVALID_REQUEST, "Some required fields are not defined: ".implode(",",$missed));
     }else{
         $res = true;
     }
@@ -419,5 +457,20 @@ function user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement){
         } 
 }  // sendApprovalEmail    
     
+function generate_passwd ($length = 8) {
+    $passwd = '';
+    $possible = '023456789bcdfghjkmnpqrstvwxyz';
+    while (strlen($passwd) < $length) {
+        $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
+        if (!strstr($passwd, $char)) $passwd .= $char;
+    }
+    return $passwd;
+}
+
+function hash_it ($passwd) {
+    $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+    $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+    return crypt($passwd, $salt);
+}
        
 ?>

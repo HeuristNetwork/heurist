@@ -123,9 +123,14 @@ class System {
                 $user['ugr_Admin'] = $this->is_admin();
                 if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getPreferences();
             }
+            
+            $dbowner = user_getDbOwner($this->mysqli);
+            
             $res = array(
                             "currentUser"=>$user,
-                            "registration_allowed"=>$this->get_system('sys_AllowRegistration') );
+                            "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                            "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
+                            "dbowner_email"=>@$dbowner['ugr_eMail'] );
             return $res;
      }
 
@@ -314,7 +319,7 @@ class System {
         if($username && $password){
 
             //db_users
-            $user = user_getByName($this->mysqli, $username);
+            $user = user_getByField($this->mysqli, 'ugr_Name', $username);
 
             if($user && $user['ugr_Enabled'] == 'y'  && crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
 
@@ -365,7 +370,7 @@ class System {
             }
 
         }else{
-                $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined"); //INVALID_REQUEST
+            $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined"); //INVALID_REQUEST
             return false;
         }
     }

@@ -148,7 +148,7 @@ fieldset {
     padding:2px; border:0; margin-top:10px;
 }
 
-fieldset > div{
+fieldset > div, .input-row{
     display:table-row;
     padding-bottom:0.4em;
 }

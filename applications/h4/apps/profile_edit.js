@@ -8,7 +8,7 @@ $.widget( "heurist.profile_edit", {
     isdialog: true,  
     
     ugr_ID:0,
-    edit_data: null    
+    edit_data: {}    
       
     // callbacks
   },
@@ -46,8 +46,16 @@ $.widget( "heurist.profile_edit", {
                 });
                 var allFields = that.edit_form.find('input');
                 
+                that.edit_form.find( "#accordion" ).accordion({collapsible: true, heightStyle: "content", active: false});
+                
                 function __doSave(){
                     that._doSave();
+                }
+                
+                var isreg = !(Number(that.options.ugr_ID)>0 || top.HAPI.is_admin());
+                if(isreg){
+                    $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI.dbowner_name+'  '+
+                    '<a href="mailto:'+top.HAPI.dbowner_email+'">'+top.HAPI.dbowner_email+'</a>');
                 }
                 
                 if(that.options.isdialog){
@@ -59,7 +67,7 @@ $.widget( "heurist.profile_edit", {
                           resizable: true,
                           title: '',
                           buttons: [
-                            {text:top.HR(Number(that.options.ugr_ID)>0?'Save':'Register'), click: __doSave},
+                            {text:top.HR(isreg?'Register':'Save'), click: __doSave, id:'btn_save', disabled:'disabled'},
                             {text:top.HR('Cancel'), click: function() {
                               $( this ).dialog( "close" );
                             }}
@@ -141,27 +149,37 @@ $.widget( "heurist.profile_edit", {
                         }
                 );
                 return;
-          }
+         }
+          
+         this.edit_form.find("#ugr_Password").removeClass('mandatory');
+         this.edit_form.find(".mode-registration").hide();
+         this.edit_form.find(".mode-edit").show();
       }else{
-         this.options.edit_data = null; 
+         this.options.edit_data = {}; 
+         this.edit_form.find("#ugr_Password").addClass('mandatory');
+         this.edit_form.find(".mode-edit").hide();
+         
+         if(Number(this.options.ugr_ID)>0 || top.HAPI.is_admin()){ //create new user by admin
+             this.edit_form.find(".mode-registration").hide();
+         }else{ //registration
+             this.edit_form.find(".mode-registration").show();
+         }
       }
       
-      if(this.options.edit_data){ //fill inputs with values
-          
-          for(id in this.options.edit_data){
+      //hide enable field
+      if(top.HAPI.is_admin()){
+             this.edit_form.find(".mode-admin").show();
+      }else{
+             this.edit_form.find(".mode-admin").hide();
+      }
+     
+      for(id in this.options.edit_data){
               if(!top.HEURIST.util.isnull(id)){
                   var inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
                   //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
               }
-          }
-          
-          if(Number(this.options.ugr_ID)>0){
-              this.edit_form.find("#ugr_Password").removeClass('mandatory');
-          }else{
-              this.edit_form.find("#ugr_Password").addClass('mandatory');
-          }
-          
       }
+          
       
       if(this.options.isdialog){
                 this.edit_form.dialog('option', 'title', 
@@ -208,7 +226,7 @@ $.widget( "heurist.profile_edit", {
       
           // validate passwords    
           var password = this.edit_form.find("#ugr_Password");
-          var password2 = this.edit_form.find("#ugr_Password2");
+          var password2 = this.edit_form.find("#password2");
           if(password.val()!=password2.val()){
               err_text = err_text + ', '+top.HR(' Passwords are different');
               password.addClass( "ui-state-error" );
@@ -236,7 +254,7 @@ $.widget( "heurist.profile_edit", {
                 // fill data with values from UI
                 allFields.each(function(){
                         var input = $(this);
-                        if(that.options.edit_data[input.attr('id')]!=undefined){
+                        if(input.attr('id').indexOf("ugr_")==0){ // that.options.edit_data[input.attr('id')]!=undefined)
                             
                             if(input.attr('type') === "checkbox"){
                                 that.options.edit_data[input.attr('id')] = input.is(':checked')?'y':'n';
@@ -247,7 +265,7 @@ $.widget( "heurist.profile_edit", {
                 });
                   
                 var that = this;
-                top.HAPI.SystemMgr.user_save( { UGrpID: this.options.ugr_ID},
+                top.HAPI.SystemMgr.user_save( that.options.edit_data,
                         function(response){
                             var  success = (response.status == top.HAPI.ResponseStatus.OK);
                             if(success){
@@ -275,10 +293,22 @@ $.widget( "heurist.profile_edit", {
   
 });
 
-//this function is used in edit_profile.html
+//these functions is used in edit_profile.html
 function autofill_login(value){
     var ele = $('#ugr_Name');
     if(ele && ele.val()==''){
         ele.val(value);
+    }
+}
+function enable_register(value){
+    var ele = $('#btn_save');
+    if(ele){
+        if(value){
+            ele.removeAttr("disabled");
+            ele.removeClass("ui-button-disabled ui-state-disabled");
+        } else {
+            ele.attr("disabled", "disabled");
+            ele.addClass("ui-button-disabled ui-state-disabled");
+        }
     }
 }

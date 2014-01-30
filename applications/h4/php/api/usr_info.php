@@ -25,7 +25,8 @@ if( ! $system->init(@$_REQUEST['db']) ){
     $action = @$_REQUEST['a']; //$system->getError();
 
     //no enough permission for guest
-    if ( $system->get_user_id()<1 && !( $action=='login' || $action=="svs_get" || $action=="usr_get" || $action=="sysinfo" ) ) {
+    if ( $system->get_user_id()<1 && 
+            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="usr_get" || $action=="sysinfo" ) ) {
 
          $response = $system->addError(HEURIST_REQUEST_DENIED);
 
@@ -44,6 +45,12 @@ if( ! $system->init(@$_REQUEST['db']) ){
                 $res = $system->getCurrentUserAndSysInfo();
             }
 
+        } else if ($action=="reset_password") {    
+
+            if(user_ResetPassword($system, @$_REQUEST['username'])){
+                $res = true;
+            }
+            
         } else if ($action=="logout") {
 
             if($system->logout()){
@@ -67,7 +74,10 @@ if( ! $system->init(@$_REQUEST['db']) ){
             
 //error_log("KUKU ".$_REQUEST['UGrpID']);            
             if($system->is_admin2($_REQUEST['UGrpID'])){
-                $res = user_getById($system->get_mysqli(), $_REQUEST['UGrpID']);    
+                $res = user_getById($system->get_mysqli(), $_REQUEST['UGrpID']); 
+                if(is_array($res)){
+                    $res['ugr_Password'] = '';   
+                }
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED);    
             }
