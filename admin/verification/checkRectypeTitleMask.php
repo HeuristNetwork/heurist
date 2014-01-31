@@ -37,8 +37,9 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 //require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
-$check = @$_REQUEST['check'] ? intval($_REQUEST['check']):0;
-if ($check == 0) {
+// 1 - check only, 2 - check and correct, 3 - output as json list of rectypes with wrong rectitles
+$mode = @$_REQUEST['check'] ? intval($_REQUEST['check']):0;
+if ($mode == 0) {
 	mysql_connection_select(DATABASE);
 }else{
 	mysql_connection_overwrite(DATABASE);
@@ -46,9 +47,10 @@ if ($check == 0) {
 
 $rectypeID = @$_REQUEST['rty_id'] ? $_REQUEST['rty_id'] : null;
 $mask = @$_REQUEST['mask'] ? $_REQUEST['mask'] : null;
-$coMask = @$_REQUEST['coMask'] ? $_REQUEST['coMask'] : null;
+$coMask = @$_REQUEST['coMask'] ? $_REQUEST['coMask'] : null; //deprecated - not used
 $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 
+if($mode!=3){
 ?>
 
 <html>
@@ -88,7 +90,7 @@ $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 	<body class="popup">
 
 		<div class="banner">
-			<h2><?=(($check==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> <!-- <?=$check==2?" AND CANONICAL SYNCHRONIZATION":"" ?> for <i>"<?=HEURIST_DBNAME?>"</i> -->
+			<h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> <!-- <?=$mode==2?" AND CANONICAL SYNCHRONIZATION":"" ?> for <i>"<?=HEURIST_DBNAME?>"</i> -->
 		</div>
 		<div id="page-inner">
 
@@ -100,19 +102,39 @@ $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 		<?php
 			
 			echo "<br/><hr>\n";
-
+}//$mode!=3
 $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_ID");
 
-
-if (!$rectypeID){
-	foreach ($rtIDs as $rtID => $rtName) {
-		checkRectypeMask($rtID, $rtName, null, null, null, $check);
-	}
+if($mode==3){
+        $rt_invalid_masks = array();
+        foreach ($rtIDs as $rtID => $rtName) {
+            $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
+            $mask=$mask[0];
+            $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+            if(is_array($res)){ //invalid mask
+                array_push($rt_invalid_masks, $rtName);
+            }
+        }
+        header('Content-type: text/javascript');
+        print json_encode($rt_invalid_masks);
+    
 }else{
-	checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $check);
+
+    if (!$rectypeID){
+        //check all rectypes
+	    foreach ($rtIDs as $rtID => $rtName) {
+		    checkRectypeMask($rtID, $rtName, null, null, null, $mode);
+	    }
+    }else{
+	    checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $mode);
+    }
+
+    echo "</body></html>";
 }
 
-function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
+function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $mode) {
+    global $mode;
+    
 	if (!@$mask && @$rtID) {
 		$mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
 		$mask=$mask[0];
@@ -124,11 +146,9 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 	}*/
 
 	//echo print_r($_REQUEST,true);
-	if($check > 0 || !$recID)
+	if($mode > 0 || !$recID)
 	{
-?>
-			<h3><b> <?=$rtID?> : <i><?=$rtName?></i></b> <br/> </h3>
-<?php
+		echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
 
         $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
         echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
@@ -158,7 +178,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 
 		if ($retCoMaskCheck !== "" && $retMaskCheck == "") {
 			$coMask = titlemask_make($mask, $rtID, 1); //make canonical
-			if ($check != 2) {
+			if ($mode != 2) {
 				echo "<div class='resultsRow'><div class='statusCell'></div><div class='maskCell'>Correct canonical mask = <span class='valid'>$coMask</span></div></div>";
 			}else{ // repair canonical
 				mysql_query("update defRecTypes set rty_CanonicalTitleMask='$coMask' where rty_ID=$rtID");
@@ -175,9 +195,4 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $check) {
 		echo fill_title_mask($mask, $recID, $rtID);
 	}
 }
-?>
-	</body>
-</html>
-<?php
-exit();
 ?>

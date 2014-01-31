@@ -389,8 +389,6 @@ $.widget( "heurist.profile", {
             var message = $dlg.find('.messages');
             var isreset = false;
             
-            $dlg.find('.messages');
-
             function __doLogin(){
 
                   allFields.removeClass( "ui-state-error" );
@@ -485,6 +483,7 @@ $.widget( "heurist.profile", {
                 //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
                 $dlg.find("#fld_reset").hide();
                 $dlg.find("#fld_login").show();
+                $dlg.find(".message").text('');
               }
             });
 

@@ -87,8 +87,10 @@
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
 
     //STEP 1 - define record types to be exported
+    mysql_connection_select(DATABASE);
     
     if($step=='1'){
+        
         if(!$rt_toexport){
             print "<div class='err_message'>Select record types for export</div>";
         }
@@ -112,11 +114,35 @@
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
         print "<div><div class='lbl_form'>Project name:</div><input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='25'></div>";
 
+        $rt_invalid_masks = array();
+        if($rt_toexport){
+            //validate title masks
+            $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name"," rty_ID in ($rt_toexport) order by rty_ID");
+            foreach ($rtIDs as $rtID => $rtName) {
+                $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
+                $mask=$mask[0];
+                $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                if(is_array($res)){ //invalid mask
+                    array_push($rt_invalid_masks, $rtName);
+                }
+            }
+            if(count($rt_invalid_masks)>0){
+                $invalid = true;
+                $step = '';
+            }
+        }
+
         print "<div id='buttondiv2' style='display:".(($step=='1')?"none":"block")."'><div class='lbl_form'>Record types to include in export:</div>"; 
         print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
-
+        
         // List of record types for export
         print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;font-weight:bold;'></div>";
+
+        if(count($rt_invalid_masks)>0){
+            print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
+            .implode(",",$rt_invalid_masks)."</b>
+ FAIMS requires setting of at least one field (attrribute) as an identifier, which is based  on the fields in the title mask. Please correct the title mask(s) before proceeding (edit the record type in Database Designer > Essentials > Manage RecordTypes/Fields)</p>";
+        }
  
         // Don't show Start Export button until record types have been selected       
         print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
@@ -127,7 +153,7 @@
         }
 
     if( $rt_toexport && !$invalid ){
-
+        
         $folder = HEURIST_UPLOAD_DIR."faims/new/".$projname;
 
         //create export folder
@@ -138,8 +164,6 @@
         }else{ //clear folder
             delFolderTree($folder, false);
         }
-
-        mysql_connection_select(DATABASE);
 
         //load definitions (USE CACHE)
         $rtStructs = getAllRectypeStructures(false);
@@ -932,11 +956,22 @@ function prepareText($str){
 
     $str = str_replace('<', 'LT', $str);
     $str = str_replace('>', 'GT', $str);
+    $str = str_replace("'", '', $str);
+    $str = str_replace('"', '', $str);
+    $str = str_replace('`', '', $str);
+    $str = str_replace('&', 'and', $str);
     //no entities $str = str_replace("&", "&amp;", $str); 
     //no escaping $str = mysql_real_escape_string($str);
     return $str;
 }
 
+function prepareText2($str){
+error_log($str);
+    $str = prepareText($str);
+    $str = mysql_real_escape_string($str);
+error_log(">>>>".$str."<<<<");    
+    return $str;
+}
 
 /**
 * add one simple xml to another

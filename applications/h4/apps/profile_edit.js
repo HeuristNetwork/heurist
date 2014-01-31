@@ -67,13 +67,16 @@ $.widget( "heurist.profile_edit", {
                           resizable: true,
                           title: '',
                           buttons: [
-                            {text:top.HR(isreg?'Register':'Save'), click: __doSave, id:'btn_save', disabled:'disabled'},
+                            {text:top.HR(isreg?'Register':'Save'), click: __doSave, id:'btn_save'}, //, disabled:(isreg)?'disabled':''
                             {text:top.HR('Cancel'), click: function() {
                               $( this ).dialog( "close" );
                             }}
                           ],
                           close: function() {
                             allFields.val( "" ).removeClass( "ui-state-error" );
+                          },
+                          open: function(){
+                              enable_register(isreg);
                           }
                        });
                 }
