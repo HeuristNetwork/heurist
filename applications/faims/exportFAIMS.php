@@ -63,6 +63,7 @@
         text-transform:uppercase;
         padding-top:5px;
         padding-bottom:5px;
+        margin-bottom: 10px;
     }
     .lbl_form{
         width:180px;
@@ -101,6 +102,19 @@
                 print "<div class='err_message'>Project name is mandatory</div>";
             }
         }
+    }else{
+        
+                $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
+                if (!$res) { // Problem reading current registration ID
+                    print "<div class='err_message'>Unable to read database identification record, this database might be incorrectly set up. \n" .
+                    "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice.</div>";
+                }
+                $row = mysql_fetch_row($res); // Get system information for current database
+                $dbID = $row[0];
+                if ( !isset($dbID) || ($dbID <1)) { // not registered
+                    print "<div class='err_message'>This database has not been registered with the Heurist network. We encourage registration before proceeding to ensure that the record types, fields and terms in your database have globally unique identifiers.
+To register click Database > Register in the menu on the left</div>";
+                }        
     }
     
         print "<div>This function writes a set of FAIMS project definition files ".
@@ -841,7 +855,11 @@ function generate_UI_Schema($projname, $rt_toexport){
                 $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
             }
             
-            if($dt_type=='file'){
+            
+            //TODO  - support pointer, relmarker            
+            if(false && $dt_type=='resource'){
+            
+            }else if($dt_type=='file'){
                 
                 $ftype = detectFileType($dtname);
                 $actionlabel = $ftype[0];
@@ -1040,7 +1058,8 @@ onEvent("'.$headername.'/attach'.$dtnamex.'", "click", "'.$action.'(\"'.$headern
                 
                 $selectors .= '
 '.($action.'("'.$headername.'/'.$dtnamex.'", makeVocab("'.$dtname.'"));');
-            }            
+            }     
+            //TODO  - support pointer, relmarker       
             
         }//for detail types
         
