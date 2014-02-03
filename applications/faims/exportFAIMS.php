@@ -180,11 +180,12 @@
         $content_a16n = null;
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
-        //writeUTF8File($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
         file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
         file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport));
         file_put_contents($folder."/arch16N.properties", arrToProps());
-        copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
+        file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport));
+        
+        //copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
 
         //CREATE ZIPFILE
         unlink($folder.".zip");
@@ -277,7 +278,7 @@ function writeUTF8File($filename, $content) {
 // Generate the database schema file (db_schema.xml)
 function generateSchema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported, $supported;
+    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
                                                                         
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?> <dataSchema />');
     $root->addAttribute('name', DATABASE);
@@ -337,7 +338,7 @@ function generateSchema($projname, $rt_toexport){
                 //$rel->addAttribute('pictureURL', '');
                 //$rel->addAttribute('semanticMapURL', '');
                 
-                // Artem, why are you adding a dash at the start of the descriptions if the y exist, and l;eavign them null if they don't??
+                // Artem, why are you adding a dash at the start of the descriptions if they exist, and leaving them null if they don't??
                 // I think you meant to do it the other way round (I've changed it) but this is horrible!
                 $rel->description = prepareText( $term[$ind_descr]?$term[$ind_descr]:"-" );
                 //$rel->description = prepareText($termid."-".$term[$ind_label].($term[$ind_descr]?"-".$term[$ind_descr]:""));
@@ -464,7 +465,7 @@ function generateSchema($projname, $rt_toexport){
 */
 function generate_UI_Schema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $unsupported, $supported;
+    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
 
    add16n('Users'); 
    add16n('placeholder');
@@ -733,6 +734,7 @@ function generate_UI_Schema($projname, $rt_toexport){
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
         
         $tab_buttonholder->addChild($rtnamex);
+        $tab_data->addChild('new'.$rtnamex);
         $tab_data->addChild($rtnamex.'List');
         $tab_data->addChild($rtnamex.'Load');
         
@@ -841,33 +843,9 @@ function generate_UI_Schema($projname, $rt_toexport){
             
             if($dt_type=='file'){
                 
-                /*                
-                If the field name contains the substring 'photo', 'picture', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
-                set the field to the approriate type - take picture, shoot video, record audio (prioritise photo, picture, video, movie, sound and audio    
-                over the verbs             
-                */
-                $name1 = mb_strtolower($dtname);
-                $name2 = mb_strtolower($detail[$int_dt_disp_name]);
-                $actionlabel = 'Attach File';
-                $filetype = 'file';
-                
-                if( strpos($name1,'photo')!== false ||  strpos($name1,'picture')!== false || strpos($name1,'image')!== false ){
-                    $filetype = 'camera';
-                    $actionlabel = 'Take Picture';
-                } else if ( strpos($name1,'video')!== false ||  strpos($name1,'movie')!== false || strpos($name1,'image')!== false ){
-                    $filetype = 'video';
-                    $actionlabel = 'Shoot Video';
-                } else if ( strpos($name1,'sound')!== false ||  strpos($name1,'audio')!== false ){
-                    $actionlabel = 'Record Sound';
-                } else if ( strpos($name1,'take')!== false ){
-                    $filetype = 'camera';
-                    $actionlabel = 'Take Picture';
-                } else if ( strpos($name1,'shoot')!== false ){
-                    $filetype = 'video';
-                    $actionlabel = 'Shoot Video';
-                } else if ( strpos($name1,'record')!== false ){
-                    $actionlabel = 'Record Sound';
-                }
+                $ftype = detectFileType($dtname);
+                $actionlabel = $ftype[0];
+                $filetype = $ftype[1];
                 
                 if($filetype == 'file'){
                     $hasattachfile = true;
@@ -942,6 +920,294 @@ function generate_UI_Schema($projname, $rt_toexport){
     
 } // generation of user interface schema
 
+
+function generate_Logic($projname, $rt_toexport){
+
+    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    
+    
+    $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
+    $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
+    $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
+    //not used $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
+    //not used $int_dt_desc = $dtStructs['typedefs']['fieldNamesToIndex']['dty_HelpText'];
+
+    //not used $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
+    //not used $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_dt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
+
+    $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
+    
+    
+$out = "";
+
+    // Loop through each of the record types (ArchEntTypes) and output fields
+    $rectyps = explode(",", $rt_toexport);
+    foreach ($rectyps as $rt) {
+
+        $rtname = $rtStructs['names'][$rt];
+        $rtnamex = getProperName($rtname);
+        $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
+
+$out .= "
+/*** ArchEnt: $rtnamex ***/";
+
+$out .= '
+refreshEntities() {
+    showToast("Fetching saved contexts...");
+    populateList("control/data/'.$rtnamex.'List", fetchEntityList("'.$rtnamex.'"));
+}
+';
+
+//event handlers
+$eventsection = '
+onEvent("control/data/'.$rtnamex.'List", "click", "load'.$rtnamex.'()");
+onEvent("control/data/new'.$rtnamex.'", "click", "new'.$rtnamex.'()");
+';
+
+$selectors = '';
+
+        $details =  $rtStructs['typedefs'][$rt]['dtFields'];
+        
+        $hasattachfile = false;
+        $headername = $rtnamex."/".$rtnamex.'_GeneralInformation'; //first tab implied if no header at top of record
+
+        // Output for each field (attribute) in the record type
+        foreach ($details as $dtid=>$detail) {
+
+            $is_repeatable = ($detail[$int_dt_repeat]!='1');
+            
+            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
+
+            $dt_type = $det[$int_dt_type];
+            $dtname = $det[$int_dt_name];  // the base field type name
+            $dtnamex = getProperName($dtname); // sanitised
+            
+            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this record type
+            $dtdisplaynamex = getProperName($dtdisplayname);
+
+            if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
+            
+                if($hasattachfile){  //add events to view attached files
+                     $eventsection .= '
+onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
+                }
+                $hasattachfile = false;
+                //new tab
+                $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
+            }
+            
+            if(!in_array($dt_type, $supported)){
+                continue;
+            }
+            
+
+            
+            if($dt_type=='file'){
+                
+                $ftype = detectFileType($dtname);
+                $actionlabel = $ftype[0];
+                $filetype = $ftype[1];
+                
+                if($filetype == 'video'){
+                    $action = 'attachVideoTo';
+                }else if($filetype == 'sound'){
+                    $action = 'attachAudioTo';
+                }else if($filetype == 'camera'){
+                    $action = 'attachPictureTo';
+                }else {  //if ($filetype == 'file')
+                    $action = 'attachFileTo';
+                    $hasattachfile = true;
+                }
+                
+                $eventsection .= '
+onEvent("'.$headername.'/attach'.$dtnamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtnamex.'\")");';
+                
+            }else if ($dt_type=='enum') {
+                
+                $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
+                
+                if($is_repeatable){
+                        $action = 'populateCheckBoxGroup';
+                        //Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+                        //$action = populateCheckBoxGroup("tabgroup1/tab1/locations",locations);
+                        
+                }else if ($termsCount<4) {
+                    $action = 'populateRadioGroup';
+                }else{
+                    $action = 'populateDropDown';
+                }
+                
+                $selectors .= '
+'.($action.'("'.$headername.'/'.$dtnamex.'", makeVocab("'.$dtname.'"));');
+            }            
+            
+        }//for detail types
+        
+        if($hasattachfile){  //add events to view attached files
+              $eventsection .= '
+onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
+        }
+        $eventsection .= '
+onEvent("'.$headername.'/Update", "delayclick", "save'.$rtnamex.'()");
+onEvent("'.$headername.'/Delete", "delayclick", "delete'.$rtnamex.'()");
+';
+
+$out .= $eventsection;            
+
+$rt_id = mb_strtolower($rtnamex)."_id";
+
+//now event handlers - new, load, save, delete
+$out .= '
+String '.$rt_id.' = null;
+
+new'.$rtnamex.'(){
+    '.$rt_id.' = null;
+    newTabGroup("'.$rtnamex.'");
+    load'.$rtnamex.'Attributes();
+}
+load'.$rtnamex.'() {
+    //new'.$rtnamex.'();
+    '.$rt_id.' = getListItemValue();
+    load'.$rtnamex.'From('.$rt_id.');
+}
+load'.$rtnamex.'From(entid) {
+    
+    '.$rt_id.' = entid;
+    if (isNull(entid)) return;
+    showToast(entid);
+    showTabGroup("'.$rtnamex.'", entid);
+    load'.$rtnamex.'Attributes();
+    updateAll'.$rtnamex.'(); 
+    //updateRelns();
+}
+
+save'.$rtnamex.'() {
+    //todo - verify all required fields
+    if (false){ 
+        showWarning("Logic Error", "Cannot save record without id");
+        return;
+    }
+    
+    if (!isNull('.$rt_id.')) {
+        entity = fetchArchEnt('.$rt_id.');
+    }
+    // first null is map data
+    saveTabGroup("'.$rtnamex.'", '.$rt_id.', null, null, "'.$rt_id.' = getLastSavedRecordId();");
+}
+
+delete'.$rtnamex.'(){
+    if (!isNull('.$rt_id.')) {
+        showAlert("Confirm Deletion", "Press OK to Delete this '.$rtname.'!", "reallyDelete'.$rtnamex.'()", "doNotDelete'.$rtnamex.'()");
+    }
+}
+reallyDelete'.$rtnamex.'(){
+    deleteArchEnt('.$rt_id.');
+    cancelTabGroup("'.$rtnamex.'", false);
+}
+doNotDelete'.$rtnamex.'(){
+    showToast("Delete Cancelled.");
+}       
+ 
+load'.$rtnamex.'Attributes(){
+'.$selectors.'
+}
+
+updateAll'.$rtnamex.'(){
+//load related records ?
+}      
+';        
+
+        
+        
+    }//for record types
+
+//header    
+$out = '    
+/****** 
+ FAIMS Logic Fail generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A').'
+ Database: '.DATABASE.'   Heurist user:'.get_user_name().'
+ ******/
+
+User user; // dont touch
+String userid;
+
+setSyncEnabled(true);
+setFileSyncEnabled(true);
+
+showWarning("Thanks for trying this module!", "We have provided this module for Demonstration purposes only. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
+
+
+/*** control ***/
+
+onEvent("control/data", "show", "refreshEntities()");
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+'.$out;    
+    
+/* misc functions to add */
+$out = $out.'
+// MISC FUNCTIONS    
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'"+attrib+"\' ");
+    return a;
+}
+';
+
+//footer
+$out = $out.'
+/*** Uneditable - you can edit the code below with extreme precaution ***/
+/*** USER ***/
+
+getDefaultUsersList() {
+    users = fetchAll("select userid, fname || \' \' || lname from user");
+    return users;
+}
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid=\'" + getListItemValue() + "\';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+    userid = userResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("control");
+}
+
+onEvent("user/usertab/users", "click", "login()");
+
+/*** SYNC ***/
+
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+';
+    
+return $out;   
+}
+
+
 //sanitize rt, dt, disp names
 function getProperName($name){
         $goodname = str_replace('__','_',preg_replace('~[^a-z0-9]+~i','_', $name));
@@ -972,6 +1238,39 @@ error_log($str);
 error_log(">>>>".$str."<<<<");    
     return $str;
 }
+
+/*                
+If the field name contains the substring 'photo', 'picture', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
+set the field to the approriate type - take picture, shoot video, record audio (prioritise photo, picture, video, movie, sound and audio    
+over the verbs             
+*/
+function detectFileType($dtname){
+    $name1 = mb_strtolower($dtname);
+    $name2 = mb_strtolower($detail[$int_dt_disp_name]);
+    $actionlabel = 'Attach File';
+    $filetype = 'file';
+    
+    if( strpos($name1,'photo')!== false ||  strpos($name1,'picture')!== false || strpos($name1,'image')!== false ){
+        $filetype = 'camera';
+        $actionlabel = 'Take Picture';
+    } else if ( strpos($name1,'video')!== false ||  strpos($name1,'movie')!== false || strpos($name1,'image')!== false ){
+        $filetype = 'video';
+        $actionlabel = 'Shoot Video';
+    } else if ( strpos($name1,'sound')!== false ||  strpos($name1,'audio')!== false ){
+        $filetype = 'sound';
+        $actionlabel = 'Record Sound';
+    } else if ( strpos($name1,'take')!== false ){
+        $filetype = 'camera';
+        $actionlabel = 'Take Picture';
+    } else if ( strpos($name1,'shoot')!== false ){
+        $filetype = 'video';
+        $actionlabel = 'Shoot Video';
+    } else if ( strpos($name1,'record')!== false ){
+        $filetype = 'sound';
+        $actionlabel = 'Record Sound';
+    }
+    return array($actionlabel, $filetype);
+} 
 
 /**
 * add one simple xml to another
