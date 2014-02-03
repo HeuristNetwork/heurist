@@ -16,7 +16,7 @@
 
 /**
 * recalcTitlesAllRecords.php
-* Rebuilds the constructed record titles listed in search results, for all records
+* Rebuilds the constructed record titles listed in search results, for ALL records (see also recalcTitlesSpecifiedRectypes.php)
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,6 +30,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
+
+/*
+* TODO: Massive redundancy: This is pretty much identical code to recalcTitlesSopecifiedRectypes.php and should be 
+* combined into one file, or call the same functions to do the work
+*/
+
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -89,14 +96,15 @@ function update_counts2(processed, total) {
 <div class="banner"><h2>Rebuild Titles</h2></div>
 <div id="page-inner" style="overflow:auto;padding: 20px;">
 
-<div style="max-width: 500px;">
-   This function recalculates all the constructed record titles, compares
+<div style="max-width: 800px;">
+   This function recalculates all the constructed (composite) record titles, compares
    them with the existing title and updates the title where the title has
-   changed. At the end of the process it will display a list of records
+   changed (generally due to changes in the title mask for the record type). 
+   At the end of the process it will display a list of records
    for which the titles were changed and a list of records for which the
    new title would be blank (an error condition).
 </div>
-<p>This will take some time for large databases.</p>
+<p>This will take some time for large databases</p>
 <!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
 <div><span id=total_count><?=count($recs)?></span> records in total</div>
@@ -149,12 +157,6 @@ foreach ($recs as $rec_id => $rec) {
 	}
 	continue;
 
-/*
-	if (substr($new_title, 0, strlen($rec['rec_Title']) == $rec['rec_Title']))
-		print '<li><b>' . htmlspecialchars($rec['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($rec['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
-	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
-*/
 	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
 		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 	else
@@ -167,8 +169,6 @@ foreach ($recs as $rec_id => $rec) {
 		flush();
 	}
 }//for
-//print '</ul>';
-
 
 print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 print '<hr>';
@@ -181,9 +181,6 @@ if (count($updates) > 0) {
 
 	$i = 0;
 	foreach ($updates as $rec_id => $new_title) {
-/*
-		mysql_query('update Records set rec_Modified=now(), rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id.' and rec_Title!="'.mysql_real_escape_string($new_title).'"');
-*/
 		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
 		++$i;
 		if ($rec_id % 10 == 0) {
@@ -209,10 +206,13 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
+	print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).
+    '">Click to view updated records</a><br/>&nbsp;<br/>';
 }
 if(count($blanks)>0){
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+	print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).
+    '">Click to view records for which the data would create a blank title</a>'.
+    '<br/>This is generally due to faulty title mask (verify with Check Title Masks)<br/>or faulty data in individual records. These titles have not been changed.';
 }
 
 ob_flush();

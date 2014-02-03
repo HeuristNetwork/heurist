@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* Recalculates the constructed titles for a specified set of record types, based on data values within the records
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -49,7 +49,7 @@ if(@$_REQUEST['recTypeIDs']) {
  $recTypeIds = $_REQUEST['recTypeIDs'];
 }else{
 ?>
-	You must specify a record type (?recTypeIDs=55) a set of record types (?recTypeIDs=55,174,175) to use this page.
+	You must specify a record type (?recTypeIDs=55) or a set of record types (?recTypeIDs=55,174,175) to use this page.
 <?php
 }
 
@@ -73,22 +73,18 @@ $blank_count = 0;
 $repair_count = 0;
 $processed_count = 0;
 
-//print '<style type="text/css">b span { color: red; }</style>';
-//print '<style type="text/css">li.same, li.same * { color: lightgray; }</style>';
-//print '<ul>';
 ?>
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>CONSTRUCTED TITLE RECALCULATION</title>
+	<title>Recalculation of composite record titles</title>
 	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 </head>
 <body class="popup">
 <p>
-	The composite record title mask has been changed.
- 	Rebuilding record titles for <b><?=implode(',',$rt_names)?></b>
+	Rebuilding record titles for <b><?=implode(',',$rt_names)?></b>
 </p>
-<p>This will take some time for large databases.</p>
+<p>This will take some time for large databases</p>
 <!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
 
@@ -152,12 +148,8 @@ foreach ($recs as $rec_id => $rec) {
 		}
 	}
 	continue;
-/*
-	if (substr($new_title, 0, strlen($rec['rec_Title']) == $rec['rec_Title']))
-		print '<li><b>' . htmlspecialchars($rec['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($rec['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
-	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
-*/
+
+
 	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
 		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 	else
@@ -170,7 +162,6 @@ foreach ($recs as $rec_id => $rec) {
 		flush();
 	}
 }
-//print '</ul>';
 
 
 print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
@@ -185,9 +176,6 @@ if (count($updates) > 0) {
 
 	$i = 0;
 	foreach ($updates as $rec_id => $new_title) {
-/*
-		mysql_query('update Records set rec_Modified=now(), rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id.' and rec_Title!="'.mysql_real_escape_string($new_title).'"');
-*/
 		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
 		++$i;
 		if ($rec_id % 10 == 0) {
@@ -211,20 +199,23 @@ if (count($updates) > 0) {
 	}
 	print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
 
-	print '<hr>';
+	print '<hr><br/>';
 
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.
+    '">Click to view updated records</a><br/>&nbsp;<br/>';
 }
 if(count($blanks)>0){
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.'">Unchanged records (title would be blank)</a>';
+	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
+     '">Click to view records for which the data would create a blank title</a>'.
+    '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)<br/>or faulty data in individual records. These titles have not been changed.';
 }
 
 ob_flush();
 flush();
 
 ?>
-<div style="color: red;padding-top:10px;">
-If the titles of other record types depend on these titles, you should run Designer View > Utilities > Rebuild record titles to rebuild all record titles in the database
+<div style="color: green;padding-top:10px;">
+If the titles of other record types depend on these titles, you should run Designer View > Utilities > Rebuild Titles to rebuild all record titles in the database
 <div>
 </body>
 </html>

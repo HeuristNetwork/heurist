@@ -15,25 +15,24 @@
 */
 
 /**
-* brief description of file
+* Allows editing of the title mask which constructs a one-line composite title for the record from fields within it
+* Title mask structure modified late 2013 (~ Vsn 3.1.5) to use only internal codes within the stored mask, which are 
+* translated to human-readable field names for editing, and vice versa
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
+* @version     3.1.6
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  
 */
 
 -->
 <html>
     <head>
-        <title>Record-type title mask</title>
+        <title>Record-type title mask editing</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
@@ -98,20 +97,21 @@
                 The element names in square brackets should match field names for this record type.<br>
                 The constructed value is used as the extended title displayed in search results and other lists.<br>
                 To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
+                <br/>&nbsp;<br/>
+                
             </div>
-
-            <div style="padding-top: 10px; padding-left: 10px;" align="left">
-                <button onclick="onInsert()" style="width:60px;">Insert fields</button>
+            
+            <hr/>
+            
+            <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;" align="left">
+                <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button onclick="onInsert()" style="width:60px;">Insert fields</button>
+                &nbsp;&nbsp;<i>Select fields in tree and click button to insert in mask at cursor position</i>
+                <br/>&nbsp;<br/>
+                <textarea cols="550" id="rty_TitleMask" rows="5" style="width:550px;"></textarea><br/>
                 <br>
             </div>
-
-            <div style="text-align:left; padding-top:10px; padding-left: 10px;" >
-                Mask:&nbsp;
-                <input maxlength="500" id="rty_TitleMask" style="width:350;"/> &nbsp;&nbsp;
-                <button style="width:60px;" onclick="onSave()">Save mask</button>&nbsp;&nbsp;
-                <button style="width:60px;" onclick="window.close(null)">Cancel</button>
-                <br>&nbsp;<br>&nbsp;<br>
-            </div>
+            
+            <!-- Jan 2014 TODO: Is ther any reason to keep this code?
             <div style="text-align:left; padding-top:10px; padding-left: 10px;display: none;" >
                 Canonical Mask:&nbsp;
                 <input maxlength="500" id="rty_CanonincalMask" style="width:350;"/> &nbsp;&nbsp;
@@ -119,15 +119,28 @@
                 <button style="width:60px;" onclick="window.editRectypeTitle.doCanonical(3)">make text</button>
                 <br>&nbsp;<br>&nbsp;<br>
             </div>
+            -->
 
-            <hr>
+            <hr/>
 
-            <div style="padding-top:5px;padding-bottom:10px;padding-left: 20px;" align="left">
+            <div style="padding-top:10px;padding-bottom:10px;padding-left: 20px;" align="left">
                 <b>Test mask</b> <br>&nbsp;<br>
                 <select id="listRecords" style="width:300px;"><option>select from records of this type (if any exist) ...</option></select>
                 <br>&nbsp;<br><button onclick="onTest()" style="width:40px;">Test</button>
                 <div id="testResult" title="Test result will appear here"  style="padding-left:40px; padding:5px; width: 400px; height: 10px; align: left"></div>
             </div>
+
+            <hr/>
+
+            <div style="padding-top:10px;padding-bottom:5px;padding-left: 20px;" align="left">
+                <b>Save mask</b> <br>
+                <br/><button style="width:60px;" onclick="onSave()">Save mask</button>&nbsp;&nbsp;
+                <button style="width:60px;" onclick="window.close(null)">Cancel</button>
+                
+            </div>
+            
+            
+            
         </div>
 
 

@@ -16,12 +16,16 @@
 
 /**
 * utilsTitleMask.php
-* Two important functions in this file:
+* Three important functions in this file:
 * check_title_mask($mask, $rt) => returns an error string if there is a fault in the given mask for the given reference type
 * fill_title_mask($mask, $rec_id, $rt) => returns the filled-in title mask for this bibliographic entry
 * titlemask_make($mask, $rt, $mode, $rec_id=null) => converts titlemask to coded, humanreadable or fill mask with values
-*
 * Various other utility functions starting with _titlemask__ may be ignored and are unlikely to invade your namespaces.
+* 
+* Note that title masks have been updated (AO late 2013) to remove the awkward storage of two versions - 'canonical' and human readable. 
+* They are now read and used as internal code values (the old 'canonical' form), decoded to human readable for editing, 
+* and then recoded back to internal codes for storage, as per original design.
+*
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -30,7 +34,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://sydney.edu.au/Heurist
-* @version     3.1.0
+* @version     3.1.6
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  CommonPHP
@@ -39,7 +43,7 @@
 require_once('Temporal.php');
 
 define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid - default
-define('_ERR_REP_MSG', 1);  // retuns detail error message
+define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
 /**
@@ -55,12 +59,12 @@ function check_title_mask2($mask, $rt, $checkempty) {
     if (! preg_match_all('/\\[\\[|\\]\\]|\\[\\s*([^]]+)\\s*\\]/', $mask, $matches))
     {
         // no substitutions to make
-        return $checkempty?'Mask must have at least one field to replace':'';
+        return $checkempty?'Title mask must have at least one data field ( in [ ] ) to replace':'';
     }
 
     $res = titlemask_make($mask, $rt, 1, null, _ERR_REP_MSG);
     if(is_array($res)){
-        return $res[0];//mark is invalid - this is error message
+        return $res[0]; // mask is invalid - this is error message
     }else{
         return '';
     }
@@ -74,8 +78,6 @@ function check_title_mask2($mask, $rt, $checkempty) {
 * @param mixed $rt
 */
 function fill_title_mask($mask, $rec_id, $rt=null){
-    //$res = titlemask_make($mask, $rt);
-    //if(!is_array($res)){
     return titlemask_value($mask, $rec_id);
 }
 
@@ -95,8 +97,8 @@ function titlemask_value($mask, $rec_id) {
    }
 }
 
-/**
-* Converts titlemask to coded, humanreadable or fill mask with values
+/*
+* Converts titlemask to coded, human readable or fill mask with values
 * In case of invalid titlemask it returns either general warning, errormessage or empty string (see $rep_mode)
 *
 * @param mixed $mask - titlemask
@@ -110,11 +112,6 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
 
     if (!$mask) {
         return ($rep_mode==_ERR_REP_WARN)?"Titlemask is not defined":"";
-        /*if($mode==0){
-            return "";
-        }else{
-            $mask ="[$titleDT]";    // title field
-        }*/
     }
 
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
@@ -205,7 +202,6 @@ function _titlemask__get_detail_types() {
             $rdt[$row['dty_Name']] = $row;
             $rdt[$dt_cc] = $row;
         }
-/*****DEBUG****///error_log("dt ".print_r($rdt,true));
     }
 
     return $rdt;
@@ -235,8 +231,6 @@ function _titlemask__get_rec_detail_types($rt) {
             .' where rst_RequirementType in ("required", "recommended", "optional") '
             .' and rst_RecTypeID='.$rt;
 
-/*****DEBUG****///error_log($query);
-
         $res = mysql_query($query);
         $rdr[$rt] = array();
 
@@ -253,11 +247,9 @@ function _titlemask__get_rec_detail_types($rt) {
             $row['dty_ConceptCode'] = $dt_cc;
 
             $rdr[$rt][$row['dty_ID']] = $row;
-            //$rdr[$rt][$row['dty_Name']] = $row;
             $rdr[$rt][$row['rst_DisplayName']] = $row;
             $rdr[$rt][$dt_cc] = $row;
         }
-/*****DEBUG****///error_log("rf ".print_r($rdr,true));
     }
     return $rdr[$rt];
 }
@@ -438,8 +430,8 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
     if (is_array($rt)){
         //ERROR
         return array("$field_name was tested with Array of record types - bad parameter");
+        // TODO: what does this error message mean? Make it comprehensible to the user
     }
-/*****DEBUG****///error_log("fieldname = $field_name and rt = $rt");
 
     if (strcasecmp($field_name,'id')==0 ||
         strcasecmp($field_name,'rectitle')==0 ||
@@ -453,7 +445,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
         $rdt_id = _titlemask__get_dt_field($rt, $field_name);  //get concept code
         if(!$rdt_id){
             //ERROR
-            return array("Field $field_name not found");
+            return array("Field $field_name not recognised");
         }else {
             return _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id );
         }
@@ -487,17 +479,17 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 }else{
                     //ERROR
-                    return array("$inner_field_name is not allowed field for enumeration type");
+                    return array("$inner_field_name is an unrecognised qualifier for a terms list field");
                 }
             }
             if($dt_type!== 'resource') {
                 //ERROR
-                return array("$field_name must be resource field type");
+                return array("$field_name must be a record pointer field");
             }
 
         }else{
             //ERROR
-            return array("$parent_field_name not found");
+            return array("$parent_field_name not recognised");
         }
     } else {
         return "";
@@ -568,7 +560,6 @@ function array_str_replace($search, $replace, $subject) {
         $match_idx = -1;
         $match_offset = -1;
         for ($i=0; $i < count($search); ++$i) {
-/*****DEBUG****///error_log(">>>>".$subject." IN ".$search[$i]);
             if($search[$i]==null || $search[$i]=='') continue;
             $offset = strpos($subject, $search[$i]);
             if ($offset === FALSE) continue;

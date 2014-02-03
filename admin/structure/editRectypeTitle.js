@@ -66,7 +66,7 @@ function EditRectypeTitle() {
 
 
         if(Hul.isnull(_rectypeID)){
-            window.close("Rectype ID is not defined");
+            window.close("Record type ID is not defined");
             return;
         }else{
 
@@ -91,15 +91,17 @@ function EditRectypeTitle() {
             }
 
             _variables = context['vars'];
-//   {rt_id: , rt_name, recID, recTitle ..... 
-//                  fNNN:'name', 
-//                  fNNN:array(termfield_name: , id, code:  )
-//                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer
-//                  fNNN:array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointer
-//
+
+            /* TODO: Clean up all this old code            
             
-            
-            /*fille selection box with the list of templates
+            //   {rt_id: , rt_name, recID, recTitle ..... 
+            //                  fNNN:'name', 
+            //                  fNNN:array(termfield_name: , id, code:  )
+            //                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer
+            //                  fNNN:array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointer
+            //
+ 
+             /*fille selection box with the list of templates
             var sel = Dom.get("selRectype");
             //celear selection list
             while (sel.length>0){
@@ -128,9 +130,9 @@ function EditRectypeTitle() {
 
             _onSelectRectype();
 
-            //fille list of records
+            //fill list of records
             var sel = Dom.get("listRecords");
-            //celear selection list
+            //clear selection list
             while (sel.length>1){
                 sel.remove(1);
             }
@@ -149,7 +151,7 @@ function EditRectypeTitle() {
     }
 
     //
-    // fill the treeview of variables of specific record type
+    // fill the treeview with variables of specified record type
     //
     function _onSelectRectype(){
 
@@ -168,18 +170,18 @@ function EditRectypeTitle() {
 
         recTypeID = _variables.rt_id;
 
-
         //find list of variables for current record type
-        var i, j;
-/*ART 2013-12-11        
-        for (i in _variables){
-            if(i!==undefined && _variables[i].id===recTypeID){
-                varnames = _variables[i];
-                break;
-            }
-        }//for
-*/        
-
+        var i, j;  
+        
+        /*TODO: Cleanup old code
+            Artem 2013-12-11        
+                for (i in _variables){
+                    if(i!==undefined && _variables[i].id===recTypeID){
+                        varnames = _variables[i];
+                        break;
+                    }
+                }//for
+        */        
 
         if(Hul.isnull(_varsTree)){
             _varsTree = new YAHOO.widget.TreeView("varsTree");
@@ -474,7 +476,7 @@ function EditRectypeTitle() {
                                 document.getElementById('testResult').innerHTML = obj2;
                             }, squery);
                     }else{
-                        alert('Select record from pulldown to test your title mask');
+                        alert('Select a record from the pulldown to test your title mask');
                     }
                 }else{
                     alert(obj);
@@ -511,7 +513,7 @@ function EditRectypeTitle() {
     }
 
     /**
-    * not used
+    * not used   TODO: DELETE UNUSED CODE
     */
     function _doCanonical(mode){
 
@@ -538,7 +540,7 @@ function EditRectypeTitle() {
     }
 
     //
-    // utility function - move to HEURIST.utils
+    // utility function - TODO: move to HEURIST.utils
     //
     function insertAtCursor(myField, myValue) {
         //IE support
