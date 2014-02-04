@@ -102,18 +102,21 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: "newGroup",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>+/-</label>",
+                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>add/edit</label>",
+                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>[add/edit tabs]</label>",
                     content:
                     ('<div id="formGroupEditor">'+
                         '<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
-                        '<h3>Create a new record type group or edit an existing one</h3><br/>'+
-                        '<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
-                        '<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
+                        '<h3>Create / edit / delete record type groups (tabs)</h3><br/>'+
+                        '<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select>'+
+                        '<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:20px"/></div></div>'+
+                        '<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:150px"/></div></div>'+
                         '<div class="input-row"><div class="input-header-cell">Description:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
-                        '<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
+                        '<div class="input-row"><div class="input-header-cell"></div>'+
+                        '<div class="input-cell">'+
                         '<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
                         '<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-                        '<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:100px"/>'+
+                        
                         '</div></div>'+
                         '</div>')
             }));
@@ -179,23 +182,25 @@ function RectypeManager() {
                     label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
                     content:
                     ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
-                        '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:10px;">'+
+                        '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
                         '<label>Filter by name:&nbsp;&nbsp;</label>'+
                         '<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+                        // declutter: Probably unecessary to provuide an active/inactive filter
                         '<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
                         '</div>'+
                         '<div style="float:right; text-align:right">'+
-                        '<label id="lblNoticeAboutChanges'+grpID+'" '+
-                        'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
-                        '&nbsp;&nbsp;&nbsp;'+
-                        '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
-                        'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-                        '<input type="button" id="btnAddRecordType'+grpID+'" value="Define new record type / fields" class="add"/>'+
+                        // TODO: remove old code - orginally had to manually save changes
+                        // '<label id="lblNoticeAboutChanges'+grpID+'" '+
+                        // 'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
+                        // '&nbsp;&nbsp;&nbsp;'+
+                        // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
+                        // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
+                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add"/>'+
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
-                        '<div style="position:absolute;bottom:8px;right:375px;">'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="Define new record type / fields" class="add"/>'+
+                        '<div style="position:absolute;bottom:8px;right:425px;">'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add"/>'+
                         '</div>'+
                         '</div>')
 
@@ -391,7 +396,7 @@ function RectypeManager() {
                         elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
                 
-                { key: "name", label: "Name", sortable:true, minWidth:200, maxAutoWidth:200, width:200, gutter:0,
+                { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("name");
                         var tit = "";
@@ -462,11 +467,11 @@ function RectypeManager() {
                 formatRow: myRowFormatter,
                 //selectionMode: "singlecell",
                 paginator : new YAHOO.widget.Paginator({
-                        rowsPerPage: 100,
+                        rowsPerPage: 250, // should never be anything like this many
                         totalRecords: arr.length,
 
                         // use a custom layout for pagination controls
-                        template: "&nbsp;Page: {PageLinks} &nbsp Show {RowsPerPageDropdown} per page",
+                        template: "&nbsp;Page: {PageLinks} &nbsp {RowsPerPageDropdown} per page",
 
                         // show all links
                         pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,

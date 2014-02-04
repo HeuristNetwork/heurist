@@ -121,8 +121,8 @@ if (array_key_exists('mode', $_REQUEST)) {
 		</a>
 		<div id="quicklinks" style="top:10px;right:15px">
 			<ul id=quicklink-cell>
-				<li id="reportBug" class="button white"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report or feature request" ><img src="../common/images/16x16.gif"></a></li>
-				<li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >refresh memory</a></li>
+				<li id="reportBug" class="button white"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report or feature request" >Bug report</a></li>
+				<li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >Refresh memory</a></li>
 			</ul>
 		</div>
 
