@@ -158,15 +158,15 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
         
-            $puncts = '+=|&-:;,.';
-            $puncts2 = '+=|&-:;,';
+            $puncts = '+=|&-:;,.@#'; // These are stripped from end of title if no field data follows them
+            $puncts2 = '+=|&-:;,@#';
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts.'/\\s]*\\)!s', '(\\1)', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
         
-/*        
+/*          TODO: Old version, removed 4th Jan 2014, to delete
             $title = preg_replace('!^[-:;,./\\s]*(.*?)[-:;,/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\([-:;,./\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\([-:;,./\\s]*(.*?)[-:;,./\\s]*\\)!s', '(\\1)', $title);
