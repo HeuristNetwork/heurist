@@ -422,7 +422,7 @@ function RectypeManager() {
                 { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Dup", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
-                        elLiner.innerHTML = '<img src="../../common/images/Design-32.png"'+
+                        elLiner.innerHTML = '<img src="../../common/images/drag_up_down_16x16.png"'+
                         'style="cursor:pointer;" onclick="rectypeManager.duplicateType('+rectypeID+')"/>'; }
                 },
                 { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
