@@ -233,7 +233,12 @@ function EditRectypeTitle() {
 
                 for(id in rectypeTree)
                 {
-                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' || id=='recURL' || id=='recTitle' || id=='recWootText') ){
+                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' || id=='recURL' || id=='recWootText') ){  // ||
+                
+                   if(parent_full=='' && id=='recTitle'){
+                       continue; //do not allow rectitle for first level
+                   }
+                
                     
                     var label = null;
                     
@@ -292,12 +297,12 @@ function EditRectypeTitle() {
 
                             var _varname = term.id;
                             
-                            rt_term.label =  '<div style="padding-left:10px;">'+child[k].rt_name + '</b></div>';
+                            rt_term.label =  '<div style="padding-left:10px;"><b>'+child[k].rt_name + '</b></div>';
                             //rt_term.href = "javascript:void(0)";
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, parentNode, false);
                             
-                            __createChildren(rectypeNode, child[k], term.this_id, parent_full);
+                            __createChildren(rectypeNode, child[k], term.this_id, term.full_path);
                         }
                         
                     }else{

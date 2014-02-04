@@ -824,6 +824,7 @@ function ShowReps() {
                     
                     var vartype = term.this_id.substring(0,1);
                     var dtid = term.this_id.substring(1);
+                    
                     if(vartype=='f' && Hul.isNumber(dtid) ){
                         term.dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[idx_dtype];
                         
@@ -1075,8 +1076,17 @@ function ShowReps() {
                 var scroll = document.getElementById("treeContainer").scrollTop;
                 insert_ID = varid;
                 
-                var w = top.HEURIST.util.popupTinyElement(top, ele, {x: pos.x + elt.offsetWidth, "no-close": false, y: pos.y-scroll, width: 400, height: 200});
-                                    // "no-titlebar": true
+                    var node = _findNodeById(varid);
+                    var title;
+                    if(node){
+                        title = ucwords(node.data.labelonly);
+                    }else{
+                        title = 'Insert variable';
+                    }
+                
+                
+                var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: pos.x + elt.offsetWidth, "no-close": false, y: pos.y-scroll, width: 400, height: 200});
+                                    // 
                 insertPopupID = w.id;
         }
         

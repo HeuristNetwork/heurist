@@ -1565,7 +1565,7 @@ function EditRecStructure() {
 			// Make the proxy look like the source element
 			Dom.setStyle(srcEl, "visibility", "hidden");
 			//proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
-			proxyEl.innerHTML = "";
+			proxyEl.innerHTML = '<div style="padding-left:30px;padding-top:6px;font-size:1.2em">'+this.srcData.rst_DisplayName+"</span>";
 			proxyEl.style.cursor = "row-resize";
 
 			//var rst_ID = this.srcData.rst_ID
