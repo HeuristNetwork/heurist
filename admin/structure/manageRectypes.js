@@ -324,7 +324,7 @@ function RectypeManager() {
 
                             //var fvals = req.split("|");
 
-                            var sByName   = _filterText; //fvals[0].toLowerCase();
+                            var sByName   = _filterText.toLowerCase(); //fvals[0].toLowerCase();
                             var iByVisibility = _filterVisible; //fvals[1];
 
                             // when we change the table, the datasource is not changed
