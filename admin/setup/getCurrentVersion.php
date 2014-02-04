@@ -107,6 +107,7 @@ function checkVersionOnMainServer($version_in_session)
         }
 
         //send request to main server HEURIST_INDEX_BASE_URL
+        // TODO: GetCurrentVersion shouldn't need to specify a database, it's a potential weak point
         $url = HEURIST_INDEX_BASE_URL . "admin/setup/getCurrentVersion.php?db=H3MasterIndex&check=1";
 
         $rawdata = loadRemoteURLContent($url);
@@ -115,8 +116,7 @@ function checkVersionOnMainServer($version_in_session)
             //parse result
             if(checkVersionValid($rawdata))
             {
-                //debug $current_version[0] = "5.9.1 RC2";
-
+   
                 $current_version = explode("|", $rawdata);
 
                 $curver = explode(".", $current_version[0]);
@@ -129,6 +129,9 @@ function checkVersionOnMainServer($version_in_session)
                     $major_local = intval($locver[0]);
                     $subver_local = intval($locver[1]);
 
+                    // TODO: HEURIST_VERSION is not rendering the local version in the email below, yet HEUTRIST_SERVER_NAME works
+                    // and it seems to have set the $variables ???
+                    
                     $email_title = null;
                     if($major_local<$major){
                         $email_title = "Major new version of Heurist Vsn ".$current_version[0]." available for ".HEURIST_SERVER_NAME." (running Vsn ".HEURIST_VERSION.")";
@@ -142,12 +145,12 @@ function checkVersionOnMainServer($version_in_session)
                         //send email to administrator about new database registration
                         $email_text =
                         "Your server is running Heurist version ".HEURIST_VERSION." The current stable version of Heurist (version ".
-                        $current_version[0].") is available from HeuristScholar.org We recommend updating your copy of the software if the sub-version has changed ".
+                        $current_version[0].") is available from <a href='https://code.google.com/p/heurist/'>Google Code</a> or ".
+                        "<a href='http://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed ".
                         "(or better still with any change of version).\n\n".
-                        "Heurist is copyright (C) The University of Sydney and available as Open Source software under the GNU-GPL licence. ".
-                        "Beta versions of the software with new features may also be available at the Google Code repository, linked from the Heurist home page.";
+                        "Heurist is copyright (C) 2007 - 2014 The University of Sydney and available as Open Source software under the GNU-GPL licence. ".
+                        "Beta versions of the software with new features may also be available at the Google Code repository or linked from the HeuristNetwork home page.";
 
-                        //
                         sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
                     }
 

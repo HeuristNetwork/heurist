@@ -987,7 +987,7 @@ function RectypeManager() {
                 }
 
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/recordTypeDuplicate.php";
+                var baseurl = top.HEURIST.baseURL + "admin/structure/duplicateRectype.php";
                 var callback = _editAfterDuplicate;
                 var params = "db=" + db + "&rtyID=" + rectypeID;
                 Hul.getJsonData(baseurl, callback, params);
