@@ -555,26 +555,31 @@ function importRectype($importRty) {
 }
 
 //
-// Copy record type icon from source to destination database
+// Copy record type icon and thumbnail from source to destination database
 //
-function copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID){
-
-	$filename = HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/".$sourceDBName."/rectype-icons/".$importRtyID.".png";// BUG this is not always true and what about cross server
+function copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID, $thumb=""){
+    
+	$filename = HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/".$sourceDBName."/rectype-icons/".$thumb.$importRtyID.".png";// BUG this is not always true and what about cross server
 
 	if(file_exists($filename)){
 
-		$target_filename = HEURIST_ICON_DIR.$importedRecTypeID.".png";
+		$target_filename = HEURIST_ICON_DIR.$thumb.$importedRecTypeID.".png";
 
 		if(file_exists($target_filename)){
 			unlink($target_filename);
 		}
 
 		if (!copy($filename, $target_filename)) {
-			makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " Can't copy icon ".$filename." to ".$target_filename);
+			makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " Can't copy ".(($thumb=="")?"icon":"thumbnail")." ".$filename." to ".$target_filename);
 		}
 	}else{
-		makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " icon does not exist");
+		makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " ".(($thumb=="")?"icon":"thumbnail")." does not exist");
 	}
+    
+    if($thumb==""){
+        copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID, "thumb/th_");
+    }
+
 }
 
 //
