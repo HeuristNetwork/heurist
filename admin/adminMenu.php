@@ -182,10 +182,7 @@ if (is_admin()) {
 						<li><a href="#" onClick="loadContent('setup/dbproperties/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>')"
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=<?=HEURIST_DBNAME?>')"
-							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
-                        <li><a href="#" onClick="loadContent('setup/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
-                            title="Summary statistics for all Heurist databases on this server">Statistics</a></li>
-                            
+							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>                            
 					</ul>
 				</div>
 
@@ -240,13 +237,15 @@ if (is_admin()) {
 				<h3><a href="#">UTILITIES: </a><span class="description">Verify and fix database integrity, specialised tools</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#"
-								onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
-								title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
-						<!-- : Also have capabuility for specific records and rectypes</p> -->
+                        <li class="seperator"><a href="#" onClick="loadContent('describe/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Size and usage statistics for all Heurist databases on this server">Database usage statistics</a></li>
 						<li><a href="#"
-								onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
-								title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
+						    onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
+							title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
+						    <!-- We also have function for specific records and rectypes</p> -->
+						<li><a href="#"
+						    onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
+							title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
 						<!-- <li><a href="#"
 							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=<?=HEURIST_DBNAME?>')"
 							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li> -->

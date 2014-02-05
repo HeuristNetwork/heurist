@@ -238,7 +238,7 @@
 			<div class="separator_row" style="margin:20px 0;"></div>
 			<h3>Suggested workflow for new databases:</h3>
 
-			<?php include("includeNewDatabaseWorkflow.html");  ?>
+			<?php include("newDBWorkflowDescription.inc");  ?>
 		</div>
 	</body>
 </html>
