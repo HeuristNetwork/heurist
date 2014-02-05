@@ -150,7 +150,7 @@ if(!$mode) {
     print "Export database definitions as readable text<br>";
     ob_flush();flush();
     
-	$url = HEURIST_BASE_URL."admin/structure/getDBStructure.php?db=".HEURIST_DBNAME."&pretty=1";
+	$url = HEURIST_BASE_URL."admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
 	saveURLasFile($url, $folder."/Database_Structure.txt");
 
 

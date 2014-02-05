@@ -431,7 +431,7 @@ function DetailTypeEditor() {
 		if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
 
 			Hul.popupURL(top, top.HEURIST.basePath +
-				"admin/structure/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
+				"admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
 				{
 				"close-on-blur": false,
 				"no-resize": true,
@@ -456,7 +456,7 @@ function DetailTypeEditor() {
 		}else{ //select terms (advanced)
 
 			Hul.popupURL(top, top.HEURIST.basePath +
-				"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
+				"admin/structure/terms/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
 				{
 				"close-on-blur": false,
 				"no-resize": true,
@@ -503,9 +503,9 @@ function DetailTypeEditor() {
 			}
 
 			if(args) {
-				URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+				URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
 			} else {
-				URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type+"&db="+_db;
+				URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
 			}
 
 			Hul.popupURL(top, URL, {
@@ -969,7 +969,7 @@ function DetailTypeEditor() {
                 var el_sel = Dom.get("selVocab");
                 var vocab_id =  el_sel.value>0?el_sel.value:'';
                 
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+                top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
                     {
                     "close-on-blur": false,
                     "no-resize": false,

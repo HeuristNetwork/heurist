@@ -800,7 +800,7 @@ function EditTerms() {
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 	Hul.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTermParent.html?domain="+_currentDomain+"&child="+_currentNode.data.id+"&db="+db,
+		"admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+_currentNode.data.id+"&db="+db,
 		{
 		"close-on-blur": false,
 		"no-resize": true,
@@ -920,7 +920,7 @@ function EditTerms() {
 
 			var term_id = (isRoot)?0:_currentNode.data.id;
 
-			var sURL = top.HEURIST.baseURL + "admin/structure/editTermsImport.php?db="+ _db +
+			var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
 						"&parent="+term_id+
 						"&domain="+_currentDomain;
 
@@ -1126,7 +1126,7 @@ function EditTerms() {
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		Hul.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
+		"admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
 		{
 		"close-on-blur": false,
 		"no-resize": true,

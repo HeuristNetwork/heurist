@@ -98,7 +98,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 
 			function _onSelectRectype()
 			{
-				var URL = top.HEURIST.basePath + "admin/structure/selectRectype.html?type=resource&ids="+document.getElementById("rectypes").value+"&db=<?=HEURIST_DBNAME?>";
+				var URL = top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=resource&ids="+document.getElementById("rectypes").value+"&db=<?=HEURIST_DBNAME?>";
 
 				top.HEURIST.util.popupURL(top, URL, {
 						"close-on-blur": false,

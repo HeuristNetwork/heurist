@@ -584,7 +584,7 @@ oRecord.getData('description')+'"/>';}
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.basePath + "admin/structure/editRectype.html?supress=1&db="+db;
+			var url = top.HEURIST.basePath + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
 
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,

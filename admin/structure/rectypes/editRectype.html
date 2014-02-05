@@ -326,7 +326,7 @@
              */
             function upload_icon(mode) {
 
-                var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
+                var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
 
                 Hul.popupURL(top, sURL, {
                         "close-on-blur": false,
@@ -690,7 +690,7 @@
              */
             function editRecStructure()
             {
-                Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
+                Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
                         "close-on-blur": false,
                         "no-resize": false,
                         height: 480,
@@ -850,7 +850,7 @@
                     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-                    var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+                    var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
                     var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
 
                     top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -977,7 +977,7 @@
                 var maskvalue = document.getElementById("rty_TitleMask").value;
 
                 Hul.popupURL(top, top.HEURIST.basePath +
-                    "admin/structure/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
+                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
                     {
                         "close-on-blur": false,
                         "no-resize": true,
@@ -1017,7 +1017,7 @@
             })();
 
             /*var structureFrame = document.getElementById("structureFrame");
-            var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+            var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
             structureFrame.src = URL;
             */
         </script>

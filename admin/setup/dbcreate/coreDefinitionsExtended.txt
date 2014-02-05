@@ -7,13 +7,13 @@
  -- @todo
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
- -- http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=rH3CoreDefinitions
+ -- http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=rH3CoreDefinitions
 
 -- This file is used, through the buildCrosswalks function, to populate a blank Heurist
 -- database structure with a minimal set of essential record type, detail type etc. definitions
 
 -- -----------------------------------------------------------------------------------------------------
--- OUTPUT FROM getDBStructure.php STARTS HERE
+-- OUTPUT FROM getDBStructureAsSQL.php STARTS HERE
 -- NOTE: This file incorporates all the structure from H3CoreDefinitiosn and H3ToolSupport
 -- -----------------------------------------------------------------------------------------------------
 

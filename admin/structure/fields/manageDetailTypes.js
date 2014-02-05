@@ -706,7 +706,7 @@ function DetailTypeManager() {
 	//
 	function _editRecStructure(rty_ID) {
 
-		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+		var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
 		//this.location.replace(URL);
 
 		var dim = Hul.innerDimensions(this.window);
@@ -752,7 +752,7 @@ function DetailTypeManager() {
 
 							var k;
 							for (k in aUsage) {
-								url = "structure/editRecStructure.html?db="+db+"&rty_ID="+aUsage[k];
+								url = "structure/fields/editRecStructure.html?db="+db+"&rty_ID="+aUsage[k];
 								textTip = textTip + "<li><a href='#' onClick='top.HEURIST.util.popupURL(top,\""+url+"\",{\"close-on-blur\": false,\"no-resize\": false,height: 520,width: 640})'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
 							}
 							textTip = textTip + "</ul>";
@@ -973,7 +973,7 @@ function DetailTypeManager() {
 
 		if(_needToSaveFirst()) { return; }
 
-		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+		var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
 		if(dty_ID>0){
 			url = url + "&detailTypeID="+dty_ID; //existing
 		}else{

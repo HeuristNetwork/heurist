@@ -52,7 +52,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 		//window.history.pushState("object or string", "Title", location.pathname+'?db=
 
 	} else if ($mode == "rectype") {
-		$url = "structure/manageRectypes.php?db=" . HEURIST_DBNAME;
+		$url = "structure/rectypes/manageRectypes.php?db=" . HEURIST_DBNAME;
 		if (array_key_exists('rtID', $_REQUEST)) {
 			$rtID = $_REQUEST['rtID'];
 			$url = $url . "&rtID=" . $rtID;
@@ -140,13 +140,13 @@ if (array_key_exists('mode', $_REQUEST)) {
 					<span class="description">The main functions needed to create and design a database</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
+						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 								type="List the databases on the current server to which you have access">Open database</a></li>
 						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
 								type="Create a new database with essential structure elements">New database</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
-						<li><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 								title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
 						<li><a href="#"
 								onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
@@ -159,7 +159,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 				<div class="adminSection">
 					<ul>
 
-						<li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
+						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 							type="List the databases on the current server to which you have access">Open database</a></li>
 						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
@@ -190,25 +190,25 @@ if (is_admin()) {
 				<span class="description">Design data types and data entry rules for the database</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 							title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
-						<li><a href="#" onClick="loadContent('structure/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/rectypes/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define constraints on the record types which can be related, and allowable relationship types">Record constraints</a></li>
-						<li  class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+						<li  class="seperator"><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 								title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/fields/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Direct access to the global field definitions">Manage field types</a></li>
-						<li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/terms/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
                         <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Display/print a listing of the record types and their pointers and relationships, including usage counts">Relationships schema</a></li>
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 								title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
-						<li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
+						<li><a href="#" onClick="loadContent('describe/getDBStructureAsSQL.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
 							title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
 						<li><a href="#" onClick="loadContent('describe/getDBStructureAsXForms.php?db=<?=HEURIST_DBNAME?>')"
 							title="Save the record types as XForms">Structure (XForms)</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageMimetypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/mimetypes/manageMimetypes.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define the relationship between file extensions and mime type">Mime types</a></li>
 						<li class="seperator"></li>
 					</ul>
@@ -226,7 +226,7 @@ if (is_admin()) {
 						<li><a href="#"
 								onClick="loadContent('ugrps/quitGroupForSession.php?db=<?=HEURIST_DBNAME?>')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
 						<li class="seperator"><a href="#"
-								onClick="loadContent('setup/getUserFromDB.php?db=<?=HEURIST_DBNAME?>')"
+								onClick="loadContent('ugrps/getUserFromDB.php?db=<?=HEURIST_DBNAME?>')"
 								title="Import users one at a time from another database on the system">Import a user</a></li>
 						<li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>

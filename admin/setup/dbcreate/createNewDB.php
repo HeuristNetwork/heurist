@@ -169,7 +169,7 @@
 <?php
 	$newDBName = "";
 	$isNewDB = false; // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
-	// or by querying an existing Heurist database using getDBStructure (for crosswalk)
+	// or by querying an existing Heurist database using getDBStructureAsSQL (for crosswalk)
 
 	global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
 	global $done; // Prevents the makeDatabase() script from running twice
@@ -400,7 +400,7 @@
 			// yes, this is badly structured, but it works - if it ain't broke ...
 			$isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 
-			require_once('../structure/buildCrosswalks.php');
+			require_once('../structure/import/buildCrosswalks.php');
 
 			// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 			if($errorCreatingTables) {

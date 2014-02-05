@@ -202,7 +202,7 @@
 		if ($res1 != 0 ) {
 			die ("<h2>Error</h2>Unable to process database create command: <i>mysql -u... -p... $msg[1]</i>".
 				"<p>The database may already exist - please check on your MySQL server or ask your sysadmin for help".
-				"<p><a href='../structure/getListOfDatabases.php' target=_blank>List of Heurist databases</a>");
+				"<p><a href='../common/connect/getListOfDatabases.php' target=_blank>List of Heurist databases</a>");
 		}
 
 		$msg=explode(ADMIN_DBUSERPSWD,$upload_command); // $msg[1] strips out the password info ...

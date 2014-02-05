@@ -251,7 +251,7 @@ function MimetypeEditor() {
 //DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.basePath + "admin/structure/srvMimetypes.php";
+			var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
 			var callback = _updateResult;
 			var params = "method=save&db=" + _db + "&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);

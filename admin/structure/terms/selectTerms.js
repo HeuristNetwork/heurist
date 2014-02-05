@@ -784,7 +784,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&db="+db+"&domain="+_datatype,
+	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&db="+db+"&domain="+_datatype,
 		{
 		"close-on-blur": false,
 		"no-resize": false,

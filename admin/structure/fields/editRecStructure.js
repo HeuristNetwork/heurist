@@ -698,7 +698,7 @@ function EditRecStructure() {
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		var url = top.HEURIST.basePath +
-		"admin/structure/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
+		"admin/structure/fields/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
 
 		window.open(url,'','scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=no');
 /*
@@ -1743,7 +1743,7 @@ function onAddNewDetail(){
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 		popupSelect = Hul.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
+		"admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
 			height: dim.h*0.9,
@@ -1780,7 +1780,7 @@ function onDefineNewType(){
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+			var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
 
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
@@ -2065,7 +2065,7 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 											(top.HEURIST.database.name?top.HEURIST.database.name:''));
-		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
+		var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
 
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,

@@ -170,7 +170,7 @@
 	// Query heuristscholar.org Index database to find the URL of the installation you want to use as source
 	// The query should be based on DOAP metadata and keywords which Steven is due to set up in the Index database
 
-	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructure returns
+	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
 		$file = fopen("../setup/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"), "r");
 		while(!feof($file)) {
@@ -178,7 +178,7 @@
 		}
 		fclose($file);
 		$data = $output;
-	} else { // Request data from source database using getDBStructure.php
+	} else { // Request data from source database using getDBStructureAsSQL.php
 		//  Set information about the database you will be importing from
 		global $source_db_id;
 		if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
@@ -187,13 +187,13 @@
 			$source_db_id = '2'; //MAGIC NUMBER - ID of H3CoreDefinitions db in Heurist_System_Index database
 			$source_db_name = 'H3CoreDefinitions';
 			$source_db_prefix = 'hdb_';
-			$source_url = "http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+			$source_url = "http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 			// parameters were ?prefix=hdb_&db=H3CoreDefinitions";
 		} else {
 			$source_db_id = $_REQUEST["dbID"];
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
-			$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+			$source_url = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 		}
 /*****DEBUG****///
 
@@ -213,7 +213,7 @@ error_log("source url ".print_r($source_url,true));
 
 	// Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
-	$startToken = ">>StartData>>"; // also defined in getDBStructure.php
+	$startToken = ">>StartData>>"; // also defined in getDBStructureAsSQL.php
 
     if(!strpos($data, $startToken)){
         die("<br>The data returned did not correspond with the expected format. Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,800)."</xmp>");
@@ -244,7 +244,7 @@ error_log("source url ".print_r($source_url,true));
 
 	function getNextDataSet($splittedData) { // returns and removes the first set of data between markers from $splitteddata
 		global $tableNumber;
-		$endToken = ">>EndData>>"; // also defined in getDBStructure.php
+		$endToken = ">>EndData>>"; // also defined in getDBStructureAsSQL.php
 		if(!$tableNumber) {
 			$tableNumber = 1;
 		}
@@ -275,7 +275,7 @@ error_log("source url ".print_r($source_url,true));
 	} // getNextDataSet
 
 	// Do the splits and place in arrays
-	// Note, these MUST be in the same order as getDBStructure
+	// Note, these MUST be in the same order as getDBStructureAsSQL
 
 	$recTypeGroups = getNextDataSet($splittedData);
 	$detailTypeGroups = getNextDataSet($splittedData);
@@ -313,7 +313,7 @@ error_log("source url ".print_r($source_url,true));
 	// These insert statements updated by Ian ~12/8/11
 
 	// NOTE: It is ESSENTIAL that the insert statements here correspond in fields and in order with the
-	//       tables being written out by getDBStructure
+	//       tables being written out by getDBStructureAsSQL
 	//       Some tables not processed (defCalcFunctions, defCrosswalk, defLanguages, sysIdentification and UGrps and tags)
 
 

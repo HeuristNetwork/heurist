@@ -668,7 +668,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.
 		}
 
 		Hul.popupURL(top, top.HEURIST.basePath +
-			"admin/structure/selectTerms.html?datatype=relationtype&all="+allTerms+"&selonly=1&db="+db,
+			"admin/structure/terms/selectTerms.html?datatype=relationtype&all="+allTerms+"&selonly=1&db="+db,
 			{
 			"close-on-blur": false,
 			"no-resize": true,

@@ -93,7 +93,7 @@ function MimetypeManager() {
 						_initTable(arr);
 					};
 
-					var baseurl = top.HEURIST.basePath + "admin/structure/srvMimetypes.php";
+					var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
 					var params = "method=search&db=" + _db;
 					top.HEURIST.util.getJsonData(baseurl, __updateList, params);
 	};
@@ -265,7 +265,7 @@ function MimetypeManager() {
 								}
 							}
 
-							var baseurl = top.HEURIST.basePath + "admin/structure/srvMimetypes.php";
+							var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
 							var callback = _updateAfterDelete;
 							var params = "method=delete&db=" + _db + "&recID=" + recID;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -306,7 +306,7 @@ function MimetypeManager() {
 	// call new popup - to edit entity
 	//
 	function _editMimetype(id) {
-		var URL = top.HEURIST.basePath + "admin/structure/editMimetype.html?db=" + _db;
+		var URL = top.HEURIST.basePath + "admin/structure/mimetypes/editMimetype.html?db=" + _db;
 
 		if(Number(id)<0) {
 

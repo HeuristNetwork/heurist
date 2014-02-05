@@ -128,7 +128,7 @@ if (!is_admin()) {
 
 	function showOtherTerms(){
 
-		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
+		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
 		{
 		"close-on-blur": false,
 		"no-resize": false,

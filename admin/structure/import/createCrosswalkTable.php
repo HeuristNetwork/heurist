@@ -746,7 +746,7 @@ function dropTempDB(redirect) {
 	if(!dropped) {
 		dropped = true;
 
-	top.HEURIST.util.popupURL(top, "structure/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+	top.HEURIST.util.popupURL(top, "structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
 			"close-on-blur": true,
 			"no-resize": true,
 			//"no-close": true,
@@ -757,7 +757,7 @@ function dropTempDB(redirect) {
 			callback: function(context) {
 
 				if(redirect) {
-					window.location = "<?=HEURIST_BASE_URL?>/admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+					window.location = "<?=HEURIST_BASE_URL?>/admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
 				}
 			}
 	});

@@ -74,7 +74,7 @@ function EditRectypeTitle() {
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
             //find variables for given rectypeID and create variable tree
-            var baseurl = top.HEURIST.basePath + "admin/structure/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
+            var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
             "&ver=1&w=all&stype=&db="+db  + "&q=type:" + _rectypeID; //"&q=id:146433";
             top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
         }
@@ -465,7 +465,7 @@ function EditRectypeTitle() {
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -501,7 +501,7 @@ function EditRectypeTitle() {
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -529,7 +529,7 @@ function EditRectypeTitle() {
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
+        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {

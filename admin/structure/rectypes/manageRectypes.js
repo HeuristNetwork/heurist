@@ -508,7 +508,7 @@ function RectypeManager() {
                         _upload_icon(rectypeID,1);
                         /*var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-                        var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
+                        var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
                         top.HEURIST.util.popupURL(top, sURL, {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -931,10 +931,10 @@ function RectypeManager() {
     function _editDetailType(detailTypeID) {
         var URL = "";
         if(detailTypeID) {
-            URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
+            URL = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
         }
         else {
-            URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+            URL = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
         }
 
         var dim = Hul.innerDimensions(window);
@@ -987,7 +987,7 @@ function RectypeManager() {
                 }
 
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/duplicateRectype.php";
+                var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/duplicateRectype.php";
                 var callback = _editAfterDuplicate;
                 var params = "db=" + db + "&rtyID=" + rectypeID;
                 Hul.getJsonData(baseurl, callback, params);
@@ -1001,7 +1001,7 @@ function RectypeManager() {
     //
     function _editRecStructure(rty_ID) {
 
-        var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+        var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
         //this.location.replace(URL);
 
         var dim = Hul.innerDimensions(this.window);
@@ -1038,7 +1038,7 @@ function RectypeManager() {
     // listener of add button
     //
     function _onAddFieldType(){
-    var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+    var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
 
     Hul.popupURL(top, url,
     {   "close-on-blur": false,
@@ -1058,7 +1058,7 @@ function RectypeManager() {
 
         if(_needToSaveFirst()) { return; }
 
-        var url = top.HEURIST.basePath + "admin/structure/editRectype.html?db="+db;
+        var url = top.HEURIST.basePath + "admin/structure/rectypes/editRectype.html?db="+db;
         if(rty_ID>0){
             url = url + "&rectypeID="+rty_ID; //existing
         }else{
@@ -1444,7 +1444,7 @@ function _upload_icon(rectypeID,mode) {
     }
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID;
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID;
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
