@@ -33,11 +33,15 @@ function hAPI(_db, _oninit) { //, _currentUser
             _database = top.HEURIST.util.getUrlParameter('db');
         }
 
-        // does not work
+        // 
         var installDir = top.location.pathname.replace(/(((\?|admin|common|js|php)\/.*)|(index.*))/, "");
         that.basePath = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';
         that.database = _database;
+        
+        //path to old interface
+        installDir = top.location.pathname.replace(/(((\?|admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+        that.basePathOld = top.location.protocol + '//'+top.location.host  + installDir;
 
         //global variable defined in localization.js
         if(!(typeof regional === 'undefined')){ 
@@ -59,7 +63,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     var  success = (response.status == top.HAPI.ResponseStatus.OK);
                     if(success){
                         that.setCurrentUser(response.data.currentUser);
-                        that.registration_allowed = (response.data.registration_allowed==1);
+                        that.sysinfo = response.data.sysinfo;
                         that.dbowner_name = response.data.dbowner_name;
                         that.dbowner_email = response.data.dbowner_email;
                     }else{
@@ -479,6 +483,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     var that = {
 
         basePath: '',
+        basePathOld: '', //base path for old interface
         iconBaseURL: '',
         database: '',
 
@@ -581,7 +586,9 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         currentUser: _guestUser,
-        registration_allowed: false,
+        sysinfo: {},
+        dbowner_name: '',
+        dbowner_email: '',
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

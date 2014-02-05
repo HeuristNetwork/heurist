@@ -128,9 +128,10 @@ class System {
             
             $res = array(
                             "currentUser"=>$user,
-                            "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                            "sysinfo"=>array("registration_allowed"=>$this->get_system('sys_AllowRegistration'), "help"=>HEURIST_HELP),
                             "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
-                            "dbowner_email"=>@$dbowner['ugr_eMail'] );
+                            "dbowner_email"=>@$dbowner['ugr_eMail'],
+                            "" );
             return $res;
      }
 
