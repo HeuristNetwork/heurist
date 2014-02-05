@@ -8,7 +8,8 @@ $.widget( "heurist.profile_edit", {
     isdialog: true,  
     
     ugr_ID:0,
-    edit_data: {}    
+    edit_data: {},
+    isregistration: false    
       
     // callbacks
   },
@@ -20,6 +21,9 @@ $.widget( "heurist.profile_edit", {
     this.element.disableSelection();
       
     this.edit_form = $( "<div>" )
+        .appendTo( this.element );
+
+    this.reg_message = $( "<div>" )
         .appendTo( this.element );
         
     // Sets up element to apply the ui-state-focus class on focus.
@@ -52,10 +56,10 @@ $.widget( "heurist.profile_edit", {
                     that._doSave();
                 }
                 
-                var isreg = !(Number(that.options.ugr_ID)>0 || top.HAPI.is_admin());
-                if(isreg){
-                    $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI.dbowner_name+'  '+
-                    '<a href="mailto:'+top.HAPI.dbowner_email+'">'+top.HAPI.dbowner_email+'</a>');
+                that.options.isregistration = !(Number(that.options.ugr_ID)>0 || top.HAPI.is_admin());
+                if(that.options.isregistration){
+                    $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI.sysinfo.dbowner_name+'  '+
+                    '<a href="mailto:'+top.HAPI.sysinfo.dbowner_email+'">'+top.HAPI.sysinfo.dbowner_email+'</a>');
                 }
                 
                 if(that.options.isdialog){
@@ -67,7 +71,7 @@ $.widget( "heurist.profile_edit", {
                           resizable: true,
                           title: '',
                           buttons: [
-                            {text:top.HR(isreg?'Register':'Save'), click: __doSave, id:'btn_save'}, //, disabled:(isreg)?'disabled':''
+                            {text:top.HR(that.options.isregistration?'Register':'Save'), click: __doSave, id:'btn_save'}, //, disabled:(isreg)?'disabled':''
                             {text:top.HR('Cancel'), click: function() {
                               $( this ).dialog( "close" );
                             }}
@@ -76,7 +80,7 @@ $.widget( "heurist.profile_edit", {
                             allFields.val( "" ).removeClass( "ui-state-error" );
                           },
                           open: function(){
-                              enable_register(isreg);
+                              enable_register(!that.options.isregistration);
                           }
                        });
                 }
@@ -133,7 +137,7 @@ $.widget( "heurist.profile_edit", {
       if(Number(this.options.ugr_ID)>0){
           
           if(this.options.edit_data && this.options.edit_data['ugr_ID']==this.options.ugr_ID) {
-              
+               this.options.edit_data['ugr_Password']='';
           }else{
                 var that = this;
                 top.HAPI.SystemMgr.user_get( { UGrpID: this.options.ugr_ID},
@@ -147,7 +151,7 @@ $.widget( "heurist.profile_edit", {
                                     top.HEURIST.util.showMsgErr("Unexpected user data obtained from server");
                                 }
                             }else{
-                                top.HEURIST.util.showMsgErr(response.message);
+                                top.HEURIST.util.showMsgErr(response);
                             }
                         }
                 );
@@ -266,17 +270,25 @@ $.widget( "heurist.profile_edit", {
                             }
                         }
                 });
-                  
+                
+                that.options.edit_data['ugr_Type'] = 'user';
+                
                 var that = this;
                 top.HAPI.SystemMgr.user_save( that.options.edit_data,
                         function(response){
                             var  success = (response.status == top.HAPI.ResponseStatus.OK);
                             if(success){
                                 if(that.options.isdialog){
-                                        that.edit_form.dialog("close");
+                                    that.edit_form.dialog("close");
+                                    if(that.options.isregistration){
+                                        top.HEURIST.util.showMsgDlgUrl("apps/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    }else{
+                                        top.HEURIST.util.showMsgDlg("User information has been saved successfully");
+                                    }
+                                        
                                 }
                             }else{
-                                top.HEURIST.util.showMsgErr(response.message);
+                                top.HEURIST.util.showMsgErr(response);
                             }
                         }
                 );

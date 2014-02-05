@@ -52,10 +52,11 @@ if(@$_REQUEST['db']){
     <!-- this scripts are loaded expicitely - for debug purposes -->
     <script type="text/javascript" src="apps/file_manager.js"></script>
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
-    <script type="text/javascript" src="apps/search_links.js"></script>
+    <script type="text/javascript" src="apps/search.js"></script>
     <script type="text/javascript" src="apps/rec_list.js"></script>
-    <script type="text/javascript" src="apps/profile.js"></script>
     <!-- script type="text/javascript" src="apps/search.js"></script>
+    <script type="text/javascript" src="apps/search_links.js"></script>
+    <script type="text/javascript" src="apps/profile_edit.js"></script>
     <script type="text/javascript" src="apps/profile.js"></script>
     <script type="text/javascript" src="apps/pagination.js"></script>
      -->

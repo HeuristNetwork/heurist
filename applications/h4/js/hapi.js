@@ -64,8 +64,6 @@ function hAPI(_db, _oninit) { //, _currentUser
                     if(success){
                         that.setCurrentUser(response.data.currentUser);
                         that.sysinfo = response.data.sysinfo;
-                        that.dbowner_name = response.data.dbowner_name;
-                        that.dbowner_email = response.data.dbowner_email;
                     }else{
                         top.HEURIST.util.showMsgErr(response.message);
                     }
@@ -587,8 +585,6 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         currentUser: _guestUser,
         sysinfo: {},
-        dbowner_name: '',
-        dbowner_email: '',
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

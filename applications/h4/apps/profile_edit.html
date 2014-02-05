@@ -1,12 +1,9 @@
-<script type="text/javascript">
-</script>  
 <form>
 <fieldset>
   
-    <div>
+    <div class="mode-edit">
         <div class="header"><label for="ugr_ID">User ID</label></div>
         <input type="text" name="ugr_ID" id="ugr_ID" class="text ui-widget-content ui-corner-all" readonly="readonly"/>
-        <input type="hidden" name="ugr_Type" id="ugr_Type" value="user" />
     </div>
     <div>
         <div class="header"><label for="ugr_FirstName">Given name</label></div>
@@ -55,7 +52,7 @@
     </div>
     <div class="mode-admin">
         <div class="header"><label for="ugr_Enabled">Enabled</label></div>
-        <input type="checkbox" id="ugr_Enabled" name="ugr_Enabled" class="text ui-widget-content ui-corner-all"/>
+        <input type="checkbox" id="ugr_Enabled" name="ugr_Enabled" class="text ui-widget-content ui-corner-all" checked="checked"/>
             <div class="prompt">
                 Check to enable the user, unchecked users will not be able to log in
             </div>
@@ -196,7 +193,7 @@
     <p>If you experience problems with the registration process, please let us know what went wrong (and send your registration details for manual addition).</p>
     <p id="contactDetails"></p>
     <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
-    <label>I have read and agree to the Terms and Conditions of Use above</label>
+    <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
 </div>
   
 </form>

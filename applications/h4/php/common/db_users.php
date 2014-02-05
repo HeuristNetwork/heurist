@@ -105,7 +105,8 @@ function user_getDbOwner($mysqli, $field=null)
 */
 function user_ResetPassword($system, $username){
     if($username){
-         $user = user_getByField($system->get_mysqli(), 'ugr_Name', $username);
+         $mysqli = $system->get_mysqli();
+         $user = user_getByField($mysqli, 'ugr_Name', $username);
          if(null==$user) $user = user_getByField($system->get_mysqli(), 'ugr_Name', $username);
          if(null==$user) {
             $system->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / email");
@@ -113,7 +114,7 @@ function user_ResetPassword($system, $username){
          }else{
             $new_passwd = generate_passwd();
             $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
-            mysql__insertupdate($system->get_mysqli(), "sysUGrps", "ugr_", $record);
+            $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
             if(is_numeric($res)>0){
                 
                 $email_title = 'Password reset';
@@ -294,13 +295,13 @@ function user_Update($system, $record){
             //encrypt password            
             $tmp_password = null;
             if($rectype=='user'){
-                if(@$record['ugr_Password']){ 
-                    if($record['ugr_Password']!=''){
-                        $tmp_password = $record['ugr_Password'];
-                        $record['ugr_Password'] = hash_it($tmp_password);
-                    }else{
-                        unset($record['ugr_Password']);
-                    }
+                
+             
+                if(@$record['ugr_Password'] && $record['ugr_Password']!=''){ 
+                     $tmp_password = $record['ugr_Password'];
+                     $record['ugr_Password'] = hash_it($tmp_password);
+                }else{
+                     unset($record['ugr_Password']);
                 }
                 if($system->get_user_id()<1){ //not logged in - always disabled
                     $record['ugr_Enabled'] = "n";
@@ -308,17 +309,20 @@ function user_Update($system, $record){
                 if("y"==@$record['ugr_Enabled']){
                     $is_approvement = user_isApprovement($system, $recID);
                 }
+
             }
             
             $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr", $record);
             if(is_numeric($res)>0){
                 
+                $new_recID = $res;
+                
                 //actions on complete
                 if($rectype=='user'){
                     if($recID<1 && $system->get_user_id()<1){
-                        user_EmailAboutNewUser($mysqli, $recID);
+                        user_EmailAboutNewUser($mysqli, $new_recID);
                     }else if($recID<1 || $is_approvement){
-                        user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement);
+                        user_EmailApproval($mysqli, $new_recID, $tmp_password, $is_approvement);
                     }
                     
                 }else if($recID<1){
@@ -332,7 +336,7 @@ function user_Update($system, $record){
                 $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
             }
         }else{   
-            $system->addError(HEURIST_REQUEST_DENIED);
+            $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights');
         }
         
     }  else {
@@ -404,7 +408,7 @@ function user_EmailAboutNewUser($mysqli, $recID){
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL_OLD."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
             
@@ -435,11 +439,11 @@ function user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement){
             }
 
             // point them to the home page
-            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
+            //$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."?db=".HEURIST_DBNAME." with the username: " . $ugr_Name;
     
             //give them a pointer to the search page for the database
             $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
-                HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+                HEURIST_BASE_URL."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 
 
             if($tmp_password!=null){

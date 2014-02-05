@@ -93,7 +93,7 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
         $params['w'] = 'all';
     }
 
-    if (@$params['w'] == 'B'  ||  @$params['w'] == BOOKMARK) {    // my bookmark entries
+    if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
         $search_domain = BOOKMARK;
     } else if (@$params['w'] == 'e') { //everything - including temporary
         $search_domain = EVERYTHING;

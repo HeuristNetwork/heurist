@@ -79,6 +79,41 @@ function fileGetPathOrURL($system, $file_ids, $type){
     
 }
 
+/**
+* Return full URL to thumbnail for given record ID
+* 
+* @param mixed $system
+* @param mixed $recIDs
+*/
+function fileGetThumbnailURL($system, $recID){
+    
+   $thumb_url = null;
+    
+   $query = "select recUploadedFiles.ulf_ObfuscatedFileID".
+            " from recDetails".
+            " left join recUploadedFiles on ulf_ID = dtl_UploadedFileID".
+            " left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
+            " where dtl_RecID = $recID" .
+            " and (dtl_UploadedFileID is not null)".    // no dty_ID of zero so undefined are ignored
+            " and (fxm_MimeType like 'image%' or ulf_Parameters like '%mediatype=image%')".
+            " limit 1";
+            
+   $fileid = mysql__select_value($system->get_mysqli(), $query);
+   if($fileid){
+       
+        $thumbfile = 'ulf_'.$fileid.'.png';
+
+        if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
+            $thumb_url = HEURIST_THUMB_BASE_URL.$thumbfile;
+        }else{
+            $thumb_url = HEURIST_BASE_URL."file.php?db=".HEURIST_DBNAME."&thumb=".$fileid;
+        }
+   }
+
+
+   return $thumb_url;            
+}
+
 
 /**
 * Returns files for given array of records for specified users

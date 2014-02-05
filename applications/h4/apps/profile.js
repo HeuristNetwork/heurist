@@ -370,7 +370,7 @@ $.widget( "heurist.profile", {
                     $(that.document).trigger(top.HAPI.Event.LOGOUT);
                     that._refresh();
                 }else{
-                    top.HEURIST.util.showMsgErr(response.message);
+                    top.HEURIST.util.showMsgErr(response);
                 }
             }
         );
@@ -409,7 +409,7 @@ $.widget( "heurist.profile", {
                                     $dlg.dialog( "close" );
                                     top.HEURIST.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
                                 }else{
-                                    top.HEURIST.util.showMsgErr(response.message);
+                                    top.HEURIST.util.showMsgErr(response);
                                 }
                          });
                       }
@@ -431,8 +431,6 @@ $.widget( "heurist.profile", {
 
                                     top.HAPI.setCurrentUser(response.data.currentUser);
                                     top.HAPI.sysinfo = response.data.sysinfo;
-                                    top.HAPI.dbowner_name = response.data.dbowner_name;
-                                    top.HAPI.dbowner_email = response.data.dbowner_email;
 
                                     $(that.document).trigger(top.HAPI.Event.LOGIN, [top.HAPI.currentUser]);
 
@@ -465,14 +463,16 @@ $.widget( "heurist.profile", {
                 //$dlg.find("#btn_login2").button("option","label",top.HR('Reset password'));
                 $dlg.find("#fld_reset").show();
                 $dlg.find("#fld_login").hide();
+                $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
             });
 
             // login dialog definition
             $dlg.dialog({
               autoOpen: false,
-              height: 300,
+              //height: 300,
               width: 350,
               modal: true,
+              resizable: false,
               title: top.HR('Login'),
               buttons: [
                 {text:top.HR('Login'), click: __doLogin, id:'btn_login2'},
@@ -490,7 +490,7 @@ $.widget( "heurist.profile", {
                 //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
                 $dlg.find("#fld_reset").hide();
                 $dlg.find("#fld_login").show();
-                $dlg.find(".message").text('');
+                $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
               }
             });
 

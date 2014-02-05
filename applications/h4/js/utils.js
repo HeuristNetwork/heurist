@@ -9,7 +9,7 @@ if (!top.HEURIST){
     top.HEURIST = {};
 }
 if (! top.HEURIST.util) top.HEURIST.util = {
-
+    
     /*
     isArray: function (a)
     {
@@ -482,17 +482,34 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         top.HEURIST.util.showMsgDlg(msg, null, "Error");
     },
     
+    getMsgDlg: function(){
+            var $dlg = $( "#dialog-common-messages" );
+            if($dlg.length==0){
+                $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+            }
+            return $dlg;
+    },
+
+    showMsgDlgUrl: function(url, buttons, title){
+        
+        if(url){
+            $dlg = top.HEURIST.util.getMsgDlg();
+            $dlg.load(url, function(){
+                    top.HEURIST.util.showMsgDlg(null, buttons, title);    
+            });
+        }
+    },
+    
     showMsgDlg: function(message, buttons, title){
         
-        var $dlg = $( "#dialog-confirm" );
-        if($dlg.length==0){
-            $dlg = $('<div>').appendTo('body');
+        $dlg = top.HEURIST.util.getMsgDlg();
+        
+        if(message!=null){
+            $dlg.empty();
+            $dlg.append('<span>'+top.HR(message)+'</span>');
         }
-        if(!title) title ='';
         
-        $dlg.empty();
-        $dlg.append('<span>'+top.HR(message)+'</span>');
-        
+        if(!title) title ='Info';
         if (typeof buttons === "function"){
 
             var titleYes = top.HR('Yes'),
@@ -521,6 +538,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             title: top.HR(title),
             resizable: false,
             //height:140,
+            width: 'auto',
             modal: true,
             buttons: buttons
         });

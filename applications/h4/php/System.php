@@ -90,6 +90,7 @@ class System {
                 //@todo  - test upload and thumb folder exist and writeable
                 define('HEURIST_UPLOAD_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/');
                 define('HEURIST_THUMB_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/');
+                define('HEURIST_THUMB_BASE_URL', HEURIST_SERVER_URL .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/' );
 
             }
             return true;
@@ -128,10 +129,12 @@ class System {
             
             $res = array(
                             "currentUser"=>$user,
-                            "sysinfo"=>array("registration_allowed"=>$this->get_system('sys_AllowRegistration'), "help"=>HEURIST_HELP),
-                            "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
-                            "dbowner_email"=>@$dbowner['ugr_eMail'],
-                            "" );
+                            "sysinfo"=>array(
+                                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'), 
+                                    "help"=>HEURIST_HELP,
+                                    "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
+                                    "dbowner_email"=>@$dbowner['ugr_eMail'])
+                        );
             return $res;
      }
 
@@ -322,7 +325,17 @@ class System {
             //db_users
             $user = user_getByField($this->mysqli, 'ugr_Name', $username);
 
-            if($user && $user['ugr_Enabled'] == 'y'  && crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
+            
+//DEBUG error_log($user['ugr_Enabled'].">>>=".crypt($password, $user['ugr_Password'])."   ".$user['ugr_Password']);
+            
+            if($user){
+            
+                if($user['ugr_Enabled'] != 'y'){
+                    
+                    $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
+                    return false;
+                    
+                }else if ( crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
 
                 $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
                 $_SESSION[$this->dbname_full]['ugr_Name'] = $user['ugr_Name'];
@@ -364,6 +377,7 @@ class System {
                 //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
                 return true;
+                }
 
             }else{
                 $this->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / password");

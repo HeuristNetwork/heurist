@@ -26,9 +26,9 @@ if( ! $system->init(@$_REQUEST['db']) ){
 
     //no enough permission for guest
     if ( $system->get_user_id()<1 && 
-            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="usr_get" || $action=="sysinfo" ) ) {
+            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" ) ) {
 
-         $response = $system->addError(HEURIST_REQUEST_DENIED);
+         $response = $system->addError(HEURIST_REQUEST_DENIED, "Operation denied. Not enough rights");
 
     }else{
 
