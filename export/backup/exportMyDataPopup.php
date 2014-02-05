@@ -219,7 +219,7 @@ if(!$mode) {
         
     }
   
-	//copy(dirname(__FILE__)."/../../admin/setup/coreDefinitions.txt", $folder."coreDefinitions.txt");
+	//copy(dirname(__FILE__)."/../../admin/setup/dbcreate/coreDefinitions.txt", $folder."coreDefinitions.txt");
 
 	//archive folder
 	//zipDirectory($folder, HEURIST_UPLOAD_DIR."backup/".$user."_backup.zip");

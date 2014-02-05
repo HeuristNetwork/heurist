@@ -37,7 +37,7 @@
 --        1. create referential constraints with AddReferentialConstraints.sql
 --        2. add stored procedures from AddProceduresTriggers.sql
 --        3. import core content (minimal database definitions) from
---           admin/setup/coreDefinitions.txt
+--           admin/setup/dbcreate/coreDefinitions.txt
 
 -- The next section of this file is a PHPMyAdmin dump of H3 database structure
 -- DO NOT include referential integrity or triggers/procedures. Turn off use of

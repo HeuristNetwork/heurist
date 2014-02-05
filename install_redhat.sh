@@ -134,7 +134,7 @@ echo -e "\n"
 echo "CREATE DATABASE hdb_ExampleDB" | mysql -uroot -p
 
 echo "Please enter your mysql root password... again..."
-mysql -uroot -p hdb_ExampleDB < /var/www/html/$1/admin/setup/buildExampleDB.sql
+mysql -uroot -p hdb_ExampleDB < /var/www/html/$1/admin/setup/dbcreate/buildExampleDB.sql
 
 # Build ExampleDB as a starting point (may need to change to IntroDB or H3Sandpit)
 sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB

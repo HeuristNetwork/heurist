@@ -131,7 +131,7 @@
 				if ($err) {
 					print "<p>MySQL returns: ".$err;
 					print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb into the current database</b>".
-						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+						"<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 				} else {
 /* IJ: 19-Sep-12 Don't make imported users members of the Database Managers group - too risky.
 					$newUserID =  mysql_insert_id();
@@ -142,15 +142,15 @@
 					if (!$res1) {
 						print "<p>MySQL returns: ".$err;
 						print "<p><b>Sorry, Unable to allocate the new user to a group - please set maually</b>".
-							"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+							"<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 					} else {
 					print "<p><b>New user allocated as a member of the 'Database Managers' group (# 1) - edit group allocation as required".
-						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+						"<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 					}
 */
-					print "<p><b>New user allocated as not a member of any group. Edit group allocation as required".
-						"<p><a href=".HEURIST_BASE_URL."admin/setup/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
+					print "<p><b>New user was not allocated as a member of any group. Edit group allocation as required".
+						"<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another</a>";
 
 				}
 			}

@@ -108,7 +108,7 @@ function checkVersionOnMainServer($version_in_session)
 
         //send request to main server HEURIST_INDEX_BASE_URL
         // TODO: GetCurrentVersion shouldn't need to specify a database, it's a potential weak point
-        $url = HEURIST_INDEX_BASE_URL . "admin/setup/getCurrentVersion.php?db=H3MasterIndex&check=1";
+        $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=H3MasterIndex&check=1";
 
         $rawdata = loadRemoteURLContent($url);
 

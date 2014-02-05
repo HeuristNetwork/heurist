@@ -59,9 +59,9 @@
     // * IMPORTANT *
     // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
     // Version info in common/config/initialise.php
-    // admin/setup/blankDBStructure.sql - dump structure of hdb_H3CoreDefinitions database and insert where indicated in file
-    // admin/setup/createDefinitionTablesOnly.sql - copy blankDBStructure.sql and delete non-definitional tables for temp db creation speed
-    // admin/setup/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
+    // admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_H3CoreDefinitions database and insert where indicated in file
+    // admin/setup/dbcreate/createDefinitionTablesOnly.sql - copy blankDBStructure.sql and delete non-definitional tables for temp db creation speed
+    // admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
     // List of fields in the include files in admin/structure/crosswalk, used for getDBStructure and insertions
     // print statements at the end of getDBStructure.php, must match the include files
 

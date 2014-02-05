@@ -163,23 +163,23 @@ if (array_key_exists('mode', $_REQUEST)) {
 							type="List the databases on the current server to which you have access">Open database</a></li>
 						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
-						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dboperations/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
 <?php
 if (is_admin()) {
 ?>
-						<li><a href="setup/deleteCurrentDB.php?db=<?=HEURIST_DBNAME?>"
+						<li><a href="setup/dboperations/deleteCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Delete a database completely">Delete entire database</a></li>
-						<li><a href="setup/clearCurrentDB.php?db=<?=HEURIST_DBNAME?>"
+						<li><a href="setup/dboperations/clearCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
 <?php
 }
 ?>
-						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('setup/dbproperties/registerDB.php?db=<?=HEURIST_DBNAME?>')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
-						<li><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dbproperties/editSysIdentification.php?db=<?=HEURIST_DBNAME?>')"
 							title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
-						<li><a href="#" onClick="loadContent('setup/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dbproperties/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>')"
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=<?=HEURIST_DBNAME?>')"
 							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>

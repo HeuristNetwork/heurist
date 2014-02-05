@@ -570,7 +570,7 @@
 			}catch(Exception $e){
 				echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
 				echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'</p>";
-				echo "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>
+				echo "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>
 				<img src='../../common/images/external_link_16x16.gif'/>Configure connection to IMAP mail server</a> (per-database)</p>";
 			}
 		?>
