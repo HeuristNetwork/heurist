@@ -36,7 +36,7 @@
     * **/
 
 	define('NO_DB_ALLOWED',1);
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
 	if (!is_logged_in() && HEURIST_DBNAME!="") {
 		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
@@ -55,9 +55,9 @@
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Create New Database</title>
-		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
 	</head>
 	<style>
 		.detailType {width:180px !important}
@@ -190,7 +190,7 @@
 		}else{*/
 ?>
 		<div id="loading">
-					<img src="../../common/images/mini-loading.gif" width="16" height="16" />
+					<img src="../../../common/images/mini-loading.gif" width="16" height="16" />
 					<strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
 		</div>
 		<script type="text/javascript">showProgress();</script>
@@ -400,7 +400,7 @@
 			// yes, this is badly structured, but it works - if it ain't broke ...
 			$isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 
-			require_once('../structure/import/buildCrosswalks.php');
+			require_once('../../structure/import/buildCrosswalks.php');
 
 			// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 			if($errorCreatingTables) {

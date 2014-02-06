@@ -31,8 +31,8 @@
 */
 
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 
     if(isForAdminOnly("to clone a database")){
         return;
@@ -50,9 +50,9 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Clone Database</title>
 
-		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+		<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
 
 		<style>
 			ul {color:#CCC;}
@@ -94,9 +94,9 @@
 
 		<div class="banner"><h2>Clone Database</h2></div>
 
-		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-		<script src="../../common/php/loadCommonInfo.php"></script>
+		<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+		<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+		<script src="../../../common/php/loadCommonInfo.php"></script>
 		<div id="page-inner" style="overflow:auto">
 
 			<p>This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. The new database is identical to the old in all respects including access.</p>
@@ -124,7 +124,7 @@
 				if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
 				?>
 				<div class="separator_row" style="margin:20px 0;"></div>
-				<form name='selectdb' action='straightCopyDatabase.php' method='get'>
+				<form name='selectdb' action='cloneDatabase.php' method='get'>
 					<input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
 					<input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
 					<p>The database will be created with the prefix "hdb_" (all databases created by this installation of the software will have the same prefix).</p>
@@ -167,14 +167,14 @@
 			return false;
 		}
 
-		straightCopyDatabase($targetdbname);
+		cloneDatabase($targetdbname);
 	}
 
 
 	// ---- COPY FUNCTION -----------------------------------------------------------------
 
 
-	function straightCopyDatabase($targetdbname) {
+	function cloneDatabase($targetdbname) {
 
 		// Use the file upload directory for this database because we know it should exist and be writable
 

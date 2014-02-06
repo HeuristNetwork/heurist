@@ -33,6 +33,8 @@
 
 define('ROOTINIT', 1);
 require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
+// TODO: something fishy: above path appears wrong, although phpEd navigates from this to the applyCredentials file 
+// However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang. 
 if (!is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
 	//HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
@@ -142,7 +144,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 					<ul>
 						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 								type="List the databases on the current server to which you have access">Open database</a></li>
-						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
+						<li><a href="#" onClick="loadContent('setup/dbcreate/createNewDB.php')"
 								type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
@@ -161,9 +163,9 @@ if (array_key_exists('mode', $_REQUEST)) {
 
 						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 							type="List the databases on the current server to which you have access">Open database</a></li>
-						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
+						<li><a href="#" onClick="loadContent('setup/dbcreate/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
-						<li><a href="#" onClick="loadContent('setup/dboperations/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dboperations/cloneDatabase.php?db=<?=HEURIST_DBNAME?>')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
 <?php
 if (is_admin()) {

@@ -33,6 +33,9 @@
 
 require_once(dirname(__FILE__)."/../config/initialise.php");
 
+header("Content-type: text/javascript");
+
+
 print "if (!top.HEURIST) top.HEURIST = {};\n";
 print "if (!top.HEURIST.magicNumbers) { \n top.HEURIST.magicNumbers = {";
 

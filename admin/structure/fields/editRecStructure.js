@@ -191,11 +191,11 @@ function EditRecStructure() {
 			var myColumnDefs = [
 			{
 				key:'rst_NonOwnerVisibility',
-				label: "<img src='../../common/images/up-down-arrow.png'>",
+				label: "<img src='../../../common/images/up-down-arrow.png'>",
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					if(Number(_expandedRecord) !== Number(oRecord.getData("rst_ID"))){
-						elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png' title='Drag up/down to change order of fields in the data entry form' style='cursor:pointer;'>";
+						elLiner.innerHTML = "<img src='../../../common/images/up-down-arrow.png' title='Drag up/down to change order of fields in the data entry form' style='cursor:pointer;'>";
 					}
 				}
 			},
@@ -313,9 +313,9 @@ function EditRecStructure() {
 						var status = oRecord.getData('rst_Status');
 						var isRequired = (oRecord.getData('rst_RequirementType')==='required');
 						if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
-							statusLock  = '<img src="../../common/images/lock_bw.png" title="This field is locked against deletion due to its status value" />';
+							statusLock  = '<img src="../../../common/images/lock_bw.png" title="This field is locked against deletion due to its status value" />';
 						}else{
-							statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Click to remove field from this record type" /><\/a>';
+							statusLock = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" title="Click to remove field from this record type" /><\/a>';
 						}
 						elLiner.innerHTML = statusLock;
 				}
@@ -741,7 +741,7 @@ function EditRecStructure() {
 		if(!Hul.isnull(record_id)){
 
 			var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
-			elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png'>";
+			elLiner.innerHTML = "<img src='../../../common/images/up-down-arrow.png'>";
 
 			if(needSave){
 				_fromUItoArray(rst_ID); //before collapse save from UI to HEURIST

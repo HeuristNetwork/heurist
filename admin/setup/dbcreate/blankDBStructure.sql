@@ -45,7 +45,7 @@
 
 -- ***************************************************************************
 
---    *  createDefinitionTablesOnly.sql must be updated at the same time
+--    *  blankDBStructureDefinitionsOnly.sql must be updated at the same time
 --    *  if there is any change of structure
 
 --   * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP

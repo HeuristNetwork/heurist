@@ -13,7 +13,7 @@
 */
 
 /**
-* createDefinitionTablesOnly.sql: SQL file to create the definition tables for use in crosswalking 
+* blankDBStructureDefinitionsOnly.sql: SQL file to create the definition tables for use in crosswalking 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

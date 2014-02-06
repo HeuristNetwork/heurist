@@ -30,9 +30,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-    require_once(dirname(__FILE__)."/../../common/config/initialise.php");
-    require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
-    require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
+    require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
+    require_once(dirname(__FILE__)."/../../../records/files/fileUtils.php");
+    require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
     $is_check = @$_REQUEST["check"];
 

@@ -32,8 +32,8 @@
 */
 
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
     if(isForAdminOnly("to import structural elements")){
        return;
@@ -45,18 +45,18 @@
 		<title>Selection of source database for structure import</title>
 
 		<!-- YUI -->
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-		<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+		<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 
-		<link rel=stylesheet href="../../common/css/global.css">
-		<link rel=stylesheet href="../../common/css/admin.css">
+		<link rel=stylesheet href="../../../common/css/global.css">
+		<link rel=stylesheet href="../../../common/css/admin.css">
 
 		<style type="text/css">
 			.yui-skin-sam .yui-dt-liner { white-space:nowrap; }
@@ -74,7 +74,7 @@
 		<div class="banner"><h2>Import structural definitions into current database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
-			<div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
+			<div id="statusMsg"><img src="../../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 			<p>The list below shows available databases registered with the HeuristScholar.org Index database which have the same major/minor version as the current database<br />
             <h4>Older (or newer) format registered databases may not shown, as this list only shows databases with version number <?=HEURIST_DBVERSION?>.</h4><br />
 Use the filter to locate a specific term in the name or title. <br />
@@ -91,7 +91,10 @@ Click the database icon on the left to view available record types in that datab
 			<div id="bottomPagination"></div>
 
 
-			<form id="crosswalkInfo" action="buildCrosswalks.php?db=<?= HEURIST_DBNAME?>" method="POST">
+			<!-- Beware: buildCrosswalks.php does includes of record structure in  admin/structure/crosswalk, and these includes
+                 appear to use paths relative to th calling script not relative to buildCrosswalks; so this will break if moved to
+                 a different level in the tree than other calling scripts -currently admin/setup/dbcreate createNewDB.php -->
+            <form id="crosswalkInfo" action="buildCrosswalks.php?db=<?= HEURIST_DBNAME?>" method="POST">
 				<input id="dbID" name="dbID" type="hidden">
 				<input id="dbURL" name="dbURL" type="hidden">
 				<input id="dbName" name="dbName" type="hidden">
@@ -103,11 +106,15 @@ Click the database icon on the left to view available record types in that datab
 			var registeredDBs = [];
 			<?php
 
-				require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+				require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 				mysql_connection_insert(DATABASE); // Connect to the current database
 
 				// Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
-				$reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
+				
+                // TODO: 6 feb 2014 This is the correct path for version 3.1.8 and above on the master index
+                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
+                // TODO: 6 feb 2014 This is a temporary path for version 3.1.7 and below on the master index
+                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
                 
 //error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
                 
@@ -191,7 +198,11 @@ Click the database icon on the left to view available record types in that datab
 						}
 					}
 				}else{
-                    echo 'alert("Can not access '.$reg_url.'\n\n Verify your proxy settings")';
+                    echo 'alert("Can not access '.$reg_url.
+                    '\n\n Please verify your proxy settings\n\n'.
+                    'Special note Feb 2014: this error may be due to a server upgrade which should be complete by the end of the month. '.
+                    'Should you run into this before it is fixed, please advise the Heurist team via a bug report and we will '.
+                    'provide you with a workaround.")';
                 }
 			?>
 
@@ -224,7 +235,7 @@ Click the database icon on the left to view available record types in that datab
 						dataArray = [];
 						for(dbID in registeredDBs) {
 							db = registeredDBs[dbID];
-							dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<img src="../../common/images/b_database.png" class="button"/>']);
+							dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<img src="../../../common/images/b_database.png" class="button"/>']);
 						}
 
 						var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{

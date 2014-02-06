@@ -29,7 +29,7 @@
 
 
 // User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
 if(isForAdminOnly("to modify database structure")){
     return;
@@ -39,56 +39,58 @@ if(isForAdminOnly("to modify database structure")){
     <head>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Record Types / Fields</title>
+        <title>Record Types / Field Definitions</title>
 
-        <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+        <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
 
         <!-- YUI -->
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+        
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
         <!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
         <!-- DATATABLE DEFS -->
-        <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+        <link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
         <!-- datatable Dependencies -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
         <!-- Source files -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
         <!-- END DATATABLE DEFS-->
 
         <!-- PAGINATOR -->
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
         <!-- END PAGINATOR -->
 
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
 
     </head>
 
     <body class="popup yui-skin-sam">
 
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/displayPreferences.php"></script>
-        <script src="../../common/php/getMagicNumbers.php"></script>
-        <script src="../../common/php/loadCommonInfo.php"></script>
-        <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
-        <script src="tabDragDrop.js"></script>
-        <script src="manageRectypes.js"></script>
+        <script src="../../../common/php/displayPreferences.php"></script>
+        <script src="../../../common/php/getMagicNumbers.php"></script>
+        <script src="../../../common/php/loadCommonInfo.php"></script>
+
+        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+        <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+        <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
+        <script type="text/javascript" src="manageRectypes.js"></script>
 
 
 
         <div>
-            <div class="banner"><h2>Record Types / Fields</h2></div>
+            <div class="banner"><h2>Record Type and Field definitions</h2></div>
             <div id="page-inner">
                 <!--
                 <div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"

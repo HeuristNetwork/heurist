@@ -58,8 +58,8 @@
 	// without importing new definitions, in other words just setting up the crosswalk to be able to send queries
 	// and/or download data from another instance.
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
 	/* ARTEM
 	if (!is_logged_in()) {
@@ -83,7 +83,7 @@
         }
 	}
 
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 
 	global $errorCreatingTables;
 	$errorCreatingTables = FALSE;
@@ -107,7 +107,7 @@
 	/*****DEBUG****///error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
 	// * IMPORTANT *
 	//   If database format is changed, update version info, include files, sql fiels for new dbs etc.
-	// see comprehensive lsit in admin/structure/getDBStrucutre.php
+	// see comprehensive lsit in admin/descriibe/getDBStructureAsSQL.php
 
 
 
@@ -122,7 +122,7 @@
 
 	// Check if someone else is already modifying database definitions, if so: stop.
 
-	if($isNewDB && !file_exists("../setup/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
+	if($isNewDB && !file_exists("../../setup/dbcreate/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
 		$errorCreatingTables = true;
 		$isCreateNew = true;
 		echo (($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." not found</br>");
@@ -154,11 +154,11 @@
 		mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");	// database might exist from previous use
 		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
 		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-		" -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
+		" -D$tempDBName < ../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {
 			unlockDatabase();
-			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing createDefinitionTablesOnly.sql)");
+			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing blankDBStructureDefinitionsOnly.sql)");
 		}
 	}
 
@@ -172,7 +172,7 @@
 
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
-		$file = fopen("../setup/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"), "r");
+		$file = fopen("../../setup/dbcreate/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"), "r");
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);
 		}
@@ -184,20 +184,32 @@
 		if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
 			// TODO: THIS SHOULD NOT HAPPEN, would be better to issue a warning and exit
 			// TODO: check that this points at the correct reference database
-			$source_db_id = '2'; //MAGIC NUMBER - ID of H3CoreDefinitions db in Heurist_System_Index database
+			/*
+            $source_db_id = '2'; //MAGIC NUMBER - ID of H3CoreDefinitions db in Heurist_System_Index database
 			$source_db_name = 'H3CoreDefinitions';
 			$source_db_prefix = 'hdb_';
 			$source_url = "http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 			// parameters were ?prefix=hdb_&db=H3CoreDefinitions";
+            */
+            
+            unlockDatabase();
+            die("Request for database structure to import does not specify a database - please advise the Heurist team through a bug report");
+            
 		} else {
+            // Set upquery to the exhcange format feed from the selected  database
 			$source_db_id = $_REQUEST["dbID"];
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
-			$source_url = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
-		}
-/*****DEBUG****///
 
-error_log("source url ".print_r($source_url,true));
+            // TODO: This is the correct URL for vsn 3.1.8 and above, Feb 2014
+            // $source_url = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+
+            // TODO: this is a fudge to access  old standard server 3.1.7 and before, prior to late Feb 2014
+            $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+
+        }
+
+        error_log("source url ".print_r($source_url,true));
 
 		$data = loadRemoteURLContent($source_url);
 
@@ -216,7 +228,8 @@ error_log("source url ".print_r($source_url,true));
 	$startToken = ">>StartData>>"; // also defined in getDBStructureAsSQL.php
 
     if(!strpos($data, $startToken)){
-        die("<br>The data returned did not correspond with the expected format. Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,800)."</xmp>");
+        die("<br>The data returned from the selected database <a href=$source_url>$source_url</a> did not correspond with the expected format. ".
+        "<p/>Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,2000)."</xmp>");
     }
 
 
@@ -316,11 +329,13 @@ error_log("source url ".print_r($source_url,true));
 	//       tables being written out by getDBStructureAsSQL
 	//       Some tables not processed (defCalcFunctions, defCrosswalk, defLanguages, sysIdentification and UGrps and tags)
 
-
+    
 	function processRecTypes($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defRecTypesFields.inc";
+			include "../../structure/crosswalk/defRecTypesFields.inc";
+            // Note re paths: it seems the relative path is ../../structure/crosswalk/ because it is relative to the calling script (createNewDB.php)
+            // this can be problematic if buildCrosswalks is called from different levels in the tree
 			//  debugStop($dataSet);
 			$query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
 			mysql_query($query);
@@ -335,7 +350,7 @@ error_log("source url ".print_r($source_url,true));
 	function processDetailTypes($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defDetailTypesFields.inc";
+			include "../../structure/crosswalk/defDetailTypesFields.inc";
 			$query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -350,7 +365,7 @@ error_log("source url ".print_r($source_url,true));
 	function processRecStructure($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defRecStructureFields.inc";
+			include "../../structure/crosswalk/defRecStructureFields.inc";
 			$query = "INSERT INTO `defRecStructure` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -365,7 +380,7 @@ error_log("source url ".print_r($source_url,true));
 	function processTerms($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defTermsFields.inc";
+			include "../../structure/crosswalk/defTermsFields.inc";
 			$query = "SET FOREIGN_KEY_CHECKS = 0;";
 			mysql_query($query);
 			$query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
@@ -382,7 +397,7 @@ error_log("source url ".print_r($source_url,true));
 	function processOntologies($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defOntologiesFields.inc";
+			include "../../structure/crosswalk/defOntologiesFields.inc";
 			$query = "INSERT INTO `defOntologies` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -397,7 +412,7 @@ error_log("source url ".print_r($source_url,true));
 	function processRelationshipConstraints($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defRelationshipConstraintsFields.inc";
+			include "../../structure/crosswalk/defRelationshipConstraintsFields.inc";
 			$query = "INSERT INTO `defRelationshipConstraints` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -412,7 +427,7 @@ error_log("source url ".print_r($source_url,true));
 	function processFileExtToMimetype($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defFileExtToMimetypeFields.inc";
+			include "../../structure/crosswalk/defFileExtToMimetypeFields.inc";
 			$query = "INSERT INTO `defFileExtToMimetype` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -427,7 +442,7 @@ error_log("source url ".print_r($source_url,true));
 	function processRecTypeGroups($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defRecTypeGroupsFields.inc";
+			include "../../structure/crosswalk/defRecTypeGroupsFields.inc";
 			$query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -442,7 +457,7 @@ error_log("source url ".print_r($source_url,true));
 	function processDetailTypeGroups($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defDetailTypeGroupsFields.inc";
+			include "../../structure/crosswalk/defDetailTypeGroupsFields.inc";
 			$query = "INSERT INTO `defDetailTypeGroups` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -455,7 +470,7 @@ error_log("source url ".print_r($source_url,true));
 	function processTranslations($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include "crosswalk/defTranslationsFields.inc";
+			include "../../structure/crosswalk/defTranslationsFields.inc";
 			$query = "INSERT INTO `defTranslations` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {

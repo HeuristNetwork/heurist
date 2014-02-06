@@ -34,8 +34,8 @@
 */
 
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 
 
 if (! is_admin()) {
@@ -796,7 +796,7 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 // Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
 
-	echo "<html><head><link rel=stylesheet href='../../common/css/global.css'></head>";
+	echo "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head>";
 	echo "<body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
 
 	$message = "";

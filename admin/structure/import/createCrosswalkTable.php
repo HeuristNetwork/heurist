@@ -31,14 +31,14 @@
 */
 
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 	// Requires admin user, access to definitions though get_definitions is open
 	if (! is_admin()) {
-		 print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		 print "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 
 	mysql_connection_insert($tempDBName); // Use temp database
 
@@ -49,18 +49,18 @@
 <title>Heurist - Crosswalk</title>
 
 <!-- YUI -->
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/samples/yui-dt-expandable.css"/>
-<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
-<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/samples/yui-dt-expandable.css"/>
+<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
+<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
 <style type="text/css">
 .yui-skin-sam .yui-dt-liner {
 	white-space:nowrap;
@@ -152,17 +152,17 @@ var replaceRecTypeName = "";
 
 		}
 			// Add recordtypes to the table
-			/*array_push($tableRows,array('arrow'=>"<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
+			/*array_push($tableRows,array('arrow'=>"<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
 										'rtyID'=>$rectype["rty_ID"],
 										'rectype'=>$rectype["rty_Name"],
 										'matches'=>$numberOfApproxMatches,
-										'import'=>"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
+										'import'=>"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
 										'rtyRecTypeGroupID'=>$rectype["rty_RecTypeGroupID"]));*/
-			array_push($tableRows,array("<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
+			array_push($tableRows,array("<img id=\"arrow".$rectype["rty_ID"]."\" src=\"../../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",
 										$rectype["rty_ID"],
 										$rectype["rty_Name"],
 										$numberOfApproxMatches,
-										"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
+										"<a href=\"#import\"><img id=\"importIcon".$rectype["rty_ID"]."\" src=\"../../../common/images/download.png\" width=\"16\" height=\"16\" /></a>",
 										$rectype["rty_RecTypeGroupID"]));
 	}
 
@@ -518,8 +518,8 @@ function directImportWarning(event){
 }
 
 </script>
-<link rel=stylesheet href="../../common/css/global.css">
-<link rel=stylesheet href="../../common/css/admin.css">
+<link rel=stylesheet href="../../../common/css/global.css">
+<link rel=stylesheet href="../../../common/css/admin.css">
 </head>
 <body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
 <div id=popup-saved style="display: none">
@@ -527,8 +527,8 @@ function directImportWarning(event){
 </div>
 
 <div class="banner"><h2>Import record types from <?= "\"".($source_db_id ?$source_db_id." : " : "").$source_db_name."\""?> </h2></div>
-<script src="../../common/js/utilsLoad.js"></script>
-<script src="../../common/js/utilsUI.js"></script>
+<script src="../../../common/js/utilsLoad.js"></script>
+<script src="../../../common/js/utilsUI.js"></script>
 <div id="page-inner" style="overflow:auto">
 
 <!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
@@ -580,7 +580,7 @@ function processAction(rtyID, action, rectypeName) {
 	// Lock import, and set import icon to loading icon
 	if(action == "import") {
 		importPending = true;
-		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
+		document.getElementById("importIcon"+rtyID).src = "../../../common/images/mini-loading.gif";
 		curTime = new Date();
 		logHeader = "Importing record type " + '<p style="color:green; font-weight:bold">' + rectypeName + " at "+ curTime +"</p>";
 	}
@@ -608,7 +608,7 @@ function processAction(rtyID, action, rectypeName) {
 			importPending = false;
 			var response = xmlhttp.responseText;
 
-			document.getElementById("importIcon"+rtyID).src = "../../common/images/download.png";
+			document.getElementById("importIcon"+rtyID).src = "../../../common/images/download.png";
 
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
@@ -634,7 +634,7 @@ function processAction(rtyID, action, rectypeName) {
 				document.getElementById("detailedLog").innerHTML = "Show detailed log";
 				document.getElementById("shortLog").innerHTML = "Show short log";
 			} else {
-				document.getElementById("importIcon"+rtyID).src = "../../common/images/import_icon.png";
+				document.getElementById("importIcon"+rtyID).src = "../../../common/images/import_icon.png";
 
 				detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
 				result += logHeader;
@@ -746,7 +746,7 @@ function dropTempDB(redirect) {
 	if(!dropped) {
 		dropped = true;
 
-	top.HEURIST.util.popupURL(top, "structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+	top.HEURIST.util.popupURL(top, "../admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
 			"close-on-blur": true,
 			"no-resize": true,
 			//"no-close": true,

@@ -383,17 +383,17 @@ function RectypeManager() {
                         var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
                         "<a href=\"#edit_icon\">"+
-                        "<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
+                        "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
-                        "<a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
+                        "<a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
                         "</div>"+
                         "</div>";
                         elLiner.innerHTML = icon;
                 }},
                 
                 { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+                        elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
                 
                 { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
@@ -421,18 +421,18 @@ function RectypeManager() {
                 }},
 
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
+                        elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
                                                                             //minWidth:20, maxWidth:20, maxAutoWidth:20, 
                 { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Dup", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
-                        elLiner.innerHTML = '<img src="../../common/images/drag_up_down_16x16.png"'+
+                        elLiner.innerHTML = '<img src="../../../common/images/drag_up_down_16x16.png"'+
                         'style="cursor:pointer;" onclick="rectypeManager.duplicateType('+rectypeID+')"/>'; }
                 },
                 { key: "info", label: "Fields", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
-                        elLiner.innerHTML = '<img src="../../common/images/info.png"'+
+                        elLiner.innerHTML = '<img src="../../../common/images/info.png"'+
                         'style="cursor:pointer;" onclick="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
                 },
                 { key: "usage", label: "Usage", hidden:true },
@@ -440,15 +440,15 @@ function RectypeManager() {
                     formatter: YAHOO.widget.DataTable.formatDropdown,
                     dropdownOptions: _groups },
                 /*{ key: null, label: "Del", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
-                elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
+                elLiner.innerHTML = '<a href="#delete"><img src="../../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
                 },*/
                 { key: "status", label: "Status", sortable:true, className:'center', minWidth:30, maxAutoWidth:30, width:30,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("status");
                         if (str === "reserved"){
-                            rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
+                            rectypeStatus = "<img src=\"../../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
                         }else{
-                            rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
+                            rectypeStatus = "<a href=\"#delete\"><img src=\"../../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
                         };
                         elLiner.innerHTML = rectypeStatus;
                 }},
