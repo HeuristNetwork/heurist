@@ -556,7 +556,7 @@ $.widget( "heurist.file_manager", {
                tag_id.val(tagID);
                tag_name.val(tag[0]);
                tag_desc.val(tag[1]);
-            }else{ //add new saved search
+            }else{ //add new 
                 $dlg.find('input').val('');  //clear all 
                 tag_name.val(this.input_search.val());
             }

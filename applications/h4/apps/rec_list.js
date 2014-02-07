@@ -187,6 +187,11 @@ $.widget( "heurist.rec_list", {
                     that._applyViewMode(mode);
                 }})
             .hide();
+    
+    var view_mode = top.HAPI.get_prefs('rec_list_viewmode');        
+    if(view_mode){
+        this._applyViewMode(view_mode);
+    }
 
     this._on( this.btn_view, {
         click: function(e) {
@@ -347,7 +352,11 @@ $.widget( "heurist.rec_list", {
             var oldmode = this.options.view_mode;
             this.options.view_mode = newmode;
             //this.option("view_mode", newmode);
-            this.div_content.removeClass(oldmode)
+            this.div_content.removeClass(oldmode);
+            
+            //save viewmode is session
+            top.HAPI.SystemMgr.save_prefs({'rec_list_viewmode': newmode});
+            
         }else{
             newmode = this.options.view_mode;
         }

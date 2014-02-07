@@ -99,12 +99,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                          dataType: "json",
                          cache: false,
                          error: function(jqXHR, textStatus, errorThrown ) {
-                            callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
+                            if(callback){
+                                callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
+                            }
                                 //message:'Error connecting server '+textStatus});
                          },
                          success: function (response) {
-                             callback(response);
+                             if(callback){
+                                callback(response);
+                             }
                          }
                      });
 

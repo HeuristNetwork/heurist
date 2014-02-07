@@ -71,6 +71,7 @@ if(@$_REQUEST['db']){
 
     <!-- move to profile.js dynamic load -->
     <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
+    <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
 
   <!-- to do -->
     <script type="text/javascript" src="layout_default.js"></script>
