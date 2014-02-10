@@ -314,33 +314,13 @@ $.widget( "heurist.search_links", {
 
             var that = this;
 
-            var request = {q: qsearch, w: domain, f: this.options.searchdetails,
-                 l:top.HAPI.get_prefs('search_limit'), orig:'saved', qname:qname};
+            var request = {q: qsearch, w: domain, f: this.options.searchdetails, orig:'saved', qname:qname};
 
-            if(that.options.isapplication){
-                $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]);
-            }
-            that._trigger( "onsearch");
-
+            //that._trigger( "onsearch"); //this widget event
+            //that._trigger( "onresult", null, resdata ); //this widget event
+            
             //get hapi and perform search
-            top.HAPI.RecordMgr.search(request,
-                function(response)
-                {
-                    var resdata = null;
-                    if(response.status == top.HAPI.ResponseStatus.OK){
-                        resdata = new hRecordSet(response.data);
-                    }else{
-                        top.HEURIST.util.showMsgErr(response.message);
-                    }
-                    if(that.options.isapplication){
-                            $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);
-                    }
-                    that._trigger( "onresult", null, resdata );
-
-                }
-
-            );
-
+            top.HAPI.RecordMgr.search(request, $(this.document));
           }
 
   },

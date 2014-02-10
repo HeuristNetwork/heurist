@@ -9,14 +9,13 @@ $.widget( "heurist.pagination", {
     showcounter: false,
     
     //move to vars
-    current_page: 0,
-    max_page: 0,
-    count_total: null,
-    query_request: null,
-    limit: 200
   },
   
-    
+  current_page: 0,
+  max_page: 0,
+  count_total: null,
+  query_request: null,  //current search request
+  limit: 200,
  
   // the constructor
   _create: function() {
@@ -40,7 +39,7 @@ $.widget( "heurist.pagination", {
             .button({icons: {
                         primary: "ui-icon-seek-prev"
                     },text:false})
-            .on("click", function(){ that._doSearch3(that.options.current_page-1); } );
+            .on("click", function(){ that._doSearch3(that.current_page-1); } );
     this.span_pages = $( "<span>" ).appendTo( this.span_buttons );
 
     this.btn_goto_next = $( "<button>", {
@@ -50,12 +49,12 @@ $.widget( "heurist.pagination", {
             .button({icons: {
                         primary: "ui-icon-seek-next"
                     },text:false})
-            .on("click", function(){ that._doSearch3(that.options.current_page+1); } );
+            .on("click", function(){ that._doSearch3(that.current_page+1); } );
                
-    this.options.limit = top.HAPI.get_prefs('search_limit');               
+    this.limit = top.HAPI.get_prefs('search_limit');               
                
     this.btn_search_limit = $( "<button>", {
-                text: this.options.limit,
+                text: this.limit,
                 title: top.HR('records per request')
             })
             //.css('width', '4em')
@@ -74,7 +73,7 @@ $.widget( "heurist.pagination", {
             .menu({
                 select: function( event, ui ) {
                     var newlimit = Number(ui.item.attr('id').substring(13));
-                    if(newlimit!=that.options.limit){
+                    if(newlimit!=that.limit){
                     
                         top.HAPI.currentUser['ugr_Preferences']['search_limit'] = newlimit;
                         if(top.HAPI.is_logged()){
@@ -88,7 +87,7 @@ $.widget( "heurist.pagination", {
                             );
                         }
                     
-                        that.option("limit", newlimit);
+                        that.limit = newlimit;
                         that._doSearch3(0);
                     }
                 }})
@@ -114,18 +113,18 @@ $.widget( "heurist.pagination", {
         if(e.type == top.HAPI.Event.ON_REC_SEARCHRESULT){
 
             if(data){
-                that.option("count_total", data.count_total()); //hRecordSet
+                that.count_total = data.count_total();
             }else{
-                that.option("count_total", 0);
+                that.count_total = 0;
             }
             that._refresh();
         }else if(e.type == top.HAPI.Event.ON_REC_SEARCHSTART){
 
             //hide all on start search   
-            that.option("count_total", 0); //hRecordSet
-            that.options.query_request = data;
+            that.count_total = 0; //hRecordSet
+            that.query_request = data;
             if(data.orig != "paginator"){
-                that.options.current_page = 0; //reset
+                that.current_page = 0; //reset
             }
             
         }else if(e.type == top.HAPI.Event.ON_REC_SEARCHRESULT){
@@ -141,24 +140,24 @@ $.widget( "heurist.pagination", {
   /* private function */
   _refresh: function(){
       
-        this.options.limit = top.HAPI.get_prefs('search_limit');
-        this.btn_search_limit.button( "option", "label", this.options.limit);
+        this.limit = top.HAPI.get_prefs('search_limit');
+        this.btn_search_limit.button( "option", "label", this.limit);
         
-        if(this.options.count_total>0){
+        if(this.count_total>0){
             
-           var limit = this.options.limit;
+           var limit = this.limit;
            
-           this.options.max_page = Math.ceil(this.options.count_total / limit); 
-           if(this.options.current_page>this.options.max_page-1){
-                this.options.current_page = 0;
+           this.max_page = Math.ceil(this.count_total / limit); 
+           if(this.current_page>this.max_page-1){
+                this.current_page = 0;
            }
 
         }else{ //hide all 
-           this.options.max_page = 0;
+           this.max_page = 0;
         }      
        
-        var pageCount = this.options.max_page;
-        var currentPage = this.options.current_page;
+        var pageCount = this.max_page;
+        var currentPage = this.current_page;
         var start = 0;
         var finish = 0;
 
@@ -226,12 +225,12 @@ $.widget( "heurist.pagination", {
   //
   _renderRecNumbers: function(){
         if(this.options.showcounter){
-            var limit = this.options.limit;
-            if(this.options.count_total>0){
-                    var rec_no_first = this.options.current_page*limit+1;
+            var limit = this.limit;
+            if(this.count_total>0){
+                    var rec_no_first = this.current_page*limit+1;
                     var rec_no_last =  rec_no_first+limit-1;
-                    if (rec_no_last>this.options.count_total) { rec_no_last = this.options.count_total; }
-                    this.span_info.html( rec_no_first+"-"+rec_no_last+"/"+this.options.count_total);
+                    if (rec_no_last>this.count_total) { rec_no_last = this.count_total; }
+                    this.span_info.html( rec_no_first+"-"+rec_no_last+"/"+this.count_total);
             }else{
                     this.span_info.html('');
             }
@@ -254,48 +253,29 @@ $.widget( "heurist.pagination", {
   _doSearch3: function(page){
       
           if(top.HEURIST.util.isNumber(page)){
-                this.options.current_page = page;
+                this.current_page = page;
           }
-          if(this.options.current_page>this.options.max_page-1){
-                this.options.current_page = this.options.max_page-1;
-          }else if(this.options.current_page<0){
-                this.options.current_page = 0;
+          if(this.current_page>this.max_page-1){
+                this.current_page = this.max_page-1;
+          }else if(this.current_page<0){
+                this.current_page = 0;
           }
       
 
-          if ( this.options.query_request ) {
+          if ( this.query_request ) {
 
             var that = this;
             
             //  l or limit  - limit of records
             //  o or offset
 
-            var limit = this.options.limit;
-            this.options.query_request.l = limit;
-            this.options.query_request.o = this.options.current_page * limit;
-            this.options.query_request.orig = "paginator";
+            var limit = this.limit;
+            this.query_request.l = limit;
+            this.query_request.o = this.current_page * limit;
+            this.query_request.orig = "paginator";
 
-            if(that.options.isapplication){
-                $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ this.options.query_request ]);
-            }
-
-            //get hapi and perform search
-            top.HAPI.RecordMgr.search(this.options.query_request,
-                function(response)
-                {
-                    var resdata = null;
-                    if(response.status == top.HAPI.ResponseStatus.OK){
-                        resdata = new hRecordSet(response.data);
-                    }else{
-                        top.HEURIST.util.showMsgErr(response.message);
-                    }
-                    if(that.options.isapplication){
-                            $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);
-                    }
-                }
-
-            );
-
+            top.HAPI.RecordMgr.search(this.query_request, $(this.document));
+            
           }
 
   }  

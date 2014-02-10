@@ -18,6 +18,7 @@ $.widget( "heurist.rec_list", {
   },
 
   _allbuttons: ["add","tags","share","more","sort","view"],
+  _query_request: null, //keep curtent query result
 
   // the constructor
   _create: function() {
@@ -234,6 +235,7 @@ $.widget( "heurist.rec_list", {
             $header.html(new_title);
             $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
             
+            that._query_request = data;  //keep current query request 
             that.option("recordset", null);
             that.loadanimation(true);
 
@@ -404,10 +406,18 @@ $.widget( "heurist.rec_list", {
                                     :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
                             )
                             .appendTo(this.div_content);                   
-                   if(top.HAPI.currentUser.ugr_ID>0){
-                       $emptyres.append()
-                   }else{
-                       
+                            
+                   if(top.HAPI.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
+                        var domain = this._query_request.w
+                        if((domain=='b' || domain=='bookmark')){
+                            var $al = $('<a href="#">')
+                                .text(top.HR('Click here to search the whole database'))
+                                .appendTo($emptyres);
+                            this._on(  $al, {
+                                click: this._doSearch4
+                            });
+                                
+                        }
                    }
                }
        }
@@ -590,7 +600,20 @@ $.widget( "heurist.rec_list", {
      }else{
         this.div_content.css('background','none');
      }
- }
+ },
+ 
+  _doSearch4: function(){
+
+          if ( this._query_request ) {
+              
+            this._query_request.w = 'a';
+            this._query_request.orig = 'rec_list';
+                 
+            top.HAPI.RecordMgr.search(this._query_request, $(this.document));
+          }
+          
+          return false;
+  }, 
 
 
 });

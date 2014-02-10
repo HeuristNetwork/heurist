@@ -33,7 +33,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     getUrlQueryAndDomain: function(qsearch)            
     {
             var domain = null;
-            if(qsearch.indexOf('?')==0){
+            if(qsearch && qsearch.indexOf('?')==0){
                 domain = top.HEURIST.util.getUrlParameter('w', qsearch);
                 qsearch = top.HEURIST.util.getUrlParameter('q', qsearch);
             }

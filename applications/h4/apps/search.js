@@ -233,34 +233,13 @@ $.widget( "heurist.search", {
 
             var that = this;
 
-            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, 
-                            l:top.HAPI.get_prefs('search_limit'), orig:'main'};
+            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, orig:'main'};
 
-            if(that.options.isapplication){
-                $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]);
-            }
+            //that._trigger( "onsearch"); //this widget event
+            //that._trigger( "onresult", null, resdata ); //this widget event
 
-            that._trigger( "onsearch");
-
-            //get hapi and perform login
-            top.HAPI.RecordMgr.search(request,
-                function(response)
-                {
-                    var resdata = null;
-                    if(response.status == top.HAPI.ResponseStatus.OK){
-                        resdata = new hRecordSet(response.data);
-                    }else{
-                        top.HEURIST.util.showMsgErr(response);
-                    }
-                    if(that.options.isapplication){
-                            $(that.document).trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);
-                    }
-                    that._trigger( "onresult", null, resdata );
-
-                }
-
-            );
-
+            //perform search
+            top.HAPI.RecordMgr.search(request, $(this.document));
           }
 
   },

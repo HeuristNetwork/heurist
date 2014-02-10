@@ -132,6 +132,7 @@ class System {
                             "sysinfo"=>array(
                                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'), 
                                     "help"=>HEURIST_HELP,
+                                    "version"=>HEURIST_VERSION,
                                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                                     "dbowner_email"=>@$dbowner['ugr_eMail'])
                         );
