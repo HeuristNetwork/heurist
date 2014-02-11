@@ -177,7 +177,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //prepare tree
         //
-        if(!top.HEURIST.util.isNumber(termIDTree)){
+        if(top.HEURIST.util.isNumber(termIDTree)){
             //this is vocabulary id - show list of all terms for this vocab
             var tree = terms.treesByDomain[datatype];
             termIDTree = tree[termIDTree];
@@ -345,7 +345,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                           var name = rectypes.names[rectypeID];
 
                           if(!top.HEURIST.util.isnull(name)){
-                                top.HEURIST.util.addoption(selObj, rectypeID, name);
+                                var opt = top.HEURIST.util.addoption(selObj, rectypeID, name);
                           }
                     }
             }
@@ -357,45 +357,102 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     /**
     * create/fill SELECT for details of given recordtype
     *
-    * rectypeList - constraint options to this list
+    * allowedlist - constraint options to this list
     */
-    createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry) {
+    createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry, needEmpty) {
 
         if(selObj==null){
             selObj = document.createElement("select");
-        }else{
+        }else if(needEmpty){
             $(selObj).empty();
         }
-
-        if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
-
-        var rectypes = top.HEURIST.rectypes.typedefs[rectype],
-            dtyID;
-
-        if(!rectypes) return selObj;
-
+        var dtyID, details;
 
         if(sFirstEmptyEntry){
             top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
         }
+        
+        if(Number(rectype)>0){
+            //structure not defined 
+            if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
+            var rectypes = top.HEURIST.rectypes.typedefs[rectype];
+            
+            if(!rectypes) return selObj;
+            details = rectypes.dtFields;
+            
+            var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
+                fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+            
+            var arrterm = [];
+            
+            for (dtyID in details){
+               if(dtyID){
 
-        var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+                   if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
+                   {
+                          var name = details[dtyID][fi];
 
-        var details = rectypes.dtFields;
-        for (dtyID in details){
-           if(dtyID){
-
-               if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
-               {
-                      var name = details[dtyID][fi];
-
-                      if(!top.HEURIST.util.isnull(name)){
-                            top.HEURIST.util.addoption(selObj, dtyID, name);
-                      }
+                          if(!top.HEURIST.util.isnull(name)){
+                                arrterm.push([dtyID, name]);
+                          }
+                   }
                }
-           }
+            }
+            
+            //sort by name
+            arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+            //add to select
+            var i=0, cnt= arrterm.length;
+            for(;i<cnt;i++) {
+                top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+            }
+            
+        }else{ //show all detail types
+        
+            if(!top.HEURIST.detailtypes) return selObj;
+            
+            var detailtypes = top.HEURIST.detailtypes;
+            var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
+            
+            
+            for (index in detailtypes.groups){
+                    if (index == "groupIDToIndex" ||
+                      detailtypes.groups[index].showTypes.length < 1) {   //ignore empty group
+                      continue;
+                    }
+                    
+                    var arrterm = [];
+
+                    for (var dtIDIndex in detailtypes.groups[index].showTypes)
+                    {
+                          var detailID = detailtypes.groups[index].showTypes[dtIDIndex];
+                          if(allowedlist==null || allowedlist.indexOf(detailtypes.typedefs[detailID].commonFields[fit])>=0)
+                          {
+                              var name = detailtypes.names[detailID];
+
+                              if(!top.HEURIST.util.isnull(name)){
+                                    arrterm.push([detailID, name]);
+                              }
+                          }
+                    }
+                    
+                    if(arrterm.length>0){
+                        var grp = document.createElement("optgroup");
+                        grp.label = detailtypes.groups[index].name;
+                        selObj.appendChild(grp);
+                        //sort by name
+                        arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+                        //add to select
+                        var i=0, cnt= arrterm.length;
+                        for(;i<cnt;i++) {
+                            top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                        }
+                    }
+                    
+            }
+            
         }
+
 
         return selObj;
     },

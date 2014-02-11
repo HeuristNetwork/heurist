@@ -125,10 +125,15 @@ if(@$_REQUEST['db']){
 
 
                 //load database structure (record types, field types, terms) definitions
-                window.HAPI.SystemMgr.get_defs({rectypes:'all', mode:2}, function(response){
+                window.HAPI.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == top.HAPI.ResponseStatus.OK){
                         top.HEURIST.rectypes = response.data.rectypes;
+                        top.HEURIST.terms = response.data.terms;
+                        top.HEURIST.detailtypes = response.data.detailtypes;
 
+                        //in layout.js
+                        appInitAll("l01", "#layout_panes");
+/*                        
                         //get all terms and rectypes   terms:0,
                         window.HAPI.SystemMgr.get_defs({terms:'all'}, function(response){
                             if(response.status == top.HAPI.ResponseStatus.OK){
@@ -141,11 +146,19 @@ if(@$_REQUEST['db']){
                                 top.HEURIST.util.redirectToError(response.message);
                             }
                         });
-
+*/
                     }else{
                         top.HEURIST.util.redirectToError(response.message);
                     }
                 });
+                /*window.HAPI.SystemMgr.get_defs({detailtypes:'all', mode:2}, function(response){
+                    if(response.status == top.HAPI.ResponseStatus.OK){
+                        top.HEURIST.detailtypes = response.data.detailtypes;
+                    }else{
+                        
+                    }
+                });*/
+                
             }else{
                 //top.HEURIST.util.redirectToError
                 alert("Can not initialize system");

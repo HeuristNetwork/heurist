@@ -3,7 +3,7 @@ $.widget( "heurist.search", {
   // default options
   options: {
     search_domain: 'a', //current search domain all|bookmark|recently added|recently selected  or a|b|r|s
-    search_domain_set: null, // comma separated list of allowed domains  a,b,r,s
+    search_domain_set: null, // comma separated list of allowed domains  a,b,c,r,s
 
     isrectype: false,  // show rectype selector
     rectype_set: null, // comma separated list of rectypes, if not defined - all rectypes
@@ -19,6 +19,8 @@ $.widget( "heurist.search", {
     onresult: null   //on search result
   },
 
+  query_request: null,  //current search request - need for "AND" search in current result set
+  
   // the constructor
   _create: function() {
 
@@ -46,7 +48,15 @@ $.widget( "heurist.search", {
             .addClass('logged-in-only')
             .appendTo( this.element );
 
-    this.btn_search_as_user = $( "<button>", {
+    this.btn_search_assistant = $( "<button>", {
+            text: top.HR("search assistant")
+            })
+            .appendTo( this.div_search_as_user )
+            .button({icons: {
+                        primary: "ui-icon-lightbulb"
+                    }, text:false});
+            
+    this.btn_search_as_user = $( "<button>", {         
             text: top.HR("search")
             })
             .css('width', '12em')
@@ -65,12 +75,12 @@ $.widget( "heurist.search", {
 
     this.div_search_as_user.buttonset();
 
-    var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,r,s';
+    var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b,c').split(',');//,r,s';
     var smenu = "";
     $.each(dset, function(index, value){
         var lbl = that._getSearchDomainLabel(value);
         if(lbl){
-            smenu = smenu + '<li id="search-domain-'+value+'"><a href="#">'+lbl+'</a></li>'
+            smenu = smenu + '<li id="search-domain-'+value+'"><a href="#">'+top.HR(lbl)+'</a></li>'
         }
     });
 
@@ -80,7 +90,7 @@ $.widget( "heurist.search", {
             .appendTo( this.document.find('body') )
             .menu({
                 select: function( event, ui ) {
-                    var mode = (ui.item.attr('id')=="search-domain-b")?"b":"a";
+                    var mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
                     that.option("search_domain", mode);
                     that._refresh();
                 }})
@@ -98,6 +108,39 @@ $.widget( "heurist.search", {
         }
     });
 
+    this.search_assistant = null;
+    
+    //show quick search assistant
+    this._on( this.btn_search_assistant, {
+        click: function() {
+        $('.ui-menu').hide(); //hide other
+        $('.menu-or-popup').hide(); //hide other
+
+        if(this.search_assistant){ //inited already
+
+                var popup = $( this.search_assistant )
+                    .show()
+                    .position({my: "right top+3", at: "right bottom", of: this.input_search });
+                    //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
+
+                function _hidethispopup(event) {
+                      if($(event.target).closest(popup).length==0){
+                            popup.hide();
+                      }else{
+                            $( document ).one( "click", _hidethispopup);
+                            //return false;
+                      }
+                }
+
+                $( document ).one( "click", _hidethispopup);  //hide itself on click outside
+        }else{ //not inited yet
+                this._initSearchAssistant();
+        }
+
+        return false;
+        }
+    });
+    
 
     if(this.options.isrectype){
 
@@ -150,6 +193,8 @@ $.widget( "heurist.search", {
         that._refresh();
     });
     $(this.document).on(top.HAPI.Event.ON_REC_SEARCHSTART, function(e, data){
+        
+        that.query_request = data; //keep for search in current result
         if(data.orig != 'main'){
             that.input_search.val(data.q);
             that.options.search_domain = data.w;
@@ -214,6 +259,7 @@ $.widget( "heurist.search", {
         if(value=='b' || value=='bookmark') { lbl = 'my bookmarks'; }
         else if(value=='r') { lbl = 'recently added'; } //not implemented
         else if(value=='s') { lbl = 'recently selected'; } //not implemented
+        else if(value=='c') { lbl = 'in current'; } //todo
         else { lbl = 'all records'; this.options.search_domain='a';}
         return lbl;
   },
@@ -232,6 +278,11 @@ $.widget( "heurist.search", {
             // stype  key|all   - key-search tags, all-title and pointer record title, by default rec_Title
 
             var that = this;
+            
+            if(this.options.search_domain=="c" && !top.HEURIST.util.isnull(this.query_request)){
+                   this.options.search_domain = this.query_request.w;
+                   qsearch = this.query_request.q + ' AND ' + qsearch;
+            }
 
             var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, orig:'main'};
 
@@ -242,15 +293,150 @@ $.widget( "heurist.search", {
             top.HAPI.RecordMgr.search(request, $(this.document));
           }
 
-  },
+  }
+  
+  ,_initSearchAssistant: function(){
+    
+    var $dlg = this.search_assistant = $( "<div>" )
+                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
+                .zIndex(9999)
+                .css('position','absolute')
+                .appendTo( this.document.find('body') )
+                .hide();
+                
+    var that = this;                
+    //load template            
+    $dlg.load("apps/search_quick.html?t="+(new Date().getTime()), function(){
+
+            //find all labels and apply localization
+            $dlg.find('label').each(function(){
+                 $(this).html(top.HR($(this).html()));
+            });
+            
+            var select_rectype = $("#sa_rectype");
+            var select_fieldtype = $("#sa_fieldtype");
+            var select_sortby = $("#sa_sortby");
+            var select_terms = $("#sa_termvalue");
+            var sortasc =  $('#sa_sortasc');
+            $dlg.find("#fld_enum").hide();
+            
+            top.HEURIST.util.createRectypeSelect( select_rectype.get(0), null, top.HR('Any record type'));
+            //top.HEURIST.util.createRectypeDetailSelect( select_fieldtype.get(0), 0, null, top.HR('Any record type'));
+            
+            var allowed = Object.keys(top.HEURIST.detailtypes.lookups);
+            allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("relmarker"),1);
+                   
+                   
+            that._on( select_rectype, {
+                change: function (event){
+                    
+                    var rectype = (event)?Number(event.target.value):0;
+                    top.HEURIST.util.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, top.HR('Any field type'), true);
+                    
+                    select_sortby.html("<option value=t>"+top.HR("record title")+"</option>"+
+                        "<option value=rt>"+top.HR("record type")+"</option>"+
+                        "<option value=u>"+top.HR("record URL")+"</option>"+
+                        "<option value=m>"+top.HR("date modified")+"</option>"+
+                        "<option value=a>"+top.HR("date added")+"</option>"+
+                        "<option value=r>"+top.HR("personal rating")+"</option>"+
+                        "<option value=p>"+top.HR("popularity")+"</option>");
+                    if(Number(rectype)>0){
+                        var grp = document.createElement("optgroup");
+                        grp.label =  top.HEURIST.rectypes.names[rectype]+' '+top.HR('fields');
+                        select_sortby.get(0).appendChild(grp);
+                    }
+                    top.HEURIST.util.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, null, false);
+                    
+                    $("#sa_fieldvalue").val("");
+                    $dlg.find("#fld_contain").show();
+                    $dlg.find("#fld_enum").hide();
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( select_fieldtype, {
+                change: function(event){
+                    
+                    var dtID = Number(event.target.value);
+                    
+                    var detailtypes = top.HEURIST.detailtypes.typedefs;
+                    
+                    if(Number(dtID)>0 && detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']]=='enum'){
+                         $dlg.find("#fld_contain").hide();
+                         $dlg.find("#fld_enum").show();
+                         //fill terms
+                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
+                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
+                         
+                         top.HEURIST.util.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false, false);
+                    }else{
+                         $dlg.find("#fld_contain").show();
+                         $dlg.find("#fld_enum").hide();
+                    }
+                    
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( select_terms, {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( select_sortby, {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( $("#sa_fieldvalue"), {
+                keyup: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( sortasc, {
+                click: function(event){
+                    //top.HEURIST.util.stopEvent(event);
+                    //sortasc.prop('checked', !sortasc.is(':checked'));
+                    this.calcShowSimpleSearch();
+                }
+            });
+    
+            select_rectype.trigger('change');
+            that.btn_search_assistant.click();
+    });
+
+  }
+  
+  ,calcShowSimpleSearch: function (e) {
+      
+        var q = $("#sa_rectype").val(); if(q) q = "t:"+q;
+        var fld = $("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
+        var ctn = $("#fld_enum").is(':visible') ?$("#sa_termvalue").val() 
+                                                :$("#sa_fieldvalue").val();    
+                                                                
+        var asc = ($("#sa_sortasc:checked").length > 0 ? "" : "-");
+        var srt = $("#sa_sortby").val();
+        srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
+        
+        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn? (isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
+        if(!q){
+            q = "sortby:t";
+        }
+        
+        
+        this.input_search.val(q);
+
+        e = top.HEURIST.util.stopEvent(e);
+  } 
 
   // events bound via _on are removed automatically
   // revert other modifications here
-  _destroy: function() {
+  ,_destroy: function() {
     // remove generated elements
     this.btn_search_as_guest.remove();
     this.btn_search_as_user.remove();
     this.btn_search_domain.remove();
+    this.btn_search_assistant.remove();
+    this.search_assistant.remove();
     this.menu_search_domain.remove();
     this.input_search.remove();
     if(this.select_rectype) this.select_rectype.remove();

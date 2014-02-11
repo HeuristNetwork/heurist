@@ -390,7 +390,7 @@ $.widget( "heurist.profile", {
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                  $(this).html(top.HR($(this).html()));
-            })
+            });
             
             var allFields = $dlg.find('input');
             var message = $dlg.find('.messages');

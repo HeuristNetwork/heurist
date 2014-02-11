@@ -32,6 +32,11 @@ if( ! $system->init(@$_REQUEST['db']) ){
         $data["terms"] = dbs_GetTerms($system);
     }
 
+    if (@$_REQUEST['detailtypes']) {
+        $ids = $_REQUEST['detailtypes']=='all'?null:$_REQUEST['detailtypes'];
+        $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
+    }
+    
     if (@$_REQUEST['rectypes']) {
         $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
         $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, intval(@$_REQUEST['mode']) );

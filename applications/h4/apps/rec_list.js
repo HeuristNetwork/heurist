@@ -58,21 +58,21 @@ $.widget( "heurist.rec_list", {
           $('.menu-or-popup').hide(); //hide other
           if(this.menu_tags){
 
-              var menu = $( this.menu_tags )
+              var popup = $( this.menu_tags )
                     .tag_manager( 'option', 'record_ids', null )
                     .show()
                     .position({my: "left top", at: "left bottom", of: this.btn_tags });
 
               function _hidethispopup(event) {
-                  if($(event.target).closest(menu).length==0){
-                        menu.hide();
+                  if($(event.target).closest(popup).length==0){
+                        popup.hide();
                   }else{
                         $( document ).one( "click", _hidethispopup);
                         return false;
                   }
               }
 
-              $( document ).one( "click", _hidethispopup);
+              $( document ).one( "click", _hidethispopup); //hide itself on click outside
 
 
           }else{
