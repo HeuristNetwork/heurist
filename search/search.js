@@ -4291,7 +4291,7 @@ top.HEURIST.search = {
 		return [maxLevel,ret];
 	},
 
-	exportHML: function(isAll,includeRelated){
+	exportHML: function(isAll, includeRelated, ishuni){
 		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
 
@@ -4345,7 +4345,8 @@ top.HEURIST.search = {
 						(rtFilter ? "&" + rtFilter : "") +
 						(relFilter ? "&" + relFilter : "") +
 						(ptrFilter ? "&" + ptrFilter : "") +
-						"&db=" + database;
+						"&db=" + database + 
+                        (ishuni?'&file=1':'');
 
 		window.open(sURL, '_blank');
 		return false;
