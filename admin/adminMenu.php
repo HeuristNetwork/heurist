@@ -203,8 +203,14 @@ if (is_admin()) {
 								title="Direct access to the global field definitions">Manage field types</a></li>
 						<li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
-                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>')"
+                                
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=relations')"
                                 title="Display/print a listing of the record types and their pointers and relationships, including usage counts">Relationships schema</a></li>
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=simple')"
+                                title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">Simple fields schema</a></li>
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=all')"
+                                title="Display/print a listing of the record types and all fields, including usage counts">Combined schema</a></li>                                
+                                
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 								title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
 						<li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
