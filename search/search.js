@@ -1264,7 +1264,7 @@ top.HEURIST.search = {
 		"</span>"+
 		"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		"</div>" +
-		"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		"<div class='recordTitle' title='"+linkText.htmlEscape()+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText.htmlEscape() + "</a>" : linkText.htmlEscape() ) + "</div>" +
 		"<div id='recordID'>"+
 		newSearchWindow +
 		editLinkIcon +
