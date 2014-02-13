@@ -148,7 +148,7 @@
                     'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
             } // relmarker
 
-            else if (($showSimpleFields) && (($dt_type=="freetext") || ($dt_type=="memo") || ($dt_type=="date") || ($dt_type=="geo") || ($dt_type=="terms") || ($dt_type=="file"))) {
+            else if ($showSimpleFields) { //}&& (($dt_type=="freetext") || ($dt_type=="memo") || ($dt_type=="date") || ($dt_type=="geo") || ($dt_type=="terms") || ($dt_type=="file"))) {
 
                 // TO DO: CODE TO OUTPUT SIMPLE FIELDS LISTING
                 $query = "select count(recDetails.dtl_ID) from Records r1, recDetails where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and dtl_DetailTypeID=$dt_id";
