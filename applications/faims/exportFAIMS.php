@@ -288,8 +288,10 @@ function writeUTF8File($filename, $content) {
         fwrite($f, $content); 
         fclose($f); 
 } 
-    
+
+//    
 // Generate the database schema file (db_schema.xml)
+//
 function generateSchema($projname, $rt_toexport){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
@@ -312,6 +314,9 @@ function generateSchema($projname, $rt_toexport){
 
     $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
     $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    
+    $int_rst_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
+    $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
 
     //$int_dt_termtree = $dtStructs['typedefs']['fieldNamesToIndex']["dty_JsonTermIDTree"];
     //$int_dt_termtree_dis = $dtStructs['typedefs']['fieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
@@ -319,8 +324,92 @@ function generateSchema($projname, $rt_toexport){
     $rectyps = explode(",", $rt_toexport);
     
     ///create RelationshipElement if there are 1 or more record types to export
-    if(false && count($rectyps)>0){ //ARTEM remove noise
+    if(count($rectyps)>0){ //ARTEM remove noise
+    
+        $reltypes = array();
+        //find relmarker fields 
+        foreach ($rectyps as $rt) {
+           $rst_fields = $rtStructs['typedefs'][$rt]['dtFields'];
+           foreach ($rst_fields as $detail) {
+                $rst_dt_type = $detail[$int_rst_dt_type];
+                if($rst_dt_type=="relmarker"){
+                    //find all 
+                    $termTree = $detail[$int_dt_termtree];
+                    $disableTerms = $detail[$int_dt_termtree_dis];
+                    $temp = preg_replace("/[\[\]\"]/","",$disableTerms);
+                    $disableTerms = explode(",",$temp);
+                    
+                    //convert to tree
+                    $list = getTermsPlainList($rst_dt_type, $termTree, $disableTerms);
+                    $reltypes = array_merge($reltypes, $list);
+                    
+                }else if($rst_dt_type=="resource"){
+                    
+                    $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this field
+                    $dtdisplaynamex = getProperName($dtdisplayname);
+                    if(!@$reltypes["has".$dtdisplaynamex]){
+                        array_push($reltypes, "has".$dtdisplaynamex);
+                    }
+                }
+                
+           }//for detals
+        }//for rectypes
+        
+        if(count($reltypes)>0){
+            
+            $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only select relationship terms
+            $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
+            $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code']; 
+            $ind_tdescr = $dtTerms['fieldNamesToIndex']['trm_Description'];
+            
+            addComment($root, 'In Heurist, relationships are stored in a single relationship record type and 
+            different types of relationship are distinguished by the relationship type field (attribute) whose values 
+            can be organised hierarchichally. In FAIMS, each type of relationship is a separate record type, organised 
+            into three classes - bidirectional, container and hierarchy');
+            foreach ($reltypes as $termid) {
+                if(is_numeric($termid)){ //reltype
+                    
+                    $term = @$termLookup[$termid];
+                    if(!$term){
+                        continue;
+                    }
+                    $termCode = $term[$ind_tcode];
+                    if(!$termCode){ $termCode = ""; }
+                    
+                    $termCcode = $term[$ind_ccode]; //concept code
+                    if(!$termCcode || strpos($termCcode,'-')===false) {
+                        $termCcode = intval(HEURIST_DBID).'-'.$termid;
+                    }
+                    $termName = getResStrNoA16n(getFullTermName($term, 'relation'));
+                    $termDesc = prepareText( $term[$ind_descr]?$term[$ind_descr]:"");
+                    
+                }else{    //respurce-pointer
+                    
+                    $termCode = "";
+                    $termCcode = "";
+                    $termName = $termid;
+                    $termDesc = prepareText("Pointer to resource");
+                    
+                }
+                    
+                $rel = $root->addChild('RelationshipElement');
+                $rel->addAttribute('name', $termName);  // required
+                $rel->addAttribute('type', 'bidirectional');
+                $rel->addAttribute('HeuristID', $termCcode);   // ignored by FAIMS oct 2013
+                $rel->addAttribute('StandardCode', $termCode); // ignored by FAIMS oct 2013
+                // getFullTermName gets a dash-separate hieerachy
+                //$rel->addAttribute('pictureURL', '');
+                //$rel->addAttribute('semanticMapURL', '');
+                $rel->description = $termDesc;
+            }
+
+    
+        }
  
+ /*
+        //
+        // old version - all reltypes
+        //
         $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only select relationship terms
         $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
         $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];    
@@ -356,41 +445,13 @@ function generateSchema($projname, $rt_toexport){
                 // I think you meant to do it the other way round (I've changed it) but this is horrible!
                 $rel->description = prepareText( $term[$ind_descr]?$term[$ind_descr]:"-" );
                 //$rel->description = prepareText($termid."-".$term[$ind_label].($term[$ind_descr]?"-".$term[$ind_descr]:""));
-/*
-                // NAME
-                $property = $rel->addChild('property');
-                $property->addAttribute('name', 'Name / Title');
-                $property->addAttribute('type', 'string');
-                $property->addAttribute('isIdentifier', 'true');
 
-                // COMMENT
-                $property = $rel->addChild('property');
-                $property->addAttribute('name', 'Short summary');
-                $property->addAttribute('type', 'string');
-
-                // INTERPREATATION
-                $property = $rel->addChild('property');
-                $property->addAttribute('name', 'Comments on relationship');
-                $property->addAttribute('type', 'string');
-
-                // TITLE OF SOURCE REC
-                $property = $rel->addChild('property');
-                $property->addAttribute('name', 'Source record title');
-                $property->addAttribute('type', 'string');
-                $property->addAttribute('isIdentifier', 'true');
-
-                // TITLE OF TARGET REC
-                $property = $rel->addChild('property');
-                $property->addAttribute('name', 'Target record title');
-                $property->addAttribute('type', 'string');
-                $property->addAttribute('isIdentifier', 'true');
-*/
             }
         }
-        
+*/        
         addComment($root, 'Archaeological elements correspond with Heurist record types');
         addComment($root, 'Properties correspond with Heurist base field types for this record type');
-    }    
+    }               
 
     // Output specifications for each ArchEnt (Record type in Heurist)
     
@@ -783,7 +844,7 @@ function generate_UI_Schema($projname, $rt_toexport){
             $dtname = $det[$int_dt_name];  // the base field type name
             $dtnamex = getProperName($dtname); // sanitised
             
-            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this record type
+            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this field
             $dtdisplaynamex = getProperName($dtdisplayname);
             
             if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
@@ -1079,11 +1140,11 @@ $rt_id = mb_strtolower($rtnamex)."_id";
 //now event handlers - new, load, save, delete
 $out .= '
 String '.$rt_id.' = null;
+load'.$rtnamex.'Attributes();
 
 new'.$rtnamex.'(){
     '.$rt_id.' = null;
     newTabGroup("'.$rtnamex.'");
-    load'.$rtnamex.'Attributes();
 }
 load'.$rtnamex.'() {
     //new'.$rtnamex.'();
@@ -1096,7 +1157,6 @@ load'.$rtnamex.'From(entid) {
     if (isNull(entid)) return;
     showToast(entid);
     showTabGroup("'.$rtnamex.'", entid);
-    load'.$rtnamex.'Attributes();
     updateAll'.$rtnamex.'(); 
     //updateRelns();
 }
@@ -1144,7 +1204,7 @@ updateAll'.$rtnamex.'(){
 //header    
 $out = '    
 /****** 
- FAIMS Logic Fail generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A').'
+ FAIMS Logic File generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A').'
  Database: '.DATABASE.'   Heurist user:'.get_user_name().'
  ******/
 
@@ -1251,10 +1311,10 @@ function prepareText($str){
 }
 
 function prepareText2($str){
-error_log($str);
+//error_log($str);
     $str = prepareText($str);
     $str = mysql_real_escape_string($str);
-error_log(">>>>".$str."<<<<");    
+//error_log(">>>>".$str."<<<<");    
     return $str;
 }
 
@@ -1399,6 +1459,48 @@ function createSubTree($parent, $datatype, $termTree, $parentname){
     
     return $cnt;
 }
+
+//
+//
+//                                          
+function getTermsPlainList($datatype, $terms, $disableTerms){
+
+    global $dtTerms; //, $ind_label, $ind_descr, $coding_sheet, $ind_tcode;
+    
+    $res = array();
+    
+    if($datatype == "relmarker" || $datatype === "relationtype"){
+        $datatype = "relation";
+    }else if(!($datatype=="enum" || $datatype=="relation")){
+        return $res;
+    }
+    
+    $termTree = null;
+    if(is_numeric($terms)){
+        $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
+    }else if(is_string($terms)){
+        $termTree = json_decode($terms);
+    }else if(is_array($terms)){
+        $termTree = $terms;
+    }
+    if($termTree && count($termTree)>0){
+        
+        //$termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+
+        foreach ($termTree as $termid=>$child_terms){
+
+            
+                if(count($child_terms)>0){
+                    $res2 = getTermsPlainList($datatype, $child_terms, $disableTerms);
+                    $res = array_merge($res, $res2);
+                }else  if(!@$disableTerms[$termid]){
+                      array_push($res, $termid);    
+                }
+        }
+    }
+    return $res;
+}
+
 
 function formatXML($simpleXml){
     $dom = dom_import_simplexml($simpleXml)->ownerDocument;
