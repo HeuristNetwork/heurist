@@ -130,7 +130,8 @@ class System {
             $res = array(
                             "currentUser"=>$user,
                             "sysinfo"=>array(
-                                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'), 
+                                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                                    "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                                     "help"=>HEURIST_HELP,
                                     "version"=>HEURIST_VERSION,
                                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],

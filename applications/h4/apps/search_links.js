@@ -515,6 +515,8 @@ $.widget( "heurist.search_links", {
         var svs = top.HAPI.currentUser.usr_SavedSearch[svsID];
         if(!svs) return;
 
+        top.HEURIST.util.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
+            
                     top.HAPI.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                         function(response){
                             if(response.status == top.HAPI.ResponseStatus.OK){
@@ -530,6 +532,7 @@ $.widget( "heurist.search_links", {
                         }
 
                     );
+         }, "Confirmation");                 
 
   },
 

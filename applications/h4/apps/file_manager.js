@@ -101,7 +101,7 @@ $.widget( "heurist.file_manager", {
 
          if(top.HAPI.currentUser.usr_Files && top.HAPI.currentUser.usr_Files[val]){  //already found
              this.options.current_mediatype = val;
-             this._renderFiles();
+             this._renderItems();
          }else{
              top.HAPI.RecordMgr.file_get({recIDs:this.options.record_ids, mediaType:val},
                 function(response) {
@@ -124,7 +124,7 @@ $.widget( "heurist.file_manager", {
                         top.HAPI.currentUser.usr_Files[val] = files;
                         
                         
-                        that._renderFiles();
+                        that._renderItems();
                     }else{
                         top.HEURIST.util.showMsgErr(response);
                     }
@@ -174,7 +174,7 @@ $.widget( "heurist.file_manager", {
       change: function(event) {
          var val = Number(event.target.value); //order
          this.options.current_order = val;
-         this._renderFiles();
+         this._renderItems();
       }
     });
     
@@ -314,7 +314,7 @@ $.widget( "heurist.file_manager", {
   },
 
   // 
-  _renderFiles: function(){
+  _renderItems: function(){
 
        if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
@@ -653,7 +653,7 @@ $.widget( "heurist.file_manager", {
                                                 
                                                 that._reloadFiles(that.options.current_mediatype);
                                                 
-                                                //that._renderFiles();
+                                                //that._renderItems();
                                             }else{
                                                 message.addClass( "ui-state-highlight" );
                                                 message.text(response.message);
@@ -662,7 +662,7 @@ $.widget( "heurist.file_manager", {
                                     
                                 }else{
                                     $dlg.dialog( "close" );
-                                    that._renderFiles();    
+                                    that._renderItems();    
                                 }
                                 
                                 
@@ -775,14 +775,14 @@ $.widget( "heurist.file_manager", {
 
 function showManageFiles(){
     
-       var manage_files = $('#heurist-file-dialog');
+       var manage_dlg = $('#heurist-file-dialog');
 
-       if(manage_files.length<1){
+       if(manage_dlg.length<1){
 
-            manage_files = $('<div id="heurist-file-dialog">')
+            manage_dlg = $('<div id="heurist-file-dialog">')
                     .appendTo( $('body') )
                     .file_manager({ isdialog:true });
        }
 
-       manage_files.file_manager( "show" );
+       manage_dlg.file_manager( "show" );
 }

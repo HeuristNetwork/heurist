@@ -287,20 +287,26 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
         if (!defaultTermID) selObj.selectedIndex = 0;
         return selObj;
-    },
+    }
 
-    /**
-    * create/fill SELECT for rectypes
-    *
-    * rectypeList - constraint options to this list
-    */
-    createRectypeSelect: function(selObj, rectypeList, sFirstEmptyEntry) {
-
+    ,createSelector: function(selObj, sFirstEmptyEntry) {
         if(selObj==null){
             selObj = document.createElement("select");
         }else{
             $(selObj).empty();
         }
+        if(sFirstEmptyEntry){
+            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
+        }
+        return selObj;
+    }
+    
+    /**
+    * create/fill SELECT for rectypes groups
+    */
+    ,createRectypeGroupSelect: function(selObj, sFirstEmptyEntry) {
+        
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
 
         var rectypes = top.HEURIST.rectypes,
             index;
@@ -308,9 +314,36 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(!rectypes) return selObj;
 
 
-        if(sFirstEmptyEntry){
-            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
+        for (index in rectypes.groups){
+                    if (index == "groupIDToIndex" ){
+                      //rectypes.groups[index].showTypes.length < 1) 
+                      continue;
+                    }
+                    
+                    var name = rectypes.groups[index].name;
+                    if(!top.HEURIST.util.isnull(name)){
+                           top.HEURIST.util.addoption(selObj, rectypes.groups[index].id, name);
+                    }
         }
+
+        return selObj;
+    
+    }
+    
+    /**
+    * create/fill SELECT for rectypes
+    *
+    * rectypeList - constraint options to this list
+    */
+    , createRectypeSelect: function(selObj, rectypeList, sFirstEmptyEntry) {
+
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+
+        var rectypes = top.HEURIST.rectypes,
+            index;
+
+        if(!rectypes) return selObj;
+
 
         if(rectypeList){
 
@@ -361,17 +394,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry, needEmpty) {
 
-        if(selObj==null){
-            selObj = document.createElement("select");
-        }else if(needEmpty){
-            $(selObj).empty();
-        }
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+        
         var dtyID, details;
 
-        if(sFirstEmptyEntry){
-            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
-        }
-        
         if(Number(rectype)>0){
             //structure not defined 
             if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;

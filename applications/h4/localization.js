@@ -134,6 +134,8 @@ language: 'Русский',
 'All (date order)': 'Все (сорт по дате)',
 'Edit saved search': 'Редактировать поиск',
 'Delete saved search': 'Удалить сохраненный поиск',
+'Manage Saved Searches': 'Управление сохр.поисками',
+'Create new saved search': 'Создать поиск',
 
 'Delete? Please confirm': 'Удалить? Подвтердите',
 

@@ -9,7 +9,7 @@ $.widget( "heurist.tag_manager", {
   options: {
       isdialog: false, //show in dialog or embedded
 
-      current_UGrpID: null,
+      current_GrpID: null,
       // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
       record_ids: null, //array of record ids the tag selection will be applied for
@@ -32,6 +32,8 @@ $.widget( "heurist.tag_manager", {
                 .css({overflow: 'none !important', width:'100% !important'})
                 .appendTo(this.element);
 
+        this.element.css({overflow: 'none !important'})                
+
         this.element.dialog({
                                 autoOpen: false,
                                 height: 620,
@@ -39,7 +41,9 @@ $.widget( "heurist.tag_manager", {
                                 modal: true,
                                 title: top.HR("Manage Tags"),
                                 resizeStop: function( event, ui ) {
-                                    that.wcontainer.css('width','100%');
+                                    //that.wcontainer.css('width','100%');
+                                    //.css({clear:'both'})
+                                    that.element.css({overflow: 'none !important','width':'100%'}); //,'height': that.element.parent().css('height')-90});
                                 },
                                   buttons: [
                                     {text:top.HR('Delete'),
@@ -68,35 +72,35 @@ $.widget( "heurist.tag_manager", {
                             });
 
     }else{
-        this.wcontainer.addClass('ui-widget-content ui-corner-all').css('padding','0.4em').appendTo( this.element );
+        this.wcontainer.addClass('ui-widget-content ui-corner-all').css({'padding':'0.4em',height:'500px'}).appendTo( this.element );
     }
 
     //---------------------------------------- HEADER
     // user group selector
-    this.select_ugrp = $( "<select>", {width:'96%'} )
+    this.select_grp = $( "<select>", {width:'96%'} )
             .addClass("text ui-widget-content ui-corner-all")
             .appendTo( this.wcontainer );
-    this._on( this.select_ugrp, {
+    this._on( this.select_grp, {
       change: function(event) {
          //load tags for this group
          var val = event.target.value; //ugrID
-         if(this.options.current_UGrpID==val) return;
+         if(this.options.current_GrpID==val) return;
 
          //var that = this;
 
          if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[val]){  //already found
-             this.options.current_UGrpID = val;
-             this._renderTags();
+             this.options.current_GrpID = val;
+             this._renderItems();
          }else{
              top.HAPI.RecordMgr.tag_get({UGrpID:val, recIDs:this.options.record_ids},
                 function(response) {
                     if(response.status == top.HAPI.ResponseStatus.OK){
-                        that.options.current_UGrpID = val;
+                        that.options.current_GrpID = val;
                         if(!top.HAPI.currentUser.usr_Tags){
                             top.HAPI.currentUser.usr_Tags = {};
                         }
                         top.HAPI.currentUser.usr_Tags[val] = response.data[val];
-                        that._renderTags();
+                        that._renderItems();
                     }else{
                         top.HEURIST.util.showMsgErr(response);
                     }
@@ -143,16 +147,22 @@ $.widget( "heurist.tag_manager", {
       change: function(event) {
          var val = Number(event.target.value); //order
          this.options.current_order = val;
-         this._renderTags();
+         this._renderItems();
       }
     });
       
     
             
     //----------------------------------------
+    var css1;
+    if(this.options.isdialog){
+      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};
+    }else{
+      css1 =  {'overflow-y':'auto','padding':'0.4em','width':'100%','height':'400px'};  
+    }
     this.div_content = $( "<div>" )
-        .css({'overflow-y':'auto','padding':'0.4em','max-height':'400px','width':'100%'})
-        //.css({'left':0,'right':0,'overflow-y':'auto','padding':'0.4em','position':'absolute','top':'2em','bottom':'2em'})
+        .addClass('list')
+        .css(css1)
         .html('list of tags')
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.wcontainer );
@@ -200,12 +210,12 @@ $.widget( "heurist.tag_manager", {
     }
 
     // list of groups for current user
-    var selObj = this.select_ugrp.get(0);
+    var selObj = this.select_grp.get(0);
     top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
             [{key:top.HAPI.currentUser.ugr_ID, title:top.HR('Personal Tags')}], 
          function(){
-                that.select_ugrp.val(top.HAPI.currentUser.ugr_ID);
-                that.select_ugrp.change();
+                that.select_grp.val(top.HAPI.currentUser.ugr_ID);
+                that.select_grp.change();
          });
 
   }, //end _create
@@ -224,8 +234,8 @@ $.widget( "heurist.tag_manager", {
       }else{
           top.HAPI.currentUser.usr_Tags = {}; //clear all  
       }      
-      this.options.current_UGrpID = null;
-      this.select_ugrp.change();
+      this.options.current_GrpID = null;
+      this.select_grp.change();
   },
   
   /* private function */
@@ -234,7 +244,7 @@ $.widget( "heurist.tag_manager", {
   _destroy: function() {
     // remove generated elements
     this.input_search.remove();
-    this.select_ugrp.remove();
+    this.select_grp.remove();
     this.select_order.remove();
     this.sort_div.remove();
     this.search_div.remove();
@@ -255,7 +265,7 @@ $.widget( "heurist.tag_manager", {
   },
 
   // [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
-  _renderTags: function(){
+  _renderItems: function(){
 
        if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
@@ -268,10 +278,10 @@ $.widget( "heurist.tag_manager", {
        btn.attr('disabled','disabled');       */
 
 
-       if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID])
+       if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[this.options.current_GrpID])
        {
                var that = this;
-               var tags2 = top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID];
+               var tags2 = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID];
                var tagID;
                var tags = [];
                for(tagID in tags2) {
@@ -306,7 +316,7 @@ $.widget( "heurist.tag_manager", {
                     $tagdiv = $(document.createElement('div'));
 
                     $tagdiv
-                        .addClass('list recordDiv')
+                        .addClass('recordDiv')
                         .attr('id', 'tag-'+tagID )
                         .attr('tagID', tagID )
                         .appendTo(this.div_content);
@@ -320,7 +330,7 @@ $.widget( "heurist.tag_manager", {
                             .css('margin','0.4em')
                             .click(function(event){
                                 
-                                top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][$(this).attr('tagID')][5] = event.target.checked;
+                                top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][$(this).attr('tagID')][5] = event.target.checked;
                                 //event.target.keepmark = event.target.checked; 
                                 
                                 if(that.options.isdialog){  //tag management                               
@@ -413,7 +423,7 @@ $.widget( "heurist.tag_manager", {
 
         var tagIDs = [];
         if(tagID){     
-                var tag = top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
+                var tag = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID][tagID];
                 if(!tag) return;
                 tagIDs.push(tagID);
         }else{
@@ -435,7 +445,7 @@ $.widget( "heurist.tag_manager", {
                                     //remove from UI
                                     $('#tag-'+e).remove();
                                     //remove from
-                                    delete top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][e];
+                                    delete top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][e];
                                 });
 
                             }else{
@@ -478,7 +488,7 @@ $.widget( "heurist.tag_manager", {
             var isEdit = (parseInt(tagID)>0);
 
             if(isEdit){
-               var tag = top.HAPI.currentUser.usr_Tags[this.options.current_UGrpID][tagID];
+               var tag = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID][tagID];
                tag_id.val(tagID);
                tag_name.val(tag[0]);
                tag_desc.val(tag[1]);
@@ -538,7 +548,7 @@ $.widget( "heurist.tag_manager", {
 
                     var request = {tag_Text: tag_text,
                             tag_Description: tag_desc,
-                            tag_UGrpID: that.options.current_UGrpID};
+                            tag_UGrpID: that.options.current_GrpID};
 
                     var isEdit = ( parseInt(tag_id) > 0 );
 
@@ -556,30 +566,30 @@ $.widget( "heurist.tag_manager", {
                                 if(!top.HAPI.currentUser.usr_Tags){
                                     top.HAPI.currentUser.usr_Tags = {};
                                 }
-                                if(!top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID]){
-                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID] = {};
+                                if(!top.HAPI.currentUser.usr_Tags[that.options.current_GrpID]){
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_GrpID] = {};
                                 }
                                 
                                 if(isEdit){
-                                    var oldtag = top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID];
-                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                    var oldtag = top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID];
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
                                 }else{
-                                    top.HAPI.currentUser.usr_Tags[that.options.current_UGrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                    top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                 }
 
                                 if(!top.HEURIST.util.isnull(tag_ids)){ 
                                     //send request to replace selected tags with new one
                                     var request = {ids: tag_ids,
                                                    new_id: tagID,
-                                                   UGrpID: that.options.current_UGrpID};
+                                                   UGrpID: that.options.current_GrpID};
                                     
                                     top.HAPI.RecordMgr.tag_replace(request, function(response){
                                             if(response.status == top.HAPI.ResponseStatus.OK){
                                                 $dlg.dialog( "close" );
                                                 
-                                                that._reloadTags(that.options.current_UGrpID);
+                                                that._reloadTags(that.options.current_GrpID);
                                                 
-                                                //that._renderTags();
+                                                //that._renderItems();
                                             }else{
                                                 message.addClass( "ui-state-highlight" );
                                                 message.text(response.message);
@@ -588,7 +598,7 @@ $.widget( "heurist.tag_manager", {
                                     
                                 }else{
                                     $dlg.dialog( "close" );
-                                    that._renderTags();    
+                                    that._renderItems();    
                                 }
                                 
                                 
@@ -665,7 +675,7 @@ $.widget( "heurist.tag_manager", {
         var t_added = $(this.element).find('input[type="checkbox"][usage="0"]:checked');
         var t_removed = $(this.element).find('input[type="checkbox"][usage!="0"]:not(:checked)');
         
-        if ((t_added.length>0 || t_removed.length>0) && this.options.current_UGrpID)
+        if ((t_added.length>0 || t_removed.length>0) && this.options.current_GrpID)
         {
         
             var toassign = [];
@@ -674,7 +684,7 @@ $.widget( "heurist.tag_manager", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
             
-             top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_UGrpID, recIDs:this.options.record_ids},
+             top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
                 function(response) {
                     if(response.status == top.HAPI.ResponseStatus.OK){
                         that.element.hide();
@@ -700,14 +710,14 @@ $.widget( "heurist.tag_manager", {
 
 function showManageTags(){
     
-       var manage_tags = $('#heurist-tags-dialog');
+       var manage_dlg = $('#heurist-tags-dialog');
 
-       if(manage_tags.length<1){
+       if(manage_dlg.length<1){
 
-            manage_tags = $('<div id="heurist-tags-dialog">')
+            manage_dlg = $('<div id="heurist-tags-dialog">')
                     .appendTo( $('body') )
                     .tag_manager({ isdialog:true });
        }
 
-       manage_tags.tag_manager( "show" );
+       manage_dlg.tag_manager( "show" );
 }

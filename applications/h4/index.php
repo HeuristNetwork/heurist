@@ -121,7 +121,7 @@ if(@$_REQUEST['db']){
                 }
                 //add theme link to html header
                 $("head").append(cssLink);
-                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
+                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css">')); //?t='+(new Date().getTime())+'">'));
 
 
                 //load database structure (record types, field types, terms) definitions

@@ -49,6 +49,7 @@ $.widget( "heurist.profile", {
     this.menu_options = $('<ul id="menu-options">'+
         '<li id="menu-options-db-select"><a href="#">'+top.HR('Databases')+'</a></li>'+
         '<li id="menu-options-db-design" class="logged-in-only"><a href="#">'+top.HR('Design database')+'</a></li>'+
+        '<li id="menu-options-db-summary" class="logged-in-only"><a href="#">'+top.HR('Database Summary')+'</a></li>'+
         '<li id="menu-options-import" class="logged-in-only"><a href="#">'+top.HR('Import data')+'</a>'+
             '<ul>'+
                 '<li><a href="#">CSV</a></li>'+
@@ -94,6 +95,14 @@ $.widget( "heurist.profile", {
                         window.open(top.HAPI.sysinfo.help, '_blank');                        
                     }else if(action == "menu-options-db-design"){
                         window.open(top.HAPI.basePathOld+'admin/adminMenu.php?db='+top.HAPI.database, '_blank');                        
+                    }else if(action == "menu-options-db-summary"){
+                        
+                        if($.isFunction($('body').rectype_manager)){ //already loaded
+                            showManageRecordTypes();
+                        }else{
+                            $.getScript(top.HAPI.basePath+'apps/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        }
+                        
                     }else if(action == "menu-options-import-faims"){
 
                         var $dlg = $("#heurist-dialog");
@@ -183,6 +192,7 @@ $.widget( "heurist.profile", {
         '<li id="menu-user-tags"><a href="#">'+top.HR('Manage Tags')+'</a></li>'+
         '<li id="menu-user-files"><a href="#">'+top.HR('Manage Files')+'</a></li>'+
         '<li id="menu-user-reminders"><a href="#">'+top.HR('Manage Reminders')+'</a></li>'+
+        '<li id="menu-user-svs"><a href="#">'+top.HR('Manage Saved Searches')+'</a></li>'+
         '<li id="menu-user-logout"><a href="#">'+top.HR('Log out')+'</a></li>'+
         '</ul>')
             .addClass('menu-or-popup')
@@ -204,6 +214,12 @@ $.widget( "heurist.profile", {
                             showManageTags();
                         }else{
                             $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
+                        }
+                    }else if(action == "menu-user-svs"){
+                        if($.isFunction($('body').svs_manager)){ //already loaded
+                            showManageSavedSearches();
+                        }else{
+                            $.getScript(top.HAPI.basePath+'apps/svs_manager.js', function(){ showManageSavedSearches(); } );
                         }
                     }else if(action == "menu-user-files"){
                         if($.isFunction($('body').file_manager)){ //already loaded
