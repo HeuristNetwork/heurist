@@ -776,12 +776,20 @@
                     }
                     var fieldNameElementValue = fieldNameElement.value;
 
-                    if(fieldName=="rty_Name" && fieldNameElementValue=="") {
-                        if(isShowWarn) alert("Name is mandatory field");
-                        document.getElementById("rty_Name").focus();
-                        updatedFields = [];
-                        return "mandatory";
-                    }
+                    if(fieldName=="rty_Name"){
+                        var swarn = "";
+                        if(fieldNameElementValue=="") {
+                            swarn = "Name is mandatory field"; 
+                        }else{
+                            swarn = Hul.validateName(fieldNameElementValue, "Record type name");
+                        }
+                        if(swarn!=""){
+                            if(isShowWarn) alert(swarn);
+                            document.getElementById("rty_Name").focus();
+                            updatedFields = [];
+                            return "mandatory";
+                        }
+                    }                 
                     else if(fieldName=="rty_Plural" && fieldNameElementValue=="") {
                         if(isShowWarn) alert("Plural is mandatory field");
                         document.getElementById("rty_Plural").focus();
