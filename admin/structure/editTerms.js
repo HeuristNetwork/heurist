@@ -552,13 +552,17 @@ function EditTerms() {
 
 		if(wasChanged || !isExistingNode(_currentNode) ){
 
+            var swarn = "";
 			if(Hul.isempty(sName)){
-				if(needConfirm){
-					alert("Field 'Display Name' is mandatory");
-					Dom.get('edName').setFocus();
-				}
-				return;
-			}
+                swarn = "Field 'Display Name' is mandatory"
+			}else {
+                swarn = Hul.validateName(sName, "Field 'Display Name'");
+            }
+            if(swarn!=""){
+                alert(swarn);
+                Dom.get('edName').setFocus();
+                return;
+            }
 
 			if(needConfirm){
 				var r=confirm("Term was modified. Save it?");

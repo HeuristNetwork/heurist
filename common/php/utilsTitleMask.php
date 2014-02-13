@@ -345,7 +345,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
             return "";
         }else if (strcasecmp($rdt_id,'id')==0){
             return $rec_values['rec_ID'];
-        }else if (strcasecmp($rdt_id,'rectitle')==0 || strcasecmp($rdt_id,'title')==0) {
+        }else if (strcasecmp($rdt_id,'rectitle')==0) {
             return $rec_values['rec_Title'];
         }else if (strcasecmp($rdt_id,'modified')==0) {
             return $rec_values['rec_Modified'];
@@ -389,7 +389,6 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
 
         if (strcasecmp($rdt_id,'id')==0 ||
             strcasecmp($rdt_id,'rectitle')==0 ||
-            strcasecmp($rdt_id,'title')==0 ||
             strcasecmp($rdt_id,'modified')==0){
                 return $rdt_id;
         }else if($mode==1){
@@ -447,7 +446,6 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (strcasecmp($field_name,'id')==0 ||
         strcasecmp($field_name,'rectitle')==0 ||
-        strcasecmp($field_name,'title')==0 ||
         strcasecmp($field_name,'modified')==0)
     {
         return _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
