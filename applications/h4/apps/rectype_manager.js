@@ -10,6 +10,8 @@ $.widget( "heurist.rectype_manager", {
       isdialog: false, //show in dialog or embedded
       isselector: false, //show in checkboxes to select
 
+      selection:[], 
+      
       current_GrpID: null,
       // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
       current_order: 1  // order by name
@@ -27,13 +29,15 @@ $.widget( "heurist.rectype_manager", {
         this.wcontainer
                 .css({overflow: 'none !important', width:'100% !important'})
                 .appendTo(this.element);
+                
+        this.element.css({overflow: 'none !important'})                
 
         this.element.dialog({
                                 autoOpen: false,
                                 height: 620,
                                 width: 400,
                                 modal: true,
-                                title: top.HR(this.option.isselector?"Select Record types":"Manage Record types"),
+                                title: top.HR(this.options.isselector?"Select Record types":"Manage Record types"),
                                 resizeStop: function( event, ui ) {
                                     that.element.css({overflow: 'none !important','width':'100%'});
                                 },
@@ -49,7 +53,8 @@ $.widget( "heurist.rectype_manager", {
                             });
 
     }else{
-        this.wcontainer.addClass('ui-widget-content ui-corner-all').css({'padding':'0.4em',height:'500px'}).appendTo( this.element );
+        //.addClass('ui-widget-content ui-corner-all').css({'padding':'0.4em',height:'500px'})
+        this.wcontainer.appendTo( this.element );
     }
     
     //---------------------------------------- HEADER
@@ -96,7 +101,7 @@ $.widget( "heurist.rectype_manager", {
     this.select_order = $( "<select><option value='1'>"+
     top.HR("by name")+"</option><option value='2'>"+
     top.HR("by usage")+"</option><option value='3'>"+
-    top.HR("marked")+"</option></select>", {'width':'80px'} )
+    top.HR("selected")+"</option></select>", {'width':'80px'} )
     
             .addClass("text ui-widget-content ui-corner-all")
             .appendTo( this.sort_div );
@@ -180,7 +185,7 @@ $.widget( "heurist.rectype_manager", {
                 
                 name = top.HEURIST.rectypes.names[rectypeID];
                 usage = 0; //  top.HEURIST.rectypes.rtUsage[rectypeID];
-                is_selected = 0;
+                is_selected = this.options.selection.indexOf(rectypeID);
 
                 rectypes.push([rectypeID, name, usage, is_selected]);
             }
@@ -195,6 +200,7 @@ $.widget( "heurist.rectype_manager", {
            }
        });               
                 
+       var that = this;
        var filter_name = this.input_search.val().toLowerCase();
        var i;
        for(i=0; i<rectypes.length; ++i) {
@@ -213,6 +219,29 @@ $.widget( "heurist.rectype_manager", {
                         .css('display', (filter_name=='' || name.toLowerCase().indexOf(filter_name)>=0)?'block':'none')
                         .appendTo(this.div_content);
                         
+                        
+                if(this.options.isselector){
+                    $('<input>')
+                            .attr('type','checkbox')
+                            .attr('rtID', rectypeID )
+                            .attr('checked', (is_selected>=0) )  //?false:true ))
+                            .addClass('recordIcons')
+                            .css('margin','0.4em')
+                            .click(function(event){
+                                var rectypeID = $(this).attr('rtID');
+                                var idx = that.options.selection.indexOf(rectypeID);
+                                if(event.target.checked){
+                                    if(idx<0){
+                                        that.options.selection.push(rectypeID);
+                                    }
+                                }else if(idx>=0){
+                                    that.options.selection.splice(idx,1);
+                                }
+                            })
+                            .appendTo($itemdiv);
+                }
+                
+                
                 $iconsdiv = $(document.createElement('div'))
                     .addClass('recordIcons')
                     .appendTo($itemdiv);
@@ -229,7 +258,7 @@ $.widget( "heurist.rectype_manager", {
                         })
                         .css('display','inline-block')
                         .addClass('recordTitle')
-                        .css({top:0,'margin':'0.4em', 'height':'1.4em'})
+                        .css({top:0,'margin':'0.4em', 'height':'1.4em', 'left':'70px'})
                         .html( name  )
                         .appendTo($itemdiv);
                 

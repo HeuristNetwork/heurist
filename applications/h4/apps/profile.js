@@ -191,8 +191,9 @@ $.widget( "heurist.profile", {
         '<li id="menu-user-groups"><a href="#">'+top.HR('My Groups')+'</a></li>'+
         '<li id="menu-user-tags"><a href="#">'+top.HR('Manage Tags')+'</a></li>'+
         '<li id="menu-user-files"><a href="#">'+top.HR('Manage Files')+'</a></li>'+
-        '<li id="menu-user-reminders"><a href="#">'+top.HR('Manage Reminders')+'</a></li>'+
-        '<li id="menu-user-svs"><a href="#">'+top.HR('Manage Saved Searches')+'</a></li>'+
+        '<li id="menu-user-reminders"><a href="#">'+top.HR('Reminders')+'</a></li>'+
+        '<li id="menu-user-svs"><a href="#">'+top.HR('Saved Searches')+'</a></li>'+
+        '<li id="menu-user-faceted"><a href="#">'+top.HR('Faceted Search')+'</a></li>'+
         '<li id="menu-user-logout"><a href="#">'+top.HR('Log out')+'</a></li>'+
         '</ul>')
             .addClass('menu-or-popup')
@@ -214,6 +215,12 @@ $.widget( "heurist.profile", {
                             showManageTags();
                         }else{
                             $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
+                        }
+                    }else if(action == "menu-user-faceted"){
+                        if($.isFunction($('body').search_faceted_wiz)){ //already loaded
+                            showSearchFacetedWizard();
+                        }else{
+                            $.getScript(top.HAPI.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
                         }
                     }else if(action == "menu-user-svs"){
                         if($.isFunction($('body').svs_manager)){ //already loaded

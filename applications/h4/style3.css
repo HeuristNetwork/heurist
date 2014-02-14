@@ -465,10 +465,9 @@ div .selected, div .selected:hover{
     text-overflow: ellipsis;
 }
 .list .recordDiv .recordIcons {
-    display: table-cell;
-    min-width: 50px;
+    min-width: 20px;
+    display: inline-block;
 }
-
 /* SAVED SEARCHES */
 div.saved-search:hover > .edit-delete-buttons, .recordDiv:hover > .edit-delete-buttons {
     display: inline-block;
