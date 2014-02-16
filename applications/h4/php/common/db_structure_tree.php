@@ -12,8 +12,7 @@
 *  __getDetailSection
 */
 
-$rtStructs = null;
-$system = null;
+$dbs_rtStructs = null;
 
 /**
 * Returns  
@@ -26,19 +25,19 @@ $system = null;
 * 
 * @param mixed $system
 * @param mixed $rectypeids
+* @param mixed $mode  3 - all, 4 - limited for faceted search
 */
-function dbs_GetRectypeStructureTree($system_, $rectypeids){
+function dbs_GetRectypeStructureTree($system, $rectypeids, $mode){
    
-    global $rtStructs, $system;
+    global $dbs_rtStructs;
     
-    $rtStructs = dbs_GetRectypeStructures($system, $rectypeids, 1);    
-    $system = $system_;
+    $dbs_rtStructs = dbs_GetRectypeStructures($system, $rectypeids, 1);    
     
-    $rtypes = $rtStructs['names'];
+    $rtypes = $dbs_rtStructs['names'];
     $res = array();
     
     foreach ($rtypes as $rectypeID=>$rectypeName){
-            array_push($res, __getRecordTypeTree($rectypeID, 0));    
+            array_push($res, __getRecordTypeTree($system, $rectypeID, 0, $mode));    
     }
     
     return $res;    
@@ -51,40 +50,43 @@ function dbs_GetRectypeStructureTree($system_, $rectypeids){
 //                  fNNN: array(rt_name: , recID ...... )       // unconstrained pointer or exact constraint
 //                  fNNN: array(array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointers
 //     NNN - field type ID
-function __getRecordTypeTree($recTypeId, $recursion_depth){
+function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
 
-    global $rtStructs, $system;
+    global $dbs_rtStructs;
     
     $res = array();
     $children = array();
     //add default fields
-    array_push($children, array('key'=>'recID',       'title'=>'ID'));
+    if($mode==3) array_push($children, array('key'=>'recID',       'title'=>'ID'));
     array_push($children, array('key'=>'recTitle',    'title'=>'RecTitle'));
-    array_push($children, array('key'=>'recURL',      'title'=>'URL'));
     array_push($children, array('key'=>'recModified', 'title'=>'Modified'));
+    if($mode==3) {
+    array_push($children, array('key'=>'recURL',      'title'=>'URL'));
     array_push($children, array('key'=>'recWootText', 'title'=>'WootText'));
+    }
  
     if($recTypeId && is_numeric($recTypeId)){
         
-            $res['key'] = $recTypeId;
-            $res['title'] = $rtStructs['names'][$recTypeId];
-            $res['type'] = 'rectype';
-        
-        
-            if(!@$rtStructs['typedefs'][$recTypeId]){
+            if(!@$dbs_rtStructs['typedefs'][$recTypeId]){
                  //this rectype is not loaded yet - load it
                  $rt0 = dbs_GetRectypeStructures($system, $recTypeId, 1);
-                 if(rt0){ //merge with $rtStructs 
-                        $rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];    
-                        $rtStructs['names'][$recTypeId] = $rt0['names'][$recTypeId];
+                 if(rt0){ //merge with $dbs_rtStructs 
+                        $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];    
+                        $dbs_rtStructs['names'][$recTypeId] = $rt0['names'][$recTypeId];
                  }
             }
-            if(@$rtStructs['typedefs'][$recTypeId]){
-                $details =  $rtStructs['typedefs'][$recTypeId]['dtFields'];
+            
+            $res['key'] = $recTypeId;
+            $res['title'] = $dbs_rtStructs['names'][$recTypeId];
+            $res['type'] = 'rectype';
+        
+            
+            if(@$dbs_rtStructs['typedefs'][$recTypeId]){
+                $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
 
                 foreach ($details as $dtID => $dtValue){
 
-                    $res_dt = __getDetailSection($dtID, $dtValue, $recursion_depth);
+                    $res_dt = __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode);
                     if($res_dt){
                            array_push($children, $res_dt);
                            /*
@@ -98,8 +100,8 @@ function __getRecordTypeTree($recTypeId, $recursion_depth){
                     }
                 }//for
             }
-            if($recursion_depth==0){
-                array_push($children, __getRecordTypeTree('Relationship', $recursion_depth+1));
+            if($mode==3 && $recursion_depth==0){
+                array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode));
             }   
         
     }else if($recTypeId=="Relationship") {
@@ -112,7 +114,6 @@ function __getRecordTypeTree($recTypeId, $recursion_depth){
         array_push($children, array('key'=>'recRelationNotes', 'title'=>'RelationNotes'));
         array_push($children, array('key'=>'recRelationStartDate', 'title'=>'RelationStartDate'));
         array_push($children, array('key'=>'recRelationEndDate', 'title'=>'RelationEndDate'));
-        
     }
     
     $res['children'] = $children;
@@ -127,14 +128,14 @@ function __getRecordTypeTree($recTypeId, $recursion_depth){
 
  returns display name  or if enum array
 */
-function __getDetailSection($dtID, $dtValue, $recursion_depth){
+function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
 
-    global $rtStructs;    
+    global $dbs_rtStructs;    
     
     $res = null;
 
-            $rtNames = $rtStructs['names']; //???need
-            $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
+            $rtNames = $dbs_rtStructs['names']; //???need
+            $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
         
             
             $detailType = $dtValue[$rst_fi['dty_Type']];
@@ -143,6 +144,7 @@ function __getDetailSection($dtID, $dtValue, $recursion_depth){
 
             //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
             //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
+//error_log("1>>>".$mode."  ".$detailType."  ".$dt_label);
 
             switch ($detailType) {
             /* @TODO
@@ -161,12 +163,13 @@ function __getDetailSection($dtID, $dtValue, $recursion_depth){
             case 'enum':
 
                 $res = array();
-                $res['children'] = array(
+                if($mode==3){
+                    $res['children'] = array(
                         array("text"=>"id"),
                         array("text"=>"code"),
                         array("text"=>"label"),
                         array("text"=>"conceptid"));
-                
+                }
             break;
 
             case 'resource': // link to another record type
@@ -179,7 +182,7 @@ function __getDetailSection($dtID, $dtValue, $recursion_depth){
                     
                     if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
                     
-                        $res = __getRecordTypeTree(null, $recursion_depth+1);
+                        $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode);
                     
                     }else{ //constrained pointer
                          
@@ -190,12 +193,14 @@ function __getDetailSection($dtID, $dtValue, $recursion_depth){
                          }
                          
                          foreach($rectype_ids as $rtID){
-                            $rt_res = __getRecordTypeTree($rtID, $recursion_depth+1);
+                            $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode);
                             if(count($rectype_ids)==1){//exact one rectype constraint
                                 //avoid redundant level in tree
                                 $res = $rt_res;
                                 $res['rt_id'] = $rtID;
                             }else{
+//error_log("<<<".print_r($rt_res,true));
+                                
                                 array_push($res['children'], $rt_res);
                             }
                          }
@@ -207,10 +212,19 @@ function __getDetailSection($dtID, $dtValue, $recursion_depth){
             break;
 
             default:
-                $res = array();
+//error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
+                if (($mode==3) ||
+                     ($detailType=='integer') || ($detailType=='date') || 
+                     ($detailType=='year') || ($detailType=='float'))
+                {
+//error_log("!!!!!!!!!");                    
+                        $res = array();
+                }
             }//end switch
 
-   if($res){
+//error_log("3>>>>".is_array($res)."<  ".$detailType."  ".$dt_label);
+   if(is_array($res)){
+
        $res['key'] = "f".$dtID;
        $res['title'] = $dt_label;
        $res['type'] = $detailType;

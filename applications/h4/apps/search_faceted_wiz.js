@@ -60,7 +60,7 @@ $.widget( "heurist.search_faceted_wiz", {
     
     //select rectypes
     this.step1 = $("<div>").appendTo(this.element);
-    $("<div>").html(top.HR("1. Select rectypes that will be used in search")).appendTo(this.step1);
+    $("<div>").append($("<h4>").html(top.HR("1. Select rectypes that will be used in search"))).appendTo(this.step1);
                 //.css({overflow: 'none !important', width:'100% !important'})
     this.step1.rectype_manager({ isdialog:false, isselector:true });
                 
@@ -78,12 +78,14 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step3 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
+    $("<div>").append($("<h4>").html(top.HR("3. Define ranges for numeric and date facets"))).appendTo(this.step3);
     this.step_panels.push(this.step3);
 
     //ranges
     this.step4 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
+    $("<div>").append($("<h4>").html(top.HR("4. Options"))).appendTo(this.step4);
     this.step_panels.push(this.step4);
       
     this._refresh();
@@ -142,8 +144,13 @@ $.widget( "heurist.search_faceted_wiz", {
               }
               //load list of field types
               this.initFieldTreeView(rectypeIds);
+          }else if(this.step==1 && newstep==2){
+
+              var tree = this.find('#field_treeview').fancytree("getTree");
+              
+              var fieldIds = tree.getSelectedNodes(false);
+              
           }
-          
           
             this.step_panels[this.step].css('display','none');
             this.step = newstep;
@@ -161,13 +168,17 @@ $.widget( "heurist.search_faceted_wiz", {
            {
                
                this.options.params.rectypes = rectypeIds;
+               var treediv = this.find('#field_treeview');
               
-                window.HAPI.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:3}, function(response){
+                window.HAPI.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4}, function(response){
                     if(response.status == top.HAPI.ResponseStatus.OK){
                         
                         //@todo - mark selected
-                        
-                        $('#field_treeview').fancytree({
+                        if(!treediv.is(':empty')){
+                            treediv.fancytree("destroy");
+                        }
+                        //setTimeout(function(){
+                        treediv.fancytree({
                     //            extensions: ["select"],
                                 checkbox: true,
                                 selectMode: 3,
@@ -203,7 +214,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 //cookieId: "fancytree-Cb3",
                                 //idPrefix: "fancytree-Cb3-"
                             });                        
-                        
+                        //},1000);
                         
                     }else{
                         top.HEURIST.util.redirectToError(response.message);

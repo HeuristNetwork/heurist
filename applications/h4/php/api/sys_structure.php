@@ -42,8 +42,8 @@ if( ! $system->init(@$_REQUEST['db']) ){
         $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
         $mode = intval(@$_REQUEST['mode']);
         
-        if($mode==3){
-            $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids);    
+        if($mode>2){
+            $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode );    
         }else{
             $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );    
         }
