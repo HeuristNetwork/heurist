@@ -46,6 +46,8 @@ define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid
 define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
+define('_ERROR_MSG', "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type");
+
 /**
 * Check that the given title mask is well-formed for the given reference type
 * Returns an error string describing any faults in the mask.
@@ -93,7 +95,7 @@ function titlemask_value($mask, $rec_id) {
         $rt = $rec_value['rec_RecTypeID'];
         return titlemask_make($mask, $rt, 0, $rec_id, _ERR_REP_WARN);
    }else{
-        return "";
+        return "Titlemask not generated. Record ".$rec_id." not found";
    }
 }
 
@@ -131,16 +133,16 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         if(is_array($value)){
             //ERROR
             if($rep_mode==_ERR_REP_WARN){
-                return "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type";
+                return _ERROR_MSG;
             }else if($rep_mode==_ERR_REP_MSG){
                 return $value;
             }else{
                 return "";
             }
         }else if ($value)
-            if($mode==0){
+            if($mode==0){ //value
                 $replacements[$matches[2][$i]] = $value;
-            }else{
+            }else{ //coded
                 $replacements[$matches[2][$i]] = "[$value]";
             }
         else
@@ -177,7 +179,16 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             $title = preg_replace('!\\s+,!s', ',', $title);
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
+        
+        if($title==""){
+            if($rep_mode==_ERR_REP_MSG){
+                return array(_ERROR_MSG);
+            }else{
+                return _ERROR_MSG;
+            }
+        }
     }
+    
     return $title;
 }
 
