@@ -282,12 +282,14 @@ function _titlemask__get_rec_detail_types($rt) {
 * @param mixed $rec_id
 */
 function _titlemask__get_record_value($rec_id) {
-
+/* it leads to memory exhaustion
     static $records;
 
     if (! $records) {
         $records = array();
     }
+*/    
+    $records = array();
 
    if(!@$records[$rec_id]){
 
@@ -295,17 +297,19 @@ function _titlemask__get_record_value($rec_id) {
 
        $query = 'SELECT rec_ID, rec_Title, rec_Modified, rec_RecTypeID FROM Records where rec_ID='.$rec_id;
        $res = mysql_query($query);
-       $row = mysql_fetch_assoc($res);
-       if($row){
+       if($res){
+           $row = mysql_fetch_assoc($res);
+           if($row){
 
-            $ret = $row;
-            $ret['rec_Details'] = array();
+                $ret = $row;
+                $ret['rec_Details'] = array();
 
-            $query = 'SELECT dtl_DetailTypeID, dtl_Value FROM recDetails where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_array($res)) {
-                array_push($ret['rec_Details'], $row);
-            }
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value FROM recDetails where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                $res = mysql_query($query);
+                while ($row = mysql_fetch_array($res)) {
+                    array_push($ret['rec_Details'], $row);
+                }
+           }
        }
 
        $records[$rec_id] = $ret;
