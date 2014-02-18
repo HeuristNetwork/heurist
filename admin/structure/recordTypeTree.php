@@ -213,6 +213,7 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             case 'relationtype':
             */
             case 'separator':
+            case 'relmarker':
                     return null;
             case 'enum':    //@todo!!!!
 
@@ -226,7 +227,6 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             break;
 
             case 'resource': // link to another record type
-            case 'relmarker':
 
                 //load this record
                 if($recursion_depth<2){ // && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {

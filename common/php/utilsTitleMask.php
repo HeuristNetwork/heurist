@@ -139,14 +139,15 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             }else{
                 return "";
             }
-        }else if ($value)
+        }else if ($value){
             if($mode==0){ //value
                 $replacements[$matches[2][$i]] = $value;
             }else{ //coded
                 $replacements[$matches[2][$i]] = "[$value]";
             }
-        else
+        }else{
             $replacements[$matches[1][$i]] = "";
+        }
     }
 
     if($mode==0){
@@ -159,16 +160,17 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
     if($mode==0){
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
-        
-            $puncts = '+=|&-:;,.@#'; // These are stripped from end of title if no field data follows them
-            $puncts2 = '+=|&-:;,@#';
+
+            $puncts = '-:;,.@#|+=&'; // These are stripped from end of title if no field data follows them
+            $puncts2 = '-:;,@#|+=&';
+            
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts.'/\\s]*\\)!s', '(\\1)', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
         
-/*          TODO: Old version, removed 4th Jan 2014, to delete
+/*          TODO: Old version, removed 4th Jan 2014, to delete  
             $title = preg_replace('!^[-:;,./\\s]*(.*?)[-:;,/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\([-:;,./\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\([-:;,./\\s]*(.*?)[-:;,./\\s]*\\)!s', '(\\1)', $title);
@@ -370,6 +372,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
         $dt_type = _titlemask__get_dt_field($rt, $rdt_id, 'dty_Type');
 
         $details = $rec_values['rec_Details'];
+
         $res = array();
         $found = false;
         foreach($details as $detail){
@@ -463,7 +466,8 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
         strcasecmp($field_name,'rectitle')==0 ||
         strcasecmp($field_name,'modified')==0)
     {
-        return _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
+        $field_val = _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
+        return $field_val;
     }
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
@@ -508,9 +512,12 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                     return array("$inner_field_name is an unrecognised qualifier for a terms list field");
                 }
             }
+            if($dt_type== 'relmarker') { //@todo - to implement it in nearest future
+                return array("$parent_field_name is relmarker field type. Not supported at the moment");
+            }
             if($dt_type!== 'resource') {
                 //ERROR
-                return array("$field_name must be a record pointer field");
+                return array("$parent_field_name must be either enum or resource(record pointer) field type");
             }
 
         }else{
@@ -542,7 +549,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 }
                 //_titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id) );
             }
-            return implode(",", $res);
+            return implode(", ", $res);
 
         }else{ //convert  coded<->human
 

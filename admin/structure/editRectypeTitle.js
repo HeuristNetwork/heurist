@@ -233,7 +233,7 @@ function EditRectypeTitle() {
 
                 for(id in rectypeTree)
                 {
-                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' || id=='recURL' || id=='recWootText') ){  // ||
+                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' || id=='recURL' || id=='recWootText' || id=='Relationship') ){  // ||
                 
                    if(parent_full=='' && id=='recTitle'){
                        continue; //do not allow rectitle for first level
@@ -518,6 +518,7 @@ function EditRectypeTitle() {
     }
 
     /**
+    * Artem: do not remove this - it is used for debug
     * not used   TODO: DELETE UNUSED CODE
     */
     function _doCanonical(mode){
