@@ -80,7 +80,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         recordtype = event.target.value;
 
-        var allowedlist = ["enum", "integer", "float", "resource"];//, "date", "freetext"]; //"resource",
+        var allowedlist = ["enum", "integer", "float", "resource", "relationtype"];//, "date", "freetext"]; //"resource",
 
         var selObj = createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
         createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
@@ -169,7 +169,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
          fields3[name] = {field:detailid, fieldname:detailname, type:detailtype, values:[], intervals:[]}
 
-         if(detailtype=="enum") //false &&
+         if(detailtype=="enum" || detailtype=="relationtype") //false &&
          {
              //get all terms and create intervals
              calculateIntervals(name);
@@ -230,7 +230,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 var request = { a:'pointers', db: database, rt:recordtype , dt:detailid };
 
                 var baseurl = top.HEURIST.basePath + "viewers/crosstab/crosstabs_srv.php";
-                var params = "a=pointers&db=" + database+'&rt='+recordtype+'&dt='+detailid;
+                var params = "a=pointers&db=" + database+'&rt='+recordtype+'&dt='+detailid+"&q="+query_main+"&w="+query_domain;
                 top.HEURIST.util.getJsonData(baseurl,
                     function(response){
                         if(response.status == "OK"){
@@ -238,7 +238,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                             if(!response.data){
                                 fields3[name].values = [];
                                 $container = clearIntervals(name);
-                                $container.html('There are no pointerv values for this field.');
+                                $container.html('There are no pointer values for this field.');
                             }else{
                                 fields3[name].values = response.data;
                                 calculateIntervals(name);
@@ -305,7 +305,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
             var pointers = fields3[name].values;
 
-             var mcnt = (count>0)?Math.min(pointers.length, count+1):pointers.length;
+             var mcnt = (count>0)?Math.min(pointers.length, count):pointers.length;
              fields3[name].intervals = [];
 
              var i;
@@ -313,7 +313,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 fields3[name].intervals.push( {name:pointers[i].text, description:pointers[i].text, values:[ parseInt(pointers[i].id) ] });
              }
 
-        }else if(fields3[name].type=="enum"){
+        }else if(fields3[name].type=="enum" || fields3[name].type=="relationtype"){
 
              var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
              var details = top.HEURIST.rectypes.typedefs[recordtype].dtFields[fields3[name].field];
@@ -325,7 +325,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
              fields3[name].values = termlist;
 
-             var mcnt = (count>0)?Math.min(termlist.length, count+1):termlist.length;
+             var mcnt = (count>0)?Math.min(termlist.length, count):termlist.length;
              fields3[name].intervals = [];
 
              var i;
@@ -360,7 +360,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
                     $intdiv
                             .append('&nbsp;&nbsp;<label>Number of intervals:</label>')
-                            .append($('<input id="'+name+'IntCount">').attr('size',3).val(keepCount))
+                            .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
                             .append($('<button>',{text: "Reset"})
                                 .css('margin-left','1em')
                                 .css('margin-right','3em')
@@ -493,7 +493,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
           var cnt=0;
 
 
-          if ( detailtype=="enum" || detailtype=="resource")
+          if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
           {
 
                 var i, j,
@@ -581,7 +581,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                             }
                             fields3[name].intervals[idx].name = $dlg.find("#intname").val();
 
-                            if(detailtype=="enum" || detailtype=="resource"){ //false &&
+                            if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
 
                                 var sels = $dlg.find("input:checked")
                                 $.each(sels, function(i, ele){
@@ -1282,7 +1282,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
     function fitToInterval(type, values, val){
         val = parseFloat(val);
-        if(type=="enum" || type=="resource"){
+        if(type=="enum" || type=="resource" || type=="relationtype"){
             return (values.indexOf(val)>=0);
         }else{
             return (val>=values[0] && val<=values[1]);

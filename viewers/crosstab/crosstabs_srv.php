@@ -105,7 +105,30 @@ function recordSearchDistictPointers($mysqli, $params){
 
     if(@$params['dt']){
 
-        $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_RecID and dtl_DetailTypeID=".$params['dt']." order by rec_Title ";
+        
+    if (function_exists('get_user_id')) {
+        $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+                                      'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
+    }else{
+        $wg_ids = null;
+    }
+
+    $search_type = (@$parms['w']=="bookmark" || @$parms['w']=="b")?$parms['w']:"all";
+
+    $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
+
+    //remove order by
+    $pos = strrpos($where, " order by ");
+    if($pos){
+        $where = substr($where,0,$pos);
+    }
+    
+    $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
+                        .$params['dt']." and dtl_RecID in (select rec_ID ".$where." ) order by rec_Title";
+        
+//error_log("<<<<<<".  $query);
+        
+        //dtl_RecID
 
         //@todo - current user constraints
 
