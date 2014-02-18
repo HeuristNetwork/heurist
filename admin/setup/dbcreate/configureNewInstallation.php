@@ -15,12 +15,9 @@
 */
 
 /**
-*  File: configure_new_installation.php Set up required data and databases for a new Heurist installation, Ian Johnson 22 Nov 2011
+*  File: configureNewInstallation.php Set up required data and databases for a new Heurist installation, Ian Johnson 22 Nov 2011
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
@@ -31,7 +28,8 @@
 */
 
 	/* This file should be called if Heurist attempts to access a database through index.php
-	and there are no Heurist databases, indicating that the installation has not yet been fully configured */
+	and there are no Heurist databases, indicating that the installation has not yet been fully configured 
+    TODO: it is not currently called and has not been tested (Feb 2014) */
 
 ?>
 
@@ -51,11 +49,12 @@
 
 		print "<h2>Heurist initial setup</h2>";
 		print "No Heurist databases were found. Heurist databases are identified by the prefix defined in your configIni.php file (<b> ".HEURIST_DB_PREFIX." </b>)";
-		print "<p>This function will create the standard example database H3ExampleDB along with the root directory for uploaded files (<b> ".HEURIST_UPLOAD_ROOT." </b>)";
+		print "<p>This function will create H3Sandpit which is used to register new users, along with the root directory for uploaded files (<b> ".HEURIST_UPLOAD_ROOT." </b>)";
 		print "<p>";
 
 		if(!array_key_exists('mode', $_REQUEST)) {
-			print "If there are already Heurist databases with a different prefix, if you want to change the prefix or directory for uploads, click [Cancel]";
+			print "If there are already Heurist databases with a different prefix, if you want to change the prefix ".
+                "or directory for uploads, click [Cancel]";
 			print "<hr>";
 			print "<form name='one' action='configureNewInstallation.php' method='get'>";
 			print "<input name='mode' value='2' type='hidden'>"; // calls step 2
@@ -96,8 +95,8 @@
 				echo("<p>Copied .htaccess file to <b>".HEURIST_UPLOAD_ROOT."</b>");
 				}
 
-			// CREATE H3ExampleDB FROM WHICH USERS CAN START TO GENERATE NEW DATABASES
-			$newname=HEURIST_DB_PREFIX.H3ExampleDB;
+			// CREATE H3Sandpit FROM WHICH USERS CAN START TO GENERATE NEW DATABASES
+			$newname=HEURIST_DB_PREFIX.H3Sandpit;
 			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 				$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
 			} else {
@@ -110,7 +109,7 @@
 				if(count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007") {
 					echo "<strong><p>A database with that name already exists. The work of this script is complete.<hr></strong>";
 					print "<h2>done ...</h2>";
-					print "<p>You can now run Heurist and open the database <a href='../../index.php?db=H3ExampleDB'>H3ExampleDB</a> with user name 'guest' + password 'guest' ";
+					print "<p>You can now run Heurist and open the database <a href='../../../index.php?db=H3Sandpit'>H3Sandpit</a> with user name 'guest' + password 'guest' ";
 					print "<p>You can create new databases when logged into the example database (DB Admin > Database > New Database).";
 					print "<p>Don't forget to change the user name and password as your login information is carried over to any new database you create";
 				}
@@ -128,7 +127,7 @@
 				exit;
 			}
 			print "<h2>success ...</h2>";
-			print "<p>You can now run Heurist and open the database <a href='../../index.php?db=H3ExampleDB'>H3ExampleDB</a> with user name 'guest' + password 'guest' ";
+			print "<p>You can now run Heurist and open the database <a href='../../../index.php?db=H3Sandpit'>H3Sandpit</a> with user name 'guest' + password 'guest' ";
 			print "<p>You can create new databases when logged into the example database (DB Admin > Database > New Database).";
 			print "<p>Don't forget to change the user name and password as your login information is carried over to any new database you create";
 			exit; // successfully completed

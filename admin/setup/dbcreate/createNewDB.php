@@ -467,7 +467,7 @@
 			}
 
 			// copy icon and thumbnail directories from default set in the program code (sync. with H3CoreDefinitions)
-			$cmdline = "cp -R rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
+			$cmdline = "cp -R ../rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
 				echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
@@ -476,7 +476,7 @@
 				$warnings = 1;
 			}
 			// copy smarty template directory from default set in the program code
-			$cmdline = "cp -R smarty-templates $uploadPath";
+			$cmdline = "cp -R ../smarty-templates $uploadPath";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
 				echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
@@ -486,7 +486,7 @@
 
 			if($isExtended){
 				// copy xsl template directories from default set in the program code
-				$cmdline = "cp -R xsl-templates $uploadPath";
+				$cmdline = "cp -R ../xsl-templates $uploadPath";
 				$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 				if ($res2 != 0 ) {
 					echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
