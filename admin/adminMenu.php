@@ -202,8 +202,12 @@ if (is_admin()) {
 								title="Direct access to the global field definitions">Manage field types</a></li>
 						<li><a href="#" onClick="loadContent('structure/terms/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
-                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>')"
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=relations')"
                                 title="Display/print a listing of the record types and their pointers and relationships, including usage counts">Relationships schema</a></li>
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=simple')"
+                                title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">Simple fields schema</a></li>
+                        <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=all')"
+                                title="Display/print a listing of the record types and all fields, including usage counts">Combined schema</a></li>
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 								title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
 						<li><a href="#" onClick="loadContent('describe/getDBStructureAsSQL.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
@@ -290,12 +294,12 @@ if (is_admin()) {
 				</div>
 
 
-                <h3><a href="#">FAIMS: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
+                <h3><a href="#">FAIMS & HuNI: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
                 <div class="adminSection">
                     <ul>
                         <li class="seperator"><a href="#"
                                 onClick="loadContent('../applications/faims/about.html?db=<?=HEURIST_DBNAME?>')"
-                                title="Information about the FAIMS project">About FAIMS</a></li>
+                                title="Information about the FAIMS (Federated Archaeological Information Management System) project">About FAIMS</a></li>
 
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
@@ -311,7 +315,15 @@ if (is_admin()) {
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/exportTDar.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Export the current database as tables, files and metadata directly into a specified tDAR repository">Export to tDAR repository</a></li>
-
+                        
+                        <!-- HuNI -->
+                        <li class="seperator"><a href="#"
+                                onClick="loadContent('../applications/huni/about.html?db=<?=HEURIST_DBNAME?>')"
+                                title="Information about the HuNI (Humanities Networked Infrastructure) project">About HuNI</a></li>
+                          <li><a href="#"
+                            onClick="loadContent('../applications/huni/exportHuNI.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Export data from the current Heurist database to a HuNI-harvestable package of XML files">Export harvestable XML</a></li>
+                                
                     </ul>
                 </div>
 				<!--</div>-->
