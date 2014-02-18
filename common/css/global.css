@@ -908,15 +908,18 @@ h3 {
 	display: inline-block;
 }
 #quicklink-cell li#reportBug {
-	width: 16px;
+	width: 75px;
 	padding-left: 2px;
 	padding-right: 2px;
-	background-image:url(../images/bug_off.png);
+	/* background-image:url(../images/bug_off.png); 
+    Cute but pointless as illegible and only comprehensible, maybe, to geeks */
 	background-repeat:no-repeat;
 	background-position:50%;
 }
 #quicklink-cell li#reportBug:hover {
-		background-image:url(../images/bug_on.png);
+    /* Cute but pointless as illegible and only comprehensible, maybe, to geeks
+    background-image:url(../images/bug_on.png);
+    */
 }
 .recTypeName {text-transform:none !important}
 .rectypeIconHolder {

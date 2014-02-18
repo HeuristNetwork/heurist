@@ -1,0 +1,217 @@
+<!--
+
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* editDetailType.html
+* A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
+* it may call another pop-ups: selectTerms and selectRectype
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Edit field type</title>
+
+<!-- YUI  -->
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+
+<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
+
+<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+<style>
+	.input-row div.input-header-cell {width:150px}
+	.actionButtons {
+		float:right;
+	}
+	.errorMsg {width:100%; text-align:center;}
+
+</style>
+</head>
+
+<body class="popup">
+
+        <script src="../../../common/php/displayPreferences.php"></script>
+        <script src="../../../common/php/getMagicNumbers.php"></script>
+<!--
+		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+		<script src="../../common/php/loadCommonInfo.php"></script>
+-->
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+		<script type="text/javascript" src="editDetailType.js"></script>
+		<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+
+
+<div class="errorMsg" id="msg" style="visibility:hidden"><span id="statusMsg"></span></div>
+<div id="dettypeValues" style="padding:5px;" >
+
+	<div class="input-row" style="margin-top:20px">
+		<div class="input-header-cell">Id:</div>
+		<div class="input-cell">
+			<div id="dty_ID" style="display: inline-block;"></div>&nbsp;&nbsp;
+			<div id="div_dty_ConceptID" style="display: inline-block;"></div>
+		</div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell">Default field type name:</div>
+		<div class="input-cell"><input id="dty_Name" style="width:200;" maxlength="255" />
+		<div class="help prompt">A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used. </div></div>
+	</div>
+	<div class="input-row required">
+		<div class="input-header-cell">Default help text:</div>
+		<div class="input-cell"><input id="dty_HelpText" maxlength="255" style="width:420;"/>
+		<div class="help prompt">A default generic help text which may be overridden with more specific help for each record type that uses this field type</div></div>
+	</div>
+	<div class="input-row">
+		<div class="input-header-cell" style="vertical-align:top">Extended description:</div>
+		<div class="input-cell"><textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:420;"></textarea>
+		<div class="help prompt">An extended description of the content of this field type and references to any standards used</div></div>
+	</div>
+
+	<div class="input-row required">
+		<div class="input-header-cell">Data type:</div>
+		<div class="input-cell"><select class="dtyValue" id="dty_Type" onChange="window.detailTypeEditor.onChangeType(event)">
+		</select>
+		<div class="help prompt">The type of data to be recorded in this field. Choose carefully - in most cases this cannot be changed once set</div></div>
+	</div>
+	<div id="pnl_enum" class="input-row" style="display:block;">
+		<div class="input-header-cell">Vocabulary (terms):</div>
+		<div class="input-cell">
+        <div id="defineTerms">
+		<span class="dtyValue" id="termsVocab"></span>
+		<span id="divAddSelTerm" style="display:inline-block;"><input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:100px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/></span>
+		<span id="divAddVocab" style="display:none;">
+            <input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/>
+            <input type="submit" value="Edit terms" onClick="{window.detailTypeEditor.showOtherTerms();}"/>    
+        </span>
+        </div>
+		<div class="dtyValue" id="termsPreview"><span>Preview:&nbsp;&nbsp;</span></div>
+		<div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
+		</div>
+	</div>
+
+	<div id="pnl_relmarker" class="input-row" style="display:block;">
+		<div class="input-header-cell">Target record types:</div>
+		<div class="input-cell">
+		<span class="dtyValue" id="dty_PtrTargetRectypeIDsPreview" style="width:270px;"></span>
+		<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="window.detailTypeEditor.onSelectRectype()"/>
+		<div class="help prompt">The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.</div>
+		</div>
+	</div>
+
+	<input type="hidden" id="dty_JsonTermIDTree"/>  <!-- for enum, relationtype, relmarker. Preview select is in termsPreview -->
+	<input type="hidden" id="dty_TermIDTreeNonSelectableIDs"/> <!-- disabled terms for the same types as above -->
+	<input type="hidden" id="dty_PtrTargetRectypeIDs"/>  <!-- for resource and relmarker -->
+	<input type="hidden" id="dty_FieldSetRecTypeID"/>  <!-- for fieldsetmarker -->
+
+	<!-- OPTIONAL FIELDS -->
+	<div id="optional" class="togglepnl"><a
+		style="margin-left: 40px;"
+			onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
+	<div id="options" class="hidden" style="background-color:#ffffff;">
+
+	<div class="input-row">
+		<div class="input-header-cell">Display group:</div>
+		<div class="input-cell"><select class="dtyValue" id="dty_DetailTypeGroupID"></select>
+		<div class="help prompt">Field types are grouped together into related types for easier management. Add new groups from the field type management screen.</div></div>
+	</div>
+
+	<div class="input-row" style="display:none">
+		<div class="input-header-cell">Order in group:</div>
+		<div class="input-cell"><input onKeyPress="checkIfInteger(event)" maxlength="3" id="dty_OrderInGroup" style="width:30;"/>
+		<div class="help prompt">Where the record type should be shown within its group</div></div>
+	</div>
+
+	<div class="input-row">
+		<div class="input-header-cell">Status:</div>
+		<div class="input-cell">
+			<select class="dtyValue" id="dty_Status" onChange="window.detailTypeEditor.onChangeStatus(event)">
+				<option selected="selected">open</option>
+				<option>pending</option>
+				<option>approved</option>
+				<!-- option>reserved</option -->
+			</select>
+			<div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;  'Open' for freely modifiable/personal record types</div>
+		</div>
+	</div>
+	<div class="input-row">
+		<div class="input-header-cell">Non-owner visibility:</div>
+		<div class="input-cell">
+			<select class="dtyValue" id="dty_NonOwnerVisibility">
+				<option selected="selected">viewable</option>
+				<option>hidden</option>
+				<option>public</option>
+			</select>
+			<div class="help prompt">Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers</div>
+		</div>
+	</div>
+	<div class="input-row">
+		<div class="input-header-cell">Show in lists:</div>
+		<div class="input-cell"><input id="dty_ShowInLists" type="checkbox"/>
+		<div class="help prompt">Show this field type in pulldown lists etc. (always visible in field management screen)</div></div>
+	</div>
+
+	<div id="pnl_fieldsetmarker" class="input-row" style="display:block;">
+		<div class="input-header-cell">Fieldset record type:</div>
+		<div class="input-cell">
+			<span class="dtyValue" id="dty_FieldSetRecTypeIDPreview" style="width:270px;"></span>
+			<input type="submit" value="Select Record Type" id="btnSelRecType1" onClick="window.detailTypeEditor.onSelectRectype()"/>
+			<div class="help prompt">The record type that describes this fieldset</div></div>
+	</div>
+	</div> <!-- optional div -->
+	</div>
+<br />
+	<div class="actionButtons">
+		<input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
+		<input type="button" value="Save" onClick="window.detailTypeEditor.save();" />
+	</div>
+</div>
+
+<script type="text/javascript">
+	//
+	//  starts initialization on load completion of this window
+	//
+	function loadHandler(){
+		window.detailTypeEditor = new DetailTypeEditor();
+	}
+	YAHOO.util.Event.addListener(window, "load", loadHandler);
+	//to implment window.onbeforeunload = onbeforeunload;
+
+</script>
+
+</body>
+</html>

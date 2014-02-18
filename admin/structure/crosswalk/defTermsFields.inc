@@ -11,6 +11,6 @@ $flds = "`trm_ID`, `trm_Label`, `trm_InverseTermId`,
             // in waiting 1/10/13 for DB version 1.2.0 for alignment with FAIMS
             // trm_ReferenceURL`, `trm_IllustrationURL` "; 
             
-            // Note: You must also add any new fields to the print format statement in getDBStructure
+            // Note: You must also add any new fields to the print format statement in getDBStructureAsSQL
 
 ?>

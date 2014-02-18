@@ -7,6 +7,7 @@
 */
 
 require_once (dirname(__FILE__).'/db_users.php');
+require_once (dirname(__FILE__).'/db_files.php');
 require_once (dirname(__FILE__).'/compose_sql.php');
 require_once (dirname(__FILE__).'/db_structure.php');
 
@@ -108,12 +109,16 @@ function recordSearch($system, $params, $need_structure, $need_details)
             foreach($_flds as $fld){
                 array_push($fields, $fld->name);
             }
+            array_push($fields, 'rec_ThumbnailURL'); //last one
 
             $records = array();
             $rectype_structures  = array();
             $rectypes = array();
 
             while ( ($row = $res->fetch_row()) && (count($records)<1001) ) {
+                
+                array_push( $row, fileGetThumbnailURL($system, $row[2]) );
+                
                 $records[$row[2]] = $row;
                 array_push($rectypes, $row[4]);
             }

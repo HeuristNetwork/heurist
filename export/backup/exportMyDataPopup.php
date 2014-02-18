@@ -150,7 +150,7 @@ if(!$mode) {
     print "Export database definitions as readable text<br>";
     ob_flush();flush();
     
-	$url = HEURIST_BASE_URL."admin/structure/getDBStructure.php?db=".HEURIST_DBNAME."&pretty=1";
+	$url = HEURIST_BASE_URL."admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
 	saveURLasFile($url, $folder."/Database_Structure.txt");
 
 
@@ -219,7 +219,7 @@ if(!$mode) {
         
     }
   
-	//copy(dirname(__FILE__)."/../../admin/setup/coreDefinitions.txt", $folder."coreDefinitions.txt");
+	//copy(dirname(__FILE__)."/../../admin/setup/dbcreate/coreDefinitions.txt", $folder."coreDefinitions.txt");
 
 	//archive folder
 	//zipDirectory($folder, HEURIST_UPLOAD_DIR."backup/".$user."_backup.zip");

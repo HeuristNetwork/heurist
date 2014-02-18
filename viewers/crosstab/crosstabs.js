@@ -80,7 +80,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
         recordtype = event.target.value;
 
-        var allowedlist = ["enum", "integer", "float", "resource"];//, "date", "freetext"]; //"resource",
+        var allowedlist = ["enum", "relationtype", "integer", "float", "resource"];//, "date", "freetext"]; //"resource",
 
         var selObj = createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
         createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
@@ -90,7 +90,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
             $("#vars").hide();
             $("#shows").hide();
             $("#btnPanels").hide();
-            $("#nofields").html(recordtype>0?'No suitable fields: numeric or enumeration types.':'Select record type.');
+            $("#nofields").html(recordtype>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
             $("#nofields").show();
         }else{
             $("#vars").show();
@@ -169,7 +169,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
 
          fields3[name] = {field:detailid, fieldname:detailname, type:detailtype, values:[], intervals:[]}
 
-         if(detailtype=="enum") //false &&
+         if((detailtype=="enum") || (detailtype="relationtype")) //false &&
          {
              //get all terms and create intervals
              calculateIntervals(name);
@@ -313,7 +313,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                 fields3[name].intervals.push( {name:pointers[i].text, description:pointers[i].text, values:[ parseInt(pointers[i].id) ] });
              }
 
-        }else if(fields3[name].type=="enum"){
+        }else if ((fields3[name].type=="enum") || (fields3[name].type=="relationtype")) {
 
              var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
              var details = top.HEURIST.rectypes.typedefs[recordtype].dtFields[fields3[name].field];
@@ -493,7 +493,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
           var cnt=0;
 
 
-          if ( detailtype=="enum" || detailtype=="resource")
+          if ( detailtype=="enum" || detailtype=="relationtype" || detailtype=="resource")
           {
 
                 var i, j,
@@ -581,7 +581,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                             }
                             fields3[name].intervals[idx].name = $dlg.find("#intname").val();
 
-                            if(detailtype=="enum" || detailtype=="resource"){ //false &&
+                            if(detailtype=="enum" || detailtype=="relationtype" || detailtype=="resource"){ //false &&
 
                                 var sels = $dlg.find("input:checked")
                                 $.each(sels, function(i, ele){
@@ -1282,7 +1282,7 @@ order by d2.dtl_Value, cast(d1.dtl_Value as decimal);
 
     function fitToInterval(type, values, val){
         val = parseFloat(val);
-        if(type=="enum" || type=="resource"){
+        if(type=="enum" || type=="relationtype" || type=="resource"){
             return (values.indexOf(val)>=0);
         }else{
             return (val>=values[0] && val<=values[1]);

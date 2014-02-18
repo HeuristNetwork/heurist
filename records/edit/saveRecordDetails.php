@@ -141,10 +141,17 @@
         return $validTermIDs;
     }
 
+    /**
+    * Verify rectype pointer value or term id
+    * 
+    * @param mixed $id  - rectype id (for resource) or term id (for enum reltype)
+    * @param mixed $dtyID - field type id
+    * @param mixed $rtyID - rectype id
+    */
     function isValidID($id, $dtyID, $rtyID = null) {
-        static $rtFieldDefs = null;
-        static $dtyIDDefs = null;
-        if (!is_numeric($id)) return false;
+        static $rtFieldDefs = null;  // constraints in recstrucutre (min max values)
+        static $dtyIDDefs = null;    // constraints in field definition   (terms and rectype pointers)  STATIC!!!! - stupidity?
+        if (!is_numeric($id) || !is_numeric($dtyID)) return false;
         if (!$dtyIDDefs) {
             $dtyIDDefs = array();
             $res = mysql_query("select dty_ID, dty_Type, dty_JsonTermIDTree,dty_TermIDTreeNonSelectableIDs,dty_PtrTargetRectypeIDs".
@@ -164,22 +171,25 @@
                                 $terms = array_diff($terms,$nonTerms);
                             }
                         }
-                        if (!empty($terms)) {
+                        if (count($temp)<1) {
+                            $dtyIDDefs[$row[0]] = "all";
+                        }else{
                             $dtyIDDefs[$row[0]] = $terms;
                         }
                     }
                 } else if ($row[1] === 'resource') {
                     // create list of valid rectypes
-                    if (count($row[4])>0 && $row[4] != "") {
+                    $dtyIDDefs[$row[0]] = "all";
+                    if ($row[4] != "") {
                         $temp = explode(",",$row[4]);
-                        if (!empty($temp)) {
+                        if (count($temp)>0) {
                             $dtyIDDefs[$row[0]] = $temp;
                         }
                     }
                 }
             }
         }
-        if ($rtyID && !$rtFieldDefs) {
+        if (false && $rtyID && !$rtFieldDefs) {   //this code not used anymore
             $rtFieldDefs = array('max'=>array());
             $res = mysql_query("select rst_DetailTypeID, dty_Type, rst_MaxValues,".
                                     " if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree,".
@@ -228,12 +238,14 @@ which is one step too many and has been removed from design by Ian in approx 201
             }
         }
         /*****DEBUG****///error_log("save record isValidID rtFields = ".print_r($rtFieldDefs,true));
-        /*****DEBUG****///error_log("save record isValidID rdtyDefs = ".print_r($dtyIDDefs,true));
+        /*****DEBUG****///error_log("save record isValidID rdtyDefs = ".print_r($dtyIDDefs,true)."  ");
         
-        if ($rtyID && array_key_exists($dtyID, $rtFieldDefs)) {
-            return $rtFieldDefs[$dtyID] === "all" || in_array($id,$rtFieldDefs[$dtyID]);
-        } else if (array_key_exists($dtyID, $dtyIDDefs)) {
-            return $dtyIDDefs[$dtyID] === "all" || in_array($id,$dtyIDDefs[$dtyID]);
+        // not used
+        // if ($rtFieldDefs && $rtyID && array_key_exists($dtyID, $rtFieldDefs)) {
+        //    $res = $rtFieldDefs[$dtyID] === "all" || in_array($id, $rtFieldDefs[$dtyID]);
+        //}
+        if ($dtyIDDefs && @$dtyIDDefs[$dtyID]) {
+            return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
         }
         return false;
     }
@@ -500,7 +512,6 @@ which is one step too many and has been removed from design by Ian in approx 201
             (@$userDefaultVisibility ? $userDefaultVisibility :
                 (defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable')));
 
-//error_log(" in insertRecord");
         // if non zero (everybody group, test if user is member, if not then set owner to user
         if (intval($owner) != 0 && !in_array($owner,get_group_ids())) {
             $owner = get_user_id();
@@ -518,7 +529,6 @@ which is one step too many and has been removed from design by Ian in approx 201
 
         $_REQUEST["recID"] = $recID = mysql_insert_id();
         if($recID){
-//error_log(" in insertRecord recID = $recID");
 
             if ($usrID) {
                 mysql__insert('usrBookmarks', array(
@@ -711,19 +721,21 @@ which is one step too many and has been removed from design by Ian in approx 201
     }
     class BibDetailResourceInput extends BibDetailInput {
         function inputOK($postVal, $dtyID, $rtyID) {
-            if($postVal){
-            $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$postVal);
-            
-    error_log("select rec_RecTypeID from Records where rec_ID = ".$postVal);
+            if($postVal && $postVal!=""){
+                $tempRtyID = null;
+                $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$postVal);
                 if ($res){
                     $tempRtyID = mysql_fetch_row($res);
-                    $tempRtyID = $tempRtyID[0];
-    error_log("RES=".$tempRtyID);
+                }
+/*****DEBUG****///error_log("find record type: select rec_RecTypeID from Records where rec_ID = ".$postVal);
+/*****DEBUG****///error_log("RES=".$tempRtyID);
+                if ($tempRtyID){
+                    $tempRtyID = @$tempRtyID[0];
                 } else {
                     return false;
                 }
                 $res = isValidID($tempRtyID,$dtyID,$rtyID);
-    error_log("VALID ID=".$res);
+/*****DEBUG****///error_log("VALID ID=".$res);
                 return $res;
             }else{
                 return false;
@@ -777,7 +789,7 @@ which is one step too many and has been removed from design by Ian in approx 201
             if (!is_numeric($postVal) && array_key_exists($postVal,$labelToID)) {
                 $postVal = $labelToID[$postVal];
             }
-            return isValidID($postVal,$dtyID,$rtyID);
+            return ($postVal)?isValidID($postVal, $dtyID, $rtyID):false;
         }
     }
     class BibDetailFileInput extends BibDetailInput {

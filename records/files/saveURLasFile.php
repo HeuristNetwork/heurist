@@ -105,7 +105,7 @@ function generate_thumbnail($sURL, $needConnect){
 
 	/*****DEBUG****///error_log("22222 FILE ID=".$fileID);
 	}else{
-		$res = getError("Can't download image");
+		$res = getError("Cannot download image");
 	}
 
 	return $res;

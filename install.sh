@@ -174,7 +174,7 @@ echo "You will be asked for your mysql root password to allow creation of the de
 echo "CREATE DATABASE hdb_ExampleDB" | mysql -uroot -p
 
 echo "Please enter your mysql root password... again..."
-mysql -uroot -p hdb_ExampleDB < /var/www/h3/admin/setup/buildExampleDB.sql
+mysql -uroot -p hdb_ExampleDB < /var/www/h3/admin/setup/dbcreate/buildExampleDB.sql
 
 echo -e "\n\n"
 echo "Creating directories and setting permissions"

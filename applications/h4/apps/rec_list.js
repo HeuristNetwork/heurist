@@ -370,19 +370,37 @@ $.widget( "heurist.rec_list", {
 
                var recs = this.options.recordset.getRecords();
 
-               //for(i=0; i<recs.length; i++){
-               //$.each(this.options.records.records, this._renderRecord)
-               var recID;
-               for(recID in recs) {
-                 if(recID){
-                    this._renderRecord(recs[recID]);
-                 }
-               }
+               if( this.options.recordset.count_total() > 0 )
+               {
+                   //for(i=0; i<recs.length; i++){
+                   //$.each(this.options.records.records, this._renderRecord)
+                   var recID;
+                   for(recID in recs) {
+                     if(recID){
+                        this._renderRecord(recs[recID]);
+                     }
+                   }
 
-               $allrecs = this.div_content.find('.recordDiv');
-               this._on( $allrecs, {
-                        click: this._recordDivOnClick
-               });
+                   $allrecs = this.div_content.find('.recordDiv');
+                   this._on( $allrecs, {
+                            click: this._recordDivOnClick
+                   });
+               
+               }else{
+                   
+                   var $emptyres = $('<div>')
+                            .html(top.HR('No records match the search')+
+                            '<div class="prompt">'+top.HR((top.HAPI.currentUser.ugr_ID>0)
+                                    ?'Note: some records are only visible to members of particular workgroups'
+                                    :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
+                            )
+                            .appendTo(this.div_content);                   
+                   if(top.HAPI.currentUser.ugr_ID>0){
+                       $emptyres.append()
+                   }else{
+                       
+                   }
+               }
        }
 
   },
@@ -408,9 +426,11 @@ $.widget( "heurist.rec_list", {
            5 .'rec_Title,'
            6 .'rec_OwnerUGrpID,'
            7 .'rec_NonOwnerVisibility,'
-           8 .'rec_URLLastVerified,'
-           9 .'rec_URLErrorMessage,'
-          10 .'bkm_PwdReminder ';
+           8. rec_ThumbnailURL
+           
+           9 .'rec_URLLastVerified,'
+          10 .'rec_URLErrorMessage,'
+          11 .'bkm_PwdReminder ';
           11  thumbnailURL - may not exist
 */
 
@@ -434,10 +454,10 @@ $.widget( "heurist.rec_list", {
             .css('background-image', 'url('+ top.HAPI.iconBaseURL + 'thumb/th_' + rectypeID + '.png)')
             .appendTo($recdiv);
 
-        if(fld['thumbnailURL']){
+        if(fld('rec_ThumbnailURL')){
         $(document.createElement('div'))
             .addClass('recTypeThumb')
-            .css('background-image', 'url('+ fld['thumbnailURL'] + ')')
+            .css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'opacity':'1' } )
             .appendTo($recdiv);
         }
 

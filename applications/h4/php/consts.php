@@ -8,6 +8,7 @@
 */
 define('HEURIST_VERSION', $version);
 define('HEURIST_MIN_DBVERSION', "1.1.0");
+define('HEURIST_HELP', "http://heuristscholar.org/help");
 
 if (!$serverName) {
     $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
@@ -32,8 +33,9 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
 define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"].'/'.$installDir); //  eg. /var/www/htdocs
+define('HEURIST_SERVER_URL', $serverBaseURL);
 define('HEURIST_BASE_URL', $serverBaseURL . $installDir . 'applications/h4/'); // eg. http://heuristscholar.org/h3/
-
+define('HEURIST_BASE_URL_OLD', $serverBaseURL . $installDir ); // access to old app
 
 
 if ($dbHost) {

@@ -62,7 +62,7 @@
             
             function onEditFieldType(dty_ID){
 
-                var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
                 if(dty_ID>0){
                     url = url + "&detailTypeID="+dty_ID; //existing
                 }else{

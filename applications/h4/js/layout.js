@@ -308,9 +308,9 @@ function appAddContent($container, app, options){
                         //DEBUG
                         $content.rec_viewer();
                     }else
-                    if(app.widgetname=='search_links'){
+                    if(app.widgetname=='search'){
                         //DEBUG
-                        $content.search_links( ); //options
+                        $content.search( ); //options
                     }else
                      if(app.widgetname=='rec_list'){
                         

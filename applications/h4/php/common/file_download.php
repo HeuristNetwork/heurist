@@ -13,6 +13,8 @@ if($system->init(@$_REQUEST['db']) ){
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
         if(file_exists($thumbfile)){
             downloadFile('image/png', $thumbfile);
+        }else{
+            //@todo $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
         }
     }else{
         
@@ -20,7 +22,8 @@ if($system->init(@$_REQUEST['db']) ){
         //find 
         $location = fileGetPathOrURL($system, $file_ids);
         if($location){
-            if(file_exists($location)){
+            $location = $location[0];
+            if(file_exists($location[0])){
                 downloadFile(null, $location);
             }else{
                 header('Location: '.$location);

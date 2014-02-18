@@ -121,7 +121,7 @@ if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
     returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
 }
 
-// refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/createNewDB.php
+// refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/dbcreate/createNewDB.php
 
 
 define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
@@ -632,7 +632,7 @@ function returnErrorMsgPage($critical, $msg = null) {
         
     } else if ($critical == 3) { // db required upgrade
 
-        $redirect = HEURIST_BASE_URL . "admin/setup/upgradeDatabase.php?db=".HEURIST_DBNAME;
+        $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
     
     } else {
 		// gets to here if database not specified properly. This is an error if set up properly, but not at first initialisaiton of the system
