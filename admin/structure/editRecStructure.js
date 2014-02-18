@@ -2109,7 +2109,7 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					//update
 					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 						recreateTermsPreviewSelector(rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type.dty_JsonTermIDTree],
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_JsonTermIDTree],
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){

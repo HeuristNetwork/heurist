@@ -465,8 +465,9 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
 			$result = $mysqli->error;
 			if ($result == "") {
 				$result = $mysqli->affected_rows;
+//DEBUG error_log(">>>$sql   affected rows=" . $result);            
 			} else {
-				error_log(">>>Error=" . $mysqli->error);
+				error_log(">>>Error=" . $result);
 			}
 		} else {
 			$meta = $stmt->result_metadata();
