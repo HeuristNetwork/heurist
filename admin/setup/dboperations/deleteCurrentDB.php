@@ -17,11 +17,7 @@
 /**
 * File: deleteCurrentDB.php Deletes the current database (owner group admins only)
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
@@ -31,7 +27,7 @@
 */
 
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
     if(isForAdminOnly("to delete a database")){
         return;
@@ -39,9 +35,9 @@
 
 	$dbname = $_REQUEST['db'];
 
-	if ($dbname=='H3ExampleDB') {// we require a valid DB incase the user deletes all DBs
-				print "<p>Deleteion of H3ExampleDB is not supported through this interface.".
-					"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=H3ExampleDB' >Return to Heurist</a>";
+	if ($dbname=='H3Sandpit') {// we require a valid DB incase the user deletes all DBs
+				print "<p>Deletion of H3Sandpit is not supported through this interface as itis required for initial user registration.".
+					"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=H3Sandpit' >Return to Heurist</a>";
 					return;
 	}
 
@@ -49,18 +45,19 @@
 		print "<html>";
 		print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
 		print "<title>Delete Current Heurist Database</title>";
-		print "<link rel='stylesheet' type='text/css' href='../../common/css/global.css'>";
-		print "<link rel='stylesheet' type='text/css' href='../../common/css/edit.css'>";
-		print "<link rel='stylesheet' type='text/css' href='../../common/css/admin.css'>";
+		print "<link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>";
+		print "<link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>";
+		print "<link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>";
 		print "</head>";
 		print "<body class='popup'>";
-		print "<div class='banner'><h2>Delete Current Heurist database</h2></div>";
+		print "<div class='banner'><h2>Delete Current Heurist Database</h2></div>";
 		print "<div id='page-inner' style='overflow:auto'>";
-		print "<h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../common/images/url_error.png' /> DANGER <img src='../../common/images/url_error.png' /></span></h4><h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br>";
-		print "<h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3> <b>$dbname</b>";
+		print "<h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../../common/images/url_error.png' /> DANGER <img src='../../../common/images/url_error.png' /></span></h4><h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br>";
+		print "<h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>";
+        print "<pre><h2>      About to delete database:   $dbname</h2></pre>";
 		print "<form name='deletion' action='deleteCurrentDB.php' method='get'>";
 		print "<p>Enter the words DELETE MY DATABASE in all-capitals to confirm that you want to delete the current database".
-		"<p>Type the word above to confirm deletion: <input type='input' maxlength='20' size='20' name='del' id='del'>".
+		"<p>Type the words above to confirm deletion: <input type='input' maxlength='20' size='20' name='del' id='del'>".
 		"&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Delete' style='font-weight: bold;' >".
 		"<input name='mode' value='2' type='hidden'>".
 		"<input name='db' value='$dbname' type='hidden'>";
@@ -91,13 +88,14 @@
 				echo($output2);
 			} else {
 				print "Database <b>$dbname</b> has been deleted";
-				print "<p>Associated files stored in upload subdirectories<b>$uploadPath</b> have ben moved to ".HEURIST_UPLOAD_ROOT."deleted_databases.".
+				print "<p>Associated files stored in upload subdirectories<b>$uploadPath</b> <br/>".
+                        "have ben moved to ".HEURIST_UPLOAD_ROOT."deleted_databases.".
 				"<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.".
-				"<p><a href='".HEURIST_BASE_URL."?db=H3ExampleDB' >Return to Heurist</a>";
+				"<p><a href='".HEURIST_BASE_URL."index.php' >Return to Heurist</a>";
 			}
 		} else { // didn't request properly
-			print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database $dbname was not deleted. ".
-			"<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a>";
+			print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted".
+			"<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to $dbname</a>";
 		}
 	}
 

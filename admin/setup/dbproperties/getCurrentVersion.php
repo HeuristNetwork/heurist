@@ -17,10 +17,6 @@
 /**
 * getCurrentVersion.php - requests code and database version from HeuristScholar.org
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
@@ -35,12 +31,21 @@
     require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
     $is_check = @$_REQUEST["check"];
+    
 
-    if($is_check){ // || HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL){ //this is main server
+// REFERENCE SERVER
+// Code to run on the reference server to return the current program and database versions
+
+    if($is_check){ // check is set to 1 when this is called to contact the Heurist reference server.
+                   // If HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL, this script is running on the reference server
         //return current db and code versions
         echo HEURIST_VERSION."|".HEURIST_DBVERSION;
         exit();
     }
+
+    
+// LOCAL COPY CHECK
+// Code to run on a copy which is checking itself against the reference server
 
 /**
 * return the date of last check if it is less than 7 days, otherwise it returns null
@@ -66,9 +71,9 @@ function getLastCheckedVersion($date_and_version){
                 }
             }
     }
-    return null; //version check is outdated or not performed at all
+    return null; //version check is outdated or has never been done
 }
-//
+
 function checkVersionValid($version){
 
     $current_version = explode("|", $version);
@@ -86,7 +91,7 @@ function checkVersionValid($version){
 }
 
 /**
-* request for last version on INDEX server and compare it with current version
+* request version on Heurist reference server and compare it with the local version
 *
 * @param mixed $version_in_session
 */
@@ -106,8 +111,9 @@ function checkVersionOnMainServer($version_in_session)
             return $version_in_session;
         }
 
-        //send request to main server HEURIST_INDEX_BASE_URL
-        // TODO: GetCurrentVersion shouldn't need to specify a database, it's a potential weak point
+        //send request to main server at HEURIST_INDEX_BASE_URL
+        // H3MasterIndex is the refernece standard for current database version
+        // TODO: Maybe this should be changed to H3Sandpit?
         $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=H3MasterIndex&check=1";
 
         $rawdata = loadRemoteURLContent($url);
@@ -117,27 +123,32 @@ function checkVersionOnMainServer($version_in_session)
             if(checkVersionValid($rawdata))
             {
    
+                // $rawdata contains program version | database version
                 $current_version = explode("|", $rawdata);
 
+                // $curver is the current program version
                 $curver = explode(".", $current_version[0]);
                 if(count($curver)>=2){
                     $major = intval($curver[0]);
                     $subver = intval($curver[1]);
 
-                    //compare with local versions
+                    //compare with local program version set in HEURIST_VERSION
                     $locver = explode(".", HEURIST_VERSION);
                     $major_local = intval($locver[0]);
                     $subver_local = intval($locver[1]);
 
-                    // TODO: HEURIST_VERSION is not rendering the local version in the email below, yet HEUTRIST_SERVER_NAME works
-                    // and it seems to have set the $variables ???
-                    
+                    // TODO: HEURIST_VERSION is not rendering the local version in the email below, yet HEURIST_SERVER_NAME works
+                    // and it seems to have set the $variables and to detect local version OK ???
+ 
+                    error_log("Heurist Version = ".HEURIST_VERSION); // DEBUG                 
                     $email_title = null;
                     if($major_local<$major){
-                        $email_title = "Major new version of Heurist Vsn ".$current_version[0]." available for ".HEURIST_SERVER_NAME." (running Vsn ".HEURIST_VERSION.")";
+                        $email_title = "Major new version of Heurist Vsn ".$current_version[0]." available for "
+                                        .HEURIST_SERVER_NAME." (running Vsn ".HEURIST_VERSION.")";
 
                     }else if($major_local == $major && $subver_local<$subver){
-                        $email_title = "Heurist update Vsn ".$current_version[0]." available for ".HEURIST_SERVER_NAME." (running Vsn ".HEURIST_VERSION.")";
+                        $email_title = "Heurist update Vsn ".$current_version[0]." available for "
+                                        .HEURIST_SERVER_NAME." (running Vsn ".HEURIST_VERSION.")";
                     }
 
                     if($email_title){
@@ -148,7 +159,7 @@ function checkVersionOnMainServer($version_in_session)
                         $current_version[0].") is available from <a href='https://code.google.com/p/heurist/'>Google Code</a> or ".
                         "<a href='http://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed ".
                         "(or better still with any change of version).\n\n".
-                        "Heurist is copyright (C) 2007 - 2014 The University of Sydney and available as Open Source software under the GNU-GPL licence. ".
+                        "Heurist is copyright (C) 20075 - 2014 The University of Sydney and available as Open Source software under the GNU-GPL licence. ".
                         "Beta versions of the software with new features may also be available at the Google Code repository or linked from the HeuristNetwork home page.";
 
                         sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);

@@ -20,10 +20,7 @@
 * This file is called by registerDB.php
 * ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
@@ -36,14 +33,14 @@
 
 	// TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
-	// We may need to hobble/delete some of the functionality on HeuristIndex to avoid people
+	// TODO: We may need to hobble/delete some of the functionality on H3MasterIndex to avoid people
 	// creating unwanted records or importing random crap into it
     
 	$dbID = 0;
 	$error = "";
-	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
+	require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
+	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
 	mysql_connection_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
 
@@ -81,26 +78,25 @@
 	$callingServer = $_SERVER['REMOTE_ADDR'];
 	// TO DO: we need to check that the script is not being called repeatedly from the same server
 
-	define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor recordsv - fixed forr Master database
+	define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor recordsv - fixed for Master database
 
 	// allocate a new user for this database unless the user's email address is recognised
 	// If a new user, log the user in and assign the record ownership to that user
-
+    // By allocating users on the database based on email address we can allow them to edit their own registrations
+    // but they can't touch anyone else's
 
 	// Find the registering user in the index database, make them the owner of the new record
 	$usrEmail = strtolower(trim($usrEmail));
 	$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_eMail)='".$usrEmail."'");
 	$indexdb_user_id = null;
-	/*****DEBUG****///error_log('trying for email address');
 
 	// Check if the email address is recognised as a user name
 	// Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
 	if(($res) && (mysql_num_rows($res) == 0)) { // no user found on email, try querying on user name
-/*****DEBUG****///error_log('trying for user name');
+
 		$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_Name)='".$usrEmail."'");
 	}
 	if($res) { // query OK, now see if we have found the user
-/*****DEBUG****///error_log('Query OK, got '.mysql_num_rows($res).' rows returned');
 		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
 			/*****DEBUG****///error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
 			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
@@ -119,26 +115,29 @@
 		} else { // existing user
 			$row = mysql_fetch_row($res);
 			$indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
-/*****DEBUG****///error_log('Existing user ID is '.$indexdb_user_id);
 		}
 
+    // TODO: It seems like the user ID is not being set properly, at least the mailout comes with indexdb_user_id=0
+        
 	} else {// error trying to find usergroup in UGrps table
 		$error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 		$returnData = $dbID . "," . $error;
-		echo $returnData; // if you can't set up user it isn't worth trying to register the database''
+		echo $returnData; // if you can't set up user it isn't worth trying to register the database
 	}
 
 	// write the core database record describing the database to be registered and allocate registration ID
 	// This is not a fully valid Heurist record, we let the edit form take care of that
 	// First look to see if there is an existing registration - note, this uses the URL to find the record, not the registration ID
 	// TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly with slight URL variations to spawn multiple registrations of dummy databases
+
 	$res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
+
 	if(mysql_num_rows($res) == 0) { // new registration
 		$res = mysql_query("insert into Records
 			(rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility,rec_Popularity)
 			VALUES  ('$serverURL', now(), '$dbTitle', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'viewable', 99)");
 		if (!$res) { // Unable to allocate a new ID
-			$error = "Cannot write record in Heurist master index database\nThe URL may have been registered wit ha previous database.\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+			$error = "Cannot write record in Heurist master index database\nThe URL may have been registered with a previous database.\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 			$returnData = $dbID . "," . $error;
 			echo $returnData;
 		} else { // core database record created OK
@@ -163,13 +162,13 @@
 
 			//send email to administrator about new database registration
 			$email_text =
-			"There is a new Heurist database registration.\n".
-			"Title: ".$dbTitle."\n".
-			"ID:    ".$indexdb_user_id."\n".
-			"Version: ".$dbVersion."\n".
-			"User name:    ".$usrFirstName." ".$usrLastName."\n".
-			"Email address: ".$usrEmail."\n".
-			"Go to the address below to review database:\n".
+			"There is a new Heurist database registration on the Heurist Master Index\n\n".
+			"Database Title:     ".$dbTitle."\n".
+			"Registration ID:    ".$dbID."\n". // was $indexdb_user_id, which is always 0 b/cnot yet logged in to master index
+			"DB Format Version:  ".$dbVersion."\n\n".
+			// "User name:    ".$usrFirstName." ".$usrLastName."\n".  // comes out 'every user' b/c user not set
+			// "Email address: ".$usrEmail."\n".                      // comes out 'not set for user 0'
+			"Go to the address below to review the database:\n".
 			$serverURL;
 
             $dbowner_Email = get_dbowner_email();

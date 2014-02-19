@@ -32,8 +32,8 @@
 
     define('SKIP_VERSIONCHECK2', 1);
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once (dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+    require_once (dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 
     /*if(isForAdminOnly("to upgrade database structure")){
        return;
@@ -56,17 +56,17 @@
 <head>
 <title>Heurist Reference Database - Need DB upgrade</title>
 
-<link rel=stylesheet type='text/css' href='../../common/css/global.css'>
-<link rel=stylesheet type='text/css' href='../../common/css/admin.css'>
-<link rel=stylesheet type='text/css' href='../../common/css/login.css'>
+<link rel=stylesheet type='text/css' href='../../../common/css/global.css'>
+<link rel=stylesheet type='text/css' href='../../../common/css/admin.css'>
+<link rel=stylesheet type='text/css' href='../../../common/css/login.css'>
 </head>
 <body>
 <div id=page style="padding: 20px;">
 
-<div id="logo" title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+<div id="logo" title="Click the logo at top left of any Heurist page to return to your default search (normally Favourites)"></div>
 
 <div>
-<h2>Database version upgrade</h2>
+<h2>Heurist Database Version upgrade</h2>
 </div>
 <div id="loginDiv" style="height:auto; margin-top:44px; overflow-y:auto;text-align:left;">
 
@@ -89,7 +89,7 @@ if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
                 }
                 
             }else{
-                print "<p style='font-weight:bold'>Can not find the upgrade script '".$filename."'. Please contact Heurist support</p>";
+                print "<p style='font-weight:bold'>Cannot find the database upgrade script '".$filename."'. Please contact Heurist support</p>";
                 $upgrade_success = false;
                 break;
             }
@@ -102,22 +102,22 @@ if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
         }
         
         if($upgrade_success){
-            print "<p>Upgrade is successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".HEURIST_DBNAME."'>Proceed to main page</a></p>";
+            print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".HEURIST_DBNAME."'>Return to main page</a></p>";
         }
     
 }else{
 ?>
 
-<p>Your database <?=HEURIST_DBNAME?> is currently version <?=HEURIST_DBVERSION?></p>
+<p>Your database <?=HEURIST_DBNAME?> currently uses database format version <?=HEURIST_DBVERSION?> (this is distinct from the program version # listed below)</p>
 
-<p>This version of the software (<?=HEURIST_VERSION?>) requires upgrade of your database to version <?=HEURIST_MIN_DBVERSION?></p>
+<p>This version of the software (<?=HEURIST_VERSION?>) requires upgrade of your database to format version <?=HEURIST_MIN_DBVERSION?></p>
 
 <?php
        
     if(is_admin()){
     
     if($src_maj!=$trg_maj){
-        print "<p style='font-weight:bold'>It is possible to upgrade minor versions only. Please contact Heurist support to upgrade major version</p>";
+        print "<p style='font-weight:bold'>It is possible to upgrade minor versions only (ie. within database version 1, 2 etc.). Please contact Heurist support to upgrade major version (1 => 2, 2 => 3)</p>";
     }else{
         
         $scripts_info = "";
@@ -152,7 +152,7 @@ if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
                     }
                     fclose($file);
                 }else{
-                    print "<p style='font-weight:bold'>Can not read the upgrade script '".$filename."'. Please contact Heurist support</p>";
+                    print "<p style='font-weight:bold'>Cannot read the upgrade script '".$filename."'. Please contact Heurist support</p>";
                     $is_allfind = false;
                     break;
                 }
@@ -161,7 +161,7 @@ if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
                 
                  $src_min++;
             }else{
-                print "<p style='font-weight:bold'>Can not find the upgrade script '".$filename."'. Please contact Heurist support</p>";
+                print "<p style='font-weight:bold'>Cannot find the upgrade script '".$filename."'. Please contact Heurist support</p>";
                 $is_allfind = false;
                 break;
             }
@@ -187,7 +187,7 @@ if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
 <?=$scripts_info?>
 </table>
 <p>
-<form action="upgradeDatabase.php">
+<form action="UpgradeDatabase.php">
     <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
     <input type="hidden" name="mode" value="action">
     <input type="submit" value="Upgrade database">

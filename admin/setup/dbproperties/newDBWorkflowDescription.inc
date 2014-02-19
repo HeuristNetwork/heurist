@@ -34,31 +34,28 @@
 
 <p>After creating a new database, please use the links on the left to follow these steps (you can return to this page to review the steps): </p>
 <div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Database &gt;<u>Properties</u></div>
-  <div class="detail">set information about the database, including ownership and some general behaviours</div>
+    <div class="detailType" style="width: 180px !important;">Database &gt;<u>Properties</u></div>
+    <div class="detail">set information about the database, including ownership and some general behaviours</div>
 </div>
 <div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
-  <div class="detail">register the database with the central HeuristScholar.org index (this will give your database a unique code and allow Heurist to check for new versions of
-    the software and database formats)</div>
+    <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Import Structure</u></div>
+    <div class="detail">find and download common record type definitions which will get you started rapidly 
+        (the record type definitions can in most cases be modified to your requirements)</div>
 </div>
 <div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Import Definitions</u></div>
-  <div class="detail">find and download common record type definitions which will get you started rapidly (the record type definitions can in most cases be modified to your requirements.</div>
+    <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Record types / fields</u></div>
+    <div class="detail">modify the record types and fields describing them, and add new record types, fields and terms</div>
 </div>
 <div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Record Types</u></div>
-  <div class="detail">define the data you can enter into the database</div>
+    <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Record constraints</u></div>
+    <div class="detail">define the overall constraints on relationships between records 
+        (which types can be related together using which relationship types)</div>
 </div>
 <div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Field Types</u></div>
-  <div class="detail">define the data you can enter into the database</div>
+    <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
+    <div class="detail">register the database with the central HeuristScholar.org index. 
+        This will give your database a unique code and allow Heurist to check for new versions of
+        the software and database formats. <br/>It also allows other databases to import structural elements 
+        (record types, field types and terms) but does NOT confer any form of access to data in this database</div>
 </div>
-<div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Terms</u></div>
-  <div class="detail">define the data you can enter into the database</div>
-</div>
-<div class="detailRow">
-  <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Constraints</u></div>
-  <div class="detail">define the data you can enter into the database</div>
-</div>
+

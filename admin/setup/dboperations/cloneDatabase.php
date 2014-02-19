@@ -17,8 +17,6 @@
 /**
 * File: strraightCopyDB.php Copies an entire databsae verbatim
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

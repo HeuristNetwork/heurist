@@ -18,11 +18,7 @@
 * File: clearCurrentDB.php Deletes all records/details/bookmarks from the current database (owner group admins only)
 *  Does not affect definitions. Resets record counter to 0.
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
@@ -32,7 +28,7 @@
 */
 
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
     if(isForAdminOnly("to clear a database")){
        return;
@@ -44,23 +40,24 @@
         print "<html>";
         print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
         print "<title>Clear Records from Current Heurist Database</title>";
-        print "<link rel='stylesheet' type='text/css' href='../../common/css/global.css'>";
-        print "<link rel='stylesheet' type='text/css' href='../../common/css/edit.css'>";
-        print "<link rel='stylesheet' type='text/css' href='../../common/css/admin.css'>";
+        print "<link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>";
+        print "<link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>";
+        print "<link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>";
         print "</head>";
         print "<body class='popup'>";
         print "<div class='banner'><h2>Clear Records from Current Heurist database</h2></div>";
         print "<div id='page-inner' style='overflow:auto'>";
         print "<h4 style='display:inline-block; margin:0 5px 0 0'>".
-        "<span><img src='../../common/images/url_error.png' /> DANGER <img src='../../common/images/url_error.png' /></span>".
+        "<span><img src='../../../common/images/url_error.png' /> DANGER <img src='../../../common/images/url_error.png' /></span>".
         "</h4><h1 style='display:inline-block'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>";
-        print "<h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3> <b>$dbname</b>";
+        print "<h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3>";
+        print "<pre><h2>    Clear database:    $dbname</h2></pre>";
         print "<form name='deletion' action='clearCurrentDB.php' method='get'>";
         print "<p>Database definitions - record types, fields, terms, tags, users etc. - are not affected. ";
         print "Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p>";
         print "This operation may take some minutes on a large database<br>";
         print "<p>Enter the words CLEAR ALL RECORDS in all-capitals to confirm that you want to clear all records from the current database".
-        "<p>Type the words above to confirm deletion: <input type='input' maxlength='20' size='20' name='del' id='del'>".
+        "<p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>".
         "&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' style='font-weight: bold;' >".
         "<input name='mode' value='2' type='hidden'>".
         "<input name='db' value='$dbname' type='hidden'>";
@@ -74,7 +71,7 @@
                 print "<p>Undefined database name"; // shouldn't get here
             } else {
                 // This is a bit inelegant but it does the job effectively. Delete all the related records first because
-                // otherwise referential integrity will stop you deleting the recordss and/or bookmarks
+                // otherwise referential integrity will stop you deleting the records and/or bookmarks
                 $fulldbname = HEURIST_DB_PREFIX.$dbname;
                 $res2=0;
 
@@ -151,7 +148,7 @@
 
                 if ($res2==0) {
                     $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrReminders' ";
-                    echo ("Deleti9ng user reminders</br>");
+                    echo ("Deletinng user reminders</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2!= 0 ) {
                         echo ("<br>Warning: Unable to delete usrReminders from <b>$dbname</b> - SQL error on DELETE FROM usrReminders<br>");
@@ -173,7 +170,7 @@
 
                 if ($res2==0) {
                     $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recDetails' ";
-                    echo ("deleting record details (fields)</br>");
+                    echo ("Deleting record details (fields)</br>");
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2 != 0 ) {
                         echo ("<br>Warning: Unable to delete recDetails from <b>$dbname</b> - SQL error on: DELETE FROM recDetails<br>");
@@ -216,14 +213,15 @@
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a>";
                 } else {
-                    print "<h2>Record data, bookmarks and tags have been deleted from <b>$dbname</b></h2>";
+                    print "Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
+                    print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
                     print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a>";
                 }
             }
         }
         else { // didn't request properly
-            print "<p><h2>Request disallowed</h2>** FAILED **<p/>&nbsp;<p/>Incorrect challenge words entered. Data was note deleted from $dbname ".
-            "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a>";
+            print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Data was not deleted from <b>$dbname</b>".
+            "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to $dbname</a>";
         }
     }
 

@@ -21,7 +21,6 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
@@ -32,8 +31,8 @@
 */
 
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
 
     if(isForAdminOnly("to modify properties")){
        return;
