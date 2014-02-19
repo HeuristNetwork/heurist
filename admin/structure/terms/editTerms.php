@@ -34,7 +34,7 @@
 
 
 // User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
     if(isForAdminOnly("to modify database structure")){
         return;
@@ -47,25 +47,25 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 <title>Manage Terms</title>
 
 		<!-- YUI -->
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 		<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
 
 		<!-- TREEVIEW DEFS -->
 		<!-- Required CSS -->
-		<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css">
+		<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css">
 		<!-- Optional dependency source file -->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
 		<!-- Optional dependency source file to decode contents of yuiConfig markup attribute-->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js" ></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js" ></script>
 		<!-- TreeView source file -->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
+		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
 		<!-- END TREEVIEW DEFS-->
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
    		<!--<link rel=stylesheet href="../../common/css/admin.css">-->
 		<style type="text/css">
 			.dtyField {
@@ -84,9 +84,9 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 </head>
 <body class="popup yui-skin-sam">
 
-	<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-	<script src="../../common/php/loadCommonInfo.php"></script>
+	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+	<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+	<script src="../../../common/php/loadCommonInfo.php"></script>
 
 	<script type="text/javascript" src="editTerms.js"></script>
 

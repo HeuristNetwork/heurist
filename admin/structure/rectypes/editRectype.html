@@ -1,1025 +1,1025 @@
-<!--
-
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
-/**
-* add/edit Record type
-*
-* @author      Juan Adriaanse
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  AdminStructure
-* @todo    Add functionality to look for rectype, to save a pointer
-* @todo    Figure out a way to display all groups in which the rectype is located, and to change it
-* @todo    (art) replace document.getElementById to jquery $
-* @todo    (art) use display block for terms fields instead of dynamic addition
-*/
-
--->
-
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Create new record type</title>
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-        <style type="text/css">
-            .input-row div.input-header-cell {
-                width:150px
-            }
-            .rtyHiddenField {
-                display:none
-            }
-        </style>
-    </head>
-
-    <body class="popup">
-        <!-- <body class="popup editRectype"> -->
-
-        <script src="../../common/php/displayPreferences.php"></script>
-
-<!-- ARTEM: these are redundant
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
-        <script src="../../common/js/utilsLoad.js">
-        </script><script src="../../common/php/loadCommonInfo.php"></script>
--->
-        <!-- script src="../../common/php/getMagicNumbers.php"></script -->
-
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-        <script	 type="text/javascript">
-
-            var Hul = top.HEURIST.util,
-            _keepStatus;
-
-            var query = this.location.search;
-            var rectypeID = Hul.getUrlParameter('rectypeID',query);
-            var defaultGroupID = Hul.getUrlParameter('groupID',query);
-            var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
-
-            var db = ((top.HEURIST.parameters && top.HEURIST.parameters["db"]) || "");
-
-        </script>
-        <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
-
-        <div id="statusMsg" style="display: none;"></div>
-        <div id="rectypeValues" style="padding:5px;" >
-            <!--<div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>-->
-            <div class="input-row">
-                <div class="input-header-cell" style="vertical-align: baseline;"><h2 style="line-height: 14px;">Id:</h2></div>
-                <div class="input-cell">
-                    <h2 style="line-height: 14px;display: inline-block; margin-right: 20px;"><span class="recTypeName" id="rty_ID"></span></h2>
-                    <img id="infoImage" src="../../common/images/info.png"
-                        onmouseover="_showInfoToolTip(event)"
-                        onmouseout="hideInfo()"
-                        style="display: inline-block;"/>
-                    <div style="margin-left: 20px;display: inline-block;font-weight: bold;" id="div_rty_ConceptID"></div>
-                </div>
-            </div>
-            <div class="input-row" id="divIconAndThumb">
-                <div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~75x75):</div>
-                <div class="input-cell" style="vertical-align: middle;">
-                    <div id="rectypeThumb" style="display:inline-block;" ></div>
-                    <div class="input-header-cell" style="display:inline-block;vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
-                    <div id="rectypeIcon" style="display:inline-block;margin: 10px 0;vertical-align: middle;"></div>
-                </div>
-            </div>
-
-            <div class="input-row  required">
-                <div class="input-header-cell"><label for="rty_Name">Record type name *</label></div>
-                <div class="input-cell">
-                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" onKeyUp="createPlural()" />
-                    <span style="display:inline-block;text-align:right;width:64px">Plural:</span>
-                    <input id="rty_Plural" maxlength="40" style="min-width:190px;width:190px;" />
-                    <div class="help prompt">Name for display in selection lists, formats or reporting</div>
-                </div>
-            </div>
-
-            <div class="input-row required">
-                <div class="input-header-cell" style="vertical-align:top"><label for="rty_Description">Description *</label></div>
-                <div class="input-cell">
-                    <textarea cols="200" id="rty_Description" rows="5" style="width:450px;"></textarea>
-                    <div class="help prompt">Detailed description of the record type, providing an explanation of its content. 
-                    <br/>A good description here is important for future documentation of the database.</div>
-                </div>
-            </div>
-
-            <div class="input-row required" id="rty_TitleMask_row">
-                <div class="input-header-cell"><label for="rty_TitleMask">Title mask *</label></div>
-                    
-                <div class="input-cell">
-                    <textarea readonly cols="450" id="rty_TitleMask" rows="2" style="width:450px; background-color: lightgray;"></textarea>
-                    <span><button onClick="_onEditMask()">Edit mask</button></span>
-                    <div class="help prompt">
-                        The title mask is a string into which data field values are inserted to create a constructed<br/> 
-                        title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as<br/>
-                        "Alice in Wonderland, pp. 37-39". The constructed title is displayed in search results and <br/> 
-                        other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]</div>
-                </div>
-            </div>
-
-            <div class="input-row">
-                <div class="input-header-cell"><label for="rty_ReferenceURL">Semantic/Reference URL</label></div>
-                <div class="input-cell">
-                    <input id="rty_ReferenceURL" maxlength="250" style="width:450px;" />
-                    <div class="help prompt">URL to a full description or ontological reference definition of the record type</div>
-                </div>
-            </div>
-
-            <div class="input-row">
-                <div class="input-header-cell"><label for="rty_ShowURLOnEditForm">Show record URL on edit form:</label></div>
-                <div class="input-cell">
-                    <input id="rty_ShowURLOnEditForm" type="checkbox"/>
-                    <div class="help prompt">
-                    Display URL at top of edit form for this record type. This is a special URL used to<br/>
-                    hyperlink search results. It is distinct from any URL fields in the record, which are<br/>
-                    not affected. Use only where a majority of records of this type have one, and only one,<br/>
-                    principle URL eg. for web sites/internet bookmarks.</div>
-                </div>
-            </div>
-
-            <!-- OPTIONAL FIELDS - hidden behind a turndown arrow -->
-            <div id="optional" class="togglepnl" style="margin-top: 20px; margin-bottom: 20px;"><a
-                    style="margin-left: 40px;"
-                    onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
-                <div id="options" class="hidden" style="background-color:#ffffff;">
-
-                    <div class="input-row">
-                        <div class="input-header-cell" for="rty_RecTypeGroupID">Display group</div>
-                        <div class="input-cell">
-                            <div class="rtyValue" id="rty_RecTypeGroupID"></div>
-                            <div class="help prompt help1">Record types are grouped together into related types for easier management. Add new groups from the record type management screen.</div>
-                        </div>
-                    </div>
-
-                    <!-- STATUS -->
-                    <div class="input-row">
-                        <div class="input-header-cell" for="rty_Status">Status</div>
-                        <div class="input-cell">
-                            <select class="rtyValue" id="rty_Status" onChange="onChangeStatus(event)">
-                                <option selected="selected">open</option>
-                                <option>pending</option>
-                                <option>approved</option>
-                                <!-- option>reserved</option -->
-                            </select>
-                            <div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;	'Open' for freely modifiable/personal record types</div>
-                        </div>
-                    </div>
-
-                    <div class="input-row">
-                        <div class="input-header-cell" for="rty_ShowInLists">Show in lists</div>
-                        <div class="input-cell">
-                            <input id="rty_ShowInLists" type="checkbox"/>
-                            <div class="help prompt">Show this record type in pulldown lists etc. (always visible in record management screen)</div>
-                        </div>
-                    </div>
-
-                    <!-- Show URL on form moved from here b/coverly hidden -->
- 
-                    <div class="input-row">
-                        <div class="input-header-cell" for="rty_ShowDescriptionOnEditForm">Show description on edit form</div>
-                        <div class="input-cell">
-                            <input id="rty_ShowDescriptionOnEditForm" type="checkbox"/>
-                            <div class="help prompt">Display record type description at top of edit form for this record type.
-                                This is a useful way of providing some context for the content of the form</div>
-                        </div>
-                    </div>
-
-                    <!-- This doesn't actually work, but is it really useful? I think not -->
-                    <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1" />&nbsp;<label for="definit">Add fields by default</label></div>
-
-                    <!-- HIDDEN  IJ REQ 2012-10-11 as not yet implemented in code - TODO: check status-->
-                    <div class="input-row" style="display:none">
-                        <div class="input-header-cell" for="rty_NonOwnerVisibility">Non-owner visibility</div>
-                        <div class="input-cell">
-                            <select class="rtyValue" id="rty_NonOwnerVisibility">
-                                <option selected="selected">viewable</option>
-                                <option>hidden</option>
-                                <option>public</option>
-                            </select>
-                            <div class="help prompt">Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers</div>
-                        </div>
-                    </div>
-
-                    <!-- HIDDEN -->
-                    <div class="input-row" style="display:none">
-                        <div class="input-header-cell" for="rty_Type">Record type:</div>
-                        <div class="input-cell">
-                            <div class="rtyValue" id="rty_Type"></div>
-                            <div class="help prompt">Distinguish ordinary records from relationship records</div>
-                        </div>
-                    </div>
-
-                    <!-- HIDDEN -->
-                    <div class="input-row" style="display:none">
-                        <div class="input-header-cell" for="rty_OrderInGroup">Order in group:</div>
-                        <input onKeyPress="checkIfInteger(event)" maxlength="3" id="rty_OrderInGroup" style="width:30px;"/>
-                    </div>
-
-                    <!-- HIDDEN -->
-                    <div class="input-row"  style="display:none">
-                        <div class="input-header-cell" for="rty_FlagAsFieldset">Use as fieldset:</div>
-                        <div class="input-cell">
-                            <input id="rty_FlagAsFieldset" type="checkbox"/>
-                            <div class="help prompt">Fieldsets are partial records for reuse in other records</div>
-                        </div>
-                    </div>
-
-                    <!-- HIDDEN -->
-                    <div class="input-row" style="display:none">
-                        <div class="input-header-cell" for="rty_AlternativeRecEditor">Alternative record editor:</div>
-                        <div class="input-cell">
-                            <input id="rty_AlternativeRecEditor" maxlength="250" style="width:450px;" />
-                            <div class="help prompt">PHP file providing a specialised editor for this record type</div>
-                        </div>
-                    </div>
-                    <div class="rtyHiddenField">
-                        <input id="rty_CanonicalTitleMask" />
-                    </div>
-                    <div class="rtyHiddenField">
-                        <input id="rty_RecTypeGroupID" />
-                    </div>
-
-                </div> <!-- optional div -->
-            </div>
-
-            <div class="actionButtons">
-                <!-- 10/12/13 The workflow here is a bit confusing, better to just have a single standard workflow through record structure
-                <input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
-                <div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
-                -->
-                Click Next save changes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input type="button" value="Next >>" onClick="EditPopup.save(true);" /> <!-- true = open rec structure popup -->
-                
-                <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
-            </div>
-        </div>
-
-        <script type="text/javascript">
-
-            var rectype,
-            rectypeID,
-            titleMaskIsOk = true,
-            _keepTitleMask;
-
-            init();
-
-            var _openEditStrucutreAfterClose = false,
-            _isIconWasUpdated = false;
-
-
-            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-            function init() {
-                var typesDropdown;
-                var groupDropdown;
-                var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
-                if(rectypeID) { // Existing rectype, so load with values
-                    try {
-                        rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
-                        setRtyValues();
-                    } catch(e) { // Invalid rectypeID, create empty form, and show error message
-                        newRectypeCode = 2;
-                    }
-                } else {
-                    newRectypeCode = 1; // No rectypeID given
-                }
-                if(newRectypeCode > 0) { // Create empty form
-                    initializeEmptyForm();
-                    document.getElementById("rty_TitleMask_row").style.display = "none";
-                }else{
-                    document.getElementById("definitdiv").style.display = "none";
-                }
-                if(newRectypeCode == 2) { // Give error message
-                    document.getElementById("statusMsg").style.display = "block";
-                    document.getElementById("statusMsg").innerHTML = "<strong>Error: record type could not be found. Clicking 'save' button will create a new record type.</strong><br /><br />";
-                }
-
-                if(supressEditStructure){
-                    document.getElementById('btnSaveAndEditStructure').style.display = 'none';
-                }
-
-                setTimeout(function(){document.getElementById("rty_Name").focus();},1000);
-            }
-
-            /**
-             * invokes popup to change icon or thumbnail
-             */
-            function upload_icon(mode) {
-
-                var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
-
-                Hul.popupURL(top, sURL, {
-                        "close-on-blur": false,
-                        "no-resize": false,
-                        height: (mode==0?140:220),
-                        width: 340,
-                        callback: mode==0?icon_refresh:thumb_refresh
-                });
-
-            }
-
-            function icon_refresh(context) {
-                var img = document.getElementById('imgIcon');
-                img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
-                _isIconWasUpdated = true;
-            }
-            function thumb_refresh(context) {
-                var img = document.getElementById('imgThumb');
-                img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
-                _isIconWasUpdated = true;
-            }
-
-
-            function initializeEmptyForm() {
-                document.getElementById("infoImage").style.display = "none";
-                document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
-                document.getElementById("rty_ShowInLists").checked = true;
-                document.getElementById("rty_ShowURLOnEditForm").checked = false;
-                document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
-                document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
-                document.getElementById("divIconAndThumb").style.display = "none";
-
-                getGroups();
-                // Set group from URL
-                getTypes();
-                getStatus();
-            }
-
-            function setRtyValues() {
-                document.title = "Record Type # " + rectypeID;
-                getGroups();
-                getTypes();
-                if(rectype) {
-                    var d = new Date(),
-                    curtimestamp = d.getMilliseconds();
-                    document.getElementById("rty_ID").innerHTML = rectypeID;
-                    try {
-
-                        document.getElementById("rectypeIcon").innerHTML =
-                        "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
-                        "<img id=\"imgIcon\" src=\""+
-                        top.HEURIST.iconBaseURL + rectypeID + ".png?" + curtimestamp +
-                        "\" width=\"16\" height=\"16\"></a>";
-
-                        document.getElementById("rectypeThumb").innerHTML =
-                        "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
-                        "<img id=\"imgThumb\" src=\""+
-                        top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp +
-                        "\" width=\"75\" height=\"75\"></a>";
-
-                    } catch(e) {
-                        alert(e);
-                    }
-                    var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
-
-                    if(Hul.isempty(rectype[fi.rty_ConceptID])){
-                        document.getElementById("div_rty_ConceptID").innerHTML = '';
-                    }else{
-                        document.getElementById("div_rty_ConceptID").innerHTML = 'Concept Code: '+rectype[fi.rty_ConceptID];
-                    }
-                    document.getElementById("rty_Name").value = rectype[fi.rty_Name];
-                    document.getElementById("rty_Plural").value = rectype[fi.rty_Plural];
-                    document.getElementById("rty_Description").value = rectype[fi.rty_Description];
-                    document.getElementById("rty_OrderInGroup").value = rectype[fi.rty_OrderInGroup];
-                    document.getElementById("rty_ShowInLists").checked = (Number(rectype[fi.rty_ShowInLists]) === 1);
-                    document.getElementById("rty_ShowURLOnEditForm").checked = (Number(rectype[fi.rty_ShowURLOnEditForm]) !== 0);
-                    document.getElementById("rty_ShowDescriptionOnEditForm").checked = (Number(rectype[fi.rty_ShowDescriptionOnEditForm]) !== 0);
-                    document.getElementById("rty_TitleMask").value = rectype[fi.rty_TitleMask];
-                    _keepTitleMask = rectype[fi.rty_TitleMask];
-                    document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[fi.rty_FlagAsFieldset]) === 1);
-                    document.getElementById("rty_ReferenceURL").value = rectype[fi.rty_ReferenceURL];
-                    document.getElementById("rty_AlternativeRecEditor").value = rectype[fi.rty_AlternativeRecEditor];
-
-                    document.getElementById("rty_CanonicalTitleMask").value = rectype[fi.rty_CanonicalTitleMask];
-                    document.getElementById("rty_RecTypeGroupID").value = rectype[fi.rty_RecTypeGroupID];
-
-                    document.getElementById("rty_NonOwnerVisibility").value = rectype[fi.rty_NonOwnerVisibility];;
-                }
-                getStatus();
-            }
-
-            function _addOptionReserved(){
-                var selstatus = document.getElementById("rty_Status");
-                if(selstatus.length<4){
-                    var option = document.createElement("option");
-                    option.text = 'reserved';
-                    option.value = 'reserved';
-                    try {
-                        // for IE earlier than version 8
-                        selstatus.add(option, sel.options[null]);
-                    }catch (ex2){
-                        selstatus.add(option,null);
-                    }
-                }
-            }
-
-            // Create the status dropdown menu with all possible statusses. In case it is reserved, disable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
-            function getStatus() {
-
-                var disable_status = false,
-                disable_fields = false,
-                selstatus = document.getElementById("rty_Status"),
-                fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex,
-                dbId = Number(top.HEURIST.database.id);
-
-                var original_dbId = (rectype)?Number(rectype[fi.rty_OriginatingDBID]):dbId;
-                if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
-
-
-                if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
-                    _addOptionReserved();
-                }
-
-
-                if(rectype){ //edit
-
-                    if(rectype[fi.rty_Status]==='reserved'){
-
-                        disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
-                        disable_fields = true;
-                        _addOptionReserved();
-
-                    }else if(rectype[fi.rty_Status]==='approved'){
-
-                        disable_fields = true;
-                    }
-
-                    _keepStatus = rectype[fi.rty_Status];
-                    selstatus.value = rectype[fi.rty_Status];
-
-                }else{ //new
-                    selstatus.value = "open";
-                }
-                toggleAll(disable_status || disable_fields, disable_status);
-            }
-
-            // Change the status. If reserved, disable the entire form. Else, enable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
-            function onChangeStatus(e) {
-
-                var el = e.target;
-                if(el.value === "reserved") {
-
-                    var changeToReserved = confirm("If you change the status to 'reserved'," +
-                        " you will no longer be able to modify the definitions of some fields in this record type.\n\nAre you sure?");
-                    if(changeToReserved) {
-                        toggleAll(true, false);
-                    } else {
-                        el.value = _keepStatus; //restore previous value
-                    }
-                }else if(el.value === "approved") {
-                    _keepStatus = el.value;
-                    toggleAll(true, false);
-                } else {
-                    _keepStatus = el.value;
-                    toggleAll(false, false);
-                }
-
-            }
-
-            // Create the dropdown menu with all possible types, and if an existing rectype is being editted, select the right value
-            function getTypes() {
-                typesDropdown = document.createElement("select");
-                typesDropdown.options.add(optionNormal = document.createElement("option"));
-                typesDropdown.options.add(optionRelationship = document.createElement("option"));
-                typesDropdown.options.add(optionDummy = document.createElement("option"));
-
-                optionNormal.text = "normal";
-                optionRelationship.text = "relationship";
-                optionDummy.text = "dummy";
-
-                if(rectype) {
-                    switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Type]) {
-                        case "normal":
-                            typesDropdown[0].selected = "1";
-                            break;
-                        case "relationship":
-                            typesDropdown[1].selected = "1";
-                            break;
-                        case "dummy":
-                            typesDropdown[2].selected = "1";
-                            break;
-                    }
-                }
-                document.getElementById("rty_Type").appendChild(typesDropdown);
-            }
-
-            function getGroups() {
-                groupDropdown = document.createElement("select");
-                var existingGroup = "",
-                index = 0,
-                rtg_ID;
-
-                for (index in top.HEURIST.rectypes.groups){
-                    if(!isNaN(Number(index))) {
-                        rtg_ID = top.HEURIST.rectypes.groups[index].id;
-
-                        optn = document.createElement("option");
-                        optn.text = top.HEURIST.rectypes.groups[index].name;
-                        optn.value = rtg_ID;
-
-                        groupDropdown.options.add(optn);
-                        if(rectype) {
-                            if(rtg_ID == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID]) {
-                                selectedIndex = index;
-                                var existingGroup = true;
-                            }
-                        }
-                        else if(defaultGroupID) {
-                            if(rtg_ID == defaultGroupID) {
-                                selectedIndex = index;
-                                var existingGroup = true;
-                            }
-                        }
-                        index++;
-                    }
-                    if(existingGroup) {
-                        groupDropdown[selectedIndex].selected = 1;
-                    }
-                    document.getElementById("rty_RecTypeGroupID").appendChild(groupDropdown);
-                }//for
-            }
-            // Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
-            function toggleAll(disable, reserved) {
-                document.getElementById("rty_Status").disabled = reserved;
-                document.getElementById("rty_OrderInGroup").disabled = disable;
-                document.getElementById("rty_FlagAsFieldset").disabled = disable;
-
-                //document.getElementById("rty_ReferenceURL").disabled = disable;
-                //document.getElementById("rty_Name").disabled = disable;
-                //document.getElementById("rty_Plural").disabled = disable;
-                //groupDropdown.disabled = disable;
-                //document.getElementById("rty_ShowInLists").disabled = disable;
-                //document.getElementById("rty_TitleMask").disabled = disable;
-                //document.getElementById("btn_TitleMask").disabled = disable;
-                typesDropdown.disabled = disable;
-            }
-
-
-            function createPlural() {
-                document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
-            }
-
-            // Validate value inserted into input field. In this case, make sure it's an integer
-            function checkIfInteger(evt) {
-                if((evt.keyCode) != 9) {
-                    var theEvent = evt || window.event;
-                    var key = theEvent.keyCode || theEvent.which;
-                    key = String.fromCharCode(key);
-                    var regex = /[0-9]|\./;
-                    if( !regex.test(key) ) {
-                        theEvent.returnValue = false;
-                        theEvent.preventDefault();
-                    }
-                }
-            }
-
-            //
-            function updateRectypeOnServer() {
-                testTitleMask(); //then it calls updateRectypeOnServer_continue
-            }
-
-            function updateRectypeOnServer_continue()
-            {
-                if(!titleMaskIsOk){
-                    alert("Title mask is invalid");
-                    return;
-                }
-
-                var str = getUpdatedFields();
-
-                if(str=="mandatory"){
-                    //do not close the window
-
-                }else if(str != null) {
-                    //DEBUG			alert("Stringified changes: " + str);
-
-                    // TODO: Change base URL
-                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                    var callback = updateResult;
-                    var params = "method=saveRT&db="+db+"&definit="+
-                    (document.getElementById("definit").checked?1:0)+
-                    "&data=" + encodeURIComponent(str);
-                    Hul.getJsonData(baseurl, callback, params);
-
-                } else { //nothing changed
-
-                    var context = null;
-                    if(_openEditStrucutreAfterClose){
-                        //editRecStructure();
-                        context = {rty_ID:rectypeID, isOpenEditStructure:true };
-                    }else if(_isIconWasUpdated){
-                        context = {rty_ID:rectypeID, isOpenEditStructure:false };
-                    }
-
-                    window.close(context);
-                }
-            }
-
-            var updateResult = function(context) {
-                top.HEURIST.rectypes.saveStatus = context;
-
-                if(!Hul.isnull(context)) {
-
-                    var error = false;
-                    var report = "";
-
-                    for(var ind in context.result)
-                    if(ind!=undefined){
-                        var item = context.result[ind];
-                        if(isNaN(item)){
-                            alert("An error occurred: " + item);
-                            error = true;
-                        }else{
-                            rectypeID = Number(item);
-                            if(report!="") report = report + ",";
-                            report = report + Math.abs(rectypeID);
-                        }
-                    }
-
-                    if(!error) {
-
-                        var ss = (rectypeID < 0)?"added":"updated";
-
-                        if(report.indexOf(",")>0){
-                            // this alert is a pain  alert("Record types with IDs :"+report+ " were succesfully "+ss);
-                        }else{
-                            // this alert is a pain  alert("Record type with ID " + report + " was succesfully "+ss);
-                        }
-
-                        context.changeTitleMask = false;
-                        if(rectypeID>0 &&
-                            document.getElementById("rty_TitleMask").value !== _keepTitleMask){
-                            context.changeTitleMask = true;
-                        }
-
-                        rectypeID = Math.abs(rectypeID);
-
-                        if(_openEditStrucutreAfterClose){
-                            //editRecStructure();
-                            context.isOpenEditStructure = true;
-                        }
-
-                        window.close(context); //send back new HEURIST strcuture
-                    }
-                }
-            }
-
-
-            /**
-             * Opens new popup to edit record structure
-             */
-            function editRecStructure()
-            {
-                Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
-                        "close-on-blur": false,
-                        "no-resize": false,
-                        height: 480,
-                        width: 620,
-                        callback: function(context) {
-                            if(context == null) {
-                                // Canceled
-                            } else {
-                                //alert("Structure is Saved");
-                            }
-                        }
-                });
-            }
-
-
-            function getUpdatedFields() {
-
-                if(fromUItoArray(true)=="mandatory"){ //save all changes
-                    return "mandatory";
-                }
-
-                if(rectypeID != null && updatedFields.length > 0) {
-                    var k;
-
-                    var oRectype = {rectype:{
-                            colNames:{common:[], dtFields:[]},
-                            defs: {}
-                    }};
-                    //fill array of updated fieldnames
-                    var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
-                    var values = [];
-                    for(k = 0; k < updatedFields.length; k++) {
-                        oRectype.rectype.colNames.common.push(fieldNames[updatedFields[k]]);
-                        values.push(updatedDetails[updatedFields[k]]);
-                    }
-
-
-                    oRectype.rectype.defs[rectypeID] = [];
-                    oRectype.rectype.defs[rectypeID].push({common:[],dtFields:[]});
-                    for(val in values) {
-                        oRectype.rectype.defs[rectypeID][0].common.push(values[val]);
-                    }
-
-                    var str = JSON.stringify(oRectype);
-                    //var str = YAHOO.lang.JSON.stringify(oRectype);
-
-                    return str;
-                }
-                else {
-                    return null;
-                }
-
-            }
-
-            var updatedFields = [];
-            var updatedDetails = [];
-            //
-            // fills 2 arrays for changed values - with fieldnames and values
-            // return "mandatory" in case some required field is not defined
-            //
-            function fromUItoArray(isShowWarn) {
-
-                updatedFields  = [];
-                updatedDetails = [];
-
-                if(!rectypeID || rectypeID == -1) { // New detail type, so save every field
-                    rectypeID = -1;
-                    var rectypeValues = [];
-                } else {
-                    var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
-                }
-
-
-                var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
-
-                var index;
-                for(index = 0; index < fieldNames.length; index++) {
-                    var fieldName = fieldNames[index];
-                    var fieldNameElement = document.getElementById(fieldName);
-                    if(fieldNameElement==undefined){
-                        //todo!!!  why these fields are not defined in this form???? alert("element not found "+fieldName);
-                        continue;
-                    }
-                    var fieldNameElementValue = fieldNameElement.value;
-
-                    if(fieldName=="rty_Name" && fieldNameElementValue=="") {
-                        if(isShowWarn) alert("Name is mandatory field");
-                        document.getElementById("rty_Name").focus();
-                        updatedFields = [];
-                        return "mandatory";
-                    }
-                    else if(fieldName=="rty_Plural" && fieldNameElementValue=="") {
-                        if(isShowWarn) alert("Plural is mandatory field");
-                        document.getElementById("rty_Plural").focus();
-                        updatedFields = [];
-                        return "mandatory";
-                    }
-                    else if(fieldName=="rty_Description" && fieldNameElementValue=="") {
-                        if(isShowWarn) alert("Description is mandatory field");
-                        document.getElementById("rty_Description").focus();
-                        updatedFields = [];
-                        return "mandatory";
-                    }
-                    else if(fieldName=="rty_TitleMask" && fieldNameElementValue=="") {
-
-
-                        if(isShowWarn) alert("Title Mask is mandatory field");
-                        document.getElementById("rty_TitleMask").focus();
-                        updatedFields = [];
-                        return "mandatory";
-
-                    }else if(fieldName=="rty_RecTypeGroupID") {
-
-                        fieldNameElementValue = groupDropdown.value;
-
-                    }else
-                        if(fieldName === "rty_Type" ) { // dropdown menu's. Can't get the value with element.value
-                        fieldNameElementValue = typesDropdown.value;
-                    } else if(fieldName === "rty_Status") {
-                        fieldNameElementValue = document.getElementById("rty_Status").value;
-                    }
-
-                    if(fieldNameElement.type=="checkbox"){
-                        fieldNameElementValue = fieldNameElement.checked?"1":"0";
-                    }
-
-                    if(rectypeValues[index] !== fieldNameElementValue || rectypeID == -1) {
-                        //if(Hul.isnull(rectypeValues[index]) && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
-                        //} else {
-                        //rectypeValues[index] = fieldNameElementValue;
-                        updatedFields.push(index);
-                        updatedDetails[index] = fieldNameElementValue;
-                        //}
-                    }
-                }
-
-                return "ok";
-            }
-
-            function testTitleMask()
-            {
-                if(!rectypeID || rectypeID < 0){
-                    var val = "record [ID]";
-                    if(document.getElementById("definit").checked &&
-                        top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
-                        val = "["+top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']]+"]";
-                    }
-
-                    document.getElementById("rty_TitleMask").value = val
-                    titleMaskIsOk = true;
-                    updateRectypeOnServer_continue();
-
-                }else{
-
-                    var mask = document.getElementById("rty_TitleMask").value;
-
-                    var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                        (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-                    var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
-                    var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
-
-                    top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                            var obj = xhr.responseText;
-                            if(obj!="" && obj.match(/\S/)){
-                                titleMaskIsOk = false;
-                                alert("Title Mask verification:\n"+obj);
-                            }else{
-                                titleMaskIsOk = true;
-                                updateRectypeOnServer_continue();
-                            }
-                        }, squery);
-                }
-            }
-
-            var needHideTip = true,
-            hideTimer,
-            textTip;
-
-            /**
-             * Show popup div with information about field types in use for given record type
-             */
-            function _showInfoToolTip(event) {
-
-                //tooltip div mouse out
-                function __hideToolTip2() {
-                    needHideTip = true;
-                    //_hideToolTip();
-                }
-                //tooltip div mouse over
-                function __clearHideTimer2() {
-                    needHideTip = false;
-                    clearHideTimer();
-                }
-
-
-                var forceHideTip = true;
-
-                if(!Hul.isnull(rectypeID)){
-                    if(Hul.isnull(textTip)) {
-
-                        var recname = top.HEURIST.rectypes.names[rectypeID];
-                        if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
-                        //find all records that reference this type
-                        var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
-                        textTip = '<h3>'+recname+'</h3>'+
-                        '<b>Fields:</b><ul>';
-
-                        var detail;
-                        for(detail in details) {
-                            textTip = textTip + "<li>"+details[detail][0] + "</li>";
-                        }
-                        textTip = textTip + "</ul>";
-                    } else {
-                        forceHideTip = false;
-                    }
-                }
-                if(!Hul.isnull(textTip)) {
-                    clearHideTimer();
-                    needHideTip = true;
-                    var my_tooltip = $("#toolTip2");
-
-                    my_tooltip.mouseover(__clearHideTimer2);
-                    my_tooltip.mouseout(__hideToolTip2);
-
-                    var xy = Hul.getMousePos(event);
-                    //xy = [posx = event.target.x,posy = event.target.y];
-
-
-                    my_tooltip.html(textTip);	//DEBUG xy[0]+",	"+xy[1]+"<br/>"+
-
-                    var border_top = $(window).scrollTop();
-                    var border_right = $(window).width();
-                    var border_height = $(window).height();
-                    var offset =0;
-
-                    Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
-
-                    //hideTimer = window.setTimeout(_hideToolTip, 2000);
-                }
-                else if(forceHideTip) {
-                    _hideToolTip();
-                }
-
-            }
-
-            function hideInfo() {
-                hideTimer = window.setTimeout(_hideToolTip, 500);
-            }
-            function forcehideInfo() {
-                hideTimer = window.setTimeout(_hideToolTip, 0);
-            }
-            //
-            //
-            function clearHideTimer(){
-                if (hideTimer) {
-                    window.clearTimeout(hideTimer);
-                    hideTimer = 0;
-                }
-            }
-            function _hideToolTip(){
-                if(needHideTip){
-                    currentTipId = null;
-                    clearHideTimer();
-                    var my_tooltip = $("#toolTip2");
-                    my_tooltip.css( {
-                            visibility:"hidden",
-                            opacity:"0"
-                    });
-                }
-            }
-
-
-
-            function viewEquivalences() {
-                alert("This function has not yet been implemented");
-            }
-
-            /**
-             * Edit title mask
-             */
-            function _onEditMask(){
-
-                var maskvalue = document.getElementById("rty_TitleMask").value;
-
-                Hul.popupURL(top, top.HEURIST.basePath +
-                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
-                    {
-                        "close-on-blur": false,
-                        "no-resize": true,
-                        height: 800,
-                        width: 800,
-                        callback: function(newvalue) {
-                            if(!Hul.isnull(newvalue)){
-                                document.getElementById("rty_TitleMask").value = newvalue;
-                            }
-                        }
-                });
-            }
-
-            var EditPopup = (function () {
-
-                    //public members
-                    var that = {
-
-                        save : function (openEditStructure) {
-                            _openEditStrucutreAfterClose = openEditStructure;
-                            updateRectypeOnServer();
-                        },
-                        cancel : function () {
-                            fromUItoArray(false);
-                            if(updatedFields.length > 0) {
-                                var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
-                                if(areYouSure) {
-                                    window.close(null);
-                                }
-                            }
-                            else {
-                                window.close(null);
-                            }
-                        }
-                    };
-                    return that;
-            })();
-
-            /*var structureFrame = document.getElementById("structureFrame");
-            var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
-            structureFrame.src = URL;
-            */
-        </script>
-    </body>
-</html>
+<!--
+
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* add/edit Record type
+*
+* @author      Juan Adriaanse
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  AdminStructure
+* @todo    Add functionality to look for rectype, to save a pointer
+* @todo    Figure out a way to display all groups in which the rectype is located, and to change it
+* @todo    (art) replace document.getElementById to jquery $
+* @todo    (art) use display block for terms fields instead of dynamic addition
+*/
+
+-->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Create new record type</title>
+        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+        <style type="text/css">
+            .input-row div.input-header-cell {
+                width:150px
+            }
+            .rtyHiddenField {
+                display:none
+            }
+        </style>
+    </head>
+
+    <body class="popup">
+        <!-- <body class="popup editRectype"> -->
+
+        <script src="../../../common/php/displayPreferences.php"></script>
+
+<!-- ARTEM: these are redundant
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
+        <script src="../../common/js/utilsLoad.js">
+        </script><script src="../../common/php/loadCommonInfo.php"></script>
+-->
+        <!-- script src="../../common/php/getMagicNumbers.php"></script -->
+
+        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script	 type="text/javascript">
+
+            var Hul = top.HEURIST.util,
+            _keepStatus;
+
+            var query = this.location.search;
+            var rectypeID = Hul.getUrlParameter('rectypeID',query);
+            var defaultGroupID = Hul.getUrlParameter('groupID',query);
+            var supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
+
+            var db = ((top.HEURIST.parameters && top.HEURIST.parameters["db"]) || "");
+
+        </script>
+        <div class="tooltip" id="toolTip2" onMouseOut="forcehideInfo()"><p></p></div>
+
+        <div id="statusMsg" style="display: none;"></div>
+        <div id="rectypeValues" style="padding:5px;" >
+            <!--<div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>-->
+            <div class="input-row">
+                <div class="input-header-cell" style="vertical-align: baseline;"><h2 style="line-height: 14px;">Id:</h2></div>
+                <div class="input-cell">
+                    <h2 style="line-height: 14px;display: inline-block; margin-right: 20px;"><span class="recTypeName" id="rty_ID"></span></h2>
+                    <img id="infoImage" src="../../../common/images/info.png"
+                        onmouseover="_showInfoToolTip(event)"
+                        onmouseout="hideInfo()"
+                        style="display: inline-block;"/>
+                    <div style="margin-left: 20px;display: inline-block;font-weight: bold;" id="div_rty_ConceptID"></div>
+                </div>
+            </div>
+            <div class="input-row" id="divIconAndThumb">
+                <div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~75x75):</div>
+                <div class="input-cell" style="vertical-align: middle;">
+                    <div id="rectypeThumb" style="display:inline-block;" ></div>
+                    <div class="input-header-cell" style="display:inline-block;vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
+                    <div id="rectypeIcon" style="display:inline-block;margin: 10px 0;vertical-align: middle;"></div>
+                </div>
+            </div>
+
+            <div class="input-row  required">
+                <div class="input-header-cell"><label for="rty_Name">Record type name *</label></div>
+                <div class="input-cell">
+                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" onKeyUp="createPlural()" />
+                    <span style="display:inline-block;text-align:right;width:64px">Plural:</span>
+                    <input id="rty_Plural" maxlength="40" style="min-width:190px;width:190px;" />
+                    <div class="help prompt">Name for display in selection lists, formats or reporting</div>
+                </div>
+            </div>
+
+            <div class="input-row required">
+                <div class="input-header-cell" style="vertical-align:top"><label for="rty_Description">Description *</label></div>
+                <div class="input-cell">
+                    <textarea cols="200" id="rty_Description" rows="5" style="width:450px;"></textarea>
+                    <div class="help prompt">Detailed description of the record type, providing an explanation of its content. 
+                    <br/>A good description here is important for future documentation of the database.</div>
+                </div>
+            </div>
+
+            <div class="input-row required" id="rty_TitleMask_row">
+                <div class="input-header-cell"><label for="rty_TitleMask">Title mask *</label></div>
+                    
+                <div class="input-cell">
+                    <textarea readonly cols="450" id="rty_TitleMask" rows="2" style="width:450px; background-color: lightgray;"></textarea>
+                    <span><button onClick="_onEditMask()">Edit mask</button></span>
+                    <div class="help prompt">
+                        The title mask is a string into which data field values are inserted to create a constructed<br/> 
+                        title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as<br/>
+                        "Alice in Wonderland, pp. 37-39". The constructed title is displayed in search results and <br/> 
+                        other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]</div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-header-cell"><label for="rty_ReferenceURL">Semantic/Reference URL</label></div>
+                <div class="input-cell">
+                    <input id="rty_ReferenceURL" maxlength="250" style="width:450px;" />
+                    <div class="help prompt">URL to a full description or ontological reference definition of the record type</div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-header-cell"><label for="rty_ShowURLOnEditForm">Show record URL on edit form:</label></div>
+                <div class="input-cell">
+                    <input id="rty_ShowURLOnEditForm" type="checkbox"/>
+                    <div class="help prompt">
+                    Display URL at top of edit form for this record type. This is a special URL used to<br/>
+                    hyperlink search results. It is distinct from any URL fields in the record, which are<br/>
+                    not affected. Use only where a majority of records of this type have one, and only one,<br/>
+                    principle URL eg. for web sites/internet bookmarks.</div>
+                </div>
+            </div>
+
+            <!-- OPTIONAL FIELDS - hidden behind a turndown arrow -->
+            <div id="optional" class="togglepnl" style="margin-top: 20px; margin-bottom: 20px;"><a
+                    style="margin-left: 40px;"
+                    onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');">Additional information</a>
+                <div id="options" class="hidden" style="background-color:#ffffff;">
+
+                    <div class="input-row">
+                        <div class="input-header-cell" for="rty_RecTypeGroupID">Display group</div>
+                        <div class="input-cell">
+                            <div class="rtyValue" id="rty_RecTypeGroupID"></div>
+                            <div class="help prompt help1">Record types are grouped together into related types for easier management. Add new groups from the record type management screen.</div>
+                        </div>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="input-row">
+                        <div class="input-header-cell" for="rty_Status">Status</div>
+                        <div class="input-cell">
+                            <select class="rtyValue" id="rty_Status" onChange="onChangeStatus(event)">
+                                <option selected="selected">open</option>
+                                <option>pending</option>
+                                <option>approved</option>
+                                <!-- option>reserved</option -->
+                            </select>
+                            <div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;	'Open' for freely modifiable/personal record types</div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-header-cell" for="rty_ShowInLists">Show in lists</div>
+                        <div class="input-cell">
+                            <input id="rty_ShowInLists" type="checkbox"/>
+                            <div class="help prompt">Show this record type in pulldown lists etc. (always visible in record management screen)</div>
+                        </div>
+                    </div>
+
+                    <!-- Show URL on form moved from here b/coverly hidden -->
+ 
+                    <div class="input-row">
+                        <div class="input-header-cell" for="rty_ShowDescriptionOnEditForm">Show description on edit form</div>
+                        <div class="input-cell">
+                            <input id="rty_ShowDescriptionOnEditForm" type="checkbox"/>
+                            <div class="help prompt">Display record type description at top of edit form for this record type.
+                                This is a useful way of providing some context for the content of the form</div>
+                        </div>
+                    </div>
+
+                    <!-- This doesn't actually work, but is it really useful? I think not -->
+                    <div id="definitdiv" style="display:inline-block;"><input id="definit" type="checkbox" checked="checked" value="1" />&nbsp;<label for="definit">Add fields by default</label></div>
+
+                    <!-- HIDDEN  IJ REQ 2012-10-11 as not yet implemented in code - TODO: check status-->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" for="rty_NonOwnerVisibility">Non-owner visibility</div>
+                        <div class="input-cell">
+                            <select class="rtyValue" id="rty_NonOwnerVisibility">
+                                <option selected="selected">viewable</option>
+                                <option>hidden</option>
+                                <option>public</option>
+                            </select>
+                            <div class="help prompt">Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" for="rty_Type">Record type:</div>
+                        <div class="input-cell">
+                            <div class="rtyValue" id="rty_Type"></div>
+                            <div class="help prompt">Distinguish ordinary records from relationship records</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" for="rty_OrderInGroup">Order in group:</div>
+                        <input onKeyPress="checkIfInteger(event)" maxlength="3" id="rty_OrderInGroup" style="width:30px;"/>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row"  style="display:none">
+                        <div class="input-header-cell" for="rty_FlagAsFieldset">Use as fieldset:</div>
+                        <div class="input-cell">
+                            <input id="rty_FlagAsFieldset" type="checkbox"/>
+                            <div class="help prompt">Fieldsets are partial records for reuse in other records</div>
+                        </div>
+                    </div>
+
+                    <!-- HIDDEN -->
+                    <div class="input-row" style="display:none">
+                        <div class="input-header-cell" for="rty_AlternativeRecEditor">Alternative record editor:</div>
+                        <div class="input-cell">
+                            <input id="rty_AlternativeRecEditor" maxlength="250" style="width:450px;" />
+                            <div class="help prompt">PHP file providing a specialised editor for this record type</div>
+                        </div>
+                    </div>
+                    <div class="rtyHiddenField">
+                        <input id="rty_CanonicalTitleMask" />
+                    </div>
+                    <div class="rtyHiddenField">
+                        <input id="rty_RecTypeGroupID" />
+                    </div>
+
+                </div> <!-- optional div -->
+            </div>
+
+            <div class="actionButtons">
+                <!-- 10/12/13 The workflow here is a bit confusing, better to just have a single standard workflow through record structure
+                <input type="button" value="Save &amp; close" onClick="EditPopup.save(false);" />
+                <div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
+                -->
+                Click Next save changes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Next >>" onClick="EditPopup.save(true);" /> <!-- true = open rec structure popup -->
+                
+                <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            var rectype,
+            rectypeID,
+            titleMaskIsOk = true,
+            _keepTitleMask;
+
+            init();
+
+            var _openEditStrucutreAfterClose = false,
+            _isIconWasUpdated = false;
+
+
+            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+            function init() {
+                var typesDropdown;
+                var groupDropdown;
+                var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
+                if(rectypeID) { // Existing rectype, so load with values
+                    try {
+                        rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
+                        setRtyValues();
+                    } catch(e) { // Invalid rectypeID, create empty form, and show error message
+                        newRectypeCode = 2;
+                    }
+                } else {
+                    newRectypeCode = 1; // No rectypeID given
+                }
+                if(newRectypeCode > 0) { // Create empty form
+                    initializeEmptyForm();
+                    document.getElementById("rty_TitleMask_row").style.display = "none";
+                }else{
+                    document.getElementById("definitdiv").style.display = "none";
+                }
+                if(newRectypeCode == 2) { // Give error message
+                    document.getElementById("statusMsg").style.display = "block";
+                    document.getElementById("statusMsg").innerHTML = "<strong>Error: record type could not be found. Clicking 'save' button will create a new record type.</strong><br /><br />";
+                }
+
+                if(supressEditStructure){
+                    document.getElementById('btnSaveAndEditStructure').style.display = 'none';
+                }
+
+                setTimeout(function(){document.getElementById("rty_Name").focus();},1000);
+            }
+
+            /**
+             * invokes popup to change icon or thumbnail
+             */
+            function upload_icon(mode) {
+
+                var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
+
+                Hul.popupURL(top, sURL, {
+                        "close-on-blur": false,
+                        "no-resize": false,
+                        height: (mode==0?140:220),
+                        width: 340,
+                        callback: mode==0?icon_refresh:thumb_refresh
+                });
+
+            }
+
+            function icon_refresh(context) {
+                var img = document.getElementById('imgIcon');
+                img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+                _isIconWasUpdated = true;
+            }
+            function thumb_refresh(context) {
+                var img = document.getElementById('imgThumb');
+                img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+                _isIconWasUpdated = true;
+            }
+
+
+            function initializeEmptyForm() {
+                document.getElementById("infoImage").style.display = "none";
+                document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
+                document.getElementById("rty_ShowInLists").checked = true;
+                document.getElementById("rty_ShowURLOnEditForm").checked = false;
+                document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
+                document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
+                document.getElementById("divIconAndThumb").style.display = "none";
+
+                getGroups();
+                // Set group from URL
+                getTypes();
+                getStatus();
+            }
+
+            function setRtyValues() {
+                document.title = "Record Type # " + rectypeID;
+                getGroups();
+                getTypes();
+                if(rectype) {
+                    var d = new Date(),
+                    curtimestamp = d.getMilliseconds();
+                    document.getElementById("rty_ID").innerHTML = rectypeID;
+                    try {
+
+                        document.getElementById("rectypeIcon").innerHTML =
+                        "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
+                        "<img id=\"imgIcon\" src=\""+
+                        top.HEURIST.iconBaseURL + rectypeID + ".png?" + curtimestamp +
+                        "\" width=\"16\" height=\"16\"></a>";
+
+                        document.getElementById("rectypeThumb").innerHTML =
+                        "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
+                        "<img id=\"imgThumb\" src=\""+
+                        top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp +
+                        "\" width=\"75\" height=\"75\"></a>";
+
+                    } catch(e) {
+                        alert(e);
+                    }
+                    var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+
+                    if(Hul.isempty(rectype[fi.rty_ConceptID])){
+                        document.getElementById("div_rty_ConceptID").innerHTML = '';
+                    }else{
+                        document.getElementById("div_rty_ConceptID").innerHTML = 'Concept Code: '+rectype[fi.rty_ConceptID];
+                    }
+                    document.getElementById("rty_Name").value = rectype[fi.rty_Name];
+                    document.getElementById("rty_Plural").value = rectype[fi.rty_Plural];
+                    document.getElementById("rty_Description").value = rectype[fi.rty_Description];
+                    document.getElementById("rty_OrderInGroup").value = rectype[fi.rty_OrderInGroup];
+                    document.getElementById("rty_ShowInLists").checked = (Number(rectype[fi.rty_ShowInLists]) === 1);
+                    document.getElementById("rty_ShowURLOnEditForm").checked = (Number(rectype[fi.rty_ShowURLOnEditForm]) !== 0);
+                    document.getElementById("rty_ShowDescriptionOnEditForm").checked = (Number(rectype[fi.rty_ShowDescriptionOnEditForm]) !== 0);
+                    document.getElementById("rty_TitleMask").value = rectype[fi.rty_TitleMask];
+                    _keepTitleMask = rectype[fi.rty_TitleMask];
+                    document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[fi.rty_FlagAsFieldset]) === 1);
+                    document.getElementById("rty_ReferenceURL").value = rectype[fi.rty_ReferenceURL];
+                    document.getElementById("rty_AlternativeRecEditor").value = rectype[fi.rty_AlternativeRecEditor];
+
+                    document.getElementById("rty_CanonicalTitleMask").value = rectype[fi.rty_CanonicalTitleMask];
+                    document.getElementById("rty_RecTypeGroupID").value = rectype[fi.rty_RecTypeGroupID];
+
+                    document.getElementById("rty_NonOwnerVisibility").value = rectype[fi.rty_NonOwnerVisibility];;
+                }
+                getStatus();
+            }
+
+            function _addOptionReserved(){
+                var selstatus = document.getElementById("rty_Status");
+                if(selstatus.length<4){
+                    var option = document.createElement("option");
+                    option.text = 'reserved';
+                    option.value = 'reserved';
+                    try {
+                        // for IE earlier than version 8
+                        selstatus.add(option, sel.options[null]);
+                    }catch (ex2){
+                        selstatus.add(option,null);
+                    }
+                }
+            }
+
+            // Create the status dropdown menu with all possible statusses. In case it is reserved, disable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
+            function getStatus() {
+
+                var disable_status = false,
+                disable_fields = false,
+                selstatus = document.getElementById("rty_Status"),
+                fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex,
+                dbId = Number(top.HEURIST.database.id);
+
+                var original_dbId = (rectype)?Number(rectype[fi.rty_OriginatingDBID]):dbId;
+                if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
+
+
+                if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
+                    _addOptionReserved();
+                }
+
+
+                if(rectype){ //edit
+
+                    if(rectype[fi.rty_Status]==='reserved'){
+
+                        disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
+                        disable_fields = true;
+                        _addOptionReserved();
+
+                    }else if(rectype[fi.rty_Status]==='approved'){
+
+                        disable_fields = true;
+                    }
+
+                    _keepStatus = rectype[fi.rty_Status];
+                    selstatus.value = rectype[fi.rty_Status];
+
+                }else{ //new
+                    selstatus.value = "open";
+                }
+                toggleAll(disable_status || disable_fields, disable_status);
+            }
+
+            // Change the status. If reserved, disable the entire form. Else, enable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
+            function onChangeStatus(e) {
+
+                var el = e.target;
+                if(el.value === "reserved") {
+
+                    var changeToReserved = confirm("If you change the status to 'reserved'," +
+                        " you will no longer be able to modify the definitions of some fields in this record type.\n\nAre you sure?");
+                    if(changeToReserved) {
+                        toggleAll(true, false);
+                    } else {
+                        el.value = _keepStatus; //restore previous value
+                    }
+                }else if(el.value === "approved") {
+                    _keepStatus = el.value;
+                    toggleAll(true, false);
+                } else {
+                    _keepStatus = el.value;
+                    toggleAll(false, false);
+                }
+
+            }
+
+            // Create the dropdown menu with all possible types, and if an existing rectype is being editted, select the right value
+            function getTypes() {
+                typesDropdown = document.createElement("select");
+                typesDropdown.options.add(optionNormal = document.createElement("option"));
+                typesDropdown.options.add(optionRelationship = document.createElement("option"));
+                typesDropdown.options.add(optionDummy = document.createElement("option"));
+
+                optionNormal.text = "normal";
+                optionRelationship.text = "relationship";
+                optionDummy.text = "dummy";
+
+                if(rectype) {
+                    switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Type]) {
+                        case "normal":
+                            typesDropdown[0].selected = "1";
+                            break;
+                        case "relationship":
+                            typesDropdown[1].selected = "1";
+                            break;
+                        case "dummy":
+                            typesDropdown[2].selected = "1";
+                            break;
+                    }
+                }
+                document.getElementById("rty_Type").appendChild(typesDropdown);
+            }
+
+            function getGroups() {
+                groupDropdown = document.createElement("select");
+                var existingGroup = "",
+                index = 0,
+                rtg_ID;
+
+                for (index in top.HEURIST.rectypes.groups){
+                    if(!isNaN(Number(index))) {
+                        rtg_ID = top.HEURIST.rectypes.groups[index].id;
+
+                        optn = document.createElement("option");
+                        optn.text = top.HEURIST.rectypes.groups[index].name;
+                        optn.value = rtg_ID;
+
+                        groupDropdown.options.add(optn);
+                        if(rectype) {
+                            if(rtg_ID == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID]) {
+                                selectedIndex = index;
+                                var existingGroup = true;
+                            }
+                        }
+                        else if(defaultGroupID) {
+                            if(rtg_ID == defaultGroupID) {
+                                selectedIndex = index;
+                                var existingGroup = true;
+                            }
+                        }
+                        index++;
+                    }
+                    if(existingGroup) {
+                        groupDropdown[selectedIndex].selected = 1;
+                    }
+                    document.getElementById("rty_RecTypeGroupID").appendChild(groupDropdown);
+                }//for
+            }
+            // Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
+            function toggleAll(disable, reserved) {
+                document.getElementById("rty_Status").disabled = reserved;
+                document.getElementById("rty_OrderInGroup").disabled = disable;
+                document.getElementById("rty_FlagAsFieldset").disabled = disable;
+
+                //document.getElementById("rty_ReferenceURL").disabled = disable;
+                //document.getElementById("rty_Name").disabled = disable;
+                //document.getElementById("rty_Plural").disabled = disable;
+                //groupDropdown.disabled = disable;
+                //document.getElementById("rty_ShowInLists").disabled = disable;
+                //document.getElementById("rty_TitleMask").disabled = disable;
+                //document.getElementById("btn_TitleMask").disabled = disable;
+                typesDropdown.disabled = disable;
+            }
+
+
+            function createPlural() {
+                document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
+            }
+
+            // Validate value inserted into input field. In this case, make sure it's an integer
+            function checkIfInteger(evt) {
+                if((evt.keyCode) != 9) {
+                    var theEvent = evt || window.event;
+                    var key = theEvent.keyCode || theEvent.which;
+                    key = String.fromCharCode(key);
+                    var regex = /[0-9]|\./;
+                    if( !regex.test(key) ) {
+                        theEvent.returnValue = false;
+                        theEvent.preventDefault();
+                    }
+                }
+            }
+
+            //
+            function updateRectypeOnServer() {
+                testTitleMask(); //then it calls updateRectypeOnServer_continue
+            }
+
+            function updateRectypeOnServer_continue()
+            {
+                if(!titleMaskIsOk){
+                    alert("Title mask is invalid");
+                    return;
+                }
+
+                var str = getUpdatedFields();
+
+                if(str=="mandatory"){
+                    //do not close the window
+
+                }else if(str != null) {
+                    //DEBUG			alert("Stringified changes: " + str);
+
+                    // TODO: Change base URL
+                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                    var callback = updateResult;
+                    var params = "method=saveRT&db="+db+"&definit="+
+                    (document.getElementById("definit").checked?1:0)+
+                    "&data=" + encodeURIComponent(str);
+                    Hul.getJsonData(baseurl, callback, params);
+
+                } else { //nothing changed
+
+                    var context = null;
+                    if(_openEditStrucutreAfterClose){
+                        //editRecStructure();
+                        context = {rty_ID:rectypeID, isOpenEditStructure:true };
+                    }else if(_isIconWasUpdated){
+                        context = {rty_ID:rectypeID, isOpenEditStructure:false };
+                    }
+
+                    window.close(context);
+                }
+            }
+
+            var updateResult = function(context) {
+                top.HEURIST.rectypes.saveStatus = context;
+
+                if(!Hul.isnull(context)) {
+
+                    var error = false;
+                    var report = "";
+
+                    for(var ind in context.result)
+                    if(ind!=undefined){
+                        var item = context.result[ind];
+                        if(isNaN(item)){
+                            alert("An error occurred: " + item);
+                            error = true;
+                        }else{
+                            rectypeID = Number(item);
+                            if(report!="") report = report + ",";
+                            report = report + Math.abs(rectypeID);
+                        }
+                    }
+
+                    if(!error) {
+
+                        var ss = (rectypeID < 0)?"added":"updated";
+
+                        if(report.indexOf(",")>0){
+                            // this alert is a pain  alert("Record types with IDs :"+report+ " were succesfully "+ss);
+                        }else{
+                            // this alert is a pain  alert("Record type with ID " + report + " was succesfully "+ss);
+                        }
+
+                        context.changeTitleMask = false;
+                        if(rectypeID>0 &&
+                            document.getElementById("rty_TitleMask").value !== _keepTitleMask){
+                            context.changeTitleMask = true;
+                        }
+
+                        rectypeID = Math.abs(rectypeID);
+
+                        if(_openEditStrucutreAfterClose){
+                            //editRecStructure();
+                            context.isOpenEditStructure = true;
+                        }
+
+                        window.close(context); //send back new HEURIST strcuture
+                    }
+                }
+            }
+
+
+            /**
+             * Opens new popup to edit record structure
+             */
+            function editRecStructure()
+            {
+                Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
+                        "close-on-blur": false,
+                        "no-resize": false,
+                        height: 480,
+                        width: 620,
+                        callback: function(context) {
+                            if(context == null) {
+                                // Canceled
+                            } else {
+                                //alert("Structure is Saved");
+                            }
+                        }
+                });
+            }
+
+
+            function getUpdatedFields() {
+
+                if(fromUItoArray(true)=="mandatory"){ //save all changes
+                    return "mandatory";
+                }
+
+                if(rectypeID != null && updatedFields.length > 0) {
+                    var k;
+
+                    var oRectype = {rectype:{
+                            colNames:{common:[], dtFields:[]},
+                            defs: {}
+                    }};
+                    //fill array of updated fieldnames
+                    var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
+                    var values = [];
+                    for(k = 0; k < updatedFields.length; k++) {
+                        oRectype.rectype.colNames.common.push(fieldNames[updatedFields[k]]);
+                        values.push(updatedDetails[updatedFields[k]]);
+                    }
+
+
+                    oRectype.rectype.defs[rectypeID] = [];
+                    oRectype.rectype.defs[rectypeID].push({common:[],dtFields:[]});
+                    for(val in values) {
+                        oRectype.rectype.defs[rectypeID][0].common.push(values[val]);
+                    }
+
+                    var str = JSON.stringify(oRectype);
+                    //var str = YAHOO.lang.JSON.stringify(oRectype);
+
+                    return str;
+                }
+                else {
+                    return null;
+                }
+
+            }
+
+            var updatedFields = [];
+            var updatedDetails = [];
+            //
+            // fills 2 arrays for changed values - with fieldnames and values
+            // return "mandatory" in case some required field is not defined
+            //
+            function fromUItoArray(isShowWarn) {
+
+                updatedFields  = [];
+                updatedDetails = [];
+
+                if(!rectypeID || rectypeID == -1) { // New detail type, so save every field
+                    rectypeID = -1;
+                    var rectypeValues = [];
+                } else {
+                    var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
+                }
+
+
+                var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
+
+                var index;
+                for(index = 0; index < fieldNames.length; index++) {
+                    var fieldName = fieldNames[index];
+                    var fieldNameElement = document.getElementById(fieldName);
+                    if(fieldNameElement==undefined){
+                        //todo!!!  why these fields are not defined in this form???? alert("element not found "+fieldName);
+                        continue;
+                    }
+                    var fieldNameElementValue = fieldNameElement.value;
+
+                    if(fieldName=="rty_Name" && fieldNameElementValue=="") {
+                        if(isShowWarn) alert("Name is mandatory field");
+                        document.getElementById("rty_Name").focus();
+                        updatedFields = [];
+                        return "mandatory";
+                    }
+                    else if(fieldName=="rty_Plural" && fieldNameElementValue=="") {
+                        if(isShowWarn) alert("Plural is mandatory field");
+                        document.getElementById("rty_Plural").focus();
+                        updatedFields = [];
+                        return "mandatory";
+                    }
+                    else if(fieldName=="rty_Description" && fieldNameElementValue=="") {
+                        if(isShowWarn) alert("Description is mandatory field");
+                        document.getElementById("rty_Description").focus();
+                        updatedFields = [];
+                        return "mandatory";
+                    }
+                    else if(fieldName=="rty_TitleMask" && fieldNameElementValue=="") {
+
+
+                        if(isShowWarn) alert("Title Mask is mandatory field");
+                        document.getElementById("rty_TitleMask").focus();
+                        updatedFields = [];
+                        return "mandatory";
+
+                    }else if(fieldName=="rty_RecTypeGroupID") {
+
+                        fieldNameElementValue = groupDropdown.value;
+
+                    }else
+                        if(fieldName === "rty_Type" ) { // dropdown menu's. Can't get the value with element.value
+                        fieldNameElementValue = typesDropdown.value;
+                    } else if(fieldName === "rty_Status") {
+                        fieldNameElementValue = document.getElementById("rty_Status").value;
+                    }
+
+                    if(fieldNameElement.type=="checkbox"){
+                        fieldNameElementValue = fieldNameElement.checked?"1":"0";
+                    }
+
+                    if(rectypeValues[index] !== fieldNameElementValue || rectypeID == -1) {
+                        //if(Hul.isnull(rectypeValues[index]) && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
+                        //} else {
+                        //rectypeValues[index] = fieldNameElementValue;
+                        updatedFields.push(index);
+                        updatedDetails[index] = fieldNameElementValue;
+                        //}
+                    }
+                }
+
+                return "ok";
+            }
+
+            function testTitleMask()
+            {
+                if(!rectypeID || rectypeID < 0){
+                    var val = "record [ID]";
+                    if(document.getElementById("definit").checked &&
+                        top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
+                        val = "["+top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']]+"]";
+                    }
+
+                    document.getElementById("rty_TitleMask").value = val
+                    titleMaskIsOk = true;
+                    updateRectypeOnServer_continue();
+
+                }else{
+
+                    var mask = document.getElementById("rty_TitleMask").value;
+
+                    var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                        (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+                    var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+                    var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
+
+                    top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+                            var obj = xhr.responseText;
+                            if(obj!="" && obj.match(/\S/)){
+                                titleMaskIsOk = false;
+                                alert("Title Mask verification:\n"+obj);
+                            }else{
+                                titleMaskIsOk = true;
+                                updateRectypeOnServer_continue();
+                            }
+                        }, squery);
+                }
+            }
+
+            var needHideTip = true,
+            hideTimer,
+            textTip;
+
+            /**
+             * Show popup div with information about field types in use for given record type
+             */
+            function _showInfoToolTip(event) {
+
+                //tooltip div mouse out
+                function __hideToolTip2() {
+                    needHideTip = true;
+                    //_hideToolTip();
+                }
+                //tooltip div mouse over
+                function __clearHideTimer2() {
+                    needHideTip = false;
+                    clearHideTimer();
+                }
+
+
+                var forceHideTip = true;
+
+                if(!Hul.isnull(rectypeID)){
+                    if(Hul.isnull(textTip)) {
+
+                        var recname = top.HEURIST.rectypes.names[rectypeID];
+                        if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
+                        //find all records that reference this type
+                        var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
+                        textTip = '<h3>'+recname+'</h3>'+
+                        '<b>Fields:</b><ul>';
+
+                        var detail;
+                        for(detail in details) {
+                            textTip = textTip + "<li>"+details[detail][0] + "</li>";
+                        }
+                        textTip = textTip + "</ul>";
+                    } else {
+                        forceHideTip = false;
+                    }
+                }
+                if(!Hul.isnull(textTip)) {
+                    clearHideTimer();
+                    needHideTip = true;
+                    var my_tooltip = $("#toolTip2");
+
+                    my_tooltip.mouseover(__clearHideTimer2);
+                    my_tooltip.mouseout(__hideToolTip2);
+
+                    var xy = Hul.getMousePos(event);
+                    //xy = [posx = event.target.x,posy = event.target.y];
+
+
+                    my_tooltip.html(textTip);	//DEBUG xy[0]+",	"+xy[1]+"<br/>"+
+
+                    var border_top = $(window).scrollTop();
+                    var border_right = $(window).width();
+                    var border_height = $(window).height();
+                    var offset =0;
+
+                    Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
+
+                    //hideTimer = window.setTimeout(_hideToolTip, 2000);
+                }
+                else if(forceHideTip) {
+                    _hideToolTip();
+                }
+
+            }
+
+            function hideInfo() {
+                hideTimer = window.setTimeout(_hideToolTip, 500);
+            }
+            function forcehideInfo() {
+                hideTimer = window.setTimeout(_hideToolTip, 0);
+            }
+            //
+            //
+            function clearHideTimer(){
+                if (hideTimer) {
+                    window.clearTimeout(hideTimer);
+                    hideTimer = 0;
+                }
+            }
+            function _hideToolTip(){
+                if(needHideTip){
+                    currentTipId = null;
+                    clearHideTimer();
+                    var my_tooltip = $("#toolTip2");
+                    my_tooltip.css( {
+                            visibility:"hidden",
+                            opacity:"0"
+                    });
+                }
+            }
+
+
+
+            function viewEquivalences() {
+                alert("This function has not yet been implemented");
+            }
+
+            /**
+             * Edit title mask
+             */
+            function _onEditMask(){
+
+                var maskvalue = document.getElementById("rty_TitleMask").value;
+
+                Hul.popupURL(top, top.HEURIST.basePath +
+                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
+                    {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        height: 800,
+                        width: 800,
+                        callback: function(newvalue) {
+                            if(!Hul.isnull(newvalue)){
+                                document.getElementById("rty_TitleMask").value = newvalue;
+                            }
+                        }
+                });
+            }
+
+            var EditPopup = (function () {
+
+                    //public members
+                    var that = {
+
+                        save : function (openEditStructure) {
+                            _openEditStrucutreAfterClose = openEditStructure;
+                            updateRectypeOnServer();
+                        },
+                        cancel : function () {
+                            fromUItoArray(false);
+                            if(updatedFields.length > 0) {
+                                var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
+                                if(areYouSure) {
+                                    window.close(null);
+                                }
+                            }
+                            else {
+                                window.close(null);
+                            }
+                        }
+                    };
+                    return that;
+            })();
+
+            /*var structureFrame = document.getElementById("structureFrame");
+            var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+            structureFrame.src = URL;
+            */
+        </script>
+    </body>
+</html>

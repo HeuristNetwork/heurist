@@ -33,12 +33,12 @@
 
 
 // User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__).'/saveStructure.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../saveStructure.php');
 
 if (!is_admin()) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to modify database structure</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+    print "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to modify database structure</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
     return;
 }
 
@@ -99,8 +99,8 @@ if (!is_admin()) {
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <title>Add <?=($parent_id==0?"vocabulary":"term for ".$parent_name)?></title>
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+    	<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
    		<!--<link rel=stylesheet href="../../common/css/admin.css">-->
 		<style type="text/css">
 			.dtyField {
@@ -118,7 +118,7 @@ if (!is_admin()) {
 
 </head>
 <body class="popup">
-	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+	<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 <?php
    echo $meesage;
 ?>

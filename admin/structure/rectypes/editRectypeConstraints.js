@@ -305,7 +305,7 @@ function ConstraintManager() {
 			}},
 			{ key: "changed", label: "Del", sortable:false,  resizeable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#delete_term"><img src="../../common/images/cross.png" title="Delete this Term" /><\/a>';
+elLiner.innerHTML = '<a href="#delete_term"><img src="../../../common/images/cross.png" title="Delete this Term" /><\/a>';
 						}
 			}
 								];

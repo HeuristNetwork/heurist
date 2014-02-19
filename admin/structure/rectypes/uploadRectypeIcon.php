@@ -33,8 +33,8 @@
 
 	define('SAVE_URI', 'disabled');
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
 
 	if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
 
@@ -55,7 +55,7 @@
 
 
 	/* ???????
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 	mysql_connection_select(DATABASE);
 	$res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
 	$rt = mysql_fetch_assoc($res);

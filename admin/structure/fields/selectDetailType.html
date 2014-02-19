@@ -1,183 +1,183 @@
-<!--
-
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
-/**
-* selectDetailType.html
-* to select the detail types for addition into record structure
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
-
--->
-
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>DETAIL TYPE</title>
-<link rel="icon" href="../../favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-
-<!-- YUI -->
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
-
-<!-- DATATABLE DEFS -->
-<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-<!-- datatable Dependencies -->
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-<!-- Source files -->
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-<!-- END DATATABLE DEFS-->
-
-<!-- PAGINATOR -->
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
-<!-- END PAGINATOR -->
-
-<!-- OVERLAYS
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/button/button-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-		END OVERLAYS -->
-
-<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>  -->
-
-<style type="text/css">
-.yui-skin-sam .yui-dt td {
-	margin:0;
-	padding:0;
-	border:none;
-	text-align:left;
-}
-.yui-skin-sam .yui-dt-list td {
-	border-right:none; /* disable inner column border in list mode */
-}
-.yui-dt table {
-	width: 100%;
-}
-.input-row label {width: auto;color: black;margin: 0 10px 0 0;padding: 0;}
-#filtertoolbar .input-cell select { margin-right:10px}
-.input-row .input-header-cell {vertical-align:baseline}
-.input-row div.input-header-cell {width:100px}
-			#filtertoolbar .input-row div.input-header-cell {min-width:100px}
-			#filtertoolbar .input-row label {min-width:100px; width:100px}
-.truncate {
-	width: 100px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}			
-</style>
-</head>
-
-<body class="popup yui-skin-sam" style="overflow: scroll;">
-<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-<script src="../../common/php/loadCommonInfo.php"></script>
-<script type="text/javascript" src="../../common/js/hintDiv.js"></script>
-<script type="text/javascript" src="selectDetailType.js"></script>
-
-<div id="filtertoolbar">
-    <div class="input-row">
-        <div class="input-header-cell">
-            Filter by group
-        </div>
-        <div class="input-cell">
-            <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;">
-                    <option value="all">all groups</option>
-            </select>
-        </div>
-    </div>
-    <div class="input-row">
-        <div class="input-header-cell">
-            Filter by name
-        </div>
-        <div class="input-cell">
-            <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:40px;" value=""/>
-            &nbsp;&nbsp;You may filter and select repeatedly
-        </div>
-    </div>
-	<div class="input-row">
-		<div style="display:inline-block;" class="input-header-cell">
-			Show
-		</div>
-		<div style="display:inline-block;">
-			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
-			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
-			<a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
-        </div>
-        
-	  <div  style="float:right;text-align:right;">
-	    <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New" onClick="{window.selectDetailType.onDefineNewType();}" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new field type." />
-	  </div>
-        
-	</div>
-</div>
-
-
-<div id="tb_top" style="height:30">
-  <div style="display:inline-block;"> </div>
-  <div style="float:right; text-align:right;padding-top:5px">
-    <label id="lblSelect1"></label>
-    <!--  <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
-    <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
-  </div>
-
-</div>
-
-<div id="tabContainer">
-<script  type="text/javascript">
-
-				function init(){
-					window.selectDetailType = new  SelectDetailType();
-				}
-				function onApply(){
-					window.selectDetailType.apply();
-				}
-				//
-				//  starts initialization on load completion of this window
-				//
-				//YAHOO.util.Event.onDOMReady(init);
-				YAHOO.util.Event.addListener(window, "load", init);
-
-</script>
-</div>
-<div id="tb_bottom" style="height:30">
-  <div style="display:inline-block;"> </div>
-  <div style="float:right; text-align:right;padding-top:5px">
-    <label id="lblSelect2"></label>
-    <!--<input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
-    <input type="button" tabindex="11" value="Insert selected" onClick="selectDetailType.apply();" />
-  </div>
-</div>
-</body>
+<!--
+
+/*
+* Copyright (C) 2005-2013 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* selectDetailType.html
+* to select the detail types for addition into record structure
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2013 University of Sydney
+* @link        http://Sydney.edu.au/Heurist
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+-->
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>DETAIL TYPE</title>
+<link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+<!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
+
+<!-- DATATABLE DEFS -->
+<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<!-- datatable Dependencies -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
+
+<!-- PAGINATOR -->
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<!-- END PAGINATOR -->
+
+<!-- OVERLAYS
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/button/button-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
+		END OVERLAYS -->
+
+<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>  -->
+
+<style type="text/css">
+.yui-skin-sam .yui-dt td {
+	margin:0;
+	padding:0;
+	border:none;
+	text-align:left;
+}
+.yui-skin-sam .yui-dt-list td {
+	border-right:none; /* disable inner column border in list mode */
+}
+.yui-dt table {
+	width: 100%;
+}
+.input-row label {width: auto;color: black;margin: 0 10px 0 0;padding: 0;}
+#filtertoolbar .input-cell select { margin-right:10px}
+.input-row .input-header-cell {vertical-align:baseline}
+.input-row div.input-header-cell {width:100px}
+			#filtertoolbar .input-row div.input-header-cell {min-width:100px}
+			#filtertoolbar .input-row label {min-width:100px; width:100px}
+.truncate {
+	width: 100px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}			
+</style>
+</head>
+
+<body class="popup yui-skin-sam" style="overflow: scroll;">
+<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+<script src="../../../common/php/loadCommonInfo.php"></script>
+<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+<script type="text/javascript" src="selectDetailType.js"></script>
+
+<div id="filtertoolbar">
+    <div class="input-row">
+        <div class="input-header-cell">
+            Filter by group
+        </div>
+        <div class="input-cell">
+            <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;">
+                    <option value="all">all groups</option>
+            </select>
+        </div>
+    </div>
+    <div class="input-row">
+        <div class="input-header-cell">
+            Filter by name
+        </div>
+        <div class="input-cell">
+            <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:40px;" value=""/>
+            &nbsp;&nbsp;You may filter and select repeatedly
+        </div>
+    </div>
+	<div class="input-row">
+		<div style="display:inline-block;" class="input-header-cell">
+			Show
+		</div>
+		<div style="display:inline-block;">
+			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
+			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
+			<a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
+        </div>
+        
+	  <div  style="float:right;text-align:right;">
+	    <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New" onClick="{window.selectDetailType.onDefineNewType();}" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new field type." />
+	  </div>
+        
+	</div>
+</div>
+
+
+<div id="tb_top" style="height:30">
+  <div style="display:inline-block;"> </div>
+  <div style="float:right; text-align:right;padding-top:5px">
+    <label id="lblSelect1"></label>
+    <!--  <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+    <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
+  </div>
+
+</div>
+
+<div id="tabContainer">
+<script  type="text/javascript">
+
+				function init(){
+					window.selectDetailType = new  SelectDetailType();
+				}
+				function onApply(){
+					window.selectDetailType.apply();
+				}
+				//
+				//  starts initialization on load completion of this window
+				//
+				//YAHOO.util.Event.onDOMReady(init);
+				YAHOO.util.Event.addListener(window, "load", init);
+
+</script>
+</div>
+<div id="tb_bottom" style="height:30">
+  <div style="display:inline-block;"> </div>
+  <div style="float:right; text-align:right;padding-top:5px">
+    <label id="lblSelect2"></label>
+    <!--<input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+    <input type="button" tabindex="11" value="Insert selected" onClick="selectDetailType.apply();" />
+  </div>
+</div>
+</body>
 </html>

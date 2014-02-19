@@ -194,7 +194,7 @@ function MimetypeManager() {
 			/*{ key: "icon", label: "Edit", sortable:false,  width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var sicon = oRecord.getData("icon");
-					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/'+sicon+'" width="16" height="16" border="0" title="Edit" /></a>';
+					elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/'+sicon+'" width="16" height="16" border="0" title="Edit" /></a>';
 			}},*/
 
 			{ key: "ext", label: "Extension", sortable:true, resizeable:false},
@@ -208,11 +208,11 @@ function MimetypeManager() {
 			{ key: "description", label: "Descriptive name for this file type", sortable:false},
 			{ key: null, label: "Edit", sortable:false,  width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>';
+					elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>';
 			}},
 			{ key: null, label: "Del", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<div align="center"><a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a></div>';
+					elLiner.innerHTML = '<div align="center"><a href="#delete"><img src="../../../common/images/cross.png" border="0" title="Delete" /><\/a></div>';
 				}
 			}
 								];

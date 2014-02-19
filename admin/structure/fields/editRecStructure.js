@@ -111,7 +111,7 @@ function EditRecStructure() {
 			var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
 			if(Hul.isnull(typedef)){
-				alert("Record type ID "+rty_ID+" is not exist");
+				alert("Internal error: Record type ID "+rty_ID+" does not exist. Please report as bug.");
 				rty_ID = null;
 				return;
 			}
@@ -313,9 +313,11 @@ function EditRecStructure() {
 						var status = oRecord.getData('rst_Status');
 						var isRequired = (oRecord.getData('rst_RequirementType')==='required');
 						if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
-							statusLock  = '<img src="../../../common/images/lock_bw.png" title="This field is locked against deletion due to its status value" />';
+							statusLock  = '<img src="../../../common/images/lock_bw.png" '+
+                                            'title="This field is locked against deletion due to its status value" />';
 						}else{
-							statusLock = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" title="Click to remove field from this record type" /><\/a>';
+							statusLock = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
+                                            'title="Click to remove field from this record type" /><\/a>';
 						}
 						elLiner.innerHTML = statusLock;
 				}
@@ -566,8 +568,10 @@ function EditRecStructure() {
 
 				YAHOO.util.Event.stopEvent(oArgs.event);
 
+                // It has not been necessary to click save since ~2011, so this code should never be called
+                // TODO: verify and remove
 				if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)>=0){ //order was changed
-					alert("Please click Save Order button to save changes in view-order beofre exiting");
+					alert("Please click Save Order button to save changes in view-order before exiting");
 					return;
 				}
 
@@ -618,14 +622,14 @@ function EditRecStructure() {
 									var callback = __updateAfterDelete;
 									var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
 									_isServerOperationInProgress = true;
-									Hul.getJsonData(baseurl, callback, params);
+									Hul.getJsonData(baseurl, callback, params);  
 								}
 
 							}
 						}
 
 						var callback = _onCheckEntries;
-						var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
+						var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID; 
 						top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 				}

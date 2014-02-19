@@ -277,7 +277,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 					var str1 = top.HEURIST.iconBaseURL + id + ".png";
 					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
-					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
 								{ key: "name", label: "<u>Name</u>", sortable:true },
@@ -285,8 +285,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 								{ key: "status", label: "<u>Status</u>", hidden:true, sortable:false },
 								{ key: "group",   hidden:true},
 								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="'+
-oRecord.getData('description')+'"/>';}
+            elLiner.innerHTML = '<img src="../../../common/images/info.png" width="16" height="16" border="0" title="'+
+                                oRecord.getData('description')+'"/>';}
 								}
 
 								];

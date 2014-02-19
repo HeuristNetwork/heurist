@@ -404,7 +404,7 @@ function DetailTypeManager() {
 			},
 			{ key: "description",   hidden:true},
             { key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
+					elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
             { key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
             { key: "usage", label: "Used in ...", sortable:true, className:'center',
                 formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -418,16 +418,16 @@ function DetailTypeManager() {
                 dropdownOptions:_groups},
 
 			/*{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },*/
+					elLiner.innerHTML = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },*/
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
+			//	elLiner.innerHTML = '<a href="#info"><img src="../../../common/images/info.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
 			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:20, maxAutoWidth:40, width:25,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("status");
 					if (str === "reserved") {
-							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status:"+str+" - Locked\">";
+							rectypeStatus = "<img src=\"../../../common/images/lock_bw.png\" title=\"Status:"+str+" - Locked\">";
 					}else{
-							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
+							rectypeStatus = "<a href=\"#delete\"><img src=\"../../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
 					};
 					elLiner.innerHTML = rectypeStatus;
 			}},
