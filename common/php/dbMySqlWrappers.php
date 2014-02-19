@@ -454,11 +454,12 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
 			if ($result == "") {
 				$result = $mysqli->affected_rows;
 			} else {
-				error_log(">>>Error=" . $mysqli->error);
+				error_log(">>> MySQL Error code " . $mysqli->error);
 			}
 		}
 	} else { //prepared query
-		$stmt = $mysqli->prepare($sql) or die("Failed to prepared the statement!");
+		$stmt = $mysqli->prepare($sql) or die("Failed to prepare the SQL statement: ".$sql);
+        error_log('>>');error_log('Preparing SQL stmt: '.$sql.' with parameters: '.$params); //TODO: DEBUG to remove
 		call_user_func_array(array($stmt, 'bind_param'), refValues($params));
 		$stmt->execute();
 		if ($retCnt) {
@@ -466,7 +467,7 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
 			if ($result == "") {
 				$result = $mysqli->affected_rows;
 			} else {
-				error_log(">>>Error=" . $mysqli->error);
+				error_log(">>> MySQL Error code " . $mysqli->error);
 			}
 		} else {
 			$meta = $stmt->result_metadata();
