@@ -57,12 +57,12 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
     $res = array();
     $children = array();
     //add default fields
-    if($mode==3) array_push($children, array('key'=>'recID',       'title'=>'ID'));
-    array_push($children, array('key'=>'recTitle',    'title'=>'RecTitle'));
-    array_push($children, array('key'=>'recModified', 'title'=>'Modified'));
+    if($mode==3) array_push($children, array('key'=>'recID', type=>'integer', 'title'=>'ID'));
+    array_push($children, array('key'=>'recTitle',    type=>'freetext',  'title'=>'RecTitle'));
+    array_push($children, array('key'=>'recModified', type=>'date',      'title'=>'Modified'));
     if($mode==3) {
-    array_push($children, array('key'=>'recURL',      'title'=>'URL'));
-    array_push($children, array('key'=>'recWootText', 'title'=>'WootText'));
+    array_push($children, array('key'=>'recURL',      type=>'freetext',  'title'=>'URL'));
+    array_push($children, array('key'=>'recWootText', type=>'blocktext', 'title'=>'WootText'));
     }
  
     if($recTypeId && is_numeric($recTypeId)){
@@ -107,7 +107,7 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
     }else if($recTypeId=="Relationship") {
         
         $res['title'] = "Relationship";
-        $res['type'] = "Relationship";
+        $res['type'] = "relationship";
         
         //add specific Relationship fields
         array_push($children, array('key'=>'recRelationType', 'title'=>'RelationType'));
@@ -188,7 +188,9 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
                          
                          $res = array();
                          
+                         
                          if(count($rectype_ids)>1){
+                            $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                             $res['children'] = array();
                          }
                          
@@ -197,10 +199,8 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
                             if(count($rectype_ids)==1){//exact one rectype constraint
                                 //avoid redundant level in tree
                                 $res = $rt_res;
-                                $res['rt_id'] = $rtID;
+                                $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                             }else{
-//error_log("<<<".print_r($rt_res,true));
-                                
                                 array_push($res['children'], $rt_res);
                             }
                          }
@@ -225,7 +225,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
 //error_log("3>>>>".is_array($res)."<  ".$detailType."  ".$dt_label);
    if(is_array($res)){
 
-       $res['key'] = "f".$dtID;
+       $res['key'] = "f:".$dtID;
        $res['title'] = $dt_label;
        $res['type'] = $detailType;
    }            

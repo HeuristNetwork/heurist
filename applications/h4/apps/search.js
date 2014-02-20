@@ -368,7 +368,7 @@ $.widget( "heurist.search", {
                          var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                          disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
                          
-                         top.HEURIST.util.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false, false);
+                         top.HEURIST.util.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false);
                     }else{
                          $dlg.find("#fld_contain").show();
                          $dlg.find("#fld_enum").hide();

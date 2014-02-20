@@ -10,19 +10,20 @@ if (!top.HEURIST){
 }
 if (! top.HEURIST.util) top.HEURIST.util = {
     
-    /*
-    isArray: function (a)
-    {
-        return Object.prototype.toString.apply(a) === '[object Array]';
-    },
-    */
 
     isnull: function(obj){
         return ( (typeof obj==="undefined") || (obj===null));
     },
 
     isempty: function(obj){
-        return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
+        if (top.HEURIST.util.isnull(obj)){
+            return true;
+        }else if(top.HEURIST.util.isArray(obj)){
+            return obj.length<1;
+        }else{
+            return (obj==="") || (obj==="null");    
+        }
+        
     },
     
     isNumber: function (n) {
@@ -58,6 +59,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
     },
 
+    isArrayNotEmpty: function (a){
+        return (top.HEURIST.util.isArray(a) && a.length>0);
+    },
+    
     isArray: function (a)
     {
         return Object.prototype.toString.apply(a) === '[object Array]';
@@ -117,7 +122,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return termName+(withcode ?termCode :'');
     },
 
-    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList) {
+    // not used 
+    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         var selObj = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
         var reslist = [];
@@ -132,6 +138,48 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return reslist;
     },
 
+    //return term and its children as well as comma-separated list of non-disabled ancestors
+    getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
+        
+        var termtree = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
+/*
+        function __setParents(parent, terms){
+        
+            for (var i=0; i<terms.length; i++)
+            {
+                if(!terms[i].parents){
+                    terms[i].parents = [];
+                }else{
+                    terms[i].parents = terms[i].parents.concat(parent.parents);    
+                }
+                terms[i].parents.unshift(parent);
+                
+                __setParents(terms[i], terms[i].children);
+            }
+        }
+*/        
+        function __findTerm(termId, parent, terms)
+        {
+            for (var i=0; i<terms.length; i++){
+                
+                if(terms[i].id==termId){
+                    return terms[i];
+                }else{
+                    var res = __findTerm(termId, terms[i], terms[i].children);
+                    if(res!=null){
+                        return res;
+                    }
+                }
+            }
+            return null; //not found in this level
+        }
+        
+        var root = {id:null, text:top.HR('all'), children:termtree};
+            
+        //__setParents(root, termtree);
+            
+        return top.HEURIST.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
+    },
 
     /**
     * create/fill SELECT for terms
@@ -139,26 +187,27 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     * datatype enum|relation
     * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST.terms.treesByDomain
     * headerTermIDsList - json string or array
-    *
+    * defaultTermID - term to be selected
+    * sFirstEmptyItem - text for first empty value item
+    * needArray  return array tree if terms (instead of select element)
+    * 
     */
-    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, isAddFirstEmpty, needPlainList) {
+    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, sFirstEmptyItem, needArray) {
 
-        if(selObj==null){
-            selObj = document.createElement("select");
+        if(needArray){
+            
         }else{
-            $(selObj).empty();
+            selObj = createSelector(selObj, sFirstEmptyItem);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
-        if(!(datatype=="enum" || datatype=="relation")){
-            return selObj;
-        }
-
+        
         var terms = top.HEURIST.terms;
-
-        if(!terms) return selObj;
+        if(!(datatype=="enum" || datatype=="relation") || !terms ){
+            return needArray ?[] :selObj;
+        }
 
         var termLookup = terms.termsByDomainLookup[datatype];
 
@@ -196,8 +245,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             var localLookup = termLookupInner;
             var termName,
             termCode,
-            arrterm = [];
-
+            arrterm = [],
+            reslist2 = [];
+            
             for(termID in termSubTree) { // For every term in 'term'
                 termName = "";
                 termCode = "";
@@ -221,6 +271,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             arrterm.sort(function (a,b){
                     return a[1]<b[1]?-1:1;
             });
+            
+            
 
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) { // For every term in 'term'
@@ -231,62 +283,86 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
-                    var a = new Array(depth*2);
+                    var a = new Array( ((depth<7)?depth:7)*2 );
                     termName = a.join('. ') + termName;
                 }
 
                 var isDisabled = (headerTerms[termID]? true:false);
                 var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
                 var isHeader   = ((headerTerms[termID]? true:false) && hasChildren);
+                var new_optgroup; 
 
                 //in FF optgroup is allowed on first level only - otherwise it is invisible
 
                 if(isHeader && depth==0) { // header term behaves like an option group
                     //opt.className +=  ' termHeader';
+                    
+                    if(selObj){
 
-                    var new_optgroup = document.createElement("optgroup");
-                    new_optgroup.label = termName;
+                        new_optgroup = document.createElement("optgroup");
+                        new_optgroup.label = termName;
+                        new_optgroup.depth = 0;
 
-                    if(optgroup==null){
-                        selObj.appendChild(new_optgroup);
-                    }else{
-                        optgroup.appendChild(new_optgroup);
+                        if(optgroup==null){
+                            selObj.appendChild(new_optgroup);
+                        }else{
+                            optgroup.appendChild(new_optgroup);
+                        }
+                    
                     }
 
-                    //A dept of 8 (depth starts at 0) is maximum, to keep it organised
-                    createSubTreeOptions( new_optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID)
                 }else{
-                    var opt = new Option(termName+termCode, termID);
-                    opt.className = "depth" + depth;
-                    opt.disabled = isDisabled;
+                    
+                    if(selObj){
+                    
+                        var opt = new Option(termName+termCode, termID);
+                        opt.className = "depth" + (depth<7)?depth:7;
+                        opt.depth = depth;
+                        opt.disabled = isDisabled;
 
-                    if (termID == defaultTermID ||
-                        termName == defaultTermID) {
-                        opt.selected = true;
-                    }
+                        if (termID == defaultTermID ||
+                            termName == defaultTermID) {
+                            opt.selected = true;
+                        }
 
-                    if(optgroup==null){
-                        selObj.appendChild(opt);
-                    }else{
-                        optgroup.appendChild(opt);
-                    }
-
-                    //second and more levels terms
-                    if(hasChildren) {
-                        // A depth of 8 (depth starts at 0) is the max indentation, to keep it organised
-                        createSubTreeOptions( optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID);
+                        if(optgroup==null){
+                            selObj.appendChild(opt);
+                        }else{
+                            optgroup.appendChild(opt);
+                        }
+                        new_optgroup = optgroup;
                     }
                 }
-            }
-        }
+                
+                var children = (hasChildren)?createSubTreeOptions( new_optgroup, depth+1, termSubTree[termID], localLookup, defaultTermID):[];
+                var k=0, cnt2 = children.length, termssearch=[];
+                for(;k<cnt2;k++){
+                    /*if(!children[k].disabled || children[k].children.length>0){
+                        termssearch.push(children[k].id);
+                    }*/
+                    termssearch = termssearch.concat( children[k].termssearch );
+                }
+                if(!isDisabled){ //} || children.length>0){
+                       termssearch.push(termID); //add itself
+                }
+                
+                reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
+                var parent = reslist2[reslist2.length-1];
+                for(k=0;k<cnt2;k++){
+                    parent.children[k].parent = parent;
+                }
+            } //for
+            
+            return reslist2;
+        }//end internal function
 
-        if(isAddFirstEmpty){
-            top.HEURIST.util.addoption(selObj, '', '');
+        var reslist = createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
+        if(selObj){
+                if (!defaultTermID) selObj.selectedIndex = 0;
+                return selObj;
+        }else{
+                return reslist;
         }
-
-        createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
-        if (!defaultTermID) selObj.selectedIndex = 0;
-        return selObj;
     }
 
     ,createSelector: function(selObj, sFirstEmptyEntry) {
