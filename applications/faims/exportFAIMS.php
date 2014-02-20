@@ -307,19 +307,16 @@ function generateSchema($projname, $rt_toexport){
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
     $ind_rt_titlemask = $rtStructs['typedefs']['commonNamesToIndex']['rty_TitleMask']; //names
     $ind_rt_titlemask_canonical = $rtStructs['typedefs']['commonNamesToIndex']['rty_CanonicalTitleMask'];// codes
-    $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
-    $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
-    $int_dt_description = $dtStructs['typedefs']['fieldNamesToIndex']['dty_HelpText'];
-    $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
 
-    $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
-    $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_rt_termtree     = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
+    $int_rt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
     
-    $int_rst_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
-    $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
-
-    //$int_dt_termtree = $dtStructs['typedefs']['fieldNamesToIndex']["dty_JsonTermIDTree"];
-    //$int_dt_termtree_dis = $dtStructs['typedefs']['fieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_rt_dt_type      = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
+    $int_rt_disp_name    = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
+    
+    $int_rt_dt_descrip   = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayHelpText'];
+    $int_dt_ccode        = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
+    
 
     $rectyps = explode(",", $rt_toexport);
     
@@ -330,12 +327,12 @@ function generateSchema($projname, $rt_toexport){
         //find relmarker fields 
         foreach ($rectyps as $rt) {
            $rst_fields = $rtStructs['typedefs'][$rt]['dtFields'];
-           foreach ($rst_fields as $detail) {
-                $rst_dt_type = $detail[$int_rst_dt_type];
+           foreach ($rst_fields as $dtid=>$detail) {
+                $rst_dt_type = $detail[$int_rt_dt_type];
                 if($rst_dt_type=="relmarker"){
                     //find all 
-                    $termTree = $detail[$int_dt_termtree];
-                    $disableTerms = $detail[$int_dt_termtree_dis];
+                    $termTree = $detail[$int_rt_termtree];
+                    $disableTerms = $detail[$int_rt_termtree_dis];
                     $temp = preg_replace("/[\[\]\"]/","",$disableTerms);
                     $disableTerms = explode(",",$temp);
                     
@@ -345,8 +342,12 @@ function generateSchema($projname, $rt_toexport){
                     
                 }else if($rst_dt_type=="resource"){
                     
-                    $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this field
+                    $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
                     $dtdisplaynamex = getProperName($dtdisplayname);
+                    if($dtdisplaynamex==""){
+                           $dtdisplaynamex = "Rectype".$rt."_Field".$dtid;
+                    }
+
                     if(!@$reltypes["has".$dtdisplaynamex]){
                         array_push($reltypes, "has".$dtdisplaynamex);
                     }
@@ -362,10 +363,10 @@ function generateSchema($projname, $rt_toexport){
             $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code']; 
             $ind_tdescr = $dtTerms['fieldNamesToIndex']['trm_Description'];
             
-            addComment($root, 'In Heurist, relationships are stored in a single relationship record type and 
-            different types of relationship are distinguished by the relationship type field (attribute) whose values 
-            can be organised hierarchichally. In FAIMS, each type of relationship is a separate record type, organised 
-            into three classes - bidirectional, container and hierarchy');
+            addComment($root, 'In Heurist, relationships are stored in a single relationship record type and '+
+            'different types of relationship are distinguished by the relationship type field (attribute) whose '+
+            'values can be organised hierarchichally. In FAIMS, each type of relationship is a separate record type, '+
+            'organised into three classes - bidirectional, container and hierarchy');
             foreach ($reltypes as $termid) {
                 if(is_numeric($termid)){ //reltype
                     
@@ -480,23 +481,24 @@ function generateSchema($projname, $rt_toexport){
         
         foreach ($details as $dtid=>$detail) {
 
-            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
-            $dt_type = $det[$int_dt_type];
             
+            $dt_type = $detail[$int_rt_dt_type];
+
             if(!in_array($dt_type, $supported)){
                 continue;
             }
 
             $property = $arch_element->addChild('property');
 
-            $property->addAttribute('name', prepareText($det[$int_dt_name]));
+            $property->addAttribute('name', prepareText($detail[$int_rt_disp_name]));
             $property->addAttribute('type', $dt_type);
-            if($det[$int_dt_description]){
-                $property->addChild('description', prepareText($det[$int_dt_description]));
+            if($detail[$int_rt_dt_descrip]){
+                $property->addChild('description', prepareText($detail[$int_rt_dt_descrip]));
             }                                         
 
+            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
             $ccode = $det[$int_dt_ccode];
-
+            
             $is_in_titlemask = (!( strpos($titlemask, ".".$ccode."]")===false && strpos($titlemask, "[".$ccode."]")===false )) ;
             if($is_in_titlemask){
                 $property->addAttribute('isIdentifier', 'true');
@@ -505,7 +507,7 @@ function generateSchema($projname, $rt_toexport){
             }
 
             if($dt_type=='enum' || $dt_type=='relationtype'){
-                $terms = $detail[$int_dt_termtree];
+                $terms = $detail[$int_rt_termtree];
                 //convert to tree
                 $cnt = getTermsTree($property, $dt_type, $terms);
                 
@@ -540,7 +542,7 @@ function generateSchema($projname, $rt_toexport){
 */
 function generate_UI_Schema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    global $rtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
 
    add16n('Users'); 
    add16n('placeholder');
@@ -680,28 +682,55 @@ function generate_UI_Schema($projname, $rt_toexport){
             <input faims_certainty="false" faims_map="true" ref="map">
                 <label/>
             </input>                                      
+        
+            <group faims_style="orientation" ref="mapContainer">
+              <label/>
+              <group faims_style="even" ref="child0">
+                <label/>
+                <trigger ref="zoomGPS">
+                  <label>CenterMe</label>
+                </trigger>
+              </group>
+              <group faims_style="even" ref="child1">
+                <label/>
+                <trigger ref="clear">
+                  <label>Remove</label>
+                </trigger>
+              </group>
+              <group faims_style="even" ref="child2">
+                <label/>
+                <trigger ref="create">
+                  <label>Create</label>
+                </trigger>
+              </group>
+            </group>
         </group>
-        <group faims_style="orientation" ref="mapContainer">
-          <label/>
-          <group faims_style="even" ref="child0">
-            <label/>
-            <trigger ref="zoomGPS">
-              <label>CenterMe</label>
+        
+        <group ref="gps">  
+            <label>Control</label>
+            <trigger ref="connectexternal">
+              <label>Connect To External GPS</label>
             </trigger>
-          </group>
-          <group faims_style="even" ref="child1">
-            <label/>
-            <trigger ref="clear">
-              <label>Remove</label>
+            <trigger ref="connectinternal">
+              <label>Connect To Internal GPS</label>
             </trigger>
-          </group>
-          <group faims_style="even" ref="child2">
-            <label/>
-            <trigger ref="create">
-              <label>Create</label>
+            <trigger ref="startsync">
+              <label>Start Synching</label>
             </trigger>
-          </group>
+            <trigger ref="stopsync">
+              <label>Stop Synching</label>
+            </trigger>
+            <trigger ref="startTimeLog">
+              <label>Start Time Log</label>
+            </trigger>
+            <trigger ref="startDistanceLog">
+              <label>Start Distance Log</label>
+            </trigger>
+            <trigger ref="stopTrackLog">
+              <label>Stop Track Log</label>
+            </trigger>
         </group>
+            
       </group>');
     xml_adopt($body, $map, 'http://www.w3.org/2002/xforms');
     
@@ -719,9 +748,9 @@ function generate_UI_Schema($projname, $rt_toexport){
         </select1>
       </group>');
     xml_adopt($body, $data, 'http://www.w3.org/2002/xforms');
-    */
+  
         
-    // GPS ADDED BY IAN
+    // GPS ADDED BY IAN (Artem: it was added into wrong place)
      $gps = new SimpleXMLElement(
      '<group ref="gps">  
         <label>Control</label>
@@ -748,7 +777,7 @@ function generate_UI_Schema($projname, $rt_toexport){
         </trigger>
       </group>');
     xml_adopt($body, $gps, 'http://www.w3.org/2002/xforms');   
-    
+   */   
 
     // ARTEM, CAN WE DELETE THIS STUFF, OR ELSE ADD COMMENTS WHAT IT'S FOR AND WHY IT HAS BEEN COMMENTED OUT
     
@@ -782,16 +811,14 @@ function generate_UI_Schema($projname, $rt_toexport){
     $item->value = 'dummy'; */
 
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
-    $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
-    $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
-    $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
-    $int_dt_desc = $dtStructs['typedefs']['fieldNamesToIndex']['dty_HelpText'];
+    $int_rt_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
+    $int_rst_dt_desc = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayHelpText']; //not used
+    
+    $int_rt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
+    $int_rt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_rt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
 
-    $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
-    $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
-    $int_dt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
-
-    $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
+    $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     
 
     
@@ -806,6 +833,10 @@ function generate_UI_Schema($projname, $rt_toexport){
 
         $rtname = $rtStructs['names'][$rt];
         $rtnamex = getProperName($rtname);
+        if($rtnamex==""){
+               $rtnamex = "Rectype".$rt;
+        }
+        
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
         
         $tab_buttonholder->addChild($rtnamex);
@@ -813,7 +844,7 @@ function generate_UI_Schema($projname, $rt_toexport){
         $tab_data->addChild($rtnamex.'List');
         $tab_data->addChild($rtnamex.'Load');
         
-        $headername = $rtnamex.'_GeneralInformation'; //first tab implied if no header at top of record
+        $headername = $rtnamex.'_General_Information'; //first tab implied if no header at top of record
 
         addComment($faims, 'ArchEnt / Record Type: '.mb_strtoupper($rtnamex) );        
         $tabgroup_head = $faims->addChild($rtnamex);  //tabgroup for this record type
@@ -836,16 +867,15 @@ function generate_UI_Schema($projname, $rt_toexport){
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
 
-            $is_repeatable = ($detail[$int_dt_repeat]!='1');
+            $is_repeatable = ($detail[$int_rt_repeat]!='1');
             
-            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
-
-            $dt_type = $det[$int_dt_type];
-            $dtname = $det[$int_dt_name];  // the base field type name
-            $dtnamex = getProperName($dtname); // sanitised
+            $dt_type = $detail[$int_rt_dt_type];
             
-            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this field
+            $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
             $dtdisplaynamex = getProperName($dtdisplayname);
+            if($dtdisplaynamex==""){
+                   $dtdisplaynamex = "Rectype".$rt."_Field".$dtid;
+            }
             
             if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
             
@@ -863,7 +893,7 @@ function generate_UI_Schema($projname, $rt_toexport){
                 $tab = $tabgroup_head->addChild($headername); //first tab
                 $group = $tabgroup_body->addChild('group'); //first tab
                 $group->addAttribute('ref', $headername);
-                $group->addChild('label', getResStrA16n( prepareText($detail[$int_dt_disp_name] )) );
+                $group->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
             }
            
             
@@ -871,9 +901,9 @@ function generate_UI_Schema($projname, $rt_toexport){
                 continue;
             }
 
-            $tab->addChild($dtnamex); //add to strucsture
+            $tab->addChild($dtdisplaynamex); //add to strucsture
             if($dt_type=='file'){
-                   $tab->addChild('attach'.$dtnamex);
+                   $tab->addChild('attach'.$dtdisplaynamex);
             }
 
             $isvocab = ($dt_type=='enum');
@@ -898,10 +928,10 @@ function generate_UI_Schema($projname, $rt_toexport){
 
             $input = $group->addChild($inputtype); 
             
-            $input->addChild('label', getResStrA16n( prepareText($detail[$int_dt_disp_name] )) );
-            $input->addAttribute('ref', $dtnamex);
-            $input->addAttribute('faims_attribute_name', prepareText($dtname));
-            $input->addAttribute('faims_certainty', $isIdentifier?'false':'true');
+            $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
+            $input->addAttribute('ref', $dtdisplaynamex);
+            $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
+            $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');
             if($isvocab && !$is_repeatable) {
                 $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                 if($termsCount<4){
@@ -922,7 +952,7 @@ function generate_UI_Schema($projname, $rt_toexport){
             
             }else if($dt_type=='file'){
                 
-                $ftype = detectFileType($dtname);
+                $ftype = detectFileType($dtdisplayname);
                 $actionlabel = $ftype[0];
                 $filetype = $ftype[1];
                 
@@ -937,7 +967,7 @@ function generate_UI_Schema($projname, $rt_toexport){
                 $input->addAttribute('faims_annotation', 'false');
                 
                 $trigger = $group->addChild('trigger');
-                $trigger->addAttribute('ref', 'attach'.$dtnamex);
+                $trigger->addAttribute('ref', 'attach'.$dtdisplaynamex);
                 $trigger->addChild('label', $actionlabel);
             } else {
                 $input->addAttribute('faims_read_only', 'false');    
@@ -957,7 +987,7 @@ function generate_UI_Schema($projname, $rt_toexport){
             }
 
             if($ftype){
-                $path = '/faims/'.$rtnamex.'/'.$headername.'/'.$dtnamex;
+                $path = '/faims/'.$rtnamex.'/'.$headername.'/'.$dtdisplaynamex;
                 $bind = $model->addChild('bind');
                 $bind->addAttribute('nodeset', $path);
                 $bind->addAttribute('type', $ftype);
@@ -965,7 +995,7 @@ function generate_UI_Schema($projname, $rt_toexport){
 
 /*
             if($dt_type=='enum' || $dt_type=='relationtype'){
-                $terms = $detail[$int_dt_termtree];
+                $terms = $detail[$int_rt_termtree];
                 //convert to tree
                 getTermsTree($property, $dt_type, $terms);
             }
@@ -1002,20 +1032,17 @@ function generate_UI_Schema($projname, $rt_toexport){
 
 function generate_Logic($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    global $rtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
     
     
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
-    $int_dt_type = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type'];
-    $int_dt_name = $dtStructs['typedefs']['fieldNamesToIndex']['dty_Name'];
-    //not used $int_dt_ccode = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
-    //not used $int_dt_desc = $dtStructs['typedefs']['fieldNamesToIndex']['dty_HelpText'];
-
-    //not used $int_dt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
-    //not used $int_dt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
+    $int_rt_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
+    
+    //not used $int_rt_termtree = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_FilteredJsonTermIDTree"];
+    //not used $int_rt_termtree_dis = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_TermIDTreeNonSelectableIDs"];
     $int_dt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
 
-    $int_dt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
+    $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     
     
 $out = "";
@@ -1026,6 +1053,10 @@ $out = "";
 
         $rtname = $rtStructs['names'][$rt];
         $rtnamex = getProperName($rtname);
+        if($rtnamex==""){
+               $rtnamex = "Rectype".$rt;
+        }
+        
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
 $out .= "
@@ -1049,21 +1080,20 @@ $selectors = '';
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         
         $hasattachfile = false;
-        $headername = $rtnamex."/".$rtnamex.'_GeneralInformation'; //first tab implied if no header at top of record
+        $headername = $rtnamex."/".$rtnamex.'_General_Information'; //first tab implied if no header at top of record
 
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
 
             $is_repeatable = ($detail[$int_dt_repeat]!='1');
             
-            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
-
-            $dt_type = $det[$int_dt_type];
-            $dtname = $det[$int_dt_name];  // the base field type name
-            $dtnamex = getProperName($dtname); // sanitised
+            $dt_type = $detail[$int_rt_dt_type];
             
-            $dtdisplayname = $detail[$int_dt_disp_name]; // the display name for this record type
+            $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this record type
             $dtdisplaynamex = getProperName($dtdisplayname);
+            if($dtdisplaynamex==""){
+                   $dtdisplaynamex = "Rectype".$rt."_Field".$dtid;
+            }
 
             if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
             
@@ -1084,7 +1114,7 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
             
             if($dt_type=='file'){
                 
-                $ftype = detectFileType($dtname);
+                $ftype = detectFileType($dtdisplayname);
                 $actionlabel = $ftype[0];
                 $filetype = $ftype[1];
                 
@@ -1100,7 +1130,7 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
                 }
                 
                 $eventsection .= '
-onEvent("'.$headername.'/attach'.$dtnamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtnamex.'\")");';
+onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
                 
             }else if ($dt_type=='enum') {
                 
@@ -1118,7 +1148,7 @@ onEvent("'.$headername.'/attach'.$dtnamex.'", "click", "'.$action.'(\"'.$headern
                 }
                 
                 $selectors .= '
-'.($action.'("'.$headername.'/'.$dtnamex.'", makeVocab("'.$dtname.'"));');
+'.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.$dtdisplayname.'"));');
             }     
             //TODO  - support pointer, relmarker       
             
@@ -1214,7 +1244,7 @@ String userid;
 setSyncEnabled(true);
 setFileSyncEnabled(true);
 
-showWarning("Thanks for trying this module!", "We have provided this module for Demonstration purposes only. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
+showWarning("Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
 
 /*** control ***/
@@ -1235,8 +1265,8 @@ makeVocab(String attrib){
 
 //footer
 $out = $out.'
-/*** Uneditable - you can edit the code below with extreme precaution ***/
 /*** USER ***/
+/*** Should not require changing: edit the code below with extreme precaution ***/
 
 getDefaultUsersList() {
     users = fetchAll("select userid, fname || \' \' || lname from user");
@@ -1289,7 +1319,10 @@ return $out;
 
 //sanitize rt, dt, disp names
 function getProperName($name){
-        $goodname = str_replace('__','_',preg_replace('~[^a-z0-9]+~i','_', $name));
+        
+        $name = str_replace(' ','_',trim(ucwords($name)));
+        
+        $goodname = preg_replace('~[^a-z0-9]+~i','', $name); //str_replace('__','_',);
         return prepareText($goodname);
 }
 // remove last (s), replace <>
@@ -1325,7 +1358,7 @@ over the verbs
 */
 function detectFileType($dtname){
     $name1 = mb_strtolower($dtname);
-    $name2 = mb_strtolower($detail[$int_dt_disp_name]);
+    //$name2 = mb_strtolower($displayname);
     $actionlabel = 'Attach File';
     $filetype = 'file';
     
@@ -1389,6 +1422,7 @@ function getFullTermName($term, $datatype){
 
 
 //  return count
+// for UI_Schema
 // 
 function getTermsTree($property, $datatype, $terms){
 
