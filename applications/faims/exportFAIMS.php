@@ -71,6 +71,9 @@
         text-align:right;
         padding:10px;
     }
+    div label{
+        padding-left: 2px;
+    }
   </style>  
 </head>
 
@@ -150,7 +153,7 @@ To register click Database > Register in the menu on the left</div>";
         print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
         
         // List of record types for export
-        print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;font-weight:bold;'></div>";
+        print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;'></div>";
 
         if(count($rt_invalid_masks)>0){
             print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
