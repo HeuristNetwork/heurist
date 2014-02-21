@@ -180,7 +180,8 @@
 
 	if(isset($_POST['dbname'])) {
 		$isCreateNew = false;
-		$isExtended = ($_POST['dbtype']=='1');
+        $isHuNI = ($_POST['dbtype']=='1');
+        $isFAIMS = ($_POST['dbtype']=='2');
 
 		/*verify that database name is unique
 		$list = mysql__getdatabases();
@@ -253,14 +254,21 @@
 <?php } ?>
 			<div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
 				<input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1" class="labelBold">Standard database</label>
-				<div style="padding-left: 38px;padding-bottom:10px">Gives an uncluttered database with essential record and field types<br />Recommended for general use</div>
-				<input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">Extended database</label>
-				<div style="padding-left: 38px;">A database structure with extra record types and fields to support tool such as XSL transforms<br />The additional structure elements can be imported later from the H3ToolSupport database</div>
+				<div style="padding-left: 38px;padding-bottom:10px">Gives an uncluttered database with essential record and field types. Recommended for general use</div>
+				<input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">HuNI Core schema</label>
+                <div style="padding-left: 38px;">The <a href="http://huni.net.au" target=_blank>
+                    Humanities Networked Infrastructure (HuNI)</a> core entities and field definitions, allowing easy harvesting into the HuNI aggregate</div>
+                <input type="radio" name="dbtype" value="2" id="rb3" /><label for="rb3" class="labelBold">FAIMS Core schema</label>
+                <div style="padding-left: 38px;">The <a href="http://fedarch.org" target=_blank>
+                    Federated Archaeological Information Management System (FAIMS)</a> core entities and field definitions, providing a minimalist framework for archaeological fieldwork databases</div>
 
-				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
-					You will become the owner and administrator of the new database.<br>
-					The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
-				(all databases created by this installation of the software will have the same prefix).</p>
+				<p>Further structure can be downloaded, after database creation, from the FAIMS Community Server (#10) or HuNI Community Server (#11), 
+                    or from other databases registered with Heurist, using Import Structure in the Essentials menu on the left</p>
+                <p><ul><li>New database creation takes 10 - 20 seconds. New databases are created on the current server</li>
+					<li>You will become the owner and administrator of the new database</li>
+					<li>The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
+				(all databases created by this installation of the software will have the same prefix)</li>
+                </ul></p>
 			</div>
 
 			<h3>Enter a name for the new database:</h3>
@@ -297,7 +305,7 @@
 
 	function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
-		global $newDBName, $isNewDB, $done, $isCreateNew, $isExtended,$errorCreatingTables;
+		global $newDBName, $isNewDB, $done, $isCreateNew, $isHuNI, $isFAIMS, $errorCreatingTables;
 
 		$error = false;
 		$warning=false;
@@ -404,7 +412,7 @@
 
 			// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 			if($errorCreatingTables) {
-				echo ("<p class='error'>Error importing core definitions from ".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." for database $newname<br>");
+				echo ("<p class='error'>Error importing core definitions from ".($isHuNI?"coreDefinitionsHuNI.txt":(($isFaims)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"))." for database $newname<br>");
 				echo ("Please check whether this file is valid; consult Heurist helpdesk if needed</p>");
 				cleanupNewDB($newname);
 				return false;
@@ -484,15 +492,13 @@
 				$warnings = 1;
 			}
 
-			if($isExtended){
-				// copy xsl template directories from default set in the program code
-				$cmdline = "cp -R ../xsl-templates $uploadPath";
-				$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-				if ($res2 != 0 ) {
-					echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
-					echo($output2);
-					$warnings = 1;
-				}
+			// copy xsl template directories from default set in the program code
+			$cmdline = "cp -R ../xsl-templates $uploadPath";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
+				echo($output2);
+				$warnings = 1;
 			}
 
 			$warnings =+ createFolder("settings","used to store import mappings and the like");
