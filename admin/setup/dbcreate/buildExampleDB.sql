@@ -14,6 +14,8 @@
 
 /**
 * buildExampleDB.sql: SQL file to create an example Heurist database as a starter/seed database
+* Note that the standard starter database is hdb_H3Sandpit which is used tas a starting poitn for new
+* databsae creation and cannot be deleted through Heurist
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -34,7 +36,7 @@
 
 -- *** IMPORTANT *** You MUST use -R or --routines so that stored fuinctions are added to the database
 
---  mysqldump -u... -p.... -R hdb_H3ExampleDB > hdb_H3ExampleDB.sql
+--  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
 
 -- *****************************************
 

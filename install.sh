@@ -171,10 +171,10 @@ echo -e "\n\n\n"
 
 echo "You will be asked for your mysql root password to allow creation of the default database"
 
-echo "CREATE DATABASE hdb_ExampleDB" | mysql -uroot -p
+echo "CREATE DATABASE hdb_H3Sandpit" | mysql -uroot -p
 
 echo "Please enter your mysql root password... again..."
-mysql -uroot -p hdb_ExampleDB < /var/www/h3/admin/setup/dbcreate/buildExampleDB.sql
+mysql -uroot -p hdb_H3Sandpit < /var/www/h3/admin/setup/dbcreate/buildExampleDB.sql
 
 echo -e "\n\n"
 echo "Creating directories and setting permissions"
@@ -184,19 +184,19 @@ sudo chown -R www-data:www-data /var/www/h3/
 sudo mkdir /var/www/HEURIST_FILESTORE
 sudo chown www-data:www-data /var/www/HEURIST_FILESTORE
 
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit
 
-sudo cp -r /var/www/h3/admin/setup/rectype-icons/ /var/www/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/h3/admin/setup/smarty-templates/ /var/www/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/h3/admin/setup/xsl-templates/ /var/www/HEURIST_FILESTORE/ExampleDB
+sudo cp -r /var/www/h3/admin/setup/rectype-icons/ /var/www/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/h3/admin/setup/smarty-templates/ /var/www/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/h3/admin/setup/xsl-templates/ /var/www/HEURIST_FILESTORE/H3Sandpit
 
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/filethumbs
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/generated-reports
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/hml-output
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/html-output
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/scratch
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/settings
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/backup
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/filethumbs
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/generated-reports
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/hml-output
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/html-output
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/scratch
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/settings
+sudo mkdir /var/www/HEURIST_FILESTORE/H3Sandpit/backup
 
 sudo chown -R www-data:www-data /var/www/HEURIST_FILESTORE
 sudo chmod -R gu+rwx  /var/www/HEURIST_FILESTORE
