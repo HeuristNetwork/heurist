@@ -38,6 +38,10 @@
 
 --  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
 
+-- ADDED 24/4/14 to obviate need to enter password twice dutring inital install
+create database hdb_H3Sandpit;
+use database hdb_H3Sandpit;
+
 -- *****************************************
 
 -- ***** INSERT MYSQL DUMP FILE BELOW *****
