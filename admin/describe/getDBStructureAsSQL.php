@@ -62,11 +62,15 @@
     // admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_H3CoreDefinitions database and insert where indicated in file
     // admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql and delete non-definitional tables for temp db creation speed
     // admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
+    // admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface lsiting in exchange format)
+    // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)
+    
     // List of fields in the include files in admin/structure/crosswalk, used for getDBStructure and insertions
     // print statements at the end of getDBStructure.php, must match the include files
 
 	// File headers to explain what the listing represents
     // HTML is a fudge to make it readable in a browser, very useful for debug and cut/paste to coreDefinitions.txt
+    // rather inelegant from an IT perspective. Should probably be replaced with a more secure format
 	print "<html><head></head><body>\n";
 	print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
 	print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
@@ -88,7 +92,7 @@
 
     print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
     print "<p>";
-    include 'crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defRecTypeGroups";
     $res = mysql_query($query);
@@ -105,7 +109,7 @@
 
     print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
     print "<p>";
-    include 'crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defDetailTypeGroups";
     $res = mysql_query($query);
@@ -122,7 +126,7 @@
 
     print "\n\n\n-- ONTOLOGIES";print "\n";
     print "<p>";
-    include 'crosswalk/defOntologiesFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defOntologiesFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defOntologies";
     $res = mysql_query($query);
@@ -140,7 +144,7 @@
 
     print "\n\n\n-- TERMS";print "\n";
     print "<p>";
-    include 'crosswalk/defTermsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defTermsFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defTerms";
     $res = mysql_query($query);
@@ -158,7 +162,7 @@
 
 	print "\n-- RECORD TYPES";print "\n";
 	print "<p>";
-    include 'crosswalk/defRecTypesFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defRecTypesFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defRecTypes";
 	$res = mysql_query($query);
@@ -176,7 +180,7 @@
 
 	print "\n\n\n-- DETAIL TYPES";print "\n";
 	print "<p>";
-    include 'crosswalk/defDetailTypesFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defDetailTypesFields.inc'; // sets value of $flds
     print "-- $flds \n";
     $query = "select $flds from defDetailTypes";
 	$res = mysql_query($query);
@@ -194,7 +198,7 @@
 
 	print "\n\n\n-- RECORD STRUCTURE";print "\n";
 	print "<p>";
-    include 'crosswalk/defRecStructureFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defRecStructureFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defRecStructure";
 	$res = mysql_query($query);
@@ -211,7 +215,7 @@
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
 	print "<p>";
-    include 'crosswalk/defRelationshipConstraintsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defRelationshipConstraintsFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defRelationshipConstraints";
 	$res = mysql_query($query);
@@ -228,7 +232,7 @@
 
 	print "\n\n\n-- FILE EXTENSIONS TO MIME TYPES";print "\n";
 	print "<p>";
-    include 'crosswalk/defFileExtToMimetypeFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defFileExtToMimetypeFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defFileExtToMimetype";
 	$res = mysql_query($query);
@@ -245,7 +249,7 @@
 
 	print "\n\n\n-- Definitions translations";print "\n";
 	print "<p>";
-    include 'crosswalk/defTranslationsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defTranslationsFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defTranslations where trn_Source in
 	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
@@ -264,7 +268,7 @@
 
 	print "\n\n\n-- DEF CALC FUNCTIONS";print "\n";
 	print "<p>";
-    include 'crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defCalcFunctions";
 	$res = mysql_query($query);
@@ -281,7 +285,7 @@
 
 	print "\n\n\n-- DEF CROSSWALK";print "\n";
 	print "<p>";
-    include 'crosswalk/defCrosswalkFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defCrosswalkFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defCrosswalk";
 	$res = mysql_query($query);
@@ -298,7 +302,7 @@
 
 	print "\n\n\n-- DEF LANGUAGE";print "\n";
 	print "<p>";
-    include 'crosswalk/defLanguagesFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defLanguages";
 	$res = mysql_query($query);
@@ -315,7 +319,7 @@
 
 	print "\n\n\n-- DEF URL PREFIXES";print "\n";
 	print "<p>";
-    include 'crosswalk/defURLPrefixesFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/defURLPrefixesFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from defURLPrefixes";
 	$res = mysql_query($query);
@@ -341,7 +345,7 @@
 
 	print "\n\n\n-- Users and Groups";print "\n";
 	print "<p>";
-    include 'crosswalk/sysUGrpsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/sysUGrpsFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from sysUGrps";
 	$res = mysql_query($query);
@@ -358,7 +362,7 @@
 
 	print "\n\n\n-- Users to Group membership and roles";print "\n";
 	print "<p>";
-    include 'crosswalk/sysUsrGrpLinksFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/sysUsrGrpLinksFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from sysUsrGrpLinks";
 	$res = mysql_query($query);
@@ -375,7 +379,7 @@
 
 	print "\n\n\n-- User's hyperlink filters";print "\n";
 	print "<p>";
-    include 'crosswalk/usrHyperlinkFiltersFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/usrHyperlinkFiltersFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from usrHyperlinkFilters";
 	$res = mysql_query($query);
@@ -392,7 +396,7 @@
 
 	print "\n\n\n-- User's tags";print "\n";
 	print "<p>";
-    include 'crosswalk/usrTagsFields.inc'; // sets value of $flds
+    include HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/structure/crosswalk/usrTagsFields.inc'; // sets value of $flds
     print "-- $flds \n";
 	$query = "select $flds from UsrTags";
 	$res = mysql_query($query);
