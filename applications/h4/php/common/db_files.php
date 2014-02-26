@@ -28,18 +28,18 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 
 
 /**
-* Get array of local paths or external links for list of file id (may be obsfucated)
+* Get array of local paths, external links, mimtypes and parameters (mediatype and source)  
+* for list of file id (may be obsfucated)
 * 
 * @param mixed $system
 * @param mixed $file_ids
-* #param mixed $type  local, external, all
 */
-function fileGetPathOrURL($system, $file_ids, $type){
+function fileGetPath_URL_Type($system, $file_ids){
 
     if(is_string($file_ids)){
         $file_ids = explode(",", $file_ids);
     }
-    if(cnt($file_ids)>0){
+    if(count($file_ids)>0){
         
         if(is_numeric($file_ids[0])){
             $query = "ulf_ID in (".implode(",", $file_ids).")";
@@ -47,7 +47,9 @@ function fileGetPathOrURL($system, $file_ids, $type){
             $query = "ulf_ObfuscatedFileID in ('".implode("','", $file_ids)."')";
         }
     
-        $query = "select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference as remoteURL from recUploadedFiles where ".$query;
+        $query = "select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference, fxm_MimeType, ulf_Parameters from recUploadedFiles "
+                    ." left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt"
+                    ." where ".$query;
 
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
@@ -56,15 +58,19 @@ function fileGetPathOrURL($system, $file_ids, $type){
             $result = array();
         
             while ($row = $res->fetch_row()){
+                array_push($result, $row);
                 
+                /*
                 $filename = $row[0];
                 $extURL = $row[1];
+                $mimeType = $row[2];
                 
-                if($extURL && $type!='local'){
-                    array_push($result, $extURL);
-                }else if($type!='external' && $filename && file_exists($filename)){
+                if( $filename && file_exists($filename) ){
                     array_push($result, $filename);
+                }else if($extURL && $type!='local'){
+                    array_push($result, $extURL);
                 }
+                */
                 
             }
             $res->close();
@@ -114,7 +120,6 @@ function fileGetThumbnailURL($system, $recID){
    return $thumb_url;            
 }
 
-
 /**
 * Returns files for given array of records for specified users
 * 
@@ -127,21 +132,17 @@ function fileGetThumbnailURL($system, $recID){
 function fileSearch($system, $isfull, $recIDs, $mediatype=null, $ugrIDs=null){
 
      $usrFilter = null;
-     if (!$ugrIDs) {
+     /* if (!$ugrIDs) {
         $ugrIDs = $system->get_user_id();
         if($ugrIDs){
             $usrFilter = "=".$ugrIDs;
         }
-    }else if(is_string($ugrIDs) && $ugrIDs!=""){
+    }else */
+    if(is_string($ugrIDs) && $ugrIDs!=""){
         $ugrIDs = explode(",", $ugrIDs);
         if(count($ugrIDs)>0){
             $usrFilter = " in (".implode(",", $ugrIDs).") ";
         }
-    }
-    
-    if(!$usrFilter) {
-        $system->addError(HEURIST_REQUEST_DENIED, 'No user or group defined');
-        return false;
     }
     
     $mysqli = $system->get_mysqli();
@@ -158,14 +159,26 @@ function fileSearch($system, $isfull, $recIDs, $mediatype=null, $ugrIDs=null){
     }else{
         $recs = "";
     }
+    
+    if(!$usrFilter && $recs=="") {
+        //$system->addError(HEURIST_REQUEST_DENIED, 'No user or group defined');
+        $system->addError(HEURIST_INVALID_REQUEST, 'Neither users nor records id are defined');
+        return false;
+    }
+    
+    if($usrFilter!=null){
 
         $query = "SELECT ulf_ID, ulf_OrigFileName, ulf_ObfuscatedFileID ".$supinfo.", count(dtl_RecID) as ulf_Usage "
             ." FROM recUploadedFiles left join recDetails on dtl_UploadedFileID = ulf_ID ".$recs
             ." WHERE ulf_UploaderUGrpID ".$usrFilter
             ." group by ulf_ID, ulf_OrigFileName, ulf_ObfuscatedFileID ".$supinfo;
-
-//error_log(">>>".$query);
             
+            
+    }else{
+        $query = "SELECT distinct ulf_ID, ulf_OrigFileName, ulf_ObfuscatedFileID ".$supinfo.", 0 as ulf_Usage "        
+            ." FROM recUploadedFiles, recDetails where dtl_UploadedFileID = ulf_ID ".$recs;
+    }
+
     $res = $mysqli->query($query);
 
     if ($res){
@@ -263,10 +276,12 @@ function fileDelete($system, $file_ids, $ugrID=null){
 
             if($res){
                
-               $listpaths = fileGetPathOrURL($system, $file_ids, 'local'); //@todo $ugrID
-               if($listpaths){
-                   foreach($listpaths as $path){
-                        unlink($path);    
+               $listpaths = fileGetPath_URL_Type($system, $file_ids); //@todo $ugrID
+               if(is_array($listpaths)){
+                   foreach($listpaths as $fileinfo){
+                       if(file_exists($fileinfo[0])){
+                            unlink($fileinfo[0]);        
+                       }
                    }
                }
                 

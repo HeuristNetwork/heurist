@@ -10,19 +10,20 @@ if (!top.HEURIST){
 }
 if (! top.HEURIST.util) top.HEURIST.util = {
     
-    /*
-    isArray: function (a)
-    {
-        return Object.prototype.toString.apply(a) === '[object Array]';
-    },
-    */
 
     isnull: function(obj){
         return ( (typeof obj==="undefined") || (obj===null));
     },
 
     isempty: function(obj){
-        return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
+        if (top.HEURIST.util.isnull(obj)){
+            return true;
+        }else if(top.HEURIST.util.isArray(obj)){
+            return obj.length<1;
+        }else{
+            return (obj==="") || (obj==="null");    
+        }
+        
     },
     
     isNumber: function (n) {
@@ -33,7 +34,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     getUrlQueryAndDomain: function(qsearch)            
     {
             var domain = null;
-            if(qsearch.indexOf('?')==0){
+            if(qsearch && qsearch.indexOf('?')==0){
                 domain = top.HEURIST.util.getUrlParameter('w', qsearch);
                 qsearch = top.HEURIST.util.getUrlParameter('q', qsearch);
             }
@@ -58,6 +59,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
     },
 
+    isArrayNotEmpty: function (a){
+        return (top.HEURIST.util.isArray(a) && a.length>0);
+    },
+    
     isArray: function (a)
     {
         return Object.prototype.toString.apply(a) === '[object Array]';
@@ -117,7 +122,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return termName+(withcode ?termCode :'');
     },
 
-    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList) {
+    // not used 
+    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         var selObj = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
         var reslist = [];
@@ -132,6 +138,48 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return reslist;
     },
 
+    //return term and its children as well as comma-separated list of non-disabled ancestors
+    getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
+        
+        var termtree = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
+/*
+        function __setParents(parent, terms){
+        
+            for (var i=0; i<terms.length; i++)
+            {
+                if(!terms[i].parents){
+                    terms[i].parents = [];
+                }else{
+                    terms[i].parents = terms[i].parents.concat(parent.parents);    
+                }
+                terms[i].parents.unshift(parent);
+                
+                __setParents(terms[i], terms[i].children);
+            }
+        }
+*/        
+        function __findTerm(termId, parent, terms)
+        {
+            for (var i=0; i<terms.length; i++){
+                
+                if(terms[i].id==termId){
+                    return terms[i];
+                }else{
+                    var res = __findTerm(termId, terms[i], terms[i].children);
+                    if(res!=null){
+                        return res;
+                    }
+                }
+            }
+            return null; //not found in this level
+        }
+        
+        var root = {id:null, text:top.HR('all'), children:termtree};
+            
+        //__setParents(root, termtree);
+            
+        return top.HEURIST.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
+    },
 
     /**
     * create/fill SELECT for terms
@@ -139,26 +187,27 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     * datatype enum|relation
     * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST.terms.treesByDomain
     * headerTermIDsList - json string or array
-    *
+    * defaultTermID - term to be selected
+    * sFirstEmptyItem - text for first empty value item
+    * needArray  return array tree if terms (instead of select element)
+    * 
     */
-    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, isAddFirstEmpty, needPlainList) {
+    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, sFirstEmptyItem, needArray) {
 
-        if(selObj==null){
-            selObj = document.createElement("select");
+        if(needArray){
+            
         }else{
-            $(selObj).empty();
+            selObj = createSelector(selObj, sFirstEmptyItem);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
-        if(!(datatype=="enum" || datatype=="relation")){
-            return selObj;
-        }
-
+        
         var terms = top.HEURIST.terms;
-
-        if(!terms) return selObj;
+        if(!(datatype=="enum" || datatype=="relation") || !terms ){
+            return needArray ?[] :selObj;
+        }
 
         var termLookup = terms.termsByDomainLookup[datatype];
 
@@ -177,7 +226,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //prepare tree
         //
-        if(!top.HEURIST.util.isNumber(termIDTree)){
+        if(top.HEURIST.util.isNumber(termIDTree)){
             //this is vocabulary id - show list of all terms for this vocab
             var tree = terms.treesByDomain[datatype];
             termIDTree = tree[termIDTree];
@@ -196,8 +245,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             var localLookup = termLookupInner;
             var termName,
             termCode,
-            arrterm = [];
-
+            arrterm = [],
+            reslist2 = [];
+            
             for(termID in termSubTree) { // For every term in 'term'
                 termName = "";
                 termCode = "";
@@ -221,6 +271,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             arrterm.sort(function (a,b){
                     return a[1]<b[1]?-1:1;
             });
+            
+            
 
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) { // For every term in 'term'
@@ -231,76 +283,106 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
-                    var a = new Array(depth*2);
+                    var a = new Array( ((depth<7)?depth:7)*2 );
                     termName = a.join('. ') + termName;
                 }
 
                 var isDisabled = (headerTerms[termID]? true:false);
                 var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
                 var isHeader   = ((headerTerms[termID]? true:false) && hasChildren);
+                var new_optgroup; 
 
                 //in FF optgroup is allowed on first level only - otherwise it is invisible
 
                 if(isHeader && depth==0) { // header term behaves like an option group
                     //opt.className +=  ' termHeader';
+                    
+                    if(selObj){
 
-                    var new_optgroup = document.createElement("optgroup");
-                    new_optgroup.label = termName;
+                        new_optgroup = document.createElement("optgroup");
+                        new_optgroup.label = termName;
+                        new_optgroup.depth = 0;
 
-                    if(optgroup==null){
-                        selObj.appendChild(new_optgroup);
-                    }else{
-                        optgroup.appendChild(new_optgroup);
+                        if(optgroup==null){
+                            selObj.appendChild(new_optgroup);
+                        }else{
+                            optgroup.appendChild(new_optgroup);
+                        }
+                    
                     }
 
-                    //A dept of 8 (depth starts at 0) is maximum, to keep it organised
-                    createSubTreeOptions( new_optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID)
                 }else{
-                    var opt = new Option(termName+termCode, termID);
-                    opt.className = "depth" + depth;
-                    opt.disabled = isDisabled;
+                    
+                    if(selObj){
+                    
+                        var opt = new Option(termName+termCode, termID);
+                        opt.className = "depth" + (depth<7)?depth:7;
+                        opt.depth = depth;
+                        opt.disabled = isDisabled;
 
-                    if (termID == defaultTermID ||
-                        termName == defaultTermID) {
-                        opt.selected = true;
-                    }
+                        if (termID == defaultTermID ||
+                            termName == defaultTermID) {
+                            opt.selected = true;
+                        }
 
-                    if(optgroup==null){
-                        selObj.appendChild(opt);
-                    }else{
-                        optgroup.appendChild(opt);
-                    }
-
-                    //second and more levels terms
-                    if(hasChildren) {
-                        // A depth of 8 (depth starts at 0) is the max indentation, to keep it organised
-                        createSubTreeOptions( optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID);
+                        if(optgroup==null){
+                            selObj.appendChild(opt);
+                        }else{
+                            optgroup.appendChild(opt);
+                        }
+                        new_optgroup = optgroup;
                     }
                 }
-            }
+                
+                var children = (hasChildren)?createSubTreeOptions( new_optgroup, depth+1, termSubTree[termID], localLookup, defaultTermID):[];
+                var k=0, cnt2 = children.length, termssearch=[];
+                for(;k<cnt2;k++){
+                    /*if(!children[k].disabled || children[k].children.length>0){
+                        termssearch.push(children[k].id);
+                    }*/
+                    termssearch = termssearch.concat( children[k].termssearch );
+                }
+                if(!isDisabled){ //} || children.length>0){
+                       termssearch.push(termID); //add itself
+                }
+                
+                reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
+                var parent = reslist2[reslist2.length-1];
+                for(k=0;k<cnt2;k++){
+                    parent.children[k].parent = parent;
+                }
+            } //for
+            
+            return reslist2;
+        }//end internal function
+
+        var reslist = createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
+        if(selObj){
+                if (!defaultTermID) selObj.selectedIndex = 0;
+                return selObj;
+        }else{
+                return reslist;
         }
+    }
 
-        if(isAddFirstEmpty){
-            top.HEURIST.util.addoption(selObj, '', '');
-        }
-
-        createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
-        if (!defaultTermID) selObj.selectedIndex = 0;
-        return selObj;
-    },
-
-    /**
-    * create/fill SELECT for rectypes
-    *
-    * rectypeList - constraint options to this list
-    */
-    createRectypeSelect: function(selObj, rectypeList, sFirstEmptyEntry) {
-
+    ,createSelector: function(selObj, sFirstEmptyEntry) {
         if(selObj==null){
             selObj = document.createElement("select");
         }else{
             $(selObj).empty();
         }
+        if(sFirstEmptyEntry){
+            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
+        }
+        return selObj;
+    }
+    
+    /**
+    * create/fill SELECT for rectypes groups
+    */
+    ,createRectypeGroupSelect: function(selObj, sFirstEmptyEntry) {
+        
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
 
         var rectypes = top.HEURIST.rectypes,
             index;
@@ -308,9 +390,36 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(!rectypes) return selObj;
 
 
-        if(sFirstEmptyEntry){
-            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
+        for (index in rectypes.groups){
+                    if (index == "groupIDToIndex" ){
+                      //rectypes.groups[index].showTypes.length < 1) 
+                      continue;
+                    }
+                    
+                    var name = rectypes.groups[index].name;
+                    if(!top.HEURIST.util.isnull(name)){
+                           top.HEURIST.util.addoption(selObj, rectypes.groups[index].id, name);
+                    }
         }
+
+        return selObj;
+    
+    }
+    
+    /**
+    * create/fill SELECT for rectypes
+    *
+    * rectypeList - constraint options to this list
+    */
+    , createRectypeSelect: function(selObj, rectypeList, sFirstEmptyEntry) {
+
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+
+        var rectypes = top.HEURIST.rectypes,
+            index;
+
+        if(!rectypes) return selObj;
+
 
         if(rectypeList){
 
@@ -345,7 +454,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                           var name = rectypes.names[rectypeID];
 
                           if(!top.HEURIST.util.isnull(name)){
-                                top.HEURIST.util.addoption(selObj, rectypeID, name);
+                                var opt = top.HEURIST.util.addoption(selObj, rectypeID, name);
                           }
                     }
             }
@@ -357,45 +466,95 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     /**
     * create/fill SELECT for details of given recordtype
     *
-    * rectypeList - constraint options to this list
+    * allowedlist - constraint options to this list
     */
-    createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry) {
+    createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry, needEmpty) {
 
-        if(selObj==null){
-            selObj = document.createElement("select");
-        }else{
-            $(selObj).empty();
-        }
+        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+        
+        var dtyID, details;
 
-        if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
+        if(Number(rectype)>0){
+            //structure not defined 
+            if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
+            var rectypes = top.HEURIST.rectypes.typedefs[rectype];
+            
+            if(!rectypes) return selObj;
+            details = rectypes.dtFields;
+            
+            var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
+                fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+            
+            var arrterm = [];
+            
+            for (dtyID in details){
+               if(dtyID){
 
-        var rectypes = top.HEURIST.rectypes.typedefs[rectype],
-            dtyID;
+                   if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
+                   {
+                          var name = details[dtyID][fi];
 
-        if(!rectypes) return selObj;
-
-
-        if(sFirstEmptyEntry){
-            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
-        }
-
-        var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
-
-        var details = rectypes.dtFields;
-        for (dtyID in details){
-           if(dtyID){
-
-               if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
-               {
-                      var name = details[dtyID][fi];
-
-                      if(!top.HEURIST.util.isnull(name)){
-                            top.HEURIST.util.addoption(selObj, dtyID, name);
-                      }
+                          if(!top.HEURIST.util.isnull(name)){
+                                arrterm.push([dtyID, name]);
+                          }
+                   }
                }
-           }
+            }
+            
+            //sort by name
+            arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+            //add to select
+            var i=0, cnt= arrterm.length;
+            for(;i<cnt;i++) {
+                top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+            }
+            
+        }else{ //show all detail types
+        
+            if(!top.HEURIST.detailtypes) return selObj;
+            
+            var detailtypes = top.HEURIST.detailtypes;
+            var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
+            
+            
+            for (index in detailtypes.groups){
+                    if (index == "groupIDToIndex" ||
+                      detailtypes.groups[index].showTypes.length < 1) {   //ignore empty group
+                      continue;
+                    }
+                    
+                    var arrterm = [];
+
+                    for (var dtIDIndex in detailtypes.groups[index].showTypes)
+                    {
+                          var detailID = detailtypes.groups[index].showTypes[dtIDIndex];
+                          if(allowedlist==null || allowedlist.indexOf(detailtypes.typedefs[detailID].commonFields[fit])>=0)
+                          {
+                              var name = detailtypes.names[detailID];
+
+                              if(!top.HEURIST.util.isnull(name)){
+                                    arrterm.push([detailID, name]);
+                              }
+                          }
+                    }
+                    
+                    if(arrterm.length>0){
+                        var grp = document.createElement("optgroup");
+                        grp.label = detailtypes.groups[index].name;
+                        selObj.appendChild(grp);
+                        //sort by name
+                        arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+                        //add to select
+                        var i=0, cnt= arrterm.length;
+                        for(;i<cnt;i++) {
+                            top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                        }
+                    }
+                    
+            }
+            
         }
+
 
         return selObj;
     },

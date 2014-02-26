@@ -99,12 +99,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                          dataType: "json",
                          cache: false,
                          error: function(jqXHR, textStatus, errorThrown ) {
-                            callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
+                            if(callback){
+                                callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
+                            }
                                 //message:'Error connecting server '+textStatus});
                          },
                          success: function (response) {
-                             callback(response);
+                             if(callback){
+                                callback(response);
+                             }
                          }
                      });
 
@@ -364,9 +368,35 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  f - none or cs list detail,map,structure,tags,relations,(backward)links,text,comments - details of output
             *  l - limit
             * o - offset
+            * 
+            *  callback - callback function or  $document we have trigger the event
             */
             ,search: function(request, callback){
-                 _callserver('record_search', request, callback);
+                
+               if(!$.isFunction(callback)){
+                    var document = callback;
+                    if(!top.HEURIST.util.isnull(document)){
+                        document.trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]); //gloal app event  
+                    } 
+                    callback = function(response)
+                        {
+                            var resdata = null;
+                            if(response.status == top.HAPI.ResponseStatus.OK){
+                                resdata = new hRecordSet(response.data);
+                            }else{
+                                top.HEURIST.util.showMsgErr(response.message);
+                            }
+                            if(!top.HEURIST.util.isnull(document)){
+                                  document.trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                            }
+                        }
+               }
+               
+               if(top.HEURIST.util.isnull(request.l)){
+                  request.l = top.HAPI.get_prefs('search_limit');
+               }
+                
+               _callserver('record_search', request, callback);
             }
 
             // find min and max values for

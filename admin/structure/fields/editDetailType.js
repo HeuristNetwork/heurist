@@ -684,14 +684,22 @@ function DetailTypeEditor() {
 		}
 
 		// check mandatory fields
-		if(Dom.get("dty_Name").value==="") {
-				if(isShowWarn) {
-					alert("Name is mandatory field");
-				}
-				Dom.get("dty_Name").focus();
-				_updatedFields = [];
-				return "mandatory";
-		}
+        var swarn = "";
+        var dt_name = Dom.get("dty_Name").value;
+		if(dt_name==="") {
+                swarn = "Name is mandatory field"
+		}else{
+            swarn = Hul.validateName(dt_name, "Field 'Default field type name'");
+        }
+        if(swarn!=""){
+                if(isShowWarn) {
+                    alert(swarn);
+                }
+                Dom.get("dty_Name").focus();
+                _updatedFields = [];
+                return "mandatory";
+        }
+        
 		if(Dom.get("dty_HelpText").value==="") {
 				if(isShowWarn) {
 					alert("Help text is mandatory field");

@@ -69,7 +69,7 @@ $.widget( "heurist.rec_viewer", {
                     //that.option("recdata", _recdata);
                 }
             /*
-            }else if( top.HEURIST.util.isArray(data) ) {
+            }else if( $.isArray(data) ) {
                 _recID = data[0];
             }else {
                 _recID = data;
@@ -117,11 +117,13 @@ $.widget( "heurist.rec_viewer", {
               //reload tags for selected record
               if(this.recIDloaded != this.options.recID){
                     this.recIDloaded = this.options.recID;
-                    this.div_content.empty();
+                    
                     //alert('show '+this.options.recID);
                     this._renderHeader(); 
 
                     var that = this;
+                    
+                    // call for tags - on response - draw tags
                     that.options.user_Tags = {}; //reset
                     //load all tags for current user and this groups with usagecount for current record
                     top.HAPI.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
@@ -136,13 +138,39 @@ $.widget( "heurist.rec_viewer", {
                                     }
                                 }
                                 that._renderTags();
-                            
                             }
+                            
                         }else{
                             top.HEURIST.util.showMsgErr(response);
                         }
                     });
-                  
+
+                    /* it works - but we already have fileids in details
+                    // call for files - on response - draw thumbnails and apply yox viewer
+                    that.options.rec_Files = {}; //reset
+                    
+                    top.HAPI.RecordMgr.file_get({recIDs:this.recIDloaded},
+                    function(response) {
+                        if(response.status == top.HAPI.ResponseStatus.OK){
+
+                            if(that.options.recID == response.data['recIDs']){ //not outdated
+                            
+                                that.options.rec_Files = [];
+                                var idx;
+                                for(idx in response.data) {
+                                    if(idx>0){
+                                        that.options.rec_Files.push(response.data[idx]);
+                                    }
+                                }
+                                that._renderFiles();
+                            }
+                            
+                        }else{
+                            top.HEURIST.util.showMsgErr(response);
+                        }
+                    });
+                    */
+                    
                   
 /* dynamic load of required js                  
                   var that = this;
@@ -179,10 +207,11 @@ $.widget( "heurist.rec_viewer", {
 
     this.action_buttons.remove();
     this.div_toolbar.remove();
+    this.mediacontent.remove();
     this.div_content.remove();
-  },
-  
-  _renderTags: function() {
+  }
+   
+  ,_renderTags: function() {
       
       var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
       
@@ -230,14 +259,57 @@ $.widget( "heurist.rec_viewer", {
             }
       }
       
-  },
-
-  _renderHeader: function(){
+  }
+  
+  ,_renderFiles: function(title){
+      
+      //$(this.mediacontent).yoxview("unload");
+      //$(this.mediacontent).yoxview("update");
+      //this.mediacontent.empty();
+      
+      if(this.options.rec_Files)
+      {
+            var recID = this.options.recID;
+            
+            for (var idx in this.options.rec_Files){
+                if(idx>=0){  //skip first 
+                     var file = this.options.rec_Files[idx];  
+                     
+                     var obf_recID = file[0];
+                     var file_param = file[1]; //($.isArray(file) ?file[2] :file ) ;
+                     
+                     var needplayer = !(file_param.indexOf('video')<0 && file_param.indexOf('audio')<0);
+                     
+// <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
+// <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
+                     
+                     var $alink = $("<a>",{href: top.HAPI.basePath+'file.php?db=' + top.HAPI.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
+                     $("<img>", {src: top.HAPI.basePath+'file.php?db=' + top.HAPI.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
+                     
+                     
+                }
+            }
+            
+            this.mediacontent.show();
+            
+            /*if($.isFunction(this.mediacontent.yoxview)){
+                $(this.mediacontent).yoxview("update");    
+            }else{
+                
+            }  */
+            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\/file.php\?db=(?:\w+)&id=(?:\w+)$/i});    
+      }      
+  }
+  
+  ,_renderHeader: function(){
 
         var recID = this.options.recID;
         var recdata = this.options.recdata;
         var record = recdata.getFirstRecord();
         var rectypes = recdata.getStructures();
+        var rec_title = recdata.fld(record, 'rec_Title');
+        var that = this;
         
         var rectypeID = recdata.fld(record, 'rec_RecTypeID');
         if(!rectypes || rectypes.length==0){
@@ -246,6 +318,8 @@ $.widget( "heurist.rec_viewer", {
 
         var rfrs = rectypes.typedefs[rectypeID].dtFields;
         var fi = rectypes.typedefs.dtFieldNamesToIndex;
+        
+        this.div_content.empty();
 
         //header: rectype and title
         var $header = $('<div>')
@@ -253,7 +327,7 @@ $.widget( "heurist.rec_viewer", {
                 //.addClass('ui-widget-header ui-corner-all')
                 .appendTo(this.div_content);
 
-        $('<h2>' + recdata.fld(record, 'rec_Title') + '</h2>')
+        $('<h2>' + rec_title + '</h2>')
                 .appendTo($header);
                 
         $('<div>')
@@ -265,9 +339,12 @@ $.widget( "heurist.rec_viewer", {
             .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>') 
             .appendTo($header);          
           
-        //media content   @todo
+        // media content - populated in renderFiles
+        this.mediacontent = $("<div>",{id:"mediarec"+recID}).css({'width':'100%','text-align':'center','height':'auto'}).addClass("thumbnails").appendTo(this.div_content); //.hide();
       
-      
+        this.options.rec_Files = [];
+
+        // list of fields
         var order = rectypes.dtDisplayOrder[rectypeID];
         if(order){      
 
@@ -285,6 +362,7 @@ $.widget( "heurist.rec_viewer", {
                 {
                         continue;
                 }
+                
 
                 var values = recdata.fld(record, dtID);
                 
@@ -292,10 +370,18 @@ $.widget( "heurist.rec_viewer", {
                 
                 var isempty = true;
                 $.each(values, function(idx,value){ 
-                        if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; } 
+                    if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; } 
                 } );
                 if(isempty) continue;
                 
+                if(rfrs[dtID][fi['dty_Type']] == 'file'){   
+                    $.each(values, function(idx,value){ 
+                        if(!top.HEURIST.util.isempty(value)){
+                            that.options.rec_Files.push(value)
+                        }
+                    } );
+                    continue; //hide files
+                }
 
                 $("<div>").editing_input(
                           {
@@ -310,7 +396,8 @@ $.widget( "heurist.rec_viewer", {
 
             }                
         }//order
-
+        
+        this._renderFiles(rec_title);
   }
 
 });

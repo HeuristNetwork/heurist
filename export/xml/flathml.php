@@ -85,16 +85,28 @@ if (@$argv) {
     if (@$ARGV['-woot']) $_REQUEST['woot'] = $ARGV['-woot'];
     if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
     if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
+    if (@$ARGV['-file']) $_REQUEST['file'] = '1'; // inline file content
 
 }
 /*****DEBUG****/
 //error_log("flathml session".print_r(@$_SESSION,true));
 /*header("Content-type: text/javascript");
 */
-if (@$_REQUEST['mode'] != '1') {
-    header('Content-type: text/xml; charset=utf-8');
+
+if(@$_REQUEST['file']){
+    $intofile = true;
+}else{
+    $intofile = false;
 }
-echo "<?xml version='1.0' encoding='UTF-8'?>\n";
+$hunifile = null;
+
+if(!$intofile){
+    if (@$_REQUEST['mode'] != '1') {
+        header('Content-type: text/xml; charset=utf-8');
+    }
+    echo "<?xml version='1.0' encoding='UTF-8'?>\n";
+}
+
 require_once (dirname(__FILE__) . '/../../common/config/initialise.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../search/getSearchResults.php');
@@ -109,6 +121,18 @@ $relTrgDT = (defined('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0);
 //----------------------------------------------------------------------------//
 //  Tag construction helpers
 //----------------------------------------------------------------------------//
+function output($str){
+    global $intofile, $hunifile;
+    
+    if($intofile){
+        if($hunifile){
+              fwrite($hunifile, $str);
+        }
+    }else{
+        echo $str;       
+    }
+    
+}
 /**
  * description
  * @global    type description of global variable usage in a function
@@ -140,7 +164,7 @@ function makeTag($name, $attributes = null, $textContent = null, $close = true, 
         }
         $tag.= "</$name>";
     }
-    echo $tag . "\n";
+    output( $tag . "\n" );
     /*****DEBUG****/
     //	error_log("in makeTag tag = $tag");
 
@@ -177,7 +201,7 @@ function openTag($name, $attributes = null) {
  * @uses      code_element_name description of use
  */
 function closeTag($name) {
-    echo "</$name>\n";
+    output( "</$name>\n" );
     /*****DEBUG****/
     //	error_log("in closeTag name = $name");
 
@@ -194,7 +218,7 @@ function closeTag($name) {
  * @uses      code_element_name description of use
  */
 function openCDATA() {
-    echo "<![CDATA[\n";
+    output( "<![CDATA[\n" );
 }
 /**
  * description
@@ -208,7 +232,7 @@ function openCDATA() {
  * @uses      code_element_name description of use
  */
 function closeCDATA() {
-    echo "]]>\n";
+    output( "]]>\n" );
 }
 //----------------------------------------------------------------------------//
 //  Retrieve record- and detail- type metadata
@@ -645,7 +669,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
  * @uses      code_element_name description of use
  */
 function outputRecords($result) {
-    global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH;
+    global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH, $intofile, $hunifile;
     $recSet = array('count' => 0, 'relatedSet' => array());
     $rec_ids = explode(",", $result['recIDs']);
     if (array_key_exists('expandColl', $_REQUEST)) {
@@ -659,13 +683,33 @@ function outputRecords($result) {
     foreach ($recSet['relatedSet'] as $recID => $recInfo) {
         $recSet['relatedSet'][$recID]['record'] = loadRecord($recID, $FRESH, true);
     }
-    openTag('records', array('count' => $recSet['count']));
+    
+    $resout = array();
+    
+    if(!$intofile){
+        openTag('records', array('count' => $recSet['count']));
+    }
+    
     foreach ($recSet['relatedSet'] as $recID => $recInfo) {
         if (intval($recInfo['depth']) <= $MAX_DEPTH) {
-            outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
+            $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
+            
+            if($intofile && $hunifile){
+                 fclose($hunifile);
+            }
+            if($res){
+                array_push($resout, $recID);
+            }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml")){
+                unlink(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml");
+            }
         }
     }
-    closeTag('records');
+    
+    if(!$intofile){
+        closeTag('records');
+    }
+    
+    return $resout;
 }
 //----------------------------------------------------------------------------//
 //  Output functions
@@ -682,7 +726,9 @@ function outputRecords($result) {
  * @uses      code_element_name description of use
  */
 function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = null) {
-    global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs;
+    global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile;
+    
+    $hunifile = null;
     $record = $recordInfo['record'];
     $depth = $recordInfo['depth'];
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
@@ -695,24 +741,31 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
                 if ($outputStub) {
                     outputRecordStub($record);
                 } else {
-                    echo $record['rec_ID'];
+                    output( $record['rec_ID'] );
                 }
             }
-            return;
+            return false;
         }
     }
+    
+    if($intofile){
+       $hunifile = fopen( HEURIST_HML_PUBPATH.$record['rec_ID'].".xml", 'w');
+       output( "<?xml version='1.0' encoding='UTF-8'?>\n" );    
+    }       
+    
+    
     /*****DEBUG****/
     //if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
     openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'), 'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
     if (array_key_exists('error', $record)) {
         makeTag('error', null, $record['error']);
         closeTag('record');
-        return;
+        return false;
     }
     if ($depth > $USEXINCLUDELEVEL) {
         outputXInclude($record);
         closeTag('record');
-        return;
+        return true;
     }
     makeTag('id', null, $record['rec_ID']);
     makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID' => getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
@@ -741,7 +794,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
             openCDATA();
             foreach ($result['woot']['chunks'] as $chunk) {
                 $text = preg_replace("/&nbsp;/", " ", $chunk['text']);
-                echo replaceIllegalChars($text) . "\n";
+                output( replaceIllegalChars($text) . "\n" );
             }
             closeCDATA();
             closeTag('woot');
@@ -851,6 +904,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
         }
     }
     closeTag('record');
+    
+    return true;    
 }
 /**
  * description
@@ -1095,15 +1150,15 @@ function outputTemporalDetail($attrs, $value) {
             openTag('property', array('type' => $tag, 'name' => $fieldsDict[$tag]));
             switch ($tag) {
                 case "DET":
-                    echo $determinationCodes[$val];
+                    output( $determinationCodes[$val] );
                 break;
                 case "PRF":
                 case "SPF":
                 case "EPF":
-                    echo $profileCodes[$val];
+                    output( $profileCodes[$val] );
                 break;
                 default:
-                    echo $val;
+                    output( $val );
             }
             closeTag('property');
         } else if (array_key_exists($tag, $tDateDict)) {
@@ -1321,30 +1376,61 @@ if (@$_REQUEST['filename']) {
 if (@$_REQUEST['pathfilename']) {
     $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
 }
-openTag('hml', $hmlAttrs);
-/*
-openTag('hml', array(
-	'xmlns' => 'http://heuristscholar.org/heurist/hml',
-	'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
-);
-*/
-/*****DEBUG****/
-//error_log("selids".print_r($_REQUEST['selids'],true));
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
-makeTag('database', array('id' => HEURIST_DBID), HEURIST_DBNAME);
-makeTag('query', $query_attrs);
-if (count($selectedIDs) > 0) {
-    makeTag('selectedIDs', null, join(",", $selectedIDs));
+
+if($intofile){
+
+    if (array_key_exists('error', $result)) {
+       print "Error: ".$result['error']; 
+    }else{
+        
+       $resout = outputRecords($result);
+       
+       $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
+       fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );    
+       fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
+       foreach ($resout as $recID) {
+           
+                $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
+                if(file_exists($resfile)){
+                    fwrite( $huni_resources, "<record>\n");
+                    fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
+                    fwrite( $huni_resources, "<hash>".md5($resfile)."</hash>\n");
+                    fwrite( $huni_resources, "</record>\n");
+                }
+       }
+       fwrite( $huni_resources, "</resources>");
+       fclose( $huni_resources );
+       
+       print "Done. Check ".HEURIST_HML_PUBPATH; 
+    }
+    
+}else{
+
+    openTag('hml', $hmlAttrs);
+    /*
+    openTag('hml', array(
+	    'xmlns' => 'http://heuristscholar.org/heurist/hml',
+	    'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+	    'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
+    );
+    */
+    /*****DEBUG****/
+    //error_log("selids".print_r($_REQUEST['selids'],true));
+    makeTag('database', array('id' => HEURIST_DBID), HEURIST_DBNAME);
+    makeTag('query', $query_attrs);
+    if (count($selectedIDs) > 0) {
+        makeTag('selectedIDs', null, join(",", $selectedIDs));
+    }
+    makeTag('dateStamp', null, date('c'));
+    if (array_key_exists('error', $result)) {
+        makeTag('error', null, $result['error']);
+    } else {
+        makeTag('resultCount', null, $result['resultCount'] ? $result['resultCount'] : " 0 ");
+        makeTag('recordCount', null, $result['recordCount'] ? $result['recordCount'] : " 0 ");
+        if ($result['recordCount'] > 0) outputRecords($result);
+    }
+    closeTag('hml');
 }
-makeTag('dateStamp', null, date('c'));
-if (array_key_exists('error', $result)) {
-    makeTag('error', null, $result['error']);
-} else {
-    makeTag('resultCount', null, $result['resultCount'] ? $result['resultCount'] : " 0 ");
-    makeTag('recordCount', null, $result['recordCount'] ? $result['recordCount'] : " 0 ");
-    if ($result['recordCount'] > 0) outputRecords($result);
-}
-closeTag('hml');
 ?>
 

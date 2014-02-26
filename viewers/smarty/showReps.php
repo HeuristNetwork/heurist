@@ -638,13 +638,14 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 						$res_code = _add_term_val($res_code, $term[ $fi['trm_Code'] ]);
 						$res_label = _add_term_val($res_label, $term[ $fi['trm_Label'] ]);
                     
-                        array_push($res, array("id"=>$res_id, "code"=>$res_code, "label"=>$res_label, "conceptid"=>$res_cid));
+                        array_push($res, array("id"=>$value, "code"=>$term[ $fi['trm_Code'] ], "label"=>$term[ $fi['trm_Label'] ], "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
 					}
 				}
+                $res_united = array("id"=>$res_id, "code"=>$res_code, "label"=>$res_label, "conceptid"=>$res_cid);
 
                 if(count($res)>0){
                         if($issingle){
-                            $res = array( $dtname =>$res[0] );    
+                            $res = array( $dtname =>$res_united );    
                         }else{
                             $res = array( $dtname =>$res[0], $dtname."s" =>$res );    
                         }

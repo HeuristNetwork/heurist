@@ -121,10 +121,16 @@ function update_counts2(processed, total) {
 
 <?php
 
+    $step_uiupdate = 10;
+    if(count($recs)>1000){
+        $step_uiupdate = ceil( count($recs) / 100 );
+    }
+
+
 $blanks = array();
 $reparables = array();
 foreach ($recs as $rec_id => $rec) {
-	if ($rec_id % 10 == 0) {
+	if ($rec_id % $step_uiupdate == 0) {
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();
 		flush();
@@ -157,7 +163,7 @@ foreach ($recs as $rec_id => $rec) {
 
 	print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
-	if ($rec_id % 10 == 0) {
+	if ($rec_id % $step_uiupdate == 0) {
 		ob_flush();
 		flush();
 	}
@@ -171,6 +177,11 @@ $titleDT = (defined('DT_NAME')?DT_NAME:0);
 
 if (count($updates) > 0) {
 
+    $step_uiupdate = 10;
+    if(count($updates)>1000){
+        $step_uiupdate = ceil( count($updates) / 100 );
+    }
+    
 	print '<p>Updating records</p>';
 	print '<div><span id=updated_count>0</span> of '.count($updates).' records updated (<span id=percent2>0</span>%)</div>';
 
@@ -178,7 +189,7 @@ if (count($updates) > 0) {
 	foreach ($updates as $rec_id => $new_title) {
 		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
 		++$i;
-		if ($rec_id % 10 == 0) {
+		if ($rec_id % $step_uiupdate == 0) {
 			print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
 			ob_flush();
 			flush();

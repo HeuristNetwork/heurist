@@ -1863,6 +1863,19 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
 
+    validateName: function(name, lbl){
+      
+            var swarn = "";
+            var regex = /[\[\].\$]+/;
+            var name = name.toLowerCase();
+            if( name=="id" || name=="modified" || name=="rectitle"){
+                   swarn = lbl+", you defined, is reserved word. Try different";
+            }else if (regex.test(name) ) {
+                   swarn = lbl+" contains not allowed characters. Try different";
+            }
+            return swarn;
+    },
+    
     //validate numeric
     validate: function(evt) {
         var theEvent = evt || window.event;

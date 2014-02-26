@@ -19,7 +19,7 @@ $.widget( "heurist.about", {
     this.div_logo = $( "<div>")
             .addClass('logo')
             .css('width','150px')
-            .css('display','inline-block')
+            .css('float','left')
             .appendTo( this.element )
             .button();
 
@@ -28,10 +28,11 @@ $.widget( "heurist.about", {
       click: function(){$( "#heurist-about" ).dialog("open");}
     });
 
-    this.div_dbname = $( "<div>")
-            .css({'font-size':'2em', 'font-style':'italic', 'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'})
-            .html(top.HAPI.database)
-            .appendTo( this.element );
+    //'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'
+    this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'text-align':'center' }).appendTo(this.element);
+    
+    $("<div>").css({'font-size':'1.6em', 'font-style':'italic'}).text(top.HAPI.database).appendTo( this.div_dbname );
+    $("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI.sysinfo.version).appendTo( this.div_dbname );
     
     this._refresh();
 

@@ -48,7 +48,19 @@ if( ! $system->init(@$_REQUEST['db']) ){
             if ( is_array($res) ) {
                 $res['recIDs'] = @$_REQUEST['recIDs'];
             }
+            
+        } else if ($action=="viewer" ) {    
 
+            //find all files for given set of records
+            $res = fileSearch($system, true, @$_REQUEST['recIDs']);
+            if(@$_REQUEST['mode']=="yox"){ 
+                //generate html output for yoxviewer in frame ???? or on client side ????
+                exit();                
+            }else if ( is_array($res) ) {
+                $res['recIDs'] = @$_REQUEST['recIDs'];
+            }
+            
+            
         } else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

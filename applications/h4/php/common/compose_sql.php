@@ -914,6 +914,8 @@ class FieldPredicate extends Predicate {
             $match_pred = " < $match_value";
         } else if ($this->parent->greaterthan) {
             $match_pred = " > $match_value";
+        } else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {   //comma separated numeric values
+           $match_pred = " in (". $this->value.")"; 
         } else {
             $match_pred = " like '%".addslashes($this->value)."%'";
         }
@@ -927,7 +929,7 @@ class FieldPredicate extends Predicate {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = 'rd.dtl_DetailTypeID = ' . intval($this->field_type);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {
+        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {   //comma separated detail types
             /* user has specified a list of numeric types ... match any of them */
             $rd_type_clause = 'rd.dtl_DetailTypeID in (' . $this->field_type . ')';
         }
@@ -935,18 +937,22 @@ class FieldPredicate extends Predicate {
             /* user has specified the field name */
             $rd_type_clause = 'rdt.dty_Name like "' . addslashes($this->field_type) . '%"';
         }
+        
+        //@todo avoid clauses for resource and date detail types if not necessary
 
         return $not . 'exists (select * from recDetails rd '
-                                . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
-                                . 'left join Records link on rd.dtl_Value=link.rec_ID '
+                                .($timestamp || !is_numeric($this->value)? 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID ': '')
+                                .(!is_numeric($this->value)?'':'left join Records link on rd.dtl_Value=link.rec_ID ')
                                     . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-                                    . '  and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
+                                    . (!is_numeric($this->value)?'  and if(rdt.dty_Type = "resource", '      // AND '.(is_numeric($this->value)?'0':'1').'
                                               .'link.rec_Title ' . $match_pred . ', '
-                               . ($timestamp ? 'if(rdt.dty_Type = "date", '
+                                                               :' and ')
+                                    . ($timestamp ? 'if(rdt.dty_Type = "date", '
                                                  .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
                                                  .'rd.dtl_Value ' . $match_pred . ')'
-                                             : 'rd.dtl_Value ' . $match_pred ) . ')'
-                                      .' and ' . $rd_type_clause . ')';
+                                             : 'rd.dtl_Value ' . $match_pred ) 
+                                    . (!is_numeric($this->value)?')':'')
+                                    . ' and ' . $rd_type_clause . ')';
     }
 }
 

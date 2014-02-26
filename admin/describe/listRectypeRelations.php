@@ -51,6 +51,7 @@
     $idx_dt_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
     $idx_dt_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dt_req = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
+    $idx_dt_max = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_MaxValues'];
 
     $resrt = array();
 
@@ -67,7 +68,7 @@
 
 
             if (($showRelationships) && ($dt_type=="resource")) {  // pointer field
-                $constraints = $dt[$idx_dt_pointers];
+                $constraints = $dt[$idx_dt_pointers]; //list of rectypes - constraints for pointer
                 $constraints = explode(",", $constraints);
                 $rels = array();
                 foreach($constraints as $pt_rt_id){
@@ -94,7 +95,7 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'type'=>$dt_type,
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
                     'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
 
             } // pointer 
@@ -142,15 +143,27 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'type'=>$dt_type,
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
                     'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
             } // relmarker
 
-            else if (($showSimpleFields) && (($dt_type=="text") || ($dt_type=="memo") || ($dt_type=="date") || ($dt_type=="geo") || ($dt_type=="terms") || ($dt_type=="file"))) {
+            else if ($showSimpleFields) { //}&& (($dt_type=="freetext") || ($dt_type=="memo") || ($dt_type=="date") || ($dt_type=="geo") || ($dt_type=="terms") || ($dt_type=="file"))) {
 
-                // TO DO: CODE TO OUTPUT SIMPLE FIELDS LISTING
+                // output simple fields listing
+                $query = "select count(recDetails.dtl_ID) from Records r1, recDetails where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and dtl_DetailTypeID=$dt_id";
+                $res = mysql_query($query);
+                $cnt = 0;
+                if ($res) {
+                        while (($row = mysql_fetch_array($res))) {
+                            $cnt = $row[0];
+                        }
+                }
+                if(count($details)==0){
+                    $rt_cnt = get_rt_usage($rt_id);
+                }
                 
-
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>intval($dt[$idx_dt_max]), 'type'=>$dt_type,
+                    'isconstrained'=>1, 'count'=>$cnt, 'rels'=>array()));
             } // simplefields
         }
 
@@ -238,7 +251,14 @@
 
                     $dt_id = $details['dt_id'];
 
-                    print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer]</i> ":" <i>[relationship]</i> ");
+                    print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);
+                    if(@$details[req]){
+                        print ", ".substr($details[req],0,3)." ";
+                    }
+                    $mv = intval(@$details['max']);
+                    print ", ".($mv==1?"sng":($mv>1?"lim":"rpt"))." ";
+
+                    print "]</i> ";
 
                     $uncontrained = ($details['isconstrained']<1);
 
@@ -253,9 +273,7 @@
                             print '<div class="lvl1  cerror"> Encountered pointer to incorrect record type id =  '.$pt_rt_id." (please run Utilities > Check Invalid Pointers to fix)</div>";
                         }else{
                             print '&nbsp; || &nbsp;'; // separator between record types poitned to by pointer field
-                            // TODO: what is function of first part of thist print statement
-                            print (($uncontrained || $data[0]=="y")?"":" cerror").'<b>'.$rtStructs['names'][$pt_rt_id]."</b> (id ".$pt_rt_id.", n=".$data[1].") ";
-
+                            print '<b>'.$rtStructs['names'][$pt_rt_id]."</b> (id ".$pt_rt_id.", n=".$data[1].") ";
 
                             if(@$data[2]){ //terms
                                 $notfirst = false;

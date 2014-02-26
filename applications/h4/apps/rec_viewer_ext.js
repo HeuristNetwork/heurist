@@ -36,7 +36,7 @@ $.widget( "heurist.rec_viewer_ext", {
                     var _rec = data.getFirstRecord();
                     _recID = _rec[2];
                 }
-            }else if( top.HEURIST.util.isArray(data) ) {
+            }else if( $.isArray(data) ) {
                 _recID = data[0];
             }else {
                 _recID = data;

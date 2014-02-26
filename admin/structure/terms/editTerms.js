@@ -383,7 +383,7 @@ function EditTerms() {
                         Dom.get('cbInverseTermItself').checked = '';
                         Dom.get('cbInverseTermOther').checked = 'checked';
 				}
-
+    
 				if(isExistingNode(node)){
 						Dom.get('div_btnAddChild').style.display = "inline-block";
 						Dom.get('btnDelete').value = "Delete Term";
@@ -535,10 +535,14 @@ function EditTerms() {
 		var sDesc = Dom.get('edDescription').value;
 		var sCode = Dom.get('edCode').value;
 		var sStatus = Dom.get('trm_Status').value;
-		var iInverseId = Number(Dom.get('edInverseTermId').value);
-		iInverseId = (iInverseId>0) ?iInverseId:null;
+		
+        var iInverseId = Number(Dom.get('edInverseTermId').value);
+		iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
+        var iInverseId_prev = Number(_currentNode.data.inverseid);
+        iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
+        
 		var iParentId = Number(Dom.get('edParentId').value);
-		iParentId = (iParentId>0)?iParentId:null;
+		iParentId = (Number(iParentId)>0)?iParentId:null;
 		var iParentId_prev = Number(_currentNode.data.parent_id);
 		iParentId_prev = (iParentId_prev>0)?iParentId_prev:null;
 
@@ -547,18 +551,29 @@ function EditTerms() {
 			(_currentNode.data.termcode !== sCode) ||
 			(_currentNode.data.status !== sStatus) ||
 			(iParentId_prev !== iParentId) ||
-			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
-				Number(_currentNode.data.inverseid) !== iInverseId));
+            (iInverseId_prev !== iInverseId));
+            
+			//( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
+			//	Number(_currentNode.data.inverseid) !== iInverseId));
 
 		if(wasChanged || !isExistingNode(_currentNode) ){
 
+            var swarn = "";
 			if(Hul.isempty(sName)){
-				if(needConfirm){
-					alert("Field 'Display Name' is mandatory");
-					Dom.get('edName').setFocus();
-				}
-				return;
-			}
+                swarn = "Field 'Display Name' is mandatory"
+			}else {
+                swarn = Hul.validateName(sName, "Field 'Display Name'");
+            }
+            if(swarn!=""){
+                alert(swarn);
+                Dom.get('edName').setFocus();
+                return;
+            }
+            if(_currTreeView === _termTree2 && Dom.get('cbInverseTermOther').checked && iInverseId==null){
+                alert("Find inverse term");
+                Dom.get('edInverseTermId').setFocus();
+                return;
+            }
 
 			if(needConfirm){
 				var r=confirm("Term was modified. Save it?");
@@ -578,7 +593,7 @@ function EditTerms() {
 				_currentNode.data.termcode = sCode;
 				_currentNode.data.status = sStatus;
 
-				_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
+				_currentNode.data.inverseid = iInverseId;
 				_currentNode.title = _currentNode.data.description;
 
 				var needReload = (_currentNode.data.parent_id != iParentId);

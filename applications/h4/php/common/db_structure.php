@@ -401,9 +401,9 @@ function __getTermColNames() {
     "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
 }
 
+//
 //-----------------------------------------------------------------------------------------------
-
-// NOT USED YET
+// DETAILS
 
 
 /**
@@ -473,8 +473,8 @@ function getRecTypeUsageCount($mysqli) {
  *         1 - only structure
  *         2 - full, both headers and structures
  */
-function getDetailTypes($system, $dettypeids=null, $imode)
-{
+function dbs_GetDetailTypes($system, $dettypeids=null, $imode){
+    
     $mysqli = $system->get_mysqli();
     $dbID = $system->get_system('sys_dbRegisteredID');
 
@@ -501,7 +501,7 @@ function getDetailTypes($system, $dettypeids=null, $imode)
                                     'fieldNamesToIndex' => __getColumnNameToIndex(getDetailTypeColNames()));
         $dtStructs['lookups'] = getDtLookups();
     }
-    if($imode==2){
+    if(false && $imode==2){
         $dtStructs['rectypeUsage'] = getDetailTypeDefUsage($mysqli);
         $dtStructs['usageCount']   = getDetailTypeUsageCount($mysqli);
     }
@@ -538,7 +538,7 @@ function getDetailType($system, &$detailtypes, $dtyID)
 {
     if (!@$detailtypes[$dtyID] ) {
         //load
-        $res = getDetailTypes($system, $dtyID, 1);
+        $res = dbs_GetDetailTypes($system, $dtyID, 1);
         if(!@$detailtypes['fieldNamesToIndex']){
              $detailtypes['fieldNamesToIndex'] = $res['typedefs']['fieldNamesToIndex'];
         }
@@ -614,5 +614,4 @@ function getDtLookups() {
                  //"urlinclude" => "File/URL of include content",
                  "boolean" => "Boolean (T/F)");
 }
-
 ?>

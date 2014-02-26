@@ -10,7 +10,7 @@ $.widget( "heurist.editing_input", {
     dtID: null,
     rectypes: null,
     values: null,
-    readonly: false
+    readonly: false,
   },
 
   // the constructor
@@ -135,7 +135,7 @@ $.widget( "heurist.editing_input", {
   * @param fieldname
   */
   f: function(fieldname){
-
+      //get field defintion
       var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
       var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
 

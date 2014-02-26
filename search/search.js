@@ -1264,7 +1264,7 @@ top.HEURIST.search = {
 		"</span>"+
 		"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		"</div>" +
-		"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		"<div class='recordTitle' title='"+linkText.htmlEscape()+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText.htmlEscape() + "</a>" : linkText.htmlEscape() ) + "</div>" +
 		"<div id='recordID'>"+
 		newSearchWindow +
 		editLinkIcon +
@@ -4291,7 +4291,7 @@ top.HEURIST.search = {
 		return [maxLevel,ret];
 	},
 
-	exportHML: function(isAll,includeRelated){
+	exportHML: function(isAll, includeRelated, ishuni){
 		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
 
@@ -4345,7 +4345,8 @@ top.HEURIST.search = {
 						(rtFilter ? "&" + rtFilter : "") +
 						(relFilter ? "&" + relFilter : "") +
 						(ptrFilter ? "&" + ptrFilter : "") +
-						"&db=" + database;
+						"&db=" + database + 
+                        (ishuni?'&file=1':'');
 
 		window.open(sURL, '_blank');
 		return false;

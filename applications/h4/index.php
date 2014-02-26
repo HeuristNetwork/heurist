@@ -37,7 +37,9 @@ if(@$_REQUEST['db']){
 <head>
   <title><?=HEURIST_TITLE ?></title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
+    
+    <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
+  
     <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
     <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
@@ -54,6 +56,7 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
     <script type="text/javascript" src="apps/search.js"></script>
     <script type="text/javascript" src="apps/rec_list.js"></script>
+    <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
     <!-- script type="text/javascript" src="apps/search.js"></script>
     <script type="text/javascript" src="apps/search_links.js"></script>
     <script type="text/javascript" src="apps/profile_edit.js"></script>
@@ -71,6 +74,7 @@ if(@$_REQUEST['db']){
 
     <!-- move to profile.js dynamic load -->
     <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
+    <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
 
   <!-- to do -->
     <script type="text/javascript" src="layout_default.js"></script>
@@ -120,14 +124,19 @@ if(@$_REQUEST['db']){
                 }
                 //add theme link to html header
                 $("head").append(cssLink);
-                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
+                $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">')); //">')); //
 
 
                 //load database structure (record types, field types, terms) definitions
-                window.HAPI.SystemMgr.get_defs({rectypes:'all', mode:2}, function(response){
+                window.HAPI.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == top.HAPI.ResponseStatus.OK){
                         top.HEURIST.rectypes = response.data.rectypes;
+                        top.HEURIST.terms = response.data.terms;
+                        top.HEURIST.detailtypes = response.data.detailtypes;
 
+                        //in layout.js
+                        appInitAll("l01", "#layout_panes");
+/*                        
                         //get all terms and rectypes   terms:0,
                         window.HAPI.SystemMgr.get_defs({terms:'all'}, function(response){
                             if(response.status == top.HAPI.ResponseStatus.OK){
@@ -140,11 +149,19 @@ if(@$_REQUEST['db']){
                                 top.HEURIST.util.redirectToError(response.message);
                             }
                         });
-
+*/
                     }else{
                         top.HEURIST.util.redirectToError(response.message);
                     }
                 });
+                /*window.HAPI.SystemMgr.get_defs({detailtypes:'all', mode:2}, function(response){
+                    if(response.status == top.HAPI.ResponseStatus.OK){
+                        top.HEURIST.detailtypes = response.data.detailtypes;
+                    }else{
+                        
+                    }
+                });*/
+                
             }else{
                 //top.HEURIST.util.redirectToError
                 alert("Can not initialize system");

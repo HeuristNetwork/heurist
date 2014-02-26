@@ -1607,7 +1607,8 @@
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
 				}else if ($rows==0 || is_string($rows) ) {
-					$ret = "SQL error updating field type $dtyID in updateDetailType: ".$query."  ".$parameters[1]."  ".$parameters[2]; //$db->error;
+//error_log($query);error_log($rows);
+					$ret = "AAA SQL error updating field type $dtyID in updateDetailType: ".htmlspecialchars($query)."  ".$parameters[1]."  ".@$parameters[2];//.$db->error;
 				} else {
 					$ret = $dtyID;
 				}
@@ -1653,6 +1654,7 @@
             $ch_parent_id = null;
             $ch_code = null;
             $ch_label = null;
+            $inverse_termid = null;
 
 
 			foreach ($colNames as $colName) {
@@ -1678,6 +1680,8 @@
                         $ch_code = $val;
                     }else if($colName=="trm_Label"){
                         $ch_label = $val;
+                    }else if($colName=="trm_InverseTermId"){
+                        $inverse_termid = $val;
                     }
 
 					$parameters[0] = $parameters[0].$trmColumnNames[$colName]; //take datatype from array
@@ -1742,12 +1746,20 @@
 					if($isInsert){
 						$trmID = $ext_db->insert_id;
 					}
+                    
+                    if($inverse_termid!=null){
+                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";    
+                        execSQL($ext_db, $query, null, true);
+                    }
 
 					$ret = $trmID;
 				}
 
 			}
 		} //if column names
+        
+        
+        
 
 		if ($ret==null){
 			$ret = "no data supplied for updating record structure - $trmID";

@@ -49,7 +49,7 @@ mysql_connection_overwrite(DATABASE);
 
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
 
-$res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary order by rand()');
+$res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where !rec_FlagTemporary order by rand()');
 $recs = array();
 while ($row = mysql_fetch_assoc($res)) {
 	$recs[$row['rec_ID']] = $row;
@@ -129,8 +129,14 @@ print '<div><span id=blank_count>0</span> to be left as is (missing fields etc)<
 */
 $blanks = array();
 $reparables = array();
+
+$step_uiupdate = 10;
+if(count($recs)>1000){
+    $step_uiupdate = ceil( count($recs) / 100 );
+}
+
 foreach ($recs as $rec_id => $rec) {
-	if ($rec_id % 10 == 0) {
+	if ($rec_id % $step_uiupdate == 0) {
 /*****DEBUG****///error_log(">>>>".$processed_count.','.$blank_count.','.$repair_count.','.count($updates));
 
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
@@ -164,7 +170,7 @@ foreach ($recs as $rec_id => $rec) {
 
 	print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'">*</a> <br> <br>';
 
-	if ($rec_id % 10 == 0) {
+	if ($rec_id % $step_uiupdate == 0) {
 		ob_flush();
 		flush();
 	}
@@ -179,11 +185,16 @@ if (count($updates) > 0) {
 	print '<p>Updating records</p>';
 	print '<div><span id=updated_count>0</span> of '.count($updates).' records updated (<span id=percent2>0</span>%)</div>';
 
+    $step_uiupdate = 10;
+    if(count($updates)>1000){
+        $step_uiupdate = ceil( count($updates) / 100 );
+    }
+    
 	$i = 0;
 	foreach ($updates as $rec_id => $new_title) {
 		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
 		++$i;
-		if ($rec_id % 10 == 0) {
+		if ($rec_id % $step_uiupdate == 0) {
 			print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
 			ob_flush();
 			flush();

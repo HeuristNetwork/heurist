@@ -48,12 +48,12 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
     //load definitions (USE CACHE)
     $rtStructs = getAllRectypeStructures(true);
-    $dtStructs = getAllDetailTypeStructures(true);
-    $dtTerms = getTerms(true);
-    $first_record = null;  //to obtain names of record header fields
+    //$dtStructs = getAllDetailTypeStructures(true);
+    //$dtTerms = getTerms(true);
+    //$first_record = null;  //to obtain names of record header fields
 
     $resVars = array();
-    $resVarsByType = array();
+    //$resVarsByType = array();
 
     $mode = @$_REQUEST['mode'];
     
@@ -107,7 +107,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 exit();
 
 //
-//   {rt_id: , rt_name, recID, recTitle ..... 
+//   {rt_id: , rt_name, recID, recTitle, recModified, recURL, ecWootText,
 //                  fNNN:'name', 
 //                  fNNN:array(termfield_name: , id, code:  )
 //                  fNNN:array(rt_name: , recID ...... ) //unconstrained pointer or exact constraint
@@ -126,7 +126,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     
     //add default fields
     $res['recID'] = 'ID';
-    $res['recTitle'] = 'Title';
+    $res['recTitle'] = 'RecTitle';
     $res['recURL'] = 'URL';
     $res['recModified'] = 'Modified';
     $res['recWootText'] = 'WootText';
@@ -182,19 +182,16 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
 */
 function getDetailSection($dtKey, $dtValue, $recursion_depth){
 
-    global $dtStructs, $rtStructs, $mode;
+    global $rtStructs, $mode;
     
     $res = null;
 
-    if(@$dtStructs['typedefs'][$dtKey]){
-        
-            $dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
+    if(true){//}@$dtStructs['typedefs'][$dtKey]){
                 
             $rtNames = $rtStructs['names']; //???need
             $rst_fi = $rtStructs['typedefs']['dtFieldNamesToIndex'];
         
-            $dtDef = $dtStructs['typedefs'][$dtKey]['commonFields'];
-            $detailType = $dtDef[$dty_fi['dty_Type']];    
+            $detailType = $dtValue[$rst_fi['dty_Type']];
         
             $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
             $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
@@ -216,6 +213,7 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             case 'relationtype':
             */
             case 'separator':
+            case 'relmarker':
                     return null;
             case 'enum':    //@todo!!!!
 
@@ -229,7 +227,6 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             break;
 
             case 'resource': // link to another record type
-            case 'relmarker':
 
                 //load this record
                 if($recursion_depth<2){ // && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {

@@ -134,8 +134,12 @@ function recordSearch($system, $params, $need_structure, $need_details)
                             dtl_DetailTypeID,
                             dtl_Value,
                             astext(dtl_Geo),
-                            dtl_UploadedFileID
-                            from recDetails where dtl_RecID in (" . join(",", array_keys($records)) . ")");
+                            dtl_UploadedFileID,
+                            recUploadedFiles.ulf_ObfuscatedFileID,
+                            recUploadedFiles.ulf_Parameters
+                            from recDetails 
+                    left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
+                            where dtl_RecID in (" . join(",", array_keys($records)) . ")");
                if (!$res){
                     $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
                }else{
@@ -152,8 +156,8 @@ function recordSearch($system, $params, $need_structure, $need_details)
                            if($row[2]){
                                $val = $row[1]." ".$row[2]; //for geo
                            }else if($row[3]){
-                               $val = $row[3];
-                           }else{
+                               $val = array($row[4], $row[5]); //obfuscted value for fileid
+                           }else { 
                                $val = $row[1];
                            }
                            array_push($records[$recID]["d"][$dtyID], $val);

@@ -46,6 +46,8 @@ define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid
 define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
+define('_ERROR_MSG', "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type");
+
 /**
 * Check that the given title mask is well-formed for the given reference type
 * Returns an error string describing any faults in the mask.
@@ -93,7 +95,7 @@ function titlemask_value($mask, $rec_id) {
         $rt = $rec_value['rec_RecTypeID'];
         return titlemask_make($mask, $rt, 0, $rec_id, _ERR_REP_WARN);
    }else{
-        return "";
+        return "Titlemask not generated. Record ".$rec_id." not found";
    }
 }
 
@@ -131,20 +133,21 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         if(is_array($value)){
             //ERROR
             if($rep_mode==_ERR_REP_WARN){
-                return "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type";
+                return _ERROR_MSG;
             }else if($rep_mode==_ERR_REP_MSG){
                 return $value;
             }else{
                 return "";
             }
-        }else if ($value)
-            if($mode==0){
+        }else if ($value){
+            if($mode==0){ //value
                 $replacements[$matches[2][$i]] = $value;
-            }else{
+            }else{ //coded
                 $replacements[$matches[2][$i]] = "[$value]";
             }
-        else
+        }else{
             $replacements[$matches[1][$i]] = "";
+        }
     }
 
     if($mode==0){
@@ -157,16 +160,17 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
     if($mode==0){
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
-        
-            $puncts = '+=|&-:;,.@#'; // These are stripped from end of title if no field data follows them
-            $puncts2 = '+=|&-:;,@#';
+
+            $puncts = '-:;,.@#|+=&'; // These are stripped from end of title if no field data follows them
+            $puncts2 = '-:;,@#|+=&';
+            
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts.'/\\s]*\\)!s', '(\\1)', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
         
-/*          TODO: Old version, removed 4th Jan 2014, to delete
+/*          TODO: Old version, removed 4th Jan 2014, to delete  
             $title = preg_replace('!^[-:;,./\\s]*(.*?)[-:;,/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\([-:;,./\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\([-:;,./\\s]*(.*?)[-:;,./\\s]*\\)!s', '(\\1)', $title);
@@ -177,7 +181,16 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             $title = preg_replace('!\\s+,!s', ',', $title);
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
+        
+        if($title==""){
+            if($rep_mode==_ERR_REP_MSG){
+                return array(_ERROR_MSG);
+            }else{
+                return _ERROR_MSG;
+            }
+        }
     }
+    
     return $title;
 }
 
@@ -271,12 +284,14 @@ function _titlemask__get_rec_detail_types($rt) {
 * @param mixed $rec_id
 */
 function _titlemask__get_record_value($rec_id) {
-
+/* it leads to memory exhaustion
     static $records;
 
     if (! $records) {
         $records = array();
     }
+*/    
+    $records = array();
 
    if(!@$records[$rec_id]){
 
@@ -284,17 +299,19 @@ function _titlemask__get_record_value($rec_id) {
 
        $query = 'SELECT rec_ID, rec_Title, rec_Modified, rec_RecTypeID FROM Records where rec_ID='.$rec_id;
        $res = mysql_query($query);
-       $row = mysql_fetch_assoc($res);
-       if($row){
+       if($res){
+           $row = mysql_fetch_assoc($res);
+           if($row){
 
-            $ret = $row;
-            $ret['rec_Details'] = array();
+                $ret = $row;
+                $ret['rec_Details'] = array();
 
-            $query = 'SELECT dtl_DetailTypeID, dtl_Value FROM recDetails where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_array($res)) {
-                array_push($ret['rec_Details'], $row);
-            }
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value FROM recDetails where dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
+                $res = mysql_query($query);
+                while ($row = mysql_fetch_array($res)) {
+                    array_push($ret['rec_Details'], $row);
+                }
+           }
        }
 
        $records[$rec_id] = $ret;
@@ -345,7 +362,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
             return "";
         }else if (strcasecmp($rdt_id,'id')==0){
             return $rec_values['rec_ID'];
-        }else if (strcasecmp($rdt_id,'rectitle')==0 || strcasecmp($rdt_id,'title')==0) {
+        }else if (strcasecmp($rdt_id,'rectitle')==0) {
             return $rec_values['rec_Title'];
         }else if (strcasecmp($rdt_id,'modified')==0) {
             return $rec_values['rec_Modified'];
@@ -355,6 +372,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
         $dt_type = _titlemask__get_dt_field($rt, $rdt_id, 'dty_Type');
 
         $details = $rec_values['rec_Details'];
+
         $res = array();
         $found = false;
         foreach($details as $detail){
@@ -389,7 +407,6 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
 
         if (strcasecmp($rdt_id,'id')==0 ||
             strcasecmp($rdt_id,'rectitle')==0 ||
-            strcasecmp($rdt_id,'title')==0 ||
             strcasecmp($rdt_id,'modified')==0){
                 return $rdt_id;
         }else if($mode==1){
@@ -447,10 +464,10 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (strcasecmp($field_name,'id')==0 ||
         strcasecmp($field_name,'rectitle')==0 ||
-        strcasecmp($field_name,'title')==0 ||
         strcasecmp($field_name,'modified')==0)
     {
-        return _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
+        $field_val = _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
+        return $field_val;
     }
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
@@ -495,9 +512,12 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                     return array("$inner_field_name is an unrecognised qualifier for a terms list field");
                 }
             }
+            if($dt_type== 'relmarker') { //@todo - to implement it in nearest future
+                return array("$parent_field_name is relmarker field type. Not supported at the moment");
+            }
             if($dt_type!== 'resource') {
                 //ERROR
-                return array("$field_name must be a record pointer field");
+                return array("$parent_field_name must be either enum or resource(record pointer) field type");
             }
 
         }else{
@@ -529,7 +549,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 }
                 //_titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id) );
             }
-            return implode(",", $res);
+            return implode(", ", $res);
 
         }else{ //convert  coded<->human
 

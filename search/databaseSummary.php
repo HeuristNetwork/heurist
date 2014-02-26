@@ -109,9 +109,9 @@
 		$rectypeTitle = $rtStructs['names'][$rt_ID];
 		$rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
 
-		$img = "<img src='../common/images/16x16.gif' title='$rectypeTitle' ".$rectypeImg." class='rft' />";
+		$img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
 
-		echo "<tr class='row' onclick='{onrowclick($rt_ID, false)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>$rectypeTitle</td><td><a href='#' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td><td align='center'>".$row[1]."</td></tr>";
+		echo "<tr class='row' onclick='{onrowclick($rt_ID, false)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>".htmlspecialchars($rectypeTitle)."</td><td><a href='#' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td><td align='center'>".$row[1]."</td></tr>";
 
 	}//end while
 ?>

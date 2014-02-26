@@ -360,7 +360,7 @@ function EditRecStructure() {
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
 
 					'<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell">'+
-                    '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" '+
+                    '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                     '<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
                     'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');" style="margin-left:100px;">'+
@@ -819,6 +819,13 @@ function EditRecStructure() {
 					//	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
 					//}
 					if(values[k] !== edt.value){
+                        
+                        if(fieldnames[k]=="rst_DisplayName"){
+                            if(top.HEURIST.util.validateName(edt.value, "Prompt (display name)")!=""){
+                                continue;
+                            }
+                        }
+                        
 						values[k] = edt.value;
 
 						isChanged = true;
@@ -2065,6 +2072,14 @@ function recreateRecTypesPreview(type, value) {
 		divRecType.innerHTML = txt;
 }
 
+function _onDispNameChange(event){
+    var name = event.target.value;
+    var swarn = top.HEURIST.util.validateName(name, "Prompt (display name)");
+    if(swarn){
+        alert(swarn);
+    }
+}
+
 function _onAddEditFieldType(dty_ID, dtg_ID){
 
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
@@ -2098,7 +2113,7 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					//update
 					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 						recreateTermsPreviewSelector(rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type.dty_JsonTermIDTree],
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_JsonTermIDTree],
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){

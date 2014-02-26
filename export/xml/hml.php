@@ -58,11 +58,12 @@ if (@$argv) {
 	if (@$ARGV['-woot'])$_REQUEST['woot'] = $ARGV['-woot'];
 	if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
 	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
-
 }
+
 
 header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
+
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -75,6 +76,9 @@ mysql_connection_select(DATABASE);
 //----------------------------------------------------------------------------//
 //  Tag construction helpers
 //----------------------------------------------------------------------------//
+function output($str){
+    echo $str;       
+}
 
 function makeTag($name, $attributes=null, $textContent=null, $close=true,$encodeContent=true) {
 	$tag = "<$name";
@@ -96,7 +100,7 @@ function makeTag($name, $attributes=null, $textContent=null, $close=true,$encode
 		}
 		$tag .= "</$name>";
 	}
-	echo $tag . "\n";
+	output($tag . "\n");
 /*****DEBUG****///	error_log("in makeTag tag = $tag");
 }
 
@@ -105,16 +109,16 @@ function openTag($name, $attributes=null) {
 }
 
 function closeTag($name) {
-	echo "</$name>\n";
+	output( "</$name>\n" );
 /*****DEBUG****///	error_log("in closeTag name = $name");
 }
 
 function openCDATA() {
-	echo "<![CDATA[\n";
+	output( "<![CDATA[\n" );
 }
 
 function closeCDATA() {
-	echo "]]>\n";
+	output( "]]>\n" );
 }
 
 
@@ -446,12 +450,13 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 				if ($outputStub){
 					outputRecordStub($record);
 				}else{
-					echo $record['rec_ID'];
+					output( $record['rec_ID'] );
 				}
 			}
 			return;
 		}
 	}
+    
 	openTag('record');
 	makeTag('id', null, $record['rec_ID']);
 	makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID'=>getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
@@ -490,7 +495,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 //			openCDATA();
 			foreach ($result['woot']['chunks'] as $chunk) {
 				$text = preg_replace("/&nbsp;/g"," ",$chunk['text']);
-				echo replaceIllegalChars($text) . "\n";
+				output( replaceIllegalChars($text) . "\n" );
 			}
 //			closeCDATA();
 			closeTag('woot');
@@ -606,7 +611,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 						if ($outputStub) {
 							outputRecordStub(loadRecordStub($value['id']));
 						}else{
-							echo $value['id'];
+							output( $value['id'] );
 						}
 						closeTag('detail');
 						return;
@@ -748,15 +753,15 @@ function outputTemporalDetail($attrs, $value) {
 				openTag('property',array('type'=>$tag, 'name'=>$fieldsDict[$tag]));
 				switch ($tag) {
 					case "DET":
-						echo $determinationCodes[$val];
+						output( $determinationCodes[$val] );
 						break;
 					case "PRF":
 					case "SPF":
 					case "EPF":
-						echo $profileCodes[$val];
+						output( $profileCodes[$val] );
 						break;
 					default:
-						echo $val;
+						output( $val );
 				}
 				closeTag('property');
 			}else if (array_key_exists($tag,$tDateDict)) {
@@ -912,43 +917,43 @@ ob_implicit_flush(1);
 //----------------------------------------------------------------------------//
 
 $result = loadSearch($_REQUEST);
-
-openTag('hml');
-/*
-openTag('hml', array(
-	'xmlns' => 'http://heuristscholar.org/heurist/hml',
-	'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
-);
-*/
 $query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'filters'=>1));
 if ($pub_id) {
-	$query_attrs['pubID'] = $pub_id;
-}
-makeTag('query', $query_attrs);
-
-makeTag('dateStamp', null, date('c'));
-
-if (array_key_exists('error', $result)) {
-	makeTag('error', null, $result['error']);
-} else {
-/*	openTag('vocabularies'); //	saw TODO change to output Ontologies
-	foreach($VOC as $vocabulary){
-		$attrs = array('id' => $vocabulary['vcb_ID']);
-		if ($vocabulary['vcb_RefURL']) {
-			$attrs['namespace'] = $vocabulary['vcb_RefURL'];
-		}
-		makeTag('vocabulary', $attrs, $vocabulary['vcb_Name']);
-	}
-	closeTag('vocabularies');
-*/	makeTag('resultCount', null, $result['resultCount']);
-	makeTag('recordCount', null, $result['recordCount']);
-	openTag('records');
-	outputRecords($result);
-	closeTag('records');
+    $query_attrs['pubID'] = $pub_id;
 }
 
-closeTag('hml');
+   
+    openTag('hml');
+    /*
+    openTag('hml', array(
+	    'xmlns' => 'http://heuristscholar.org/heurist/hml',
+	    'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+	    'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
+    );
+    */
+    makeTag('query', $query_attrs);
+
+    makeTag('dateStamp', null, date('c'));
+
+    if (array_key_exists('error', $result)) {
+	    makeTag('error', null, $result['error']);
+    } else {
+    /*	openTag('vocabularies'); //	saw TODO change to output Ontologies
+	    foreach($VOC as $vocabulary){
+		    $attrs = array('id' => $vocabulary['vcb_ID']);
+		    if ($vocabulary['vcb_RefURL']) {
+			    $attrs['namespace'] = $vocabulary['vcb_RefURL'];
+		    }
+		    makeTag('vocabulary', $attrs, $vocabulary['vcb_Name']);
+	    }
+	    closeTag('vocabularies');
+    */	makeTag('resultCount', null, $result['resultCount']);
+	    makeTag('recordCount', null, $result['recordCount']);
+	    openTag('records');
+	    outputRecords($result);
+	    closeTag('records');
+    }
+    closeTag('hml');
 
 ?>
 
