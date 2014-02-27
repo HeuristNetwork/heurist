@@ -305,27 +305,42 @@ function ShowReps() {
 
 					//ApplyLineBreaks
 					var text = [
-            '{* This is a very simple Smarty report template which you can edit into something more sophisticated.',
-            '   Enter html for web pages or other text format. Use tree on right to insert fields.',
-            '   Use this format to include comments in your file, use <!-- --> for output of html comments.',
-            '   Smarty help describes many functions you can apply, loop counting/summing, custom fucntions et.*}',
-            '',
-            '<h2>Title for report</h2> {* Text here appears at start of report *}',
-            '',
-            '<hr>',
-            '{foreach $results as $r} {* Records loop, do not remove *}',
-            '',
-            '   {$r.recID} {* the unique record ID *}',
-            '   {$r.recTitle} {* the constructed record title *}',
-            '   {* add further sub-loops and fields here *}',
-            '',
-            '   <br/> {* one record per line *}',
-            '',
-            '{/foreach} {* end records loop, do not remove *}',
-            '<hr/>',
-            '',
-            '<h2>End of report</h2> {* Text here appears at end of report *}'];                    
                     
+                    
+                '{* This is a very simple Smarty report template which you can edit into something more sophisticated.',
+                '   Enter html for web pages or other text format. Use tree on right to insert fields.',
+                '   Use this format to include comments in your file, use <!-- --> for output of html comments.',
+                '   Smarty help describes many functions you can apply, loop counting/summing, custom fucntions et.*}',
+                '',
+                '<h2>Title for report</h2> {* Text here appears at start of report *}',
+                '<hr>',
+                '',
+                '{*------------------------------------------------------------*}',
+                '{foreach $results as $r} {* Start records loop, do not remove *}',
+                '{*------------------------------------------------------------*}',
+                '',
+                '',
+                '',   
+                '',   
+                '  {* put the data you want output for each record here - insert the *}',
+                '  {* fields using the tree of record types and fields on the right *}',
+                '',
+                '  {* Examples: *}',
+                '     {$r.recID}  {* the unique record ID *}',
+                '     {$r.f1}     {* the name / title field - may or may not be present *}  ',
+                '',
+                '',
+                '',
+                '<br/> {* line break between each record *}',
+                '',
+                '{*------------------------------------------------------------*}',
+                '{/foreach} {* end records loop, do not remove *}',
+                '{*------------------------------------------------------------*}',
+                '',
+                '<hr/>',
+                '<h2>End of report</h2> {* Text here appears at end of report *}'];
+        
+                        
 					var k;
 					var res = "";
                     for (k=0;k<text.length;k++){
