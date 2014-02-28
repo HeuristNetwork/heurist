@@ -191,11 +191,11 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
 
         //$dbname_faims = HEURIST_UPLOAD_DIR."faims/db2.sqlite3";
         //$dbname_faims = HEURIST_UPLOAD_DIR."faims/tracklog/db.sqlite3";
-        // /var/www/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/tracklog/db.sqlite3
-        // /var/www/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/syncdemo/db.sqlite3
+        // /var/www/HEURIST/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/tracklog/db.sqlite3
+        // /var/www/HEURIST/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/syncdemo/db.sqlite3
         if(!$dbname_faims){
             $dbname_faims = "/var/www/faims-server/";
-            //$dbname_faims = "/var/www/HEURIST_FILESTORE/artem_test/faims2/db.sqlite3";
+            //$dbname_faims = "/var/www/HEURIST/HEURIST_FILESTORE/artem_test/faims2/db.sqlite3";
         }
 
         print "<form name='selectdb' action='syncFAIMS.php' method='post' enctype='multipart/form-data'>";

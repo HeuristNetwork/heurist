@@ -88,7 +88,7 @@ if (!$serverName) {
 	$serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
 }
 define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
-define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/htdocs
+define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/html
 $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
@@ -153,7 +153,7 @@ if (@$httpProxy != '') {
         define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
     }
 }
-// upload path eg. /var/www/htdocs/HEURIST_FILESTORE
+// upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE
 if ($defaultRootFileUploadPath) {
 	if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
 		$defaultRootFileUploadPath.= "/"; // append trailing /

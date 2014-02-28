@@ -34,7 +34,7 @@
 //define('_PREF', 'c:/xampp/');
 define('_PREF', '/var/www/');
 
-//define('SMARTY_DIR', _PREF.'htdocs/smarty/Smarty-3.0.7/libs/');
+//define('SMARTY_DIR', _PREF.'html/smarty/Smarty-3.0.7/libs/');
 
 define('SMARTY_DIR', dirname(__FILE__).'/../../external/Smarty-3.0.7/libs/');
 

@@ -34,7 +34,7 @@
 
 -- This file contains the stored procedures and triggers for h3 databases
 
--- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/htdocs/h3-xx WITH:
+-- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h3-xx WITH:
 --   mysql -u root -ppassword hdb_databasename < admin/setup/dbcreate/addProceduresTriggers.sql
 -- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
 

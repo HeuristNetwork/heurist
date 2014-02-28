@@ -972,7 +972,7 @@ CREATE TABLE `sysIdentification` (
 
 LOCK TABLES `sysIdentification` WRITE;
 /*!40000 ALTER TABLE `sysIdentification` DISABLE KEYS */;
-INSERT INTO `sysIdentification` VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'Please enter a DB name ...',NULL,'Please define ownership and rights here ...',NULL,NULL,'0',0,0,NULL,'/var/www/htdocs/HEURIST_FILESTORE/dos_0/hml-output','/var/www/htdocs/HEURIST_FILESTORE/dos_0/html-output',0,'viewable',0,'locktypetotype',0,NULL,'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff');
+INSERT INTO `sysIdentification` VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'Please enter a DB name ...',NULL,'Please define ownership and rights here ...',NULL,NULL,'0',0,0,NULL,'','',0,'viewable',0,'locktypetotype',0,NULL,'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff');
 /*!40000 ALTER TABLE `sysIdentification` ENABLE KEYS */;
 UNLOCK TABLES;
 

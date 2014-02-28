@@ -38,8 +38,10 @@
     }*/
 
     // refer http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-
-    $filename = "/var/www/htdocs/OpenLayersMapCache/${r}_${z}_${x}_${y}.".$ext;
+    
+    //This requires settign to appropraite file path for the server\
+    // TODO: set this using relative paths
+    $filename = "/var/www/html/HEURIST/HEURIST_FILESTORE/OpenLayersMapCache/${r}_${z}_${x}_${y}.".$ext;
 
 	if(!file_exists($filename) || filemtime($filename)<time()-(86400*30))
 	{

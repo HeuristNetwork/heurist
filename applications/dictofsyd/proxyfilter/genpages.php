@@ -6,9 +6,10 @@ ini_set('display_errors', '1');
 require_once('fileUtils.php');
 
 $baseURL = "http://dictionaryofsydney.org/";
-//$localFolderCache = "/var/www/htdocs/maritime/cache/";
-$localFolderCache = "/var/www/htdocs/maritime/anmm/cache/";
-$localFolderOrig = "/var/www/htdocs/maritime/orig/";
+//$localFolderCache = "/var/www/html/maritime/cache/";
+// THIS NEEDS SETTING TO AN APPROPRIATE PATH
+$localFolderCache = "/var/www/html/maritime/anmm/cache/";
+$localFolderOrig = "/var/www/html/maritime/orig/";
 
 //
 // Change these 3 parameters
