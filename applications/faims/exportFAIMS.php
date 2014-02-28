@@ -32,7 +32,12 @@
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
-    $rt_toexport = @$_REQUEST['rt'];
+    $rt_toexport_toplevel = @$_REQUEST['crt'];
+    $rt_toexport = @$_REQUEST['frt'];
+    
+//error_log(print_r($rt_toexport, true));
+//error_log(print_r($rt_toexport_toplevel, true));
+    
     $projname = @$_REQUEST['projname'];
     $step = @$_REQUEST['step'];
     
@@ -83,9 +88,13 @@
     <script src="../../common/php/loadCommonInfo.php"></script>
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
-    <div id="page-inner" style="width:740px; margin:0px 5%; padding: 0.5em;">   
-    
-    
+    <div id="page-inner" style="width:80%; margin:0px 5%; padding: 0.5em;">   
+
+<script>
+$( document ).ready(function() {
+    showSelectedRecTypes();
+});    
+</script>        
 <?php
     
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
@@ -94,8 +103,8 @@
     mysql_connection_select(DATABASE);
     
     if($step=='1'){
-        
-        if(!$rt_toexport){
+
+        if (!(isset($rt_toexport) && is_array($rt_toexport) && count($rt_toexport)>0)){
             print "<div class='err_message'>Select record types for export</div>";
         }
         if($invalid){
@@ -134,7 +143,7 @@ To register click Database > Register in the menu on the left</div>";
         $rt_invalid_masks = array();
         if($rt_toexport){
             //validate title masks
-            $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name"," rty_ID in ($rt_toexport) order by rty_ID");
+            $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name"," rty_ID in (".implode(",",$rt_toexport).") order by rty_ID");
             foreach ($rtIDs as $rtID => $rtName) {
                 $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
                 $mask=$mask[0];
@@ -149,11 +158,13 @@ To register click Database > Register in the menu on the left</div>";
             }
         }
 
+/*        
         print "<div id='buttondiv2' style='display:".(($step=='1')?"none":"block")."'><div class='lbl_form'>Record types to include in export:</div>"; 
         print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
+*/        
         
         // List of record types for export
-        print "<div id='selectedRectypes' style='width:470px;color:black;padding-left:200px;'></div>";
+        print "<div id='selectedRectypes' style='width:100%;color:black;'></div>";
 
         if(count($rt_invalid_masks)>0){
             print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
@@ -165,9 +176,9 @@ To register click Database > Register in the menu on the left</div>";
         print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
 
         print "</form>";
-        if($rt_toexport){
+        /*art 2014-02-24 if($rt_toexport){
             print "<script>showSelectedRecTypes('".$rt_toexport."')</script>";
-        }
+        }*/
 
     if( $rt_toexport && !$invalid ){
         
@@ -191,14 +202,14 @@ To register click Database > Register in the menu on the left</div>";
         $ind_descr =  $dtTerms['fieldNamesToIndex']['trm_Description'];
 
         // $unsupported was original specification, but this will stuff up if new types are added
-        $supported = array ('freetext', 'blocktext', 'integer', 'date', 'year', 'boolean', 'enum', 'float', 'file');
-        //$unsupported = array('relmarker','relationtype','separator','resource','calculated','fieldsetmarker','urlinclude','geo');
+        $supported = array ('freetext', 'blocktext', 'integer', 'date', 'year', 'boolean', 'enum', 'float', 'file', 'resource');
+        //$unsupported = array('relmarker','relationtype','separator','calculated','fieldsetmarker','urlinclude','geo');
         // Note: Geos are supported, but FAIMS uses a different methodology for recording them, that is they are an implicit part of every record 
         $content_a16n = null;
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
         file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
-        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport));
+        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel));
         file_put_contents($folder."/arch16N.properties", arrToProps());
         file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport));
         
@@ -297,7 +308,7 @@ function writeUTF8File($filename, $content) {
 //
 function generateSchema($projname, $rt_toexport){
 
-    global $rtStructs, $dtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    global $rtStructs, $dtStructs, $dtTerms, $ind_descr, $supported;
                                                                         
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?> <dataSchema />');
     $root->addAttribute('name', DATABASE);
@@ -319,9 +330,9 @@ function generateSchema($projname, $rt_toexport){
     
     $int_rt_dt_descrip   = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayHelpText'];
     $int_dt_ccode        = $dtStructs['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
-    
+    $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];    
 
-    $rectyps = explode(",", $rt_toexport);
+    $rectyps = is_array($rt_toexport)?$rt_toexport:explode(",", $rt_toexport);
     
     ///create RelationshipElement if there are 1 or more record types to export
     if(count($rectyps)>0){ //ARTEM remove noise
@@ -345,14 +356,19 @@ function generateSchema($projname, $rt_toexport){
                     
                 }else if($rst_dt_type=="resource"){
                     
-                    $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
-                    $dtdisplaynamex = getProperName($dtdisplayname);
-                    if($dtdisplaynamex==""){
-                           $dtdisplaynamex = "Rectype".$rt."_Field".$dtid;
-                    }
+                    $dt_pointers = $detail[$idx_rst_pointers];
+                    $dt_pointers = explode(",", dt_pointers);
+                    if(count($dt_pointers)>0){   //ignore unconstrained
+                    
+                        $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
+                        $dtdisplaynamex = getProperName($dtdisplayname);
+                        if($dtdisplaynamex==""){
+                               $dtdisplaynamex = "Rectype".$rt."_Field".$dtid;
+                        }
 
-                    if(!@$reltypes["has".$dtdisplaynamex]){
-                        array_push($reltypes, "has".$dtdisplaynamex);
+                        if(!@$reltypes["has".$dtdisplaynamex]){
+                            array_push($reltypes, "has".$dtdisplaynamex);
+                        }
                     }
                 }
                 
@@ -360,6 +376,7 @@ function generateSchema($projname, $rt_toexport){
         }//for rectypes
         
         if(count($reltypes)>0){
+            $reltypes = array_unique($reltypes);
             
             $termLookup = $dtTerms['termsByDomainLookup']['relation']; // only select relationship terms
             $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
@@ -387,7 +404,7 @@ function generateSchema($projname, $rt_toexport){
                     $termName = getResStrNoA16n(getFullTermName($term, 'relation'));
                     $termDesc = prepareText( $term[$ind_descr]?$term[$ind_descr]:"");
                     
-                }else{    //respurce-pointer
+                }else{    //resource-pointer
                     
                     $termCode = "";
                     $termCcode = "";
@@ -490,6 +507,14 @@ function generateSchema($projname, $rt_toexport){
             if(!in_array($dt_type, $supported)){
                 continue;
             }
+            
+            if($dt_type=="resource"){
+                $dt_pointers = $detail[$idx_rst_pointers];
+                $dt_pointers = explode(",", $dt_pointers);
+                if(count($dt_pointers)<1){ //ignore unconstrained
+                    continue;
+                }
+            }
 
             $property = $arch_element->addChild('property');
 
@@ -543,9 +568,9 @@ function generateSchema($projname, $rt_toexport){
 * @param mixed $projname
 * @param mixed $rt_toexport
 */
-function generate_UI_Schema($projname, $rt_toexport){
+function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 
-    global $rtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    global $rtStructs, $dtTerms, $supported;
 
    add16n('Users'); 
    add16n('placeholder');
@@ -579,12 +604,12 @@ function generate_UI_Schema($projname, $rt_toexport){
     // Header part 1
     
     // style 
-    $style = new SimpleXMLElement('<style><orientation><orientation/></orientation><even><layout_weight/></even></style>');
+    $style = new SimpleXMLElement('<style><orientation><orientation/></orientation><even><layout_weight/></even><large><layout_weight/></large></style>');
     xml_adopt($faims, $style);
     
     // user
-    $user = new SimpleXMLElement('<user><usertab><users/></usertab></user>');
-    xml_adopt($faims, $user);
+    $header_user = new SimpleXMLElement('<user><usertab><users/><login/></usertab></user>');
+    xml_adopt($faims, $header_user);
     
     //<devices/><login/>
     //$faims->addChild('user')->addChild('usertab')->addChild('users');
@@ -598,10 +623,38 @@ function generate_UI_Schema($projname, $rt_toexport){
          
     addComment($faims, 'control tabgroup that contains button to manipulate entities: load, list, create');
 
-    $tabgroup_control = $faims->addChild('control');
+   
+    $header_control = $faims->addChild('control');   //$controlgroup in body
     
-    $tab_buttonholder  = $tabgroup_control->addChild('buttonholder');
-    
+    $header_controldata = new SimpleXMLElement('
+            <data>
+                <rectypeList/>
+                <newRecord/>
+                <recordList/>
+            </data>');
+    xml_adopt($header_control, $header_controldata);
+
+/* @todo - add to control/data
+                <searchpanel>
+                    <child1>
+                        <searchInput/>
+                    </child1>
+                    <child2>
+                        <searchButton/>
+                    </child2>
+                </searchpanel>
+*/
+    addComment($faims, 'select record for given record type');
+    $header_selectres = new SimpleXMLElement('
+          <selectresource>
+            <data>
+              <newRecord/>
+              <recordList/>
+            </data>
+          </selectresource>');
+    xml_adopt($faims, $header_selectres);
+ 
+/* ART temorary removed    
     $tab_map = new SimpleXMLElement(
              '<map>
                   <map/>
@@ -617,9 +670,8 @@ function generate_UI_Schema($projname, $rt_toexport){
                       </child2>
                   </mapContainer>
               </map>');
-    xml_adopt($tabgroup_control, $tab_map);
+    xml_adopt($header_control, $tab_map);
      
-    $tab_data  = $tabgroup_control->addChild('data');
     
     $tab_gps = new SimpleXMLElement('<gps>
               <connectexternal/>
@@ -630,14 +682,14 @@ function generate_UI_Schema($projname, $rt_toexport){
               <startDistanceLog/>
               <stopTrackLog/>
             </gps>');
-    xml_adopt($tabgroup_control, $tab_gps);
-      
+    xml_adopt($header_control, $tab_gps);
+*/
       
     // -------------------------------------------------------------------------------------------------------
     
     // Body section 3
   
-    addComment($body, 'Describes controls for each tabgroup and its nested tabs', 'http://www.w3.org/2002/xforms');
+    addComment($body, 'Describes controls for each tabgroup and its nested tabs');
     
     // Style
     $style = new SimpleXMLElement(
@@ -649,38 +701,119 @@ function generate_UI_Schema($projname, $rt_toexport){
           <label>horizontal</label>
         </input>
       </group>
-      
       <group ref="even">
         <label/>
         <input ref="layout_weight">
           <label>1</label>
         </input>
       </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
     </group>'); 
     xml_adopt($body, $style, 'http://www.w3.org/2002/xforms');
     
     // User
-    $user = new SimpleXMLElement(
+    $body_user = new SimpleXMLElement(
     '<group ref="user">
       <label>'.getResStrA16n('User List').'</label>
       <group ref="usertab" faims_scrollable="false">
         <label>'.getResStrA16n('User List').'</label>
-        <select1 appearance="compact" ref="users">
+        <select1 ref="users">
           <label>{Users}:</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select1>
+        <trigger ref="login">
+          <label>Login</label>
+        </trigger>        
       </group>
     </group>');
-    xml_adopt($body, $user, 'http://www.w3.org/2002/xforms');
+    xml_adopt($body, $body_user, 'http://www.w3.org/2002/xforms');
+//        <select1 appearance="compact" ref="users">
+
+    $body_control = $body->addChild('group','','http://www.w3.org/2002/xforms');
+    $body_control->addAttribute('ref', 'control');
+    $body_control->addChild('label','');
     
+    //group for list of rectypes
+    $body_controldata = $body_control->addChild('group','','http://www.w3.org/2002/xforms');
+    $body_controldata->addAttribute('ref', 'data');
+    $body_controldata->addAttribute('faims_scrollable', 'false');
+    $body_controldata->addChild('label','All records');
+
+     
+        //all top level rectyps will be in this list
+        $rectypes = new SimpleXMLElement(
+        '<select1 ref="rectypeList">
+          <label>Select record type:</label>
+        </select1>');
+        xml_adopt($body_controldata, $rectypes);        
+        
+        // new record button
+        $trigger = new SimpleXMLElement('<trigger ref="newRecord"><label>Create New Record</label></trigger>');
+        xml_adopt($body_controldata, $trigger);        
+      
+        /* @todo search panel
+        $searchgroup = new SimpleXMLElement(
+        '<group faims_style="orientation" ref="searchpanel">
+          <label/>
+          <group faims_style="even" ref="child1">
+            <label/>
+            <input faims_certainty="false" faims_read_only="false" ref="searchInput">
+              <label>Search</label>  
+            </input>
+          </group>
+          <group faims_style="large" ref="child2">
+            <label/>
+            <trigger ref="searchButton">
+              <label>Search</label>
+            </trigger>
+          </group>
+        </group>');
+        xml_adopt($body_controldata, $searchgroup);        
+        */
+
+        $input = new SimpleXMLElement(
+        '<select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="recordList">
+          <label>Tap record in list below to load it</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>');
+        xml_adopt($body_controldata, $input);        
+    
+
+        $select_resource = new SimpleXMLElement(
+        '<group ref="selectresource">
+              <label/>
+              <group ref="data" faims_scrollable="false">
+                <label>Select record or create new one</label>
+                <trigger ref="newRecord">
+                  <label>Create New Record</label>
+                </trigger>
+                <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="recordList">
+                  <label>Tap record in list below to select it</label>
+                  <item>
+                    <label>placeholder</label>
+                    <value>placeholder</value>
+                  </item>
+                </select1>
+              </group>
+        </group>');
+        xml_adopt($body, $select_resource, 'http://www.w3.org/2002/xforms');
+    
+  
     // Maps and controls ADDED BY IAN
+/* ART temporary removed    
      $map = new SimpleXMLElement(
-     '<group ref="control">  
-        <label>Maps and Controls</label>
-        <group faims_scrollable="false" ref="map">
+        '<group faims_scrollable="false" ref="map">
             <label>Map</label>
             <input faims_certainty="false" faims_map="true" ref="map">
                 <label/>
@@ -707,9 +840,10 @@ function generate_UI_Schema($projname, $rt_toexport){
                 </trigger>
               </group>
             </group>
-        </group>
-        
-        <group ref="gps">  
+        </group>');
+     xml_adopt($body_control, $map, 'http://www.w3.org/2002/xforms');
+     
+     $gps = new SimpleXMLElement('<group ref="gps">  
             <label>Control</label>
             <trigger ref="connectexternal">
               <label>Connect To External GPS</label>
@@ -732,11 +866,9 @@ function generate_UI_Schema($projname, $rt_toexport){
             <trigger ref="stopTrackLog">
               <label>Stop Track Log</label>
             </trigger>
-        </group>
-            
-      </group>');
-    xml_adopt($body, $map, 'http://www.w3.org/2002/xforms');
-    
+        </group>');
+     xml_adopt($body_control, $gps, 'http://www.w3.org/2002/xforms');
+*/    
     // Data ADDED BY IAN
     /*
      $data = new SimpleXMLElement(
@@ -822,16 +954,16 @@ function generate_UI_Schema($projname, $rt_toexport){
     $int_rt_repeat = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_MaxValues"];
 
     $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
-    
-
+    $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];    
     
     // --------------------------------------------------------------------------------------------------------
     
     // Output specifications for each ArchEnt (Record type in Heurist)
-    addComment($faims, 'list of tabgroups for entities');
+    addComment($faims, 'list of tabgroups for rectypes(archentities)');
     
+    $uniqcnt = 1;
     // Loop through each of the record types (ArchEntTypes) and output fields
-    $rectyps = explode(",", $rt_toexport);
+    $rectyps = is_array($rt_toexport)?$rt_toexport:explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
 
         $rtname = $rtStructs['names'][$rt];
@@ -840,32 +972,37 @@ function generate_UI_Schema($projname, $rt_toexport){
                $rtnamex = "Rectype".$rt;
         }
         
-        $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
+        //add to rectypes list on control/data  - this is list of rectypes that can be searched/edit directly from main page
+        if( in_array($rt, $rt_toexport_toplevel, true) ){
+                $item = $rectypes->addChild('item');
+                $item->label = getResStrA16n(prepareText($rtname));
+                $item->value = $rtnamex;
+        }
         
-        $tab_buttonholder->addChild($rtnamex);
-        $tab_data->addChild('new'.$rtnamex);
-        $tab_data->addChild($rtnamex.'List');
-        $tab_data->addChild($rtnamex.'Load');
+        
+        $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
         
         $headername = $rtnamex.'_General_Information'; //first tab implied if no header at top of record
 
-        addComment($faims, 'ArchEnt / Record Type: '.mb_strtoupper($rtnamex) );        
-        $tabgroup_head = $faims->addChild($rtnamex);  //tabgroup for this record type
-        $tab = $tabgroup_head->addChild($headername); //first tab for this record type
+        addComment($faims, 'ArchEnt / Record Type: '.mb_strtoupper($rtname) );        
+        $header_rectypeform = $faims->addChild($rtnamex);  //tabgroup for this record type
+        $tab = $header_rectypeform->addChild($headername); //first tab for this record type
 
         addComment($body, mb_strtoupper($rtnamex), 'http://www.w3.org/2002/xforms');
-        $tabgroup_body = $body->addChild('group','','http://www.w3.org/2002/xforms');
-        $tabgroup_body->addChild('label',  getResStrA16n(prepareText($rtname)) );
-        $tabgroup_body->addAttribute('ref', $rtnamex);
-        $tabgroup_body->addAttribute('faims_archent_type', prepareText($rtname));
+        $body_rectypeform = $body->addChild('group','','http://www.w3.org/2002/xforms');
+        $body_rectypeform->addChild('label',  getResStrA16n(prepareText($rtname)) );
+        $body_rectypeform->addAttribute('ref', $rtnamex);
+        $body_rectypeform->addAttribute('faims_archent_type', prepareText($rtname));
         
-        $group = $tabgroup_body->addChild('group'); //first tab
+        $group = $body_rectypeform->addChild('group'); //first tab
         $group->addAttribute('ref', $headername);
         $group->addChild('label', 'Gen'); // getResStrA16n(prepareText($descr)) );
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         
         $hasattachfile = false;
+        
+        $contaier_no = 1; //container for resource field type
 
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
@@ -881,20 +1018,22 @@ function generate_UI_Schema($projname, $rt_toexport){
             }
             
             if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
-            
-                if($hasattachfile){ //add to previous one
+  
+/* art temp 2014-02-28           
+                if($hasattachfile){ //add to previous on
                         $tab->addChild('viewattached');            
                         $trigger = $group->addChild('trigger');
                         $trigger->addAttribute('ref', 'viewattached');
                         $trigger->addChild('label', 'View Attached Files');
                 }
+*/                
                 
                 $hasattachfile = false;
             
                 //create new tab
                 $headername = $rtnamex.'_'.$dtdisplaynamex;
-                $tab = $tabgroup_head->addChild($headername); //first tab
-                $group = $tabgroup_body->addChild('group'); //first tab
+                $tab = $header_rectypeform->addChild($headername); //first tab
+                $group = $body_rectypeform->addChild('group'); //first tab
                 $group->addAttribute('ref', $headername);
                 $group->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
             }
@@ -903,99 +1042,164 @@ function generate_UI_Schema($projname, $rt_toexport){
             if(!in_array($dt_type, $supported)){
                 continue;
             }
-
-            $tab->addChild($dtdisplaynamex); //add to strucsture
-            if($dt_type=='file'){
-                   $tab->addChild('attach'.$dtdisplaynamex);
-            }
-
-            $isvocab = ($dt_type=='enum');
-            
-            // TO LOOK AT  -  isIdentifier not defined (in logs, 5.20pnm 30/9/13)
             
             $isIdentifier = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'];
-
-            $inputtype = 'input';
             
-            if($isvocab){
-                $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-                addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": ($termsCount<4)?"Radiogroup":"Dropdown")  );
-                $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
-            }else if($dt_type=='file'){
-                 $inputtype = 'select';               
-            //<select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-            //<select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-            //<select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
-            //<select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false"    faims_certainty="false">
-            }
+            //add field to header
+            if($dt_type=='resource'){
+                
+                $dt_pointers = $detail[$idx_rst_pointers];
+                $dt_pointers = explode(",", $dt_pointers);
+                if(count($dt_pointers)>0){ //ignore unconstrained
+                
+                    $container = new SimpleXMLElement(
+                      '<container'.$contaier_no.'>
+                        <child1>
+                          <'.$dtdisplaynamex.'/>
+                        </child1>
+                        <child2>
+                          <'.$dtdisplaynamex.'_clearPointer/>
+                        </child2>
+                       </container'.$contaier_no.'>');
+                    xml_adopt($tab, $container);                    
+                    
+                    //add to body/group/tab
+                    $container = new SimpleXMLElement(
+                        '<group faims_style="orientation" ref="container'.$contaier_no.'">
+                          <label/>
+                          <group faims_style="even" ref="child1">
+                            <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
+                            <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false" faims_attribute_name="'.prepareText($dtdisplayname).'" faims_attribute_type="freetext">
+                                <label/>
+                                <item>
+                                    <label>browse for resource record</label>
+                                    <value></value>
+                                </item>
+                            </select1>
+                          </group>
+                          <group faims_style="large" ref="child2">
+                            <label/>
+                            <trigger ref="'.$dtdisplaynamex.'_clearPointer">
+                              <label>Clear</label>
+                            </trigger>
+                          </group>
+                        </group>');
+                    xml_adopt($group, $container);                    
+                
+                    foreach ($dt_pointers as $rt2) {
 
-            $input = $group->addChild($inputtype); 
-            
-            $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
-            $input->addAttribute('ref', $dtdisplaynamex);
-            $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
-            $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');
-            if($isvocab && !$is_repeatable) {
-                $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-                if($termsCount<4){
-                    $input->addAttribute('appearance', 'full');
-                }
-                //$input->addAttribute('appearance', ($termsCount>4)?'compact':'full');
-            }
-
-            if($isIdentifier){
-                $input->addAttribute('faims_attribute_type', 'freetext');
+                        $rtname2 = $rtStructs['names'][$rt2];
+                        $rtnamex2 = getProperName($rtname2);
+                        if($rtnamex2==""){
+                            $rtnamex2 = "Rectype".$rt2;
+                        }
+                        
+                        $tab->addChild($dtdisplaynamex.'_browse_'.$rtnamex2);
+                        
+                        //@todo - specify the exact name of resource - pointer record type
+                        $trigger = new SimpleXMLElement(
+                           '<trigger ref="'.$dtdisplaynamex.'_browse_'.$rtnamex2.'">
+                                <label>'.getResStrA16n('Browse '.prepareText($rtname2)).'</label>
+                            </trigger>'
+                        );
+                        xml_adopt($group, $trigger);
+                    }//for
+                    
+                    $contaier_no++;
+                }//if ignore unconstrained
+                
             }else{
-                $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
-            }
+                $tab->addChild($dtdisplaynamex); //add to structure
+                if($dt_type=='file'){
+                       $tab->addChild('attach'.$dtdisplaynamex);
+                }
             
-            
-            //TODO  - support pointer, relmarker            
-            if(false && $dt_type=='resource'){
-            
-            }else if($dt_type=='file'){
+
+                $isvocab = ($dt_type=='enum');
                 
-                $ftype = detectFileType($dtdisplayname);
-                $actionlabel = $ftype[0];
-                $filetype = $ftype[1];
+                // TO LOOK AT  -  isIdentifier not defined (in logs, 5.20pnm 30/9/13)
+
+                $inputtype = 'input';
                 
-                if($filetype == 'file'){
-                    $hasattachfile = true;
-                }else if($filetype == 'camera'){
-                    $input->addAttribute('faims_sync', 'true');
-                    // absence of attribute = false, which is appropriate for video and audio
+                if($isvocab){
+                    $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
+                    addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": ($termsCount<4)?"Radiogroup":"Dropdown")  );
+                    $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
+                }else if($dt_type=='file'){
+                     $inputtype = 'select';               
+                //<select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+                //<select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+                //<select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+                //<select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false"    faims_certainty="false">
+                }
+
+                $input = $group->addChild($inputtype); 
+                
+                $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
+                $input->addAttribute('ref', $dtdisplaynamex);
+                $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
+                $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');
+                if($isvocab && !$is_repeatable) {
+                    $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
+                    if($termsCount<4){
+                        $input->addAttribute('appearance', 'full');
+                    }
+                    //$input->addAttribute('appearance', ($termsCount>4)?'compact':'full');
+                }
+
+                if($isIdentifier){
+                    $input->addAttribute('faims_attribute_type', 'freetext');
+                }else{
+                    $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
                 }
                 
-                $input->addAttribute('type', $filetype);
-                $input->addAttribute('faims_annotation', 'false');
                 
-                $trigger = $group->addChild('trigger');
-                $trigger->addAttribute('ref', 'attach'.$dtdisplaynamex);
-                $trigger->addChild('label', $actionlabel);
-            } else {
-                $input->addAttribute('faims_read_only', 'false');    
-            }
-            
-            if (($isvocab) || ($dt_type=='file')) { //empty value for selection
-                $item = $input->addChild('item');
-                $item->label = 'placeholder';
-                $item->value = 'placeholder';
-            }
+                //TODO  - support pointer, relmarker            
+                if(false && $dt_type=='resource'){
+                
+                }else if($dt_type=='file'){
+                    
+                    $ftype = detectFileType($dtdisplayname);
+                    $actionlabel = $ftype[0];
+                    $filetype = $ftype[1];
+                    
+                    if($filetype == 'file'){
+                        $hasattachfile = true;
+                    }else if($filetype == 'camera'){
+                        $input->addAttribute('faims_sync', 'true');
+                        // absence of attribute = false, which is appropriate for video and audio
+                    }
+                    
+                    $input->addAttribute('type', $filetype);
+                    $input->addAttribute('faims_annotation', 'false');
+                    
+                    $trigger = $group->addChild('trigger');
+                    $trigger->addAttribute('ref', 'attach'.$dtdisplaynamex);
+                    $trigger->addChild('label', $actionlabel);
+                } else {
+                    $input->addAttribute('faims_read_only', 'false');    
+                }
+                
+                if (($isvocab) || ($dt_type=='file')) { //empty value for selection
+                    $item = $input->addChild('item');
+                    $item->label = 'placeholder';
+                    $item->value = 'placeholder';
+                }
 
-            $ftype = null;
-            if($dt_type=='float' || $dt_type=='integer'){
-                $ftype =  'decimal';
-            }else if($dt_type=='blocktext'){
-                $ftype = 'string';
-            }
+                $ftype = null;
+                if($dt_type=='float' || $dt_type=='integer'){
+                    $ftype =  'decimal';
+                }else if($dt_type=='blocktext'){
+                    $ftype = 'string';
+                }
 
-            if($ftype){
-                $path = '/faims/'.$rtnamex.'/'.$headername.'/'.$dtdisplaynamex;
-                $bind = $model->addChild('bind');
-                $bind->addAttribute('nodeset', $path);
-                $bind->addAttribute('type', $ftype);
+                if($ftype){
+                    $path = '/faims/'.$rtnamex.'/'.$headername.'/'.$dtdisplaynamex;
+                    $bind = $model->addChild('bind');
+                    $bind->addAttribute('nodeset', $path);
+                    $bind->addAttribute('type', $ftype);
+                }
             }
-
 /*
             if($dt_type=='enum' || $dt_type=='relationtype'){
                 $terms = $detail[$int_rt_termtree];
@@ -1005,13 +1209,14 @@ function generate_UI_Schema($projname, $rt_toexport){
 */
         }//for details
         
+/* art temp 2014-02-28                   
         if($hasattachfile){
                 $tab->addChild('viewattached');            
                 $trigger = $group->addChild('trigger');
                 $trigger->addAttribute('ref', 'viewattached');
                 $trigger->addChild('label', 'View Attached Files');
         }
-        
+*/        
         
         //add save/delete buttons to last tab
         $tab->addChild('Update');
@@ -1035,7 +1240,7 @@ function generate_UI_Schema($projname, $rt_toexport){
 
 function generate_Logic($projname, $rt_toexport){
 
-    global $rtStructs, $dtTerms, $ind_parentid, $ind_label, $ind_descr, $supported;
+    global $rtStructs, $dtTerms, $supported;
     
     
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
@@ -1047,11 +1252,17 @@ function generate_Logic($projname, $rt_toexport){
 
     $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     
+    $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];    
     
-$out = "";
+    
+    $function_section = "";
+    $event_section = "";
+    $load_selectors = '';
+    $load_related = '';
+    $rectype_to_entname = '';
 
     // Loop through each of the record types (ArchEntTypes) and output fields
-    $rectyps = explode(",", $rt_toexport);
+    $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
 
         $rtname = $rtStructs['names'][$rt];
@@ -1060,26 +1271,16 @@ $out = "";
                $rtnamex = "Rectype".$rt;
         }
         
+        $rectype_to_entname .=  '
+            if("'.$rtnamex.'".equals(rectype)){
+                return "'.prepareText($rtname).'";
+            }
+        ';
+        
+        $load_related_part = '';
+        
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
-
-$out .= "
-/*** ArchEnt: $rtnamex ***/";
-
-$out .= '
-refreshEntities() {
-    showToast("Fetching saved contexts...");
-    populateList("control/data/'.$rtnamex.'List", fetchEntityList("'.$rtnamex.'"));
-}
-';
-
-//event handlers
-$eventsection = '
-onEvent("control/data/'.$rtnamex.'List", "click", "load'.$rtnamex.'()");
-onEvent("control/data/new'.$rtnamex.'", "click", "new'.$rtnamex.'()");
-';
-
-$selectors = '';
-
+    
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         
         $hasattachfile = false;
@@ -1100,10 +1301,12 @@ $selectors = '';
 
             if($dt_type=='separator'){ // note, separator is classed as unsupported b/c it is not a data value
             
+/* art temp 2014-02-28                       
                 if($hasattachfile){  //add events to view attached files
                      $eventsection .= '
 onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
                 }
+*/                
                 $hasattachfile = false;
                 //new tab
                 $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
@@ -1112,8 +1315,6 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
             if(!in_array($dt_type, $supported)){
                 continue;
             }
-            
-
             
             if($dt_type=='file'){
                 
@@ -1132,7 +1333,7 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
                     $hasattachfile = true;
                 }
                 
-                $eventsection .= '
+                $event_section .= '
 onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
                 
             }else if ($dt_type=='enum') {
@@ -1150,90 +1351,78 @@ onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$
                     $action = 'populateDropDown';
                 }
                 
-                $selectors .= '
-'.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.$dtdisplayname.'"));');
+                $load_selectors .= '
+'.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));');
+            }else if ($dt_type=='resource') {
+                
+                $dt_pointers = $detail[$idx_rst_pointers];
+                $dt_pointers = explode(",", $dt_pointers);
+                if(count($dt_pointers)>0){ //ignore unconstrained
+                
+                    foreach ($dt_pointers as $rt2) {
+
+                        $rtname2 = $rtStructs['names'][$rt2];
+                        $rtnamex2 = getProperName($rtname2);
+                        if($rtnamex2==""){
+                            $rtnamex2 = "Rectype".$rt2;
+                        }
+                    $event_section .= ' 
+onEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", "browseRecord(\"'.$rtnamex2.'\", \"'.$headername.'/'.$dtdisplaynamex.'\")");';
+                    }//for
+
+                    $event_section .= ' 
+onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';                
+                
+                    $load_related_part .= '                
+    fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
+                }
             }     
             //TODO  - support pointer, relmarker       
             
         }//for detail types
         
+/* art temp 2014-02-28                   
         if($hasattachfile){  //add events to view attached files
               $eventsection .= '
 onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
         }
-        $eventsection .= '
-onEvent("'.$headername.'/Update", "delayclick", "save'.$rtnamex.'()");
-onEvent("'.$headername.'/Delete", "delayclick", "delete'.$rtnamex.'()");
+*/        
+
+        if($load_related_part!=''){
+                $load_related .= '                
+if(rectype=="'.$rtnamex.'"){
+    '.$load_related_part.
+'   return;
+}
+';
+        }
+
+
+//event handlers for save/delete
+$event_section = $event_section.'
+onEvent("'.$headername.'/Update", "delayclick", "saveRecord(\"'.$rtnamex.'\")");
+onEvent("'.$headername.'/Delete", "delayclick", "deleteRecord(\"'.$rtnamex.'\")");
 ';
 
-$out .= $eventsection;            
-
-$rt_id = mb_strtolower($rtnamex)."_id";
-
-//now event handlers - new, load, save, delete
-$out .= '
-String '.$rt_id.' = null;
-load'.$rtnamex.'Attributes();
-
-new'.$rtnamex.'(){
-    '.$rt_id.' = null;
-    newTabGroup("'.$rtnamex.'");
-}
-load'.$rtnamex.'() {
-    //new'.$rtnamex.'();
-    '.$rt_id.' = getListItemValue();
-    load'.$rtnamex.'From('.$rt_id.');
-}
-load'.$rtnamex.'From(entid) {
-    
-    '.$rt_id.' = entid;
-    if (isNull(entid)) return;
-    showToast(entid);
-    showTabGroup("'.$rtnamex.'", entid);
-    updateAll'.$rtnamex.'(); 
-    //updateRelns();
-}
-
-save'.$rtnamex.'() {
-    //todo - verify all required fields
-    if (false){ 
-        showWarning("Logic Error", "Cannot save record without id");
-        return;
-    }
-    
-    if (!isNull('.$rt_id.')) {
-        entity = fetchArchEnt('.$rt_id.');
-    }
-    // first null is map data
-    saveTabGroup("'.$rtnamex.'", '.$rt_id.', null, null, "'.$rt_id.' = getLastSavedRecordId();");
-}
-
-delete'.$rtnamex.'(){
-    if (!isNull('.$rt_id.')) {
-        showAlert("Confirm Deletion", "Press OK to Delete this '.$rtname.'!", "reallyDelete'.$rtnamex.'()", "doNotDelete'.$rtnamex.'()");
-    }
-}
-reallyDelete'.$rtnamex.'(){
-    deleteArchEnt('.$rt_id.');
-    cancelTabGroup("'.$rtnamex.'", false);
-}
-doNotDelete'.$rtnamex.'(){
-    showToast("Delete Cancelled.");
-}       
- 
-load'.$rtnamex.'Attributes(){
-'.$selectors.'
-}
-
-updateAll'.$rtnamex.'(){
-//load related records ?
-}      
-';        
-
-        
-        
     }//for record types
 
+$function_section  = '
+loadRelatedRecords(rectype){
+    '.$load_related.'
+}      
+
+getEntityNameByRectype(rectype) {
+    '.$rectype_to_entname.
+    'return null;
+}
+
+//loop for each enum field for every rectype 
+loadTestAllFieldTypesAttributes(){
+    showToast("load attributes");
+    '.$load_selectors.'
+}
+';
+    
 //header    
 $out = '    
 /****** 
@@ -1241,35 +1430,251 @@ $out = '
  Database: '.DATABASE.'   Heurist user:'.get_user_name().'
  ******/
 
-User user; // dont touch
+User user;
 String userid;
 
-setSyncEnabled(true);
-setFileSyncEnabled(true);
+showWarning("Ver 15. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
-showWarning("Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
+//stack of tabs in use
+ArrayList tabs_edit = new ArrayList();
+ArrayList tabs_select = new ArrayList();
 
-
-/*** control ***/
-
+/*** EVENTS ***/
 onEvent("control/data", "show", "refreshEntities()");
-onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
-onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
-'.$out;    
+onEvent("user/usertab/login", "click", "login()"); 
+
+onEvent("control/data/recordList", "click", "loadRecord()"); //load particular record
+onEvent("control/data/newRecord", "click", "newRecord()");
+//selectresource tab
+onEvent("TestAllFieldTypes", "show", "onShowEditForm(\"TestAllFieldTypes\")");
+onEvent("selectresource/data", "show", "onShowSelect()");
+onEvent("selectresource/data/recordList", "click", "onSelectRecord()");
+onEvent("selectresource/data/newRecord", "click", "onNewRecordInSelect()");
+
+/*** START: this section of code depends on the module and record types selected ***/
+'.$event_section.$function_section;    
     
 /* misc functions to add */
 $out = $out.'
-// MISC FUNCTIONS    
+/*** END: this section of code depends on the module and record types selected ***/
+
+/*** navigation functions ***/
+String last_invoker = null; //keep field path
+//
+onShowSelect(){    
+
+    if(tabs_select.size()>0 && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
+        //open new select
+    
+    }else{
+        //return from new record
+        if(tabs_edit.size()>0){
+            tabs_edit.remove(tabs_edit.size()-1);
+        }
+    }
+    
+        String last_select_callback = tabs_select.get(tabs_select.size()-1);
+    
+        String[] parts = last_select_callback.split("=");
+        String rectype = parts[0]; //rectype to search
+        String fieldpath = parts[1]; //
+    
+        //search record for given rectype    
+        String entName = getEntityNameByRectype( rectype );
+        populateList("selectresource/data/recordList", fetchEntityList(entName));
+    
+}
+//
+onShowEditForm(rectype){
+
+    if(tabs_edit.size()>0 && rectype.equals(tabs_edit.get(tabs_edit.size()-1))){
+        //return from select
+        if(tabs_select.size()>0){
+            //last_invoker = tabs_select.get(tabs_select.size()-1);
+            tabs_select.remove(tabs_select.size()-1);
+        }
+    }else{
+        tabs_edit.add(rectype);
+    }
+}
+/*** selectresource functions ***/
+// rectype - to search
+// fieldpath - field to assign 
+browseRecord(rectype, fieldpath) {
+
+    last_invoker = rectype+"="+fieldpath;
+
+    tabs_select.add(rectype+"="+fieldpath); //keep last call
+    showTabGroup("selectresource");
+    
+}
+//
+onNewRecordInSelect(){
+    String last_select_callback = tabs_select.get(tabs_select.size()-1);
+    String[] parts = last_select_callback.split("=");
+    String rectype = parts[0];
+    
+    for (String rt : tabs_edit) {
+        if (rt.equals(rectype) ) {
+            showWarning("Already in use", "Can not create new "+rectype+". Save previous");    
+            return;
+        }
+    }    
+    
+    newTabGroup(rectype); //load and clear fields    
+}
+//
+onSelectRecord() {
+
+    String record_id = getListItemValue(); //get id from list
+    String last_select_callback = tabs_select.get(tabs_select.size()-1);
+    
+    String[] parts = last_select_callback.split("=");
+    String fieldpath = parts[1]; //
+    parts = fieldpath.split("/");
+    String rectype = parts[0]; //editing rectype
+    String rectype_tab = parts[1];
+    String field = parts[2];
+
+    //back to edit form
+    cancelTabGroup("selectresource", false);
+    showTab(rectype+"/"+rectype_tab);
+    
+    showToast("selected "+record_id);
+    
+    //ArrayList pairs = new ArrayList();
+    //pairs.add(new NameValuePair("selected "+record_id, record_id));
+    
+    populateDropDown(fieldpath, loadEntity(record_id) );
+}
+//
+clearPointer(fieldname){
+    ArrayList pairs = new ArrayList();
+    pairs.add(new NameValuePair("browse for resource record", ""));
+    populateDropDown(fieldname, pairs );
+}
+//fill pointer field
+fillPointer(fieldname){
+    String res_id = getFieldValue(fieldname);
+    if(null==res_id || "".equals(res_id)){
+        clearPointer(fieldname);
+    }else{
+        populateDropDown(fieldname, loadEntity(res_id));
+    }
+}
+
+/*** record management function ***/
+newRecord(){
+    String rectype = getFieldValue("control/data/rectypeList");
+    
+    for (String rt : tabs_edit) {
+        if (rt.equals(rectype) ) {
+            showWarning("Already in use", "Can not create new "+rectype+". Save previous");    
+            return;
+        }
+    }    
+    
+    newTabGroup(rectype); //load and clear fields
+}
+//listener on click on records list
+loadRecord() {
+    String record_id = getListItemValue(); //get id from list
+    String rectype = getFieldValue("control/data/rectypeList");
+    loadRecordById(record_id, rectype);
+}
+//
+loadRecordById(entid, rectype) {
+    
+    if (isNull(entid)) return;
+    
+    showToast(entid);
+    showTabGroup(rectype, entid);
+    
+    setFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID", entid);
+    
+    loadRelatedRecords(rectype); 
+    //updateRelns();
+}
+
+//
+loadEntity(record_id){
+    return fetchAll(""+
+"SELECT uuid, group_concat(coalesce(measure   || \' \'  || vocabname || \'(\'  ||  freetext ||\'; \'|| (certainty * 100.0) || \'% certain)\',  "+
+"                                     measure   || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
+"                                     vocabname || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
+"                                     measure   || \' \'  || vocabname || \' (\' || (certainty * 100.0) || \'% certain)\',  "+
+"                                       vocabname || \' (\' || freetext  || \')\',  "+
+"                                       measure   || \' (\' || freetext  || \')\',  "+
+"                                     measure   || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+"                                     vocabname || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+"                                     freetext  || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+"                                     measure,  "+
+"                                     vocabname,  "+
+"                                     freetext), \' \') as response  "+
+"FROM (select * from latestNonDeletedArchentIdentifiers order by attributename) "+
+"WHERE uuid = \'"+record_id+"\' "+
+"GROUP BY uuid;");
+
+}
+
+//
+saveRecord(rectype) {
+    //todo - verify all required fields
+    if (false){ 
+        showWarning("Logic Error", "Cannot save record without id");
+        return;
+    }
+    
+    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    if("".equals(record_id)){
+        record_id=null;
+    }
+    
+    if (!isNull(record_id)) { 
+        entity = fetchArchEnt(record_id); //need for geometry
+        //data = entity.getGeometryList();
+    }
+    // first null is map data
+    saveTabGroup(rectype, record_id, null, null, "setFieldValue(\""+rectype+"/"+rectype+"_General_Information/FAIMS_UID\", getLastSavedRecordId());");
+}
+
+deleteRecord(rectype){
+    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    if (!isNull(record_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this record!", "deleteRecordConfirmed(\""+rectype+"\")", "deleteRecordCanceled()");
+    }
+}
+deleteRecordConfirmed(rectype){
+    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    deleteArchEnt(record_id);
+    cancelTabGroup(rectype, false);
+}
+deleteRecordCanceled(){
+    showToast("Delete Cancelled.");
+}       
+/*** END record management function ***/
+
+/*** main list of records on control/data ***/
+refreshEntities() {
+
+   tabs_select.clear();
+   tabs_edit.clear();
+
+   showToast("Fetching all records...");
+   
+   // populateDropDown("control/data/rectypeList", getRectypeList());
+   String entName = getEntityNameByRectype( getFieldValue("control/data/rectypeList") );
+   
+   populateList("control/data/recordList", fetchEntityList(entName));
+}
+
+// make vocabulary
 makeVocab(String attrib){
     Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'"+attrib+"\' ");
     return a;
 }
-';
 
-//footer
-$out = $out.'
 /*** USER ***/
-/*** Should not require changing: edit the code below with extreme precaution ***/
 
 getDefaultUsersList() {
     users = fetchAll("select userid, fname || \' \' || lname from user");
@@ -1277,7 +1682,7 @@ getDefaultUsersList() {
 }
 
 populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
+    populateDropDown("user/usertab/users", getDefaultUsersList());
 }
 
 populateListForUsers();
@@ -1286,7 +1691,7 @@ String username = "";
 String device = "";
 
 login(){
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid=\'" + getListItemValue() + "\';");
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid=\'" + getFieldValue("user/usertab/users") + "\';");
     User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
     userid = userResult.get(0);
     setUser(user);
@@ -1294,13 +1699,7 @@ login(){
     showTabGroup("control");
 }
 
-onEvent("user/usertab/users", "click", "login()");
-
-/*** SYNC ***/
-
-onEvent("control/gps/startsync", "click", "startSync()");
-onEvent("control/gps/stopsync", "click", "stopSync()");
-
+/*** SYNC  ***/
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
 setSyncDelay(5.0f);
@@ -1314,6 +1713,8 @@ stopSync() {
     setSyncEnabled(false);
     setFileSyncEnabled(false);
 }
+
+loadTestAllFieldTypesAttributes();
 ';
     
 return $out;   
