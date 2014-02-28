@@ -16,7 +16,9 @@
 
     /**
     * File: DoS3Redesign.php Update the existing DoS3 database from DoS Trsut to a properly strcutured H3 database
-    *       suitable for export of HML for HuNI 
+    *       suitable for export of HML for HuNI. Major steps are differentiating the undifferntiated entity types
+    *       and converting the highly atomised factoids into conventional fields, where possible eg. birth date, 
+    *       death date, location 
     *
     * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -46,6 +48,7 @@
         return;
     }
 
+
     // ---- SUBSTANTIVE CODE STARTS HERE ---------------------------------------------------------------------------------
 
     echo "<h3>Requires DoS3_redesign database as copy of original supplied by DoS, before running this script</h3>" ;
@@ -60,6 +63,7 @@
         $id++; // incremented within loop
 
         // Dulicate record type definition
+        echo "<br/>Duplicating entity type ".$id."<br/>";
         $query="Insert into hdb_DoS3_redesign.defRecTypes
         (SELECT $id,'$rtname', rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, rty_NameInOriginatingDB, 
         rty_IDInOriginatingDB, rty_NonOwnerVisibility, rty_ShowInLists, rty_RecTypeGroupID, rty_RecTypeModelIDs, rty_FlagAsFieldset, rty_ReferenceURL, rty_AlternativeRecEditor, 
@@ -71,6 +75,7 @@
         }
 
         // Duplicate record structure details (fields)
+        echo "<br/>Duplicating record structure for entity type ".$id."<br/>";
         $query="INSERT INTO hdb_DoS3_redesign.defRecStructure 
         (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, 
         rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,rst_MaxValues, rst_MinValues, 
@@ -97,16 +102,27 @@
             case 37: $termCode=3305; break;   
         };
 
+        $count=0;
         $query="update Records, recDetails set rec_RecTypeID=$id where (Records.rec_ID=recDetails.dtl_RecID) 
-            And (rec_RecTypeID=25) and (dtl_DetailTypeID=75) and (dtl_Value='$termcode')";
+        And (rec_RecTypeID=25) and (dtl_DetailTypeID=75) and (dtl_Value='$termCode')";
 
         $res = mysql_query($query);
-        if (mysql_error()) {
-            echo "<b>Warning: </b> Unable to convert undifferentiated entity type $id (".mysql_error().")<br/>";
+        if (mysql_error()) { 
+            echo "<br/>Unable to convert undifferentiated entity type with term code = $termCode (".mysql_error().")<br/>";
+        } else {
+            echo "<br/>Converted entity type for id = $id term code = $termCode <br/>";
         }
 
-    } // duplication of record types, splitting undifferentiated entity type to multiple
 
+    } // duplication of record types, splitting undifferentiated entity type to multiple     
+
+
+    // -------------------- Insert Factoids ----------------------------------------------
+
+
+
+
+    echo "<br/><br/>FINISHED: I am done, Master ...";
 
 
 ?>

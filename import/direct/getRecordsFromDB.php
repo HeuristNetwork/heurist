@@ -1366,7 +1366,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				global $sourcedbname, $dbPrefix, $db_prefix;
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$HEURIST_UPLOAD_ROOT_OLD =	HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/";
+				$HEURIST_UPLOAD_ROOT_OLD =	HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/";
 				$_src_HEURIST_UPLOAD_DIR =  $HEURIST_UPLOAD_ROOT_OLD.$sourcedbname.'/';
 
 

@@ -4,14 +4,35 @@
   xmlns:aml ="http://schemas.microsoft.com/aml/2001/core"
   xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint"
   exclude-result-prefixes="w o aml wx">
-<!-- NOTES
-  This stylesheet attempts to convert wordML to TEI to the best of its capacities. To facilitate its capacities, in the original word document you should:
-  -> Eliminate the footer on the document
-  -> Be VERY careful and precise with nested lists formatting - empty paragraphs etc. immediately before or after the list items can make lists render in an unpredictable fashion.
-  -> Rather then using "heading" styles  in document format, use "Strong" and "Emphasis" - this will render appropriate elements
 
-
-  -->
+    <!--
+    * Copyright (C) 2005-2014 University of Sydney
+    *
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+    * in compliance with the License. You may obtain a copy of the License at
+    *
+    * http://www.gnu.org/licenses/gpl-3.0.txt
+    *
+    * Unless required by applicable law or agreed to in writing, software distributed under the License
+    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    * or implied. See the License for the specific language governing permissions and limitations under
+    * the License.
+    
+    * @author      Kim Jackson 
+    * @copyright   (C) 2005-2013 University of Sydney
+    * @link        http://sydney.edu.au/heurist
+    * @version     v3 - 23 October 2008
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @package     Heurist academic knowledge management system
+    
+    * This stylesheet attempts to convert wordML to TEI to the best of its capacities. To facilitate its capacities, in the original word document you should:
+    
+        -> Eliminate the footer on the document
+        -> Be VERY careful and precise with nested lists formatting - empty paragraphs etc. immediately before or after the list items can make lists render in an unpredictable fashion.
+        -> Rather then using "heading" styles  in document format, use "Strong" and "Emphasis" - this will render appropriate elements
+        
+    -->
+    
   <xsl:output indent="yes"/>
 
   <!-- xsl:template match="wx:sub-section[parent::wx:sect]" -->
@@ -27,7 +48,7 @@
   <!-- to be dropped into the <item> element of the revision description in the TEI Header. -->
 
   <!-- URL root: the root of the URL to which image links should point. Should correspond to the directory contained in $fileRoot. -->
-  <xsl:param name="urlroot">http://dos.heuristscholar.org/</xsl:param>
+  <xsl:param name="urlroot">http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy</xsl:param>
   <!-- File root: absolute path to the directory into which images are to be written -->
   <xsl:param name="fileRoot">
     <xsl:value-of select="$urlroot"/>

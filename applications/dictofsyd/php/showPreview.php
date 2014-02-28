@@ -62,7 +62,7 @@ function showPreview($rec_id, $is_cache=1){
 					$xml->load($filename);
 
 			}else{
-				$url = "http://heuristscholar.org/h3-ao/export/xml/flathml.php?w=all&a=1&depth=1&fc=-1&q=ids:".$rec_id."&db=dos_1&rtfilters={\"1\":[\"5\",\"11\"]}";  //media and tiled images
+				$url = "http://heuristscholar.org/h3-ij/export/xml/flathml.php?w=all&a=1&depth=1&fc=-1&q=ids:".$rec_id."&db=dos_1&rtfilters={\"1\":[\"5\",\"11\"]}";  //media and tiled images
 				$data = loadRemoteURLContentWithRange($url, null);
 				if($data){
 					$xml->loadXML($data);

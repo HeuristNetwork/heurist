@@ -57,7 +57,7 @@ function showRecord($rec_id, $is_cache=1){
 					$xml->load($filename);
 
 			}else{
-				$url = "http://heuristscholar.org/h3-ao/export/xml/flathml.php?w=all&a=1&depth=2&q=ids:".$rec_id."&db=dos_1&rtfilters={\"2\":[\"5\",\"11\",\"13\",\"24\",\"25\",\"26\",\"27\"]}";
+				$url = "http://heuristscholar.org/h3-ij/export/xml/flathml.php?w=all&a=1&depth=2&q=ids:".$rec_id."&db=dos_1&rtfilters={\"2\":[\"5\",\"11\",\"13\",\"24\",\"25\",\"26\",\"27\"]}";
 				$data = loadRemoteURLContentWithRange($url, null);
 				if($data){
 					$xml->loadXML($data);

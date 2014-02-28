@@ -14,9 +14,9 @@
 */
 
 /**
-* Render Entry page
+* Dictionary of Sydney: Render page for Entry
 *
-* It loads wml file (specified in detail) and applies 2 xsl
+* Loads the Word ML file (specified in detail) and applies two XSL transforms to it
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -35,11 +35,14 @@ function makeEntryPage($record){
  if(!$fileid){
  	$fileid = $record->getDet(DT_FILE, 'dtfile');
  }
+
  if($fileid){
 
  	$file = get_uploaded_file_info_internal($fileid);
 
  	$filename = $file['fullpath'];
+
+ error_log("file=".$file."filename=".$filename);
 
  	if(file_exists($filename)){
 
@@ -48,16 +51,16 @@ function makeEntryPage($record){
 
 		if($xml){
 
-			$xsl = new DOMDocument;
+            $xsl = new DOMDocument;
 			$xsl->load(dirname(__FILE__)."/../xsl/wordml2TEI.xsl");
-
+            
 			$proc = new XSLTProcessor();
 			$proc->importStyleSheet($xsl);
 
-			$xml->loadXML($proc->transformToXML($xml));
+            $xml->loadXML($proc->transformToXML($xml));
 			$xsl->load(dirname(__FILE__)."/../xsl/tei_to_html_basic2.xsl");
 			$proc->importStyleSheet($xsl);
-
+            
 			$doc_content = $proc->transformToXML($xml);
 		}
 	}

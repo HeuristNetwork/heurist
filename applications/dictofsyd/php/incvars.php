@@ -47,7 +47,7 @@
     
     define('HEURIST_THUMB_DIR', '/var/www/html/HEURIST/HEURIST_FILESTORE/' . HEURIST_DBNAME . '/filethumbs/');
     define('HEURIST_THUMB_BASE_URL', DOMAIN.'HEURIST_FILESTORE/' . HEURIST_DBNAME . '/filethumbs/');
-    //define('DOS_FILES', DOMAIN.'uploaded-heurist-files/dos/');  // Heurist Vsn2 file path
+    //define('DOS_FILES', DOMAIN.'HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/dos/');  // Heurist Vsn2 file path
        
     /*  END FILE PATHS, PASSWORDS ETC. WHICH MAY REQUIRE CHANGING */
   
