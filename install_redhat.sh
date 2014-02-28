@@ -70,6 +70,9 @@ sudo yum install php-mysql php-pecl-memcache php-devel php-pecl-memcached php-gd
 # TODO: check this: Added from Ubuntu install 23/1/14 - may be superfluous, not yet tested
 sudo yum install php-curl php-xsl pv
 
+# needed by FAIMS module output
+sudo yum install zip unzip
+
 # TODO: Review rest of script against the Ubuntu install script
 
 sed 's/^display_errors = .*/display_errors = Off/' < /etc/php.ini | sudo tee /etc/php.ini

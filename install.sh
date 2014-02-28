@@ -62,6 +62,9 @@ echo "Installing tasksel etc"
 sudo apt-get install tasksel software-properties-common python-software-properties -y >> install.log
 echo "Tasksel installed"
 
+# needed by FAIMS module output
+sudo apt-get install zip unzip
+
 # contains backports of spatialite 3.1.0 RC 2 (aka 3.0.1 as released)
 
 echo "Repo added for spatiallite"
