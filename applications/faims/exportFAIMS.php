@@ -36,7 +36,7 @@
     $rt_toexport = @$_REQUEST['frt'];
     
 //error_log(print_r($rt_toexport, true));
-//error_log(print_r($rt_toexport_toplevel, true));
+error_log(print_r($rt_toexport_toplevel, true));
     
     $projname = @$_REQUEST['projname'];
     $step = @$_REQUEST['step'];
@@ -749,11 +749,14 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 
      
         //all top level rectyps will be in this list
-        $rectypes = new SimpleXMLElement(
+    $rectypes = $body_controldata->addChild('select1');
+    $rectypes->addAttribute('ref', 'rectypeList');
+    $rectypes->addChild('label','Select record type:');
+        /*$rectypes = new SimpleXMLElement(
         '<select1 ref="rectypeList">
           <label>Select record type:</label>
         </select1>');
-        xml_adopt($body_controldata, $rectypes);        
+        xml_adopt($body_controldata, $rectypes); */
         
         // new record button
         $trigger = new SimpleXMLElement('<trigger ref="newRecord"><label>Create New Record</label></trigger>');
@@ -972,8 +975,9 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                $rtnamex = "Rectype".$rt;
         }
         
+//error_log(">>>> ".$rt."  ".in_array($rt, $rt_toexport_toplevel));
         //add to rectypes list on control/data  - this is list of rectypes that can be searched/edit directly from main page
-        if( in_array($rt, $rt_toexport_toplevel, true) ){
+        if( in_array($rt, $rt_toexport_toplevel) ){
                 $item = $rectypes->addChild('item');
                 $item->label = getResStrA16n(prepareText($rtname));
                 $item->value = $rtnamex;
@@ -998,11 +1002,29 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         $group->addAttribute('ref', $headername);
         $group->addChild('label', 'Gen'); // getResStrA16n(prepareText($descr)) );
 
+        // second hidden tab - contains record UID and pointers UID values
+        $tab_uids = $header_rectypeform->addChild($rtnamex."_uids");
+        $tab_uids->addChild('FAIMS_UID');  
+        $group_uids = $body_rectypeform->addChild('group');
+        $group_uids->addAttribute('ref', $rtnamex."_uids");
+        $group_uids->addAttribute('faims_hidden', 'true');
+        $group_uids->addChild('label', 'UIDs');
+        
+        $input = new SimpleXMLElement(
+        '<input ref="FAIMS_UID" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+          <label>UID</label>
+        </input>');
+        xml_adopt($group_uids, $input);            
+        
+        //
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         
         $hasattachfile = false;
         
         $contaier_no = 1; //container for resource field type
+        
+        $cnt_pertab = 0;
+        $issectab = false;
 
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
@@ -1030,12 +1052,16 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                 
                 $hasattachfile = false;
             
-                //create new tab
-                $headername = $rtnamex.'_'.$dtdisplaynamex;
-                $tab = $header_rectypeform->addChild($headername); //first tab
-                $group = $body_rectypeform->addChild('group'); //first tab
-                $group->addAttribute('ref', $headername);
-                $group->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
+                if($issectab || $cnt_pertab>0){
+                    //create new tab
+                    $headername = $rtnamex.'_'.$dtdisplaynamex;
+                    $tab = $header_rectypeform->addChild($headername); //first tab
+                    $group = $body_rectypeform->addChild('group'); //first tab
+                    $group->addAttribute('ref', $headername);
+                    $group->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
+                    $cnt_pertab=0;
+                    $issectab = true;
+                }
             }
            
             
@@ -1051,6 +1077,14 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                 $dt_pointers = $detail[$idx_rst_pointers];
                 $dt_pointers = explode(",", $dt_pointers);
                 if(count($dt_pointers)>0){ //ignore unconstrained
+                    
+                    //add to uids tab
+                    $tab_uids->addChild($dtdisplaynamex.'_UID');
+                    $input = new SimpleXMLElement(
+                        '<input ref="'.$dtdisplaynamex.'_UID" faims_annotation="false" faims_certainty="false" faims_attribute_name="'.prepareText($dtdisplayname).'" faims_attribute_type="freetext">
+                            <label/>
+                        </input>');
+                    xml_adopt($group_uids, $input);                                        
                 
                     $container = new SimpleXMLElement(
                       '<container'.$contaier_no.'>
@@ -1068,12 +1102,12 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                         '<group faims_style="orientation" ref="container'.$contaier_no.'">
                           <label/>
                           <group faims_style="even" ref="child1">
-                            <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
-                            <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false" faims_attribute_name="'.prepareText($dtdisplayname).'" faims_attribute_type="freetext">
-                                <label/>
+                            <label/>
+                            <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false">
+                                <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
                                 <item>
                                     <label>browse for resource record</label>
-                                    <value></value>
+                                    <value>null</value>
                                 </item>
                             </select1>
                           </group>
@@ -1200,6 +1234,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                     $bind->addAttribute('type', $ftype);
                 }
             }
+            
+            $cnt_pertab++;
 /*
             if($dt_type=='enum' || $dt_type=='relationtype'){
                 $terms = $detail[$int_rt_termtree];
@@ -1277,6 +1313,9 @@ function generate_Logic($projname, $rt_toexport){
             }
         ';
         
+                $event_section .= '
+onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
+        
         $load_related_part = '';
         
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
@@ -1285,6 +1324,9 @@ function generate_Logic($projname, $rt_toexport){
         
         $hasattachfile = false;
         $headername = $rtnamex."/".$rtnamex.'_General_Information'; //first tab implied if no header at top of record
+        $headername_uids = $rtnamex."/".$rtnamex.'_uids'; //first tab implied if no header at top of record
+        $cnt_pertab = 0;
+        $issectab = false;
 
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
@@ -1309,7 +1351,11 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
 */                
                 $hasattachfile = false;
                 //new tab
-                $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
+                if($issectab || $cnt_pertab>0){
+                    $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
+                    $issectab=true;
+                    $cnt_pertab=0;
+                }
             }
             
             if(!in_array($dt_type, $supported)){
@@ -1332,6 +1378,8 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
                     $action = 'attachFileTo';
                     $hasattachfile = true;
                 }
+              
+                
                 
                 $event_section .= '
 onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
@@ -1371,14 +1419,15 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", "br
                     }//for
 
                     $event_section .= ' 
-onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';                
+onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\",\"'.$headername_uids.'/'.$dtdisplaynamex.'_UID\")");';                
                 
-                    $load_related_part .= '                
-    fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
+                    $load_related_part .= '
+                    fillPointer("'.$headername.'/'.$dtdisplaynamex.'","'.$headername_uids.'/'.$dtdisplaynamex.'_UID");';
                 }
             }     
             //TODO  - support pointer, relmarker       
             
+            $cnt_pertab++;
         }//for detail types
         
 /* art temp 2014-02-28                   
@@ -1390,9 +1439,8 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
 
         if($load_related_part!=''){
                 $load_related .= '                
-if(rectype=="'.$rtnamex.'"){
-    '.$load_related_part.
-'   return;
+if("'.$rtnamex.'".equals(rectype)){'.$load_related_part.'
+    return;
 }
 ';
         }
@@ -1417,7 +1465,7 @@ getEntityNameByRectype(rectype) {
 }
 
 //loop for each enum field for every rectype 
-loadTestAllFieldTypesAttributes(){
+loadAllAttributes(){
     showToast("load attributes");
     '.$load_selectors.'
 }
@@ -1441,12 +1489,12 @@ ArrayList tabs_select = new ArrayList();
 
 /*** EVENTS ***/
 onEvent("control/data", "show", "refreshEntities()");
+onEvent("control/data/rectypeList", "click", "refreshEntities()");
 onEvent("user/usertab/login", "click", "login()"); 
 
 onEvent("control/data/recordList", "click", "loadRecord()"); //load particular record
 onEvent("control/data/newRecord", "click", "newRecord()");
 //selectresource tab
-onEvent("TestAllFieldTypes", "show", "onShowEditForm(\"TestAllFieldTypes\")");
 onEvent("selectresource/data", "show", "onShowSelect()");
 onEvent("selectresource/data/recordList", "click", "onSelectRecord()");
 onEvent("selectresource/data/newRecord", "click", "onNewRecordInSelect()");
@@ -1548,16 +1596,17 @@ onSelectRecord() {
     populateDropDown(fieldpath, loadEntity(record_id) );
 }
 //
-clearPointer(fieldname){
+clearPointer(fieldname,fieldname_uid){
     ArrayList pairs = new ArrayList();
     pairs.add(new NameValuePair("browse for resource record", ""));
     populateDropDown(fieldname, pairs );
+    setFieldValue(fieldname_uid, "");
 }
 //fill pointer field
-fillPointer(fieldname){
-    String res_id = getFieldValue(fieldname);
-    if(null==res_id || "".equals(res_id)){
-        clearPointer(fieldname);
+fillPointer(fieldname,fieldname_uid){
+    String res_id = getFieldValue(fieldname_uid);
+    if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
+        clearPointer(fieldname,fieldname_uid);
     }else{
         populateDropDown(fieldname, loadEntity(res_id));
     }
@@ -1590,7 +1639,7 @@ loadRecordById(entid, rectype) {
     showToast(entid);
     showTabGroup(rectype, entid);
     
-    setFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID", entid);
+    setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", entid);
     
     loadRelatedRecords(rectype); 
     //updateRelns();
@@ -1625,7 +1674,7 @@ saveRecord(rectype) {
         return;
     }
     
-    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
     if("".equals(record_id)){
         record_id=null;
     }
@@ -1635,17 +1684,17 @@ saveRecord(rectype) {
         //data = entity.getGeometryList();
     }
     // first null is map data
-    saveTabGroup(rectype, record_id, null, null, "setFieldValue(\""+rectype+"/"+rectype+"_General_Information/FAIMS_UID\", getLastSavedRecordId());");
+    saveTabGroup(rectype, record_id, null, null, "setFieldValue(\""+rectype+"/"+rectype+"_uids/FAIMS_UID\", getLastSavedRecordId());");
 }
 
 deleteRecord(rectype){
-    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
     if (!isNull(record_id)) {
         showAlert("Confirm Deletion", "Press OK to Delete this record!", "deleteRecordConfirmed(\""+rectype+"\")", "deleteRecordCanceled()");
     }
 }
 deleteRecordConfirmed(rectype){
-    String record_id = getFieldValue(rectype+"/"+rectype+"_General_Information/FAIMS_UID");
+    String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
     deleteArchEnt(record_id);
     cancelTabGroup(rectype, false);
 }
@@ -1714,7 +1763,7 @@ stopSync() {
     setFileSyncEnabled(false);
 }
 
-loadTestAllFieldTypesAttributes();
+loadAllAttributes();
 ';
     
 return $out;   
