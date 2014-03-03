@@ -617,11 +617,11 @@ function EditTerms() {
 			for (ind in sibs){
 				if(!Hul.isnull(ind)){
 					if(sibs[ind].label == new_name){
-						alert("There is already the term with the same label in this branch");
+						alert("Duplicate term - there is already a term with the same label in this branch at this level");
 						return false;
 					}
 					if(new_code!='' && sibs[ind].data.termcode == new_code){
-						alert("There is already the term with the same code in this branch");
+						alert("There is already a term with the same standard code in this branch");
 						return false;
 					}
 				}
