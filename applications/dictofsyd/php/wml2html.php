@@ -46,7 +46,7 @@ if(@$_REQUEST['id']){
 		$xml->load($filename);
 
 	}else{
-		$url = "http://heuristscholar.org/h3-ao/records/files/downloadFile.php?db=dos_1&ulf_ID=".$rec_id;
+		$url = "http://heuristscholar.org/h3-ij/records/files/downloadFile.php?db=dos_1&ulf_ID=".$rec_id;
 		$data = loadRemoteURLContentWithRange($url, null);
 		if($data){
 			$xml->loadXML($data);

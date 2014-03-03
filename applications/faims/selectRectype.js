@@ -129,7 +129,7 @@
 
             var URL;
             var args = $("#rt_selected").val();
-            var URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=select&db="+_db;
+            var URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=select&db="+_db;
 
             if(args) {
                 URL =  URL + "&ids=" + args;

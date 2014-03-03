@@ -160,7 +160,7 @@ function update_counts(divid, processed, added, total) {
 					print "<p><b>Folders to scan :</b> $mediaFolders<p>";
 					print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 				}
-				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
+				print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
 				"Set media folders</a><p>";
 
 

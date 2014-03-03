@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
-require_once(dirname(__FILE__).'/../admin/setup/getCurrentVersion.php');
+require_once(dirname(__FILE__).'/../admin/setup/dbproperties/getCurrentVersion.php');
 
 mysql_connection_overwrite(DATABASE);
 

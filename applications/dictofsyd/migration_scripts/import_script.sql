@@ -39,7 +39,7 @@ set r1.rec_URL=rd.rd_val where r1.rec_id=rd.rd_rec_id and rd.rd_type=198;
 insert into recUploadedFiles (`ulf_ID`, `ulf_OrigFileName`, `ulf_UploaderUGrpID`, `ulf_Added`, `ulf_Modified`, `ulf_ObfuscatedFileID`, `ulf_PreferredSource`, `ulf_Thumbnail`, `ulf_Description`, `ulf_MimeExt`, `ulf_FileSizeKB`, `ulf_FilePath`, `ulf_FileName`)
 SELECT `file_id`, `file_orig_name`, 2, current_timestamp, current_timestamp, `file_nonce`, 'local',
 `file_thumbnail`, `file_description`, LOWER(SUBSTRING_INDEX(`file_orig_name`,'.',-1)) AS ext,
-round(SUBSTRING_INDEX(`file_size`,' ',1)) as fsize, '/var/www/htdocs/uploaded-heurist-files/dos/' as path, `file_id` as fname
+round(SUBSTRING_INDEX(`file_size`,' ',1)) as fsize, '/var/www/html/HEURIST/HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/dos/' as path, `file_id` as fname
 FROM `heuristdb-dos`.`files` where 1;
 
 insert into recDetails (`dtl_ID`, `dtl_RecID`, `dtl_DetailTypeID`, `dtl_Value`, `dtl_UploadedFileID`, `dtl_Geo`, `dtl_ValShortened`)

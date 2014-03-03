@@ -1,14 +1,15 @@
 #! /bin/sh
 
-# Preliminary installation script for Heurist on Ubuntu, rev Sept 2013 by Brian Ballsun-Stanton
+# Preliminary Heurist installation script for Heurist on Ubuntu
+# Initial script Brian Ballsun-Stanton Sept 2013, extended and revised by Ian Johnson
 
 # (https://code.google.com/p/heurist/)
-# This script takes something of a brute force approach to making sure everythign is up-to-date. It could certainly be imporved.
+# This script takes something of a brute force approach to making sure everything is up-to-date. It could certainly be imporved.
 
 if [ -z $1 ] 
    then 
       echo -e "\n\n"
-      echo "Please supply version eg. h3.x.x or h3_alpha, h3_beta, h3_latest (this MUST exist as tar.bz2 on Google Code or script will not download Heurist code)" 
+      echo "Please supply version eg. h3.x.x or h3_alpha, h3_beta, h3_latest (this MUST exist as a tar.bz2 file on Google Code or script will not download Heurist code package)" 
       exit
    fi
  
@@ -36,7 +37,7 @@ echo -e "\n\n"
 echo "This installation is fairly radical in upgrading all required software to latest versions"
 echo "We do not recommend using it on servers which depend on old versions of software for existing applications to work"
 echo "It should be fine on new servers without much in the way of exsiting applications."
-echo "Progress and errors go to terminal, other messages to file install.log"
+echo "Progress and errors go to terminal, other messages to file called install.log"
 echo "Typical install time on a virtual server is about 15 - 30 minutes"
 
 echo -e "\n"  
@@ -50,7 +51,7 @@ echo "Do not let your session time out or you will need to start over"
 
 echo -e "\n"  
 
-echo "You may see a sudo error or two below - unable to resolve host - do not panic, this is expected"
+echo "You may see a couple of unable-to-resolve-host sudo errors below - do not panic, this is expected"
 
 sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
 
@@ -60,6 +61,9 @@ echo "Installing tasksel etc"
 # TODO erring on more is better, cleanup later
 sudo apt-get install tasksel software-properties-common python-software-properties -y >> install.log
 echo "Tasksel installed"
+
+# needed by FAIMS module output
+sudo apt-get install zip unzip
 
 # contains backports of spatialite 3.1.0 RC 2 (aka 3.0.1 as released)
 
@@ -73,16 +77,9 @@ fi
 sudo apt-get update >> install.log
 sudo apt-get upgrade -y >> install.log
 
-echo -e "\n"
+echo -e "\n\n"
 
-echo "System upgraded. I hope you wanted that done ..."
-
-
-
-
-# this does not work to pause
-read -p "Press [Enter] key to start LAMP stack install..."
-
+echo "System upgraded top latest versions, about to install LAMP stack, PHP 5 extensions, spatialLite"
 
 sudo tasksel install lamp-server
 
@@ -92,9 +89,6 @@ sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-de
 sudo apt-get install php5-pdo php5-mbstring
 
 sudo apt-get build-dep libspatialite-dev -y >> install.log
-
-
-
 
 
 wget http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "downloads failed. exiting." ; exit 1; }
@@ -109,6 +103,9 @@ sudo make | pv -p -s 115351 -e > /tmp/compile2.log
 sudo make install | pv -p -s 15628 -e > /tmp/compile3.log
 
 sudo ldconfig
+
+
+echo -e "\n\n"
 
 echo "Main PHP libraries installed"
 
@@ -149,58 +146,58 @@ echo "Apache restarted"
 
 echo -e "\n\n\n\n"
 
+# added 24/2/14. Everything now lives in /var/www/HEURIST with appropriate simlinks
+echo "Changing to /var/www and creating HEURIST directory"
+cd /var/www
+sudo mkdir HEURIST
+sudo mkdir /var/www/HEURIST/HEURIST_SUPPORT
+sudo chown -R www-data:www-data /var/www/HEURIST/
+
 echo -e "Now fetching Heurist code from Google Code site"
 wget https://heurist.googlecode.com/files/$1.tar.bz2 
-
-tar -xjf $1.tar.bz2
-
+sudo tar -xjf $1.tar.bz2
+sudo rm $1.tar.bz2
+sudo mv $1/ /var/www/HEURIST/h3
+cd /var/www
+ln -s HEURIST/h3
+cd /var/www/HEURIST_SUPPORT
+wget https://heurist.googlecode.com/files/external.tar.bz2
+sudo tar -xjf external.tar.bz2
+sudo rm external.tar.bz2
+# TODO: WE ALSO NEED help and exemplars download <<<<<<<<<<<<<<<< TO DO
 echo "Heurist unpacked"
-
-sudo mv $1/ /var/www/h3
-
-cd /var/www/
-
-sudo wget https://heurist.googlecode.com/git/favicon.ico
 
 cd /var/www/h3/
 
-# not sure why we fetched this as it is already in the code
-# sudo wget https://heurist.googlecode.com/git/favicon.ico
-
 echo -e "\n\n\n"
-
 echo "You will be asked for your mysql root password to allow creation of the default database"
 
-echo "CREATE DATABASE hdb_ExampleDB" | mysql -uroot -p
-
-echo "Please enter your mysql root password... again..."
-mysql -uroot -p hdb_ExampleDB < /var/www/h3/admin/setup/buildExampleDB.sql
+# Added database creation to buildExampleDB script 24/2/14 so password doesn't need to be entered twice
+# echo "CREATE DATABASE hdb_H3Sandpit" | mysql -uroot -p
+echo "Please enter your MySQL root password to allow creation of the default database"
+mysql -uroot -p  < /var/www/HEURIST/h3/admin/setup/dbcreate/buildExampleDB.sql
 
 echo -e "\n\n"
 echo "Creating directories and setting permissions"
 
-sudo chown -R www-data:www-data /var/www/h3/
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit
+sudo chown -R www-data:www-data /var/www/HEURIST/
 
-sudo mkdir /var/www/HEURIST_FILESTORE
-sudo chown www-data:www-data /var/www/HEURIST_FILESTORE
+sudo cp -r /var/www/HEURIST/h3/admin/setup/rectype-icons/ /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/HEURIST/h3/admin/setup/smarty-templates/ /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/HEURIST/h3/admin/setup/xsl-templates/ /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
+sudo mkdir /var/www/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 
-sudo cp -r /var/www/h3/admin/setup/rectype-icons/ /var/www/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/h3/admin/setup/smarty-templates/ /var/www/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/h3/admin/setup/xsl-templates/ /var/www/HEURIST_FILESTORE/ExampleDB
-
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/filethumbs
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/generated-reports
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/hml-output
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/html-output
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/scratch
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/settings
-sudo mkdir /var/www/HEURIST_FILESTORE/ExampleDB/backup
-
-sudo chown -R www-data:www-data /var/www/HEURIST_FILESTORE
-sudo chmod -R gu+rwx  /var/www/HEURIST_FILESTORE
-sudo chmod -R a+r /var/www/HEURIST_FILESTORE
+sudo chown -R www-data:www-data /var/www/HEURIST/HEURIST_FILESTORE
+sudo chmod -R 755  /var/www/HEURIST/HEURIST_FILESTORE
 
 echo -e "\n\n\n\n\n\n"
 
@@ -214,6 +211,9 @@ echo "Please edit configIni.php to set your MySQL root user + password (twice, c
 echo -e "\n\n"
 echo "Now do this:    cd /var/www/h3"
 echo "                sudo nano configIni.php       and set MySQL passwords"
+echo -e "\n\n"
+echo "You may wish to move HEURIST_FILESTORE from its current location (/var/www/HEURIST) to a location with plenty of space allocation"
+echo "and add a simlink in its original location. This move is recommended since there is normally limited space on /var/www"
 echo -e "\n\n"
 echo "WARNING: Bug in creation of php.ini at 2/10/13 - please check whether /etc/php5/apache2/php.ini is blank"
 echo "         If so, copy a valid php.ini file into this location, otherwise the search interface fails to "

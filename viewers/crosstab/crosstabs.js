@@ -90,7 +90,7 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
             $("#vars").hide();
             $("#shows").hide();
             $("#btnPanels").hide();
-            $("#nofields").html(recordtype>0?'No suitable fields: numeric or enumeration types.':'Select record type.');
+            $("#nofields").html(recordtype>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
             $("#nofields").show();
         }else{
             $("#vars").show();
@@ -582,7 +582,6 @@ function CrosstabsAnlysis(_database, _query, _query_domain) {
                             fields3[name].intervals[idx].name = $dlg.find("#intname").val();
 
                             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-
                                 var sels = $dlg.find("input:checked")
                                 $.each(sels, function(i, ele){
                                     fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );

@@ -2515,7 +2515,7 @@ s
                 }
 
                 top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-                    "admin/structure/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
+                    "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
                         "no-resize": true,
@@ -2532,7 +2532,7 @@ s
 
             }else{
                 top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-                    "admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
+                    "admin/structure/terms/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
                     {//options
                         "close-on-blur": false,
                         "no-resize": true,

@@ -17,12 +17,12 @@
 /**
 * utilsTitleMask.php
 * Three important functions in this file:
-* check_title_mask($mask, $rt) => returns an error string if there is a fault in the given mask for the given reference type
-* fill_title_mask($mask, $rec_id, $rt) => returns the filled-in title mask for this bibliographic entry
-* titlemask_make($mask, $rt, $mode, $rec_id=null) => converts titlemask to coded, humanreadable or fill mask with values
+*   check_title_mask($mask, $rt) => returns an error string if there is a fault in the given mask for the given reference type
+*   fill_title_mask($mask, $rec_id, $rt) => returns the filled-in title mask for this bibliographic entry
+*   titlemask_make($mask, $rt, $mode, $rec_id=null) => converts titlemask to coded, humanreadable or fill mask with values
 * Various other utility functions starting with _titlemask__ may be ignored and are unlikely to invade your namespaces.
 * 
-* Note that title masks have been updated (AO late 2013) to remove the awkward storage of two versions - 'canonical' and human readable. 
+* Note that title masks have been updated (Artem Osmakov late 2013) to remove the awkward storage of two versions - 'canonical' and human readable. 
 * They are now read and used as internal code values (the old 'canonical' form), decoded to human readable for editing, 
 * and then recoded back to internal codes for storage, as per original design.
 *
@@ -46,7 +46,7 @@ define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid
 define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
-define('_ERROR_MSG', "Please go to Designer View > Essentials > Record types/fields and edit the title mask for this record type");
+define('_ERROR_MSG', "Title mask not properly defined for this record type: please edit through Designer View > Essentials > Record types/fields");
 
 /**
 * Check that the given title mask is well-formed for the given reference type
@@ -95,7 +95,7 @@ function titlemask_value($mask, $rec_id) {
         $rt = $rec_value['rec_RecTypeID'];
         return titlemask_make($mask, $rt, 0, $rec_id, _ERR_REP_WARN);
    }else{
-        return "Titlemask not generated. Record ".$rec_id." not found";
+        return "Title mask not generated. Record ".$rec_id." not found";
    }
 }
 
@@ -113,7 +113,7 @@ function titlemask_value($mask, $rec_id) {
 function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN) {
 
     if (!$mask) {
-        return ($rep_mode==_ERR_REP_WARN)?"Titlemask is not defined":"";
+        return ($rep_mode==_ERR_REP_WARN)?"Title mask is not defined":"";
     }
 
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
@@ -162,21 +162,13 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
 
             $puncts = '-:;,.@#|+=&'; // These are stripped from end of title if no field data follows them
-            $puncts2 = '-:;,@#|+=&';
+            $puncts2 = '-:;,@#|+=&'; // same less period
             
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts.'/\\s]*\\)!s', '(\\1)', $title);
             $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
-        
-/*          TODO: Old version, removed 4th Jan 2014, to delete  
-            $title = preg_replace('!^[-:;,./\\s]*(.*?)[-:;,/\\s]*$!s', '\\1', $title);
-            $title = preg_replace('!\\([-:;,./\\s]+\\)!s', '', $title);
-            $title = preg_replace('!\\([-:;,./\\s]*(.*?)[-:;,./\\s]*\\)!s', '(\\1)', $title);
-            $title = preg_replace('!\\([-:;,./\\s]*\\)|\\[[-:;,./\\s]*\\]!s', '', $title);
-            $title = preg_replace('!^[-:;,./\\s]*(.*?)[-:;,/\\s]*$!s', '\\1', $title);
-*/            
             $title = preg_replace('!,\\s*,+!s', ',', $title);
             $title = preg_replace('!\\s+,!s', ',', $title);
         }
@@ -458,7 +450,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (is_array($rt)){
         //ERROR
-        return array("$field_name was tested with Array of record types - bad parameter");
+        return array("Field name '$field_name' was tested with Array of record types - bad parameter");
         // TODO: what does this error message mean? Make it comprehensible to the user
     }
 
@@ -475,7 +467,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
         $rdt_id = _titlemask__get_dt_field($rt, $field_name);  //get concept code
         if(!$rdt_id){
             //ERROR
-            return array("Field $field_name not recognised");
+            return array("Field name '$field_name' not recognised");
         }else {
             return _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id );
         }
@@ -509,20 +501,20 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 }else{
                     //ERROR
-                    return array("$inner_field_name is an unrecognised qualifier for a terms list field");
+                    return array("'$inner_field_name' is an unrecognised qualifier for a terms list field");
                 }
             }
             if($dt_type== 'relmarker') { //@todo - to implement it in nearest future
-                return array("$parent_field_name is relmarker field type. Not supported at the moment");
+                return array("'$parent_field_name' is a relationship marker field type. This type is not supported at present.");
             }
             if($dt_type!== 'resource') {
                 //ERROR
-                return array("$parent_field_name must be either enum or resource(record pointer) field type");
+                return array("'$parent_field_name' must be either a terms list or a record pointer field type");
             }
 
         }else{
             //ERROR
-            return array("$parent_field_name not recognised");
+            return array("'$parent_field_name' not recognised as a field name");
         }
     } else {
         return "";

@@ -70,6 +70,9 @@ sudo yum install php-mysql php-pecl-memcache php-devel php-pecl-memcached php-gd
 # TODO: check this: Added from Ubuntu install 23/1/14 - may be superfluous, not yet tested
 sudo yum install php-curl php-xsl pv
 
+# needed by FAIMS module output
+sudo yum install zip unzip
+
 # TODO: Review rest of script against the Ubuntu install script
 
 sed 's/^display_errors = .*/display_errors = Off/' < /etc/php.ini | sudo tee /etc/php.ini
@@ -128,26 +131,26 @@ sudo chmod a+r HEURIST_FILESTORE
 # ----------------------------------------------------------------
 
 echo -e "\n\n\n\n"
-echo "Creating ExampleDB database"
+echo "Creating H3Sandpit database"
 echo -e "\n"
 
-echo "CREATE DATABASE hdb_ExampleDB" | mysql -uroot -p
+echo "CREATE DATABASE hdb_H3Sandpit" | mysql -uroot -p
 
 echo "Please enter your mysql root password... again..."
-mysql -uroot -p hdb_ExampleDB < /var/www/html/$1/admin/setup/buildExampleDB.sql
+mysql -uroot -p hdb_H3Sandpit < /var/www/html/$1/admin/setup/dbcreate/buildExampleDB.sql
 
-# Build ExampleDB as a starting point (may need to change to IntroDB or H3Sandpit)
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/filethumbs
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/generated-reports
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/hml-output
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/html-output
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/scratch
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/settings
-sudo mkdir /srv/HEURIST_FILESTORE/ExampleDB/backup
-sudo cp -r /var/www/html/$1/admin/setup/rectype-icons/ /srv/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/html/$1/admin/setup/smarty-templates/ /srv/HEURIST_FILESTORE/ExampleDB
-sudo cp -r /var/www/html/$1/admin/setup/xsl-templates/ /srv/HEURIST_FILESTORE/ExampleDB
+# Build H3Sandpit database as starting point
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/filethumbs
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/generated-reports
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/hml-output
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/html-output
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/scratch
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/settings
+sudo mkdir /srv/HEURIST_FILESTORE/H3Sandpit/backup
+sudo cp -r /var/www/html/$1/admin/setup/rectype-icons/ /srv/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/html/$1/admin/setup/smarty-templates/ /srv/HEURIST_FILESTORE/H3Sandpit
+sudo cp -r /var/www/html/$1/admin/setup/xsl-templates/ /srv/HEURIST_FILESTORE/H3Sandpit
 
 # ----------------------------------------------------------------
 

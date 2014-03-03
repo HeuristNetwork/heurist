@@ -804,7 +804,7 @@ FlexImport = (function () {
 
 								var dtid = e.target.id2;
 								var url = HeuristBaseURL+
-									"admin/structure/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
+									"admin/structure/fields/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
 
 								top.HEURIST.util.popupURL(top, url,
 								{	"close-on-blur": false,

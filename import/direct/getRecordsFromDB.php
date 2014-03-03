@@ -132,7 +132,7 @@ Make sure the target records and field types are compatible. <b>If you get the c
 This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 2-36) for each record
 <br/>This field does not exist in the database - please import it from the Heurist Core definitions database (db#2)
 <br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.
-<a href="../../admin/structure/selectDBForImport.php?db=<?=HEURIST_DBNAME ?>" title="Import database structure elements"
+<a href="../../admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME ?>" title="Import database structure elements"
             target=_blank><b>Import structure elements</b></a> (loads in new tab)
 <br/>(choose H3 Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)
 <br/>Reload this page after importing the field
@@ -1366,7 +1366,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				global $sourcedbname, $dbPrefix, $db_prefix;
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$HEURIST_UPLOAD_ROOT_OLD =	HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/";
+				$HEURIST_UPLOAD_ROOT_OLD =	HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/";
 				$_src_HEURIST_UPLOAD_DIR =  $HEURIST_UPLOAD_ROOT_OLD.$sourcedbname.'/';
 
 

@@ -65,7 +65,8 @@ require_once('fileUtils.php');
 
 $baseURL = "http://dictionaryofsydney.org/";
 $localURL = "http://heuristscholar.org/maritime/";
-$localFolder = "/var/www/htdocs/maritime/cache/";
+// THIS NEEDS SETTING TO AN APPROPRIATE PATH
+$localFolder = "/var/www/htML/maritime/cache/";
 
 if(array_key_exists('htm', $_REQUEST)){
 

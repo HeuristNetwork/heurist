@@ -33,6 +33,8 @@
 
 define('ROOTINIT', 1);
 require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
+// TODO: something fishy: above path appears wrong, although phpEd navigates from this to the applyCredentials file 
+// However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang. 
 if (!is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
 	//HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
@@ -52,7 +54,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 		//window.history.pushState("object or string", "Title", location.pathname+'?db=
 
 	} else if ($mode == "rectype") {
-		$url = "structure/manageRectypes.php?db=" . HEURIST_DBNAME;
+		$url = "structure/rectypes/manageRectypes.php?db=" . HEURIST_DBNAME;
 		if (array_key_exists('rtID', $_REQUEST)) {
 			$rtID = $_REQUEST['rtID'];
 			$url = $url . "&rtID=" . $rtID;
@@ -140,13 +142,13 @@ if (array_key_exists('mode', $_REQUEST)) {
 					<span class="description">The main functions needed to create and design a database</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
+						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 								type="List the databases on the current server to which you have access">Open database</a></li>
-						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
+						<li><a href="#" onClick="loadContent('setup/dbcreate/createNewDB.php')"
 								type="Create a new database with essential structure elements">New database</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
-						<li><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 								title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
 						<li><a href="#"
 								onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
@@ -159,33 +161,30 @@ if (array_key_exists('mode', $_REQUEST)) {
 				<div class="adminSection">
 					<ul>
 
-						<li class="seperator"><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
+						<li class="seperator"><a href="#" onClick="loadContent('../common/connect/getListOfDatabases.php')"
 							type="List the databases on the current server to which you have access">Open database</a></li>
-						<li><a href="#" onClick="loadContent('setup/createNewDB.php')"
+						<li><a href="#" onClick="loadContent('setup/dbcreate/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
-						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dboperations/cloneDatabase.php?db=<?=HEURIST_DBNAME?>')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
 <?php
 if (is_admin()) {
 ?>
-						<li><a href="setup/deleteCurrentDB.php?db=<?=HEURIST_DBNAME?>"
+						<li><a href="setup/dboperations/deleteCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Delete a database completely">Delete entire database</a></li>
-						<li><a href="setup/clearCurrentDB.php?db=<?=HEURIST_DBNAME?>"
+						<li><a href="setup/dboperations/clearCurrentDB.php?db=<?=HEURIST_DBNAME?>"
 							title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
 <?php
 }
 ?>
-						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('setup/dbproperties/registerDB.php?db=<?=HEURIST_DBNAME?>')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
-						<li><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dbproperties/editSysIdentification.php?db=<?=HEURIST_DBNAME?>')"
 							title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
-						<li><a href="#" onClick="loadContent('setup/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('setup/dbproperties/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>')"
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=<?=HEURIST_DBNAME?>')"
-							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
-                        <li><a href="#" onClick="loadContent('setup/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
-                            title="Summary statistics for all Heurist databases on this server">Statistics</a></li>
-                            
+							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>                            
 					</ul>
 				</div>
 
@@ -193,31 +192,29 @@ if (is_admin()) {
 				<span class="description">Design data types and data entry rules for the database</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 							title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
-						<li><a href="#" onClick="loadContent('structure/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/rectypes/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define constraints on the record types which can be related, and allowable relationship types">Record constraints</a></li>
-						<li  class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+						<li  class="seperator"><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 								title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/fields/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Direct access to the global field definitions">Manage field types</a></li>
-						<li><a href="#" onClick="loadContent('structure/editTerms.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/terms/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>
-                                
                         <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=relations')"
                                 title="Display/print a listing of the record types and their pointers and relationships, including usage counts">Relationships schema</a></li>
                         <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=simple')"
                                 title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">Simple fields schema</a></li>
                         <li><a href="#" onClick="loadContent('describe/listRectypeRelations.php?db=<?=HEURIST_DBNAME?>&action=all')"
                                 title="Display/print a listing of the record types and all fields, including usage counts">Combined schema</a></li>                                
-                                
 						<li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=<?=HEURIST_DBNAME?>')"
 								title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
-						<li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
+						<li><a href="#" onClick="loadContent('describe/getDBStructureAsSQL.php?db=<?=HEURIST_DBNAME?>&amp;pretty=1')"
 							title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
 						<li><a href="#" onClick="loadContent('describe/getDBStructureAsXForms.php?db=<?=HEURIST_DBNAME?>')"
 							title="Save the record types as XForms">Structure (XForms)</a></li>
-						<li><a href="#" onClick="loadContent('structure/manageMimetypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li><a href="#" onClick="loadContent('structure/mimetypes/manageMimetypes.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define the relationship between file extensions and mime type">Mime types</a></li>
 						<li class="seperator"></li>
 					</ul>
@@ -235,7 +232,7 @@ if (is_admin()) {
 						<li><a href="#"
 								onClick="loadContent('ugrps/quitGroupForSession.php?db=<?=HEURIST_DBNAME?>')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
 						<li class="seperator"><a href="#"
-								onClick="loadContent('setup/getUserFromDB.php?db=<?=HEURIST_DBNAME?>')"
+								onClick="loadContent('ugrps/getUserFromDB.php?db=<?=HEURIST_DBNAME?>')"
 								title="Import users one at a time from another database on the system">Import a user</a></li>
 						<li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
@@ -246,13 +243,15 @@ if (is_admin()) {
 				<h3><a href="#">UTILITIES: </a><span class="description">Verify and fix database integrity, specialised tools</span></h3>
 				<div class="adminSection">
 					<ul>
-						<li class="seperator"><a href="#"
-								onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
-								title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
-						<!-- : Also have capabuility for specific records and rectypes</p> -->
+                        <li class="seperator"><a href="#" onClick="loadContent('describe/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Size and usage statistics for all Heurist databases on this server">Database usage statistics</a></li>
 						<li><a href="#"
-								onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
-								title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
+						    onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
+							title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
+						    <!-- We also have function for specific records and rectypes</p> -->
+						<li><a href="#"
+						    onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
+							title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
 						<!-- <li><a href="#"
 							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=<?=HEURIST_DBNAME?>')"
 							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li> -->
@@ -295,12 +294,12 @@ if (is_admin()) {
 				</div>
 
 
-                <h3><a href="#">FAIMS: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
+                <h3><a href="#">FAIMS & HuNI: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
                 <div class="adminSection">
                     <ul>
                         <li class="seperator"><a href="#"
                                 onClick="loadContent('../applications/faims/about.html?db=<?=HEURIST_DBNAME?>')"
-                                title="Information about the FAIMS project">About FAIMS</a></li>
+                                title="Information about the FAIMS (Federated Archaeological Information Management System) project">About FAIMS</a></li>
 
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/exportFAIMS.php?db=<?=HEURIST_DBNAME?>')"
@@ -316,7 +315,15 @@ if (is_admin()) {
                         <li><a href="#"
                             onClick="loadContent('../applications/faims/exportTDar.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Export the current database as tables, files and metadata directly into a specified tDAR repository">Export to tDAR repository</a></li>
-
+                        
+                        <!-- HuNI -->
+                        <li class="seperator"><a href="#"
+                                onClick="loadContent('../applications/huni/about.html?db=<?=HEURIST_DBNAME?>')"
+                                title="Information about the HuNI (Humanities Networked Infrastructure) project">About HuNI</a></li>
+                          <li><a href="#"
+                            onClick="loadContent('../applications/huni/exportHuNI.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Export data from the current Heurist database to a HuNI-harvestable package of XML files">Export harvestable XML</a></li>
+                                
                     </ul>
                 </div>
 				<!--</div>-->

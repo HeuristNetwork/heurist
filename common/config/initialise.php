@@ -88,7 +88,7 @@ if (!$serverName) {
 	$serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
 }
 define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
-define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/htdocs
+define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/html
 $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
@@ -121,7 +121,7 @@ if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
     returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
 }
 
-// refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/createNewDB.php
+// refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/dbcreate/createNewDB.php
 
 
 define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
@@ -153,7 +153,7 @@ if (@$httpProxy != '') {
         define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
     }
 }
-// upload path eg. /var/www/htdocs/HEURIST_FILESTORE
+// upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE
 if ($defaultRootFileUploadPath) {
 	if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
 		$defaultRootFileUploadPath.= "/"; // append trailing /
@@ -632,7 +632,7 @@ function returnErrorMsgPage($critical, $msg = null) {
         
     } else if ($critical == 3) { // db required upgrade
 
-        $redirect = HEURIST_BASE_URL . "admin/setup/upgradeDatabase.php?db=".HEURIST_DBNAME;
+        $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
     
     } else {
 		// gets to here if database not specified properly. This is an error if set up properly, but not at first initialisaiton of the system

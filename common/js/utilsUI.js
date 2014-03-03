@@ -1323,7 +1323,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 top.HEURIST.detailTypes = context.detailTypes;
                 top.HEURIST.terms = context.terms;
 
-                alert("Database structure definitions have been refreshed");
+                alert("Database structure definitions in memory have been refreshed. You may need to reload pages to see changes.");
             }
         }
 
@@ -1869,9 +1869,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             var regex = /[\[\].\$]+/;
             var name = name.toLowerCase();
             if( name=="id" || name=="modified" || name=="rectitle"){
-                   swarn = lbl+", you defined, is reserved word. Try different";
+                   swarn = lbl+", you defined, is a reserved word. Please try an alternative";
             }else if (regex.test(name) ) {
-                   swarn = lbl+" contains not allowed characters. Try different";
+                   swarn = lbl+" contains punctuation characters which are not permitted in this context. Please use alphanumeric characters.";
             }
             return swarn;
     },
@@ -1915,11 +1915,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     showError: function(msg){
         if(top.HEURIST.util.isempty(msg)){
-            msg = "Incorrect responce from server. Please contact development team if it persists";
+            msg = "Incorrect response from server. Please contact development team if this error persists";
         }else if (Number(msg)===-1){
             msg = "An error occurred trying to contact the database";
         }else if (msg.toLowerCase().indexOf("error")<0){
-            msg = "An error occurred: " + msg;
+            msg = "An unknown error occurred: " + msg;
         }
         alert(msg);
     },
