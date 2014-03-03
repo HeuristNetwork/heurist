@@ -35,6 +35,7 @@
     $g_title = "Dictionary of Sydney";
     $urlbase_absolute = DOMAIN."HEURIST/h3-ij/applications/dictofsyd/";
     $urlbase = DOMAIN."HEURIST/h3-ij/applications/dictofsyd/";
+    $deploypath="var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/";
     
     // Login information for MySQL
     define('HEURIST_DBNAME', 'DoS3');

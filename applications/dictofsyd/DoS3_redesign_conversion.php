@@ -115,7 +115,23 @@
 
 
     } // duplication of record types, splitting undifferentiated entity type to multiple     
+    
+    // Fix up file paths to point to Dos3 and DoS3_redesign in proper directory for VS2
 
+    // DoS3
+    $query="UPDATE hdb_DoS3.recUploadedFiles 
+            SET ulf_FilePath=REPLACE(ulf_FilePath,'/var/www/HEURIST_FILESTORE/dos/','/var/www/html/HEURIST/HEURIST_FILESTORE/DoS3/') where ulf_ID>0";
+    $res=mysql_query($query);
+
+    // DoS3_redesign copied directly from DoS3 without corrections
+    $query="UPDATE hdb_DoS3_redesign.recUploadedFiles 
+            SET ulf_FilePath=REPLACE(ulf_FilePath,'/var/www/HEURIST_FILESTORE/dos/','/var/www/html/HEURIST/HEURIST_FILESTORE/DoS3_redesign/') where ulf_ID>0";
+    $res=mysql_query($query);
+
+    // DoS3_redesign copied directly from DoS3 after corrections
+    $query="UPDATE hdb_DoS3_redesign.recUploadedFiles 
+            SET ulf_FilePath=REPLACE(ulf_FilePath,'/var/www/HEURIST/HEURIST_FILESTORE/DoS3/','/var/www/html/HEURIST/HEURIST_FILESTORE/DoS3_redesign/') where ulf_ID>0";
+    $res=mysql_query($query);
 
     // -------------------- Insert Factoids ----------------------------------------------
 

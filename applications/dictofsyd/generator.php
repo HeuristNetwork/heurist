@@ -47,30 +47,30 @@
 
             mysql_connection_select();
             $is_generation = true;
-            $urlbase = "../"; //$urlbase".deploy/";  urlbase is DOMAIN."HEURIST/h3-ij/applications/dictofsyd/";
+            $urlbase = "../"; // why reset this here, it is set in incvars.php ??
 
             if(@$_REQUEST['path']){
                 $path = $_REQUEST['path'];
             }else{
-                $path = "var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/";
+                $path = $deploypath; // path where results are to be output
             }
-            $ft = $_REQUEST['ft'];  //entity type
+            $ft = $_REQUEST['ft'];  //recoord type
 
             if(@$_REQUEST['step']=="1"){
 
-                //find the list of records
+                // Step 1: find the list of records
 
-                if($ft>3000){
+                if($ft>3000){ // entity records only: $ft is entity type field (only exists in entity records) indicating entity type
                     $where = ", ".$ft." as enttype, d2.dtl_Value as rname from Records r, recDetails d ".
                     " left join recDetails d2 on d.dtl_RecID=d2.dtl_RecID and d2.dtl_DetailTypeID=".DT_NAME.
                     " where r.rec_RecTypeID=".RT_ENTITY." and r.rec_ID=d.dtl_RecID and d.dtl_DetailTypeID=".DT_ENTITY_TYPE." and d.dtl_Value=".$ft;
-                }else if($ft==RT_ROLE){
-
+               
+                }else if($ft==RT_ROLE){ // $ft = record type for Role = 27
                     $where = ", 0 as enttype, d2.dtl_Value as rname from Records r, recDetails d ".
                     " left join recDetails d2 on d.dtl_RecID=d2.dtl_RecID and d2.dtl_DetailTypeID=".DT_NAME.
                     " where r.rec_RecTypeID=".RT_ROLE." and r.rec_ID=d.dtl_RecID and d.dtl_DetailTypeID=".DT_ROLE_TYPE." and d.dtl_Value=3324";
 
-                }else {
+                }else { // all other records
                     $where = ", d.dtl_Value as enttype, d2.dtl_Value as rname, d3.dtl_Value as roletype from Records r ".
                     " left join recDetails d on r.rec_ID=d.dtl_RecID and d.dtl_DetailTypeID=".DT_ENTITY_TYPE.
                     " left join recDetails d2 on r.rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID=".DT_NAME.
@@ -78,9 +78,9 @@
                     " where r.rec_RecTypeID";
 
                     if($ft>0){
-                        $where = $where."=".$ft;
+                        $where = $where."=".$ft; // specific record type
                     }else{
-                        $where = $where." in (5,13,24,25,27,28,29)"; //
+                        $where = $where." in (5,13,24,25,27,28,29)"; //  $ft = 0 indicates All record types
                     }
                 }
                 if(@$_REQUEST['r1'] && @$_REQUEST['r2'] && is_numeric($_REQUEST['r1']) && is_numeric($_REQUEST['r2']))
@@ -116,9 +116,8 @@
 
                 $query = 'select r.rec_ID as rec_id, r.rec_RecTypeID as rtype '.$where;
 
-                //echo $query."<br>";
-                echo "Generating Dictioanry of Sydney website ...<br>";
-                /**/
+                echo "Generating Dictionary of Sydney website ...<br>";
+                
                 $res2 = mysql_query($query);
                 $cntp = 1;
                 $err_count = 0;
@@ -247,7 +246,11 @@
                     echo "Average ".sprintf(' %.3f sec.', $tottime/($cntp-1))." sec<br />";
                 }
 
-            }else if(@$_REQUEST['step']=="2"){ //start generation browse pages  ===============================
+            } // end of step 1 = find lsit of entities
+            
+            else 
+            
+            if(@$_REQUEST['step']=="2"){ //start generation browse pages  ===============================
 
                 $path_browse = $path."browse";
                 createDir($path_browse);
@@ -305,7 +308,7 @@
             <h1>Dictionary of Sydney web site generator (H3) - database hardcoded hdb_DoS3</h1>
             <h4>Artem Osmakov Feb 2013</h4>
                         
-            <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://heuristscholar.org/HEURIST/h3-ij/applications/dictofsyd/browse.php" target=_blank>Go to live preview</a></b> <p/>
+            <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href=""<?$urlbase?>browse.php" target=_blank>Go to live preview</a></b> <p/>
 
             <form method="post">
                 <input name="step" value="1" type="hidden" />
