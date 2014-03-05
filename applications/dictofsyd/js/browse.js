@@ -118,7 +118,7 @@ return {
 				$ul = $("<ul/>").appendTo("#entities-alpha");
 			}
 
-			className = entity[2] ? " class='has-entry'" : "";
+            className = entity[2] ? " class='has-entry'": "";
 			if (entity[1]) {
 				$ul.append("<li"+className+"><div class='left'><a class='preview-"+id+"' href='"+href+"'>"+title+"</a></div><div class='right'>"+_getSubtypes(entity[1])+"</div><div class='clearfix'/></li>");
 				shadeRows = true;
@@ -135,7 +135,7 @@ return {
 				_sortBy = "alpha";
 				DOS.Browse.sortByName();
 			}
-			if (shadeRows) {
+			if (shadeRows || true) {
 				// alternate row shading
 				$("#entities-alpha ul").each(function () {
 					$(this).find("li:odd").addClass("shade"); }
@@ -165,6 +165,7 @@ return {
 
 		type = DOS.Browse.orderedSubtypes[i];
 		subtype = DOS.Browse.subtypes[type];
+        if(subtype && subtype.length>0){
 
 		if (DOS.Browse.orderedSubtypes.length > 1) {
 			$("#browse-type-index").append("<li><a href='#"+type+"'>"+subtype[0]+"</a></li>");
@@ -179,10 +180,11 @@ return {
 			title = entity[0];
 			href = _getHref(id, title);
 			if (entity) {
-				className = entity[2] ? " class='has-entry'" : "";
+                className = entity[2] ? " class='has-entry'": "";
 				$ul.append("<li"+className+"><a class='preview-"+id+"' href='"+href+"'>"+title+"</a></li>");
 			}
 		}
+        }
 
 		if (i + 1 === DOS.Browse.orderedSubtypes.length) {
 			$("#browse-type-index").append("<div class='clearfix'/>");
@@ -246,7 +248,9 @@ return {
 			title = entity[0];
 			href = _getHref(id, title);
 			if (entity) {
-				className = entity[2] ? " class='has-entry'" : "";
+
+                className = entity[2] ? " class='has-entry'": "";
+                
 				$ul.append("<li"+className+"><a class='preview-"+id+"' href='"+href+"'>"+title+"</a></li>");
 			}
 		}
@@ -281,7 +285,8 @@ return {
 			title = entity[0];
 			href = _getHref(id, title);
 
-			className = entity[2] ? " class='has-entry'" : "";
+                className = entity[2] ? " class='has-entry'": "";
+            
 			$ul = entity[2] ? $("#entities-with-entries") : $("#entities-without-entries");
 
 			if (entity[1]) {
@@ -302,7 +307,7 @@ return {
 				$("#entities-content").empty();
 			}
 
-			if (shadeRows) {
+			if (shadeRows || true) {
 				// alternate row shading
 				$("#entities-content ul").each(function () {
 					$(this).find("li:odd").addClass("shade"); }

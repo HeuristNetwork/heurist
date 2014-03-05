@@ -47,6 +47,8 @@ if(isset($record)){
 						baseURL: "<?=$urlbase ?>"
 					};
 				</script>
+              
+                
 <script src="<?=$urlbase ?>js/timemap.js/2.0.1/lib/jquery-1.6.2.min.js" type="text/javascript"/></script>
 <script type="text/javascript" src="<?=$urlbase ?>js/cookies.js"></script>
 <script type="text/javascript" src="<?=$urlbase ?>js/fontsize.js"></script>
@@ -56,7 +58,7 @@ if(isset($record)){
 <script type="text/javascript" src="<?=$urlbase ?>js/tooltip.js"></script>
 <script type="text/javascript" src="<?=$urlbase ?>js/swfobject.js"></script>
 <script type="text/javascript" src="<?=$urlbase ?>js/media.js"></script>
-<?php
+<?php                           
 if(!isset($starttime)){
 	$starttime = explode(' ', microtime());
 	$starttime = $starttime[1] + $starttime[0];
@@ -125,7 +127,7 @@ if($record->type()==RT_ENTITY || $record->type()==RT_MAP){
 
 
 </head>
-<body>
+<body class="">
 <?php
 if(isset($record) && $record->type()==RT_ENTRY){
 ?>

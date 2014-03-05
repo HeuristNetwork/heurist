@@ -29,6 +29,7 @@
 
 
 function makeEntryPage($record){
+    global $err_count;
 
  $doc_content = "";
  $fileid = $record->getDet(DT_ENTRY_WML, 'dtfile');
@@ -42,7 +43,7 @@ function makeEntryPage($record){
 
  	$filename = $file['fullpath'];
 
- error_log("file=".$file."filename=".$filename);
+ //error_log("file=".$file."   filename=".$filename);
 
  	if(file_exists($filename)){
 
@@ -63,9 +64,14 @@ function makeEntryPage($record){
             
 			$doc_content = $proc->transformToXML($xml);
 		}
-	}
+	}else{
+        $err_count++;
+        $doc_content = "No content as yet ( file not found ".$filename." )";
+        error_log(">>>>> CONTENT EMPTY. entry ".$record->id()."  file not found ".$filename);
+    }
 
     if(!$doc_content){
+        $doc_content = "No content as yet";
         error_log(">>>>> CONTENT EMPTY. entry ".$record->id());
     }
 
@@ -212,12 +218,12 @@ function makeAnnotations($record){
 
                 $subtype = $annotation->getDet(DT_ANNOTATION_ENTITY, 'ref2');
                 if(!$subtype){
-                    $record = getRecordFull($annotated_rec_id);
-                    if(!$record){
+                    $sub_record = getRecordFull($annotated_rec_id);
+                    if(!$sub_record){
                         error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
                         continue;
                     }
-                    $rectype = $record->type();
+                    $rectype = $sub_record->type();
                 }else{
                     $rectype = RT_ENTITY;
                 }
@@ -261,6 +267,7 @@ function makeAnnotations($record){
     </script>
 
 <?php
+    //print "<!-- image annotations -->";
     print $images;
 }
 ?>

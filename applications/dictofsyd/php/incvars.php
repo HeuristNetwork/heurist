@@ -16,7 +16,7 @@
     /**
     * Dictionary of Sydney Heurist web site generator: Global variables and constants
     *
-    * IMPORTANT! Location must be specified explicitely in  $urlbase_absolute and $urlbase
+    * IMPORTANT! Location must be specified explicitely in  $urlbase
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2013 University of Sydney
@@ -33,14 +33,18 @@
     define('DOMAIN','http://heuristscholar.org/');
 
     $g_title = "Dictionary of Sydney";
-    $urlbase_absolute = DOMAIN."HEURIST/h3-ij/applications/dictofsyd/";
-    $urlbase = DOMAIN."HEURIST/h3-ij/applications/dictofsyd/";
-    $deploypath="var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/";
+    $urlbase_absolute = DOMAIN."HEURIST/h3-ao/applications/dictofsyd/";
+    $urlbase = DOMAIN."HEURIST/h3-ao/applications/dictofsyd/";
+    $deploypath = "var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/";
+    
+    $deployurl = DOMAIN."HEURIST/HEURIST_FILESTORE/dosh3-deploy/"; //it overwrites $urlbase for generated pages
+    $startupurl = "http://dictionaryofsydney.org/"; //for logo icon
     
     // Login information for MySQL
     define('HEURIST_DBNAME', 'DoS3');
     define('READONLY_DBUSERNAME', 'root');
-    include 'DoSPassword.inc'; // avoid including in repository
+    //include 'DoSPassword.inc'; // avoid including in repository
+    $DoSPassword='SpeakEasy1935';
     define('READONLY_DBUSERPSWD', $DoSPassword);
    
     // Port 3306 is not open, everything is happening locally
@@ -52,6 +56,7 @@
        
     /*  END FILE PATHS, PASSWORDS ETC. WHICH MAY REQUIRE CHANGING */
   
+    ini_set('memory_limit', '256M'); //'128M');
   
     $is_generation = false;
     $use_pointer_cache = true;
@@ -79,6 +84,7 @@
 
     define('DT_NAME', 1);
     define('DT_NAME2', 2);
+    define('DT_SHORTSUMMARY', 3);
     define('DT_DESCRIPTION', 4);
     define('DT_RELATION_TARGET', 5);
     define('DT_RELATION_TYPE', 6);
@@ -123,7 +129,7 @@
     define('DT_ANNOTATION_END_ELEMENT', 47);
     define('DT_ANNOTATION_START_WORD', 44);
     define('DT_ANNOTATION_END_WORD', 45);
-    define('DT_ANNOTATION_TYPE', 96);
+    define('DT_ANNOTATION_TYPE', 52); //was 96
 
     define('DT_CONTRIBUTOR_REF', 90);
     define('DT_CONTRIBUTOR_TYPE', 74);

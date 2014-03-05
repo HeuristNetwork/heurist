@@ -276,7 +276,9 @@
                     }
                 }
             }
-            //error_log("DT=".$typeid."  ".print_r($res,true));
+            
+            //error_log("DT=".$typeid."  ".print_r($this->details, true));
+            
             return "";
             /*
             $dt = @$this->details[$typeid];
@@ -302,6 +304,17 @@
             }
             return $res;
         }
+
+        //
+        public function getDescription(){
+            
+            $val = $this->getDet(DT_SHORTSUMMARY);           
+            if(!$val){
+                    $val = $this->getDet(DT_DESCRIPTION);           
+            }
+            return $val;
+        }
+        
         /*
         public function getDetails($typeid, $kind='dtvalue'){
         $dt = @$this->details[$typeid];

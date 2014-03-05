@@ -136,17 +136,17 @@ Mapstraction: {
 				this.addSmallControls();
 			}
 		}
-		if (args.scale){
-			var myOptions = {
-				scaleControl:true,
-				scaleControlOptions: {style:google.maps.ScaleControlStyle.DEFAULT}
-			};
-			map.setOptions(myOptions);
-			this.addControlsArgs.scale = true;
-		}
 		if (args.map_type){
 			this.addMapTypeControls();
 		}
+        if (args.scale){
+            var myOptions = {
+                scaleControl:true,
+                scaleControlOptions: {style:google.maps.ScaleControlStyle.DEFAULT}
+            };
+            map.setOptions(myOptions);
+            this.addControlsArgs.scale = true;
+        }
 	},
 
 	addSmallControls: function() {

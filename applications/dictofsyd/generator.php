@@ -101,6 +101,11 @@
                 $media_is_recreate = (@$_REQUEST['filecreate']=='1');
                 $media_thumb = $path.$media_filepath."thumbnail/";
                 $media_full = $path.$media_filepath."full/";
+                
+                if(@$_REQUEST['deployurl']){
+                    $deployurl = @$_REQUEST['deployurl']; 
+                }
+
 
                 $path_popup = $path."popup";
                 $path_preview = $path."preview";
@@ -217,8 +222,8 @@
                         }
                     }
 
+                    echo "".($cntp)." <a href='$deployurl".$rname."' target='_blank' disabled='disabled'>$rname</a>";  // was ./deploy/
 
-                    echo "".($cntp)." <a href='$path".$rname."'>$rname</a>";  // was ./deploy/
                     if(isset($starttime)){
                         $mtime = explode(' ', microtime());
                         $totaltime = $mtime[0] + $mtime[1] - $starttime;
@@ -245,12 +250,15 @@
                     //echo "Max time ".printf(' %.3f sec.', $maxtime[0])."   ".$maxtime[1]."<br />";
                     echo "Average ".sprintf(' %.3f sec.', $tottime/($cntp-1))." sec<br />";
                 }
+                
+                
 
-            } // end of step 1 = find lsit of entities
+            /*} // end of step 1 = find lsit of entities
             
             else 
             
             if(@$_REQUEST['step']=="2"){ //start generation browse pages  ===============================
+            */
 
                 $path_browse = $path."browse";
                 createDir($path_browse);
@@ -272,7 +280,34 @@
                         "role",
                         "term",
                         "contributor");
+                }else if($ft=='25'){
+                    $types = array(
+                        "artefact",
+                        "building",
+                        "event",
+                        "natural",
+                        "organisation",
+                        "person",
+                        "place",
+                        "structure");
                 }else{
+                    $types2 = array(
+                        "3291"=>"artefact",
+                        "3294"=>"building",
+                        "3296"=>"event",
+                        "3298"=>"natural",
+                        "3300"=>"organisation",
+                        "3301"=>"person",
+                        "3302"=>"place",
+                        "3305"=>"structure",
+                        "13"=>"entry",
+                        "28"=>"map",
+                        "5"=>"media",
+                        "27"=>"role",
+                        "29"=>"term",
+                        "24"=>"contributor");
+                    
+                    $ft = $types2[$ft];
                     $types = array($ft);
                 }
 
@@ -284,15 +319,16 @@
                     $out = ob_get_clean();
                     if($out){
                         saveAsFile($out, $path_browse."/".$ftype);
-                        echo "Browse: <a href='".$path."browse/".$ftype."'>".$ftype."</a><br/>";
+                        echo "Browse: <a href='".$deployurl."browse/".$ftype."'>".$ftype."</a><br/>";
                     }else{
                         //report error
                         echo "error ".$ftype."<br/>";
                     }
                     ob_flush();flush();
                 }//foreach
-
-            }
+                
+                print '<script>$("a").removeAttr("disabled");</script>';
+            }   
 
             echo "<a href='./generator.php'>back to form</a>";
         }else{
@@ -308,7 +344,7 @@
             <h1>Dictionary of Sydney web site generator (H3) - database hardcoded hdb_DoS3</h1>
             <h4>Artem Osmakov Feb 2013</h4>
                         
-            <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href=""<?$urlbase?>browse.php" target=_blank>Go to live preview</a></b> <p/>
+            <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="<?=$urlbase?>browse.php" target=_blank>Go to live preview</a></b> <p/>
 
             <form method="post">
                 <input name="step" value="1" type="hidden" />
@@ -338,9 +374,12 @@
                     <tr><td>And/or range of records ids</td><td>from&nbsp;<input type="text" value="" name="r1" size="6">&nbsp;to&nbsp;<input type="text" value="" name="r2" size="6">&nbsp;(all records if left blank)</td></tr>
                     <tr><td>Recreate pages</td><td><input type="checkbox" checked="checked" name="fcreate" value="1" /></td></tr>
                     <!-- tr><td>Re-request hml</td><td><input type="checkbox" checked="checked" name="fhml" value="1" /></td></tr -->
-                    <tr><td>Folder on server</td><td><input type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="80"></td></tr>
-                    <tr><td>Subfolder for media</td><td><input type="text" value="files/" name="filepath" size="80"> leave empty to use getMedia.php</td></tr>
+                    <tr><td>Folder on server</td><td><input type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
+                    <tr><td>Subfolder for media</td><td><input type="text" value="deployed_files/" name="filepath" size="80"> leave empty to use getMedia.php</td></tr>
                     <tr><td>Copy media</td><td><input type="checkbox" value="1" name="filecreate"></td></tr>
+                    
+                    <tr><td>Deploy URL</td><td><input type="text" value="http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="deployurl" size="100"></td></tr>
+                    
                     <tr><td>Password</td><td><input type="password" value="" name="pwd"></td></tr>
                     <tr><td>Test limit</td><td><input type="text" value="" name="limit" size="10"> leave empty to generate all</td></tr>
                     <tr><td colspan="2"><button type="submit">Start</button></td></tr>
@@ -397,7 +436,7 @@
         Do this before generation becuase it improves performance
 
 
-        use hdb_dos_3;
+        use hdb_DoS3;
         DROP TABLE IF EXISTS `recFacctoidsCache`;
         CREATE TABLE `recFacctoidsCache` (
 
@@ -425,21 +464,21 @@
 
         count = 25377
 
-
-        use hdb_dos_3;
+        use hdb_DoS3;
         DROP TABLE IF EXISTS `recAnnotationCache`;
         CREATE TABLE `recAnnotationCache` (
 
+        `rac_ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `rac_RecID` int(10) unsigned NOT NULL,
         `rac_EntryRecID` int(10) unsigned,
         `rac_TargetRecID` int(10) unsigned,
 
-        PRIMARY KEY  (`rac_RecID`),
+        PRIMARY KEY  (`rac_ID`),
         KEY `rac_EntryPtrKey` (`rac_EntryRecID`),
         KEY `rac_TargetPtrKey` (`rac_TargetRecID`)
         );
-        delete from `recAnnotationCache` where rac_RecID>0;
-        INSERT INTO `recAnnotationCache`
+        delete from `recAnnotationCache` where rac_ID>0;
+        INSERT INTO `recAnnotationCache` (rac_RecID,rac_EntryRecID,rac_TargetRecID)
         select distinct r.rec_ID, d1.dtl_Value as entry, d2.dtl_Value as entity
         from Records r
         left join recDetails d1

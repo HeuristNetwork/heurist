@@ -30,7 +30,7 @@
 <div class="list-left-col"></div>
 <div class="list-right-col">
 <?php
-	$val = $record->getDet(DT_DESCRIPTION);
+	$val = $record->getDescription();
 	if($val){
 ?>
 

@@ -569,7 +569,8 @@ a.selected {
 
 #resource img.resource-image {
 	border: 1px solid #320a0a;
-	margin: 0px 0px 17px 0px
+	margin: 0px 0px 17px 0px;
+    width: 100%;
 }
 #resource #media {
 	margin: 0px 0px 17px 0px
@@ -1046,7 +1047,10 @@ img.entity-picture {
 
 .picbox-image { text-align: center; padding: 5px 0 5px 0 }
 
-.picbox-image img { border: 1px solid #705454 }
+.picbox-image img { 
+    border: 1px solid #705454;
+    max-height:450px;
+}
 
 .picbox-heading {
 	height: 44px;

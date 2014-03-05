@@ -28,7 +28,7 @@
 function makeRolePage($record)
 {
 	print '<div id="subject-list">';
-	$val = $record->getDet(DT_DESCRIPTION);
+	$val = $record->getDescription();
 	if($val){
 		print '<div class="entity-content"><p>'.$val.'</p></div>';
 	}

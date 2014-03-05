@@ -167,7 +167,7 @@ function initMappingClass(){
 
 		RelBrowser.Mapping.map.addControl(new CustomMapTypeControl());
 */
-		RelBrowser.Mapping.map.addControls({ pan:true, zoom:'large', overview: false, scale:true, map_type:true});
+		RelBrowser.Mapping.map.addControls({ pan:true, zoom:'small', overview: false, scale:true, map_type:true});
 
 	}, //end of addCustomMapTypeControl
 

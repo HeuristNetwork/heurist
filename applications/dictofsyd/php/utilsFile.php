@@ -193,6 +193,8 @@
         $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
         if(!file_exists($thumbnail_file)){
 
+error_log("create for ".$filedata['ext']);
+           
             switch($filedata['ext']) {
                 case 'jpeg':
                 case 'jpg':
@@ -232,10 +234,13 @@
             $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
             imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
 
+
             imagepng($img_resized, $thumbnail_file);
             imagedestroy($img);
             imagedestroy($img_resized);
 
+            $img = null;
+            $img_resized = null;
         }
 
         if($needreturn){
@@ -265,12 +270,14 @@
 
             print "       ".$filename." => ".$folder."full/".$filedata["nonce"]."<br />";
 
+            //make thumbnail in original db folder
             makeThumbnailImage($filedata, false);
             //create thumbnail and copy
-            $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$res["nonce"].".png";
+            $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
             if(file_exists($thumbnail_file)){
-                $res = copy($filename, $folder."thumbnail/".$filedata["nonce"]);
+                $res = copy($thumbnail_file, $folder."thumbnail/".$filedata["nonce"]);
             }
+            
         }
 
         return $res;

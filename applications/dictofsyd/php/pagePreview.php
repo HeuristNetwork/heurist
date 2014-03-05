@@ -26,15 +26,30 @@
 */
 
 	$rec_id = @$_REQUEST['name'];
+    $rec_id_annotation = null;
 
+//debug error_log("GEN PREVIEW=".$rec_id);
+    
+    if(strpos($rec_id,"A")>0){
+        $recs = explode("A",$rec_id);
+        $rec_id = $recs[0];
+        $rec_id_annotation = $recs[1];
+    }
+    
 	$record = null;
+    $record_annotation = null;
 
 	if(is_numeric($rec_id)){
         if(!$db_selected){
             $db_selected = mysql_connection_select();
         }
 		$record = getRecordFull($rec_id);
-	}
+
+
+        if(is_numeric($rec_id_annotation)){
+            $record_annotation = getRecordFull($rec_id_annotation);
+        }
+    }
 
 	if(!$record){
 		//echo "not found"; //TODO
@@ -43,4 +58,4 @@
 
 //error_log(">>>>>".$rec_id);
 
-	echo makePreviewDiv($record);
+	echo makePreviewDiv($record, $record_annotation);

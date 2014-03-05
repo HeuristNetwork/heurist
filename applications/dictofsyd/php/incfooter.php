@@ -51,7 +51,7 @@
 </ul>
 <ul id="footer-right-col">
 <li class="no-bullet">
-<a href="http://www.everydayhero.com.au/dictionaryofsydney">Donate</a>
+<a href="http://www.givenow.com.au/dictionaryofsydney" target="_blank">Donate</a>
 </li>
 <li>
 <a href="http://trust.dictionaryofsydney.org/participate/contact-form/">Contribute</a>
@@ -78,11 +78,12 @@ if( (!$is_generation) && isset($starttime)){
 					var pageTracker = _gat._getTracker("UA-11403264-1");
 					pageTracker._trackPageview();
 				} catch(err) {}
+</script>                
+-->                
 			</script><script src="http://s7.addthis.com/js/250/addthis_widget.js#pub=dictionaryofsydney" type="text/javascript"></script><script type="text/javascript">
 				var addthis_config = {
 					services_exclude: 'myaol'
 				}
 			</script>
--->
 </body>
 </html>

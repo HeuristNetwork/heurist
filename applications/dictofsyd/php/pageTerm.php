@@ -26,7 +26,7 @@
 * @subpackage  applications
 */
 
-	$val = $record->getDet(DT_DESCRIPTION);
+	$val = $record->getDescription();
 	if($val){
 		print '<p>'.$val.'</p>';
 	}

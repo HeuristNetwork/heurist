@@ -220,8 +220,8 @@ order by TRIM( LEADING 'a ' FROM TRIM( LEADING 'an ' FROM TRIM( LEADING 'the ' F
 $res = mysql_query($query);
 while ($row = mysql_fetch_row($res)) {
 	$entity = array($row[1]);
-	$types = @$row[2] ? split(",", $row[2]) : null;
-	$entries = @$row[3] ? split(",", $row[3]) : null;
+	$types = @$row[2] ? explode(",", $row[2]) : null;
+	$entries = @$row[3] ? explode(",", $row[3]) : null;
 	if ($types || $entries) {
 		array_push($entity, $types);
 	}
@@ -345,6 +345,9 @@ order by factoid_role_name.rec_Title, TRIM( LEADING 'a ' FROM TRIM( LEADING 'an 
     }
 
 }
+
+//DEBUG error_log($query);
+
 
 if($query){
 $res = mysql_query($query);

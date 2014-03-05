@@ -623,7 +623,7 @@ function makeEntriesInfo(Record $record){
 					</div>
 					<div class="<?=$content_class ?>">
 						<p>
-					        <?=$entry->getDet(DT_DESCRIPTION) ?>
+					        <?=$entry->getDescription() ?>
 							<br/><?=$morelink ?>
 						</p>
 					</div>
@@ -763,7 +763,7 @@ function getLinkTag($record, $factoid_type=null){
 
 function getLinkTag3($type, $subtype, $title, $id, $url=""){
 
-        global $urlbase, $is_generation;
+        global $urlbase, $is_generation, $err_count, $path_preview;
 
         $linktext = $title;
 
@@ -777,6 +777,26 @@ function getLinkTag3($type, $subtype, $title, $id, $url=""){
 
         }else{
             $classname = 'preview-'.$id;
+            if(strpos($url,"#ref=")===0){
+                //add annotation id
+                $classname = $classname."A".substr($url,5);
+                
+                if ($is_generation){
+                    $preview_id = $id."A".substr($url,5);
+                    $keep = @$_REQUEST['name'];
+                    $_REQUEST['name'] = $preview_id;
+                    ob_start();
+                    require(dirname(__FILE__)."/pagePreview.php");
+                    $out = ob_get_clean();
+                    if($out){
+                        saveAsFile($out, $path_preview."/".$preview_id);
+                    }else{
+                        $err_count++;
+                    }                
+                    $_REQUEST['name'] = $keep;
+                }
+            }
+            
             if($type==RT_MEDIA){
                  $classname = 'popup '.$classname;
             }
@@ -882,6 +902,10 @@ function makeConnectionMenu(Record $record){
 	makeConnectionMenuItem( $record->getRelationRecordByType(RT_TERM) );
 
 	if($record->type()!=RT_ENTRY){
+
+//$list = $record->getRelationRecordByType(RT_ANNOTATION);
+//error_log(">>>".print_r($list, true));
+
 		makeConnectionMenuItem( $record->getRelationRecordByType(RT_ANNOTATION) );
 	}
 
@@ -897,7 +921,7 @@ function makeConnectionMenuItem($entries){
 
 	if(count($entries)>0){
 
-		$entry0 = reset($entries);
+		$entry0 = reset($entries); //get first
 
 
 		$type = $entry0->type();
@@ -1050,7 +1074,7 @@ function makeMediaAttributionStatement(Record $record){
 * @param mixed $record
 * @param mixed $intemplate
 */
-function makePreviewDiv($record)
+function makePreviewDiv($record, $record_annotation)
 {
 	$type = $record->type_classname();
 
@@ -1077,6 +1101,11 @@ function makePreviewDiv($record)
 		    $image = getImageTag($record, 'thumbnail', 'thumbnail2');
         }
 	}
+    if($record_annotation!=null){
+        $description = $record_annotation->getDet(DT_SHORTSUMMARY);
+    }else{
+        $description = $record->getDet(DT_SHORTSUMMARY);
+    }
 
 	//ob_start();
 ?>
@@ -1091,7 +1120,7 @@ function makePreviewDiv($record)
 				<div class="balloon-content">
 					<?=$image ?>
 					<p>
-						<?=$record->getDet(DT_DESCRIPTION) ?>
+						<?=$description ?>
 					</p>
 					<div class="clearfix">
 				</div>

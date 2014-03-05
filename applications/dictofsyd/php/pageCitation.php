@@ -48,8 +48,7 @@
     }
 
             if ($is_generation){
-                //$urlbase_absolute
-                $human_url = "http://dictionaryofsydney.org/".getStaticFileName($record->type(), null, $record->getDet(DT_NAME), $record->id());
+                $human_url = $startupurl.getStaticFileName($record->type(), null, $record->getDet(DT_NAME), $record->id());
             }else {
                 $human_url = $urlbase.$record->id();
             }

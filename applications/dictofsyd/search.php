@@ -103,7 +103,7 @@ $query = "select distinct d.dtl_RecID as rec_id, r.rec_RecTypeID as rectype from
                         <?=getLinkTag($record) ?>
                     </div>
                     <div class="context">
-                        <?=$record->getDet(DT_DESCRIPTION) ?>
+                        <?=$record->getDescription() ?>
                     </div>
                     <div class="infoline">&nbsp;</div>
                 </div>
@@ -115,7 +115,7 @@ $query = "select distinct d.dtl_RecID as rec_id, r.rec_RecTypeID as rectype from
 	</div>
 </div>
 <div id="right-col">
-	<a title="Dictionary of Sydney" href="<?=($urlbase==''?'./':$urlbase) ?>"><img class="logo" height="125" width="198" alt="Dictionary of Sydney" src="<?=$urlbase?>images/img-logo.jpg"></a>
+	<a title="Dictionary of Sydney" href="<?=($startupurl==''?'./':$startupurl) ?>"><img class="logo" height="125" width="198" alt="Dictionary of Sydney" src="<?=$urlbase?>images/img-logo.jpg"></a>
 	<div id="search-bar">
         <form action="<?=$urlbase ?>search.php" method="get">    <!-- was search/search.cgi -->
 			<input size="20" id="search" name="zoom_query" type="text">

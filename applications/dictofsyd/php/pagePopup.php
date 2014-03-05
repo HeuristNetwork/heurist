@@ -79,11 +79,11 @@
 <?php
 		}
 	}
-	if($record->getDet(DT_DESCRIPTION)){
+	if($record->getDet(DT_SHORTSUMMARY)){
 ?>
 
 				<p>
-					<?=$record->getDet(DT_DESCRIPTION) ?>
+					<?=$record->getDet(DT_SHORTSUMMARY) ?>
 				</p>
 <?php
 	}

@@ -143,7 +143,7 @@ function makeFullTimeMap(Record $record){
 
 
 
-	$description = $record->getDet(DT_DESCRIPTION);
+	$description = $record->getDescription();
 	if($description){
 		$description = '<p>'.$description.'</p>';
 	}else{
