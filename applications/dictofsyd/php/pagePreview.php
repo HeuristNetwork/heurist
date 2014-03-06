@@ -53,6 +53,7 @@
 
 	if(!$record){
 		//echo "not found"; //TODO
+        add_error_log("ERROR >>>> Can not create PREVIEW. Record not found: ".$rec_id);
 		exit();
 	}
 

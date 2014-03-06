@@ -29,7 +29,6 @@
 
 
 function makeEntryPage($record){
-    global $err_count;
 
  $doc_content = "";
  $fileid = $record->getDet(DT_ENTRY_WML, 'dtfile');
@@ -65,14 +64,13 @@ function makeEntryPage($record){
 			$doc_content = $proc->transformToXML($xml);
 		}
 	}else{
-        $err_count++;
         $doc_content = "No content as yet ( file not found ".$filename." )";
-        error_log(">>>>> CONTENT EMPTY. entry ".$record->id()."  file not found ".$filename);
+        add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()."  file not found ".$filename);
     }
 
     if(!$doc_content){
         $doc_content = "No content as yet";
-        error_log(">>>>> CONTENT EMPTY. entry ".$record->id());
+        add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()." can not provide xsl transformation");
     }
 
  }
@@ -167,7 +165,7 @@ function makeAnnotations($record){
         if(!$annotated_rec_id){
 
             // ignore such records
-            //error_log("ERROR >>>> entry ".$record->id()." annotated target is not defined for annotation ".$annotation->id());
+            //add_error_log("ERROR >>>> entry ".$record->id()." annotated target is not defined for annotation ".$annotation->id());
             continue;
 
         }else if($annotation_type == "Multimedia"){
@@ -201,7 +199,7 @@ function makeAnnotations($record){
                 }
 
                 if(!$mediarec){
-                    error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
+                    add_error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
                     continue;
                 }
 
@@ -220,7 +218,7 @@ function makeAnnotations($record){
                 if(!$subtype){
                     $sub_record = getRecordFull($annotated_rec_id);
                     if(!$sub_record){
-                        error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
+                        add_error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
                         continue;
                     }
                     $rectype = $sub_record->type();

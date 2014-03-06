@@ -183,17 +183,21 @@
     *
     * @param mixed $filedata
     */
-    function makeThumbnailImage($filedata, $needreturn){
+    function makeThumbnailImage($filedata, $thumb_folder, $needreturn){
 
         $filename = $filedata['fullpath'];
         if(!file_exists($filename)){
             return;
         }
+        if($thumb_folder==HEURIST_THUMB_DIR){
+            $thumbnail_file = $thumb_folder."ulf_".$filedata["nonce"].".png";    
+        }else{
+            $thumbnail_file = $thumb_folder.$filedata["nonce"];    
+        }
+        
+        if(!$needreturn || !file_exists($thumbnail_file)){ //if needreturn fales - this is generation - always recreate thumb
 
-        $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
-        if(!file_exists($thumbnail_file)){
-
-error_log("create for ".$filedata['ext']);
+//error_log("create for ".$filedata['ext']);
            
             switch($filedata['ext']) {
                 case 'jpeg':
@@ -207,7 +211,13 @@ error_log("create for ".$filedata['ext']);
                     $img = imagecreatefrompng($filename);
                     break;
                 default:
-                    return;
+                   /* copy thumbnails for non-image files 
+                   $thumbnail_file_orig = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
+                   if(file_exists($thumbnail_file_orig)){
+                        $res = copy($thumbnail_file_orig, $thumbnail_file);
+                   }
+                   */
+                   return;
             }
 
             $x = 148;
@@ -222,7 +232,9 @@ error_log("create for ".$filedata['ext']);
             $rx = $x / $orig_x;
             $ry = $y / $orig_y;
 
-            $scale = $rx ? $ry ? min($rx, $ry) : $rx : $ry;
+            $scale = $rx;
+            
+            //$scale = $rx ? $ry ? max($rx, $ry) : $rx : $ry;
 
             if ($no_enlarge  &&  $scale > 1) {
                 $scale = 1;
@@ -261,23 +273,38 @@ error_log("create for ".$filedata['ext']);
         $fileid = $record->getDet(DT_FILE, 'dtfile');
         $filedata = get_uploaded_file_info_internal($fileid);
 
-        $filename = $filedata['fullpath'];
+        $filename_orig = $filedata['fullpath'];
 
-        if(file_exists($filename)){
-
-
-            $res = copy($filename, $folder."full/".$filedata["nonce"]);
-
-            print "       ".$filename." => ".$folder."full/".$filedata["nonce"]."<br />";
-
-            //make thumbnail in original db folder
-            makeThumbnailImage($filedata, false);
-            //create thumbnail and copy
-            $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
-            if(file_exists($thumbnail_file)){
-                $res = copy($thumbnail_file, $folder."thumbnail/".$filedata["nonce"]);
-            }
+        if(file_exists($filename_orig)){
             
+            $filename_dest = $folder."full/".$filedata["nonce"];
+            
+            if(!file_exists($filename_dest) || filectime($filename_orig)>filectime($filename_dest)){
+
+                //copy full size from db to destination folder
+                $res = copy($filename_orig, $filename_dest);
+                
+                if($filedata['ext']=="flv"){
+                    $fileid = $record->getDet(DT_FILE_THUMBNAIL, 'dtfile');
+                    $filedata = get_uploaded_file_info_internal($fileid);
+//$thumbnail_file_orig = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";    
+//error_log(">>>>>".$thumbnail_file_orig.'  '.file_exists($thumbnail_file_orig));                   
+                }
+                
+                //make thumbnail in destination folder
+                makeThumbnailImage($filedata,  $folder."thumbnail/", false);
+                
+                print "       ".$filename_orig." => ".$filename_dest."<br />";
+                
+                //create thumbnail and copy
+                /* Ian req: always recreate thumbnail in dest folder
+                $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$filedata["nonce"].".png";
+                if(file_exists($thumbnail_file)){
+                    $res = copy($thumbnail_file, $folder."thumbnail/".$filedata["nonce"]);
+                }*/
+            }            
+        }else{
+            add_error_log("ERROR >>> Media record#".$record->id().". File not found ".$filename_orig);
         }
 
         return $res;

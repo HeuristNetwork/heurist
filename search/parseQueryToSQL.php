@@ -1333,8 +1333,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-/*****DEBUG****/// 
-error_log("request to query returns ".print_r($query,true));
+/*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

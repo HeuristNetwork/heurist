@@ -372,7 +372,7 @@
         $res2 = mysql_query($query);
         if(!$res2){
             //error_log($query);
-            error_log("NOT FOUND!!!!");
+            //error_log("NOT FOUND!!!!");
         }else
         if($no_loop){
             $row = mysql_fetch_row($res2);

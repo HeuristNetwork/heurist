@@ -42,7 +42,7 @@ $isthumbnail = (@$_REQUEST['thumb']==1);
 
 if($isthumbnail){
 
-    echo makeThumbnailImage($filedata, true);
+    echo makeThumbnailImage($filedata, HEURIST_THUMB_DIR, true);
 
 }else{
 

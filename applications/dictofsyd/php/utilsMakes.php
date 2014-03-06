@@ -763,7 +763,7 @@ function getLinkTag($record, $factoid_type=null){
 
 function getLinkTag3($type, $subtype, $title, $id, $url=""){
 
-        global $urlbase, $is_generation, $err_count, $path_preview;
+        global $urlbase, $is_generation, $path_preview;
 
         $linktext = $title;
 
@@ -791,7 +791,7 @@ function getLinkTag3($type, $subtype, $title, $id, $url=""){
                     if($out){
                         saveAsFile($out, $path_preview."/".$preview_id);
                     }else{
-                        $err_count++;
+                        add_error_log("ERROR >>>> Can not create PREVIEW. ".$preview_id);
                     }                
                     $_REQUEST['name'] = $keep;
                 }
@@ -902,10 +902,6 @@ function makeConnectionMenu(Record $record){
 	makeConnectionMenuItem( $record->getRelationRecordByType(RT_TERM) );
 
 	if($record->type()!=RT_ENTRY){
-
-//$list = $record->getRelationRecordByType(RT_ANNOTATION);
-//error_log(">>>".print_r($list, true));
-
 		makeConnectionMenuItem( $record->getRelationRecordByType(RT_ANNOTATION) );
 	}
 

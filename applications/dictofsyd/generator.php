@@ -41,6 +41,8 @@
 
     require_once(dirname(__FILE__)."/php/utilsMakes.php");
 
+    $error_log = array();
+    
     if(@$_REQUEST['step']=="1" || @$_REQUEST['step']=="2"){ //start generation
 
         if($_REQUEST['pwd']=="DoSRocks2013!"){ // this is a very simple challenge password - should be replaced
@@ -125,7 +127,6 @@
                 
                 $res2 = mysql_query($query);
                 $cntp = 1;
-                $err_count = 0;
 
                 $stime0 = explode(' ', microtime());
                 $stime0 = $stime0[1] + $stime0[0];
@@ -168,12 +169,12 @@
                         }else{
                             //report error
                             echo "".($cntp)." <div style='color:red'>$rname - ERROR!!!</div>";
-                            $err_count++;
+                            add_error_log("ERROR>>>> Can not create page for $ranme. Record #".$rec_id);
                             continue;
                         }
                     } catch (Exception $e) {
                         echo "".($cntp)." <div style='color:red'>$rname - ERROR:". $e->getMessage()."</div>";
-                        $err_count++;
+                        add_error_log("ERROR>>>> Can not create page for $ranme. Record #".$rec_id."  Sys.message: ".$e->getMessage());
                         continue;
                     }
 
@@ -185,7 +186,7 @@
                         saveAsFile($out, $path_preview."/".$rec_id);
                     }else{
                         echo "".($cntp)." <div style='color:blue'>$rname - preview generation failed</div>";
-                        $err_count++;
+                        add_error_log("ERROR>>>> Can not create Preview for $ranme. Record #".$rec_id);
                     }
 
                     if($row2['rtype']==RT_ENTRY){
@@ -197,7 +198,7 @@
                             saveAsFile($out, $path_citation."/".$rec_id);
                         }else{
                             echo "".($cntp)." <div style='color:blue'>$rname - citation generation failed</div>";
-                            $err_count++;
+                            add_error_log("ERROR>>>> Can not create citation for $ranme. Record #".$rec_id);
                         }
 
                     }else if($row2['rtype']==RT_MEDIA){
@@ -210,14 +211,14 @@
                             saveAsFile($out, $path_popup."/".$rec_id);
                         }else{
                             echo "".($cntp)." <div style='color:blue'>$rname - popup generation failed</div>";
-                            $err_count++;
+                            add_error_log("ERROR>>>> Can not create media popup for $ranme. Record #".$rec_id);
                         }
 
                         //copy full media file and create thumbnail (for images)
                         if($media_is_recreate){
                             if(!publicMedia($record, $path.$media_filepath)){
                                 echo "".($cntp)." <div style='color:blue'>$rname - copy media file failed</div>";
-                                $err_count++;
+                                add_error_log("ERROR>>>> Can not copy media file for $ranme. Record #".$rec_id);
                             }
                         }
                     }
@@ -241,8 +242,13 @@
                 }
 
                 echo "<br /><br />".($cntp-1)." pages have been generated <br />";
-                echo "errors: ".$err_count."<br />";
-
+                
+                echo "errors: ".count($error_log)."<br>";
+                if(count($error_log)>0){
+                    echo "See error log file for details<br />";
+                    file_put_contents($path.'error_log.txt', implode("\n", $error_log) );
+                }
+                
                 if($cntp>1){
                     $mtime0 = explode(' ', microtime());
                     $tottime = ($mtime0[0] + $mtime0[1] - $stime0);
@@ -339,16 +345,32 @@
 
     ?>
     <html>
+        <head>
+            <style type="text/css">
+body {
+    font: 11px Verdana, Geneva, sans-serif;
+    padding: 20px; margin: 0; outline: 0
+}
+.shade{
+    background-color: #aaaaff;
+}
+.hints{
+    font-size:0.7em;
+    font-style:italic;
+}
+            </style>
+        </head>
         <body>
 
-            <h1>Dictionary of Sydney web site generator (H3) - database hardcoded hdb_DoS3</h1>
+            <h1>Dictionary of Sydney web site generator (H3)</h1>
             <h4>Artem Osmakov Feb 2013</h4>
                         
             <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="<?=$urlbase?>browse.php" target=_blank>Go to live preview</a></b> <p/>
 
             <form method="post">
                 <input name="step" value="1" type="hidden" />
-                <table>
+                <table border="0" cellspacing="0" cellpadding="3">
+                    <tr class="shade"><td>Heurist Database</td><td><b>DoS3</b></td></tr>
                     <tr><td>Select type</td><td>
                             <select name="ft">
                                 <option value="0">All types (entities, entries etc.)</option>
@@ -371,17 +393,18 @@
                                 <option value="24">Contributors</option>
                             </select>
                         </td></tr>
-                    <tr><td>And/or range of records ids</td><td>from&nbsp;<input type="text" value="" name="r1" size="6">&nbsp;to&nbsp;<input type="text" value="" name="r2" size="6">&nbsp;(all records if left blank)</td></tr>
-                    <tr><td>Recreate pages</td><td><input type="checkbox" checked="checked" name="fcreate" value="1" /></td></tr>
+                    <tr class="shade"><td>And/or range of records ids</td><td>from&nbsp;<input type="text" value="" name="r1" size="6">&nbsp;to&nbsp;<input type="text" value="" name="r2" size="6"><label class="hints">&nbsp;(all records if left blank)</label></td></tr>
+                    <tr><td>Update all pages<br>(excludes Pending)</td><td><input type="checkbox" checked="checked" name="fcreate" value="1" /><label class="hints">&nbsp;Uncheck to only generate pages for new records or pages which have been deleted from deployment
+</label></td></tr>
                     <!-- tr><td>Re-request hml</td><td><input type="checkbox" checked="checked" name="fhml" value="1" /></td></tr -->
-                    <tr><td>Folder on server</td><td><input type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
-                    <tr><td>Subfolder for media</td><td><input type="text" value="deployed_files/" name="filepath" size="80"> leave empty to use getMedia.php</td></tr>
+                    <tr class="shade"><td>Folder on server</td><td><input type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
+                    <tr><td>Subfolder for media</td><td><input type="text" value="deployed_files/" name="filepath" size="80"></td></tr> <!-- <label class="hints">&nbsp;leave empty to use getMedia.php</label> -->
                     <tr><td>Copy media</td><td><input type="checkbox" value="1" name="filecreate"></td></tr>
                     
-                    <tr><td>Deploy URL</td><td><input type="text" value="http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="deployurl" size="100"></td></tr>
+                    <tr class="shade"><td>Deploy URL</td><td><input type="text" value="http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="deployurl" size="100"></td></tr>
                     
                     <tr><td>Password</td><td><input type="password" value="" name="pwd"></td></tr>
-                    <tr><td>Test limit</td><td><input type="text" value="" name="limit" size="10"> leave empty to generate all</td></tr>
+                    <!-- tr><td>Test limit</td><td><input type="text" value="" name="limit" size="10"> leave empty to generate all</td></tr -->
                     <tr><td colspan="2"><button type="submit">Start</button></td></tr>
                 </table>
             </form>

@@ -43,8 +43,7 @@
     // Login information for MySQL
     define('HEURIST_DBNAME', 'DoS3');
     define('READONLY_DBUSERNAME', 'root');
-    //include 'DoSPassword.inc'; // avoid including in repository
-    $DoSPassword='SpeakEasy1935';
+    include dirname(__FILE__).'/DoSPassword.inc'; // avoid including in repository
     define('READONLY_DBUSERPSWD', $DoSPassword);
    
     // Port 3306 is not open, everything is happening locally
@@ -157,5 +156,15 @@
         mysql_query('set names "utf8"');
 
         return $db_selected;
+    }
+    
+    function add_error_log($text){
+        global $error_log;
+        if(isset($error_log)){
+            array_push($error_log, $text);
+        }else{
+            error_log($text);
+        }
+        
     }
 ?>
