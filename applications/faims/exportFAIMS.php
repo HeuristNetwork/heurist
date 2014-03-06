@@ -745,13 +745,13 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     $body_controldata = $body_control->addChild('group','','http://www.w3.org/2002/xforms');
     $body_controldata->addAttribute('ref', 'data');
     $body_controldata->addAttribute('faims_scrollable', 'false');
-    $body_controldata->addChild('label','All records');
+    $body_controldata->addChild('label','All Entities');
 
      
         //all top level rectyps will be in this list
     $rectypes = $body_controldata->addChild('select1');
     $rectypes->addAttribute('ref', 'rectypeList');
-    $rectypes->addChild('label','Select record type:');
+    $rectypes->addChild('label','Select entity type:');
         /*$rectypes = new SimpleXMLElement(
         '<select1 ref="rectypeList">
           <label>Select record type:</label>
@@ -759,7 +759,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         xml_adopt($body_controldata, $rectypes); */
         
         // new record button
-        $trigger = new SimpleXMLElement('<trigger ref="newRecord"><label>Create New Record</label></trigger>');
+        $trigger = new SimpleXMLElement('<trigger ref="newRecord"><label>Create New Entity</label></trigger>');
         xml_adopt($body_controldata, $trigger);        
       
         /* @todo search panel
@@ -784,7 +784,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 
         $input = new SimpleXMLElement(
         '<select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="recordList">
-          <label>Tap record in list below to load it</label>
+          <label>Tap entity in list below to load it</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
@@ -797,12 +797,12 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         '<group ref="selectresource">
               <label/>
               <group ref="data" faims_scrollable="false">
-                <label>Select record or create new one</label>
+                <label>Select entity or create new one</label>
                 <trigger ref="newRecord">
-                  <label>Create New Record</label>
+                  <label>Create New Entity</label>
                 </trigger>
                 <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="recordList">
-                  <label>Tap record in list below to select it</label>
+                  <label>Tap entity in list below to select it</label>
                   <item>
                     <label>placeholder</label>
                     <value>placeholder</value>
@@ -1106,7 +1106,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                             <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false">
                                 <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
                                 <item>
-                                    <label>browse for resource record</label>
+                                    <label>browse for resource entity</label>
                                     <value>null</value>
                                 </item>
                             </select1>
@@ -1419,10 +1419,10 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", "br
                     }//for
 
                     $event_section .= ' 
-onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\",\"'.$headername_uids.'/'.$dtdisplaynamex.'_UID\")");';                
+onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';                
                 
                     $load_related_part .= '
-                    fillPointer("'.$headername.'/'.$dtdisplaynamex.'","'.$headername_uids.'/'.$dtdisplaynamex.'_UID");';
+                    fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
                 }
             }     
             //TODO  - support pointer, relmarker       
@@ -1499,12 +1499,12 @@ onEvent("selectresource/data", "show", "onShowSelect()");
 onEvent("selectresource/data/recordList", "click", "onSelectRecord()");
 onEvent("selectresource/data/newRecord", "click", "onNewRecordInSelect()");
 
-/*** START: this section of code depends on the module and record types selected ***/
+/*** START: this section of code depends on the module and record/entity types selected ***/
 '.$event_section.$function_section;    
     
 /* misc functions to add */
 $out = $out.'
-/*** END: this section of code depends on the module and record types selected ***/
+/*** END: this section of code depends on the module and record/entity types selected ***/
 
 /*** navigation functions ***/
 String last_invoker = null; //keep field path
@@ -1578,8 +1578,8 @@ onSelectRecord() {
     String last_select_callback = tabs_select.get(tabs_select.size()-1);
     
     String[] parts = last_select_callback.split("=");
-    String fieldpath = parts[1]; //
-    parts = fieldpath.split("/");
+    String fieldname = parts[1]; //
+    parts = fieldname.split("/");
     String rectype = parts[0]; //editing rectype
     String rectype_tab = parts[1];
     String field = parts[2];
@@ -1593,20 +1593,33 @@ onSelectRecord() {
     //ArrayList pairs = new ArrayList();
     //pairs.add(new NameValuePair("selected "+record_id, record_id));
     
-    populateDropDown(fieldpath, loadEntity(record_id) );
+    populateDropDown(fieldname, loadEntity(record_id) );
+    
+    String fieldname_uid = getPointerFiledName(fieldname);
+    setFieldValue(fieldname_uid, record_id);    
 }
 //
-clearPointer(fieldname,fieldname_uid){
+getPointerFiledName(fieldname){
+    String[] parts = fieldname.split("/");
+    parts[1] = parts[0]+"_uids";
+    parts[2] = parts[2]+"_UID";
+    return parts[0]+"/"+parts[1]+"/"+parts[2];
+}
+//
+clearPointer(fieldname){
     ArrayList pairs = new ArrayList();
     pairs.add(new NameValuePair("browse for resource record", ""));
     populateDropDown(fieldname, pairs );
+    
+    String fieldname_uid = getPointerFiledName(fieldname);
     setFieldValue(fieldname_uid, "");
 }
 //fill pointer field
-fillPointer(fieldname,fieldname_uid){
+fillPointer(fieldname){
+    String fieldname_uid = getPointerFiledName(fieldname);
     String res_id = getFieldValue(fieldname_uid);
     if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
-        clearPointer(fieldname,fieldname_uid);
+        clearPointer(fieldname);
     }else{
         populateDropDown(fieldname, loadEntity(res_id));
     }
@@ -1709,7 +1722,7 @@ refreshEntities() {
    tabs_select.clear();
    tabs_edit.clear();
 
-   showToast("Fetching all records...");
+   showToast("Fetching all entities...");
    
    // populateDropDown("control/data/rectypeList", getRectypeList());
    String entName = getEntityNameByRectype( getFieldValue("control/data/rectypeList") );

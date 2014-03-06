@@ -42,7 +42,8 @@
                                             
                                                     $tr.append($("<td>").css('text-align','center').append("<input type='checkbox' id='crt"+rtID+"' name='crt[]' value='"+rtID+"' depended='"+deprts2.join(",")
                                                                         +"' onclick='onRtCheckBox(this);'>"))
-                                                      .append($("<td>").css('text-align','center').append("<input type='checkbox' id='frt"+rtID+"' name='frt[]' value='"+rtID+"' onclick='{return false;}'>"));
+                                                      .append($("<td>").css({'text-align':'center', 'background-color':'#aaaaaa'})
+                                                                    .append("<input type='checkbox' id='frt"+rtID+"' name='frt[]' value='"+rtID+"' onclick='{return false;}'>"));
                                                     
                                                     dtName = "<b>"+top.HEURIST.rectypes.names[rtID]+"</b>"; 
                                             
