@@ -78,16 +78,16 @@
                 $mdiv.append($table_div);                
                 $mdiv.append($("<p>").append($("<i>").html('Select additional top level tab groups for your app:')));                
 
-                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='ct0'><label for='ct0'>Control tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1'><label for='ct1'>Start/stop synching (always on if not checked)<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct4'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
+                $("<div>").css('font-weight','bold').append("<label>Control tab<label>").appendTo($mdiv);   //<input type='checkbox' id='ct0'>
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always on if not checked)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct4' name='ct4' value='1'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
                 $("<br>").appendTo($mdiv);
                 $("<div>").css('font-weight','bold').append("<input type='checkbox' id='mt0'><label for='mt0'>Map tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt1'><label for='mt1'>Ordnance survey 1:25K [tiled]<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt2'><label for='mt2'>Claire's sketch map [tiled]<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt3'><label for='mt3'>New road alignment [KML]<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt1' name='mt1' value='1'><label for='mt1'>Ordnance survey 1:25K [tiled]<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt2' name='mt2' value='1'><label for='mt2'>Claire's sketch map [tiled]<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt3' name='mt3' value='1'><label for='mt3'>New road alignment [KML]<label>").appendTo($mdiv);
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        

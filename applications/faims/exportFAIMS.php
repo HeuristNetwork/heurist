@@ -309,6 +309,8 @@ function writeUTF8File($filename, $content) {
 function generateSchema($projname, $rt_toexport){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_descr, $supported;
+    
+    $hasControlTracklog = @$_REQUEST['ct4']=="1";
                                                                         
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?> <dataSchema />');
     $root->addAttribute('name', DATABASE);
@@ -550,6 +552,34 @@ function generateSchema($projname, $rt_toexport){
         }
 
     }//foreach recordtype
+    
+    //specila entity for tracklog
+    if($hasControlTracklog){
+         addComment($root, mb_strtoupper("GPS TRACK")); 
+         $gps_track = new SimpleXMLElement('
+  <ArchaeologicalElement name="gps_track">
+    <description>
+      A unit is a portion of trench described by this record..
+    </description>
+    <property type="integer" name="gps_user" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="time" name="gps_timestamp" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="text" name="gps_longitude" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="text" name="gps_latitude" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="float" name="gps_heading" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="float" name="gps_accuracy" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+    <property type="text" name="gps_type" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    </property>
+  </ArchaeologicalElement>');
+         xml_adopt($root, $gps_track);
+    }
+    
+    
 
     $out = prepareXml($root);
 
@@ -572,6 +602,13 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 
     global $rtStructs, $dtTerms, $supported;
 
+    $hasControlSync = @$_REQUEST['ct1']=="1";
+    $hasControlInternalGPS = @$_REQUEST['ct2']=="1";
+    $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
+    $hasControlTracklog = @$_REQUEST['ct4']=="1";
+    
+    $hasControlGPS = ($hasControlSync ||  $hasControlInternalGPS || $hasControlExternalGPS || $hasControlTracklog);
+    
    add16n('Users'); 
    add16n('placeholder');
    add16n('Devices');
@@ -619,8 +656,6 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     
     // Header part  2  
     
-    // ARTEM: THIS SECTION WAS BELOW THE BODY SECTION, MOVED UP HERE 6.30PM 30/9/13
-         
     addComment($faims, 'control tabgroup that contains button to manipulate entities: load, list, create');
 
    
@@ -633,6 +668,16 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                 <recordList/>
             </data>');
     xml_adopt($header_control, $header_controldata);
+    
+    if($hasControlGPS){
+        $tab_gps = new SimpleXMLElement('<gps>'
+                  .($hasControlInternalGPS?'<connectinternal/>':'')
+                  .($hasControlExternalGPS?'<connectexternal/>':'')
+                  .($hasControlSync?'<startsync/><stopsync/>':'')
+                  .($hasControlTracklog?'<starttrackingtime/><starttrackingdistance/><stoptracking/>':'')
+                .'</gps>');
+        xml_adopt($header_control, $tab_gps); 
+    }
 
 /* @todo - add to control/data
                 <searchpanel>
@@ -672,17 +717,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
               </map>');
     xml_adopt($header_control, $tab_map);
      
-    
-    $tab_gps = new SimpleXMLElement('<gps>
-              <connectexternal/>
-              <connectinternal/>
-              <startsync/>
-              <stopsync/>
-              <startTimeLog/>
-              <startDistanceLog/>
-              <stopTrackLog/>
-            </gps>');
-    xml_adopt($header_control, $tab_gps);
+
 */
       
     // -------------------------------------------------------------------------------------------------------
@@ -792,6 +827,39 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         </select1>');
         xml_adopt($body_controldata, $input);        
     
+    if($hasControlGPS){
+        
+        $gps = new SimpleXMLElement('<group ref="gps">  
+            <label>Control</label>'
+            .($hasControlInternalGPS?'
+            <trigger ref="connectinternal">
+              <label>Connect To Internal GPS</label>
+            </trigger>':'')
+            .($hasControlExternalGPS?'
+            <trigger ref="connectexternal">
+              <label>Connect To External GPS</label>
+            </trigger>':'')
+            .($hasControlSync?'
+            <trigger ref="startsync">
+              <label>Start Synching</label>
+            </trigger>
+            <trigger ref="stopsync">
+              <label>Stop Synching</label>
+            </trigger>':'')
+            .($hasControlTracklog?'
+            <trigger ref="starttrackingtime">
+                <label>Start tracking gps based on time interval</label>
+            </trigger>
+            <trigger ref="starttrackingdistance">
+                <label>Start tracking gps based on distance interval</label>
+            </trigger>
+            <trigger ref="stoptracking">
+                <label>Stop tracking gps</label>
+            </trigger>':'')
+        .'</group>');        
+        xml_adopt($body_control, $gps); 
+    }
+    
 
         $select_resource = new SimpleXMLElement(
         '<group ref="selectresource">
@@ -845,32 +913,6 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
             </group>
         </group>');
      xml_adopt($body_control, $map, 'http://www.w3.org/2002/xforms');
-     
-     $gps = new SimpleXMLElement('<group ref="gps">  
-            <label>Control</label>
-            <trigger ref="connectexternal">
-              <label>Connect To External GPS</label>
-            </trigger>
-            <trigger ref="connectinternal">
-              <label>Connect To Internal GPS</label>
-            </trigger>
-            <trigger ref="startsync">
-              <label>Start Synching</label>
-            </trigger>
-            <trigger ref="stopsync">
-              <label>Stop Synching</label>
-            </trigger>
-            <trigger ref="startTimeLog">
-              <label>Start Time Log</label>
-            </trigger>
-            <trigger ref="startDistanceLog">
-              <label>Start Distance Log</label>
-            </trigger>
-            <trigger ref="stopTrackLog">
-              <label>Stop Track Log</label>
-            </trigger>
-        </group>');
-     xml_adopt($body_control, $gps, 'http://www.w3.org/2002/xforms');
 */    
     // Data ADDED BY IAN
     /*
@@ -886,8 +928,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         </select1>
       </group>');
     xml_adopt($body, $data, 'http://www.w3.org/2002/xforms');
-  
         
+     xml_adopt($body_control, $gps, 'http://www.w3.org/2002/xforms');
     // GPS ADDED BY IAN (Artem: it was added into wrong place)
      $gps = new SimpleXMLElement(
      '<group ref="gps">  
@@ -1278,6 +1320,10 @@ function generate_Logic($projname, $rt_toexport){
 
     global $rtStructs, $dtTerms, $supported;
     
+    $hasControlSync = @$_REQUEST['ct1']=="1";
+    $hasControlInternalGPS = @$_REQUEST['ct2']=="1";
+    $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
+    $hasControlTracklog = @$_REQUEST['ct4']=="1";
     
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
     $int_rt_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
@@ -1761,7 +1807,16 @@ login(){
     showTabGroup("control");
 }
 
+/*** INIT ATTRIBUTES ***/
+loadAllAttributes();
+';
+
+if($hasControlSync){
+$out = $out.'    
 /*** SYNC  ***/
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
 setSyncDelay(5.0f);
@@ -1776,8 +1831,74 @@ stopSync() {
     setFileSyncEnabled(false);
 }
 
-loadAllAttributes();
+';    
+}else{
+$out = $out.'    
+/*** SYNC  ***/
+setSyncEnabled(true);
+setFileSyncEnabled(true);
+
+';    
+}
+
+if($hasControlInternalGPS){
+$out = $out.'    
+/*** INTERNAL GPS ***/
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
 ';
+}else{
+$out = $out.'    
+startInternalGPS();
+';
+}
+ 
+if($hasControlExternalGPS){
+$out = $out.'    
+/*** EXTRNAL GPS ***/
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+';
+}
+
+if($hasControlTracklog){
+$out = $out.'    
+/*** TRACKLOG ***/
+onEvent("control/gps/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("control/gps/starttrackingdistance", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("control/gps/stoptracking", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+    List attributes = createAttributeList();
+    attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+    saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+    List attributes = createAttributeList();
+    attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+    saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+    position = getGPSPosition();
+    if (position == null) return;
+
+    attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+    attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+    attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+    attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+    attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+    attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+    
+    positionProj = getGPSPositionProjected();
+    Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+    ArrayList l = new ArrayList();
+    l.add(p);
+    
+    saveArchEnt(null, "gps_track", l, attributes);
+}
+';
+}
+
     
 return $out;   
 }
