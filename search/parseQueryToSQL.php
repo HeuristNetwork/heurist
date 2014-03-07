@@ -132,7 +132,8 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-/*****DEBUG****///error_log("QUERY after parse ".print_r($q,true));
+/*****DEBUG****///
+error_log("QUERY after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -148,13 +149,21 @@ class Query {
 
 	function Query($search_type, $text, $publicOnly, $absoluteStrQuery = false) {
 		$this->search_type = $search_type;
-		$this->isPublicOnly = $publicOnly;
+		$this->recVisibilityType = $publicOnly;
 		$this->absoluteStrQuery = $absoluteStrQuery;
 		$this->or_limbs = array();
 		$this->sort_phrases = array();
 		$this->sort_tables = array();
 		$this->workgroups = array();
 
+        // Find any 'vt:' phrases in the query, and pull them out.
+        while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
+/*****DEBUG****///error_log("Create query obj ".print_r($matches, 1)."   ".substr($matches[2],3));
+            $this->addVisibilityTypeRestriction(substr($matches[2],3));
+            $text = preg_replace('/\bvt:\S+/i', '', $text); 
+            //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
+        }
+        
 		// Find any 'sortby:' phrases in the query, and pull them out.
 		// "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
 		while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
@@ -182,6 +191,16 @@ class Query {
 	function addWorkgroupRestriction($wg_ids) {
 		if ($wg_ids) $this->workgroups = $wg_ids;
 	}
+    
+    function addVisibilityTypeRestriction($visibility_type) {
+        if ($visibility_type){
+            $visibility_type = strtolower($visibility_type);
+            if(in_array($visibility_type,array('viewable','hidden','pending','public')))
+            {
+                $this->recVisibilityType = $visibility_type;
+            }
+        }
+    }
 
 	function makeSQL() {
 		$where_clause = '';
@@ -230,10 +249,30 @@ class Query {
 		}
 /*****DEBUG****///error_log("query obj  - ".print_r($this,true));
 		array_push($this->workgroups,0); // be sure to include the generic everybody workgroup
-		$where_clause = '('.((is_logged_in() && !$this->isPublicOnly) ?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
-							((is_logged_in() && !$this->isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
-							((!empty($this->workgroups) && !$this->isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
+        
+        if(is_bool($this->recVisibilityType)){   //old way - in case vt param is not specified
+            $isPublicOnly = $this->recVisibilityType;
+		    $where_clause = '('.((is_logged_in() && !$isPublicOnly) ?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
+							    ((is_logged_in() && !$isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
+							    ((!empty($this->workgroups) && !$isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
 							' and ' . $where_clause;
+        }else{
+            //hidden - means visible for specific user/group ONLY
+            if($this->recVisibilityType=="hidden"){ //pubic only
+                $sw = is_logged_in()? 'rec_OwnerUGrpID='. get_user_id():'';
+                if(!empty($this->workgroups)){
+                    $sw = $sw.($sw!=''?' or ':'').'rec_OwnerUGrpID in (' . join(',', $this->workgroups).')';
+                }
+                if($sw==''){ //not logged in - can not show hidden
+                    $where2 = '(1=0)';
+                }else{
+                    $where2 = '('.$sw.') and (rec_NonOwnerVisibility="hidden")';
+                }
+            }else{
+                $where2 = '(rec_NonOwnerVisibility="'.$this->recVisibilityType.'")';
+            }
+            $where_clause = $where2 . ' and ' . $where_clause;
+        }
 
 		return $from_clause . 'where ' . $where_clause . $sort_clause;
 	}
@@ -1264,7 +1303,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 	/* use the supplied _REQUEST variables (or $parms if supplied) to construct a query starting with $query */
 	if (! $parms) $parms = $_REQUEST;
 	define('stype', @$parms['stype']);
-
+    
 	if (! $wg_ids  &&  function_exists('get_user_id')) {
 		$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 		                              'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
