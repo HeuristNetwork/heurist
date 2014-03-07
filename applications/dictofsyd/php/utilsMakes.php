@@ -660,7 +660,7 @@ function getAuthors(Record $record){
         }
 
         if($author->getFeatureTypeName()=='supporter'){
-            array_push($supportes, $author->getDet(DT_NAME));
+            array_push($supportes, $author); //->getDet(DT_NAME));
         }else{
             array_push($authors, $author);
         }
@@ -696,7 +696,18 @@ function makeAuthorList(Record $record){
 		}
 		$out = "by ".$out.", ".date('Y', strtotime($record->getDet(DT_DATE)));
 		if(count($supportes)){
-			$out = $out."<br/>supported by ".implode(",", $supportes);
+			$out = $out."<br/>supported by "; //.implode(",", $supportes);
+            $cnt = 0;
+            $len = count($supportes);
+            foreach ($supportes as $author){
+                $cnt++;
+                if($cnt==$len && $len>1){
+                    $out = $out." and ";
+                }else if ($cnt>1){
+                    $out = $out.", ";
+                }
+                $out = $out.getLinkTag($author);
+            }            
 		}
 
 		print $out;
@@ -1097,9 +1108,12 @@ function makePreviewDiv($record, $record_annotation)
 		    $image = getImageTag($record, 'thumbnail', 'thumbnail2');
         }
 	}
+    
+    $description = null;
     if($record_annotation!=null){
         $description = $record_annotation->getDet(DT_SHORTSUMMARY);
-    }else{
+    }
+    if(!$description){
         $description = $record->getDet(DT_SHORTSUMMARY);
     }
 

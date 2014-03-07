@@ -73,7 +73,14 @@ DOS.Browse = (function () {
 			}else if (DOS.Browse.pathBase === "multimedia") {
 				return "../item/" + id;
 			} else {
-				return "../" + DOS.Browse.pathBase + "/" + escape(
+                var subfolder = DOS.Browse.pathBase;
+                if(subfolder=="term"){
+                    subfolder = "subject";
+                }else if(subfolder=="natural"){
+                    subfolder = "natural_feature";
+                }
+                
+				return "../" + subfolder + "/" + escape(
 					title.toLowerCase()
 						.replace(/ /g, "_")
 						.replace(/,/g, "")

@@ -46,7 +46,7 @@
     if(@$_REQUEST['step']=="1" || @$_REQUEST['step']=="2"){ //start generation
 
         if($_REQUEST['pwd']=="DoSRocks2013!"){ // this is a very simple challenge password - should be replaced
-
+        
             mysql_connection_select();
             $is_generation = true;
             $urlbase = "../"; // why reset this here, it is set in incvars.php ??
@@ -59,6 +59,10 @@
             $ft = $_REQUEST['ft'];  //recoord type
 
             if(@$_REQUEST['step']=="1"){
+                
+                if(@$_REQUEST['rebuildcache']=="1"){
+                     createAndFillFactoidsCache();
+                }
 
                 // Step 1: find the list of records
 
@@ -94,6 +98,7 @@
                         $where = $where." and  r.rec_ID=".$_REQUEST['r1'];
                     }
                 }
+                $where = $where." and  r.rec_NonOwnerVisibility='public'";
 
 
                 //NOT USED $type_cache = (@$_REQUEST['fhml']=='1')?0:1;
@@ -342,7 +347,6 @@
         }
 
     }else{
-
     ?>
     <html>
         <head>
@@ -358,10 +362,18 @@ body {
     font-size:0.7em;
     font-style:italic;
 }
+input[readonly="readonly"]{
+    background-color: #aaaaaa;
+}
             </style>
         </head>
         <body>
-
+<?php
+        if(@$_REQUEST['step']=="5"){  //regenrate cache
+            ob_flush();flush();
+            createAndFillFactoidsCache();
+        }
+?>
             <h1>Dictionary of Sydney web site generator (H3)</h1>
             <h4>Artem Osmakov Feb 2013</h4>
                         
@@ -370,8 +382,8 @@ body {
             <form method="post">
                 <input name="step" value="1" type="hidden" />
                 <table border="0" cellspacing="0" cellpadding="3">
-                    <tr class="shade"><td>Heurist Database</td><td><b>DoS3</b></td></tr>
-                    <tr><td>Select type</td><td>
+                    <tr><td>Heurist Database</td><td><b>DoS3</b></td></tr>
+                    <tr class="shade"><td>Select type</td><td>
                             <select name="ft">
                                 <option value="0">All types (entities, entries etc.)</option>
                                 <option value="25">All Entities</option>  // 25 = DoS entity (undifferentiated)
@@ -394,19 +406,25 @@ body {
                             </select>
                         </td></tr>
                     <tr class="shade"><td>And/or range of records ids</td><td>from&nbsp;<input type="text" value="" name="r1" size="6">&nbsp;to&nbsp;<input type="text" value="" name="r2" size="6"><label class="hints">&nbsp;(all records if left blank)</label></td></tr>
-                    <tr><td>Update all pages<br>(excludes Pending)</td><td><input type="checkbox" checked="checked" name="fcreate" value="1" /><label class="hints">&nbsp;Uncheck to only generate pages for new records or pages which have been deleted from deployment
+                    <tr><td>Update all pages marked Public<br>(excludes Pending)</td><td><input type="checkbox" checked="checked" name="fcreate" value="1" /><label class="hints">&nbsp;Uncheck to only generate pages for new records or pages which have been deleted from deployment
 </label></td></tr>
                     <!-- tr><td>Re-request hml</td><td><input type="checkbox" checked="checked" name="fhml" value="1" /></td></tr -->
-                    <tr class="shade"><td>Folder on server</td><td><input type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
-                    <tr><td>Subfolder for media</td><td><input type="text" value="deployed_files/" name="filepath" size="80"></td></tr> <!-- <label class="hints">&nbsp;leave empty to use getMedia.php</label> -->
-                    <tr><td>Copy media</td><td><input type="checkbox" value="1" name="filecreate"></td></tr>
+                    <tr class="shade"><td>Deploy URL</td><td><input readonly="readonly" type="text" value="http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="deployurl" size="100"></td></tr>
+                    <tr class="shade"><td>Folder on server</td><td><input readonly="readonly" type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
+                    <tr class="shade"><td>Subfolder for media</td><td><input readonly="readonly" type="text" value="deployed_files/" name="filepath" size="80"></td></tr> <!-- <label class="hints">&nbsp;leave empty to use getMedia.php</label> -->
+                    <tr><td>Regenerate media files</td><td><input type="checkbox" value="1" name="filecreate"><label class="hints">&nbsp;check this box if new media files have been added since last generation (doubles processing time)</label></td></tr>
                     
-                    <tr class="shade"><td>Deploy URL</td><td><input type="text" value="http://heuristscholar.org/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="deployurl" size="100"></td></tr>
+                    <tr class="shade"><td>Password</td><td><input type="password" value="" name="pwd"></td></tr>
+                    <tr class="shade"><td>Rebuild Annotation/Factoid cache</td><td><input type="checkbox" checked="checked" value="1" name="rebuildcache"></td></tr>
                     
-                    <tr><td>Password</td><td><input type="password" value="" name="pwd"></td></tr>
                     <!-- tr><td>Test limit</td><td><input type="text" value="" name="limit" size="10"> leave empty to generate all</td></tr -->
                     <tr><td colspan="2"><button type="submit">Start</button></td></tr>
                 </table>
+            </form>
+            <hr />
+            <form method="post">
+                <input name="step" value="5" type="hidden" />
+                <button type="submit">Manual Rebuild Annotation/Factoid cache</button><label><i>&nbsp;Check in form above to rebuilt automatically as part of any static pages generation</i></label>
             </form>
             <hr />
 
@@ -454,11 +472,22 @@ body {
     * original H3 database does not contain these tables. They are required to improve performance
     */
     function createAndFillFactoidsCache(){
+        
+            $cmdline="mysql -u".READONLY_DBUSERNAME." -p".READONLY_DBUSERPSWD." -D hdb_DoS3 < buildFactoidsAnnotationCache.sql";
+            $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+            if ($res2 != 0 ) {
+                echo ("<p>Error $res2 on MySQL exec: Unable to build annotation/factoids cache (use buildFactoidsAnnotationCache.sql)");
+                echo ("<br>Please check whether this file is valid; consult your fellow programmer if needed");
+                echo($output2);
+                exit;
+            }else{
+                print "<p>Annotation/Factoids cache tables have been regenerated.</p>";
+            }
+        
+        
         /*
-
         Do this before generation becuase it improves performance
-
-
+        
         use hdb_DoS3;
         DROP TABLE IF EXISTS `recFacctoidsCache`;
         CREATE TABLE `recFacctoidsCache` (
@@ -483,11 +512,8 @@ body {
         on r.rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID = 86
         left join recDetails d3
         on r.rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID = 88
-        where r.rec_RecTypeID = 26;
+        where r.rec_RecTypeID = 26 and r.rec_NonOwnerVisibility='public';
 
-        count = 25377
-
-        use hdb_DoS3;
         DROP TABLE IF EXISTS `recAnnotationCache`;
         CREATE TABLE `recAnnotationCache` (
 
@@ -508,9 +534,7 @@ body {
         on r.rec_ID=d1.dtl_RecID and d1.dtl_DetailTypeID = 42
         left join recDetails d2
         on r.rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID = 13
-        where r.rec_RecTypeID = 15;
-
-        count=22742
-        */
+        where r.rec_RecTypeID = 15 and r.rec_NonOwnerVisibility='public';
+         */
     }
 ?>

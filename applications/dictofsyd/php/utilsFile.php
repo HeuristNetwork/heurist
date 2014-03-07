@@ -342,6 +342,14 @@
         }else{
             $subfolder = getNameByCode($rec_type);
         }
+        
+        //two stupid exclusions
+        if($subfolder=="term"){
+            $subfolder = "subject";
+        }else if($subfolder=="natural"){
+            $subfolder = "natural_feature";
+        }
+        
         return $subfolder;
     }
 

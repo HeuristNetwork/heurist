@@ -47,7 +47,7 @@
     define('READONLY_DBUSERPSWD', $DoSPassword);
    
     // Port 3306 is not open, everything is happening locally
-    define('HEURIST_DBSERVER_NAME', 'heur-db-pro-1.ucc.usyd.edu.au:3306');
+    define('HEURIST_DBSERVER_NAME', 'heur-db-pro-1.ucc.usyd.edu.au:3306');  //NOT USED!!!
     
     define('HEURIST_THUMB_DIR', '/var/www/html/HEURIST/HEURIST_FILESTORE/' . HEURIST_DBNAME . '/filethumbs/');
     define('HEURIST_THUMB_BASE_URL', DOMAIN.'HEURIST_FILESTORE/' . HEURIST_DBNAME . '/filethumbs/');
