@@ -1,0 +1,18 @@
+Heurist academic data management system (http://HeuristScholar.org)
+Copyright © 2005 - 2014 University of Sydney
+License: http://www.gnu.org/licenses/gpl-3.0.txt
+Concept/design/direction: Ian Johnson
+Developers: Tom Murtagh, Kim Jackson, Artem Osmakov, Steve White, Maria Shvedova, Maxim Nikitin
+Graphic design/testing: Andrew Wilson, Ireneusz Golka, Steven Hayes, Martin King
+ 
+---------------------------------------------------------------------
+
+Directory:	admin/setup/rectype-icons
+
+Overview:	
+
+Record type icons for core definitions which are copied to every new database
+
+Notes:	
+
+Updated: 	Ian Johnson 11 March 2014
