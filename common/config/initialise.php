@@ -418,6 +418,8 @@ $rtDefines = array('RT_RELATION' => array(2, 1),
 					'RT_BOOK' => array(3, 1002),
 					'RT_JOURNAL_VOLUME' => array(3, 1013),
 					'RT_KML_LAYER' => array(3, 1014),
+                    'RT_SHP_LAYER' => array(3, 1017),
+                    'RT_GEOTIFF_LAYER' => array(3, 1018),
 					'RT_AUTHOR_EDITOR' => array(3, 23), //Depricated
 					'RT_FACTOID' => array(3, 22), //depricated
 					'RT_AGGREGATION' => array(2, 6));

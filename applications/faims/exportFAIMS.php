@@ -32,14 +32,16 @@
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
     require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
-    $rt_toexport_toplevel = @$_REQUEST['crt'];
     $rt_toexport = @$_REQUEST['frt'];
+    $rt_toexport_toplevel = @$_REQUEST['crt'];
+    $maprec_toexport = @$_REQUEST['mt'];
     
-//error_log(print_r($rt_toexport, true));
+error_log(print_r($rt_toexport, true));
 error_log(print_r($rt_toexport_toplevel, true));
+error_log(print_r($maprec_toexport, true));
     
     $projname = @$_REQUEST['projname'];
-    $step = @$_REQUEST['step'];
+    $step = @$_REQUEST['step']; // 1 - define record type  ,   2 - download result
     
     $arc_filename = HEURIST_UPLOAD_DIR."faims/new/".$projname.".zip";
     
@@ -90,11 +92,6 @@ error_log(print_r($rt_toexport_toplevel, true));
     <div class="banner"><h2>Build FAIMS Project</h2></div>
     <div id="page-inner" style="width:80%; margin:0px 5%; padding: 0.5em;">   
 
-<script>
-$( document ).ready(function() {
-    showSelectedRecTypes();
-});    
-</script>        
 <?php
     
     $invalid = (!$projname || preg_match('/[^A-Za-z0-9_\$]/', $projname)); //'[\W]'
@@ -129,19 +126,68 @@ To register click Database > Register in the menu on the left</div>";
                 }        
     }
     
-        print "<div>This function writes a set of FAIMS project definition files ".
-        "(db schema, ui schema, ui logic, A16N) to a zip file, based on the record types ".
-        "selected from the Heurist database. <p/>These files can be loaded into ".
-        "the FAIMS server to create a new module.<p/></div>";
+//find all records for specific record types: GeoTiff, KML, Shapefile
+    $map_records = array();
+    if (! $wg_ids  &&  function_exists('get_user_id')) {
+
+        $mrt = array();
+        if(defined('RT_GEOTIFF_LAYER')){
+            array_push($mrt, RT_GEOTIFF_LAYER);
+        }
+        if(defined('RT_SHP_LAYER')){
+            array_push($mrt, RT_SHP_LAYER);
+        }
+        if(defined('RT_KML_LAYER')){
+            array_push($mrt, RT_KML_LAYER);
+        }
+        
+        if(count($mrt)>0){
+            $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+                                          'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
+            if($wg_ids && count($wg_ids)>0){
+                $swgs = ' or rec_OwnerUGrpID in ('.implode(",",$wg_ids).')';
+            }else{
+                $swgs = '';
+            }
+
+            
+            $res = mysql_query('SELECT rec_ID, rec_Title, rec_RecTypeID FROM Records where rec_RecTypeID in ('.implode(',',$mrt).') and '
+            .'( rec_OwnerUGrpID='. get_user_id().$swgs.' or not rec_NonOwnerVisibility="hidden") and not rec_FlagTemporary');
+            
+            while (($row = mysql_fetch_assoc($res))){
+                array_push($map_records, $row);  
+            }
+            
+        } 
+    }        
+?>
+<script>
+var map_records = <?=json_format($map_records)?>;
+$( document ).ready(function() {
+    showSelectedRecTypes();
+});    
+</script>        
+        <div>
+        
+            This function writes a set of FAIMS project definition files 
+            (db schema, ui schema, ui logic, A16N) to a zip file, based on the record types 
+            selected from the Heurist database. <p/>These files can be loaded into 
+            the FAIMS server to create a new module.<p/>
+        </div>
+<?php
 
         print "<form name='startform' action='exportFAIMS.php' method='get'>";
         print "<input id='rt_selected' name='rt' type='hidden'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
         print "<div><div class='lbl_form'>Project name:</div><input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='25'></div>";
+        // List of record types for export
+        print "<div id='selectedRectypes' style='width:100%;color:black;'></div>";
 
+        $rtStructs = getAllRectypeStructures(false);
+        
         $rt_invalid_masks = array();
-        if($rt_toexport){
+        if($rt_toexport && count($rt_toexport)>0){
             //validate title masks
             $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name"," rty_ID in (".implode(",",$rt_toexport).") order by rty_ID");
             foreach ($rtIDs as $rtID => $rtName) {
@@ -151,6 +197,13 @@ To register click Database > Register in the menu on the left</div>";
                 if(is_array($res)){ //invalid mask
                     array_push($rt_invalid_masks, $rtName);
                 }
+                
+                $rst_fields = $rtStructs['typedefs'][$rtID]['dtFields'];
+                if(!$rst_fields){
+                     print "<p style='color:red'>No details defined for record type #".$rtName.". Edit record type structure.</p>";            
+                    $invalid = true;
+                }
+                
             }
             if(count($rt_invalid_masks)>0){
                 $invalid = true;
@@ -163,9 +216,6 @@ To register click Database > Register in the menu on the left</div>";
         print "<input type='button' value='Select Record Types' id='btnSelRecType1' onClick='onSelectRectype(\"".HEURIST_DBNAME."\")'/></div>";
 */        
         
-        // List of record types for export
-        print "<div id='selectedRectypes' style='width:100%;color:black;'></div>";
-
         if(count($rt_invalid_masks)>0){
             print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
             .implode(",",$rt_invalid_masks)."</b>
@@ -180,7 +230,7 @@ To register click Database > Register in the menu on the left</div>";
             print "<script>showSelectedRecTypes('".$rt_toexport."')</script>";
         }*/
 
-    if( $rt_toexport && !$invalid ){
+    if( $rt_toexport && count($rt_toexport)>0 && !$invalid ){
         
         $folder = HEURIST_UPLOAD_DIR."faims/new/".$projname;
 
@@ -194,7 +244,6 @@ To register click Database > Register in the menu on the left</div>";
         }
 
         //load definitions (USE CACHE)
-        $rtStructs = getAllRectypeStructures(false);
         $dtStructs = getAllDetailTypeStructures(false);
         $dtTerms = getTerms(false);
         $ind_parentid =  $dtTerms['fieldNamesToIndex']['trm_ParentTermID'];
@@ -343,6 +392,11 @@ function generateSchema($projname, $rt_toexport){
         //find relmarker fields 
         foreach ($rectyps as $rt) {
            $rst_fields = $rtStructs['typedefs'][$rt]['dtFields'];
+           if(!$rst_fields){
+                error_log("No details defined for RT#".$rt);            
+                continue;
+           }
+           
            foreach ($rst_fields as $dtid=>$detail) {
                 $rst_dt_type = $detail[$int_rt_dt_type];
                 if($rst_dt_type=="relmarker"){
@@ -498,6 +552,10 @@ function generateSchema($projname, $rt_toexport){
         $has_identifier = false;
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
+        if(!$details){
+            error_log("1. No details defined for RT#".$rt);            
+            continue;
+        }
 
         // Loop through the fields (details)
         
@@ -607,6 +665,10 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
     $hasControlTracklog = @$_REQUEST['ct4']=="1";
     
+    
+error_log(">>>>> ".@$_REQUEST['mainmt']);
+    $hasMapTab = @$_REQUEST['mainmt']=="1";
+    
     $hasControlGPS = ($hasControlSync ||  $hasControlInternalGPS || $hasControlExternalGPS || $hasControlTracklog);
     
    add16n('Users'); 
@@ -660,6 +722,24 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 
    
     $header_control = $faims->addChild('control');   //$controlgroup in body
+   
+    if($hasMapTab){
+        $tab_map = new SimpleXMLElement('<map>
+              <map/>
+              <mapContainer>
+                <child0>
+                  <zoomGPS/>
+                </child0>
+                <child1>
+                  <clear/>
+                </child1>
+                <child2>
+                  <create/>
+                </child2>
+              </mapContainer>
+            </map>');
+        xml_adopt($header_control, $tab_map); 
+    }   
     
     $header_controldata = new SimpleXMLElement('
             <data>
@@ -678,6 +758,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                 .'</gps>');
         xml_adopt($header_control, $tab_gps); 
     }
+
 
 /* @todo - add to control/data
                 <searchpanel>
@@ -699,27 +780,6 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
           </selectresource>');
     xml_adopt($faims, $header_selectres);
  
-/* ART temorary removed    
-    $tab_map = new SimpleXMLElement(
-             '<map>
-                  <map/>
-                  <mapContainer>
-                      <child0>
-                        <zoomGPS/>
-                      </child0>
-                      <child1>
-                        <clear/>
-                      </child1>
-                      <child2>
-                        <create/>
-                      </child2>
-                  </mapContainer>
-              </map>');
-    xml_adopt($header_control, $tab_map);
-     
-
-*/
-      
     // -------------------------------------------------------------------------------------------------------
     
     // Body section 3
@@ -775,6 +835,38 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     $body_control = $body->addChild('group','','http://www.w3.org/2002/xforms');
     $body_control->addAttribute('ref', 'control');
     $body_control->addChild('label','');
+    
+    if($hasMapTab){
+    
+        $map = new SimpleXMLElement('<group faims_scrollable="false" ref="map">
+            <label>Map</label>
+            <input faims_certainty="false" faims_map="true" ref="map">
+              <label/>
+            </input>
+            <group faims_style="orientation" ref="mapContainer">
+              <label/>
+              <group faims_style="even" ref="child0">
+                <label/>
+                <trigger ref="zoomGPS">
+                  <label>centerMe</label>
+                </trigger>
+              </group>          
+              <group faims_style="even" ref="child1">
+                <label/>
+                <trigger ref="clear">
+                  <label>Clear</label>
+                </trigger>
+              </group>
+              <group faims_style="even" ref="child2">
+                <label/>
+                <trigger ref="create">
+                  <label>Create</label>
+                </trigger>
+              </group>
+            </group>
+          </group>');
+        xml_adopt($body_control, $map);       
+    }
     
     //group for list of rectypes
     $body_controldata = $body_control->addChild('group','','http://www.w3.org/2002/xforms');
@@ -1016,6 +1108,14 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         if($rtnamex==""){
                $rtnamex = "Rectype".$rt;
         }
+
+        //
+        $details =  $rtStructs['typedefs'][$rt]['dtFields'];
+        if(!$details){
+            error_log("2. No details defined for RT#".$rt."  ".$rtname);            
+            continue;
+        }
+        
         
 //error_log(">>>> ".$rt."  ".in_array($rt, $rt_toexport_toplevel));
         //add to rectypes list on control/data  - this is list of rectypes that can be searched/edit directly from main page
@@ -1058,9 +1158,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         </input>');
         xml_adopt($group_uids, $input);            
         
-        //
-        $details =  $rtStructs['typedefs'][$rt]['dtFields'];
-        
+       
         $hasattachfile = false;
         
         $contaier_no = 1; //container for resource field type
@@ -1353,6 +1451,12 @@ function generate_Logic($projname, $rt_toexport){
                $rtnamex = "Rectype".$rt;
         }
         
+        $details =  $rtStructs['typedefs'][$rt]['dtFields'];
+        if(!$details){
+            error_log("3. No details defined for RT#".$rt."  ".$rtname);            
+            continue;
+        }
+        
         $rectype_to_entname .=  '
             if("'.$rtnamex.'".equals(rectype)){
                 return "'.prepareText($rtname).'";
@@ -1366,8 +1470,6 @@ onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
     
-        $details =  $rtStructs['typedefs'][$rt]['dtFields'];
-        
         $hasattachfile = false;
         $headername = $rtnamex."/".$rtnamex.'_General_Information'; //first tab implied if no header at top of record
         $headername_uids = $rtnamex."/".$rtnamex.'_uids'; //first tab implied if no header at top of record
@@ -1899,7 +2001,118 @@ saveGPSTrack(List attributes) {
 ';
 }
 
+$hasMapTab = @$_REQUEST['mainmt']=="1";
+if($hasMapTab){
+$out = $out.'
+/*** MAP ***/
+
+DATA_ENTRY_LAYER = "Data Entry Layer";
+DATA_ENTRY_LAYER_ID = 0;
+
+onToolEvent("control/map/map", "load", "onLoadData()");
+
+onLoadData() {
+    id = getMapGeometryLoaded();
+    is_entity = "entity".equals(getMapGeometryLoadedType());
     
+    showToast("To load entity please use load tab");
+}
+
+onEvent("control/map/clear", "click", "onClearMap()");
+onEvent("control/map/create", "click", "onCreateMap()");
+
+onClearMap() {
+    clearGeometryList("control/map/map", getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID));
+}
+
+onCreateMap() {
+    List geomList = getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+    if (geomList == null || geomList.size() == 0) {
+        showWarning("Logic Error", "No geometry found on data entry layer");
+    } else if (geomList.size() > 1) {
+        showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
+    } else {
+        Geometry geom = geomList.get(0);
+        /*if (geom instanceof Point) {
+            showTabGroup("createPoint");
+        } else if (geom instanceof Line) {
+            showTabGroup("createLine");
+        } else if (geom instanceof Polygon) {
+            showTabGroup("createPolygon");
+        }*/
+    }
+}
+
+getCreatedGeometry() {
+    return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+}
+
+clearCreatedGeometry() {
+    onClearMap();
+}
+
+zoomGPS(){
+    Object position = getGPSPositionProjected();
+    Object projPosition = getGPSPositionProjected();
+    if (projPosition != null ){
+        Double latitude = projPosition.getLatitude();
+        Double longitude = projPosition.getLongitude();
+        showToast("Zooming to "+position.getLongitude()+", "+position.getLatitude());
+        setMapFocusPoint("control/map/map", longitude, latitude);
+    } else {
+        showToast("GPS Not initialized");
+    }
+
+}
+
+onEvent("control/map/zoomGPS", "click", "zoomGPS()");
+
+initMap() {
+    setMapZoom("control/map/map", 19.0f);
+
+    //showBaseMap("control/map/map", "Base Layer", "files/data/maps/ZAG-TPan-3857-grass-tiled.tif");
+    createCanvasLayer("control/map/map", "Non-saved sketch layer");
+
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
+    isEntity = true;
+    queryName = "All entities";
+    querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
+        
+    addDatabaseLayerQuery("control/map/map", queryName, querySQL);
+
+    addTrackLogLayerQuery("control/map/map", "track log entities", 
+        "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+        " FROM archentity join aenttype using (aenttypeid)\n" +
+        " where archentity.deleted is null\n" + 
+        "   and lower(aenttypename) = lower(\'gps_track\')\n" + 
+        " group by uuid\n" + 
+        " having max(aenttimestamp)");
+        
+    addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
+        "select uuid\n" + 
+        "  from latestNonDeletedArchent\n" + 
+        "  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+        "  join aenttype using (aenttypeid)\n" + 
+        "  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+        "  where lower(aenttypename) = lower(?) \n" + 
+        "   group by uuid").addParameter("Type", "RemoteSensingFeature"));
+        
+                    
+    // define database layer styles for points, lines, polygons and text
+    ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+    ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+    pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+    ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+
+    showDatabaseLayer("control/map/map", "Saved Data Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
+
+initMap();
+
+';
+}    
+
 return $out;   
 }
 

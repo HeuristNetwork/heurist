@@ -459,7 +459,7 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
 		}
 	} else { //prepared query
 		$stmt = $mysqli->prepare($sql) or die("Failed to prepare the SQL statement: ".$sql);
-        error_log('>>');error_log('Preparing SQL stmt: '.$sql.' with parameters: '.$params); //TODO: DEBUG to remove
+//DEBUG error_log('>>');error_log('Preparing SQL stmt: '.$sql.' with parameters: '.$params); //TODO: DEBUG to remove
 		call_user_func_array(array($stmt, 'bind_param'), refValues($params));
 		$stmt->execute();
 		if ($retCnt) {

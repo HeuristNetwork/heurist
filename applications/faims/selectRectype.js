@@ -10,10 +10,10 @@
                 var newvalue = "", txt="",
                     ind, dtName, rtID, grpID;
                    
-                var $table_div = $("<div>").css({'max-height':'350px','width':'100%','overflow-y':'auto'});    
+                var $table_div = $("<div>").css({'width':'100%','overflow-y':'auto'});      //'max-height':'350px',
                 var $table =$("<table>").appendTo($table_div);
                 
-                $("<tr>").css('text-align','left').html("<th>Entity Group</th><th>TabGrp</th><th>Form</th><th>Record type &gt;&gt; record types referenced</th>").appendTo($table);
+                $("<tr>").css('text-align','left').html("<th>TabGrp</th><th>Form</th><th>Record type &gt;&gt; record types referenced</th>").appendTo($table);
                 
                             
                        for (grpID in grp) {
@@ -24,16 +24,19 @@
                                     
                                     //find dependent recordtypes
                                      var $tr =$("<tr>")
-                                        .append($("<td>").css('font-weight','bold').text(dtName));
+                                        .append($("<td>").attr('colspan','2'))
+                                        .append($("<td>").css({'font-weight':'bold', 'font-style':'italic', 'font-size':'1.2em'}).text(dtName));
+                                     $tr.appendTo($table);
 
                                      var i=0, idx;                                     
                                      for (idx in arr) {
                                          rtID = arr[idx];
                                          if(!isNaN(rtID)){
                                          
-                                            if(i>0){
+                                            /*if(i>0){
                                                $tr =$("<tr>").append($("<td>").text(" "));
-                                            }                                                                                //checked='checked'
+                                            }*/                                                                                //checked='checked'
+                                            $tr =$("<tr>");
                                             
                                             if(top.HEURIST.rectypes['typedefs'][rtID]){
 
@@ -42,8 +45,9 @@
                                             
                                                     $tr.append($("<td>").css('text-align','center').append("<input type='checkbox' id='crt"+rtID+"' name='crt[]' value='"+rtID+"' depended='"+deprts2.join(",")
                                                                         +"' onclick='onRtCheckBox(this);'>"))
-                                                      .append($("<td>").css({'text-align':'center', 'background-color':'#aaaaaa'})
-                                                                    .append("<input type='checkbox' id='frt"+rtID+"' name='frt[]' value='"+rtID+"' onclick='{return false;}'>"));
+                                                      .append($("<td>").css({'text-align':'center'})
+                                                                    .append("<input type='checkbox' id='fff"+rtID+"' disabled=disabled' onclick='{return false;}'>")
+                                                                    .append("<input type='checkbox' id='frt"+rtID+"' value='"+rtID+"' style='display:none;' name='frt[]'>"));
                                                     
                                                     dtName = "<b>"+top.HEURIST.rectypes.names[rtID]+"</b>"; 
                                             
@@ -78,16 +82,27 @@
                 $mdiv.append($table_div);                
                 $mdiv.append($("<p>").append($("<i>").html('Select additional top level tab groups for your app:')));                
 
-                $("<div>").css('font-weight','bold').append("<label>Control tab<label>").appendTo($mdiv);   //<input type='checkbox' id='ct0'>
+                $("<div>").css('font-weight','bold').append("<input type='checkbox' checked='checked' onclick='onCtCheckBox(event)' id='mainct'>").append("<label for='mainct'>Control tab<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always on if not checked)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct4' name='ct4' value='1'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
                 $("<br>").appendTo($mdiv);
-                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='mt0'><label for='mt0'>Map tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt1' name='mt1' value='1'><label for='mt1'>Ordnance survey 1:25K [tiled]<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt2' name='mt2' value='1'><label for='mt2'>Claire's sketch map [tiled]<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' id='mt3' name='mt3' value='1'><label for='mt3'>New road alignment [KML]<label>").appendTo($mdiv);
+                
+
+         if(map_records.length>0){
+                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='mainmt' name='mainmt' value='1' checked='checked' onclick='onMtCheckBox(event)'><label for='mainmt'>Map tab<label>").appendTo($mdiv);
+         
+                 var k=0;
+                 for (; k<map_records.length; k++) {
+                        //map_records[k]['rec_RecTypeID']
+                        var sname = "mt"+map_records[k]['rec_ID'];
+                        $("<div>").css('padding-left','40px').append("<input type='checkbox' id='"+sname+"' name='mt[]' value='"+map_records[k]['rec_ID']+"'><label for='"+sname+"'> ["+
+                                    map_records[k]['rec_RecTypeID']+"] "+
+                                    map_records[k]['rec_Title']+"<label>").appendTo($mdiv);
+                        
+                 }
+         }
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        
@@ -160,8 +175,11 @@
         });
         
         //check frt that are in dependent list
-        $('input[id^="frt"]').each(function(ind){
-              $(this).attr('checked', deps.indexOf( this.id.substring(3) )>=0 );
+        $('input[id^="fff"]').each(function(ind){
+              var rtid = this.id.substring(3);
+              var ischecked = deps.indexOf( rtid )>=0;
+              $(this).attr('checked', ischecked);
+              $('#frt'+rtid).attr('checked', ischecked); //.val(ischecked?rtid:'');
         });
         
 /*        
@@ -174,3 +192,35 @@
         });
 */        
     }
+    
+    function onCtCheckBox(event){
+        
+        var ischecked = event.target.checked;
+        
+        $('input[id^="ct"]').each(function(ind){
+            if(ischecked){
+                $(this).removeAttr('disabled');  
+            }else{
+                $(this).attr('disabled', 'disabled');  
+            }
+              
+        });
+    }
+        
+    function onMtCheckBox(event){
+        
+        var ischecked = event.target.checked;
+        
+        $('input[id^="mt"]').each(function(ind){
+            if(ischecked){
+                $(this).removeAttr('disabled');  
+            }else{
+                $(this).attr('disabled', 'disabled');  
+            }
+              
+        });
+    }
+        
+    
+    
+    
