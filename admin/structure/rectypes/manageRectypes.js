@@ -387,7 +387,7 @@ function RectypeManager() {
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
                         "<a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
-                        "</div>"+
+                        "</div>"+ 
                         "</div>";
                         elLiner.innerHTML = icon;
                 }},
@@ -446,9 +446,9 @@ function RectypeManager() {
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("status");
                         if (str === "reserved"){
-                            rectypeStatus = "<img src=\"../../../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
+                            rectypeStatus = "<img src=\"../../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
                         }else{
-                            rectypeStatus = "<a href=\"#delete\"><img src=\"../../../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
+                            rectypeStatus = "<a href=\"#delete\"><img src=\"../../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
                         };
                         elLiner.innerHTML = rectypeStatus;
                 }},

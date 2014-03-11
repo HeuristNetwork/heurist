@@ -584,9 +584,11 @@ div#termsFilter.popup {
 	display:none;
 	position:absolute
 }
+/* Ian req: 2014-03-11
 .rectypeImages:hover div.thumbPopup {
 	display:block
 }
+*/
 #formGroupEditor {
 	margin:0 0 20px 0
 }
