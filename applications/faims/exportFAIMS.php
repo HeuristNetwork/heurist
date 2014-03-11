@@ -121,8 +121,8 @@ error_log(print_r($maprec_toexport, true));
                 $row = mysql_fetch_row($res); // Get system information for current database
                 $dbID = $row[0];
                 if ( !isset($dbID) || ($dbID <1)) { // not registered
-                    print "<div class='err_message'>This database has not been registered with the Heurist network. We encourage registration before proceeding to ensure that the record types, fields and terms in your database have globally unique identifiers.
-To register click Database > Register in the menu on the left</div>";
+                    print "<div class='err_message'>This database has not been registered with the Heurist network.</div> We encourage registration before proceeding to ensure that the record types, fields and terms in your database have globally unique identifiers.
+To register click Database > Register in the menu on the left<br />&nbsp;<br />";
                 }        
     }
     
@@ -169,10 +169,9 @@ $( document ).ready(function() {
 </script>        
         <div>
         
-            This function writes a set of FAIMS project definition files 
-            (db schema, ui schema, ui logic, A16N) to a zip file, based on the record types 
-            selected from the Heurist database. <p/>These files can be loaded into 
-            the FAIMS server to create a new module.<p/>
+            This function writes a set of FAIMS project definition files (db schema, ui schema, ui logic, A16N) to a zip file, 
+            based on the record types selected from the Heurist database, along with any required image or map data files. 
+            These files can be loaded into the FAIMS server to create a new module.<p/>
         </div>
 <?php
 
@@ -180,7 +179,7 @@ $( document ).ready(function() {
         print "<input id='rt_selected' name='rt' type='hidden'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-        print "<div><div class='lbl_form'>Project name:</div><input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='25'></div>";
+        print "<div><div class='lbl_form'>Module name</div><input name='projname' value='".($projname?$projname:HEURIST_DBNAME)."' size='25'></div>";
         // List of record types for export
         print "<div id='selectedRectypes' style='width:100%;color:black;'></div>";
 
@@ -219,7 +218,8 @@ $( document ).ready(function() {
         if(count($rt_invalid_masks)>0){
             print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
             .implode(",",$rt_invalid_masks)."</b>
- FAIMS requires setting of at least one field (attrribute) as an identifier, which is based  on the fields in the title mask. Please correct the title mask(s) before proceeding (edit the record type in Database Designer > Essentials > Manage RecordTypes/Fields)</p>";
+            FAIMS requires setting of at least one field (attrribute) as an identifier, which is based  on the fields in the title mask. 
+            Please correct the title mask(s) before proceeding (edit the record type in Database Designer > Essentials > Manage RecordTypes/Fields)</p>";
         }
  
         // Don't show Start Export button until record types have been selected       

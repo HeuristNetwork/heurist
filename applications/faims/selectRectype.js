@@ -8,12 +8,12 @@
         var grp = top.HEURIST.rectypes.groups;
         
                 var newvalue = "", txt="",
-                    ind, dtName, rtID, grpID;
+                    ind, dtName, rtID, grpID, hasSubnames;
                    
                 var $table_div = $("<div>").css({'width':'100%','overflow-y':'auto'});      //'max-height':'350px',
                 var $table =$("<table>").appendTo($table_div);
                 
-                $("<tr>").css('text-align','left').html("<th>TabGrp</th><th>Form</th><th>Record type &gt;&gt; record types referenced</th>").appendTo($table);
+                $("<tr>").css('text-align','left').html("<th>Entity&nbsp;&nbsp;</th><th>Form&nbsp;&nbsp;</th><th>Entity/Record type [references]</th>").appendTo($table);
                 
                             
                        for (grpID in grp) {
@@ -25,7 +25,7 @@
                                     //find dependent recordtypes
                                      var $tr =$("<tr>")
                                         .append($("<td>").attr('colspan','2'))
-                                        .append($("<td>").css({'font-weight':'bold', 'font-style':'italic', 'font-size':'1.2em'}).text(dtName));
+                                        .append($("<td>").css({'font-weight':'bold', 'font-style':'normal', 'font-size':'1.3em', padding:'10px 0px 3px 0px'}).text(dtName));
                                      $tr.appendTo($table);
 
                                      var i=0, idx;                                     
@@ -35,7 +35,8 @@
                                          
                                             /*if(i>0){
                                                $tr =$("<tr>").append($("<td>").text(" "));
-                                            }*/                                                                                //checked='checked'
+                                            }*/     
+
                                             $tr =$("<tr>");
                                             
                                             if(top.HEURIST.rectypes['typedefs'][rtID]){
@@ -51,12 +52,14 @@
                                                     
                                                     dtName = "<b>"+top.HEURIST.rectypes.names[rtID]+"</b>"; 
                                             
+                                                    hasSubnames=0;
                                                     var subnames = [];
                                                     for (j=0;j<deprts2.length;j++){
                                                         subnames.push(top.HEURIST.rectypes.names[deprts2[j]]);
                                                     }
                                                     if(subnames.length>0){
-                                                       dtName = dtName + " >> " + subnames.join(", ");    
+                                                       dtName = dtName + " &nbsp;&nbsp; [" + subnames.join(", "); 
+                                                       hasSubnames = 1;   
                                                     }
                                             
                                             }else{
@@ -64,7 +67,8 @@
                                                 dtName = " not found";
                                             }
                                             
-                                            $tr.append($("<td>").append(dtName));
+                                            if (hasSubnames) {closeBracket=']'} else {closeBracket=''};
+                                            $tr.append($("<td>").css({'font-weight':'normal', 'font-style':'normal', 'font-size':'0.8em'}).append(dtName).append(closeBracket));
                                             $tr.appendTo($table);
                                             
                                             i++;
@@ -74,10 +78,10 @@
                             }
                         } //for
 
-                $mdiv.append($("<p>").css('width','600px').append($("<i>").html('Please select ONLY entity (record) types which you want to be represented as top level tab groups.<br /><br />'+
-'Any entity which is referenced by a pointer or relationship marker within these entity types (eg. a site within a project, a context within a site, '+
-'an artefact, sample or feature within a context) is indicated by >> and will be included automatically in the appropriate locations. The Form column '+
-'shows whether a data entry form will be included in the app.')));
+                $mdiv.append($("<p>").css('width','600px').append($("<i>").html('<b>Please select ONLY entity (record) types below which you want represented as an entry point on the first screen</b><br />'+
+                    'Any entity which is referenced by a pointer or relationship marker within these entity types (eg. a context within a site, '+
+                    'an artefact, sample or feature within a context) is indicated between [ ] and will be included automatically in the appropriate locations. The Form column '+
+                    'shows whether a data entry form will be included in the app.')));
                         
                 $mdiv.append($table_div);                
                 $mdiv.append($("<p>").append($("<i>").html('Select additional top level tab groups for your app:')));                
