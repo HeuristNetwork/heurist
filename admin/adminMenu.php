@@ -243,22 +243,29 @@ if (is_admin()) {
 				<h3><a href="#">UTILITIES: </a><span class="description">Verify and fix database integrity, specialised tools</span></h3>
 				<div class="adminSection">
 					<ul>
-                        <li class="seperator"><a href="#" onClick="loadContent('describe/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
+                        <!-- INSTALLATION AND STATS -->
+                        <li class="seperator"><a href="#"
+                            onClick="loadContent('verification/verifyInstallation.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Verifies that all required javascript libraries and other components and directories are in the expected locations">Verify Installation</a></li>
+                        <li><a href="#" onClick="loadContent('describe/dbStatistics.php?db=<?=HEURIST_DBNAME?>')"
                             title="Size and usage statistics for all Heurist databases on this server">Database usage statistics</a></li>
-						<li><a href="#"
-						    onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
-							title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
+
+                        <!-- TITLE MASKS -->
+                        <li class="seperator"><a href="#"
+                            onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
+                            title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
+                        <li><a href="#"
+                            onClick="loadContent('verification/recalcTitlesAllRecords.php?db=<?=HEURIST_DBNAME?>')"
+                            title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild Titles</a></li>
 						    <!-- We also have function for specific records and rectypes</p> -->
-						<li><a href="#"
-						    onClick="loadContent('verification/checkRectypeTitleMask.php?check=1&amp;db=<?=HEURIST_DBNAME?>')"
-							title="Check correctness of each Record Type's title mask with respect to field definitions.">Check Title Masks</a></li>
-						<!-- <li><a href="#"
-							onClick="loadContent('verification/checkRectypeTitleMask.php?check=2&amp;db=<?=HEURIST_DBNAME?>')"
-							title="Check correctness and synch canonical mask of each Record Type's title mask with respect to field definitions.">Synch Canonical Title Masks</a></li> -->
 						<li><a href="#"
 							onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=<?=HEURIST_DBNAME?>')"
 							title="Fuzzy search to identify records which might contain duplicate data">Find Duplicate Records</a></li>
-						<li><a href="#"
+                        <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                                title="Show records with URLs which point to a non-existant or otherwise faulty address">Find Broken URLs</a></li>
+
+                        <!-- DATA QUALITY -->
+						<li class="seperator"><a href="#"
 							onClick="loadContent('verification/listRecordPointerErrors.php?db=<?=HEURIST_DBNAME?>')"
 							title="Find record pointer which point to an incorrect record type or to nothing at all">Check Invalid Pointers</a></li>
 						<li><a href="#"
@@ -266,15 +273,14 @@ if (is_admin()) {
 							title="Find field types with invalid terms or pointer record types">Check Invalid Field Types</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/checkXHTML.php?db=<?=HEURIST_DBNAME?>')"
-							title="Check the wysiwyg text fields in records and blog entries for structural errors">Check Wysiwyg Texts</a></li>
+							title="Check the wysiwyg text fields in records/blog entries for structural errors">Check Wysiwyg Texts</a></li>
 						<li><a href="#"
 							onClick="loadContent('verification/checkInvalidChars.php?db=<?=HEURIST_DBNAME?>')"
-								title="Check the wysiwyg text fields for invalid characters">Check Invalid Characters</a></li>
+								title="Check the wysiwyg text fields in records/blog entries for invalid characters">Check Invalid Characters</a></li>
 						<li><a href="#"
 								onClick="loadContent('verification/cleanInvalidChars.php?db=<?=HEURIST_DBNAME?>')"
 								title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean Invalid Characters</a></li>
-						<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-								title="Show records with URLs which point to a non-existant or otherwise faulty address">Find Broken URLs</a></li>
+
 						<!-- Other non-verification functions -->
 						<li class="seperator"><a href="#"
 								onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
@@ -289,12 +295,12 @@ if (is_admin()) {
 							title="Update the old format bare-number associated file storage to new format path + name">Upgrade Associated Files Naming</a></li>
 						-->
 						<li class="seperator"><a href="#" onClick="loadContent('../export/publish/manageReports.html?db=<?=HEURIST_DBNAME?>')"
-							title="Add new / modify existing scheduled reports">Scheduled Reports</a></li>
+							title="Add new / modify existing scheduled reports">Schedule Reports</a></li>
 					</ul>
 				</div>
 
 
-                <h3><a href="#">FAIMS & HuNI: </a><span class="description">The FAIMS project has built a highly configurable system for data collection using consumer grade Android tablets</span></h3>
+                <h3><a href="#">FAIMS & HuNI: </a><span class="description">Infrastructure projects - tablet data collection and data aggregation/federated search</span></h3>
                 <div class="adminSection">
                     <ul>
                         <li class="seperator"><a href="#"
@@ -321,9 +327,9 @@ if (is_admin()) {
                                 onClick="loadContent('../applications/huni/about.html?db=<?=HEURIST_DBNAME?>')"
                                 title="Information about the HuNI (Humanities Networked Infrastructure) project">About HuNI</a></li>
                           <li><a href="#"
-                            onClick="loadContent('../applications/huni/exportHuNI.php?db=<?=HEURIST_DBNAME?>')"
+                            onClick="loadContent('../export/xml/flathml.php?w=all&q=sortby:rt&a=1&depth=0&file=1&db=<?=HEURIST_DBNAME?>')"
                                 title="Export data from the current Heurist database to a HuNI-harvestable package of XML files">Export harvestable XML</a></li>
-                                
+
                     </ul>
                 </div>
 				<!--</div>-->
