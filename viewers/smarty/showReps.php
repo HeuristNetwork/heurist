@@ -135,10 +135,14 @@ function executeSmartyTemplate($params){
 
 	//get name of template file
 	$template_file = (array_key_exists('template',$params)?$params['template']:null);
+    
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);
     
     if($template_file){
+        if(substr($template_file,-4)!=".tpl"){
+            $template_file = $template_file.".tpl";
+        }
         $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
     }else{
         $content = $template_body; 
