@@ -90,7 +90,7 @@ error_log(print_r($maprec_toexport, true));
     <script src="../../common/php/loadCommonInfo.php"></script>
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
-    <div id="page-inner" style="width:80%; margin:0px 5%; padding: 0.5em;">   
+    <div id="page-inner" style="padding-left: 30px;padding-right:10px">   
 
 <?php
     
@@ -167,7 +167,7 @@ $( document ).ready(function() {
     showSelectedRecTypes();
 });    
 </script>        
-        <div>
+        <div style="width: 600px;">
         
             This function writes a set of FAIMS project definition files (db schema, ui schema, ui logic, A16N) to a zip file, 
             based on the record types selected from the Heurist database, along with any required image or map data files. 
@@ -193,7 +193,7 @@ $( document ).ready(function() {
                 $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
                 $mask=$mask[0];
                 $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
-                if(is_array($res)){ //invalid mask
+                if( is_array($res) ){ //invalid mask
                     array_push($rt_invalid_masks, $rtName);
                 }
                 
@@ -216,14 +216,14 @@ $( document ).ready(function() {
 */        
         
         if(count($rt_invalid_masks)>0){
-            print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
+            print "<p style='color:red; width:600px'>You have invalid title masks in the following record types: <b>"
             .implode(",",$rt_invalid_masks)."</b>
             FAIMS requires setting of at least one field (attrribute) as an identifier, which is based  on the fields in the title mask. 
             Please correct the title mask(s) before proceeding (edit the record type in Database Designer > Essentials > Manage RecordTypes/Fields)</p>";
         }
  
         // Don't show Start Export button until record types have been selected       
-        print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
+        print "<div id='buttondiv' style='padding-bottom:30px;display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
 
         print "</form>";
         /*art 2014-02-24 if($rt_toexport){
