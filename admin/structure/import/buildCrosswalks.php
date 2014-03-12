@@ -201,23 +201,32 @@
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 
-            // TODO: This is the correct URL for vsn 3.1.8 and above, Feb 2014
-            // $source_url = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+            // This is the correct URL for vsn 3.1.8 and above, March 2014
+            $source_url_new = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 
-            // TODO: this is a fudge to access  old standard server 3.1.7 and before, prior to late Feb 2014
+            // TODO: this is a fudge to access  old standard server 3.1.7 and before, prior to March 2014
             $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 
         }
 
         error_log("source url ".print_r($source_url,true));
+        error_log("source url NEW ".print_r($source_url_new,true));
 
-		$data = loadRemoteURLContent($source_url);
-
-
-		if (!$data || substr($data, 0, 6) == "unable") {
-
-			unlockDatabase();
-			die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline or URL incorrect");
+		$data = loadRemoteURLContent($source_url_new); // try new  path
+		if (!$data || substr($data, 0, 6) == "unable") { // new path didn't work
+            $data = loadRemoteURLContent($source_url); // try old path
+            if (!$data || substr($data, 0, 6) == "unable") { // old path didn't work
+			    unlockDatabase();
+                if (!$data) {
+                    $msg="URL appears to be inaccessible (timeout); if one of the URLs above works, your server may require a web proxy setting";
+                } else {
+                    $msg="Server appears to be returning incorrect data, first 25 characters: ".substr($data, 0, 25)." ...";
+                }
+			    die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>gave incorrect response<p>".
+                    "URLs to structure service, tried: ".
+                    "<br /><a href=$source_url target=_blank>$source_url</a>".
+                    "<br /><a href=$source_url_new target=_blank>$source_url_new</a> <p>$msg");
+            }
 		}
 
 	} // getting data from source database for import of definitions to an existing database

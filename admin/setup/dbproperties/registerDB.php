@@ -172,27 +172,34 @@
                     $usrLastName = rawurlencode($usrLastName);
                     $usrPassword = rawurlencode($usrPassword);
                     $dbDescriptionEncoded = rawurlencode($dbDescription);
-                    // TODO: SWITCH TO THIS WHEN H3 UPDATED TO NEW FILE LAYOUT IN VS2
+
+                    // TODO: New URL should be active March 2014 when H3 on HeuristScholar.org updated to 3.1.8
                     // $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
                     $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/getNextDBRegistrationID.php" . 
                     "?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 
+                    // TODO: remove debug
                     error_log("DB Registration attempt with URL: ".$reg_url);
-
+                    
                     $data = loadRemoteURLContent($reg_url);
+                    if (!$data) {                            
+                            die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
+                            "URL requested: <a href='$reg_url'>$reg_url</a>");
+                    }
 
                     if ($data) {
-                        $dbID = intval($data);
+                        $dbID = intval($data); // correct return of data is just the registration number
+                                               // we probably need a better formatted return with some tags to ensure we are getting the right thing
                     }
 
                     if ($dbID == 0) { // Unable to allocate a new database identifier
                         $decodedData = explode(',', $data);
                         $errorMsg = $decodedData[0];
                         error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
-                        $msg = "Problem allocating a database identifier from the Heurist master index.\n" .
-                        "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                        $msg = "Problem allocating a database identifier from the Heurist master index, returned the following instead of registration number:\n" .
+                            substr($data, 0, 25)." ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
                         echo $msg . "<br />";
                         return;
                     } else if($dbID == -1) { // old title update function, should no longer be called
