@@ -43,6 +43,7 @@
     require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
 	mysql_connection_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
+                                                  // database is located at HeuristScholar.org and accessed via .../h3 version
 
 	$indexdb_user_id = 0; // Flags problem if not reset
 	$returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)
@@ -78,7 +79,7 @@
 	$callingServer = $_SERVER['REMOTE_ADDR'];
 	// TO DO: we need to check that the script is not being called repeatedly from the same server
 
-	define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor recordsv - fixed for Master database
+	define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor records - fixed for Master database
 
 	// allocate a new user for this database unless the user's email address is recognised
 	// If a new user, log the user in and assign the record ownership to that user
@@ -117,7 +118,7 @@
 			$indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
 		}
 
-    // TODO: It seems like the user ID is not being set properly, at least the mailout comes with indexdb_user_id=0
+    // TODO: It seems like the user ID is not being set properly, at least that seems to be indicated by the fact that the mailout comes with indexdb_user_id=0
         
 	} else {// error trying to find usergroup in UGrps table
 		$error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
