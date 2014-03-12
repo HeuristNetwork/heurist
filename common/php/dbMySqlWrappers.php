@@ -119,8 +119,17 @@ function mysql_connection_overwrite($database = '', $server = HEURIST_DBSERVER_N
 		exit(2);
 	}
 	//	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
-	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD) or die(mysql_error());
-	if ($database != '') mysql_query("use $database") or die(mysql_error());
+	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+    if(!$db){
+        printf("An error occurred trying to contact the sql database: %s\n", mysql_error());
+        die(mysql_error());
+    }
+	if ($database != ''){
+      if(!mysql_query("use $database")){
+        printf("Can not connect to sql database $database: %s\n", mysql_error());
+        die(mysql_error());    
+      } 
+    } 
 	mysql_query('set character set "utf8"');
 	mysql_query('set names "utf8"');
 	if (function_exists('get_user_id')) mysql_query('set @logged_in_user_id = ' . get_user_id());
@@ -145,7 +154,7 @@ function mysqli_connection_overwrite($database = '', $server = HEURIST_DBSERVER_
 	$mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
 	/* check connection */
 	if (mysqli_connect_errno()) {
-		printf("Connect failed: %s\n", mysqli_connect_error());
+		printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
 		die(mysqli_connect_error());
 	}
 	$mysqli->query('set character set "utf8"');

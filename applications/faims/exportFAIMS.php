@@ -90,7 +90,7 @@ error_log(print_r($maprec_toexport, true));
     <script src="../../common/php/loadCommonInfo.php"></script>
 
     <div class="banner"><h2>Build FAIMS Project</h2></div>
-    <div id="page-inner" style="width:80%; margin:0px 5%; padding: 0.5em;">   
+    <div id="page-inner" style="padding-left: 30px;padding-right:10px">   
 
 <?php
     
@@ -167,7 +167,7 @@ $( document ).ready(function() {
     showSelectedRecTypes();
 });    
 </script>        
-        <div>
+        <div style="width: 600px;">
         
             This function writes a set of FAIMS project definition files (db schema, ui schema, ui logic, A16N) to a zip file, 
             based on the record types selected from the Heurist database, along with any required image or map data files. 
@@ -193,7 +193,7 @@ $( document ).ready(function() {
                 $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
                 $mask=$mask[0];
                 $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
-                if(is_array($res)){ //invalid mask
+                if( is_array($res) ){ //invalid mask
                     array_push($rt_invalid_masks, $rtName);
                 }
                 
@@ -216,14 +216,14 @@ $( document ).ready(function() {
 */        
         
         if(count($rt_invalid_masks)>0){
-            print "<p style='color:red'>You have invalid title masks in the following record types: <b>"
+            print "<p style='color:red; width:600px'>You have invalid title masks in the following record types: <b>"
             .implode(",",$rt_invalid_masks)."</b>
             FAIMS requires setting of at least one field (attrribute) as an identifier, which is based  on the fields in the title mask. 
             Please correct the title mask(s) before proceeding (edit the record type in Database Designer > Essentials > Manage RecordTypes/Fields)</p>";
         }
  
         // Don't show Start Export button until record types have been selected       
-        print "<div id='buttondiv' style='display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
+        print "<div id='buttondiv' style='padding-bottom:30px;display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
 
         print "</form>";
         /*art 2014-02-24 if($rt_toexport){
@@ -733,10 +733,15 @@ error_log(">>>>> ".@$_REQUEST['mainmt']);
                 <child1>
                   <clear/>
                 </child1>
+              </mapContainer>
+              <mapCreateNew>
+                <child1>
+                  <rectypeList/>
+                </child1>
                 <child2>
                   <create/>
                 </child2>
-              </mapContainer>
+              </mapCreateNew>              
             </map>');
         xml_adopt($header_control, $tab_map); 
     }   
@@ -838,6 +843,18 @@ error_log(">>>>> ".@$_REQUEST['mainmt']);
     
     if($hasMapTab){
     
+        //@todo - only geoenabled rectypes
+        $rectyps = is_array($rt_toexport_toplevel)?$rt_toexport_toplevel:explode(",", $rt_toexport_toplevel);
+        $stypes = "";
+        foreach ($rt_toexport_toplevel as $rt) {
+            $rtname = $rtStructs['names'][$rt];
+            $rtnamex = getProperName($rtname);
+            if($rtnamex==""){
+                   $rtnamex = "Rectype".$rt;
+            }        
+            $stypes = $stypes."<item><label>".getResStrA16n(prepareText($rtname))."</label><value>".$rtnamex."</value></item>";
+        }
+        
         $map = new SimpleXMLElement('<group faims_scrollable="false" ref="map">
             <label>Map</label>
             <input faims_certainty="false" faims_map="true" ref="map">
@@ -857,13 +874,22 @@ error_log(">>>>> ".@$_REQUEST['mainmt']);
                   <label>Clear</label>
                 </trigger>
               </group>
-              <group faims_style="even" ref="child2">
-                <label/>
-                <trigger ref="create">
-                  <label>Create</label>
-                </trigger>
-              </group>
             </group>
+            <group faims_style="orientation" ref="mapCreateNew">
+                <label/>
+                <group faims_style="even" ref="child1">
+                <label/>
+                <select1 ref="rectypeList">
+                    <label/>'.$stypes.'
+                </select1>
+                </group>
+                <group faims_style="large" ref="child2">
+                    <label/>
+                    <trigger ref="create">
+                        <label>Create</label>
+                    </trigger>
+                </group>
+            </group>            
           </group>');
         xml_adopt($body_control, $map);       
     }
@@ -1440,6 +1466,7 @@ function generate_Logic($projname, $rt_toexport){
     $load_selectors = '';
     $load_related = '';
     $rectype_to_entname = '';
+    $entname_to_rectype = '';
 
     // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
@@ -1460,6 +1487,12 @@ function generate_Logic($projname, $rt_toexport){
         $rectype_to_entname .=  '
             if("'.$rtnamex.'".equals(rectype)){
                 return "'.prepareText($rtname).'";
+            }
+        ';
+        
+        $entname_to_rectype .=  '
+            if("'.prepareText($rtname).'".equals(entname)){
+                return "'.$rtnamex.'";
             }
         ';
         
@@ -1612,6 +1645,11 @@ getEntityNameByRectype(rectype) {
     'return null;
 }
 
+getRectypeByEntityName(entname) {
+    '.$entname_to_rectype.
+    'return null;
+}
+
 //loop for each enum field for every rectype 
 loadAllAttributes(){
     showToast("load attributes");
@@ -1641,7 +1679,7 @@ onEvent("control/data/rectypeList", "click", "refreshEntities()");
 onEvent("user/usertab/login", "click", "login()"); 
 
 onEvent("control/data/recordList", "click", "loadRecord()"); //load particular record
-onEvent("control/data/newRecord", "click", "newRecord()");
+onEvent("control/data/newRecord", "click", "newRecord(null)");
 //selectresource tab
 onEvent("selectresource/data", "show", "onShowSelect()");
 onEvent("selectresource/data/recordList", "click", "onSelectRecord()");
@@ -1774,8 +1812,11 @@ fillPointer(fieldname){
 }
 
 /*** record management function ***/
-newRecord(){
-    String rectype = getFieldValue("control/data/rectypeList");
+newRecord(rectype){
+    
+    if (isNull(rectype)){
+        rectype = getFieldValue("control/data/rectypeList");
+    }
     
     for (String rt : tabs_edit) {
         if (rt.equals(rectype) ) {
@@ -1828,6 +1869,27 @@ loadEntity(record_id){
 }
 
 //
+getRecordId(rectype){
+    String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
+    if("".equals(record_id)){
+        record_id=null;
+    }
+    return record_id;
+}
+
+//
+mapRecord(rectype){
+
+    String record_id = getRecordId(rectype);
+    if (!isNull(record_id)) { 
+        entity = fetchArchEnt(record_id); 
+        data = entity.getGeometryList();
+        
+        //setMapFocusPoint("control/map/map", longitude, latitude);
+    }
+}
+
+//
 saveRecord(rectype) {
     //todo - verify all required fields
     if (false){ 
@@ -1840,12 +1902,13 @@ saveRecord(rectype) {
         record_id=null;
     }
     
+    data = getCreatedGeometry(); //map data
     if (!isNull(record_id)) { 
         entity = fetchArchEnt(record_id); //need for geometry
-        //data = entity.getGeometryList();
+        data = entity.getGeometryList();
     }
-    // first null is map data
-    saveTabGroup(rectype, record_id, null, null, "setFieldValue(\""+rectype+"/"+rectype+"_uids/FAIMS_UID\", getLastSavedRecordId());");
+    // save record/entity
+    saveTabGroup(rectype, record_id, data, null, "setFieldValue(\""+rectype+"/"+rectype+"_uids/FAIMS_UID\", getLastSavedRecordId());");
 }
 
 deleteRecord(rectype){
@@ -2009,13 +2072,22 @@ $out = $out.'
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
 
+//mapping tool to load entity by selected feature on map
 onToolEvent("control/map/map", "load", "onLoadData()");
 
 onLoadData() {
-    id = getMapGeometryLoaded();
-    is_entity = "entity".equals(getMapGeometryLoadedType());
+    uuid = getMapGeometryLoaded();
+    isEntity = "entity".equals(getMapGeometryLoadedType());
     
-    showToast("To load entity please use load tab");
+    if (isEntity) {
+    
+        String entname = fetchOne("select aenttypename from aenttype join latestnondeletedarchent using (aenttypeid) where uuid = "+uuid+"; ").get(0);
+        String rectype = getRectypeByEntityName(entname);
+    
+        loadRecordById(uuid, rectype);
+    } else {
+        //to implement loadUIRelationship(uuid);
+    }
 }
 
 onEvent("control/map/clear", "click", "onClearMap()");
@@ -2040,6 +2112,9 @@ onCreateMap() {
         } else if (geom instanceof Polygon) {
             showTabGroup("createPolygon");
         }*/
+        
+        String rectype = getFieldValue("control/map/rectypeList");
+        newRecord(rectype);        
     }
 }
 
@@ -2080,7 +2155,7 @@ initMap() {
     querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
         
     addDatabaseLayerQuery("control/map/map", queryName, querySQL);
-
+    
     addTrackLogLayerQuery("control/map/map", "track log entities", 
         "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
         " FROM archentity join aenttype using (aenttypeid)\n" +
@@ -2112,6 +2187,12 @@ initMap();
 
 ';
 }    
+
+/* @todo
+    addDatabaseLayerQuery("control/map/map", "Digital Media Item", querySQL+" where lower(aenttypename) = lower('Digital Media Item')");
+    addDatabaseLayerQuery("control/map/map", "Organisation", querySQL+" where lower(aenttypename) = lower('Organisation')");
+    addDatabaseLayerQuery("control/map/map", "Person", querySQL+" where lower(aenttypename) = lower('Person')");
+*/
 
 return $out;   
 }

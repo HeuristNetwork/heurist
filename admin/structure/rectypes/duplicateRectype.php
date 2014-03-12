@@ -1,4 +1,5 @@
-<!--
+<?php
+
 
 /*
 * Copyright (C) 2005-2014 University of Sydney
@@ -30,12 +31,9 @@
 * @todo    (art) use display block for terms fields instead of dynamic addition
 */
 
--->
-
-<?php
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-
+    
     if (! is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
@@ -68,6 +66,8 @@
     ."rty_ReferenceURL, rty_AlternativeRecEditor, rty_Type, rty_ShowURLOnEditForm, rty_ShowDescriptionOnEditForm, rty_Modified, rty_LocallyModified "
     ."FROM defRecTypes where rty_ID=".$old_rt_id;
 
+//error_log($query);
+    
     $res = mysql_query($query);
     $new_rt_id = mysql_insert_id();
     

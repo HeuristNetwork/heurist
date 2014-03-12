@@ -101,9 +101,9 @@
                  for (; k<map_records.length; k++) {
                         //map_records[k]['rec_RecTypeID']
                         var sname = "mt"+map_records[k]['rec_ID'];
-                        $("<div>").css('padding-left','40px').append("<input type='checkbox' id='"+sname+"' name='mt[]' value='"+map_records[k]['rec_ID']+"'><label for='"+sname+"'> ["+
-                                    map_records[k]['rec_RecTypeID']+"] "+
-                                    map_records[k]['rec_Title']+"<label>").appendTo($mdiv);
+                        $("<div>").css('padding-left','40px').append("<input type='checkbox' id='"+sname+"' name='mt[]' value='"+map_records[k]['rec_ID']+"'><label for='"+sname+"'> "+
+                                    map_records[k]['rec_Title']+
+                                    "  ["+top.HEURIST.rectypes.names[map_records[k]['rec_RecTypeID']]+"]<label>").appendTo($mdiv);
                         
                  }
          }
