@@ -1290,19 +1290,25 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 */
     getJsonData: function(url, callback, postData) {
         top.HEURIST.util.sendRequest(url, function(xhr) {
-
-                var obj = top.HEURIST.util.evalJson(xhr.responseText);
-                if(!obj) {
-                    top.HEURIST.util.showError(-1);
-                }else if (obj.error) {
-                    top.HEURIST.util.showError(obj.error);
-
+            
+                if(xhr.responseText==""){
+                    top.HEURIST.util.showError("No response from server at "+url+", please try again later");
                     obj = null;
-                }else if(obj.errors && obj.errors.length>0){
-                    var rep = obj.errors.join(" ");
-                    top.HEURIST.util.showError(rep);
+                }else{
 
-                    obj = null;
+                    var obj = top.HEURIST.util.evalJson(xhr.responseText);
+                    if(!obj) {
+                        top.HEURIST.util.showError("Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250));
+                    }else if (obj.error) {
+                        top.HEURIST.util.showError(obj.error);
+
+                        obj = null;
+                    }else if(obj.errors && obj.errors.length>0){
+                        var rep = obj.errors.join(" ");
+                        top.HEURIST.util.showError(rep);
+
+                        obj = null;
+                    }
                 }
 
                 if (callback) callback(obj);
@@ -1917,7 +1923,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(top.HEURIST.util.isempty(msg)){
             msg = "Incorrect response from server. Please contact development team if this error persists";
         }else if (Number(msg)===-1){
-            msg = "An error occurred trying to contact the database";
+            msg = "No response from server, please try again later";
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "An unknown error occurred: " + msg;
         }
