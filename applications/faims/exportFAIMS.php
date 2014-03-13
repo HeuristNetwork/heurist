@@ -161,12 +161,6 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
         } 
     }        
 ?>
-<script>
-var map_records = <?=json_format($map_records)?>;
-$( document ).ready(function() {
-    showSelectedRecTypes();
-});    
-</script>        
         <div style="width: 600px;">
         
             This function writes a set of FAIMS project definition files (db schema, ui schema, ui logic, A16N) to a zip file, 
@@ -175,7 +169,7 @@ $( document ).ready(function() {
         </div>
 <?php
 
-        print "<form name='startform' action='exportFAIMS.php' method='get'>";
+        print "<form id='startform' name='startform' action='exportFAIMS.php' method='get'>";
         print "<input id='rt_selected' name='rt' type='hidden'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
@@ -223,7 +217,7 @@ $( document ).ready(function() {
         }
  
         // Don't show Start Export button until record types have been selected       
-        print "<div id='buttondiv' style='padding-bottom:30px;display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='submit' value='Start Export' /></div>";
+        print "<div id='buttondiv' style='padding-bottom:30px;display:".(($rt_toexport && $step!='1')?"block":"none")."'><div class='lbl_form'></div><input type='button' value='Start Export' onclick='validateForm()' /></div>";
 
         print "</form>";
         /*art 2014-02-24 if($rt_toexport){
@@ -275,14 +269,33 @@ $( document ).ready(function() {
                     echo $output;
                     echo "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
         }else{
-            print "<br><br><div class='lbl_form'></div>".
+            print "<br><br>".
             "<a href='exportFAIMS.php/$projname.zip?db=".HEURIST_DBNAME."&step=2&projname=".$projname."' target='_blank' style='color:blue; font-size:1.2em'>Click here to download FAIMS project definitions zip archive</a>";
         }
-
+?>        
+</div>
+<script>
+$( document ).ready(function() {
+    $("#startform").hide();
+});    
+</script>        
+</body>
+</html>
+<?php        
     }else{
-        print "</div></body></html>";
+?>        
+</div>
+<script>
+var map_records = <?=json_format($map_records)?>;
+$( document ).ready(function() {
+    showSelectedRecTypes();
+});    
+</script>        
+</body></html>;
+<?php        
     }
-
+exit();
+    
 /*
 Since PHP 5.3
 $phar = new PharData('project.tar');
@@ -612,7 +625,7 @@ function generateSchema($projname, $rt_toexport){
     }//foreach recordtype
     
     //specila entity for tracklog
-    if($hasControlTracklog){
+    if(true || $hasControlTracklog){
          addComment($root, mb_strtoupper("GPS TRACK")); 
          $gps_track = new SimpleXMLElement('
   <ArchaeologicalElement name="gps_track">
@@ -1353,11 +1366,7 @@ error_log(">>>>> ".@$_REQUEST['mainmt']);
                     $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
                 }
                 
-                
-                //TODO  - support pointer, relmarker            
-                if(false && $dt_type=='resource'){
-                
-                }else if($dt_type=='file'){
+                if($dt_type=='file'){
                     
                     $ftype = detectFileType($dtdisplayname);
                     $actionlabel = $ftype[0];
@@ -1606,7 +1615,7 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPoint
                     fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
                 }
             }     
-            //TODO  - support pointer, relmarker       
+
             
             $cnt_pertab++;
         }//for detail types
@@ -1636,21 +1645,32 @@ onEvent("'.$headername.'/Delete", "delayclick", "deleteRecord(\"'.$rtnamex.'\")"
     }//for record types
 
 $function_section  = '
+//
+// find related records and fill pointer fields with their names
+//
 loadRelatedRecords(rectype){
     '.$load_related.'
 }      
 
+//
+// return entity name by tab name
+//
 getEntityNameByRectype(rectype) {
     '.$rectype_to_entname.
     'return null;
 }
 
+//
+// get tab name by entity name
+//
 getRectypeByEntityName(entname) {
     '.$entname_to_rectype.
     'return null;
 }
 
-//loop for each enum field for every rectype 
+//
+// load all selectors for terms for every rectype 
+//
 loadAllAttributes(){
     showToast("load attributes");
     '.$load_selectors.'
@@ -1670,8 +1690,11 @@ String userid;
 showWarning("Ver 15. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
 //stack of tabs in use
-ArrayList tabs_edit = new ArrayList();
-ArrayList tabs_select = new ArrayList();
+ArrayList tabs_edit = new ArrayList(); //list of edit form in use 
+ArrayList tabs_select = new ArrayList(); //list of calls to select (see last_invoker)
+//keeps rectype to select(browse) and field path to assign the result of selection
+// for example Person=DigitalMediaItem/DigitalMediaItem_General_Information/Creators
+String last_invoker = null; 
 
 /*** EVENTS ***/
 onEvent("control/data", "show", "refreshEntities()");
@@ -1693,15 +1716,16 @@ $out = $out.'
 /*** END: this section of code depends on the module and record/entity types selected ***/
 
 /*** navigation functions ***/
-String last_invoker = null; //keep field path
+//
+// onshow list of entities (to fill pointer field)
 //
 onShowSelect(){    
 
     if(tabs_select.size()>0 && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
-        //open new select
+        //inital call - open new select
     
     }else{
-        //return from new record
+        //back call - return from new record
         if(tabs_edit.size()>0){
             tabs_edit.remove(tabs_edit.size()-1);
         }
@@ -1719,12 +1743,13 @@ onShowSelect(){
     
 }
 //
+// onshow edit form for particular entity
+//
 onShowEditForm(rectype){
 
     if(tabs_edit.size()>0 && rectype.equals(tabs_edit.get(tabs_edit.size()-1))){
         //return from select
         if(tabs_select.size()>0){
-            //last_invoker = tabs_select.get(tabs_select.size()-1);
             tabs_select.remove(tabs_select.size()-1);
         }
     }else{
@@ -1732,8 +1757,11 @@ onShowEditForm(rectype){
     }
 }
 /*** selectresource functions ***/
+//
+// search for resource for pointer filed - open select tab
 // rectype - to search
 // fieldpath - field to assign 
+//
 browseRecord(rectype, fieldpath) {
 
     last_invoker = rectype+"="+fieldpath;
@@ -1743,6 +1771,8 @@ browseRecord(rectype, fieldpath) {
     
 }
 //
+// create new record from select (in case required resource not found)
+//
 onNewRecordInSelect(){
     String last_select_callback = tabs_select.get(tabs_select.size()-1);
     String[] parts = last_select_callback.split("=");
@@ -1750,6 +1780,7 @@ onNewRecordInSelect(){
     
     for (String rt : tabs_edit) {
         if (rt.equals(rectype) ) {
+            //prevents show edit form in case it is already in use
             showWarning("Already in use", "Can not create new "+rectype+". Save previous");    
             return;
         }
@@ -1757,6 +1788,8 @@ onNewRecordInSelect(){
     
     newTabGroup(rectype); //load and clear fields    
 }
+//
+// user click on record in list - back to edit form and fill pointer field
 //
 onSelectRecord() {
 
@@ -1778,19 +1811,24 @@ onSelectRecord() {
     
     //ArrayList pairs = new ArrayList();
     //pairs.add(new NameValuePair("selected "+record_id, record_id));
-    
+
+    //fill pointer field    
     populateDropDown(fieldname, loadEntity(record_id) );
     
     String fieldname_uid = getPointerFiledName(fieldname);
     setFieldValue(fieldname_uid, record_id);    
 }
 //
+// Returns path to UID field on hidden tab for given resource attribute (field)
+//
 getPointerFiledName(fieldname){
     String[] parts = fieldname.split("/");
-    parts[1] = parts[0]+"_uids";
-    parts[2] = parts[2]+"_UID";
+    parts[1] = parts[0]+"_uids"; //hidden tab with uid fields
+    parts[2] = parts[2]+"_UID";  //pointer field to keep UID of resource record 
     return parts[0]+"/"+parts[1]+"/"+parts[2];
 }
+//
+// Clear resource attribute (field) - dropdown and UID field on hidden tab
 //
 clearPointer(fieldname){
     ArrayList pairs = new ArrayList();
@@ -1800,7 +1838,9 @@ clearPointer(fieldname){
     String fieldname_uid = getPointerFiledName(fieldname);
     setFieldValue(fieldname_uid, "");
 }
-//fill pointer field
+//
+// Fill dropdown (name) for pointer field by value of hidden UID field
+//
 fillPointer(fieldname){
     String fieldname_uid = getPointerFiledName(fieldname);
     String res_id = getFieldValue(fieldname_uid);
@@ -1812,6 +1852,11 @@ fillPointer(fieldname){
 }
 
 /*** record management function ***/
+
+//
+// Create new record for main entity 
+// (some entities are not accessible from main tab - they can be added from select tab only)
+//
 newRecord(rectype){
     
     if (isNull(rectype)){
@@ -1827,12 +1872,16 @@ newRecord(rectype){
     
     newTabGroup(rectype); //load and clear fields
 }
-//listener on click on records list
+//
+// Select record in list - load edit form 
+//
 loadRecord() {
     String record_id = getListItemValue(); //get id from list
     String rectype = getFieldValue("control/data/rectypeList");
     loadRecordById(record_id, rectype);
 }
+//
+// Show edit form by record id and record type
 //
 loadRecordById(entid, rectype) {
     
@@ -1847,6 +1896,8 @@ loadRecordById(entid, rectype) {
     //updateRelns();
 }
 
+//
+// load entity by UID (used to populate dropdown for pointer fields)
 //
 loadEntity(record_id){
     return fetchAll(""+
@@ -1869,7 +1920,10 @@ loadEntity(record_id){
 }
 
 //
+// Get entity(record) UID from field on hidden tab
+//
 getRecordId(rectype){
+
     String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
     if("".equals(record_id)){
         record_id=null;
@@ -1878,17 +1932,7 @@ getRecordId(rectype){
 }
 
 //
-mapRecord(rectype){
-
-    String record_id = getRecordId(rectype);
-    if (!isNull(record_id)) { 
-        entity = fetchArchEnt(record_id); 
-        data = entity.getGeometryList();
-        
-        //setMapFocusPoint("control/map/map", longitude, latitude);
-    }
-}
-
+// save new entity
 //
 saveRecord(rectype) {
     //todo - verify all required fields
@@ -1897,20 +1941,35 @@ saveRecord(rectype) {
         return;
     }
     
-    String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
+    String record_id = getRecordId(rectype);
     if("".equals(record_id)){
         record_id=null;
     }
     
-    data = getCreatedGeometry(); //map data
+    data = null;
     if (!isNull(record_id)) { 
         entity = fetchArchEnt(record_id); //need for geometry
         data = entity.getGeometryList();
+    }else if( tabs_edit.size()==1 ){ //add geo for main edit only
+        //LIMITATION!!!! map data can be assigned for new entity ONLY!!
+        data = getCreatedGeometry(); //map data
     }
     // save record/entity
-    saveTabGroup(rectype, record_id, data, null, "setFieldValue(\""+rectype+"/"+rectype+"_uids/FAIMS_UID\", getLastSavedRecordId());");
+    saveTabGroup(rectype, record_id, data, null, "saveRecordCallback(\""+rectype+"\")");
+}
+//
+//
+//
+saveRecordCallback(rectype){
+
+    setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", getLastSavedRecordId());
+    
+    onClearMap();
 }
 
+//
+//
+//
 deleteRecord(rectype){
     String record_id = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
     if (!isNull(record_id)) {
@@ -1927,11 +1986,22 @@ deleteRecordCanceled(){
 }       
 /*** END record management function ***/
 
-/*** main list of records on control/data ***/
-refreshEntities() {
-
+//
+// clear edit/select stacks on control/data, control/map show
+//
+clearStacks(){
    tabs_select.clear();
    tabs_edit.clear();
+   last_invoker = null;
+}
+
+/*** main list of records on control/data ***/
+//
+// reload list of records on control/data show or on rectype selection
+//
+refreshEntities() {
+
+   clearStacks();
 
    showToast("Fetching all entities...");
    
@@ -2072,6 +2142,8 @@ $out = $out.'
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
 
+onEvent("control/map", "show", "clearStacks()");
+
 //mapping tool to load entity by selected feature on map
 onToolEvent("control/map/map", "load", "onLoadData()");
 
@@ -2122,10 +2194,6 @@ getCreatedGeometry() {
     return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
 }
 
-clearCreatedGeometry() {
-    onClearMap();
-}
-
 zoomGPS(){
     Object position = getGPSPositionProjected();
     Object projPosition = getGPSPositionProjected();
@@ -2139,8 +2207,21 @@ zoomGPS(){
     }
 
 }
-
 onEvent("control/map/zoomGPS", "click", "zoomGPS()");
+
+//
+// @todo - show map tab and zoom to current record
+//
+mapRecord(rectype){
+
+    String record_id = getRecordId(rectype);
+    if (!isNull(record_id)) { 
+        entity = fetchArchEnt(record_id); 
+        data = entity.getGeometryList();
+        
+        //setMapFocusPoint("control/map/map", longitude, latitude);
+    }
+}
 
 initMap() {
     setMapZoom("control/map/map", 19.0f);
@@ -2188,7 +2269,7 @@ initMap();
 ';
 }    
 
-/* @todo
+/* @todo???
     addDatabaseLayerQuery("control/map/map", "Digital Media Item", querySQL+" where lower(aenttypename) = lower('Digital Media Item')");
     addDatabaseLayerQuery("control/map/map", "Organisation", querySQL+" where lower(aenttypename) = lower('Organisation')");
     addDatabaseLayerQuery("control/map/map", "Person", querySQL+" where lower(aenttypename) = lower('Person')");
@@ -2433,7 +2514,3 @@ function formatXML2($sxml){
 
 
 ?>
-  </div>
-</body>
-</html>
-

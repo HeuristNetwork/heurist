@@ -224,7 +224,16 @@
               
         });
     }
-        
     
+    
+    function validateForm(){
+        var n = $('input[id^="crt"]:checked').length;
+        if(n<1){
+            alert('Please select at least one entity type');
+            return false;            
+        }else{
+            document.forms['startform'].submit();
+        }
+    }
     
     
