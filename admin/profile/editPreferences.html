@@ -22,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
+* @copyright   (C) 2005-2014 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -34,7 +34,7 @@
 
 <html>
 <head>
-  <title>My Profile. Preferences</title>
+  <title>Heurist : My Profile - Preferences</title>
 	<link rel=stylesheet href="../../common/css/global.css">
 	<link rel=stylesheet href="../../common/css/edit.css">
 	<link rel=stylesheet href="../../common/css/admin.css">
@@ -58,6 +58,8 @@
   <script>
 
 	var mybkm, agg, navi, favsrch;
+    
+    // Note: "Preferences are defined in /common/php/displayPreferences
 
 	function showPreferences() {
 		document.getElementById("results-per-page").value
@@ -181,23 +183,6 @@
 		"searchQueryInBrowser"],
 		[rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery]);
 
-		/*
-		top.HEURIST.util.setDisplayPreference("defaultSearch", def);
-		top.HEURIST.util.setDisplayPreference("favourites", fav);
-		top.HEURIST.util.setDisplayPreference("loadRelatedOnSearch", rel);
-		top.HEURIST.util.setDisplayPreference("defaultRecentPointerSearch", rec);
-        top.HEURIST.util.setDisplayPreference("defaultMyBookmarksSearch", bkm);
-        top.HEURIST.util.setDisplayPreference("showMyBookmarks", mybkm);
-		top.HEURIST.util.setDisplayPreference("autoSelectRelated", asr);
-		top.HEURIST.util.setDisplayPreference("autoDeselectOtherLevels", adl);
-		top.HEURIST.util.setDisplayPreference("tagging-popup", ptd);
-        top.HEURIST.util.setDisplayPreference("showAggregations", agg);
-        top.HEURIST.util.setDisplayPreference("showNavMenuAlways", navi);
-        top.HEURIST.util.setDisplayPreference("showFavouritesSearch", favsrch);
-        top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
-        top.HEURIST.util.setDisplayPreference("searchQueryInBrowser", showquery);
-        */
-
 		//update underlaying search UI
 		if(top.HEURIST.search){
 			if(reload_nav){
@@ -212,7 +197,7 @@
 	}
   </script>
 
-  <!-- h2>My Profile Preferences</h2 -->
+  <!-- h2>Heurist - My Profile - Preferences</h2 -->
 
 
    <div class="input-row">
@@ -233,7 +218,7 @@
    </div>
    <h3>Search</h3>
    <div class="input-row">
-    <div class="input-header-cell">Show current search query in browser search field</div><div  class="input-cell"><input type="checkbox" id="showSearchQueryInBrowser"></div>
+    <div class="input-header-cell">Show current search query in browser address field</div><div  class="input-cell"><input type="checkbox" id="showSearchQueryInBrowser"></div>
     <div class="input-header-cell">Show Favourites link in search screen navigation panel</div><div  class="input-cell"><input type="checkbox" id="showFavouritesSearch"></div>
   </div>
    <div class="input-row">
@@ -250,12 +235,12 @@
   </div>
   <div class="input-row">
     <div class="input-header-cell">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
-    <div class="input-header-cell">Automatically deselect when changing active level in search</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
+    <div class="input-header-cell">Automatically deselect records when changing active level in search</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
   </div>
 
   <h3>Editing</h3>
   <div class="input-row">
-    <div class="input-header-cell">When exiting record edit, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
+    <div class="input-header-cell">When saving record, prompt for tags if no tags have been set</div><div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition"></div>
 	<div class="input-header-cell">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
   </div>
   <div class="input-row">
