@@ -35,9 +35,12 @@
 }
 #page {
 	background-color:#ECF1FB !important;
-	left:200px;
+	left:10px;
 	bottom: 10px;
 	min-height: 310px;
+}
+.edit-mode-depended{
+    display: none;   
 }
 #workgroup-div {
 	border-left:1px solid #D6D6D6;

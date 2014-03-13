@@ -1,5 +1,4 @@
 <?php
-
     /*
     * Copyright (C) 2005-2013 University of Sydney
     *
@@ -116,8 +115,7 @@
     "report-output-limit" => "1000",   //report output limit for smarty and map
 
     "record-edit-date" => "", // TODO: what is this for, it is not set in profile
-
-    "editRecordShowAdvanced => 0", // by default record editing comes up in stripped down 'simple' mode
+    "record-edit-advancedmode" => "false"  //by default record editing comes up in stripped down 'simple' mode
 
     // Notes: to add new preferences, add here, add in editPreferences (if required)
     );
@@ -137,7 +135,7 @@
             }
     }
 
-    //	if ($writeMode) return;	// suppress normal output
+//	if ($writeMode) return;	// suppress normal output
 
 ?>
 

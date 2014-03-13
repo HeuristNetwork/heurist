@@ -89,9 +89,7 @@
         </script>
         <script src="../../common/php/loadCommonInfo.php"></script>
         <script src="../../common/php/displayPreferences.php"></script>
-        <script>
 
-        </script>
         <script src="editRecord.js"></script>
         <script src="inputUrlInclude.js"></script>
         <script>
@@ -375,13 +373,13 @@
 
             <div id=rectype-edit class=edit >
                 <!-- div style="display:inline-block;padding-right:2px;"><img id=rectype-img src="../../common/images/16x16.gif"></div -->
-                <div id="rectype-name" style="display:inline-block;"></div><img src="../../common/images/edit-pencil.png"
+                <div id="rectype-name" style="display:inline-block;"></div><img src="../../common/images/edit-pencil.png" id="rectype-change"
                     onclick="{document.getElementById('rectype-name').style.display='none';document.getElementById('rectype-select').style.display='inline-block';}">
             </div>
             <div id=record-title>
                 <div id=title-val></div>
             </div>
-            <div id="workgroup-div">
+            <div id="workgroup-div" class="edit-mode-depended">
                 <div id=workgroup-val-div title="Restrict access by workgroup" style="white-space:nowrap;">
                     <b><span id=workgroup-val></span></b>
                     <div id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();">
@@ -400,7 +398,7 @@
         </div>
 
         <!-- sidebar -->
-        <div id="sidebar">
+        <div id="sidebar" class="edit-mode-depended">
             <div class="sidebar-link disabled" style="background-image: url(../../common/images/user_public.gif);" id=public-link
                 disabledDescription="No shared information available as this is marked as a private record"><img src="../../common/images/16x16.gif">
                 <b>Shared information</b>
@@ -468,12 +466,20 @@
         <div id=page>
             <!-- banner -->
             <div class="banner">
+                <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
+                    <input type=radio name="editmode" id=input-record-edit-simplemode
+                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode();" class=minimal>
+                    <label for=input-record-edit-simplemode>Simple Mode</label>
+                    <input type=radio name="editmode" id=input-record-edit-advancedmode
+                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'true' : 'false');setEditMode();" class=minimal>
+                    <label for=input-record-edit-advancedmode>Advanced Mode</label>
+                </div>
                 <a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
                 <div class=public-visible style="display:inline-block;margin:3px 10px">
                     <input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
                     <label for=input-visibility>show optional fields</label>
                 </div>
-                <div id="admin_editrectype" style="float:right;width:200px;text-align:right;"></div>
+                <div id="admin_editrectype" style="float:right;width:200px;text-align:right;"  class="edit-mode-depended"></div>
             </div>
             <!-- main panel -->
             <div id="page-inner" class="panel-main-div">
@@ -523,7 +529,7 @@
         <!-- footer -->
         <div id=footer>
             <div id="rty_description" class="help"></div>
-            <span>last accessed: <span id=moddate></span>
+            <span class="edit-mode-depended">last accessed: <span id=moddate></span>
                 <span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
                 <script>
                     top.HEURIST.whenLoaded(recordEvent, function() {
@@ -653,6 +659,25 @@
             }
             top.HEURIST.contentLoaded();
             top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
+            
+            function setEditMode(){
+                if(top.HEURIST.util.getDisplayPreference('record-edit-advancedmode')=="true"){
+                    $(".edit-mode-depended").css('display','block');
+                    $("#rectype-change").css('display','inline-block');
+                    $("#page").css('left','200px');
+                    $("#page").css('top','140px');
+                    $("#input-record-edit-advancedmode").attr('checked',true);
+                }else{
+                    $(".edit-mode-depended").css('display','none');
+                    $("#rectype-change").css('display','none');
+                    $("#page").css('left','10px');
+                    $("#page").css('top','120px');
+                    $("#input-record-edit-simplemode").attr('checked',true);
+                }
+            }
+            $("#input-record-edit-advancedmode").css('vertical-align','top');
+            $("#input-record-edit-simplemode").css('vertical-align','top');
+            setEditMode();
         </script>
 
     </body>

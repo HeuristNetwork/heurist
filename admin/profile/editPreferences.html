@@ -109,6 +109,10 @@
 
 		var showquery = top.HEURIST.util.getDisplayPreference("searchQueryInBrowser");
         document.getElementById("showSearchQueryInBrowser").checked = (showquery!=='false');
+        
+        var edadv = top.HEURIST.util.getDisplayPreference("record-edit-advancedmode");
+        document.getElementById("record-edit-advancedmode").checked = (edadv!=='false');
+        
 	}
 
 	function save() {
@@ -126,6 +130,7 @@
 		var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
         var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
         var showquery = (document.getElementById("showSearchQueryInBrowser").checked)?'true':'false';
+        var edadv = (document.getElementById("record-edit-advancedmode").checked)?'true':'false';
 
 
 		if (isNaN(rpp) || rpp < 1 || rpp > 500) {
@@ -180,8 +185,9 @@
 		"showNavMenuAlways",
 		"showFavouritesSearch",
 		"report-output-limit",
-		"searchQueryInBrowser"],
-		[rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery]);
+		"searchQueryInBrowser",
+        "record-edit-advancedmode"],
+		[rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery,edadv]);
 
 		//update underlaying search UI
 		if(top.HEURIST.search){
@@ -245,7 +251,7 @@
   </div>
   <div class="input-row">
     <div class="input-header-cell">Check for similar records on creation (can slow down new record save significantly)</div><div  class="input-cell"><input type="checkbox" id="findFuzzyMatches"></div>
-    <div class="input-header-cell"></div>
+    <div class="input-header-cell">Advanced edit mode</div><div  class="input-cell"><input type="checkbox" id="record-edit-advancedmode"></div>  
   </div>
 
   <div id="buttons" class="actionButtons">
