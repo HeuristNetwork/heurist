@@ -90,23 +90,24 @@
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always on if not checked)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct4' name='ct4' value='1'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
+/* Brian asks to hide this feature */
+                $("<div>").css('padding-left','40px').css('display','none').append("<input type='checkbox' id='ct4' name='ct4' value='1'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
+
                 $("<br>").appendTo($mdiv);
                 
 
-         if(map_records.length>0){
                 $("<div>").css('font-weight','bold').append("<input type='checkbox' id='mainmt' name='mainmt' value='1' checked='checked' onclick='onMtCheckBox(event)'><label for='mainmt'>Map tab<label>").appendTo($mdiv);
-         
-                 var k=0;
-                 for (; k<map_records.length; k++) {
-                        //map_records[k]['rec_RecTypeID']
-                        var sname = "mt"+map_records[k]['rec_ID'];
-                        $("<div>").css('padding-left','40px').append("<input type='checkbox' id='"+sname+"' name='mt[]' value='"+map_records[k]['rec_ID']+"'><label for='"+sname+"'> "+
-                                    map_records[k]['rec_Title']+
-                                    "  ["+top.HEURIST.rectypes.names[map_records[k]['rec_RecTypeID']]+"]<label>").appendTo($mdiv);
-                        
-                 }
-         }
+                if(map_records.length>0){
+                     var k=0;
+                     for (; k<map_records.length; k++) {
+                            //map_records[k]['rec_RecTypeID']
+                            var sname = "mt"+map_records[k]['rec_ID'];
+                            $("<div>").css('padding-left','40px').append("<input type='checkbox' id='"+sname+"' name='mt[]' value='"+map_records[k]['rec_ID']+"'><label for='"+sname+"'> "+
+                                        map_records[k]['rec_Title']+
+                                        "  ["+top.HEURIST.rectypes.names[map_records[k]['rec_RecTypeID']]+"]<label>").appendTo($mdiv);
+                            
+                     }
+                }
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        
