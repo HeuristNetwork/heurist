@@ -35,11 +35,11 @@
     $rt_toexport = @$_REQUEST['frt'];
     $rt_toexport_toplevel = @$_REQUEST['crt'];
     $maprec_toexport = @$_REQUEST['mt'];
-    
+    /*
 error_log(print_r($rt_toexport, true));
 error_log(print_r($rt_toexport_toplevel, true));
 error_log(print_r($maprec_toexport, true));
-    
+    */
     $projname = @$_REQUEST['projname'];
     $step = @$_REQUEST['step']; // 1 - define record type  ,   2 - download result
     
@@ -178,7 +178,9 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
         print "<div id='selectedRectypes' style='width:100%;color:black;'></div>";
 
         $rtStructs = getAllRectypeStructures(false);
+        $int_rt_dt_type      = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
         
+        $rt_geoenabled = array();
         $rt_invalid_masks = array();
         if($rt_toexport && count($rt_toexport)>0){
             //validate title masks
@@ -191,10 +193,19 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
                     array_push($rt_invalid_masks, $rtName);
                 }
                 
-                $rst_fields = $rtStructs['typedefs'][$rtID]['dtFields'];
-                if(!$rst_fields){
+                $details = $rtStructs['typedefs'][$rtID]['dtFields'];
+                if(!$details){
                      print "<p style='color:red'>No details defined for record type #".$rtName.". Edit record type structure.</p>";            
                     $invalid = true;
+                }else{
+                            //check if rectype is geoenabled
+                            foreach ($details as $dtid=>$detail) {
+                                $dt_type = $detail[$int_rt_dt_type];
+                                if($dt_type=="geo"){
+                                    array_push($rt_geoenabled, $rtID);
+                                    break;
+                                }
+                            }
                 }
                 
             }
@@ -252,9 +263,9 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
         file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
-        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel));
+        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled));
         file_put_contents($folder."/arch16N.properties", arrToProps());
-        file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport));
+        file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport, $rt_geoenabled));
         
         //copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
 
@@ -668,7 +679,7 @@ function generateSchema($projname, $rt_toexport){
 * @param mixed $projname
 * @param mixed $rt_toexport
 */
-function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
+function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled){
 
     global $rtStructs, $dtTerms, $supported;
 
@@ -853,16 +864,11 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     
     if($hasMapTab){
     
-        //@todo - only geoenabled rectypes
-        $rectyps = is_array($rt_toexport_toplevel)?$rt_toexport_toplevel:explode(",", $rt_toexport_toplevel);
-        $stypes = "";
-        foreach ($rt_toexport_toplevel as $rt) {
-            $rtname = $rtStructs['names'][$rt];
-            $rtnamex = getProperName($rtname, $rt);
-
-            $stypes = $stypes."<item><label>".getResStrA16n(prepareText($rtname))."</label><value>".$rtnamex."</value></item>";
+        foreach ($rt_geoenabled as $rt) {
+                   $rtname = $rtStructs['names'][$rt];
+                   $rtnamex = getProperName($rtname, $rt);
+                   $stypes = $stypes."<item><label>".getResStrA16n(prepareText($rtname))."</label><value>".$rtnamex."</value></item>";
         }
-        
         $map = new SimpleXMLElement('<group faims_scrollable="false" ref="map">
             <label>Map</label>
             <input faims_certainty="false" faims_map="true" ref="map">
@@ -1018,6 +1024,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
     $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];    
     
     // --------------------------------------------------------------------------------------------------------
+
     
     // Output specifications for each ArchEnt (Record type in Heurist)
     addComment($faims, 'list of tabgroups for ArchEntTypes)');
@@ -1112,10 +1119,34 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
             
                 if($issectab || $cnt_pertab>0){
                     
-                    $tab->addChild('Update');
+                    $update_container = new SimpleXMLElement('
+                    <container_upd>
+                        <child1/>
+                        <child2>
+                            <Update/>
+                        </child2>
+                    </container_upd>');
+                    xml_adopt($tab, $update_container);            
+
+                    $trigger = new SimpleXMLElement('
+                    <group faims_style="orientation" ref="container_upd">
+                      <label/>
+                      <group faims_style="even" ref="child1">
+                        <label/>
+                      </group>
+                      <group faims_style="large" ref="child2">
+                        <label/>
+                        <trigger ref="Update">
+                            <label>Save</label>
+                        </trigger>
+                      </group>
+                    </group>');
+                    xml_adopt($group, $trigger);            
+                    
+                    /*old version $tab->addChild('Update');
                     $trigger = $group->addChild('trigger');
                     $trigger->addAttribute('ref', 'Update');
-                    $trigger->addChild('label', getResStrA16n('Save Entity') );
+                    $trigger->addChild('label', getResStrA16n('Save') );*/
                     
                     //create new tab
                     $headername = $rtnamex.'_'.$dtdisplaynamex;
@@ -1233,8 +1264,12 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
                 $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
                 $input->addAttribute('ref', $dtdisplaynamex);
                 $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
-                $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');
+                $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');    
+                if($isvocab){
+                    $input->addAttribute('faims_annotation','false');
+                }
                 if($isvocab && !$is_repeatable) {
+                    
                     $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                     if($termsCount<4){
                         $input->addAttribute('appearance', 'full');
@@ -1311,7 +1346,23 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
         }
 */        
 
+
         //add save/delete buttons to last tab
+        $tab->addChild('gap');
+        $gap = $group->addChild('input');
+        $gap->addAttribute('ref', 'gap');
+        $gap->addAttribute('faims_attribute_type', 'freetext');
+        $gap->addAttribute('faims_certainty', 'false');
+        $gap->addAttribute('faims_read_only', 'true');
+        $gap->addChild('label', '' );
+        
+        if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
+            $tab->addChild('AttachGeometry');
+            $trigger = $group->addChild('trigger');
+            $trigger->addAttribute('ref', 'AttachGeometry');
+            $trigger->addChild('label', getResStrA16n('Attach Geometry from Map') );
+        }
+        
         $tab->addChild('Update');
         $tab->addChild('UpdateAndClose');
         $tab->addChild('Delete');
@@ -1334,7 +1385,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel){
 } // generation of user interface schema
 
 
-function generate_Logic($projname, $rt_toexport){
+function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
 
     global $rtStructs, $dtTerms, $supported;
     
@@ -1354,6 +1405,7 @@ function generate_Logic($projname, $rt_toexport){
     $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     
     $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];    
+    $idx_rst_required = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_RequirementType"];
     
     
     $function_section = "";
@@ -1362,6 +1414,7 @@ function generate_Logic($projname, $rt_toexport){
     $load_related = '';
     $rectype_to_entname = '';
     $entname_to_rectype = '';
+    $mandatory_check = '';
 
     // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
@@ -1388,6 +1441,7 @@ function generate_Logic($projname, $rt_toexport){
             }
         ';
         
+        
                 $event_section .= '
 onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         
@@ -1400,7 +1454,8 @@ onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         $headername_uids = $rtnamex."/".$rtnamex.'_uids'; //first tab implied if no header at top of record
         $cnt_pertab = 0;
         $issectab = false;
-
+        $mandatory_attributes = '';
+        
         // Output for each field (attribute) in the record type
         foreach ($details as $dtid=>$detail) {
 
@@ -1495,9 +1550,30 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPoint
                 
                     $load_related_part .= '
                     fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
+                    
+                    
+                    if($detail[$idx_rst_required]=="required"){
+                        $mandatory_attributes .= '
+                        value = getFieldValue("'.$headername_uids.'/'.$dtdisplaynamex.'_UID");
+                        if( null==value || "".equals(value) ){
+                            msg = msg + "'.prepareText($dtdisplayname).'\n";
+                        }';
+                    }
+                    
                 }
-            }     
-
+            }
+            
+            if(!($dt_type=='resource' || $dt_type=='file')){
+                    if($detail[$idx_rst_required]=="required"){
+                        $mandatory_attributes .= '
+                        value = getFieldValue("'.$headername.'/'.$dtdisplaynamex.'");
+                        if( null==value || "".equals(value) ){
+                            msg = msg + "'.prepareText($dtdisplayname).'\n";
+                        }';
+                    }
+            }
+            
+            
             
             $cnt_pertab++;
         }//for detail types
@@ -1508,6 +1584,12 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPoint
 onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
         }
 */        
+
+        $mandatory_check .= '
+            if("'.$rtnamex.'".equals(rectype)){
+                '.$mandatory_attributes.'
+            }
+        '; 
 
         if($load_related_part!=''){
                 $load_related .= '                
@@ -1524,6 +1606,10 @@ onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", fa
 onEvent("'.$headername.'/UpdateAndClose", "delayclick", "saveEntity(\"'.$rtnamex.'\", true)");
 onEvent("'.$headername.'/Delete", "delayclick", "deleteEntity(\"'.$rtnamex.'\")");
 ';
+        if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
+$event_section = $event_section.'onEvent("'.$headername.'/AttachGeometry", "click", "attachGeometry()");
+';
+        }
 
     }//for record types
 
@@ -1552,6 +1638,15 @@ getTabnameByEntityName(entname) {
 }
 
 //
+//
+//
+checkMandatoryAttributes(rectype){
+    String msg = "";
+    '.$mandatory_check.'
+    return msg;
+}
+
+//
 // load all selectors for terms for every rectype 
 //
 loadAllAttributes(){
@@ -1570,7 +1665,7 @@ $out = '
 User user;
 String userid;
 
-showWarning("Ver 15. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
+showWarning("Ver 25. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
 //stack of tabs in use
 ArrayList tabs_edit = new ArrayList(); //list of edit form in use 
@@ -1578,6 +1673,7 @@ ArrayList tabs_select = new ArrayList(); //list of calls to select (see last_inv
 //keeps rectype to select(browse) and field path to assign the result of selection
 // for example Person=DigitalMediaItem/DigitalMediaItem_General_Information/Creators
 String last_invoker = null; 
+List attachedGeometry = null;
 
 /*** EVENTS ***/
 onEvent("control/data", "show", "refreshEntities()");
@@ -1715,7 +1811,7 @@ getPointerFiledName(fieldname){
 //
 clearPointer(fieldname){
     ArrayList pairs = new ArrayList();
-    pairs.add(new NameValuePair("browse for resource record", ""));
+    pairs.add(new NameValuePair("select with Browse button(s)", ""));
     populateDropDown(fieldname, pairs );
     
     String fieldname_uid = getPointerFiledName(fieldname);
@@ -1818,9 +1914,10 @@ getEntityId(rectype){
 // save new entity
 //
 saveEntity(rectype, andclose) {
-    //todo - verify all required fields
-    if (false){ 
-        showWarning("Logic Error", "Cannot save record without id");
+
+    String msg = checkMandatoryAttributes(rectype);
+    if (!(isNull(msg) || "".equals(msg))){ 
+        showWarning("Logic Error", "Cannot save entity without mandatory attributes:\n"+msg);
         return;
     }
     
@@ -1831,7 +1928,10 @@ saveEntity(rectype, andclose) {
     
     data = null;
 '.($hasMapTab?'    
-    if (!isNull(uid)) { 
+    if(!isNull(attachedGeometry)){
+         data = attachedGeometry;
+         attachedGeometry = null;
+    }else if (!isNull(uid)) { 
         entity = fetchArchEnt(uid); //need for geometry
         data = entity.getGeometryList();
     }else if( tabs_edit.size()==1 ){ //add geo for main edit only
@@ -2052,11 +2152,11 @@ onEvent("control/map/clear", "click", "onClearMap()");
 onEvent("control/map/create", "click", "onCreateMap()");
 
 onClearMap() {
-    clearGeometryList("control/map/map", getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID));
+    clearGeometryList("control/map/map", getCreatedGeometry() );
 }
 
 onCreateMap() {
-    List geomList = getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+    List geomList = getCreatedGeometry();
     if (geomList == null || geomList.size() == 0) {
         showWarning("Logic Error", "No geometry found on data entry layer");
     } else if (geomList.size() > 1) {
@@ -2078,6 +2178,18 @@ onCreateMap() {
 
 getCreatedGeometry() {
     return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+}
+
+attachGeometry(){
+    List geomList = getCreatedGeometry();
+    if (geomList == null || geomList.size() == 0) {
+        showWarning("Logic Error", "No geometry found on data entry layer");
+    } else if (geomList.size() > 1) {
+        showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
+    } else {
+        attachedGeometry = geomList;
+        showToast("Geometry attached. Now you may save Entity");
+    }
 }
 
 zoomGPS(){
