@@ -50,6 +50,65 @@ function recordSearchMinMax($system, $params){
 }
 
 /**
+* Find minimal and maximal values for given detail type and record type
+* 
+* @param mixed $system
+* @param mixed $params - array  rt - record type(s); 
+*                               dt - detail type(s) or recTitle, recModified, 
+*                               type - field type (freetext, date, integer), 
+*                               min, max - range (optional)
+*/
+function recordSearchFacets($system, $params){
+
+    if(@$params['rt'] && @$params['dt'] && @$params['type']){
+
+        $mysqli = $system->get_mysqli();
+        $currentUser = $system->getCurrentUser();
+        $dt_type = $params['type'];
+        
+        //@todo take type with getDetailType ?
+        $fieldid = $params['dt'];
+        if(strpos($fieldid,"f:")===0){
+            $fieldid = substr($fieldid,2);
+        }
+        
+        if($dt_type=="freetext"){
+            //find count by first letter
+            if($params['dt']=='recTitle'){
+                $query = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt from Records where rec_RecTypeId in ("
+                    .$params['rt'].") GROUP BY SUBSTRING(trim(rec_Title), 1, 1) order by SUBSTRING(trim(rec_Title), 1, 1)";
+            }else{
+                $query = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) from Records, recDetails "
+                    ." where rec_RecTypeId in (".$params['rt'].") and dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid 
+                    ." GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) order by SUBSTRING(trim(dtl_Value), 1, 1)";
+            }
+                    
+        }else{
+            return array("status"=>HEURIST_OK, "data"=> array());
+        }        
+        
+
+        $res = $mysqli->query($query);
+        if (!$res){
+            $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+            $data = array();
+            while ( $row = $res->fetch_row() ) {
+                array_push($data, $row);
+            }
+            $response = array("status"=>HEURIST_OK, "data"=> $data);
+            $res->close();
+        }
+
+    }else{
+        $response = $system->addError(HEURIST_INVALID_REQUEST);
+    }
+
+   return $response;
+}
+
+
+/**
 * put your comment there...
 *
 * @param mixed $system
@@ -116,9 +175,7 @@ function recordSearch($system, $params, $need_structure, $need_details)
             $rectypes = array();
 
             while ( ($row = $res->fetch_row()) && (count($records)<1001) ) {
-                
                 array_push( $row, fileGetThumbnailURL($system, $row[2]) );
-                
                 $records[$row[2]] = $row;
                 array_push($rectypes, $row[4]);
             }

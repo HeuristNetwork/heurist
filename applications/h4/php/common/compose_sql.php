@@ -153,7 +153,8 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
 
     $query .=  " limit $limit" . ($offset>0? " offset $offset " : "");
 
-/*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
+/*****DEBUG****/// 
+error_log("request to query returns ".print_r($query,true));
     return $query;
 }
 
@@ -906,7 +907,8 @@ class FieldPredicate extends Predicate {
         $not = ($this->parent->negate)? 'not ' : '';
 /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
 
-        $match_value = is_numeric($this->value)? floatval($this->value) : '"' . addslashes($this->value) . '"';
+        $isnumericvalue = is_numeric($this->value);
+        $match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
 
         if ($this->parent->exact  ||  $this->value === "") {    // SC100
             $match_pred = " = $match_value";
@@ -914,10 +916,13 @@ class FieldPredicate extends Predicate {
             $match_pred = " < $match_value";
         } else if ($this->parent->greaterthan) {
             $match_pred = " > $match_value";
-        } else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {   //comma separated numeric values
-           $match_pred = " in (". $this->value.")"; 
         } else {
-            $match_pred = " like '%".addslashes($this->value)."%'";
+            $match_pred = " like '%".mysql_real_escape_string($this->value)."%'";
+        }
+        if($isnumericvalue){
+            $match_pred_for_term = " = $match_value";
+        }else{
+            $match_pred_for_term = " = trm.trm_ID";
         }
 
         $timestamp = strtotime($this->value);
@@ -929,17 +934,32 @@ class FieldPredicate extends Predicate {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = 'rd.dtl_DetailTypeID = ' . intval($this->field_type);
         }
-        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {   //comma separated detail types
+        else if (preg_match('/^\d+(?:,\d+)+$/', $this->field_type)) {
             /* user has specified a list of numeric types ... match any of them */
             $rd_type_clause = 'rd.dtl_DetailTypeID in (' . $this->field_type . ')';
         }
         else {
             /* user has specified the field name */
-            $rd_type_clause = 'rdt.dty_Name like "' . addslashes($this->field_type) . '%"';
+            $rd_type_clause = 'rdt.dty_Name like "' . mysql_real_escape_string($this->field_type) . '%"';
         }
+
+        return $not . 'exists (select * from recDetails rd '
+                                . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
+                                . 'left join Records link on rd.dtl_Value=link.rec_ID '
+                                . (($isnumericvalue)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
+                                    . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+                                    . ' and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
+                                              .'link.rec_Title ' . $match_pred . ', '
+                                              .'if(rdt.dty_Type in ("enum","relationtype"), '
+                                              .'rd.dtl_Value '.$match_pred_for_term.', '
+                               . ($timestamp ? 'if(rdt.dty_Type = "date", '
+                                                 .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+                                                 .'rd.dtl_Value ' . $match_pred . ')'
+                                             : 'rd.dtl_Value ' . $match_pred ) . '))'
+                                      .' and ' . $rd_type_clause . ')';
         
         //@todo avoid clauses for resource and date detail types if not necessary
-
+        /* not working properly
         return $not . 'exists (select * from recDetails rd '
                                 .($timestamp || !is_numeric($this->value)? 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID ': '')
                                 .(!is_numeric($this->value)?'':'left join Records link on rd.dtl_Value=link.rec_ID ')
@@ -953,6 +973,7 @@ class FieldPredicate extends Predicate {
                                              : 'rd.dtl_Value ' . $match_pred ) 
                                     . (!is_numeric($this->value)?')':'')
                                     . ' and ' . $rd_type_clause . ')';
+       */
     }
 }
 

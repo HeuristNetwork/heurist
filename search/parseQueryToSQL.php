@@ -826,7 +826,6 @@ class FieldPredicate extends Predicate {
 /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true)." type = ".print_r($this->field_type,true));
 
         $isnumericvalue = is_numeric($this->value);
-
 		$match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
 
 		if ($this->parent->exact  ||  $this->value === "") {	// SC100

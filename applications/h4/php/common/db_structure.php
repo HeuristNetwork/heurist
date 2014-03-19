@@ -10,6 +10,7 @@
 * dbs_GetRectypeGroups
 * dbs_GetRectypeByID
 * dbs_GetTerms
+* dbs_GetDetailTypes
 * 
 * INTERNAL FUNCTIONS
 * __getRectypeColNames

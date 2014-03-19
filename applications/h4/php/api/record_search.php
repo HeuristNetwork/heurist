@@ -23,7 +23,11 @@ if( ! $system->init(@$_REQUEST['db']) ){
 }else if(@$_REQUEST['a'] == 'minmax'){
 
     $response = recordSearchMinMax($system, $_REQUEST);
+    
+}else if(@$_REQUEST['a'] == 'getfacets'){    
 
+    $response = recordSearchFacets($system, $_REQUEST);
+    
 }else {
 
 //DEGUG        $currentUser = array('ugr_ID'=>2);

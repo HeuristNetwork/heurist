@@ -275,7 +275,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  Get the desired database structure definition 
             * request
             *   terms, rectypes, detailtypes :  list of desired ids,  OR 'all'
-            *   mode: applied for rectypes  0 only names (default), 1 only strucuture, 2 - both
+            *   mode: applied for rectypes  0 only names (default), 1 only strucuture, 2 - both, 3,   4
             * 
             */
             ,get_defs: function(request, callback){
@@ -407,6 +407,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                  _callserver('record_search', request, callback);
             }
 
+            // find ranges for faceted search
+            //             
+            ,get_facets: function(request, callback){
+                 if(request) request.a = 'getfacets';
+                 _callserver('record_search', request, callback);
+            }
 
             //@TODO get full info for particular record
             ,get: function(request, callback){
