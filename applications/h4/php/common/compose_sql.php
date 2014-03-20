@@ -53,46 +53,53 @@ define('SORT_TITLE', 't');
     parameters:
 
     stype  - (OUTDATED) type of search: key - by tag title, all - by title of record and titles of its resource, by default by record title
-    s - sort order
+    s - sort order   (NOTE!!!  sort may be defined in "q" parameter also)
     l or limit  - limit of records
     o or offset
+    w - domain of search a|all, b|bookmark, e (everything)
 
     qq - several conjunctions and disjunctions
     q  - query string
 
             keywords for 'q' parameter
-            u:  url
-            t:  title
+            url:  url
+            title: title contains
+            t:  record type id
+            f:   field id
             tag:   tag
             id:  id
             n:   description
             usr:   user id
             any:
+            relatedto:
+            sortby:
 
 *
 * @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
 *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
 * @param mixed $publicOnly
 */
-function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false) {
-    //
+function compose_sql_query($select_clause, $params, $currentUser=null, $publicOnly=false) {
 
-    /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query */
+    /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
     if (! $params) $params = array();//$_REQUEST;
     define('stype', @$params['stype']);
 
-    $wg_ids = null;
-
+    // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
+    $wg_ids = array();
     if($currentUser && @$currentUser['ugr_ID']>0){
         if(@$currentUser['ugr_Groups']){
             $wg_ids = array_keys($currentUser['ugr_Groups']);
         }
         $currUserID = $currentUser['ugr_ID'];
+        array_push($wg_ids, $currUserID);
     }else{
         $currUserID = 0;
         $params['w'] = 'all';
     }
+    array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
 
+    // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
         $search_domain = BOOKMARK;
     } else if (@$params['w'] == 'e') { //everything - including temporary
@@ -101,44 +108,48 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
         $search_domain = null;
     }
 
-    if (! @$params['qq']  &&  ! preg_match('/&&|\\bAND\\b/i', @$params['q'])) {
-        
-        
-        $qwhere = parse_query($search_domain, @$params['q'], $currUserID, $wg_ids, @$params['s'], $publicOnly);
-        $query .= $qwhere;
-        
-    } else {
-        // search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
 
-//error_log("params = ".print_r($params,true));
-        $qq = @$params['qq'];
-        if ($params['q']) {
-            if ($qq) $qq .= ' && ' . $params['q'];
-            else $qq = $params['q'];
+    // 4. QUERY MAY BE SIMPLE or full expressiveness ----------------------------------------------------------------------
+    
+    $query = parse_query($search_domain, @$params['q'], @$params['s'], $currUserID);
+    
+    $where_clause = $query->where_clause;
+    
+    // 5. DEFINE USERGROUP RESTRICTIONS ---------------------------------------------------------------------------------
+
+    if ($search_domain != EVERYTHING) {
+
+        if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
+        
+        if ($search_domain == BOOKMARK) {
+            $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not rec_FlagTemporary) ';
+        } else if ($search_domain == BIBLIO) {   //NOT USED
+            $where_clause .= ' (bkm_UGrpID is null and not rec_FlagTemporary) ';
+        } else {
+            $where_clause .= ' not rec_FlagTemporary ';
         }
-        $q_bits = preg_split('/&&|\\bAND\\b/i', $qq);
-//error_log("qbits = ".print_r($q_bits,true));
-        $where_clause = '';
-        $q_clauses = array();
-        foreach ($q_bits as $q_bit) {
-            $q = parse_query($search_domain, $q_bit, $currUserID, $wg_ids, @$params['s'], $publicOnly);
-//error_log("parsed q for qbits = ".print_r($q, true));
-            // for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
-            preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*?) order by/s', $q, $matches);
-            if ($matches[1]) {
-                array_push($q_clauses, '(' . $matches[1] . ')');
-            }
-        }
-        sort($q_clauses);
-        $where_clause = join(' and ', $q_clauses);
-        // check last qbits for form of owner/vis prefix and order by suffix, then capture and add them
-        if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*?( order by.*)$/s', $q, $matches))
-        {
-//error_log("where_clauses matches for q = ".print_r($matches,true));
-            $query .= $matches[1] . $where_clause . $matches[2];
-        }
+
     }
-
+    
+    if($publicOnly){
+        $query->recVisibilityType = "public";
+    }
+    
+    if($query->recVisibilityType && $query->recVisibilityType!="hidden"){ 
+        $where2 = '(rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
+    }else{
+        if($query->recVisibilityType){ //hidden 
+             $where2 = 'rec_NonOwnerVisibility="hidden" and ';  
+        }else{
+             $where2 = '(not rec_NonOwnerVisibility="hidden") or ';  
+        }
+        
+        $where2 = '( '.$where2.'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+    }
+    
+    $where_clause = $where_clause . ' and ' . $where2;
+    
+    // 6. DEFINE LIMIT AND OFFSET ---------------------------------------------------------------------------------------
     if (@$params["l"]) {
         $limit = intval($params["l"]);
     }else if(@$params["limit"]) {
@@ -150,12 +161,12 @@ function compose_sql_query($query, $params, $currentUser=null, $publicOnly=false
     }
     
     $offset = get_offset($params);
+    
+    // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
+    $res_query =  $select_clause.$query->from_clause." WHERE ".$where_clause.$query->sort_clause." LIMIT $limit" . ($offset>0? " OFFSET $offset " : "");
 
-    $query .=  " limit $limit" . ($offset>0? " offset $offset " : "");
-
-/*****DEBUG****/// 
-error_log("request to query returns ".print_r($query,true));
-    return $query;
+/*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
+    return $res_query;
 }
 
 function get_offset($params){
@@ -172,16 +183,17 @@ function get_offset($params){
 }
 
 /**
-* put your comment there...
+* Returns array with 3 elements: FROM, WHERE and ORDER BY
 *
 * @param mixed $search_domain -   bookmark - searcch my bookmarks, otherwise all records
 * @param mixed $text     - query string
 * @param mixed $sort_order
 * @$currUserID
-* @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
-* @param mixed $publicOnly
+* NOTUSED @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
+* NOTUSED @param mixed $publicOnly
 */
-function parse_query($search_domain, $text, $currUserID, $wg_ids=null, $sort_order='', $publicOnly=false) {
+function parse_query($search_domain, $text, $sort_order='', $currUserID) { //$currUserID, $wg_ids=null, $publicOnly=false
+
 
     // remove any  lone dashes outside matched quotes.
     $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
@@ -196,8 +208,8 @@ function parse_query($search_domain, $text, $currUserID, $wg_ids=null, $sort_ord
         if (!preg_match('/^\s*-?".*"$/',$queryPart)) {
         // clean up the query.
         // liposuction out all the non-kocher characters
-        // (this means all punctuation except -, _, :, ', ", = and ,  ...?)
-            $queryPart = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $queryPart);
+        // (this means all punctuation except -, _, %, :, ', ", = and ,  ...?)
+            $queryPart = preg_replace('/[\000-\041\043-\044\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $queryPart);
         }
         //reconstruct the string
         $addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
@@ -205,71 +217,87 @@ function parse_query($search_domain, $text, $currUserID, $wg_ids=null, $sort_ord
 /*****DEBUG****///error_log("query part = ".print_r($queryPart[0],true));
 /*****DEBUG****///error_log("preprocessed query = ".print_r($preProcessedQuery,true));
     }
-    $query = new Query($search_domain, $preProcessedQuery, $currUserID, $publicOnly);
-    $query->addWorkgroupRestriction($wg_ids);
-    $q = $query->makeSQL();
+    
+    $query = new Query($search_domain, $preProcessedQuery, $currUserID);
+    $query->makeSQL();
+    
+    $q = null;
 
     if ($query->sort_phrases) {
         // handled in Query logic
     } else if (preg_match('/^f:(\d+)/', $sort_order, $matches)) {
-        $q .= ' order by ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID='.$matches[1].' order by link.rec_Title limit 1), "~~"), rec_Title';
+        //mindfuck!!!! - sort by detail?????
+       $q = 'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID='.$matches[1].' ORDER BY link.rec_Title limit 1), "~~"), rec_Title';
     } else {
         if ($search_domain == BOOKMARK) {
             switch ($sort_order) {
                 case SORT_POPULARITY:
-                $q .= ' order by rec_Popularity desc, rec_Added desc'; break;
+                $q = 'rec_Popularity desc, rec_Added desc'; break;
                 case SORT_RATING:
-                $q .= ' order by bkm_Rating desc'; break;
+                $q = 'bkm_Rating desc'; break;
                 case SORT_URL:
-                $q .= ' order by rec_URL is null, rec_URL'; break;
+                $q = 'rec_URL is null, rec_URL'; break;
                 case SORT_MODIFIED:
-                $q .= ' order by bkm_Modified desc'; break;
+                $q = 'bkm_Modified desc'; break;
                 case SORT_ADDED:
-                $q .= ' order by bkm_Added desc'; break;
+                $q = 'bkm_Added desc'; break;
                 case SORT_TITLE: default:
-                $q .= ' order by rec_Title = "", rec_Title';
+                $q = 'rec_Title = "", rec_Title';
             }
         } else {
             switch ($sort_order) {
                 case SORT_POPULARITY:
-                $q .= ' order by rec_Popularity desc, rec_Added desc'; break;
+                $q = 'rec_Popularity desc, rec_Added desc'; break;
                 case SORT_URL:
-                $q .= ' order by rec_URL is null, rec_URL'; break;
+                $q = 'rec_URL is null, rec_URL'; break;
                 case SORT_MODIFIED:
-                $q .= ' order by rec_Modified desc'; break;
+                $q = 'rec_Modified desc'; break;
                 case SORT_ADDED:
-                $q .= ' order by rec_Added desc'; break;
+                $q = 'rec_Added desc'; break;
                 case SORT_TITLE: default:
-                $q .= ' order by rec_Title = "", rec_Title';
+                $q = 'rec_Title = "", rec_Title';
             }
         }
+        
+    }
+    if($q){ //sort defined in separate request param
+        $query->sort_clause = ' ORDER BY '.$q;
     }
 /*****DEBUG****///error_log("QUERY after parse ".print_r($q,true));
-    return $q;
+    return $query;
 }
 
 
 class Query {
-    var $search_domain;
+    
+    var $from_clause = '';
+    var $where_clause = '';
+    var $sort_clause = '';
+    var $recVisibilityType;
 
-    var $currUserID;
-
-    var $or_limbs;
+    var $top_limbs;
     var $sort_phrases;
     var $sort_tables;
+    
 
-    var $workgroups;
+    function Query($search_domain, $text, $currUserID, $absoluteStrQuery = false) {
 
-    function Query($search_domain, $text, $currUserID, $publicOnly, $absoluteStrQuery = false) {
         $this->search_domain = $search_domain;
-        $this->isPublicOnly = $publicOnly;
+        $this->recVisibilityType = null;
         $this->currUserID = $currUserID;
         $this->absoluteStrQuery = $absoluteStrQuery;
-        $this->or_limbs = array();
+        
+        $this->top_limbs = array();
         $this->sort_phrases = array();
         $this->sort_tables = array();
-        $this->workgroups = array();
 
+        // Find any 'vt:' phrases in the query, and pull them out.
+        while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
+            $this->addVisibilityTypeRestriction(substr($matches[2],3));
+            $text = preg_replace('/\bvt:\S+/i', '', $text); 
+            //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
+        }
+        
         // Find any 'sortby:' phrases in the query, and pull them out.
         // "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
         while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
@@ -278,37 +306,73 @@ class Query {
             $text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
         }
 /*****DEBUG****///error_log("Create query obj text after processing sortby ".print_r($text, 1));
+    
+        // Search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
+        if(preg_match('/&&|\\bAND\\b/i', $text)){
+             $q_bits = preg_split('/&&|\\bAND\\b/i', $text);
+        }else{
+             $q_bits = array($text);
+        }
+        foreach ($q_bits as $q_bit) {
+            $this->addTopLimb($q_bit);
+        }        
+/*****DEBUG****///error_log("Create query obj text after processing and/or ".print_r($this->top_limbs, true));
+    }
 
+    function addTopLimb($text) {
+        
+        $or_limbs = array();
         // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
         $or_texts = preg_split('/\\b *OR *\\b/i', $text);
-/*****DEBUG****///error_log("Create query obj text after processing or's ".print_r($or_texts, 1));
-        for ($i=0; $i < count($or_texts); ++$i)
-            if ($or_texts[$i]) $this->addOrLimb($or_texts[$i]);    // NO LONGER collapse uppercase -> lowercase ... let's wait till PHP understands UTF-8 (mysql match ignores case anyway)
+        for ($i=0; $i < count($or_texts); ++$i){
+                if ($or_texts[$i]){
+                    array_push( $or_limbs, new OrLimb($this, $or_texts[$i]) );
+                } 
+        }
+        array_push($this->top_limbs, $or_limbs);
     }
 
-    function addOrLimb($text) {
-        $this->or_limbs[] = new OrLimb($this, $text);
-    }
-
+    //
     function addSortPhrase($text) {
         array_unshift($this->sort_phrases, new SortPhrase($this, $text));
     }
 
-    function addWorkgroupRestriction($wg_ids) {
-        if ($wg_ids) $this->workgroups = $wg_ids;
+    //
+    function addVisibilityTypeRestriction($visibility_type) {
+        if ($visibility_type){
+            $visibility_type = strtolower($visibility_type);
+            if(in_array($visibility_type,array('viewable','hidden','pending','public')))
+            {
+                $this->recVisibilityType = $visibility_type;
+            }
+        }
     }
 
     function makeSQL() {
+
+        //WHERE     
         $where_clause = '';
+        $and_clauses = array();
+        for ($i=0; $i < count($this->top_limbs); ++$i) {
 
-        $or_clauses = array();
-        for ($i=0; $i < count($this->or_limbs); ++$i) {
-            $new_sql = $this->or_limbs[$i]->makeSQL();
-            array_push($or_clauses, '(' . $new_sql . ')');
+        
+            $or_clauses = array();
+            $or_limbs = $this->top_limbs[$i];
+            for ($j=0; $j < count($or_limbs); ++$j) {
+                $new_sql = $or_limbs[$j]->makeSQL();
+                array_push($or_clauses, '(' . $new_sql . ')');
+            }
+            sort($or_clauses);    // alphabetise
+            $where_clause = join(' or ', $or_clauses);
+            if(count($or_clauses)>1) $where_clause = '(' . $where_clause . ')';
+            array_push($and_clauses, $where_clause);
         }
-        sort($or_clauses);    // alphabetise
-        $where_clause = join(' or ', $or_clauses);
+        sort($and_clauses);
+        $this->where_clause = join(' and ', $and_clauses);        
 
+error_log(">>> ". $this->where_clause);
+        
+        //SORT
         $sort_clause = '';
         $sort_clauses = array();
         for ($i=0; $i < count($this->sort_phrases); ++$i) {
@@ -323,38 +387,20 @@ class Query {
                 $sort_clauses[$new_sig] = 1;
             }
         }
-        if ($sort_clause) $sort_clause = ' order by ' . $sort_clause;
+        if ($sort_clause) $sort_clause = ' ORDER BY ' . $sort_clause;
+        $this->sort_clause = $sort_clause;
 
-        if ($this->search_domain == BOOKMARK)
-            $from_clause = 'from usrBookmarks TOPBKMK left join Records TOPBIBLIO on bkm_recID=rec_ID ';
-        else
-            $from_clause = 'from Records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_ID and bkm_UGrpID='.$this->currUserID.' ';
-
-        $from_clause .= join(' ', $this->sort_tables);    // sorting may require the introduction of more tables
-
-
-        if ($this->search_domain != EVERYTHING) {
-
+        //FROM
         if ($this->search_domain == BOOKMARK) {
-            if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-            $where_clause .= 'bkm_UGrpID = ' . $this->currUserID . ' and (rec_FlagTemporary is null or not rec_FlagTemporary) ';
-        } else if ($this->search_domain == BIBLIO) {   //NOT USED
-            if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-            $where_clause .= 'bkm_UGrpID is null and not rec_FlagTemporary ';
-        } else {
-            if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-            $where_clause .= 'not rec_FlagTemporary ';
+            $this->from_clause = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+        }else{
+            $this->from_clause = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$this->currUserID.' ';
         }
 
-        }
-/*****DEBUG****///error_log("query obj  - ".print_r($this,true));
-        array_push($this->workgroups,0); // be sure to include the generic everybody workgroup
-        $where_clause = '('.(($this->currUserID>0 && !$this->isPublicOnly) ?'rec_OwnerUGrpID='. $this->currUserID.' or ':'').// this includes non logged in because it returns 0
-                            (($this->currUserID>0 && !$this->isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
-                            ((!empty($this->workgroups) && !$this->isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
-                            ' and ' . $where_clause;
+        $this->from_clause .= join(' ', $this->sort_tables);    // sorting may require the introduction of more tables
 
-        return $from_clause . 'where ' . $where_clause . $sort_clause;
+        //MAKE
+        return $this->from_clause . ' WHERE' . $this->where_clause . $this->sort_clause;
     }
 }
 
@@ -878,7 +924,7 @@ class AddedByPredicate extends Predicate {
 class AnyPredicate extends Predicate {
     function makeSQL() {
         $not = ($this->parent->negate)? 'not ' : '';
-        return $not . ' (exists (select * from recDetails rd '
+        return $not . ' (exists (select rd.dtl_ID from recDetails rd '
                                   . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
                                   . 'left join Records link on rd.dtl_Value=link.rec_ID '
                                . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
@@ -906,26 +952,43 @@ class FieldPredicate extends Predicate {
     function makeSQL() {
         $not = ($this->parent->negate)? 'not ' : '';
 /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
+        
+        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+            // comma-separated list of ids
+            $match_pred = ' in ('.$this->value.')';
+            $isin = true;
+        }else{
+            $isin = false;
+            $isnumericvalue = is_numeric($this->value);
+        
+            $match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
 
-        $isnumericvalue = is_numeric($this->value);
-        $match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
-
-        if ($this->parent->exact  ||  $this->value === "") {    // SC100
-            $match_pred = " = $match_value";
-        } else if ($this->parent->lessthan) {
-            $match_pred = " < $match_value";
-        } else if ($this->parent->greaterthan) {
-            $match_pred = " > $match_value";
-        } else {
-            $match_pred = " like '%".mysql_real_escape_string($this->value)."%'";
+            if ($this->parent->exact  ||  $this->value === "") {    // SC100
+                $match_pred = " = $match_value";
+            } else if ($this->parent->lessthan) {
+                $match_pred = " < $match_value";
+            } else if ($this->parent->greaterthan) {
+                $match_pred = " > $match_value";
+            } else {
+                if($isnumericvalue){
+                    $match_pred = " = $match_value";
+                }else if(strpos($this->value,"%")===false){
+                    $match_pred = " like '%".mysql_real_escape_string($this->value)."%'";
+                }else{
+                    $match_pred = " like '".mysql_real_escape_string($this->value)."'";
+                }
+            }
         }
-        if($isnumericvalue){
+        
+        if($isin){
+            $match_pred_for_term = $match_pred;
+        }else if($isnumericvalue){
             $match_pred_for_term = " = $match_value";
         }else{
             $match_pred_for_term = " = trm.trm_ID";
         }
 
-        $timestamp = strtotime($this->value);
+        $timestamp = $isin ?false:strtotime($this->value);
         if ($timestamp) {
             $date_match_pred = $this->makeDateClause();
         }
@@ -943,12 +1006,12 @@ class FieldPredicate extends Predicate {
             $rd_type_clause = 'rdt.dty_Name like "' . mysql_real_escape_string($this->field_type) . '%"';
         }
 
-        return $not . 'exists (select * from recDetails rd '
+        return $not . 'exists (select rd.dtl_ID from recDetails rd '
                                 . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
                                 . 'left join Records link on rd.dtl_Value=link.rec_ID '
-                                . (($isnumericvalue)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
+                                . (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
                                     . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-                                    . ' and if(rdt.dty_Type = "resource" AND '.(is_numeric($this->value)?'0':'1').', '
+                                    . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
                                               .'link.rec_Title ' . $match_pred . ', '
                                               .'if(rdt.dty_Type in ("enum","relationtype"), '
                                               .'rd.dtl_Value '.$match_pred_for_term.', '

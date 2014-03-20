@@ -144,7 +144,7 @@ function recordSearch($system, $params, $need_structure, $need_details)
             .'rec_URLErrorMessage,'
             .'bkm_PwdReminder ';*/
 
-    $query = compose_sql_query($query, $params, $currentUser);
+    $query = compose_sql_query($query, $params, $currentUser);   //!!!! IMPORTANT CALL
 
 //DEGUG print error_log("AAA ".$query);
 

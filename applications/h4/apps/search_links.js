@@ -20,9 +20,9 @@ $.widget( "heurist.search_links", {
   _create: function() {
 
     var that = this;
-
+    
     this.user_groups = $( "<div>" )
-             .css("font-size","0.9em")
+             .css({"font-size":"0.9em","overflow-y":"auto","height":"100%"})
              .appendTo( this.element )
              .hide();
 
