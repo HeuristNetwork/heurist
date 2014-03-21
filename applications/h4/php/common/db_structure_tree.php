@@ -127,6 +127,8 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
  $dtValue - record type structure definition
 
  returns display name  or if enum array
+ 
+ $mode - 3 all, 4 for facet treeview
 */
 function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
 
@@ -214,7 +216,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
             default:
 //error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
                 if (($mode==3) ||
-                     ($detailType=='integer') || ($detailType=='date') || 
+                     ($detailType=='integer') || ($detailType=='date') || ($detailType=='freetext') ||
                      ($detailType=='year') || ($detailType=='float'))
                 {
 //error_log("!!!!!!!!!");                    

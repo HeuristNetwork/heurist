@@ -445,38 +445,34 @@ $.widget( "heurist.search_faceted_wiz", {
            var facet_index, i, len = facets.length;
            var detailtypes = top.HEURIST.detailtypes.typedefs;
            
-           //create current faceted query - for debug purposes only
+           //create current faceted query - for debug purposes only 
+           var full_query = '';
            for (facet_index=0;facet_index<len;facet_index++){
-                var type = facets[facet_index][0].type;
-                var fieldid = facets[facet_index][0].fieldid;
-                var query = facets[facet_index][0].query;
                 var currentvalue = facets[facet_index][0].currentvalue;
-                var dtID = fieldid.substring(2);
+                var type = facets[facet_index][0].type;
                
                 if(!top.HEURIST.util.isnull(currentvalue)){
-                   
-                   if(type=="enum"){
-                       if(Number(dtID)>0 && detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']]=='enum'){
-                        
-                            var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
-                            disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
-                         
-                            var term = top.HEURIST.util.getChildrenTerms(type, allTerms, disabledTerms, currentvalue);
+
+                        var cv = currentvalue;
+                        if(type=="freetext"){
+                             cv = cv.query;
+                        }
+                    
+                        var this_query = '';
+                        var len2 = facets[facet_index].length;
+                        for (i=0;i<len2;i++){
                             
-                            " and dtl_Value in ("+term.termssearch.join(",")+")";
-                       }
-                   }else{
-                       
-                       //currentvalue.query
-                       " and SUBSTRING(trim(dtl_Value), 1, 1)='"+currentvalue.query+"'";
-                   }
-                   
-                   var rectypes = query.split(' ')[0].trim().substr(2);
-                   
-                   " from Records, recDetails where rec_RecTypeId in ("+rectypes+") and dtl_RecId=rec_ID and dtl_DetailTypeId="+dtID+" and dtl_Value=" 
-                   
-                   
-                   
+                            if(i==0){
+                                this_query = facets[facet_index][i].query+':'+cv;
+                            }else if (i==len2-1){
+                                this_query = facets[facet_index][i].query+':"('+this_query+')"';
+                            }else{
+                                this_query = facets[facet_index][i].query+':('+this_query+')';
+                            }
+                        }
+                        facets[facet_index][0].comb_query = this_query; 
+                        
+                        full_query = full_query + ' ' + this_query;                 
                 }
            }
 /*           
@@ -486,6 +482,9 @@ where dtl_RecId=rec_ID and (
 (rec_RecTypeID=30 and dtl_DetailTypeId=1 and dtl_Value like '%Sacred%')
 )
 */
+           if(full_query!=''){
+                $('<div>').html(full_query).appendTo(listdiv);
+           }
             
            for (facet_index=0;facet_index<len;facet_index++){
                
