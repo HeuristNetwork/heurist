@@ -29,8 +29,10 @@ body {
     text-decoration: none;
 }
 
-
-
+/*  UI THEME FIX */
+.ui-button .ui-button-text {
+    line-height: 1em;
+}
 /*  LAYOUT */
 .ui-layout-pane {
     padding: 0 !important;
@@ -457,8 +459,7 @@ div .selected, div .selected:hover{
 .list .recordDiv .recordTitle {
     left: 54px;
     right: 32px;
-    top: 8px;
-    height: 1.1em;
+    top: 3px;
 
     vertical-align: middle;
     white-space: nowrap;
@@ -508,3 +509,32 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 .thumbnails a img{ border: solid 1px Black; }
 .thumbnails a:hover img{ border: solid 1px #aaa }
+
+/* Tag cloud */
+.tagsCloud ul{
+    text-align:center;
+    /*
+    margin:1em 0;
+    padding:.5em 10px;
+    background:#71b5e9 url(bg_tags.gif) repeat-x;*/        
+    }
+.tagsCloud li{
+    margin:0;
+    padding:0;
+    list-style:none;
+    display:inline-block;
+    }
+.tagsCloud li a{
+    /*text-decoration:none;
+    color:#fff;*/
+    padding:0 2px;    
+    }
+.tagsCloud li a:hover{    
+    /*color:#cff400;*/
+    }        
+
+.tag1{font-size:0.8em;}
+.tag2{font-size:0.9em;}
+.tag3{font-size:1em;}
+.tag4{font-size:1.1em;}
+.tag5{font-size:1.2em;}

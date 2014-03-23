@@ -1,5 +1,5 @@
 /**
-* Accordeon: saved and predefined searches
+* Accordeon: saved, faceted and tag searches
 */
 $.widget( "heurist.search_links", {
 
@@ -15,15 +15,32 @@ $.widget( "heurist.search_links", {
   },
 
   currentSearch: null,
+  currentMode:'saved', //faceted|tags
 
   // the constructor
   _create: function() {
 
     var that = this;
     
+    this.mode_selector = $( "<div>" )
+             .html('<input type="radio" id="ssradio1" name="ssradio" checked="checked" value="saved"/>'
+                +'<label for="ssradio1">'+top.HR('Saved')+'</label>'
+             +'<input type="radio" id="ssradio2" name="ssradio" value="faceted"/>'
+                +'<label for="ssradio2">'+top.HR('Faceted')+'</label>'
+             +'<input type="radio" id="ssradio3" name="ssradio" value="tags"/>'
+                +'<label for="ssradio3">'+top.HR('Tags')+'</label>')
+             .css({"font-size":"0.8em","height":"2.4em","text-align":"center"})
+             .buttonset()
+             .click(function( event ) {
+                 that.currentMode = $("input[name='ssradio']:checked").val(); //event.target.value;
+                 that._refresh();
+             })
+             .appendTo( this.element );
+             
+    
     this.user_groups = $( "<div>" )
              .css({"font-size":"0.9em","overflow-y":"auto","height":"100%"})
-             .appendTo( this.element )
+             .appendTo( $( "<div>" ).css({"top":"2.4em","bottom":0,"left":0,"right":4,"position":"absolute"}).appendTo( this.element ))
              .hide();
 
     this.edit_dialog = null;
@@ -51,9 +68,21 @@ $.widget( "heurist.search_links", {
   /* private function */
   _refresh: function(){
 
-                  if(!top.HAPI.currentUser.usr_SavedSearch){
+      var that = this;
+      if(this.currentMode=='tags' && !top.HAPI.currentUser.usr_Tags){
 
-                    var that = this;
+             top.HAPI.RecordMgr.tag_get({UGrpID:'all', info:'full'},
+                function(response) {
+                    if(response.status == top.HAPI.ResponseStatus.OK){
+                        top.HAPI.currentUser.usr_Tags = response.data;
+                        that._prepareTags();
+                        that._updateAccordeon();
+                    }else{
+                        top.HEURIST.util.showMsgErr(response);
+                    }
+                });
+          
+      }else if(!top.HAPI.currentUser.usr_SavedSearch){
 
                     top.HAPI.SystemMgr.ssearch_get(
                         function(response){
@@ -62,10 +91,37 @@ $.widget( "heurist.search_links", {
                                 that._updateAccordeon();
                             }
                         });
-                  }else{
+      }else{
                         this._updateAccordeon();
-                  }
+      }
 
+  },
+  
+  _prepareTags: function(){
+  
+       var gtags = top.HAPI.currentUser.usr_Tags;
+       var name, usage;
+       
+       this.tagsMinMax = {};
+      
+       for (var usrID in gtags){
+           var tags = gtags[usrID];
+           var min=0,max=0,cnt=0;
+           
+           for (var tagID in tags)
+           {
+                    usage = parseInt(tags[tagID][3]);
+                    if(usage>0){
+                        //name = tags[tagID][0];
+                        min = Math.min(min, usage);
+                        max = Math.max(max, usage);
+                        cnt++;
+                    }
+           }
+           if(cnt>0){
+               this.tagsMinMax[usrID] = [min,max,cnt];
+           }
+       }
   },
 
   _updateAccordeon: function()
@@ -76,16 +132,21 @@ $.widget( "heurist.search_links", {
 
             if(islogged){
 
-
-                this.user_groups.append(
-                    $('<div>')
+                if(this.currentMode=='tags'){
+                    this.user_groups.append(
+                        $('<div>')
+                       .append(this._defineHeader(top.HR('Personal Tags')))
+                       .append( this._define_GroupContent(top.HAPI.currentUser.ugr_ID, "bookmark") ));
+                }else{
+                    this.user_groups.append(
+                        $('<div>')
                        .append(this._defineHeader(top.HR('My Bookmarks')))
-                       .append( this._define_SVSlist(top.HAPI.currentUser.ugr_ID, "bookmark") ));
-
-                this.user_groups.append(
-                    $('<div>')
+                       .append( this._define_GroupContent(top.HAPI.currentUser.ugr_ID, "bookmark") ));
+                    this.user_groups.append(
+                        $('<div>')
                        .append( this._defineHeader(top.HR('All Records')))
-                       .append( this._define_SVSlist(top.HAPI.currentUser.ugr_ID) ));
+                       .append( this._define_GroupContent(top.HAPI.currentUser.ugr_ID) ));
+                }
 
                   if(!top.HAPI.currentUser.usr_GroupsList){
 
@@ -108,8 +169,8 @@ $.widget( "heurist.search_links", {
                 this.user_groups
                     .append(
                         $('<div>')
-                            .append(this._defineHeader(top.HR('Prepared searches')))
-                            .append( this._define_SVSlist( top.HAPI.currentUser.ugr_ID) ))
+                            .append(this._defineHeader(top.HR('Predefined searches')))
+                            .append( this._define_GroupContent( top.HAPI.currentUser.ugr_ID) ))
                     .show();
 
             }
@@ -121,12 +182,13 @@ $.widget( "heurist.search_links", {
   */
   _defineHeader: function(name){
 
-       var $header = $('<h3>'+name+'</h3>');
-       var that = this;
+      var $header = $('<h3>'+name+'</h3>');
+      var that = this;
 
+      if(this.currentMode!='tags'){
        $('<div>',{
                 id: 'rec_add_link',
-                title: top.HR('Click to save current search')
+                title: top.HR(this.currentMode=='faceted'?'Define new faceted search':'Click to save current search')
             })
             .button({icons: {primary: "ui-icon-circle-plus"}, text:false})
             .click(function( event ) {
@@ -135,10 +197,65 @@ $.widget( "heurist.search_links", {
                 return false;
             })
             .appendTo($header);
-
+      }
       return $header
   },
+  
+  /**
+  * fill content of group
+  * domain - all or bookmark
+  */
+  _define_GroupContent: function(ugr_ID, domain){
+      if(this.currentMode=='tags'){
+          return this._define_TagCloud(ugr_ID, domain);
+      }else{
+          return this._define_SVSlist(ugr_ID, domain);
+      }
+  },
 
+  /**
+  * create cloud of tags
+  * domain - all or bookmark
+  */
+  _define_TagCloud: function(ugr_ID, domain){
+    
+       var $div = $('<div>',{class:'tagsCloud'});
+       var that = this;
+       
+       if(this.tagsMinMax[ugr_ID] && this.tagsMinMax[ugr_ID][2]>0){
+           
+           var $ul = $('<ul>').appendTo($div);
+           
+           var tags = top.HAPI.currentUser.usr_Tags[ugr_ID];
+           var min = this.tagsMinMax[ugr_ID][0];
+           var max = this.tagsMinMax[ugr_ID][1];
+           var cnt = 0;
+      
+           for (var tagID in tags)
+           {
+                    var usage = parseInt(tags[tagID][3]);
+                    if(usage>0){
+                        var name = tags[tagID][0];
+                        
+                        var group = Math.floor( (usage - min) * 5 / (max - min) );
+                        group++;if(group>5) group=5;
+                        
+                        $ul.append( $('<li>',{class:'tag'+group})
+                                .append($("<A>",{href:"#"}).text(name).on("click", function(event){
+                                var name = $(event.target).text();
+                                that._doSearch2(name, 'tag:"'+name+'"');
+                             } )) );
+                        
+                        cnt++;
+                        if(cnt>100) break;
+                    }
+           }
+             
+       
+       }
+       return $div;
+  },
+  
   //
   /**
   * create list of saved searches for given user/group
@@ -150,24 +267,24 @@ $.widget( "heurist.search_links", {
        var cnt = 0;
        var that = this;
 
-       $ul = $('<div>'); //.css({'padding': '0em 0em !important', 'background-color':'red'});
+       var $ul = $('<div>'); //.css({'padding': '0em 0em !important', 'background-color':'red'});
 
        //add predefined searches
-       if(ugr_ID == top.HAPI.currentUser.ugr_ID){
+       if(this.currentMode=='saved' && ugr_ID == top.HAPI.currentUser.ugr_ID){
 
-            domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+                domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-            $ul.attr('id', 'svsu-'+ugr_ID+'-'+domain);
+                $ul.attr('id', 'svsu-'+ugr_ID+'-'+domain);
 
-            var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
-            var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
+                var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
+                var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
 
-            $ul.append( this._add_SVSitem(top.HR('Recent changes'), null, s_all));
-            $ul.append( this._add_SVSitem(top.HR('All (date order)'), null, s_recent));
+                $ul.append( this._add_SVSitem(top.HR('Recent changes'), null, s_all));
+                $ul.append( this._add_SVSitem(top.HR('All (date order)'), null, s_recent));
 
-            cnt = 2;
+                cnt = 2;
        }else{
-           $ul.attr('id', 'svsu-'+ugr_ID+'-all');
+               $ul.attr('id', 'svsu-'+ugr_ID+'-all');
        }
 
        for (var svsID in ssearches)
@@ -214,7 +331,7 @@ $.widget( "heurist.search_links", {
                                     squery = top.HAPI.currentUser.usr_SavedSearch[qid][1];
                                 }
                                 that._doSearch2(name, squery);
-                                } )
+                            } )
                          );
             if(qid && top.HAPI.currentUser.usr_SavedSearch){
 
@@ -223,12 +340,12 @@ $.widget( "heurist.search_links", {
                  $resdiv
                   .append( $('<div>')
                       .addClass('edit-delete-buttons')
-                      .append( $('<div>', { title: top.HR('Edit saved search') })
+                      .append( $('<div>', { title: top.HR('Edit '+this.currentMode+' search') })
                             .button({icons: {primary: "ui-icon-pencil"}, text:false})
                             .click(function( event ) {
                                 that._editSavedSearch(qid);
                             }) )
-                      .append($('<div>',{title: top.HR('Delete saved search') })
+                      .append($('<div>',{title: top.HR('Delete '+this.currentMode+' search') })
                             .button({icons: {primary: "ui-icon-close"}, text:false})
                             .click(function( event ) {
                                 that._deleteSavedSearch(qid);
@@ -251,7 +368,7 @@ $.widget( "heurist.search_links", {
                     this.user_groups.append(
                     $('<div>')
                        .append( this._defineHeader(name ))
-                       .append( this._define_SVSlist(groupID) ));
+                       .append( this._define_GroupContent(groupID) ));
 
                 }
             }
@@ -358,11 +475,15 @@ $.widget( "heurist.search_links", {
 
                 svs_id.val('');
                 svs_name.val('');
+                var domain = 'all';
 
-                var domain = this.currentSearch.w;
-                domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-
-                svs_query.val( this.currentSearch.q );
+                if(top.HEURIST.util.isnull(this.currentSearch)){
+                    svs_query.val( '' );
+                }else{
+                    domain = this.currentSearch.w;
+                    domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+                    svs_query.val( this.currentSearch.q );
+                }
 
                 //fill with list of user groups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
@@ -546,6 +667,7 @@ $.widget( "heurist.search_links", {
     }
 
     this.user_groups.remove();
+    this.mode_selector.remove();
   }
 
 });

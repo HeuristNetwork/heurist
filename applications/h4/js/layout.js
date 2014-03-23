@@ -308,13 +308,13 @@ function appAddContent($container, app, options){
                         //DEBUG
                         $content.rec_viewer();
                     }else
-                    if(app.widgetname=='search'){
+                    if(app.widgetname=='svs_manager'){
                         //DEBUG
-                        $content.search( ); //options
+                        $content.svs_manager( options ); //options
                     }else
-                     if(app.widgetname=='rec_list'){
+                     if(app.widgetname=='search_links'){
                         
-                        $content.rec_list( options );
+                        $content.search_links( options );
                     }else    
                     {
                      //this is normal way of widget initialization   

@@ -108,7 +108,7 @@ class System {
     /**
     * keep error message (for further use with getError) 
     */
-    public function addError($status, $message='', $sysmsg=null){
+    public function addError($status, $message='', $sysmsg=null) {
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
     }
@@ -379,10 +379,13 @@ class System {
                 //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
                 return true;
+                }else{
+                    $this->addError(HEURIST_REQUEST_DENIED,  "Password is incorrect");
+                    return false;
                 }
 
             }else{
-                $this->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / password");
+                $this->addError(HEURIST_REQUEST_DENIED,  "User name is incorrect");
                 return false;
             }
 

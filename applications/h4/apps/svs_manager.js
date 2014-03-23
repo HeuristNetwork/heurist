@@ -182,7 +182,8 @@ $.widget( "heurist.svs_manager", {
             //this._off( $allrecs, "click");
             this.div_content.empty();  //clear
        }
-
+       
+       var that = this;
        var ssearches = top.HAPI.currentUser.usr_SavedSearch;
 
        for (var svsID in ssearches)
@@ -213,27 +214,27 @@ $.widget( "heurist.svs_manager", {
                         .appendTo(this.div_content);
                         
                 $('<div>',{
-                            title: name
+                            title: name + ' ' + domain2
                         })
                         .css('display','inline-block')
                         .addClass('recordTitle')
-                        .css({'left':'1em',top:0,'margin':'0.4em', 'height':'1.4em'})
-                        .html( name + domain2 )
+                        .css({'left':'1em',top:0}) //,'margin':'0.4em', 'height':'1.4em'})
+                        .html( name )
                         .appendTo($itemdiv);
                 
-
+                
                 $itemdiv.append( $('<div>')
                               .addClass('edit-delete-buttons')
                               .css('margin','0.4em 1.2em')
-                              .append( $('<div>', { svsID:svsID, title: top.HR('Edit saved search') })
+                              .append( $('<div>', { svsid:svsID, title: top.HR('Edit saved search') })
                                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
                                     .click(function( event ) {
-                                        that._editSavedSearch( $(this).attr('svsID') );
+                                        that._editSavedSearch( $(this).attr('svsid') );
                                     }) )
                               .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved search') })
                                     .button({icons: {primary: "ui-icon-close"}, text:false})
                                     .click(function( event ) {
-                                        that._deleteSavedSearch( $(this).attr('svsID') );
+                                        that._deleteSavedSearch( $(this).attr('svsid') );
                                     }) )
                           );
             }
@@ -321,7 +322,7 @@ $.widget( "heurist.svs_manager", {
   },
 
   _editSavedSearch: function(svsID){
-      
+    alert('todo!');
   },
   /*
   * Open itself as modal dialogue

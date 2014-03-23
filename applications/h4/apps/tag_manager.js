@@ -156,7 +156,7 @@ $.widget( "heurist.tag_manager", {
     //----------------------------------------
     var css1;
     if(this.options.isdialog){
-      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};
+      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};
     }else{
       css1 =  {'overflow-y':'auto','padding':'0.4em','width':'100%','height':'400px'};  
     }
@@ -369,14 +369,14 @@ $.widget( "heurist.tag_manager", {
                         })
                         .css('display','inline-block')
                         .addClass('recordTitle')
-                        .css({'margin':'0.4em', 'height':'1.4em'})
+                        //.css({'margin':'0.4em', 'height':'1.4em'})
                         .html( tag[0] )
                         .appendTo($tagdiv);
 
                     //count - usage    
                     $('<div>')
                             //.addClass('recordIcons')
-                            .css({'margin':'0.4em', 'height':'1.4em', 'position':'absolute','right':'60px'})
+                            .css({ 'position':'absolute','right':'60px'}) //'margin':'0.4em', 'height':'1.4em',
                             .css('display','inline-block')
                             .html( tag[3] )
                             .appendTo($tagdiv);

@@ -86,7 +86,7 @@ function compose_sql_query($select_clause, $params, $currentUser=null, $publicOn
     define('stype', @$params['stype']);
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
-    $wg_ids = array();
+    $wg_ids = array(); //may be better use $system->get_user_group_ids() ???
     if($currentUser && @$currentUser['ugr_ID']>0){
         if(@$currentUser['ugr_Groups']){
             $wg_ids = array_keys($currentUser['ugr_Groups']);

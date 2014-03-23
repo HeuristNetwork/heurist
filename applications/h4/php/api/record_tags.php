@@ -44,7 +44,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
 
         } else if ($action=="search" && @$_REQUEST['UGrpID'] ) {
 
-            $res = tagGetByRecords($system, true, @$_REQUEST['recIDs'], $_REQUEST['UGrpID']);
+            $res = tagGetByRecords($system, @$_REQUEST['info']!="short", @$_REQUEST['recIDs'], $_REQUEST['UGrpID']);
             if ( is_array($res) ) {
                 $res['recIDs'] = @$_REQUEST['recIDs'];
             }

@@ -439,7 +439,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             // get list of tags for sepcified userid
             // request  a: search
             //          UGrpID
-            //          recIDs - record ids  
+            //          recIDs - record ids 
+            //          info - full or short 
             // responce  recIDs
             // 
             ,tag_get: function(request, callback){
