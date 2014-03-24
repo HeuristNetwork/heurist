@@ -56,7 +56,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                      click: function() {
                                         that.navigateWizard(-1);
                                     }},
-                                    {text:top.HR('Next'),
+                                    {text:top.HR('Next'), id:'btnNext',
                                      click: function() {
                                         that.navigateWizard(1);
                                     }},
@@ -165,9 +165,12 @@ $.widget( "heurist.search_faceted_wiz", {
             if(newstep==5){
                 //save into database
                 this._doSaveSearch();
+                return;
             }
             newstep = 4;  
-      }  
+      } else{
+           $("#btnNext").button('option', 'label', top.HR('Next'));
+      }
       if(this.step != newstep){
           
           if(isNaN(this.step) && newstep==0){ //select record types
@@ -217,7 +220,8 @@ $.widget( "heurist.search_faceted_wiz", {
               
           }else if(this.step==3 && newstep==4){ //preview
               
-              this._initStep4_FacetsPreview()
+              this._initStep4_FacetsPreview();
+              $("#btnNext").button('option', 'label', top.HR('Save'));
           }
           
           this._showStep(newstep);
@@ -760,7 +764,7 @@ where dtl_RecId=rec_ID and (
 
                                 that._trigger( "onsave", request );
                                 
-                                this.element.dialog("close");
+                                that.element.dialog("close");
 
                             }else{
                                 top.HEURIST.util.redirectToError(response.message);

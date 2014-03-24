@@ -598,7 +598,7 @@ $.widget( "heurist.search_links", {
             if( parseInt(request.svs_ID) > 0 ){
                 $('#svs-'+svsID).html(request.svs_Name);
             }else{
-                $('#svsu-'+request.svs_UGrpID+'-'+request.domain).append( that._add_SVSitem(request.svs_Name, request.svs_ID) );
+                $('#svsu-'+request.svs_UGrpID+'-'+request.domain).append( this._add_SVSitem(request.svs_Name, request.svs_ID) );
             }
   }
 
@@ -610,13 +610,15 @@ $.widget( "heurist.search_links", {
   */
   , _editSavedSearch: function(svsID, domain){
       
+    var that = this;
     if( this.currentMode == "faceted") {
       
-        this._showSearchFacetedWizard( {svsID:svsID, domain:domain, onsave: this._updateAfterSave});
+        this._showSearchFacetedWizard( {svsID:svsID, domain:domain, onsave: function(request){
+          that._updateAfterSave(request);
+        } });
 
     }else if(  this.edit_dialog==null )
     {
-        var that = this;
         var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
 
         //load edit dialogue
