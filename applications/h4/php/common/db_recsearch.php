@@ -96,7 +96,7 @@ function recordSearchFacets($system, $params){
             while ( $row = $res->fetch_row() ) {
                 array_push($data, $row);
             }
-            $response = array("status"=>HEURIST_OK, "data"=> $data);
+            $response = array("status"=>HEURIST_OK, "data"=> $data, "facet_index"=>@$params['facet_index']);
             $res->close();
         }
 

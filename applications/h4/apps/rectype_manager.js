@@ -117,9 +117,9 @@ $.widget( "heurist.rectype_manager", {
     //----------------------------------------
     var css1;
     if(this.options.isdialog){
-      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};
+      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};
     }else{
-      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};  
+      css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};  
     }
     
     this.div_content = $( "<div>" )

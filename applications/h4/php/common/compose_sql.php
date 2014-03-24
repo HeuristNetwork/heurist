@@ -165,7 +165,8 @@ function compose_sql_query($select_clause, $params, $currentUser=null, $publicOn
     // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
     $res_query =  $select_clause.$query->from_clause." WHERE ".$where_clause.$query->sort_clause." LIMIT $limit" . ($offset>0? " OFFSET $offset " : "");
 
-/*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
+/*****DEBUG****///
+error_log("request to query returns ".print_r($res_query,true));
     return $res_query;
 }
 
@@ -1044,7 +1045,7 @@ error_log("AAA>>>".$resq);
         }
         
         
-        $match_pred = get_field_value();
+        $match_pred = $this->get_field_value();
         
         if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             $isnumericvalue = false;

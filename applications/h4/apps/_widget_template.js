@@ -31,7 +31,8 @@ $.widget( "heurist.widgetname", {
   
   //Called whenever the option() method is called
   //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-  _setOptions: function( options ) {
+  _setOptions: function( ) {
+        this._superApply( arguments );
   },
   
   /* 

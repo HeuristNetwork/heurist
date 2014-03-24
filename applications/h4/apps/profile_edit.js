@@ -104,11 +104,6 @@ $.widget( "heurist.profile_edit", {
         }
   },
   
-  //Called whenever the option() method is called
-  //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-  _setOptions: function( options ) {
-  },
-  
   /* 
   * private function 
   * show/hide buttons depends on current login status

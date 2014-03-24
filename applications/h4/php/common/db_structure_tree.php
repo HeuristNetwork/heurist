@@ -27,9 +27,15 @@ $dbs_rtStructs = null;
 * @param mixed $rectypeids
 * @param mixed $mode  3 - all, 4 - limited for faceted search
 */
-function dbs_GetRectypeStructureTree($system, $rectypeids, $mode){
+function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null){
    
     global $dbs_rtStructs;
+    
+    if($fieldtypes==null){
+        $fieldtypes = array('integer','date','freetext','year','float');
+    }else if(!is_array($fieldtypes)){
+        $fieldtypes = explode(",",$fieldtypes);
+    }
     
     $dbs_rtStructs = dbs_GetRectypeStructures($system, $rectypeids, 1);    
     
@@ -37,7 +43,7 @@ function dbs_GetRectypeStructureTree($system, $rectypeids, $mode){
     $res = array();
     
     foreach ($rtypes as $rectypeID=>$rectypeName){
-            array_push($res, __getRecordTypeTree($system, $rectypeID, 0, $mode));    
+            array_push($res, __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes));    
     }
     
     return $res;    
@@ -50,7 +56,7 @@ function dbs_GetRectypeStructureTree($system, $rectypeids, $mode){
 //                  fNNN: array(rt_name: , recID ...... )       // unconstrained pointer or exact constraint
 //                  fNNN: array(array(rt_id: , rt_name, recID, recTitle ... ) //constrined pointers
 //     NNN - field type ID
-function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
+function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fieldtypes){
 
     global $dbs_rtStructs;
     
@@ -86,7 +92,7 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
 
                 foreach ($details as $dtID => $dtValue){
 
-                    $res_dt = __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode);
+                    $res_dt = __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $fieldtypes);
                     if($res_dt){
                            array_push($children, $res_dt);
                            /*
@@ -101,7 +107,7 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
                 }//for
             }
             if($mode==3 && $recursion_depth==0){
-                array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode));
+                array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode, $fieldtypes));
             }   
         
     }else if($recTypeId=="Relationship") {
@@ -130,7 +136,7 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode){
  
  $mode - 3 all, 4 for facet treeview
 */
-function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
+function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $fieldtypes){
 
     global $dbs_rtStructs;    
     
@@ -184,7 +190,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
                     
                     if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
                     
-                        $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode);
+                        $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes);
                     
                     }else{ //constrained pointer
                          
@@ -197,7 +203,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
                          }
                          
                          foreach($rectype_ids as $rtID){
-                            $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode);
+                            $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes);
                             if(count($rectype_ids)==1){//exact one rectype constraint
                                 //avoid redundant level in tree
                                 $res = $rt_res;
@@ -215,9 +221,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode){
 
             default:
 //error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
-                if (($mode==3) ||
-                     ($detailType=='integer') || ($detailType=='date') || ($detailType=='freetext') ||
-                     ($detailType=='year') || ($detailType=='float'))
+                if (($mode==3) ||  in_array($detailType, $fieldtypes))
                 {
 //error_log("!!!!!!!!!");                    
                         $res = array();

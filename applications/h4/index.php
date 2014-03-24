@@ -55,6 +55,7 @@ if(@$_REQUEST['db']){
     <script type="text/javascript" src="apps/file_manager.js"></script>
     <script type="text/javascript" src="apps/rec_viewer.js"></script>
     <script type="text/javascript" src="apps/svs_manager.js"></script>
+    <script type="text/javascript" src="apps/search_faceted.js"></script>
     <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
     <script type="text/javascript" src="apps/search_links.js"></script>
     <!-- script type="text/javascript" src="apps/search.js"></script>
