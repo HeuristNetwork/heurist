@@ -78,6 +78,12 @@ $dbPrefix = "hdb_"; // strongly recommended so it's clear which of your database
 $httpProxy = ""; // blank = assumes direct internet access from server - ok for laptop installations.
 $httpProxyAuth = ""; // authorization for proxy server "username:password"
 
+// The base URL for Elastic Search (Lucene). If left blank, some search methods may not be available.
+// See http://www.elasticsearch.org for information on installation (only dependency is Java)
+// Specify address as http://129.78.138.64 or http://frog.net (note: localhost may also work)
+$indexServerAddress="";  // REQUIRED if Elastic Search is installed, include http://
+$indexServerPort="9200"; // default for Elastic Search
+
 // A simple challenge password for creation of new databases. If left blank, any logged in user can create a new database
 $passwordForDatabaseCreation=""; // blank = any logged in user can create
 
