@@ -157,8 +157,8 @@ fieldset > div, .input-row{
 
 fieldset > div > .header{
     display:table-cell;
-    width:120px;
-    min-width:120px;
+    width:150px;
+    min-width:150px;
     text-align:right;
     padding-top:0.4em;
     padding-right:0.4em;
