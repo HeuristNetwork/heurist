@@ -50,17 +50,20 @@ function recordSearchMinMax($system, $params){
 }
 
 /**
-* Find minimal and maximal values for given detail type and record type
+* Find
 * 
 * @param mixed $system
-* @param mixed $params - array  rt - record type(s); 
+* @param mixed $params - array  rt - record type(s); (if nested)
 *                               dt - detail type(s) or recTitle, recModified, 
 *                               type - field type (freetext, date, integer), 
-*                               min, max - range (optional)
+*                               q - current query
+*                               w - domain
 */
 function recordSearchFacets($system, $params){
 
-    if(@$params['rt'] && @$params['dt'] && @$params['type']){
+    //@$params['rt'] && 
+    
+    if(@$params['dt'] && @$params['type']){
 
         $mysqli = $system->get_mysqli();
         $currentUser = $system->getCurrentUser();
@@ -75,18 +78,38 @@ function recordSearchFacets($system, $params){
         if($dt_type=="freetext"){
             //find count by first letter
             if($params['dt']=='recTitle'){
-                $query = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt from Records where rec_RecTypeId in ("
-                    .$params['rt'].") GROUP BY SUBSTRING(trim(rec_Title), 1, 1) order by SUBSTRING(trim(rec_Title), 1, 1)";
+                
+                $select_clause = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt ";
+                $where_clause = " WHERE ";
+                $grouporder_clause = " GROUP BY SUBSTRING(trim(rec_Title), 1, 1) ORDER BY SUBSTRING(trim(rec_Title), 1, 1)";
+                
+                /*$query = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt from Records where rec_RecTypeId in ("
+                    .@$params['rt'].") GROUP BY SUBSTRING(trim(rec_Title), 1, 1) ORDER BY SUBSTRING(trim(rec_Title), 1, 1)";*/
             }else{
-                $query = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) from Records, recDetails "
-                    ." where rec_RecTypeId in (".$params['rt'].") and dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid 
-                    ." GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) order by SUBSTRING(trim(dtl_Value), 1, 1)";
-            }
+                /*$query = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) from Records, recDetails "
+                    ." where rec_RecTypeId in (".@$params['rt'].") and dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid 
+                    ." GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";*/
                     
+                $select_clause = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) ";
+                $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
+                $grouporder_clause = " GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";    
+            }
+            
+        }else if($dt_type=="enum" || $dt_type=="relationtype"){    
+
+                $select_clause = "SELECT dtl_Value as termid, count(*) ";
+                $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
+                $grouporder_clause = " GROUP BY dtl_Value ORDER BY dtl_Value";    
         }else{
             return array("status"=>HEURIST_OK, "data"=> array());
         }        
         
+        
+        $qclauses = get_sql_query_clauses($params, $currentUser);
+    
+        $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
+        
+// error_log(">>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -131,7 +154,7 @@ function recordSearch($system, $params, $need_structure, $need_details)
     }
 
 
-    $query = 'select SQL_CALC_FOUND_ROWS '
+    $select_clause = 'select SQL_CALC_FOUND_ROWS '
             .'bkm_ID,'
             .'bkm_UGrpID,'
             .'rec_ID,'
@@ -144,9 +167,11 @@ function recordSearch($system, $params, $need_structure, $need_details)
             .'rec_URLErrorMessage,'
             .'bkm_PwdReminder ';*/
 
-    $query = compose_sql_query($query, $params, $currentUser);   //!!!! IMPORTANT CALL
+    $query = get_sql_query_clauses($params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+    
+    $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
-//DEGUG print error_log("AAA ".$query);
+//DEGUG error_log("AAA ".$query);
 
     $res = $mysqli->query($query);
     if (!$res){

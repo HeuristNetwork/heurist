@@ -80,6 +80,50 @@ define('SORT_TITLE', 't');
 * @param mixed $publicOnly
 */
 function compose_sql_query($select_clause, $params, $currentUser=null, $publicOnly=false) {
+    
+    $query = get_sql_query_clauses($params, $currentUser=null, $publicOnly=false);
+
+    $res_query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+/*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
+    return $res_query;
+}
+/**
+* Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
+*
+* @param System $system
+* @param mixed $query  -  prefix (usually SELECT with list of fields)
+* @param mixed $params
+*
+    parameters:
+
+    stype  - (OUTDATED) type of search: key - by tag title, all - by title of record and titles of its resource, by default by record title
+    s - sort order   (NOTE!!!  sort may be defined in "q" parameter also)
+    l or limit  - limit of records
+    o or offset
+    w - domain of search a|all, b|bookmark, e (everything)
+
+    qq - several conjunctions and disjunctions
+    q  - query string
+
+            keywords for 'q' parameter
+            url:  url
+            title: title contains
+            t:  record type id
+            f:   field id
+            tag:   tag
+            id:  id
+            n:   description
+            usr:   user id
+            any:
+            relatedto:
+            sortby:
+
+*
+* @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
+*                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
+* @param mixed $publicOnly
+*/
+function get_sql_query_clauses($params, $currentUser=null, $publicOnly=false) {
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
     if (! $params) $params = array();//$_REQUEST;
@@ -163,11 +207,8 @@ function compose_sql_query($select_clause, $params, $currentUser=null, $publicOn
     $offset = get_offset($params);
     
     // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
-    $res_query =  $select_clause.$query->from_clause." WHERE ".$where_clause.$query->sort_clause." LIMIT $limit" . ($offset>0? " OFFSET $offset " : "");
-
-/*****DEBUG****///
-error_log("request to query returns ".print_r($res_query,true));
-    return $res_query;
+    return array("from"=>$query->from_clause, "where"=>$where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
+    
 }
 
 function get_offset($params){
@@ -1026,7 +1067,7 @@ class FieldPredicate extends Predicate {
                 }
                 
                 if($type_clause){ //record type clause is mandatory
-                    $nest_joins .= ' left join Records link'.$i.' on '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID and link'.$i.'.'.$type_clause;
+                    $nest_joins .= ' left join Records link'.$i.' on STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0 and link'.$i.'.'.$type_clause;
                     if($field_type){
                         $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
                     }
@@ -1040,9 +1081,9 @@ class FieldPredicate extends Predicate {
                                   .$nest_joins
                                     . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value.')';
                                     
-error_log("AAA>>>".$resq);            
+//error_log("AAA>>>".$resq);            
             return $resq;
-        }
+        } //end special case nested query for resources
         
         
         $match_pred = $this->get_field_value();
@@ -1058,7 +1099,7 @@ error_log("AAA>>>".$resq);
         if($isin){
             $match_pred_for_term = $match_pred;
         }else if($isnumericvalue){
-            $match_pred_for_term = " = $match_value";
+            $match_pred_for_term = $match_pred; //" = $match_value";
         }else{
             $match_pred_for_term = " = trm.trm_ID";
         }
