@@ -683,7 +683,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     global $rtStructs, $dtTerms, $supported;
 
-    $hasControlSync = @$_REQUEST['ct1']=="1";
+    $hasControlSync = @$_REQUEST['ct1']=="1"; // This is disabled in the form so will always be on - 
+                                              // app hangs while synching so always need to be able to switch it off
     $hasControlInternalGPS = @$_REQUEST['ct2']=="1";
     $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
     $hasControlTracklog = @$_REQUEST['ct4']=="1";
@@ -959,7 +960,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
         </select1>');
         xml_adopt($body_controldata, $input);        
     
-    if($hasControlGPS){
+    if($hasControlGPS){ // This is the tab labelled Control - not jsut GPS, also includes Sync
         
         $gps = new SimpleXMLElement('<group ref="gps">  
             <label>Control</label>'
@@ -2033,15 +2034,15 @@ login(){
 loadAllAttributes();
 ';
 
-if($hasControlSync){
+if($hasControlSync){ // there are start/stop synch controls on the interface
 $out = $out.'    
 /*** SYNC  ***/
 onEvent("control/gps/startsync", "click", "startSync()");
 onEvent("control/gps/stopsync", "click", "stopSync()");
 
-setSyncMinInterval(10.0f);
-setSyncMaxInterval(20.0f);
-setSyncDelay(5.0f);
+setSyncMinInterval(60.0f); // sync every minute
+setSyncMaxInterval(120.0f); // max interval 2 minutes
+setSyncDelay(10.0f); // increment delay 10 secs each time sync fails up to max
 
 startSync() {
     setSyncEnabled(true);
@@ -2054,7 +2055,7 @@ stopSync() {
 }
 
 ';    
-}else{
+}else{  // deprecated by Ian 25/3/14: sync hangs the app, so start/stop sync controls will always be enabled
 $out = $out.'    
 /*** SYNC  ***/
 setSyncEnabled(true);
@@ -2081,6 +2082,8 @@ onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
 ';
 }
 
+// Feb 2014: Brian says tracklog requires extra logic which is not yet available, so the option
+//           to switch this section on has been removed from the export interface
 if($hasControlTracklog){
 $out = $out.'    
 /*** TRACKLOG ***/
@@ -2329,7 +2332,7 @@ function prepareText2($str){
 }
 
 /*                
-If the field name contains the substring 'photo', 'picture', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
+If the field name contains the substring 'photo', 'picture', 'image', 'take' / 'video', 'movie', 'shoot' / 'sound', 'audio', 'record'  (case indifferent), 
 set the field to the approriate type - take picture, shoot video, record audio (prioritise photo, picture, video, movie, sound and audio    
 over the verbs             
 */

@@ -86,11 +86,14 @@
                 $mdiv.append($table_div);                
                 $mdiv.append($("<p>").append($("<i>").html('Select additional top level tab groups for your app:')));                
 
-                $("<div>").css('font-weight','bold').append("<input type='checkbox' checked='checked' onclick='onCtCheckBox(event)' id='mainct'>").append("<label for='mainct'>Control tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always on if not checked)<label>").appendTo($mdiv);
+                // We always require the control tab and start/stop synch as the app hangs inconveniently when synching, so you need to be able to turn it off
+                $("<div>").css('font-weight','bold').append("<input type='checkbox' checked='checked' disabled onclick='onCtCheckBox(event)' id='mainct'>").append("<label for='mainct'>Control tab<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' disabled id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always required)<label>").appendTo($mdiv);
+                
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
-/* Brian asks to hide this feature */
+
+                /* Feb 2014: Brian says tracklog requires extra logic which is not yet available, so this option has been hidden - code exists in exportFAIMS.php to write appropriate logic in bsh file */
                 $("<div>").css('padding-left','40px').css('display','none').append("<input type='checkbox' id='ct4' name='ct4' value='1'><label for='ct4'>Switch tracklog on/off (tracklog unavailable if not checked)<label>").appendTo($mdiv);
 
                 $("<br>").appendTo($mdiv);
@@ -107,6 +110,8 @@
                                         "  ["+top.HEURIST.rectypes.names[map_records[k]['rec_RecTypeID']]+"]<label>").appendTo($mdiv);
                             
                      }
+                } else {
+                    $("<div>").css('padding-left','40px').css('padding-bottom','20px').append("No map layers in database. You may add layers manually before loading module in FAIMS server.").appendTo($mdiv);                    
                 }
                         
             //$("#rt_selected").val(recordTypesSelected);
