@@ -282,9 +282,12 @@ if (is_admin()) {
 								title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean Invalid Characters</a></li>
 
 						<!-- Other non-verification functions -->
-						<li class="seperator"><a href="#"
-								onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
-								title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear Database Locks</a></li>
+                        <li class="seperator"><a href="#"
+                                onClick="loadContent('verification/rebuildLuceneIndices.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Rebuilds the Lucence indices used by Elastic Search, for all record types">Rebuild Lucene indices</a></li>
+                        <li class="seperator"><a href="#"
+                                onClick="loadContent('verification/removeDatabaseLocks.php?db=<?=HEURIST_DBNAME?>')"
+                                title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">Clear Database Locks</a></li>
                         <li><a href="#"
                             onClick="loadContent('../import/direct/getRecordsFromDB.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database Transfer</a></li>

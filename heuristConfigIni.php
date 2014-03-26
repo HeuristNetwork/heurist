@@ -43,6 +43,9 @@ if (!@$dbHost) {
 
 if (!@$dbPrefix) $dbPrefix = "hdb_"; // recommend retaining hdb_
 
+if (!@$indexServerAddress) $indexServerAddress = ""; // set to IP address of server
+if (!@$indexServerPort) $indexServerPort = "9200";
+
 if (!@$defaultDBname) $defaultDBname = ""; // not required, generally best left blank
 if (!@$httpProxy) $httpProxy = ""; // if access to the outside world is through a proxy
 if (!@$httpProxyAuth) $httpProxyAuth = ""; // ditto
