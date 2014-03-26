@@ -203,7 +203,7 @@ function mysql__insert($table, $pairs_assoc, $ignoreDupes = false) {
 		}
 		$stmt.= ')';
 	}
-	if (defined("T1000_DEBUG")) error_log($stmt);
+	if (defined("T1000_DEBUG")) error_log("T1000 debug: ".$stmt);
 	return mysql_query($stmt); // Maybe something bad, maybe something good!
 
 }
@@ -246,7 +246,7 @@ function mysql__update($table, $condition, $pairs_assoc) {
 		$stmt.= " WHERE $condition";
 	}
 	//if (defined('T1000_DEBUG')) 
-    error_log($stmt);
+    error_log("T1000: ".$stmt);
 	return mysql_query($stmt); // Up to the user to check for error.
 
 }
@@ -260,7 +260,7 @@ function mysql__update($table, $condition, $pairs_assoc) {
 * @return   array of results from the $column column of $table or NULL on failure
 */
 function mysql__select_array($table, $column, $condition) {
-	if (defined('T1000_DEBUG')) error_log("SELECT $column FROM $table WHERE $condition");
+	if (defined('T1000_DEBUG')) error_log("T1000 select: SELECT $column FROM $table WHERE $condition");
 	$res = mysql_query("SELECT $column FROM $table WHERE $condition");
 	if (!$res) return NULL;
 	$matches = array();

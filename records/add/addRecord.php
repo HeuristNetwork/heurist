@@ -530,7 +530,7 @@ function insert_woot_content($rec_id, $content) {
 	array_push($woot["chunks"], $new_chunk);
 
 	$result = saveWoot($woot);
-	if (! $result["success"]) error_log($result["errorType"]);
+	if (! $result["success"]) error_log("Save woot: ".$result["errorType"]);
 }
 
 function check_rectype_exist($rt) {
