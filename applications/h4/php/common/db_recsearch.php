@@ -75,13 +75,37 @@ function recordSearchFacets($system, $params){
             $fieldid = substr($fieldid,2);
         }
         
+        $resource = @$params['resource'];  // f:15(t:20 f:41)  f:15(t:20 f:41(t:10 title))
+        $resource_field = null;
+        if($resource){
+        
+            $vr = explode(" ", $resource);
+            $resource_rt = substr($vr[0],2);
+            $resource_field = $vr[1];
+            if(strpos($resource_field,"f:")===0){
+                $resource_field = substr($resource_field,2);
+            }
+        }
+        
+        
         if($dt_type=="freetext"){
             //find count by first letter
-            if($params['dt']=='recTitle'){
+            if($fieldid=='recTitle' || $resource_field=='title'){
                 
-                $select_clause = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt ";
-                $where_clause = " WHERE ";
-                $grouporder_clause = " GROUP BY SUBSTRING(trim(rec_Title), 1, 1) ORDER BY SUBSTRING(trim(rec_Title), 1, 1)";
+                if($resource_rt){
+                    
+                    $select_clause = "SELECT SUBSTRING(trim(linked.rec_Title), 1, 1) as alpha, count(*) as cnt ";
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and ";
+                    $grouporder_clause = " GROUP BY SUBSTRING(trim(linked.rec_Title), 1, 1) ORDER BY SUBSTRING(trim(linked.rec_Title), 1, 1)";
+                    
+                }else{
+                
+                    $select_clause = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt ";
+                    $where_clause = " WHERE ";
+                    $grouporder_clause = " GROUP BY SUBSTRING(trim(rec_Title), 1, 1) ORDER BY SUBSTRING(trim(rec_Title), 1, 1)";
+                
+                }
                 
                 /*$query = "SELECT SUBSTRING(trim(rec_Title), 1, 1) as alpha, count(*) as cnt from Records where rec_RecTypeId in ("
                     .@$params['rt'].") GROUP BY SUBSTRING(trim(rec_Title), 1, 1) ORDER BY SUBSTRING(trim(rec_Title), 1, 1)";*/
@@ -89,17 +113,36 @@ function recordSearchFacets($system, $params){
                 /*$query = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) from Records, recDetails "
                     ." where rec_RecTypeId in (".@$params['rt'].") and dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid 
                     ." GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";*/
+                if($resource_rt){
                     
-                $select_clause = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) ";
-                $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
-                $grouporder_clause = " GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";    
+                    $select_clause = "SELECT SUBSTRING(trim(linkeddt.dtl_Value), 1, 1) as alpha, count(*) as cnt ";
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                        ." LEFT JOIN recDetails linkeddt ON (linkeddt.dtl_RecID=linked.rec_ID and linkeddt.dtl_DetailTypeID=".$resource_field.")"
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt.dtl_Value is not null and ";
+                    $grouporder_clause = " GROUP BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1)";
+                    
+                }else{
+                    $select_clause = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) ";
+                    $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
+                    $grouporder_clause = " GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";    
+                }
             }
             
         }else if($dt_type=="enum" || $dt_type=="relationtype"){    
 
-                $select_clause = "SELECT dtl_Value as termid, count(*) ";
-                $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
-                $grouporder_clause = " GROUP BY dtl_Value ORDER BY dtl_Value";    
+                if($resource_rt){
+                    
+                    $select_clause = "SELECT linkeddt.dtl_Value as termid, count(*) as cnt ";
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                        ." LEFT JOIN recDetails linkeddt ON (linkeddt.dtl_RecID=linked.rec_ID and linkeddt.dtl_DetailTypeID=".$resource_field.")"
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt.dtl_Value is not null and ";
+                    $grouporder_clause = " GROUP BY linkeddt.dtl_Value ORDER BY linkeddt.dtl_Value";
+                    
+                }else{
+                    $select_clause = "SELECT dtl_Value as termid, count(*) ";
+                    $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
+                    $grouporder_clause = " GROUP BY dtl_Value ORDER BY dtl_Value";    
+                }
         }else{
             return array("status"=>HEURIST_OK, "data"=> array());
         }        

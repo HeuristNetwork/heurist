@@ -661,6 +661,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     
     showMsgDlg: function(message, buttons, title){
         
+        if(!$.isFunction(top.HR)){
+            alert(message);
+            return;
+        }
+        
         $dlg = top.HEURIST.util.getMsgDlg();
         
         if(message!=null){

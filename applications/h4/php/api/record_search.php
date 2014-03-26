@@ -27,7 +27,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
 }else if(@$_REQUEST['a'] == 'getfacets'){    
 
     $response = recordSearchFacets($system, $_REQUEST);
-    
+
 }else {
 
 //DEGUG        $currentUser = array('ugr_ID'=>2);
@@ -38,7 +38,7 @@ if( ! $system->init(@$_REQUEST['db']) ){
     $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);
 }
 
-header('Content-type: text/javascript');
+header('Content-type: application/json'); //'text/javascript');
 print json_encode($response);
 exit();
 ?>

@@ -166,11 +166,11 @@ function get_sql_query_clauses($params, $currentUser=null, $publicOnly=false) {
         if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
         
         if ($search_domain == BOOKMARK) {
-            $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not rec_FlagTemporary) ';
+            $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and TOPBIBLIO.not rec_FlagTemporary) ';
         } else if ($search_domain == BIBLIO) {   //NOT USED
-            $where_clause .= ' (bkm_UGrpID is null and not rec_FlagTemporary) ';
+            $where_clause .= ' (bkm_UGrpID is null and not TOPBIBLIO.rec_FlagTemporary) ';
         } else {
-            $where_clause .= ' not rec_FlagTemporary ';
+            $where_clause .= ' not TOPBIBLIO.rec_FlagTemporary ';
         }
 
     }
@@ -180,15 +180,15 @@ function get_sql_query_clauses($params, $currentUser=null, $publicOnly=false) {
     }
     
     if($query->recVisibilityType && $query->recVisibilityType!="hidden"){ 
-        $where2 = '(rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
+        $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
     }else{
         if($query->recVisibilityType){ //hidden 
-             $where2 = 'rec_NonOwnerVisibility="hidden" and ';  
+             $where2 = 'TOPBIBLIO.rec_NonOwnerVisibility="hidden" and ';  
         }else{
-             $where2 = '(not rec_NonOwnerVisibility="hidden") or ';  
+             $where2 = '(not TOPBIBLIO.rec_NonOwnerVisibility="hidden") or ';  
         }
         
-        $where2 = '( '.$where2.'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+        $where2 = '( '.$where2.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
     }
     
     $where_clause = $where_clause . ' and ' . $where2;
@@ -865,44 +865,54 @@ class Predicate {
 
 
 class TitlePredicate extends Predicate {
-    function makeSQL() {
+    function makeSQL($isTopRec=true) {
         $not = ($this->parent->negate)? 'not ' : '';
 
         $query = &$this->getQuery();
         $evalue = mysql_real_escape_string($this->value);
 
+        if($isTopRec){
+            $topbiblio = "TOPBIBLIO.";
+        }else{
+            $topbiblio = "";
+        }
+        
         if ($this->parent->exact)
-            return $not . 'rec_Title = "'.$evalue.'"';
+            return $not . $topbiblio.'rec_Title = "'.$evalue.'"';
         else if ($this->parent->lessthan)
-            return $not . 'rec_Title < "'.$evalue.'"';
+            return $not . $topbiblio.'rec_Title < "'.$evalue.'"';
         else if ($this->parent->greaterthan)
-            return $not . 'rec_Title > "'.$evalue.'"';
+            return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
         else
             if(strpos($this->value,"%")===false){
-                return 'rec_Title ' . $not . 'like "%'.$evalue.'%"';    
+                return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';    
             }else{
-                return 'rec_Title ' . $not . 'like "'.$evalue.'"';        
+                return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';        
             }
         
-            
     }
 }
 
 
 class TypePredicate extends Predicate {
-    function makeSQL() {
+    function makeSQL($isTopRec=true) {
         $eq = ($this->parent->negate)? '!=' : '=';
         if (is_numeric($this->value)) {
-            return "rec_RecTypeID $eq ".intval($this->value);
+            $res = "rec_RecTypeID $eq ".intval($this->value);
         }
         else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             // comma-separated list of defRecTypes ids
             $in = ($this->parent->negate)? 'not in' : 'in';
-            return "rec_RecTypeID $in (" . $this->value . ")";
+            $res = "rec_RecTypeID $in (" . $this->value . ")";
         }
         else {
-            return "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
+            $res = "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
         }
+        
+        if($isTopRec){
+            $res = "TOPBIBLIO.".$res;
+        }
+        return $res;
     }
 }
 
@@ -912,7 +922,7 @@ class URLPredicate extends Predicate {
         $not = ($this->parent->negate)? 'not ' : '';
 
         $query = &$this->getQuery();
-        return 'rec_URL ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
+        return 'TOPBIBLIO.rec_URL ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
     }
 }
 
@@ -925,7 +935,7 @@ class NotesPredicate extends Predicate {
         if ($query->search_domain == BOOKMARK)    // saw TODO change this to check for woot match or full text search
             return '';
         else
-            return 'rec_ScratchPad ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
+            return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
     }
 }
 
@@ -934,21 +944,21 @@ class UserPredicate extends Predicate {
     function makeSQL() {
         $not = ($this->parent->negate)? 'not ' : '';
         if (is_numeric($this->value)) {
-            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_ID '
+            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
                                                               . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
         }
         else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_ID '
+            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
                                                               . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
         }
         else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){    // saw MODIFIED: 16/11/2010 since Realname field was removed.
             return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
-                                . ' where bkmk.bkm_recID=rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
+                                . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
                                   . ' and (usr.ugr_FirstName = "' . mysql_real_escape_string($matches[1]) . '" and usr.ugr_LastName = "' . mysql_real_escape_string($matches[2]) . '"))';
         }
         else {
             return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
-                                . ' where bkmk.bkm_recID=rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
+                                . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
                                   . ' and usr.ugr_Name = "' . mysql_real_escape_string($this->value) . '"))';
         }
     }
@@ -959,15 +969,15 @@ class AddedByPredicate extends Predicate {
     function makeSQL() {
         $eq = ($this->parent->negate)? '!=' : '=';
         if (is_numeric($this->value)) {
-            return "rec_AddedByUGrpID $eq " . intval($this->value);
+            return "TOPBIBLIO.rec_AddedByUGrpID $eq " . intval($this->value);
         }
         else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             $not = ($this->parent->negate)? "not" : "";
-            return "rec_AddedByUGrpID $not in (" . $this->value . ")";
+            return "TOPBIBLIO.rec_AddedByUGrpID $not in (" . $this->value . ")";
         }
         else {
             $not = ($this->parent->negate)? "not" : "";
-            return "rec_AddedByUGrpID $not in (select usr.ugr_ID from sysUGrps usr where usr.ugr_Name = '" . mysql_real_escape_string($this->value) . "')";
+            return "TOPBIBLIO.rec_AddedByUGrpID $not in (select usr.ugr_ID from sysUGrps usr where usr.ugr_Name = '" . mysql_real_escape_string($this->value) . "')";
         }
     }
 }
@@ -982,7 +992,7 @@ class AnyPredicate extends Predicate {
                                . '  and if(dty_Type != "resource", '
                                           .'rd.dtl_Value like "%'.mysql_real_escape_string($this->value).'%", '
                                           .'link.rec_Title like "%'.mysql_real_escape_string($this->value).'%"))'
-                                 .' or rec_Title like "%'.mysql_real_escape_string($this->value).'%") ';
+                                 .' or TOPBIBLIO.rec_Title like "%'.mysql_real_escape_string($this->value).'%") ';
     }
 }
 
@@ -1050,7 +1060,7 @@ class FieldPredicate extends Predicate {
                     $cn = get_class($limbs[$j]->pred);
                     
                     if($cn == 'TypePredicate'){
-                                $type_clause = $limbs[$j]->pred->makeSQL();
+                                $type_clause = $limbs[$j]->pred->makeSQL(false);
                     }else if($cn == 'FieldPredicate'){
                                 $field_type = $limbs[$j]->pred->get_field_type_clause();
                                 if(strpos($field_type,"like")!==false){
@@ -1060,9 +1070,10 @@ class FieldPredicate extends Predicate {
                                     $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value(); 
                                 }
                     }else if($cn == 'TitlePredicate'){
-                                $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                                $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
                     }else if($cn == 'DateModifiedPredicate'){
                                 $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                                $field_value = str_replace("TOPBIBLIO.","",$field_value);
                     }
                 }
                 
@@ -1238,7 +1249,7 @@ class TagPredicate extends Predicate {
             } else if (! $this->wg_value) {
                 // this runs faster (like TEN TIMES FASTER) - think it's to do with the join
                 $query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                                    . 'where kwi.rtl_RecID=rec_ID and (';
+                                    . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
                     if (! $first_value) $query .= 'or ';
@@ -1253,7 +1264,7 @@ class TagPredicate extends Predicate {
                 $query .=              ') and kwd.tag_UGrpID='.$query->currUserID.') ';
             } else {
                 $query=$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                                    . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=rec_ID and (';
+                                    . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value); ++$i) {
                     if ($i > 0) $query .= 'or ';
 
@@ -1275,7 +1286,7 @@ class TagPredicate extends Predicate {
         } else {
             if (! $this->wg_value) {
                 $query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                                    . 'where kwi.rtl_RecID=rec_ID and (';
+                                    . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
                     if (! $first_value) $query .= 'or ';
@@ -1290,7 +1301,7 @@ class TagPredicate extends Predicate {
                 $query .= ')) ';
             } else {
                 $query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
-                                    . 'where kwi.rtl_RecID=rec_ID and (';
+                                    . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value); ++$i) {
                     if ($i > 0) $query .= 'or ';
 
@@ -1325,7 +1336,7 @@ class TagPredicate extends Predicate {
 class BibIDPredicate extends Predicate {
     function makeSQL() {
         $not = ($this->parent->negate)? 'not' : '';
-        return "rec_ID $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
+        return "TOPBIBLIO.rec_ID $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
     }
 }
 
@@ -1413,7 +1424,7 @@ class AfterPredicate extends Predicate {
         if ($timestamp  &&  $timestamp != -1) {
             $not = ($this->parent->negate)? 'not' : '';
             $datestamp = date('Y-m-d H:i:s', $timestamp);
-            return "$not rec_Modified >= '$datestamp'";
+            return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
         }
         return '1';
     }
@@ -1426,7 +1437,7 @@ class BeforePredicate extends Predicate {
         if ($timestamp  &&  $timestamp != -1) {
             $not = ($this->parent->negate)? 'not' : '';
             $datestamp = date('Y-m-d H:i:s', $timestamp);
-            return "$not rec_Modified <= '$datestamp'";
+            return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
         }
         return '1';
     }
@@ -1454,13 +1465,13 @@ class DatePredicate extends Predicate {
 
 class DateAddedPredicate extends DatePredicate {
     function DateAddedPredicate(&$parent, $value) {
-        parent::DatePredicate($parent, 'rec_Added', $value);
+        parent::DatePredicate($parent, 'TOPBIBLIO.rec_Added', $value);
     }
 }
 
 class DateModifiedPredicate extends DatePredicate {
     function DateModifiedPredicate(&$parent, $value) {
-        parent::DatePredicate($parent, 'rec_Modified', $value);
+        parent::DatePredicate($parent, 'TOPBIBLIO.rec_Modified', $value);
     }
 }
 
@@ -1469,14 +1480,14 @@ class WorkgroupPredicate extends Predicate {
     function makeSQL() {
         $eq = ($this->parent->negate)? '!=' : '=';
         if (is_numeric($this->value)) {
-            return "rec_OwnerUGrpID $eq ".intval($this->value);
+            return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
         }
         else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             $in = ($this->parent->negate)? 'not in' : 'in';
-            return "rec_OwnerUGrpID $in (" . $this->value . ")";
+            return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
         }
         else {
-            return "rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
+            return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
         }
     }
 }
@@ -1567,11 +1578,11 @@ class HHashPredicate extends Predicate {
         $op = '';
         if ($this->parent->exact) {
             $op = $this->parent->negate? "!=" : "=";
-            return "rec_Hash $op '" . mysql_real_escape_string($this->value) . "'";
+            return "TOPBIBLIO.rec_Hash $op '" . mysql_real_escape_string($this->value) . "'";
         }
         else {
             $op = $this->parent->negate? " not like " : " like ";
-            return "rec_Hash $op '" . mysql_real_escape_string($this->value) . "%'";
+            return "TOPBIBLIO.rec_Hash $op '" . mysql_real_escape_string($this->value) . "%'";
         }
     }
 }

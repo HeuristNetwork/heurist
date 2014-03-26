@@ -90,8 +90,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                     request.db = _database;
                  }
 
-                 var url = that.basePath+"php/api/"+action+".php";
-
+                 var url = that.basePath+"php/api/"+action+".php"; //+(new Date().getTime());
+                 
+                 //top.HEURIST.ajax.getJsonData(url, callback, request);
+                 
+                 //note jQuery ajax does not properly in the loop - success callback does not work often   
                  $.ajax({
                          url: url,
                          type: "POST",
@@ -105,13 +108,13 @@ function hAPI(_db, _oninit) { //, _currentUser
                             }
                                 //message:'Error connecting server '+textStatus});
                          },
-                         success: function (response) {
+                         success: function( response, textStatus, jqXHR ){
                              if(callback){
                                 callback(response);
                              }
                          }
                      });
-
+                 
     }
 
     /**

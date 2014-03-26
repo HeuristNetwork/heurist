@@ -12,6 +12,7 @@ $.widget( "heurist.search_faceted", {
   options: {
     // callbacks
     params: {},
+    ispreview: false,
     onclose: null
   },
 
@@ -77,6 +78,15 @@ $.widget( "heurist.search_faceted", {
   * show/hide buttons depends on current login status
   */
   _refresh: function(){
+      
+      if(this.options.ispreview){
+         this.btn_save.hide(); 
+         this.btn_close.hide(); 
+      }else{
+         this.btn_save.show(); 
+         this.btn_close.show(); 
+      }
+      
       this.doRender();
       this.doSearch();
   },
@@ -143,8 +153,9 @@ $.widget( "heurist.search_faceted", {
                                 this_query = facets[facet_index][i].query+':('+this_query+')';
                             }
                         }
-                        facets[facet_index][0].comb_query = this_query; 
                         
+                        facets[facet_index][0].comb_query = this_query;
+                         
                         full_query = full_query + ' ' + this_query;                 
                 }
            }
@@ -153,6 +164,24 @@ $.widget( "heurist.search_faceted", {
            }
            
            return full_query;
+  }
+  
+  ,getQueryForCount: function(facet){
+
+            var this_query = '';
+            var len2 = facet.length;
+            for (i=0;i<len2;i++){
+                
+                if(i==0){
+                    this_query = facet[i].query; //+':'+cv;
+                }else if (i==len2-1){
+                    this_query = facet[i].query+':"('+this_query+')"';
+                }else{
+                    this_query = facet[i].query+':('+this_query+')';
+                }
+            }
+            return this_query; 
+      
   }
 
   ,doRender: function(){
@@ -167,6 +196,7 @@ $.widget( "heurist.search_faceted", {
            var detailtypes = top.HEURIST.detailtypes.typedefs;
            var facet_index, i, len = facets.length;
            var current_query = this.getQuery();
+           var facet_requests = [];
            
            //debug
            $('<div>').html(current_query).appendTo(listdiv);
@@ -241,74 +271,31 @@ $.widget( "heurist.search_faceted", {
                          }*/
 
                          if(term.children.length>0){
-
-                            var that = this;
-                            window.HAPI.RecordMgr.get_facets({ q:current_query, w:this.options.params.domain, dt:fieldid, type:type, facet_index:facet_index}, function(response){
-                                if(response.status == top.HAPI.ResponseStatus.OK){
-
-                                    var terms_usage = response.data; //0-id, 1-cnt
-                                    var facet_index = parseInt(response.facet_index); 
-                                    var j;
-                                    
-                                    var terms_cnt = {};
-                                    
-                                    for (j=0; j<terms_usage.length; j++){
-                                           //var termid = terms_usage[j].shift();
-                                           terms_cnt[terms_usage[j][0]] = terms_usage[j][1];
-                                    }
-                         
-                                     //create links for child terms                         
-                                     for (i=0;i<term.children.length;i++){
-                                            var cterm = term.children[i];
-                                            
-                                            //calc usage
-                                            var cnt = 0;
-                                            for (j=0; j<cterm.termssearch.length; j++){
-                                                var usg = parseInt(terms_cnt[cterm.termssearch[j]]);
-                                                if(usg>0){
-                                                    cnt = cnt + usg;
-                                                }
-                                            }
-                                            if(cnt>0){
-                                                var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
-                                                $("<div>").append(f_link).appendTo($("#fv-"+facet_index));
-                                            }
-                                     }
                              
-                                }else{
-                                    top.HEURIST.util.showMsgDlg(response.message);
-                                }
-                               });
+                               var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, term:term};
+                               if(facets[facet_index].length>1){
+                                    prms.resource = facets[facet_index][0].query;  // t:5 f:25
+                               }
+                               prms.dt = facets[facet_index][facets[facet_index].length-1].fieldid;
                              
+                               facet_requests.push(prms);
                          }
                     }
                     
                 }else {
                     
+         
                    //$facet_values.html(type);
                    if(top.HEURIST.util.isnull(currentvalue)){
                    
-                       var rectypes = query.split(' ')[0].trim().substr(2);
-                       var that = this;
+                       var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index};
+                       if(facets[facet_index].length>1){
+                            prms.resource = facets[facet_index][0].query;  // t:5 f:25
+                       }
+                       prms.dt = facets[facet_index][facets[facet_index].length-1].fieldid;
+                       
+                       facet_requests.push(prms);
 
-                       //rt:rectypes,
-                       window.HAPI.RecordMgr.get_facets({ q:current_query, w:this.options.params.domain, dt:fieldid, type:type, facet_index:facet_index}, function(response){
-                        if(response.status == top.HAPI.ResponseStatus.OK){
-                            
-                             for (i=0;i<response.data.length;i++){
-                                    var cterm = response.data[i];
-                                    var facet_index = parseInt(response.facet_index); 
-                                    if(facet_index>=0){
-                                        var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[0]+'%', count:cterm[1]});
-                                        $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($("#fv-"+facet_index));
-                                    }
-                             }
-                                
-                            
-                        }else{
-                            top.HEURIST.util.showMsgDlg(response.message);
-                        }
-                       });
                    }else{
                        
                        var cterm = { text:top.HR('all'), query:null, count:0 };    
@@ -324,9 +311,77 @@ $.widget( "heurist.search_faceted", {
                    
                 }
                 
-           }
+           }   //for facet_index
+           
+           this._getFacets(facet_requests);
        }
         
+  }
+  
+  //
+  // workaround: jQuery ajax does not properly in the loop - success callback does not work often   
+  //
+  ,_getFacets: function(requests){
+       if(top.HEURIST.util.isArrayNotEmpty(requests)) {
+           
+            var request = requests.shift();  
+            
+            var term = request.term;
+            request.term = null;
+            
+                            var that = this;
+                            window.HAPI.RecordMgr.get_facets(request, function(response){
+                                if(response.status == top.HAPI.ResponseStatus.OK){
+                                    
+                                    if(request.type=="enum"){
+                                        
+                                        var terms_usage = response.data; //0-id, 1-cnt
+                                        var facet_index = parseInt(response.facet_index); 
+                                        var j,i;
+                                        
+                                        var terms_cnt = {};
+                                        
+                                        for (j=0; j<terms_usage.length; j++){
+                                               //var termid = terms_usage[j].shift();
+                                               terms_cnt[terms_usage[j][0]] = terms_usage[j][1];
+                                        }
+                             
+                                         //create links for child terms                         
+                                         for (i=0;i<term.children.length;i++){
+                                                var cterm = term.children[i];
+                                                
+                                                //calc usage
+                                                var cnt = 0;
+                                                for (j=0; j<cterm.termssearch.length; j++){
+                                                    var usg = parseInt(terms_cnt[cterm.termssearch[j]]);
+                                                    if(usg>0){
+                                                        cnt = cnt + usg;
+                                                    }
+                                                }
+                                                if(cnt>0){
+                                                    var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
+                                                    $("<div>").append(f_link).appendTo($("#fv-"+facet_index));
+                                                }
+                                         }
+                                     
+                                    }else{
+                                        for (i=0;i<response.data.length;i++){
+                                            var cterm = response.data[i];
+                                            var facet_index = parseInt(response.facet_index); 
+                                            if(facet_index>=0){
+                                                var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[0]+'%', count:cterm[1]});
+                                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($("#fv-"+facet_index));
+                                            }
+                                        }
+                                    }
+                                    that._getFacets(requests);
+                             
+                                }else{
+                                    top.HEURIST.util.showMsgDlg(response.message);
+                                }
+                               });            
+        
+       }    
   }
   
   /**
@@ -387,14 +442,18 @@ $.widget( "heurist.search_faceted", {
   
   ,doSearch : function(){
       
-      var qsearch = this.getQuery();
-      var qname = this.options.query_name;
-      var domain = this.options.params.domain;
+      if(!this.options.ispreview){
       
-      //this.options.searchdetails
-      var request = {q: qsearch, w: domain, f: "map", orig:'saved', qname:qname};
-      //get hapi and perform search
-      top.HAPI.RecordMgr.search(request, $(this.document));
+          var qsearch = this.getQuery();
+          var qname = this.options.query_name;
+          var domain = this.options.params.domain;
+          
+          //this.options.searchdetails
+          var request = {q: qsearch, w: domain, f: "map", orig:'saved', qname:qname};
+          //get hapi and perform search
+          top.HAPI.RecordMgr.search(request, $(this.document));
+      
+      }
       
   }
   
