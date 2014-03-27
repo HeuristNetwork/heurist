@@ -108,7 +108,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
     $("<div>").append($("<h4>").html(top.HR("5. Preview"))).appendTo(this.step4);
-    $("<div>",{id:'facets_preview'}).appendTo(this.step4);
+    $("<div>",{id:'facets_preview'}).css('top','3.2em').appendTo(this.step4);
     this.step_panels.push(this.step4);
       
     this._refresh();
@@ -400,7 +400,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             if(isOneRoot){
                                 q = "t:"+parent.key+" "+q; 
                             }
-                            return [{ title:node.title, type:node.data.type, query: q, fieldid:node.key }]; 
+                            return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }]; 
                       }
                   }else{
                       fieldnode = parent;
@@ -412,7 +412,7 @@ $.widget( "heurist.search_faceted_wiz", {
                   if(fieldnode.data.rt_ids){ //constrained
                         q = "t:"+fieldnode.data.rt_ids+" "+q; 
                   }
-                  res.push( { title:node.title, type:node.data.type, query:q, fieldid:node.key });    
+                  res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q, fieldid:node.key });    
                   
                   var res2 = __get_queries(fieldnode);
                   for(var i=0; i<res2.length; i++){
@@ -579,8 +579,10 @@ $.widget( "heurist.search_faceted_wiz", {
                                 }
 
                                 top.HAPI.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
-
-                                that._trigger( "onsave", request );
+                                
+                                request.new_svs_ID = svsID;
+                                
+                                that._trigger( "onsave", null, request );
                                 
                                 that.element.dialog("close");
 

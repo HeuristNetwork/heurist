@@ -25,7 +25,7 @@ $dbs_rtStructs = null;
 * 
 * @param mixed $system
 * @param mixed $rectypeids
-* @param mixed $mode  3 - all, 4 - limited for faceted search
+* @param mixed $mode  3 - all, 4 - for faceted search (with type names)
 */
 function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null){
    
@@ -85,7 +85,6 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fiel
             $res['key'] = $recTypeId;
             $res['title'] = $dbs_rtStructs['names'][$recTypeId];
             $res['type'] = 'rectype';
-        
             
             if(@$dbs_rtStructs['typedefs'][$recTypeId]){
                 $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
@@ -148,6 +147,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $
             
             $detailType = $dtValue[$rst_fi['dty_Type']];
             $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
+            $dt_title   = $dtValue[$rst_fi['rst_DisplayName']];
             $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
 
             //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
@@ -185,6 +185,12 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $
 
                if($recursion_depth<2){
 
+                   
+                   if($mode==4){
+                        $dt_title = " <span style='font-style:italic'>" . $dt_title . "</span>";
+                   }
+       
+                   
                     $pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
                     $rectype_ids = explode(",", $pointerRecTypeId);
                     
@@ -232,8 +238,13 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $
    if(is_array($res)){
 
        $res['key'] = "f:".$dtID;
-       $res['title'] = $dt_label;
+       if($mode==4){
+            $res['title'] = $dt_title . " <span style='font-size:0.7em'>" . $detailType . "</span>";   
+       }else{
+            $res['title'] = $dt_title;    
+       }
        $res['type'] = $detailType;
+       $res['name'] = $dt_label;
    }            
    return $res;
 }

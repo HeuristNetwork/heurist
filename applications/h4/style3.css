@@ -538,3 +538,16 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .tag3{font-size:1em;}
 .tag4{font-size:1.1em;}
 .tag5{font-size:1.2em;}
+
+.facet_link {
+    text-decoration: none;
+}
+.facet_link span:first-child{
+    text-decoration: underline;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

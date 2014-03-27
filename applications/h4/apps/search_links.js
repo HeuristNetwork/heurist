@@ -596,9 +596,9 @@ $.widget( "heurist.search_links", {
   , _updateAfterSave: function(request){
       
             if( parseInt(request.svs_ID) > 0 ){
-                $('#svs-'+svsID).html(request.svs_Name);
+                $('#svs-'+request.svs_ID).html(request.svs_Name);
             }else{
-                $('#svsu-'+request.svs_UGrpID+'-'+request.domain).append( this._add_SVSitem(request.svs_Name, request.svs_ID) );
+                $('#svsu-'+request.svs_UGrpID+'-'+request.domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
             }
   }
 
@@ -613,7 +613,7 @@ $.widget( "heurist.search_links", {
     var that = this;
     if( this.currentMode == "faceted") {
       
-        this._showSearchFacetedWizard( {svsID:svsID, domain:domain, onsave: function(request){
+        this._showSearchFacetedWizard( {svsID:svsID, domain:domain, onsave: function(event, request){
           that._updateAfterSave(request);
         } });
 
@@ -686,6 +686,8 @@ $.widget( "heurist.search_links", {
 
                                 $dlg.dialog( "close" );
 
+                                request.new_svs_ID = svsID;
+                                
                                 that._updateAfterSave(request);
 
 

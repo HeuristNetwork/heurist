@@ -47,7 +47,7 @@ if(@$_REQUEST['db']){
 
     <script type="text/javascript" src="localization.js"></script>
     <script type="text/javascript" src="js/utils.js"></script>
-    <script type="text/javascript" src="js/utils_ajax.js"></script>
+    <!-- script type="text/javascript" src="js/utils_ajax.js"></script -->
     <script type="text/javascript" src="js/recordset.js"></script>
     <script type="text/javascript" src="js/hapi.js"></script>
     <script type="text/javascript" src="js/layout.js"></script>

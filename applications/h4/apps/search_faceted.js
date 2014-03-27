@@ -50,7 +50,7 @@ $.widget( "heurist.search_faceted", {
 
     
     this.facets_list_container = $( "<div>" )
-            .css({"top":"2.4em","bottom":0,"left":0,"right":4,"position":"absolute"})
+            .css({"top":"3.2em","bottom":0,"left":0,"right":4,"position":"absolute"})
             .appendTo( this.element );
     
     this.facets_list = $( "<div>" )
@@ -197,9 +197,12 @@ $.widget( "heurist.search_faceted", {
            var facet_index, i, len = facets.length;
            var current_query = this.getQuery();
            var facet_requests = [];
+           var colors = ['teal',  'blue', 'fuchsia', 'gray', 'green', 
+            'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red', 
+            'silver', 'black' ];
            
-           //debug
-           $('<div>').html(current_query).appendTo(listdiv);
+           //debug  $('<div>').html(current_query).appendTo(listdiv);
+           var clr_index = -1;
             
            for (facet_index=0;facet_index<len;facet_index++){
                
@@ -207,22 +210,24 @@ $.widget( "heurist.search_faceted", {
                 var title = '';
                 var queries = [];
                 for (i=0;i<facets[facet_index].length;i++){
-                       title = title + ' ' + facets[facet_index][i].title;      
+                       title = "<div class='truncate'>"+facets[facet_index][i].title+'</div> '+title;      
                 }
                 var type = facets[facet_index][0].type;
                 var fieldid = facets[facet_index][0].fieldid;
                 var query = facets[facet_index][0].query;
                 var currentvalue = facets[facet_index][0].currentvalue;
-
+                clr_index = (clr_index>=colors.length)?0:(clr_index+1);
+                
                 //add ui                
                 var $facetdiv = $('<div>').appendTo(listdiv);
-                var $facet_header = $("<h3>")
-                        .addClass('ui-widget-header ui-state-active ui-corner-top')
-                        .css({"padding":"0.5em 0.5em 0.5em 0.7em","margin-top":"2px"}).appendTo($facetdiv);
+                var $facet_header = $("<h4>")
+                        .addClass('ui-corner-top')   // ui-header ui-state-active                                                        Math.floor(Math.random() / colors.length)
+                        .css({"padding":"0.5em 0.5em 0.5em 0.7em","margin-top":"2px","color":"#FFF",
+                            "background-color":colors[clr_index]}).appendTo($facetdiv);
                 var $facet_values = $("<div>", {"id":"fv-"+facet_index})
                          .addClass('ui-widget-content ui-corner-bottom')
                          .css({"padding":"0.5em 0.5em 0.5em 0.7em"}).appendTo($facetdiv);
-                $facet_header.html( title+"<br />" );
+                $facet_header.html( title );
                 
                 //var queries = facets[facet_index][i].query;
                 if(type=="enum"){ //} || type=="relationtype"){
@@ -260,7 +265,7 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 
                                 var $before = $("<span>",{'title':term.termssearch.join(",")}).css({'display':'inline-block'}).append(term.text);
-                                $before.appendTo($facet_header);
+                                $before.appendTo($facet_values);
                                 __getParent(term, $before);
                          }
 
@@ -303,8 +308,8 @@ $.widget( "heurist.search_faceted", {
                        $("<span>").css('display','inline-block').append(f_link)
                                 .append($('<span class="ui-icon ui-icon-carat-1-e" />')
                                 .css({'display':'inline-block','height':'13px'}))
-                                .appendTo($facet_header);
-                       $("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_header);
+                                .appendTo($facet_values);
+                       $("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_values);
                        
                    }
                    
@@ -332,12 +337,15 @@ $.widget( "heurist.search_faceted", {
                             var that = this;
                             window.HAPI.RecordMgr.get_facets(request, function(response){
                                 if(response.status == top.HAPI.ResponseStatus.OK){
+
+                                    var facet_index = parseInt(response.facet_index); 
+                                    var j,i;
+                                    var noValues = true;
+                                    var $facet_values = $("#fv-"+facet_index);
                                     
                                     if(request.type=="enum"){
                                         
                                         var terms_usage = response.data; //0-id, 1-cnt
-                                        var facet_index = parseInt(response.facet_index); 
-                                        var j,i;
                                         
                                         var terms_cnt = {};
                                         
@@ -359,21 +367,28 @@ $.widget( "heurist.search_faceted", {
                                                     }
                                                 }
                                                 if(cnt>0){
+                                                    noValues = false;
                                                     var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
-                                                    $("<div>").append(f_link).appendTo($("#fv-"+facet_index));
+                                                    $("<div>").css({"display":"inline-block","min-width":"90px","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                                                 }
                                          }
                                      
                                     }else{
                                         for (i=0;i<response.data.length;i++){
                                             var cterm = response.data[i];
-                                            var facet_index = parseInt(response.facet_index); 
+                                            
                                             if(facet_index>=0){
+                                                noValues = false;
                                                 var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[0]+'%', count:cterm[1]});
-                                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($("#fv-"+facet_index));
+                                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                                             }
                                         }
                                     }
+                                    
+                                    if(noValues){
+                                        $("<span>").text(top.HR('no values')).css({'font-style':'italic'}).appendTo($facet_values);
+                                    }
+                                    
                                     that._getFacets(requests);
                              
                                 }else{
@@ -389,11 +404,15 @@ $.widget( "heurist.search_faceted", {
   */
   ,_createTermLink : function(facet_index, cterm){
       
-            var f_link = $("<a>",{href:'#', facet_idx:facet_index, facet_value:cterm.query, facet_label:cterm.text, termid:cterm.id}).text(cterm.text+(cterm.count>0?" ("+cterm.count+")":""));
-         
+            var f_link = $("<a>",{href:'#', facet_idx:facet_index, facet_value:cterm.query, facet_label:cterm.text, termid:cterm.id}).addClass("facet_link")
+            $("<span>").text(cterm.text).appendTo(f_link);
+            if(cterm.count>0){
+                $("<span>").text(" ("+cterm.count+")").appendTo(f_link);
+            } 
+            
             this._on( f_link, {
                 click: function(event) { 
-                  var link = $(event.target);
+                  var link = $(event.target).parent();
                   var facet_index = Number(link.attr('facet_idx'));
                   var value = link.attr('facet_value');
                   var label = link.attr('facet_label');                  
@@ -416,12 +435,17 @@ $.widget( "heurist.search_faceted", {
   // cterm - {text, query, count}
   ,_createFacetLink : function(facet_index, cterm){
       
-            var f_link = $("<a>",{href:'#', facet_idx:facet_index, facet_value:cterm.query, facet_label:cterm.text }).text(cterm.text+(cterm.count>0?" ("+cterm.count+")":""));
+            var f_link = $("<a>",{href:'#', facet_idx:facet_index, facet_value:cterm.query, facet_label:cterm.text}).addClass("facet_link")
+            $("<span>").text(cterm.text).appendTo(f_link);
+            if(cterm.count>0){
+                $("<span>").text(" ("+cterm.count+")").appendTo(f_link);
+            } 
+         
          
             this._on( f_link, {
                 click: function(event) { 
                   
-                  var link = $(event.target);
+                  var link = $(event.target).parent();
                   var facet_index = Number(link.attr('facet_idx'));
                   var value = link.attr('facet_value');                  
                   var label = link.attr('facet_label');                  
