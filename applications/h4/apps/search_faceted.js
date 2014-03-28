@@ -15,6 +15,8 @@ $.widget( "heurist.search_faceted", {
     ispreview: false,
     onclose: null
   },
+  
+  cached_counts:[],
 
    // the widget's constructor
   _create: function() {
@@ -70,6 +72,7 @@ $.widget( "heurist.search_faceted", {
   
   _setOptions: function( options ) {
         this._superApply( arguments );
+        this.cached_counts = [];
         this._refresh();
   },
   
@@ -94,6 +97,7 @@ $.widget( "heurist.search_faceted", {
   // custom, widget-specific, cleanup.
   _destroy: function() {
     // remove generated elements
+    this.cached_counts = null;
     this.btn_close.remove();
     this.btn_save.remove();
     this.btn_reset.remove();
@@ -130,9 +134,12 @@ $.widget( "heurist.search_faceted", {
   
   ,getQuery: function(){
       
+           var full_query = '';
+                
+           // by field types     
            var facets = this.options.params.facets;
            var facet_index, i, len = facets.length;
-           var full_query = '';
+
            for (facet_index=0;facet_index<len;facet_index++){
                 var currentvalue = facets[facet_index][0].currentvalue;
                 var type = facets[facet_index][0].type;
@@ -159,8 +166,9 @@ $.widget( "heurist.search_faceted", {
                         full_query = full_query + ' ' + this_query;                 
                 }
            }
+           
            if(full_query=='' && len>0){
-               full_query = facets[0][facets[0].length-1].query.split(' ')[0];
+               full_query = "t:"+this.options.params.rectypes.join(",")+' '+full_query; //facets[0][facets[0].length-1].query.split(' ')[0];
            }
            
            return full_query;
@@ -197,9 +205,11 @@ $.widget( "heurist.search_faceted", {
            var facet_index, i, len = facets.length;
            var current_query = this.getQuery();
            var facet_requests = [];
-           var colors = ['teal',  'blue', 'fuchsia', 'gray', 'green', 
-            'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red', 
-            'silver', 'black' ];
+           var colors = ["#A2A272","#9E65B3","#AC9EA0","#C57152","#87AE94",
+                         "#FFFA5F","#9184EC","#AD6676","#EEA179","#EDEFF0",
+                         "#C1F7C6","#D7A4D9","#CDD0D3","#ED9366","#CBDCDA",
+                         "#435E53","#472A71","#754E48","#6F354A","#3D635A",
+                         "#C7CC92","#DCB0D9","#CDA1AF","#F2BFA6","#AFCFA3"];
            
            //debug  $('<div>').html(current_query).appendTo(listdiv);
            var clr_index = -1;
@@ -277,7 +287,7 @@ $.widget( "heurist.search_faceted", {
 
                          if(term.children.length>0){
                              
-                               var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, term:term};
+                               var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, term:term };
                                if(facets[facet_index].length>1){
                                     prms.resource = facets[facet_index][0].query;  // t:5 f:25
                                }
@@ -289,7 +299,6 @@ $.widget( "heurist.search_faceted", {
                     
                 }else {
                     
-         
                    //$facet_values.html(type);
                    if(top.HEURIST.util.isnull(currentvalue)){
                    
@@ -297,7 +306,7 @@ $.widget( "heurist.search_faceted", {
                        if(facets[facet_index].length>1){
                             prms.resource = facets[facet_index][0].query;  // t:5 f:25
                        }
-                       prms.dt = facets[facet_index][facets[facet_index].length-1].fieldid;
+                       prms.dt = (type=="rectype")?"rt:":"" + facets[facet_index][facets[facet_index].length-1].fieldid;
                        
                        facet_requests.push(prms);
 
@@ -333,17 +342,18 @@ $.widget( "heurist.search_faceted", {
             
             var term = request.term;
             request.term = null;
+            var that = this;
             
-                            var that = this;
-                            window.HAPI.RecordMgr.get_facets(request, function(response){
+            function __onResponse(response){
                                 if(response.status == top.HAPI.ResponseStatus.OK){
 
+                                    that.cached_counts.push(response);
+                                    
                                     var facet_index = parseInt(response.facet_index); 
                                     var j,i;
-                                    var noValues = true;
                                     var $facet_values = $("#fv-"+facet_index);
                                     
-                                    if(request.type=="enum"){
+                                    if(response.type=="enum"){
                                         
                                         var terms_usage = response.data; //0-id, 1-cnt
                                         
@@ -367,25 +377,35 @@ $.widget( "heurist.search_faceted", {
                                                     }
                                                 }
                                                 if(cnt>0){
-                                                    noValues = false;
                                                     var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
                                                     $("<div>").css({"display":"inline-block","min-width":"90px","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                                                 }
                                          }
+                                    }else if(response.type=="rectype"){
+                                        
+                                        for (i=0;i<response.data.length;i++){
+                                            var cterm = response.data[i];
+                                            
+                                            if(facet_index>=0){
+                                                var facet = that.facets[facet_index][0];
+                                                var f_link = that._createFacetLink(facet_index, {text:facet.title, query:facet.query, count:cterm[1]});
+                                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                            }
+                                        }
+                                        
                                      
                                     }else{
                                         for (i=0;i<response.data.length;i++){
                                             var cterm = response.data[i];
                                             
                                             if(facet_index>=0){
-                                                noValues = false;
                                                 var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[0]+'%', count:cterm[1]});
                                                 $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                                             }
                                         }
                                     }
                                     
-                                    if(noValues){
+                                    if($facet_values.is(':empty')){
                                         $("<span>").text(top.HR('no values')).css({'font-style':'italic'}).appendTo($facet_values);
                                     }
                                     
@@ -394,7 +414,17 @@ $.widget( "heurist.search_faceted", {
                                 }else{
                                     top.HEURIST.util.showMsgDlg(response.message);
                                 }
-                               });            
+            };            
+            
+            //try to find in cache
+            for (var k=0; k<this.cached_counts.length; k++){
+              if(this.cached_counts[k].q == request.q && this.cached_counts[k].dt == request.dt){
+                    __onResponse(this.cached_counts[k]);
+                    return;
+              }
+            }
+            
+            window.HAPI.RecordMgr.get_facets(request, __onResponse);            
         
        }    
   }

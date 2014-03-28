@@ -13,6 +13,7 @@
 */
 
 $dbs_rtStructs = null;
+$dbs_lookups = null; //human readale field type names
 
 /**
 * Returns  
@@ -29,7 +30,7 @@ $dbs_rtStructs = null;
 */
 function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null){
    
-    global $dbs_rtStructs;
+    global $dbs_rtStructs, $dbs_lookups;
     
     if($fieldtypes==null){
         $fieldtypes = array('integer','date','freetext','year','float');
@@ -37,7 +38,8 @@ function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=nu
         $fieldtypes = explode(",",$fieldtypes);
     }
     
-    $dbs_rtStructs = dbs_GetRectypeStructures($system, $rectypeids, 1);    
+    $dbs_rtStructs = dbs_GetRectypeStructures($system, $rectypeids, 1);   
+    $dbs_lookups = dbs_GetDtLookups();
     
     $rtypes = $dbs_rtStructs['names'];
     $res = array();
@@ -137,7 +139,7 @@ function __getRecordTypeTree($system, $recTypeId, $recursion_depth, $mode, $fiel
 */
 function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $fieldtypes){
 
-    global $dbs_rtStructs;    
+    global $dbs_rtStructs, $dbs_lookups;    
     
     $res = null;
 
@@ -239,7 +241,7 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $
 
        $res['key'] = "f:".$dtID;
        if($mode==4){
-            $res['title'] = $dt_title . " <span style='font-size:0.7em'>" . $detailType . "</span>";   
+            $res['title'] = $dt_title . " <span style='font-size:0.7em'>(" . $dbs_lookups[$detailType] . ")</span>";   
        }else{
             $res['title'] = $dt_title;    
        }

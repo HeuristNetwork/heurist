@@ -334,19 +334,30 @@ $.widget( "heurist.search", {
                     var rectype = (event)?Number(event.target.value):0;
                     top.HEURIST.util.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, top.HR('Any field type'), true);
                     
-                    select_sortby.html("<option value=t>"+top.HR("record title")+"</option>"+
+                    /*select_sortby.html("<option value=t>"+top.HR("record title")+"</option>"+
                         "<option value=rt>"+top.HR("record type")+"</option>"+
                         "<option value=u>"+top.HR("record URL")+"</option>"+
                         "<option value=m>"+top.HR("date modified")+"</option>"+
                         "<option value=a>"+top.HR("date added")+"</option>"+
                         "<option value=r>"+top.HR("personal rating")+"</option>"+
-                        "<option value=p>"+top.HR("popularity")+"</option>");
+                        "<option value=p>"+top.HR("popularity")+"</option>");*/
+                    var topOptions = [{key:'t', title:top.HR("record title")},
+                    {key:'rt', title:top.HR("record type")},
+                    {key:'u', title:top.HR("record URL")},
+                    {key:'m', title:top.HR("date modified")},
+                    {key:'a', title:top.HR("date added")},
+                    {key:'r', title:top.HR("personal rating")},
+                    {key:'p', title:top.HR("popularity")}];       
+                        
                     if(Number(rectype)>0){
+                        topOptions.push({optgroup:'yes', title:top.HEURIST.rectypes.names[rectype]+' '+top.HR('fields')});
+                        /*
                         var grp = document.createElement("optgroup");
                         grp.label =  top.HEURIST.rectypes.names[rectype]+' '+top.HR('fields');
                         select_sortby.get(0).appendChild(grp);
+                        */
                     }
-                    top.HEURIST.util.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, null, false);
+                    top.HEURIST.util.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions, false);
                     
                     $("#sa_fieldvalue").val("");
                     $dlg.find("#fld_contain").show();

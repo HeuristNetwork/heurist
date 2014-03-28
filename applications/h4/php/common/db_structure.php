@@ -11,6 +11,7 @@
 * dbs_GetRectypeByID
 * dbs_GetTerms
 * dbs_GetDetailTypes
+* dbs_GetDtLookups
 * 
 * INTERNAL FUNCTIONS
 * __getRectypeColNames
@@ -465,7 +466,7 @@ function getRecTypeUsageCount($mysqli) {
  * @uses      getDetailTypeGroups()
  * @uses      getDetailTypeUsageCount()
  * @uses      getDetailTypeDefUsage()
- * @uses      getDtLookups()
+ * @uses      dbs_GetDtLookups()
  * @uses      getCachedData()
  * @uses      setCachedData()
  *
@@ -500,7 +501,7 @@ function dbs_GetDetailTypes($system, $dettypeids=null, $imode){
     if($imode>0){
         $dtStructs['typedefs'] = array('commonFieldNames' => getDetailTypeColNames(),
                                     'fieldNamesToIndex' => __getColumnNameToIndex(getDetailTypeColNames()));
-        $dtStructs['lookups'] = getDtLookups();
+        $dtStructs['lookups'] = dbs_GetDtLookups();
     }
     if(false && $imode==2){
         $dtStructs['rectypeUsage'] = getDetailTypeDefUsage($mysqli);
@@ -595,7 +596,7 @@ function getDetailTypeColNames() {
  * @return    object lookup from basetype to Display name
  * @todo      compare this against table for complete list logging error if mismatch
  */
-function getDtLookups() {
+function dbs_GetDtLookups() {
     return array("enum" => "Terms list",
                  "float" => "Numeric",
                  "date" => "Date / temporal",

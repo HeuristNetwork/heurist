@@ -166,7 +166,7 @@ function get_sql_query_clauses($params, $currentUser=null, $publicOnly=false) {
         if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
         
         if ($search_domain == BOOKMARK) {
-            $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and TOPBIBLIO.not rec_FlagTemporary) ';
+            $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not TOPBIBLIO.rec_FlagTemporary) ';
         } else if ($search_domain == BIBLIO) {   //NOT USED
             $where_clause .= ' (bkm_UGrpID is null and not TOPBIBLIO.rec_FlagTemporary) ';
         } else {

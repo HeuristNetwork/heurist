@@ -192,12 +192,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     * needArray  return array tree if terms (instead of select element)
     * 
     */
-    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, sFirstEmptyItem, needArray) {
+    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
 
         if(needArray){
             
         }else{
-            selObj = createSelector(selObj, sFirstEmptyItem);
+            selObj = createSelector(selObj, topOptions);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
@@ -365,24 +365,49 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
     }
 
-    ,createSelector: function(selObj, sFirstEmptyEntry) {
+    ,createSelector: function(selObj, topOptions) {
         if(selObj==null){
             selObj = document.createElement("select");
         }else{
             $(selObj).empty();
         }
-        if(sFirstEmptyEntry){
-            top.HEURIST.util.addoption(selObj, '', sFirstEmptyEntry);
+        
+        if(top.HEURIST.util.isArray(topOptions)){
+            var idx;
+            if(topOptions){  //list of options that must be on top of list
+                for (idx in topOptions)
+                {
+                    if(idx){
+                        var key = topOptions[idx].key;
+                        var title = topOptions[idx].title;
+                        if(!top.HEURIST.util.isnull(title))
+                        {
+                             if(!top.HEURIST.util.isnull(topOptions[idx].optgroup)){
+                                var grp = document.createElement("optgroup");
+                                grp.label =  title;
+                                selObj.appendChild(grp);
+                             }else{
+                                top.HEURIST.util.addoption(selObj, key, title);    
+                             }
+                             
+                        }
+                    }
+                }
+            }        
+        }else if(!top.HEURIST.util.isempty(topOptions)){
+           top.HEURIST.util.addoption(selObj, '', topOptions); 
         }
+        
+        
         return selObj;
     }
     
     /**
     * create/fill SELECT for rectypes groups
     */
-    ,createRectypeGroupSelect: function(selObj, sFirstEmptyEntry) {
+    ,createRectypeGroupSelect: function(selObj, topOptions) {
         
-        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+        top.HEURIST.util.createSelector(selObj, topOptions);
 
         var rectypes = top.HEURIST.rectypes,
             index;
@@ -411,9 +436,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     *
     * rectypeList - constraint options to this list
     */
-    , createRectypeSelect: function(selObj, rectypeList, sFirstEmptyEntry) {
+    , createRectypeSelect: function(selObj, rectypeList, topOptions) {
 
-        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+        top.HEURIST.util.createSelector(selObj, topOptions);
 
         var rectypes = top.HEURIST.rectypes,
             index;
@@ -468,9 +493,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     *
     * allowedlist - constraint options to this list
     */
-    createRectypeDetailSelect: function(selObj, rectype, allowedlist, sFirstEmptyEntry, needEmpty) {
+    createRectypeDetailSelect: function(selObj, rectype, allowedlist, topOptions, needEmpty) {
 
-        top.HEURIST.util.createSelector(selObj, sFirstEmptyEntry);
+        top.HEURIST.util.createSelector(selObj, topOptions);
         
         var dtyID, details;
 

@@ -17,27 +17,40 @@
         <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
     </div>
     
-    <br /> <hr /> <br />
-       
-    <div>
-        <div class="header"><label for="opt_rectype_as_facets">Display facets separately for each record type</label></div>
+    <br /><hr />
+    <p style="text-align: center; padding: 8px">
+        <input type="radio" name="opt_mode" id="opt_mode_simple" value="false" checked="checked" class="ui-widget-content ui-corner-all" />
+        <label for="opt_rectype_as_facets">Simplified</label>
+        <input type="radio" name="opt_mode" id="opt_mode_advanced" value="true" class="ui-widget-content ui-corner-all" />
+        <label for="opt_rectype_as_facets">Advanced settings</label>
+    </p>
+    <hr /><br />
+
+    <div class="simple-mode">
+            <div class="header"><label for="opt_rectypes">Select record type</label></div>
+            <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+    </div>
+
+    <div class="advanced-mode">
+        <div class="header"><label for="opt_rectype_as_facets">Record types act as facet</label></div>
         <input type="checkbox" name="opt_rectype_as_facets" id="opt_rectype_as_facets" value="remember" class="ui-widget-content ui-corner-all" />
     </div>
    
-   <br /><b>Term list and pointer fields are included by default</b><br />&nbsp;<br />
-
-    <div>
+    <div class="advanced-mode">
         <div class="header"><label for="opt_use_freetext">Include text fields</label></div>
         <input type="checkbox" name="opt_use_freetext" id="opt_use_freetext" value="remember" class="ui-widget-content ui-corner-all" />
     </div>
-    <div>
+    <div class="advanced-mode">
         <div class="header"><label for="opt_use_date">Include date fields</label></div>
         <input type="checkbox" name="opt_use_date" id="opt_use_date" value="remember" class="ui-widget-content ui-corner-all" />
     </div>
-    <div>
+    <div class="advanced-mode">
         <div class="header"><label for="opt_use_numeric">Include numeric fields</label></div>
         <input type="checkbox" name="opt_use_numeric" id="opt_use_numeric" value="remember" class="ui-widget-content ui-corner-all" />
     </div>
+    <br />
+    <p class="advanced-mode">Term list and pointer fields are included by default</p>
+
     
   </fieldset>
   </form>

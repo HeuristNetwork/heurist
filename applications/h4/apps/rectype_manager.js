@@ -135,6 +135,13 @@ $.widget( "heurist.rectype_manager", {
 
   }, //end _create
 
+  
+  _setOptions: function( options ) {
+        this._superApply( arguments );
+        this._refresh();
+  },
+  
+  
   /* private function */
   _refresh: function(){
          this._renderItems();

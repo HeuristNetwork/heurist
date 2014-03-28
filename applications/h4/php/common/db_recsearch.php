@@ -152,7 +152,8 @@ function recordSearchFacets($system, $params){
     
         $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
         
-// error_log(">>>".$query);
+// 
+error_log(">>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -162,7 +163,7 @@ function recordSearchFacets($system, $params){
             while ( $row = $res->fetch_row() ) {
                 array_push($data, $row);
             }
-            $response = array("status"=>HEURIST_OK, "data"=> $data, "facet_index"=>@$params['facet_index']);
+            $response = array("status"=>HEURIST_OK, "data"=> $data, "facet_index"=>@$params['facet_index'], "type"=>@$params['type'], "q"=>@$params['q'], "dt"=>@$params['dt']);
             $res->close();
         }
 

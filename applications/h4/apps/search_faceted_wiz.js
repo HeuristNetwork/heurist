@@ -19,6 +19,8 @@ $.widget( "heurist.search_faceted_wiz", {
   },
   //params:
   // domain
+  // isadvanced
+  // rectype_as_facets
   // fieldtypes:[] //allowed field types besides enum amd resource
   //  rectypes:[]
   //  facets:[[{ title:node.title, type: freetext|enum|integer, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value} }, ]  
@@ -45,7 +47,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.element.dialog({
                                 autoOpen: false,
                                 height: 620,
-                                width: 400,
+                                width: 500,
                                 modal: true,
                                 title: top.HR("Define Faceted Search"),
                                 resizeStop: function( event, ui ) {
@@ -72,7 +74,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step0 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'block'})
                 .appendTo(this.element);
-    $("<div>").append($("<h4>").html(top.HR("1. Options"))).appendTo(this.step0);
+    $("<div>").append($("<h4>").html(top.HR("Options"))).appendTo(this.step0);
     $("<div>",{id:'facets_options'}).appendTo(this.step0);
     this.step_panels.push(this.step0);
     
@@ -81,7 +83,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step1 = $("<div>")
                 .css({'display':'none'})
                 .appendTo(this.element);
-    $("<div>").append($("<h4>").html(top.HR("2. Select rectypes that will be used in search"))).appendTo(this.step1);
+    $("<div>").append($("<h4>").html(top.HR("Select rectypes that will be used in search"))).appendTo(this.step1);
                 //.css({overflow: 'none !important', width:'100% !important'})
     this.step1.rectype_manager({ isdialog:false, isselector:true });
                 
@@ -91,7 +93,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step2 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
-    $("<div>").html(top.HR("3. Select fields that act as facet")).appendTo(this.step2);
+    $("<div>").html(top.HR("Select fields that act as facet")).appendTo(this.step2);
     $("<div>",{id:'field_treeview'}).appendTo(this.step2);
     this.step_panels.push(this.step2);
 
@@ -99,7 +101,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step3 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
-    $("<div>").append($("<h4>").html(top.HR("4. Define ranges for numeric and date facets"))).appendTo(this.step3);
+    $("<div>").append($("<h4>").html(top.HR("Define ranges for numeric and date facets"))).appendTo(this.step3);
     $("<div>",{id:'facets_list'}).appendTo(this.step3);
     this.step_panels.push(this.step3);
 
@@ -107,7 +109,7 @@ $.widget( "heurist.search_faceted_wiz", {
     this.step4 = $("<div>")
                 .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
                 .appendTo(this.element);
-    $("<div>").append($("<h4>").html(top.HR("5. Preview"))).appendTo(this.step4);
+    $("<div>").append($("<h4>").html(top.HR("Preview"))).appendTo(this.step4);
     $("<div>",{id:'facets_preview'}).css('top','3.2em').appendTo(this.step4);
     this.step_panels.push(this.step4);
       
@@ -182,22 +184,47 @@ $.widget( "heurist.search_faceted_wiz", {
               var that = this;
               var $dlg = this.step0.find("#facets_options");
               if($dlg.html()==''){
-                  $dlg.load("apps/svs_edit_faceted.html", function(){
+                  $dlg.load("apps/svs_edit_faceted.html?t=9", function(){
                             that._initStep0_options();
                   });
               }else{
                   this._initStep0_options();
               }
-                
-          }else if(this.step==1 && newstep==2){ //select record types
-              //load field types
-              var rectypeIds = this.step1.rectype_manager("option","selection");
-              if(!top.HEURIST.util.isArrayNotEmpty(rectypeIds)){
-                   
-                   top.HEURIST.util.showMsgDlg(top.HR("Select record type"));
-                   return;
-              }
+
+          }else if(this.step==0 && newstep==1){ //select record types 
               
+              this.options.params.isadvanced = this.step0.find("#opt_mode_advanced").is(":checked");
+              this.options.params.rectype_as_facets = this.step0.find("#opt_rectype_as_facets").is(":checked");
+              
+              if(this.options.params.isadvanced){
+
+                this.step1.rectype_manager({selection:this.options.params.rectypes});                  
+                
+              }else{
+                  this.step = 1; 
+                  newstep = 2; //skip step
+              }
+          }
+          
+          if(this.step==1 && newstep==2){ //select field types
+          
+              var rectypeIds = null;
+              if(this.options.params.isadvanced){
+                    rectypeIds = this.step1.rectype_manager("option","selection");
+              }else{
+                    rectypeIds = [this.step0.find("#opt_rectypes").val()];
+              }
+              //mandatory
+              if(!top.HEURIST.util.isArrayNotEmpty(rectypeIds)){
+                   top.HEURIST.util.showMsgDlg(top.HR("Select record type"));
+                   
+                   this.step = (this.options.params.isadvanced)?1:0;
+                   return;
+              }else{
+                  this.step0.hide();
+              }
+                
+              //load field types
               allowed = ['enum'];
               var $dlg = this.step0.find("#facets_options");
               if($dlg.find("#opt_use_freetext").is(":checked")){
@@ -216,7 +243,7 @@ $.widget( "heurist.search_faceted_wiz", {
               //load list of field types
               this._initStep2_FieldTreeView(rectypeIds);
                    
-          }else if(this.step==2 && newstep==3){  //set ranges
+          }  if(this.step==2 && newstep==3){  //set ranges
               
               if(!this.initFacetsRanges()){
                   return;
@@ -226,6 +253,11 @@ $.widget( "heurist.search_faceted_wiz", {
               
               this._initStep4_FacetsPreview();
               $("#btnNext").button('option', 'label', top.HR('Save'));
+              
+          }
+          
+          if(this.step==2 && newstep==1 && !this.options.params.isadvanced){
+              newstep = 0;
           }
           
           this._showStep(newstep);
@@ -253,6 +285,34 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_id = $dlg.find('#svs_ID');
             var svs_name = $dlg.find('#svs_Name');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
+            
+            var opt_numeric = $dlg.find('#opt_use_numeric');
+            var opt_date = $dlg.find('#opt_use_date');
+            var opt_text = $dlg.find('#opt_use_freetext');
+            var opt_rectypes = $dlg.find("#opt_rectypes").get(0);
+            var opt_mode = $dlg.find("input[name='opt_mode']");
+
+            var opt_mode_simple = $dlg.find("#opt_mode_simple");
+            var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
+            
+            if($(opt_rectypes).is(':empty')){
+                top.HEURIST.util.createRectypeSelect( opt_rectypes, null, null);
+
+             this._on( opt_mode, {
+                click: function(e){
+                        if($(e.target).val()=="true"){
+                            $dlg.find('.simple-mode').hide();
+                            $dlg.find('.advanced-mode').show();
+                        }else{
+                            $dlg.find('.simple-mode').show();
+                            $dlg.find('.advanced-mode').hide();
+                            if(this.options.params.rectypes) $(opt_rectypes).val(this.options.params.rectypes[0]);
+                        }
+                }
+                }); 
+                
+            }
+            
             var svsID = this.options.svsID;
 
             var isEdit = (parseInt(svsID)>0);
@@ -267,6 +327,16 @@ $.widget( "heurist.search_faceted_wiz", {
                svs_ugrid.val(svs[2]==top.HAPI.currentUser.ugr_ID ?this.options.domain:svs[2]);
                svs_ugrid.parent().hide();
 
+               var ft = this.options.params.fieldtypes;
+               opt_numeric.attr( "checked", ft.indexOf('integer') );
+               opt_date.attr( "checked", ft.indexOf('date') );
+               opt_text.attr( "checked", ft.indexOf('freetext') );
+               
+               this.step0.find("#opt_rectype_as_facets").attr( "checked", this.options.params.rectype_as_facets );
+               
+               opt_mode_advanced.attr("checked", this.options.params.isadvanced );
+               opt_mode_advanced.click();
+            
             }else{ //add new saved search
 
                 svs_id.val('');
@@ -281,11 +351,18 @@ $.widget( "heurist.search_faceted_wiz", {
                             });
                 svs_ugrid.val(this.options.domain);
                 svs_ugrid.parent().show();
+
+                opt_numeric.attr( "checked", true );
+                opt_date.attr( "checked", true );
+                opt_text.attr( "checked", true );
+                
+                opt_mode_simple.attr("checked", (this.options.params.isadvanced) );
+                opt_mode_simple.click();
             }
       }
   }
   
-  // 2d step
+  // 2d step - init fieldtreeview
   , _initStep2_FieldTreeView: function(rectypeIds){
       
        if(top.HEURIST.util.isArrayNotEmpty(rectypeIds)){
@@ -373,14 +450,12 @@ $.widget( "heurist.search_faceted_wiz", {
               var k, len = this.options.params.rectypes.length;
               var isOneRoot = (this.options.params.rectypes.length==1);
               //if more than one root rectype each of them acts as facet
-              if(!isOneRoot){
-                  /*for (k=0;k<len;k++){
-                       var rtID = this.options.params.rectypes[k];
-                       facets.push({ title:top.HEURIST.rectypes.names[rtID], type:"rectype", query: "t:"+this.options.params.rectypes[k] });
+              if(this.options.params.rectype_as_facets && len>1){
+                   for (k=0;k<len;k++){
+                        var rtID = this.options.params.rectypes[k];
+                        this.options.params.facets.push([{ title:top.HEURIST.rectypes.names[rtID], type:"rectype", query:"t:"+rtID, fieldid:rtID }]);
                    }
-                   */
-              }
-              
+               }
 
               function __get_queries(node){
                   
@@ -398,7 +473,8 @@ $.widget( "heurist.search_faceted_wiz", {
                             else if(q=="recModified") q = "modified";
                             
                             if(isOneRoot){
-                                q = "t:"+parent.key+" "+q; 
+                                //root rectypes will be added only once - when full_query is creating
+                                // q = "t:"+parent.key+" "+q; 
                             }
                             return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }]; 
                       }
@@ -462,7 +538,7 @@ $.widget( "heurist.search_faceted_wiz", {
                        //name, type, query,  ranges
                        if(!top.HEURIST.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
                             var facet = __get_queries(node);
-                            facets.push( facet ); // { id:node.key, title:node.title, query: squery } );
+                            facets.push( facet ); // { id:node.key, title:node.title, query: squery, fieldid } );
                        }
                   }
                   
