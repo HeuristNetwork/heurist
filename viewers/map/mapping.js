@@ -551,7 +551,7 @@ if (typeof mxn.LatLonPoint == "function") {
 							 basePath + "common/images/edit-pencil.png'/></a></div>";
 
 			var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
-							"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
+							"' target='_blank' title='Open in new window' class='externalLink'>&nbsp;</a></div>"
 
 			//info window template for map (for timeline we use default window with small modifications)
 			var template = '<div style="max-width: 300px;padding-top:5px;">'+

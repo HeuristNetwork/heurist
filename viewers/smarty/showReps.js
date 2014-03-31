@@ -877,9 +877,9 @@ function ShowReps() {
                          }else{
                              if ( typeof(child[0]) == "string" ) {
                                 is_multicontstrained = true;
-                                label = child[0];         
+                                label = '<i>'+child[0]+'</i>';         
                              }else{
-                                label = child['rt_name'];         
+                                label = '<i>'+child['rt_name']+'</i>';         
                              }
                          }
                          
