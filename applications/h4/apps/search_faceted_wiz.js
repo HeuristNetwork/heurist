@@ -451,10 +451,11 @@ $.widget( "heurist.search_faceted_wiz", {
               var isOneRoot = (this.options.params.rectypes.length==1);
               //if more than one root rectype each of them acts as facet
               if(this.options.params.rectype_as_facets && len>1){
-                   for (k=0;k<len;k++){
+                  facets.push([{ title:top.HR('Record types'), type:"rectype", query:"t" }]);
+                   /*for (k=0;k<len;k++){
                         var rtID = this.options.params.rectypes[k];
-                        this.options.params.facets.push([{ title:top.HEURIST.rectypes.names[rtID], type:"rectype", query:"t:"+rtID, fieldid:rtID }]);
-                   }
+                        facets.push([{ title:top.HEURIST.rectypes.names[rtID], type:"rectype", query:"t:"+rtID, fieldid:rtID }]);
+                   }*/
                }
 
               function __get_queries(node){

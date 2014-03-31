@@ -167,7 +167,9 @@ $.widget( "heurist.search_faceted", {
                 }
            }
            
-           if(full_query=='' && len>0){
+           if(this.options.params.rectypes.length==1 || 
+             (this.options.params.rectype_as_facets && top.HEURIST.util.isnull(facets[0][0].currentvalue))) {
+           //if(full_query=='' && len>0){
                full_query = "t:"+this.options.params.rectypes.join(",")+' '+full_query; //facets[0][facets[0].length-1].query.split(' ')[0];
            }
            
@@ -211,7 +213,8 @@ $.widget( "heurist.search_faceted", {
                          "#435E53","#472A71","#754E48","#6F354A","#3D635A",
                          "#C7CC92","#DCB0D9","#CDA1AF","#F2BFA6","#AFCFA3"];
            
-           //debug  $('<div>').html(current_query).appendTo(listdiv);
+           //debug  
+           $('<div>').html(current_query).appendTo(listdiv);
            var clr_index = -1;
             
            for (facet_index=0;facet_index<len;facet_index++){
@@ -297,6 +300,8 @@ $.widget( "heurist.search_faceted", {
                          }
                     }
                     
+                //}else if(type=="rectype"){
+                    
                 }else {
                     
                    //$facet_values.html(type);
@@ -306,13 +311,15 @@ $.widget( "heurist.search_faceted", {
                        if(facets[facet_index].length>1){
                             prms.resource = facets[facet_index][0].query;  // t:5 f:25
                        }
-                       prms.dt = (type=="rectype")?"rt:":"" + facets[facet_index][facets[facet_index].length-1].fieldid;
+                       prms.dt = (type=="rectype")?"rectype":facets[facet_index][facets[facet_index].length-1].fieldid;
                        
                        facet_requests.push(prms);
 
                    }else{
                        
-                       var cterm = { text:top.HR('all'), query:null, count:0 };    
+                       var cterm = { text:top.HR('all'), 
+                                query:null, 
+                                count:0 };    
                        var f_link = this._createFacetLink(facet_index, cterm);
                        $("<span>").css('display','inline-block').append(f_link)
                                 .append($('<span class="ui-icon ui-icon-carat-1-e" />')
@@ -321,7 +328,6 @@ $.widget( "heurist.search_faceted", {
                        $("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_values);
                        
                    }
-                   
                    
                 }
                 
@@ -387,8 +393,9 @@ $.widget( "heurist.search_faceted", {
                                             var cterm = response.data[i];
                                             
                                             if(facet_index>=0){
-                                                var facet = that.facets[facet_index][0];
-                                                var f_link = that._createFacetLink(facet_index, {text:facet.title, query:facet.query, count:cterm[1]});
+                                                var rtID = cterm[0];
+                                                var f_link = that._createFacetLink(facet_index, 
+                                                        {text:top.HEURIST.rectypes.names[rtID], query:rtID, count:cterm[1]});
                                                 $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                                             }
                                         }
@@ -418,7 +425,8 @@ $.widget( "heurist.search_faceted", {
             
             //try to find in cache
             for (var k=0; k<this.cached_counts.length; k++){
-              if(this.cached_counts[k].q == request.q && this.cached_counts[k].dt == request.dt){
+              if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
+                    this.cached_counts[k].q == request.q && this.cached_counts[k].dt == request.dt){
                     __onResponse(this.cached_counts[k]);
                     return;
               }

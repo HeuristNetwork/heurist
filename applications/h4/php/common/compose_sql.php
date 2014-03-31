@@ -1075,7 +1075,7 @@ class FieldPredicate extends Predicate {
                                 $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
                                 $field_value = str_replace("TOPBIBLIO.","",$field_value);
                     }
-                }
+                }//for predicates
                 
                 if($type_clause){ //record type clause is mandatory
                     $nest_joins .= ' left join Records link'.$i.' on STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0 and link'.$i.'.'.$type_clause;
@@ -1085,14 +1085,30 @@ class FieldPredicate extends Predicate {
                 } else {
                       return ''; //fail - record type is mandatory for nested queries
                 }
+            }//for nests
+            
+            $rd_type_clause = '';
+            $rd_type_clause = $this->get_field_type_clause();
+            if(strpos($rd_type_clause,"like")===false){
+                $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;    
+            }else{
+                $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
             }
-        
             
             $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '
                                   .$nest_joins
-                                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value.')';
+                                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.')';
                                     
-//error_log("AAA>>>".$resq);            
+            //for relmarkers
+            /*
+            "exists (select rrc_TargetRecID, rrc_SourceRecID from recDetails rd "
+                .$nest_joins
+                .", recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in ".$field_value . $rd_type_clause.")
+                                                           or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in  ".$field_value . $rd_type_clause."))";
+           */
+                                    
+                                    
+//error_log("BBB>>>".$resq);            
             return $resq;
         } //end special case nested query for resources
         

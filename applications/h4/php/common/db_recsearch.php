@@ -75,6 +75,7 @@ function recordSearchFacets($system, $params){
             $fieldid = substr($fieldid,2);
         }
         
+        //nested resource pointer
         $resource = @$params['resource'];  // f:15(t:20 f:41)  f:15(t:20 f:41(t:10 title))
         $resource_field = null;
         if($resource){
@@ -128,6 +129,12 @@ function recordSearchFacets($system, $params){
                 }
             }
             
+        }else if($dt_type=="rectype"){    
+            
+                    $select_clause = "SELECT rec_RecTypeID as alpha, count(*) as cnt ";
+                    $where_clause = " WHERE ";
+                    $grouporder_clause = " GROUP BY rec_RecTypeID ORDER BY rec_RecTypeID";
+            
         }else if($dt_type=="enum" || $dt_type=="relationtype"){    
 
                 if($resource_rt){
@@ -153,7 +160,7 @@ function recordSearchFacets($system, $params){
         $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
         
 // 
-error_log(">>>".$query);
+error_log("COUNT >>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

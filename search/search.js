@@ -2744,6 +2744,11 @@ top.HEURIST.search = {
 			var sid = cmb[2];
 
 			var innerHTML = "";
+            
+            try {
+                var facet_params = $.parseJSON(cmb[1]);
+            }
+            catch (err) {
 
 			innerHTML += "<div class='saved-search'><div id='ss" + sid + "' class='name' "+  //<a id='ss" + sid + "' href='#' " +
 					 'onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</div>";
@@ -2755,13 +2760,22 @@ top.HEURIST.search = {
 			innerHTML += "</div>";
 			innerHTML += " ";
 
+            }
+
 			return innerHTML;
 		};
 
 		printSavedSearchAsMenuItem = function(cmb) {
 			var sid = cmb[2];
+            
+            var innerHTML = "";
 
-			var innerHTML = '<li><a style="padding-right:20px" href="#" onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</a>";
+            try {
+                var facet_params = $.parseJSON(cmb[1]);
+            }
+            catch (err) {
+            
+			innerHTML = '<li><a style="padding-right:20px" href="#" onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</a>";
 
 			innerHTML += '<span class="sf-edit-icons"><img title="edit" src="' +top.HEURIST.basePath+'common/images/edit_pencil_9x11.gif" '+
 						'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
@@ -2769,6 +2783,7 @@ top.HEURIST.search = {
 						'onclick="{top.HEURIST.search.savedSearchDelete('+sid+');}"></span>';
 			innerHTML += "</li>";
 
+            }
 			return innerHTML;
 		};
 

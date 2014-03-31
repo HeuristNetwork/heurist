@@ -138,6 +138,9 @@ $.widget( "heurist.rectype_manager", {
   
   _setOptions: function( options ) {
         this._superApply( arguments );
+        if(top.HEURIST.util.isnull(this.options.selection)){
+            this.options.selection = [];
+        }
         this._refresh();
   },
   
@@ -192,7 +195,7 @@ $.widget( "heurist.rectype_manager", {
                 
                 name = top.HEURIST.rectypes.names[rectypeID];
                 usage = 0; //  top.HEURIST.rectypes.rtUsage[rectypeID];
-                is_selected = this.options.selection.indexOf(rectypeID);
+                is_selected =  this.options.selection.indexOf(rectypeID);
 
                 rectypes.push([rectypeID, name, usage, is_selected]);
             }
