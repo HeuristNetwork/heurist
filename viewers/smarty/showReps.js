@@ -874,16 +874,18 @@ function ShowReps() {
                          
                          if(child['termfield_name']) {
                              label = child['termfield_name'];
+                             term.label = term.label + label; //<b> + '</b>';
                          }else{
                              if ( typeof(child[0]) == "string" ) {
                                 is_multicontstrained = true;
-                                label = '<i>'+child[0]+'</i>';         
+                                label = child[0];         
                              }else{
-                                label = '<i>'+child['rt_name']+'</i>';         
+                                label = child['rt_name'];         
                              }
+                             term.label = term.label + '<b><i>' + label + '</i></b>';
                          }
                          
-                         term.label = term.label + '<b>' + label + '</b>';
+                         
                          if(!is_single){
                             term.label = term.label + '&nbsp;(<a href="javascript:void(0)" '+
                             'title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">repeat</a>)';    

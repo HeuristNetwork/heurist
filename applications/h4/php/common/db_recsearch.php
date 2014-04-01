@@ -96,7 +96,7 @@ function recordSearchFacets($system, $params){
                 if($resource_rt){
                     
                     $select_clause = "SELECT SUBSTRING(trim(linked.rec_Title), 1, 1) as alpha, count(*) as cnt ";
-                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (TOPDET.dtl_Value=linked.rec_ID and linked.rec_RecTypeID in (".$resource_rt.")) " //(STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0
                         ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and ";
                     $grouporder_clause = " GROUP BY SUBSTRING(trim(linked.rec_Title), 1, 1) ORDER BY SUBSTRING(trim(linked.rec_Title), 1, 1)";
                     
@@ -117,7 +117,7 @@ function recordSearchFacets($system, $params){
                 if($resource_rt){
                     
                     $select_clause = "SELECT SUBSTRING(trim(linkeddt.dtl_Value), 1, 1) as alpha, count(*) as cnt ";
-                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (TOPDET.dtl_Value=linked.rec_ID and linked.rec_RecTypeID in (".$resource_rt.")) " // STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0
                         ." LEFT JOIN recDetails linkeddt ON (linkeddt.dtl_RecID=linked.rec_ID and linkeddt.dtl_DetailTypeID=".$resource_field.")"
                         ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt.dtl_Value is not null and ";
                     $grouporder_clause = " GROUP BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1)";
@@ -140,7 +140,7 @@ function recordSearchFacets($system, $params){
                 if($resource_rt){
                     
                     $select_clause = "SELECT linkeddt.dtl_Value as termid, count(*) as cnt ";
-                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0 and linked.rec_RecTypeID in (".$resource_rt.")) " //t:20
+                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (TOPDET.dtl_Value=linked.rec_ID and linked.rec_RecTypeID in (".$resource_rt.")) " //STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0
                         ." LEFT JOIN recDetails linkeddt ON (linkeddt.dtl_RecID=linked.rec_ID and linkeddt.dtl_DetailTypeID=".$resource_field.")"
                         ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt.dtl_Value is not null and ";
                     $grouporder_clause = " GROUP BY linkeddt.dtl_Value ORDER BY linkeddt.dtl_Value";
@@ -159,8 +159,7 @@ function recordSearchFacets($system, $params){
     
         $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
         
-// 
-error_log("COUNT >>>".$query);
+// error_log("COUNT >>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -222,7 +221,8 @@ function recordSearch($system, $params, $need_structure, $need_details)
     
     $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
-//DEGUG error_log("AAA ".$query);
+//DEGUG 
+error_log("AAA ".$query);
 
     $res = $mysqli->query($query);
     if (!$res){

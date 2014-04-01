@@ -598,7 +598,7 @@ $.widget( "heurist.rec_list", {
      if(show){
          this.div_content.css('background','url('+top.HAPI.basePath+'assets/loading-animation-white.gif) no-repeat center center');
      }else{
-        this.div_content.css('background','none');
+         this.div_content.css('background','none');
      }
  },
  

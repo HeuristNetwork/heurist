@@ -272,16 +272,16 @@ function EditRectypeTitle() {
                          
                          if(child['termfield_name']) {
                              label = child['termfield_name']; //enumeration
+                             term.label = term.label + label+'</div>'; //'<b>' +  + '</b></div>';
                          }else{
                              if ( typeof(child[0]) == "string" ) {
                                 is_multicontstrained = true;
-                                label = '<i>'+child[0]+'</i>';         
+                                label = child[0];         
                              }else{
-                                label = '<i>'+child['rt_name']+'</i>';         
+                                label = child['rt_name'];         
                              }
+                             term.label = term.label + '<b><i>' + label + '</i></b></div>';
                          }
-                         
-                         term.label = term.label + '<b>' + label + '</b></div>';
                     }
 
                     //term.labelonly = label;

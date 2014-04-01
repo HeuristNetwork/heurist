@@ -208,14 +208,14 @@ $.widget( "heurist.search_faceted", {
            var current_query = this.getQuery();
            var facet_requests = [];
            var colors = ["#A2A272","#9E65B3","#AC9EA0","#C57152","#87AE94",
-                         "#FFFA5F","#9184EC","#AD6676","#EEA179","#EDEFF0",
-                         "#C1F7C6","#D7A4D9","#CDD0D3","#ED9366","#CBDCDA",
+                                   "#9184EC","#AD6676","#EEA179",//"#EDEFF0",
+                         "#D7A4D9","#CDD0D3","#ED9366","#CBDCDA", //"#C1F7C6",
                          "#435E53","#472A71","#754E48","#6F354A","#3D635A",
                          "#C7CC92","#DCB0D9","#CDA1AF","#F2BFA6","#AFCFA3"];
            
-           //debug  
+           //debug - current query
            $('<div>').html(current_query).appendTo(listdiv);
-           var clr_index = -1;
+           var clr_index = 0;
             
            for (facet_index=0;facet_index<len;facet_index++){
                
@@ -229,7 +229,6 @@ $.widget( "heurist.search_faceted", {
                 var fieldid = facets[facet_index][0].fieldid;
                 var query = facets[facet_index][0].query;
                 var currentvalue = facets[facet_index][0].currentvalue;
-                clr_index = (clr_index>=colors.length)?0:(clr_index+1);
                 
                 //add ui                
                 var $facetdiv = $('<div>').appendTo(listdiv);
@@ -237,9 +236,15 @@ $.widget( "heurist.search_faceted", {
                         .addClass('ui-corner-top')   // ui-header ui-state-active                                                        Math.floor(Math.random() / colors.length)
                         .css({"padding":"0.5em 0.5em 0.5em 0.7em","margin-top":"2px","color":"#FFF",
                             "background-color":colors[clr_index]}).appendTo($facetdiv);
+                            
+                clr_index++;
+                if(clr_index>=colors.length){ clr_index=0;}
+                            
                 var $facet_values = $("<div>", {"id":"fv-"+facet_index})
                          .addClass('ui-widget-content ui-corner-bottom')
-                         .css({"padding":"0.5em 0.5em 0.5em 0.7em"}).appendTo($facetdiv);
+                         .css({"padding":"0.5em 0.5em 0.5em 0.7em","min-height":"20px"})
+                         .css('background','url('+top.HAPI.basePath+'assets/loading-animation-white20.gif) no-repeat center center')
+                         .appendTo($facetdiv);
                 $facet_header.html( title );
                 
                 //var queries = facets[facet_index][i].query;
@@ -297,6 +302,8 @@ $.widget( "heurist.search_faceted", {
                                prms.dt = facets[facet_index][facets[facet_index].length-1].fieldid;
                              
                                facet_requests.push(prms);
+                         }else{
+                              $facet_values.css('background','none');
                          }
                     }
                     
@@ -316,6 +323,7 @@ $.widget( "heurist.search_faceted", {
                        facet_requests.push(prms);
 
                    }else{
+                       $facet_values.css('background','none');
                        
                        var cterm = { text:top.HR('all'), 
                                 query:null, 
@@ -351,6 +359,7 @@ $.widget( "heurist.search_faceted", {
             var that = this;
             
             function __onResponse(response){
+                
                                 if(response.status == top.HAPI.ResponseStatus.OK){
 
                                     that.cached_counts.push(response);
@@ -358,6 +367,7 @@ $.widget( "heurist.search_faceted", {
                                     var facet_index = parseInt(response.facet_index); 
                                     var j,i;
                                     var $facet_values = $("#fv-"+facet_index);
+                                    $facet_values.css('background','none');
                                     
                                     if(response.type=="enum"){
                                         

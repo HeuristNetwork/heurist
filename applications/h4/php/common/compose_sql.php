@@ -893,7 +893,6 @@ class TitlePredicate extends Predicate {
     }
 }
 
-
 class TypePredicate extends Predicate {
     function makeSQL($isTopRec=true) {
         $eq = ($this->parent->negate)? '!=' : '=';
@@ -1047,65 +1046,157 @@ class FieldPredicate extends Predicate {
 /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
 
         if($this->nests){  //special case nested query for resources
-        
+
             $field_value = '';
             $nest_joins = '';
-            for ($i=0; $i < count($this->nests); ++$i) {
+            $relation_second_level = '';
+            $relation_second_level_where = '';
         
-                $limbs = $this->nests[$i];
-                $type_clause = null;
-                $field_type = null;
+            if( true ){ //new test version
                 
-                for ($j=0; $j < count($limbs); ++$j) {
-                    $cn = get_class($limbs[$j]->pred);
+                for ($i=0; $i < count($this->nests); ++$i) {
+            
+                    $limbs = $this->nests[$i];
+                    $type_clause = null;
+                    $field_type = null;
+                    $isrelmarker = false;
                     
-                    if($cn == 'TypePredicate'){
-                                $type_clause = $limbs[$j]->pred->makeSQL(false);
-                    }else if($cn == 'FieldPredicate'){
-                                $field_type = $limbs[$j]->pred->get_field_type_clause();
-                                if(strpos($field_type,"like")!==false){
-                                    $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$field_type." limit 1)";
-                                }
-                                if($limbs[$j]->pred->value){
-                                    $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value(); 
-                                }
-                    }else if($cn == 'TitlePredicate'){
-                                $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
-                    }else if($cn == 'DateModifiedPredicate'){
-                                $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
-                                $field_value = str_replace("TOPBIBLIO.","",$field_value);
-                    }
-                }//for predicates
-                
-                if($type_clause){ //record type clause is mandatory
-                    $nest_joins .= ' left join Records link'.$i.' on STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0 and link'.$i.'.'.$type_clause;
-                    if($field_type){
-                        $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
-                    }
-                } else {
-                      return ''; //fail - record type is mandatory for nested queries
-                }
-            }//for nests
-            
-            $rd_type_clause = '';
-            $rd_type_clause = $this->get_field_type_clause();
-            if(strpos($rd_type_clause,"like")===false){
-                $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;    
-            }else{
-                $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
-            }
-            
-            $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '
-                                  .$nest_joins
-                                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.')';
+                    for ($j=0; $j < count($limbs); ++$j) {
+                        $cn = get_class($limbs[$j]->pred);
+                        
+                        if($cn == 'TypePredicate'){
+                                    $type_clause = $limbs[$j]->pred->makeSQL(false);  // rec_RecTypeID in (12,14)
+                        }else if($cn == 'FieldPredicate'){
+                                if($i==0 && $limbs[$j]->pred->value=="relmarker"){ //allowed for i==0 only
+                                    $isrelmarker = true;
                                     
-            //for relmarkers
-            /*
-            "exists (select rrc_TargetRecID, rrc_SourceRecID from recDetails rd "
-                .$nest_joins
-                .", recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in ".$field_value . $rd_type_clause.")
-                                                           or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in  ".$field_value . $rd_type_clause."))";
-           */
+                                    $relation_second_level = ', recRelationshipsCache rel1';
+                                    if($this->value=="relmarker"){
+                                        $relation_second_level_where = ' and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=link1.rec_ID) '
+                                                                      .'or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=link1.rec_ID))';
+                                    }else{
+                                        $relation_second_level_where = ' and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=rd.dtl_Value) '
+                                                                      .'or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=rd.dtl_Value))';
+                                    }
+                                    
+                                }else{
+                            
+                                    $field_type = $limbs[$j]->pred->get_field_type_clause();
+                                    if(strpos($field_type,"like")!==false){
+                                        $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$field_type." limit 1)";
+                                    }
+                                    if($limbs[$j]->pred->value){
+                                        $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value(); 
+                                    }
+                                    
+                                }
+                        }else if($cn == 'TitlePredicate'){
+                                    $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
+                        }else if($cn == 'DateModifiedPredicate'){
+                                    $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                                    $field_value = str_replace("TOPBIBLIO.","",$field_value);
+                        }
+                    }//for predicates
+                    
+                    if($type_clause){ //record type clause is mandatory     
+                        
+                        if($isrelmarker){//allowed for $i==0 only
+                        
+                            $nest_joins .= ' left join Records link1 on link1.'.$type_clause;
+                            
+                        }else{
+                                                                                
+                            $nest_joins .= ' left join Records link'.$i.' on link'.$i.'.'.$type_clause;
+                            if($this->value!="relmarker" || $i>0){
+                                $nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID '; //STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
+                            }
+                            
+                            if($field_type){
+                                $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
+                            }
+                        }
+                    } else {
+                          return ''; //fail - record type is mandatory for nested queries
+                    }
+                }//for nests
+                
+                if($this->value=="relmarker"){
+                    
+                    $resq = $not . 'exists (select rel0.rrc_TargetRecID, rel0.rrc_SourceRecID from recRelationshipsCache rel0 '.$relation_second_level
+                                          .$nest_joins
+                                          .' where ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=link0.rec_ID)'
+                                          .' or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=link0.rec_ID)) '
+                                          .$relation_second_level_where
+                                          .$field_value.')';
+                    
+                    
+                }else{
+                
+                    $rd_type_clause = '';
+                    $rd_type_clause = $this->get_field_type_clause();
+                    if(strpos($rd_type_clause,"like")===false){
+                        $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;    
+                    }else{
+                        $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
+                    }
+                    
+                    $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '.$relation_second_level
+                                          .$nest_joins
+                                            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ' . $relation_second_level_where . $field_value . $rd_type_clause.')';
+                }
+                
+            }else{  //working copy!!!! 
+        
+                for ($i=0; $i < count($this->nests); ++$i) {
+            
+                    $limbs = $this->nests[$i];
+                    $type_clause = null;
+                    $field_type = null;
+                    
+                    for ($j=0; $j < count($limbs); ++$j) {
+                        $cn = get_class($limbs[$j]->pred);
+                        
+                        if($cn == 'TypePredicate'){
+                                    $type_clause = $limbs[$j]->pred->makeSQL(false);
+                        }else if($cn == 'FieldPredicate'){
+                                    $field_type = $limbs[$j]->pred->get_field_type_clause();
+                                    if(strpos($field_type,"like")!==false){
+                                        $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$field_type." limit 1)";
+                                    }
+                                    if($limbs[$j]->pred->value){
+                                        $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value(); 
+                                    }
+                        }else if($cn == 'TitlePredicate'){
+                                    $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
+                        }else if($cn == 'DateModifiedPredicate'){
+                                    $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                                    $field_value = str_replace("TOPBIBLIO.","",$field_value);
+                        }
+                    }//for predicates
+                    
+                    if($type_clause){ //record type clause is mandatory     STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
+                        $nest_joins .= ' left join Records link'.$i.' on '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID and link'.$i.'.'.$type_clause;
+                        if($field_type){
+                            $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
+                        }
+                    } else {
+                          return ''; //fail - record type is mandatory for nested queries
+                    }
+                }//for nests
+                
+                $rd_type_clause = '';
+                $rd_type_clause = $this->get_field_type_clause();
+                if(strpos($rd_type_clause,"like")===false){
+                    $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;    
+                }else{
+                    $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
+                }
+                
+                $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '
+                                      .$nest_joins
+                                        . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.')';
+                                        
+           }
                                     
                                     
 //error_log("BBB>>>".$resq);            
