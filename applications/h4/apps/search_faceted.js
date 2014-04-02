@@ -318,7 +318,7 @@ $.widget( "heurist.search_faceted", {
                        if(facets[facet_index].length>1){
                             prms.resource = facets[facet_index][0].query;  // t:5 f:25
                        }
-                       prms.dt = (type=="rectype")?"rectype":facets[facet_index][facets[facet_index].length-1].fieldid;
+                       prms.dt = (type=="rectype")  ?"rectype"  :facets[facet_index][facets[facet_index].length-1].fieldid;
                        
                        facet_requests.push(prms);
 

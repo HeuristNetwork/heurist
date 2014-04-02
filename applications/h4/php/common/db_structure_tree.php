@@ -175,9 +175,9 @@ function __getDetailSection($system, $dtID, $dtValue, $recursion_depth, $mode, $
                 $res = array();
                 if($mode==3){
                     $res['children'] = array(
-                        array("text"=>"id"),
+                        array("text"=>"internalid"),
                         array("text"=>"code"),
-                        array("text"=>"label"),
+                        array("text"=>"term"),
                         array("text"=>"conceptid"));
                 }
             break;

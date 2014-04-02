@@ -1053,13 +1053,15 @@ class FieldPredicate extends Predicate {
             $relation_second_level_where = '';
         
             if( true ){ //new test version
+            
+                $isrelmarker_0 = ($this->field_type=="relmarker");
+                $isrelmarker_1 = false;
                 
                 for ($i=0; $i < count($this->nests); ++$i) {
             
                     $limbs = $this->nests[$i];
                     $type_clause = null;
                     $field_type = null;
-                    $isrelmarker = false;
                     
                     for ($j=0; $j < count($limbs); ++$j) {
                         $cn = get_class($limbs[$j]->pred);
@@ -1067,11 +1069,11 @@ class FieldPredicate extends Predicate {
                         if($cn == 'TypePredicate'){
                                     $type_clause = $limbs[$j]->pred->makeSQL(false);  // rec_RecTypeID in (12,14)
                         }else if($cn == 'FieldPredicate'){
-                                if($i==0 && $limbs[$j]->pred->value=="relmarker"){ //allowed for i==0 only
-                                    $isrelmarker = true;
+                                if($i==0 && $limbs[$j]->pred->field_type=="relmarker"){ //allowed for i==0 only
+                                    $isrelmarker_1 = true;
                                     
                                     $relation_second_level = ', recRelationshipsCache rel1';
-                                    if($this->value=="relmarker"){
+                                    if($isrelmarker_0){
                                         $relation_second_level_where = ' and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=link1.rec_ID) '
                                                                       .'or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=link1.rec_ID))';
                                     }else{
@@ -1100,27 +1102,27 @@ class FieldPredicate extends Predicate {
                     
                     if($type_clause){ //record type clause is mandatory     
                         
-                        if($isrelmarker){//allowed for $i==0 only
-                        
-                            $nest_joins .= ' left join Records link1 on link1.'.$type_clause;
-                            
-                        }else{
-                                                                                
                             $nest_joins .= ' left join Records link'.$i.' on link'.$i.'.'.$type_clause;
-                            if($this->value!="relmarker" || $i>0){
-                                $nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID '; //STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
+                            if($i==0){
+                                if(!$isrelmarker_0)
+                                 $nest_joins .= ' and rd.dtl_Value=link0.rec_ID ';    
+                            }else{
+                                if(!$isrelmarker_1)
+                                 $nest_joins .= ' and linkdt0.dtl_Value=link1.rec_ID ';    
                             }
+                            
+                            //$nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID '; //STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
                             
                             if($field_type){
                                 $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
                             }
-                        }
+                        
                     } else {
                           return ''; //fail - record type is mandatory for nested queries
                     }
                 }//for nests
                 
-                if($this->value=="relmarker"){
+                if($isrelmarker_0){
                     
                     $resq = $not . 'exists (select rel0.rrc_TargetRecID, rel0.rrc_SourceRecID from recRelationshipsCache rel0 '.$relation_second_level
                                           .$nest_joins
@@ -1294,10 +1296,10 @@ class FieldPredicate extends Predicate {
             $isin = false;
             $isnumericvalue = is_numeric($this->value);
         
-            $match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
+            $match_value = '"' . ( $isnumericvalue? floatval($this->value) : mysql_real_escape_string($this->value) ) . '"';
 
             if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                $match_pred = " = $match_value";
+                $match_pred = ' = "$match_value"'; //for unknown reason comparison with numeric takes ages
             } else if ($this->parent->lessthan) {
                 $match_pred = " < $match_value";
             } else if ($this->parent->greaterthan) {

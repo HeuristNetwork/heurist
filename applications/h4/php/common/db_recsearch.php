@@ -49,20 +49,39 @@ function recordSearchMinMax($system, $params){
    return $response;
 }
 
+
+//$resource - t:20 f:41
+function _getRt_Ft($resource)
+{
+        if($resource){
+
+            $vr = explode(" ", $resource);
+            $resource_rt = substr($vr[0],2);
+            $resource_field = $vr[1];
+            if(strpos($resource_field,"f:")===0){
+                $resource_field = substr($resource_field,2);
+            }
+            
+            return array("rt"=>$resource_rt, "field"=>$resource_field);
+        }
+        
+        return null;
+}   
 /**
 * Find
 * 
 * @param mixed $system
-* @param mixed $params - array  rt - record type(s); (if nested)
-*                               dt - detail type(s) or recTitle, recModified, 
-*                               type - field type (freetext, date, integer), 
+* @param mixed $params - array  dt - detail type(s) ID or recTitle, recModified,      - field for current query
+*                               type - field type (freetext, date, integer), for deepest level
 *                               q - current query
 *                               w - domain
+*                               resource - facet query 
+* 
+* The idea is to add count to current search - this search is always returns rectypes defined in level 0
+* 
 */
 function recordSearchFacets($system, $params){
 
-    //@$params['rt'] && 
-    
     if(@$params['dt'] && @$params['type']){
 
         $mysqli = $system->get_mysqli();
@@ -74,6 +93,69 @@ function recordSearchFacets($system, $params){
         if(strpos($fieldid,"f:")===0){
             $fieldid = substr($fieldid,2);
         }
+        
+        //fill array max length 3  from level 0 to 2
+        $links = array();
+        $links[0] = array("field"=>$fieldid);
+        
+        if(@$params['level1']){
+            $links[1] = _getRt_Ft($params['level1']);
+            if(@$params['level2']){
+                $links[2] = _getRt_Ft($params['level2']);
+            }
+        }
+        
+                    $resource_rt0 = "";
+                    $resource_rt1 = "";   
+                    $resource_field0 = "";
+                    $resource_field1 = "";
+                    
+                    // in case first field and second title
+                    $where_clause2 = ", recDetails TOPDET "
+                        ." LEFT JOIN Records linked0 ON (TOPDET.dtl_Value=linked0.rec_ID and linked0.rec_RecTypeID in (".$resource_rt0.")) "
+                        ." LEFT JOIN recDetails linkeddt0 ON (linkeddt0.dtl_RecID=linked0.rec_ID and linkeddt0.dtl_DetailTypeID=".$resource_field0.")"
+                        ." LEFT JOIN Records linked1 ON (linkeddt0.dtl_Value=linked1.rec_ID and linked1.rec_RecTypeID in (".$resource_rt1.")) "
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and ";
+                    
+                    // in case 2 levels
+                    $where_clause2 = ", recDetails TOPDET "
+                        ." LEFT JOIN Records linked0 ON (TOPDET.dtl_Value=linked0.rec_ID and linked0.rec_RecTypeID in (".$resource_rt0.")) "
+                        ." LEFT JOIN recDetails linkeddt0 ON (linkeddt0.dtl_RecID=linked0.rec_ID and linkeddt0.dtl_DetailTypeID=".$resource_field0.")"
+                        ." LEFT JOIN Records linked1 ON (linkeddt0.dtl_Value=linked1.rec_ID and linked1.rec_RecTypeID in (".$resource_rt1.")) "
+                        ." LEFT JOIN recDetails linkeddt1 ON (linkeddt1.dtl_RecID=linked1.rec_ID and linkeddt1.dtl_DetailTypeID=".$resource_field1.")"
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt1.dtl_Value is not null and ";
+                        
+                    // in case relaionship and second detail (remove dt in case title)   
+                    $where_clause2 = ", recRelationshipsCache rel0 "
+                        ." LEFT JOIN Records linked0 ON (linked0.rec_RecTypeID in (".$resource_rt0.")) "
+                        ." LEFT JOIN recDetails linkeddt0 ON (linkeddt0.dtl_RecID=linked0.rec_ID and linkeddt0.dtl_DetailTypeID=".$resource_field0.")"
+                        ." LEFT JOIN Records linked1 ON (linkeddt0.dtl_Value=linked1.rec_ID and linked1.rec_RecTypeID in (".$resource_rt1.")) "
+                        ." LEFT JOIN recDetails linkeddt1 ON (linkeddt1.dtl_RecID=linked1.rec_ID and linkeddt1.dtl_DetailTypeID=".$resource_field1.")"
+                        ." WHERE ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=linked0.rec_ID) "
+                        ."     or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=linked0.rec_ID)) and linkeddt1.dtl_Value is not null and ";
+
+                    // in case 2 relaionships
+                    $where_clause2 = ", recRelationshipsCache rel0, recRelationshipsCache rel1 "
+                        ." LEFT JOIN Records linked0 ON (linked0.rec_RecTypeID in (".$resource_rt0.")) "
+                        ." LEFT JOIN Records linked1 ON (linked1.rec_RecTypeID in (".$resource_rt1.")) "
+                        ." WHERE ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=linked0.rec_ID) "
+                        ."     or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=linked0.rec_ID)) "
+                        ."    and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=linked1.rec_ID)"
+                        ."     or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=linked1.rec_ID)) and ";
+
+                    // in pointer and relaionships
+                    $where_clause2 = ", recDetails TOPDET, recRelationshipsCache rel1 "
+                        ." LEFT JOIN Records linked0 ON (TOPDET.dtl_Value=linked0.rec_ID and linked0.rec_RecTypeID in (".$resource_rt0.")) "
+
+                        ." LEFT JOIN Records linked1 ON (linked1.rec_RecTypeID in (".$resource_rt1.")) "
+                        ." LEFT JOIN recDetails linkeddt1 ON (linkeddt1.dtl_RecID=linked1.rec_ID and linkeddt1.dtl_DetailTypeID=".$resource_field1.")"
+                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and "
+                        ."    and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=linked1.rec_ID)"
+                        ."     or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=linked1.rec_ID)) and ";
+                        
+                    
+        
+        
         
         //nested resource pointer
         $resource = @$params['resource'];  // f:15(t:20 f:41)  f:15(t:20 f:41(t:10 title))
@@ -93,11 +175,12 @@ function recordSearchFacets($system, $params){
             //find count by first letter
             if($fieldid=='recTitle' || $resource_field=='title'){
                 
-                if($resource_rt){
+                if($resource_rt){   //second level
                     
                     $select_clause = "SELECT SUBSTRING(trim(linked.rec_Title), 1, 1) as alpha, count(*) as cnt ";
-                    $where_clause = ", recDetails TOPDET LEFT JOIN Records linked ON (TOPDET.dtl_Value=linked.rec_ID and linked.rec_RecTypeID in (".$resource_rt.")) " //(STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0
-                        ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and ";
+                    $where_clause = ", recDetails TOPDET "
+                         ." LEFT JOIN Records linked ON (TOPDET.dtl_Value=linked.rec_ID and linked.rec_RecTypeID in (".$resource_rt.")) " //(STRCMP(TOPDET.dtl_Value, linked.rec_ID)=0
+                         ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and ";
                     $grouporder_clause = " GROUP BY SUBSTRING(trim(linked.rec_Title), 1, 1) ORDER BY SUBSTRING(trim(linked.rec_Title), 1, 1)";
                     
                 }else{
@@ -121,10 +204,13 @@ function recordSearchFacets($system, $params){
                         ." LEFT JOIN recDetails linkeddt ON (linkeddt.dtl_RecID=linked.rec_ID and linkeddt.dtl_DetailTypeID=".$resource_field.")"
                         ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and linkeddt.dtl_Value is not null and ";
                     $grouporder_clause = " GROUP BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(linkeddt.dtl_Value), 1, 1)";
+
                     
                 }else{
                     $select_clause = "SELECT SUBSTRING(trim(dtl_Value), 1, 1) as alpha, count(*) ";
-                    $where_clause = ", recDetails WHERE dtl_RecId=rec_ID and dtl_DetailTypeId=".$fieldid." and ";
+                    $where_clause = ", recDetails TOPDET "
+                                   ." WHERE TOPDET.dtl_RecId=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeId=".$fieldid." and ";
+                                   
                     $grouporder_clause = " GROUP BY SUBSTRING(trim(dtl_Value), 1, 1) ORDER BY SUBSTRING(trim(dtl_Value), 1, 1)";    
                 }
             }
@@ -159,7 +245,8 @@ function recordSearchFacets($system, $params){
     
         $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
         
-// error_log("COUNT >>>".$query);
+// 
+error_log("COUNT >>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -221,8 +308,7 @@ function recordSearch($system, $params, $need_structure, $need_details)
     
     $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
-//DEGUG 
-error_log("AAA ".$query);
+//DEGUG error_log("AAA ".$query);
 
     $res = $mysqli->query($query);
     if (!$res){

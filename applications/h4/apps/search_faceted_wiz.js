@@ -23,7 +23,7 @@ $.widget( "heurist.search_faceted_wiz", {
   // rectype_as_facets
   // fieldtypes:[] //allowed field types besides enum amd resource
   //  rectypes:[]
-  //  facets:[[{ title:node.title, type: freetext|enum|integer, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value} }, ]  
+  //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value} }, ]  
   
   
   step: 0, //current step
@@ -245,7 +245,7 @@ $.widget( "heurist.search_faceted_wiz", {
                    
           }  if(this.step==2 && newstep==3){  //set ranges
               
-              if(!this.initFacetsRanges()){
+              if(!this._initStep3_FacetsRanges()){
                   return;
               }
               
@@ -440,8 +440,8 @@ $.widget( "heurist.search_faceted_wiz", {
       }
   }
   
-  // 4d step
-  , initFacetsRanges: function() {
+  // 3d step
+  , _initStep3_FacetsRanges: function() {
     
               var listdiv = $(this.step3).find("#facets_list");
               listdiv.empty();
@@ -485,7 +485,8 @@ $.widget( "heurist.search_faceted_wiz", {
                   
                   var q = node.key;
                   if(q=="recTitle") q = "title"
-                  else if(q=="recModified") q = "modified";
+                  else if(q=="recModified") q = "modified"
+                  else if(type=="relmarker") q = "f:relmarker";
                   if(fieldnode.data.rt_ids){ //constrained
                         q = "t:"+fieldnode.data.rt_ids+" "+q; 
                   }
@@ -569,7 +570,7 @@ $.widget( "heurist.search_faceted_wiz", {
               }
   }
   
-  //5. show facet search preview
+  //4. show facet search preview
   ,_initStep4_FacetsPreview: function(){
       
        this._defineDomain();
