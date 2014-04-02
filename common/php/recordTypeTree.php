@@ -219,10 +219,10 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
 
                 $res = array(
                     "termfield_name" => $dt_label,
-                    "label"=>"Term",
+                    "term"=>"Term", //was label
                     "code"=>"Code",
                     "conceptid"=>"Concept ID",
-                    "id"=>"Internal ID");
+                    "internalid"=>"Internal ID"); //was id
                 
             break;
 

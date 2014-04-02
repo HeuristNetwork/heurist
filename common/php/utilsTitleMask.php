@@ -488,7 +488,9 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 }
 
                 if (strcasecmp($inner_field_name,'id')==0 ||
+                strcasecmp($inner_field_name,'internalid')==0 ||
                 strcasecmp($inner_field_name,'label')==0 ||
+                strcasecmp($inner_field_name,'term')==0 ||
                 strcasecmp($inner_field_name,'code')==0 ||
                 strcasecmp($inner_field_name,'conceptid')==0)
                 {
