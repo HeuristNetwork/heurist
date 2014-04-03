@@ -605,6 +605,7 @@ class AndLimb {
 
             case 'field':
             case 'f':
+
             $colon_pos = strpos($raw_pred_val, ':');
             if (! $colon_pos) {
                 if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
@@ -1288,7 +1289,13 @@ class FieldPredicate extends Predicate {
     //
     function get_field_value(){
         
-        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        
+        if (preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
+            
+            $vals = explode("<>", $this->value);
+            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+            
+        }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             // comma-separated list of ids
             $match_pred = ' in ('.$this->value.')';
             $isin = true;

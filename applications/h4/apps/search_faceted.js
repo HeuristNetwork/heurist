@@ -176,23 +176,6 @@ $.widget( "heurist.search_faceted", {
            return full_query;
   }
   
-  ,getQueryForCount: function(facet){
-
-            var this_query = '';
-            var len2 = facet.length;
-            for (i=0;i<len2;i++){
-                
-                if(i==0){
-                    this_query = facet[i].query; //+':'+cv;
-                }else if (i==len2-1){
-                    this_query = facet[i].query+':"('+this_query+')"';
-                }else{
-                    this_query = facet[i].query+':('+this_query+')';
-                }
-            }
-            return this_query; 
-      
-  }
 
   ,doRender: function(){
       
@@ -204,7 +187,7 @@ $.widget( "heurist.search_faceted", {
        if(top.HEURIST.util.isArrayNotEmpty(facets)){
            
            var detailtypes = top.HEURIST.detailtypes.typedefs;
-           var facet_index, i, len = facets.length;
+           var facet_index, i, len2 = facets.length;
            var current_query = this.getQuery();
            var facet_requests = [];
            var colors = ["#A2A272","#9E65B3","#AC9EA0","#C57152","#87AE94",
@@ -217,7 +200,7 @@ $.widget( "heurist.search_faceted", {
            $('<div>').html(current_query).appendTo(listdiv);
            var clr_index = 0;
             
-           for (facet_index=0;facet_index<len;facet_index++){
+           for (facet_index=0;facet_index<len2;facet_index++){
                
                 //get title
                 var title = '';
@@ -225,7 +208,7 @@ $.widget( "heurist.search_faceted", {
                 for (i=0;i<facets[facet_index].length;i++){
                        title = "<div class='truncate'>"+facets[facet_index][i].title+'</div> '+title;      
                 }
-                var type = facets[facet_index][0].type;
+                var type = facets[facet_index][0].type;  //deepest value
                 var fieldid = facets[facet_index][0].fieldid;
                 var query = facets[facet_index][0].query;
                 var currentvalue = facets[facet_index][0].currentvalue;
@@ -296,10 +279,14 @@ $.widget( "heurist.search_faceted", {
                          if(term.children.length>0){
                              
                                var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, term:term };
-                               if(facets[facet_index].length>1){
-                                    prms.resource = facets[facet_index][0].query;  // t:5 f:25
+                               var len = facets[facet_index].length;
+                               prms.level0 = facets[facet_index][len-1].fieldid; //top level fieldid  f:XXX
+                               if(len>1){
+                                    prms.level1 = facets[facet_index][len-2].query;
+                                    if(len>2){
+                                        prms.level2 = facets[facet_index][len-3].query;
+                                    }
                                }
-                               prms.dt = facets[facet_index][facets[facet_index].length-1].fieldid;
                              
                                facet_requests.push(prms);
                          }else{
@@ -315,10 +302,19 @@ $.widget( "heurist.search_faceted", {
                    if(top.HEURIST.util.isnull(currentvalue)){
                    
                        var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index};
-                       if(facets[facet_index].length>1){
-                            prms.resource = facets[facet_index][0].query;  // t:5 f:25
+                       var len = facets[facet_index].length;
+                       prms.level0 = facets[facet_index][len-1].fieldid; //top level fieldid  f:XXX
+                       if(len>1){
+                            prms.level1 = facets[facet_index][len-2].query;
+                            if(len>2){
+                                prms.level2 = facets[facet_index][len-3].query;
+                            }
                        }
-                       prms.dt = (type=="rectype")  ?"rectype"  :facets[facet_index][facets[facet_index].length-1].fieldid;
+                       if(type=="rectype"){
+                            prms.level0 = "rectype";
+                       }else{
+                            prms.dt = facets[facet_index][len-1].fieldid;
+                       }
                        
                        facet_requests.push(prms);
 
@@ -410,6 +406,16 @@ $.widget( "heurist.search_faceted", {
                                             }
                                         }
                                         
+                                    }else if(response.type=="float" || response.type=="integer"){
+                                        
+                                        for (i=0;i<response.data.length;i++){
+                                            var cterm = response.data[i];
+                                            
+                                            if(facet_index>=0){
+                                                var f_link = that._createFacetLink(facet_index, {text:cterm[0], query: cterm[0].replace(' ~ ','<>') , count:cterm[1]});
+                                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                            }
+                                        }
                                      
                                     }else{
                                         for (i=0;i<response.data.length;i++){
@@ -429,7 +435,7 @@ $.widget( "heurist.search_faceted", {
                                     that._getFacets(requests);
                              
                                 }else{
-                                    top.HEURIST.util.showMsgDlg(response.message);
+                                    top.HEURIST.util.showMsgErr(response.message);
                                 }
             };            
             
