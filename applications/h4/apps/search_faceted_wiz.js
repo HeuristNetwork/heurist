@@ -22,8 +22,8 @@ $.widget( "heurist.search_faceted_wiz", {
   // isadvanced
   // rectype_as_facets
   // fieldtypes:[] //allowed field types besides enum amd resource
-  //  rectypes:[]
-  //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value} }, ]  
+  //  rectypes:[]                                                                                                                                     //for enums     //for other
+  //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value, termid:termid, parent:currentvalue} }, ]  
   
   
   step: 0, //current step
@@ -486,7 +486,7 @@ $.widget( "heurist.search_faceted_wiz", {
                   var q = node.key;
                   if(q=="recTitle") q = "title"
                   else if(q=="recModified") q = "modified"
-                  else if(type=="relmarker") q = "f:relmarker";
+                  else if(fieldnode.data.type=="relmarker") q = "f:relmarker";
                   if(fieldnode.data.rt_ids){ //constrained
                         q = "t:"+fieldnode.data.rt_ids+" "+q; 
                   }

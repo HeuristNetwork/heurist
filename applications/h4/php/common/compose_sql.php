@@ -833,33 +833,57 @@ class Predicate {
         }
         return $this->query;
     }
+    
+    function isDateTime() {
+
+        if (strpos($this->value,"<>")>0) {
+            $vals = explode("<>", $this->value);
+            $timestamp0 = strtotime($vals[0]);
+            $timestamp1 = strtotime($vals[1]);
+        }else{
+            $timestamp0 = strtotime($this->value);
+            $timestamp1 = 1;
+        }
+        return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+    }
 
     function makeDateClause() {
-        $timestamp = strtotime($this->value);
-        if ($this->parent->exact) {
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
-            return "= '$datestamp'";
-        }
-        else if ($this->parent->lessthan) {
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
-            return "< '$datestamp'";
-        }
-        else if ($this->parent->greaterthan) {
-            $datestamp = date('Y-m-d H:i:s', $timestamp);
-            return "> '$datestamp'";
-        }
-        else {
-            // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
-            if (preg_match('!^\d{4}$!', $this->value)) {
-                $date = date('Y', $timestamp);
+        
+        if (strpos($this->value,"<>")) {
+            
+            $vals = explode("<>", $this->value);
+            $timestamp0 = strtotime($vals[0]);
+            $timestamp1 = strtotime($vals[1]);
+            return "between '".date('Y-m-d', $timestamp0)."' and '".date('Y-m-d', $timestamp1)."'";
+            
+        }else{
+        
+            $timestamp = strtotime($this->value);
+            if ($this->parent->exact) {
+                $datestamp = date('Y-m-d H:i:s', $timestamp);
+                return "= '$datestamp'";
             }
-            else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
-                $date = date('Y-m', $timestamp);
+            else if ($this->parent->lessthan) {
+                $datestamp = date('Y-m-d H:i:s', $timestamp);
+                return "< '$datestamp'";
+            }
+            else if ($this->parent->greaterthan) {
+                $datestamp = date('Y-m-d H:i:s', $timestamp);
+                return "> '$datestamp'";
             }
             else {
-                $date = date('Y-m-d', $timestamp);
+                // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
+                if (preg_match('!^\d{4}$!', $this->value)) {
+                    $date = date('Y', $timestamp);
+                }
+                else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
+                    $date = date('Y-m', $timestamp);
+                }
+                else {
+                    $date = date('Y-m-d', $timestamp);
+                }
+                return "like '$date%'";
             }
-            return "like '$date%'";
         }
     }
 }
@@ -1225,7 +1249,7 @@ class FieldPredicate extends Predicate {
             $match_pred_for_term = " = trm.trm_ID";
         }
 
-        $timestamp = $isin ?false:strtotime($this->value);
+        $timestamp = $isin ?false:$this->isDateTime();
         if ($timestamp) {
             $date_match_pred = $this->makeDateClause();
         }
@@ -1290,7 +1314,7 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         
         
-        if (preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
+        if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
             
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
@@ -1570,10 +1594,15 @@ class DatePredicate extends Predicate {
 
     function makeSQL() {
         $col = $this->col;
-        $timestamp = strtotime($this->value);
-        if ($timestamp  &&  $timestamp != -1) {
-            $not = ($this->parent->negate)? 'not' : '';
-            return "$not $col " . $this->makeDateClause();
+        
+        if($this->isDateTime()){
+            $not = ($this->parent->negate)? 'not' : '';    
+            $s = $this->makeDateClause();
+            if(strpos($s, "between")===0){
+                return " $col $not ".$s;
+            }else{
+                return " $not $col ".$s;
+            }
         }
         return '1';
     }
