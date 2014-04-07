@@ -23,7 +23,8 @@ $.widget( "heurist.search_faceted_wiz", {
   // rectype_as_facets
   // fieldtypes:[] //allowed field types besides enum amd resource
   //  rectypes:[]                                                                                                                                     //for enums     //for other
-  //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", currentvalue:{text:label, query:value, termid:termid, parent:currentvalue} }, ]  
+  //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", 
+  //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]  
   
   
   step: 0, //current step

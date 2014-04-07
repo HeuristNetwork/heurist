@@ -61,7 +61,8 @@ $.widget( "heurist.search_faceted", {
     
 
       
-    this._refresh();
+    //this._refresh();
+    this.doReset();
 
   }, //end _create
 
@@ -73,7 +74,8 @@ $.widget( "heurist.search_faceted", {
   _setOptions: function( options ) {
         this._superApply( arguments );
         this.cached_counts = [];
-        this._refresh();
+        //this._refresh();
+        this.doReset();
   },
   
   /* 
@@ -119,6 +121,7 @@ $.widget( "heurist.search_faceted", {
            
            for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index][0].currentvalue = null;
+                facets[facet_index][0].history = [];
            }
            this._refresh();
        }
@@ -320,6 +323,7 @@ $.widget( "heurist.search_faceted", {
                        facet_requests.push(prms);
                    */    
                    var steps = 0;
+                   var k, len = facets[facet_index][0].history.length;    
 
                    if(!top.HEURIST.util.isnull(currentvalue)){
                        $facet_values.css('background','none');
@@ -335,7 +339,7 @@ $.widget( "heurist.search_faceted", {
                                 .appendTo($facet_values);
                        $("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_values);
                        */
-                       
+                       /*
                                 var that = this;
                                 function __renderParent2(cvalue, $before){
                                     
@@ -357,10 +361,20 @@ $.widget( "heurist.search_faceted", {
                                 $before.appendTo($facet_values);
                                 __renderParent2(currentvalue, $before);
                                 $facet_values.append($("<br>"));
+                           */     
+                            for (k=0;k<len;k++){
+                                var cvalue = facets[facet_index][0].history[k];
+                                var f_link = this._createFacetLink(facet_index, cvalue);
+                                var $span = $("<span>").css('display','inline-block').append(f_link).appendTo($facet_values);
+                                if(k<len-1){
+                                    $span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
+                                }
+                            }
+                            //$("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_values);
                    }
                    
-                   if( (type=="rectype" && step==0) || steps<2 ){ // top.HEURIST.util.isnull(currentvalue)){
-                       var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, step:steps};
+                   if( (type=="rectype" && len==0) || len<3 ){ // top.HEURIST.util.isnull(currentvalue)){
+                       var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, step:len-1};
                        var len = facets[facet_index].length;
                        prms.level0 = facets[facet_index][len-1].fieldid; //top level fieldid  f:XXX
                        if(len>1){
@@ -470,7 +484,7 @@ $.widget( "heurist.search_faceted", {
                                             if(facet_index>=0){
                                                 var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[2], count:cterm[1]});
                                                 $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
-                                                if(i>100){
+                                                if(i>50){
                                                      $("<div>").css({"display":"inline-block","padding-right":"6px"}).html('more '+(response.data.length-i)+' results').appendTo($facet_values);
                                                      break;       
                                                 }
@@ -539,7 +553,11 @@ $.widget( "heurist.search_faceted", {
   // cterm - {text, query, count}
   ,_createFacetLink : function(facet_index, cterm){
       
-            var f_link = $("<a>",{href:'#', facet_idx:facet_index, facet_value:cterm.query, facet_label:cterm.text}).addClass("facet_link")
+            var step = cterm.step;
+            var hist = this.options.params.facets[facet_index][0].history;
+            var step = hist.length+1;
+      
+            var f_link = $("<a>",{href:'#', facet_index:facet_index, facet_value:cterm.query, facet_label:cterm.text, step:step}).addClass("facet_link")
             $("<span>").text(cterm.text).appendTo(f_link);
             if(cterm.count>0){
                 $("<span>").text(" ("+cterm.count+")").appendTo(f_link);
@@ -550,13 +568,25 @@ $.widget( "heurist.search_faceted", {
                 click: function(event) { 
                   
                   var link = $(event.target).parent();
-                  var facet_index = Number(link.attr('facet_idx'));
+                  var facet_index = Number(link.attr('facet_index'));
                   var value = link.attr('facet_value');                  
                   var label = link.attr('facet_label');                  
+                  var step = link.attr('step');
                   if(top.HEURIST.util.isempty(value)){
                       this.options.params.facets[facet_index][0].currentvalue = null;
+                      this.options.params.facets[facet_index][0].history = [];
                   }else{
-                      this.options.params.facets[facet_index][0].currentvalue = {text:label, query:value, parent:this.options.params.facets[facet_index][0].currentvalue};    
+                      var currentvalue = {text:label, query:value, step:step};
+                      
+                      //replace/add for current step and remove that a bigger
+                      if(hist.length==0){
+                            hist.push({text:top.HR('all'), query:null});
+                      }else{
+                            hist = hist.slice(0,step);
+                      }
+
+                      this.options.params.facets[facet_index][0].currentvalue = currentvalue
+                      hist.push(currentvalue);    
                   }
                   //
                   this._refresh();
