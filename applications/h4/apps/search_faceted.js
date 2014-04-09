@@ -156,9 +156,9 @@ $.widget( "heurist.search_faceted", {
                         for (i=0;i<len2;i++){
                             
                             if(i==0){
-                                this_query = facets[facet_index][i].query+':'+cv;
-                            }else if (i==len2-1){
-                                this_query = facets[facet_index][i].query+':"('+this_query+')"';
+                                this_query = facets[facet_index][i].query+':"'+cv+'"';
+                            //}else if (i==len2-1){
+                            //    this_query = facets[facet_index][i].query+':"('+this_query+')"';
                             }else{
                                 this_query = facets[facet_index][i].query+':('+this_query+')';
                             }

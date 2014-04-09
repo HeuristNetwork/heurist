@@ -333,7 +333,7 @@ class Query {
         $this->sort_phrases = array();
         $this->sort_tables = array();
 
-        // Find any 'vt:' phrases in the query, and pull them out.
+        // Find any 'vt:' phrases in the query, and pull them out.   vt - visibility type
         while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
             $this->addVisibilityTypeRestriction(substr($matches[2],3));
             $text = preg_replace('/\bvt:\S+/i', '', $text); 
@@ -459,10 +459,18 @@ class OrLimb {
         $this->and_limbs = array();
         if (substr_count($text, '"') % 2 != 0) $text .= '"';    // unmatched quote
 
-        //@todo - use () as well
         
-        if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
+        //preg_match('/\((.+?)(?:\((.+)\))?\)/', $text, $matches);
+//        preg_match('/\(([^)]+)\)*/', $text, $matches);
+//error_log("DEBUG1>>>>> ".print_r($matches,true));
+        
+        //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
+
+         // split by spaces - exclude text inside quotes and parentheses           
+        if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
+            
             $and_texts = $matches[0];
+//error_log("DEBUG2>>>>> ".print_r($and_texts,true));
             for ($i=0; $i < count($and_texts); ++$i)
                 if ($and_texts[$i]) $this->addAndLimb($and_texts[$i]);
         }
@@ -1034,7 +1042,7 @@ class FieldPredicate extends Predicate {
             $value = substr($value, 1);
         }
         
-        //inside brackets 
+        //inside parentheses 
         preg_match('/\((.+?)(?:\((.+)\))?\)/', $this->value, $matches);
         if(count($matches)>0 && $matches[0]==$this->value){
 

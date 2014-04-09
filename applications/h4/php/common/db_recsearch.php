@@ -555,7 +555,7 @@ GROUP BY EXTRACT(YEAR_MONTH FROM record_date)
                 if(count($ranges)>0 && @$ranges[$row[0]]){
                     array_push($data, array($ranges[$row[0]]["label"], $row[1], $ranges[$row[0]]["query"]));
                 }else{
-                    array_push($data, array($row[0], $row[1], ($step_level==0)?$row[0]."%":$row[0]) );
+                    array_push($data, array($row[0], $row[1], ($step_level<2)?$row[0]."%":$row[0]) );
                     //array_push($data, $row);
                 }
             }

@@ -513,7 +513,9 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
             }
             if($dt_type!== 'resource') {
                 //ERROR
-                return array("'$parent_field_name' must be either a terms list or a record pointer field type");
+                return array("'$parent_field_name' must be either a record type name, a terms list field name or a record pointer field name. "
+                ."Periods are used as separators between record type name and field names. If you have a period in your record type name or field name, "
+                ."please rename it to use an alternative punctuation such as - _ , ) |");
             }
 
         }else{
