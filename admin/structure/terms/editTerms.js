@@ -562,7 +562,7 @@ function EditTerms() {
 			if(Hul.isempty(sName)){
                 swarn = "Field 'Display Name' is mandatory"
 			}else {
-                swarn = Hul.validateName(sName, "Field 'Display Name'");
+                //IJ 2014-04-09 swarn = Hul.validateName(sName, "Field 'Display Name'");
             }
             if(swarn!=""){
                 alert(swarn);

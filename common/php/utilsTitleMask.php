@@ -321,8 +321,10 @@ function _titlemask__get_enum_value($enum_id, $enum_param_name)
 {
     $ret = null;
 
-        if($enum_param_name==null){
+        if($enum_param_name==null || strcasecmp($enum_param_name,'term')==0){
             $enum_param_name = "label";
+        }else if(strcasecmp($enum_param_name,'internalid')==0){
+            $enum_param_name = "id";
         }
 
         $ress = mysql_query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
@@ -483,14 +485,14 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
             $dt_type = _titlemask__get_dt_field($rt, $rdt_id, 'dty_Type');
             if($dt_type=="enum" || $dt_type=="relationtype"){
 
-                if(!$inner_field_name){
+                if(!$inner_field_name || strcasecmp($inner_field_name,'term')==0){
                     $inner_field_name = "label";
+                }else if(strcasecmp($inner_field_name,'internalid')==0){
+                    $inner_field_name = "id";
                 }
 
                 if (strcasecmp($inner_field_name,'id')==0 ||
-                strcasecmp($inner_field_name,'internalid')==0 ||
                 strcasecmp($inner_field_name,'label')==0 ||
-                strcasecmp($inner_field_name,'term')==0 ||
                 strcasecmp($inner_field_name,'code')==0 ||
                 strcasecmp($inner_field_name,'conceptid')==0)
                 {

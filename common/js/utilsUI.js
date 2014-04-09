@@ -1877,7 +1877,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             if( name=="id" || name=="modified" || name=="rectitle"){
                    swarn = lbl+", you defined, is a reserved word. Please try an alternative";
             }else if (regex.test(name) ) {
-                   swarn = lbl+" contains punctuation characters which are not permitted in this context. Please use alphanumeric characters.";
+                   swarn = lbl+" contains 'full stop' characters which are not permitted in this context. Please use alphanumeric characters.";
             }
             return swarn;
     },
