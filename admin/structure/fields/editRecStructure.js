@@ -1194,7 +1194,22 @@ function EditRecStructure() {
 
 		//find max order and index to insert
 		var recs = _myDataTable.getRecordSet();
-		var index_toinsert = recs.getLength()-1;
+        var sels = _myDataTable.getSelectedRows();
+        
+        var row_index, k, len = recs.getLength();
+        var index_toinsert;
+        for (row_index = 0; row_index < len; row_index++ )
+        {
+            var rec = _myDataTable.getRecord(row_index);
+            if(sels[0]==rec.getId()){
+                index_toinsert = row_index+1;
+                break;
+            }
+        }
+        if(index_toinsert==null){
+		    index_toinsert = recs.getLength()-1;
+        }
+        
 		var order = 0;
 		if(index_toinsert<0){
 			index_toinsert = 0;
@@ -1204,7 +1219,7 @@ function EditRecStructure() {
 		}
 
 		//moves detail types to
-		var k;
+		
 		for(k=0; k<arrDty_ID.length; k++){
 			var dty_ID = arrDty_ID[k];
 			if(Hul.isnull(recDetTypes[dty_ID])){ //not added
@@ -1278,6 +1293,7 @@ function EditRecStructure() {
 
 			_myDataTable.addRows(data_toadd, index_toinsert);
 
+            _myDataTable.unselectAllRows();
 			_myDataTable.selectRow(index_toinsert);
 
 			// in case of addition - all fields were affected
