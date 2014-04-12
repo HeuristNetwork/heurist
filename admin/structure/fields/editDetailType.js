@@ -78,7 +78,8 @@ function DetailTypeEditor() {
 			_updatedDetails = [], //field values
 			_keepStatus,// Keeps current status for rollback if user decided to keep it
 			_keepType,	// Keeps current datatype for rollback
-			_db;
+			_db,
+            _dialogbox;
 
 	/**
 	* Initialization of input form
@@ -152,6 +153,8 @@ function DetailTypeEditor() {
 			_detailType[fi.dty_NonOwnerVisibility] = 'viewable';
 
 			Dom.get("dty_Type").disabled = false;
+            
+            $("#topdiv_closebtn").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
 		}else{
 			var el = Dom.get("dty_Type"),
 				ftype = _detailType[fi.dty_Type];
@@ -881,6 +884,11 @@ function DetailTypeEditor() {
 						_recreateTermsVocabSelector(that.keepType, null);
 						_recreateTermsPreviewSelector(that.keepType, null, null);
 						_recreateRecTypesPreview(that.keepType, null);
+                        
+                   if(el.value=="freetext" && _dtyID<0){
+                        _dialogbox = Hul.popupElement(window, $("#topdiv").get(0), {height: 500, width:800, title:"Information", modal:true} );   
+                   }
+                        
 				}
 		}else{
 					el.value = that.keepType;  //rollback
@@ -965,7 +973,7 @@ function DetailTypeEditor() {
 			 *	handles change status event
 			 */
 			onSelectRectype : _onSelectRectype,
-
+            
             showOtherTerms: function(){
                 
                 var allTerms = Dom.get("dty_JsonTermIDTree").value;

@@ -62,12 +62,12 @@
     function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
         global $msgInfoSaveRec;
         $msgInfoSaveRec = array(); // reset the message array
-        
+     
         mysql_query("start transaction");
         //	$log = " saving record ($recordID) ";
         $recordID = intval($recordID);
         $wg = intval($wg);
-        if ($wg || !is_logged_in()) {// non-member saves are not allowed
+        if ($wg>0 || !is_logged_in()) {// non-member saves are not allowed
             $res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
             if (mysql_num_rows($res) < 1) {
                 errSaveRec("invalid workgroup, record save aborted");
@@ -86,14 +86,17 @@
         }
         $now = date('Y-m-d H:i:s');
 
+        $wg = ($wg>=0?$wg:get_user_id());
+        
         // public records data
-        if (! $recordID) {
+        if (! $recordID) {  //new record
             //		$log .= "- inserting record ";
+            
             mysql__insert("Records", array(
                     "rec_RecTypeID" => $rectype,
                     "rec_URL" => $url,
                     "rec_ScratchPad" => $notes,
-                    "rec_OwnerUGrpID" => ($wg||$wg==0?$wg:get_user_id()),
+                    "rec_OwnerUGrpID" => $wg, //($wg||$wg==0?$wg:get_user_id()),
                     "rec_NonOwnerVisibility" => ($vis? $vis:"viewable"),
                     "rec_AddedByUGrpID" => get_user_id(),
                     "rec_Added" => $now,
@@ -125,13 +128,13 @@
                     "rec_RecTypeID" => $rectype,
                     "rec_URL" => $url,
                     "rec_ScratchPad" => $notes,
-                    "rec_OwnerUGrpID" => ($wg||$wg==0?$wg:get_user_id()),
+                    "rec_OwnerUGrpID" => $wg, //($wg||$wg==0?$wg:get_user_id()),
                     "rec_NonOwnerVisibility" => ($vis? $vis:"viewable"),
                     "rec_FlagTemporary" => 0,
                     "rec_Modified" => $now
                 ));
             if (mysql_error()) {
-                errSaveRec("database record update error - " . mysql_error());
+                errSaveRec("Database record update error - " . mysql_error());
                 return $msgInfoSaveRec;
             }
         }

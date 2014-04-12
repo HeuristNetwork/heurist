@@ -73,7 +73,7 @@ function GroupEditor() {
 				_recID = top.HEURIST.parameters.recID;
 				typeID = top.HEURIST.parameters.typeID;
 
-				if(_recID){
+				if(_recID>=0){
 					_entity = top.HEURIST.userGrp.groups[_recID];
 				}
 				if(Hul.isnull(typeID)){
@@ -81,7 +81,7 @@ function GroupEditor() {
 				}
 		}
 
-		if (_recID && Hul.isnull(_entity) ){
+		if (_recID>=0 && Hul.isnull(_entity) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: Group #"+_recID+"  not be found. Clicking 'save' button will create a new Group.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined

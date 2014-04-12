@@ -1,5 +1,4 @@
 <?php
-
 /*
 * Copyright (C) 2005-2013 University of Sydney
 *
@@ -13,7 +12,6 @@
 * or implied. See the License for the specific language governing permissions and limitations under
 * the License.
 */
-
 /**
 * brief description of file
 *
@@ -40,9 +38,6 @@
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
-
-
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
@@ -80,8 +75,12 @@ if ($addRecDefaults){
 $out = array("record" => array());
 
 foreach ($_REQUEST["records"] as $nonce => $record) {
+
 	if (! $record["id"]) {
 		$wg = defined(HEURIST_NEWREC_OWNER_ID) ? HEURIST_NEWREC_OWNER_ID:get_user_id();
+        $wg = intval($wg);
+        $wg = ($wg>=0?$wg:get_user_id());
+        
 		if(@$record["group"]){// check membership as non-member saves are not allowed
 			$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $record["group"]);
 			$wg = (mysql_num_rows($res) > 0 ? $record["group"]: get_user_id());// if not a member we save the record with user as owner
@@ -111,6 +110,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 		}
 	}
 	$nonces[$nonce] = $_REQUEST["records"][$nonce]["id"];
+    
 }
 
 foreach ($_REQUEST["records"] as $nonce => $record) {
@@ -152,8 +152,12 @@ if (count($retitleRecs) > 0) {
 		$mask = mysql_fetch_assoc($res);
 		$type = $mask["rty_ID"];
 		$mask = $mask["rty_TitleMask"];
+
+error_log("title mask ".$id."   ".$mask);
         
         $new_title = fill_title_mask($mask, $id, $type);
+
+error_log($new_title);
 		if ($new_title) {
 			mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($new_title) . "' where rec_ID = $id");
 		}

@@ -296,7 +296,7 @@ $query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrp
 $details = mysql_fetch_row($query);
 $fullName = $details[0] . " " . $details[1];
 $eMail = $details[2];
-print "<p>Please log in as an administrator or contact <a href=\"mailto:$email\">$fullname</a>". 
+print "<p>Please log in as an administrator or contact <a href=\"mailto:$eMail\">$fullName</a>". 
       "to request a higher<br> level of access or membership of the group of owners of this function.".
       "<br>If you have lost access rights that you think you should have, please log out and log back in again.</p>"        
 ?>

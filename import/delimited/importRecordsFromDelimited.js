@@ -175,6 +175,7 @@ FlexImport = (function () {
 					FlexImport.fields[k] = lines[i].split(fieldRegex);
 					for (var j = 0; j < FlexImport.fields[k].length; ++j) {
 						FlexImport.fields[k][j] = FlexImport.fields[k][j].replace(doubleQuoteRegex, FlexImport.quote);
+                        //FlexImport.fields[k][j] = FlexImport.fields[k][j].trim();
 						FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
 					}
 					k++;

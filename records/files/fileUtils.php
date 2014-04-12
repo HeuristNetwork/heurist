@@ -37,6 +37,12 @@
   }
 
   function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true) {
+      
+    if(!function_exists("curl_init"))  {
+//DEBUG error_log(" CURL is not installed!!!");
+        return false;
+    }
+      
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
