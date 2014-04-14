@@ -459,20 +459,20 @@ class OrLimb {
         $this->and_limbs = array();
         if (substr_count($text, '"') % 2 != 0) $text .= '"';    // unmatched quote
 
-        
-        //preg_match('/\((.+?)(?:\((.+)\))?\)/', $text, $matches);
-//        preg_match('/\(([^)]+)\)*/', $text, $matches);
-//error_log("DEBUG1>>>>> ".print_r($matches,true));
-        
         //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
 
          // split by spaces - exclude text inside quotes and parentheses           
         if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
             
             $and_texts = $matches[0];
-//error_log("DEBUG2>>>>> ".print_r($and_texts,true));
-            for ($i=0; $i < count($and_texts); ++$i)
-                if ($and_texts[$i]) $this->addAndLimb($and_texts[$i]);
+//csv import error_log("DEBUG2>>>>> ".print_r($and_texts,true));
+            for ($i=0; $i < count($and_texts); ++$i){
+                $str = $and_texts[$i];
+                if ($str) {
+                    $str = str_replace('+', " ", $str); //workaround until understand how to regex F:("AA BB CC")
+                    $this->addAndLimb($str);
+                }
+            }
         }
     }
 

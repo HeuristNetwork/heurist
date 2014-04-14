@@ -42,6 +42,11 @@
     }
   }
 
+  /**
+  * 
+  * 
+  * @param mixed $data
+  */
   function add_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
     //error_log("data ".print_r($data,true));
@@ -106,6 +111,7 @@
     $processedRecIDs = array();
     $limittedRecIDs = array();
     $insertErrors = array();
+    
     mysql_connection_overwrite(DATABASE);
     foreach ($recIDs as $recID) {
       //check field limit for this record
@@ -114,13 +120,15 @@
                             "from recDetails ".
                             "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID group by dtl_RecID) as tmp on rec_ID = tmp.recID ".
                 "where rec_ID = $recID";
+                
       $res = mysql_query($query);
       $row = mysql_fetch_row($res);
       //error_log("recID $recID - detailcount ".print_r($row,true). " ".mysql_error());
+      
       if (!array_key_exists($row[0],$rtyLimits)) {
           array_push($undefinedFieldsRecIDs, $recID);
           continue;
-      }else if (is_numeric($rtyLimits[$row[0]]) && ($rtyLimits[$row[0]] - $row[1]) < 1){
+      }else if (intval($rtyLimits[$row[0]])>0 && $row[1]>0 && ($rtyLimits[$row[0]] - $row[1]) < 1){
           array_push($limittedRecIDs, $recID);
           continue;
       }

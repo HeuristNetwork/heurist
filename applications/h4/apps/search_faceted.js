@@ -156,7 +156,7 @@ $.widget( "heurist.search_faceted", {
                         for (i=0;i<len2;i++){
                             
                             if(i==0){
-                                this_query = facets[facet_index][i].query+':"'+cv+'"';
+                                this_query = facets[facet_index][i].query+':"'+cv.split(" ").join("+")+'"';  //workaround until understand how to regex F:("AA BB CC") on server side
                             //}else if (i==len2-1){
                             //    this_query = facets[facet_index][i].query+':"('+this_query+')"';
                             }else{

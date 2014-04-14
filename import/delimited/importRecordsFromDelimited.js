@@ -175,7 +175,7 @@ FlexImport = (function () {
 					FlexImport.fields[k] = lines[i].split(fieldRegex);
 					for (var j = 0; j < FlexImport.fields[k].length; ++j) {
 						FlexImport.fields[k][j] = FlexImport.fields[k][j].replace(doubleQuoteRegex, FlexImport.quote);
-                        //FlexImport.fields[k][j] = FlexImport.fields[k][j].trim();
+                        FlexImport.fields[k][j] = FlexImport.fields[k][j].trim();
 						FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
 					}
 					k++;
@@ -1631,7 +1631,7 @@ FlexImport.Loader = (function () {
 				if (r.length < 100) {
 					// we've loaded all the records: invoke the original loader's onload
 					$("#results").html('<b>Loaded ' + loadedrecords.length + ' records </b>');
-					loader.onload(baseSearch, records);
+					loader.onload(baseSearch, r);
 				}
 				else { // more records to retrieve
 					$("#results").html('<b>Loaded ' + loadedrecords.length + ' records so far ...</b>');

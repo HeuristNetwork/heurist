@@ -201,7 +201,7 @@
 	</div>
 </div>
 
-<div id="topdiv" style="padding:1em;display: none;">
+<div id="info_div" style="padding:1em;display: none;">
 <p>
 <b>Text fields</b> should only be used for unstructured data, such as text strings (eg. place name, family name, artwork title) or descriptive information (eg. notes, abstract, narrative).
 </p>
@@ -212,7 +212,7 @@
 <p><b>Record pointer</b> fields allow a record to reference other records of specified type which contain sets of related information, often components of the parent record, eg. a ship's captain, a person's father, a period of military service, educational episode, place of birth. The referenced record may be an independent entity (eg. place, publisher, person, work) or group together related information such as the attributes of a person or object, a set of attributes which apply for a specified time period, or the attributes of some part of an object or for a particular type of object. The type of relationship, however, is implicit in the field name - father, mother, service, education, place or component all imply a fixed relationship to the parent entity - but is not otherwise recorded.</p>
 
 <p><b>Relationship marker</b> fields create a connection between two entities with an explicit relationship type (selected from a dropdown), as well as a date range and other contextual information. They are particularly useful when there is a large list of potential relationships, such as roles of actors in an event, interpersonal relationships, stratigraphic relationships and so forth. Relationship marker fields look like a composite field in the data entry form but, rather than creating an attribute attached to the record, they create a separate relationship record which can carry significant extra information about the relationship.</p>
-<input type="button" value="OK" id="topdiv_closebtn"/>    
+<div style="float:right;padding-right: 50px;"><input type="button" value="OK" id="topdiv_closebtn"/></div>
 </div>
                         
 <script type="text/javascript">
