@@ -672,6 +672,7 @@ FlexImport = (function () {
 					re = new RegExp ("^\\s*" + FlexImport.quote + "(.*)" +FlexImport.quote +"\\s*$");
 					if (inputRow[j].toString().match(re)) {
 						inputRow[j] = inputRow[j].toString().match(re)[1];
+                        FlexImport.fields[i][j] = inputRow[j].trim();
 					}
 					if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i][j]){
 						//td.className = "invalidInput";

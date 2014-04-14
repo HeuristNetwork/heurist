@@ -47,6 +47,7 @@ define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
 define('_ERROR_MSG', "Title mask not properly defined for this record type: please edit through Designer View > Essentials > Record types/fields");
+define('_EMPTY_MSG', "&lt;No data in title fields for this record&gt;");
 
 /**
 * Check that the given title mask is well-formed for the given reference type
@@ -173,12 +174,12 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             $title = preg_replace('!\\s+,!s', ',', $title);
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
-        
+
         if($title==""){
             if($rep_mode==_ERR_REP_MSG){
-                return array(_ERROR_MSG);
+                return array(_EMPTY_MSG);
             }else{
-                return _ERROR_MSG;
+                return _EMPTY_MSG;
             }
         }
     }
