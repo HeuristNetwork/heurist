@@ -53,7 +53,8 @@ function EditRecStructure() {
 	_isServerOperationInProgress = false, //prevents send request if there is not respoce from previous one
 	_isReserved = false,
 	_rty_Status,
-	myDTDrags = {};
+	myDTDrags = {},
+    _fieldMenu = null;
 
 	/**
 	* Initialization of input form
@@ -73,22 +74,26 @@ function EditRecStructure() {
 		}
 
 		// buttons on top and bottom of design tab
-        var hToolBar = '<div style=\"text-align:right;float:right;\">'+
+        var hToolBar = '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;\">'+
         //<div style="display:inline-block; text-align:left">
         //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
         //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-        '<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-        '<input type="button" style="margin:0 5px" value="Define New Base Field Type" onClick="onDefineNewType()" '+
+        '<input style="visibility:hidden ;width:0; color:red;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
+        
+        '<input type="button" style="visibility:hidden; width:0;" value="Define New Base Field Type" onClick="onDefineNewType()" '+
         'title="Add a new base field type which can be used by all record types - use an existing field (Add Field) if a suitable one exists" class="add"/>'+
-        '<input type="button" style="margin:0 5px" value="Add Section" onClick="onAddSeparator()" '+
+        
+        '<input type="button" style="visibility:hidden; width:0;" value="Add Section" onClick="onAddSeparator()" '+
         'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
+        
         '<input type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
         'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
-        // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
+        // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button      ; margin:0 5px
         // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
         // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-        'Add existing fields where possible &nbsp;&nbsp; </div>';   
-
+        //'Add existing fields where possible &nbsp;&nbsp; '+
+        '</div>';   
+        
 		Dom.get("recordTitle").innerHTML += hToolBar;
 		Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';
 		_initTabDesign(null);
@@ -150,6 +155,7 @@ function EditRecStructure() {
 
 					arr.push([ rst_ID,
 						rst_ID,
+                        rst_ID,
 						Number(aval[fi.rst_DisplayOrder]),
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name], //field name
 						aval[fi.rst_DisplayName],
@@ -167,12 +173,16 @@ function EditRecStructure() {
 					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
 			}
+            
+            if(arr.length==0){
+                $("#recStructure_toolbar").show();
+            }
 
 			// define datasource for datatable
 			var myDataSource = new YAHOO.util.LocalDataSource(arr,{
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
-					fields: [  "rst_ID","expandColumn","rst_DisplayOrder",
+					fields: [  "addColumn", "rst_ID", "expandColumn","rst_DisplayOrder",
 					"dty_Name",
 					"rst_DisplayName", "dty_Type", "rst_RequirementType",
 					"rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
@@ -191,7 +201,7 @@ function EditRecStructure() {
 			var myColumnDefs = [
 			{
 				key:'rst_NonOwnerVisibility',
-				label: "<img src='../../../common/images/up-down-arrow.png'>",
+                label: "<img src='../../../common/images/up-down-arrow.png'>",
 				sortable:false, width:10,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					if(Number(_expandedRecord) !== Number(oRecord.getData("rst_ID"))){
@@ -199,6 +209,15 @@ function EditRecStructure() {
 					}
 				}
 			},
+            {
+                key:'addColumn',
+                label: "Add",
+                sortable:false, width:10,
+                formatter: function(elLiner, oRecord, oColumn, oData) {
+                    elLiner.innerHTML = "<img src='../../../common/images/add-record-small.png' title='Click to add new field or section header' style='cursor:pointer;' "+
+                    " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldMenu(event);}' >";
+                }
+            },
 			{
 				key:"rst_ID", label: "Code", sortable:false, className:"center",
                 formatter: function(elLiner, oRecord, oColumn, oData){
@@ -206,13 +225,13 @@ function EditRecStructure() {
                    elLiner.title = oRecord.getData("conceptCode");
                 }
 			},
-			{
-				key:"expandColumn",
-				label: "Edit",
-				hidden:true, //width : "16px",
-				sortable:false,
-				formatter:expansionFormatter
-			},
+            {
+                key:"expandColumn",
+                label: "Edit",
+                hidden:true, //width : "16px",
+                sortable:false,
+                formatter:expansionFormatter
+            },
 			{
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
@@ -328,7 +347,7 @@ function EditRecStructure() {
 			var myRowFormatter = function(elTr, oRecord) {
 				var val0 = oRecord.getData('dty_Type');
 				if(val0 === 'separator'){
-					Dom.addClass(elTr, 'greyout');
+					Dom.addClass(elTr, 'separator');
 				}else{
 					var val1 = oRecord.getData('rst_NonOwnerVisibility');
 					var val2 = oRecord.getData('rst_RequirementType');
@@ -481,7 +500,7 @@ function EditRecStructure() {
 
 				//prevent any operation in case of opened popup
 				if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
-				(!Hul.isnull(column) && (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility') ))
+				(!Hul.isnull(column) && (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
 				{ return; }
 
 
@@ -588,14 +607,17 @@ function EditRecStructure() {
 
 						top.HEURIST.rectypes = context.rectypes;
 						top.HEURIST.detailTypes = context.detailTypes;
+                        
+                        if(_myDataTable.getRecordSet().getLength()<1){
+                              $("#recStructure_toolbar").show();    
+                        }
 					}
 					_isServerOperationInProgress = false;
 				}
+                
 				if(elLink.hash === "#edit"){
 					_onAddEditFieldType(dty_ID, 0);
-				}
-
-				if(elLink.hash === "#delete"){
+				}else if(elLink.hash === "#delete"){
 
 						var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 											(top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1214,7 +1236,7 @@ function EditRecStructure() {
 		if(index_toinsert<0){
 			index_toinsert = 0;
 		}else{
-			var rec = _myDataTable.getRecord(index_toinsert);
+			var rec = _myDataTable.getRecord(index_toinsert>=recs.getLength()?recs.getLength()-1:index_toinsert);
 			order = Number(rec.getData('rst_DisplayOrder')) + 1;
 		}
 
@@ -1267,6 +1289,7 @@ function EditRecStructure() {
 
 				data_toadd.push({
 					rst_ID:dty_ID,
+                    addColumn:dty_ID,
 					expandColumn:dty_ID,
 					rst_DisplayOrder: order,
 					dty_Name: arrs[fi.dty_Name],
@@ -1303,6 +1326,8 @@ function EditRecStructure() {
 			dragDropEnable();
 
 			_saveUpdates(false);
+            
+            $("#recStructure_toolbar").hide();
 		}
 
 	}//end _addDetails
@@ -1430,7 +1455,47 @@ function EditRecStructure() {
 
 			return false;
 	}
+    
+    function _addFieldMenu(e){
+        
+        e = top.HEURIST.util.stopEvent(e);
+        var targ = e.target;
+        var rst_ID = targ.getAttribute("rst_ID")
+        
+        if(!rst_ID) return;
+        
+        var index_toinsert = _getRecordById(rst_ID).row_index;
+        _myDataTable.unselectAllRows();
+        _myDataTable.selectRow(index_toinsert);
+            
+        var oMenu;
 
+        if(!_fieldMenu){
+                _fieldMenu = new YAHOO.widget.Menu("menu_addfield",{zindex: 21});
+                _fieldMenu.addItems([
+                    { text: "Add field (use existing definition)" },
+                    { text: "Define field (create new definition)" },
+                    { text: "Add section header" }
+                ]);
+                _fieldMenu.render(document.getElementById('recStrcuture_bottom')); //document.body);
+                $("#menu_addfield").bind("mouseleave",function(){
+                    _fieldMenu.hide();
+                });
+        }
+        oMenu = _fieldMenu;
+        //_fieldMenu.hide();
+
+        var items = oMenu.getItems();
+        items[0].cfg.setProperty("onclick", { fn: onAddNewDetail, obj: [] } );
+        items[1].cfg.setProperty("onclick", { fn: onDefineNewType, obj: [] } );
+        items[2].cfg.setProperty("onclick", { fn: onAddSeparator, obj: [] } );
+
+
+        oMenu.cfg.setProperty("context",
+                [e.target, "bl", "bl"]);
+        oMenu.show();
+        
+    }
 
 	//------------------- DRAG AND DROP ROUTINES
 
@@ -1725,6 +1790,10 @@ function EditRecStructure() {
 		onAddSeparator: function(){
 			_onAddSeparator();
 		},
+        
+        onAddFieldMenu: function(e){
+           _addFieldMenu(e);
+        },
 
 		closeWin:function(){
 			if(_checkForRequired()){
@@ -1747,7 +1816,6 @@ function EditRecStructure() {
 	_init();  // initialize before returning
 	return that;
 }
-
 
 /////////////////////////////////////////////////
 //			GENERAL

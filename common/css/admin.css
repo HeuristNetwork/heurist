@@ -160,6 +160,21 @@ body.popup #page-inner {
     background-color: #CCCCCC;
     color: #fff;
 }
+/* Class for HEADER (separator) rows */
+.yui-skin-sam .yui-dt tr.separator,
+.yui-skin-sam .yui-dt tr.separator td.yui-dt-asc,
+.yui-skin-sam .yui-dt tr.separator td.yui-dt-desc,
+.yui-skin-sam .yui-dt tr.separator td.yui-dt-asc,
+.yui-skin-sam .yui-dt tr.separator td.yui-dt-desc{
+    font-style:italic;
+    font-weight:bold;
+    font-size: 1.4em;
+}
+.yui-skin-sam tr.yui-dt-highlighted{
+    background-color:#BFDFFF;
+    color:black;
+}
+
 .yui-navset {
 	width: 100%;
 }
