@@ -74,7 +74,7 @@ function EditRecStructure() {
 		}
 
 		// buttons on top and bottom of design tab
-        var hToolBar = '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;\">'+
+        var hToolBar = '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
         //<div style="display:inline-block; text-align:left">
         //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
         //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
@@ -1842,7 +1842,7 @@ function onAddNewDetail(){
 		{	"close-on-blur": false,
 			"no-resize": false,
 			height: dim.h*0.9,
-			width: dim.w*0.5,
+			width: 700, //back to fixed width    dim.w*0.5,
 
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){
