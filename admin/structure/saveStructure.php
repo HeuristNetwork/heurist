@@ -585,6 +585,15 @@
 	return $ret;
 	}
 	*/
+    
+    function addParam($parameters, $type, $val){
+        $parameters[0] = $parameters[0].$type;
+        if($type=="s" && $val!=null){
+            $val = trim($val);
+        }
+        array_push($parameters, $val);
+        return $parameters;
+    }
 
 	//
 	// add new record type
@@ -614,9 +623,7 @@
                         $query = $query.",";
                     }
 				    $query = $query."?";
-				    $parameters[0] = $parameters[0].$rtyColumnNames[$colName];
-				    array_push($parameters, $val);
-
+                    $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
 			}
 
 			$query = "insert into defRecTypes ($colNames) values ($query)";
@@ -820,22 +827,14 @@
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";
 
-					$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
-
                     //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
 					if($colName == "rty_TitleMask"){
                         //array_push($parameters, ""); //empty title mask - store only canonical!
 						$val = titlemask_make($val, $rtyID, 1, null, _ERR_REP_SILENT); //make canonical
-
-                        array_push($parameters, $val);
-                        /*    DEPRECATED
-						$colName = "rty_CanonicalTitleMask";
-						$query = $query.",".$colName." = ?";
-						$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
-						array_push($parameters, $val);*/
-					}else{
-                        array_push($parameters, $val);
                     }
+                    
+                    $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
+                    
 				}
 			}
 
@@ -876,9 +875,8 @@
 		$ret = 0;
 		if($mask){
 				$val = titlemask_make($mask, $rtyID, 1, null, _ERR_REP_SILENT); //make coded
-                $parameters = array("s");
-                array_push($parameters, $val);
-
+                $parameters = addParam($parameters, "s", $val);
+                
                 /* DEPRECATED
 				$colName = "rty_CanonicalTitleMask";
 				$parameters[0] = "ss";//$parameters[0].$rtyColumnNames[$colName];
@@ -1065,8 +1063,7 @@
 							$val = null;
 						}
 
-						$parameters[0] = $parameters[0].$rstColumnNames[$colName]; //take datatype from array
-						array_push($parameters, $val);
+                        $parameters = addParam($parameters, $rstColumnNames[$colName], $val);
 					}
 				}//for columns
 
@@ -1152,8 +1149,7 @@
 					$val = array_shift($colValues);
 					if($query!="") $query = $query.",";
 					$query = $query."?";
-					$parameters[0] = $parameters[0].$rtgColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
+                    $parameters = addParam($parameters, $rtgColumnNames[$colName], $val);
 
 					if($colName=='rtg_Name'){
 						$rtg_Name = $val;
@@ -1225,8 +1221,7 @@
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";
 
-					$parameters[0] = $parameters[0].$rtgColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
+                    $parameters = addParam($parameters, $rtgColumnNames[$colName], $val);
 
 					if($colName=='rtg_Name'){
 						$rtg_Name = $val;
@@ -1323,8 +1318,7 @@
 					$val = array_shift($colValues);
 					if($query!="") $query = $query.",";
 					$query = $query."?";
-					$parameters[0] = $parameters[0].$dtgColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
+                    $parameters = addParam($parameters, $dtgColumnNames[$colName], $val);
 
 					if($colName=='dtg_Name'){
 						$dtg_Name = $val;
@@ -1396,8 +1390,7 @@
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";
 
-					$parameters[0] = $parameters[0].$dtgColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
+                    $parameters = addParam($parameters, $dtgColumnNames[$colName], $val);
 
 					if($colName=='dtg_Name'){
 						$dtg_Name = $val;
@@ -1493,8 +1486,7 @@
 				$val = array_shift($dt['common']);
 				if($query!="") $query = $query.",";
 				$query = $query."?";
-				$parameters[0] = $parameters[0].$dtyColumnNames[$colName]; //take datatype from array
-				array_push($parameters, $val);
+                $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
 			}
 
 			$query = "insert into defDetailTypes ($colNames) values ($query)";
@@ -1593,8 +1585,7 @@
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";
 
-					$parameters[0] = $parameters[0].$dtyColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
+                    $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
 				}
 			}//for
 			//
@@ -1681,12 +1672,11 @@
                     }else if($colName=="trm_Label"){
                         $ch_label = $val;
                     }else if($colName=="trm_InverseTermId"){
+                        if($val=="") $val=null;
                         $inverse_termid = $val;
                     }
 
-					$parameters[0] = $parameters[0].$trmColumnNames[$colName]; //take datatype from array
-					array_push($parameters, $val);
-
+                    $parameters = addParam($parameters, $trmColumnNames[$colName], $val);
 				}
 			}//for columns
 
@@ -1741,7 +1731,7 @@
 
 				if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "SQL error $oper term $trmID in updateTerms: ".$rows;
+					$ret = "$inverse_termid   SQL error $oper term $trmID in updateTerms: ".$rows;
 				} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;
@@ -1767,7 +1757,7 @@
 
 		return $ret;
 	}
-
+    
 	/**
 	* recursive function
 	* @param $ret -- array of child

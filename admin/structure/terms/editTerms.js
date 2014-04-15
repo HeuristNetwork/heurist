@@ -531,9 +531,9 @@ function EditTerms() {
 	*/
 	function _doSave(needConfirm){
 
-		var sName = Dom.get('edName').value;
-		var sDesc = Dom.get('edDescription').value;
-		var sCode = Dom.get('edCode').value;
+		var sName = Dom.get('edName').value.trim();
+		var sDesc = Dom.get('edDescription').value.trim();
+		var sCode = Dom.get('edCode').value.trim();
 		var sStatus = Dom.get('trm_Status').value;
 		
         var iInverseId = Number(Dom.get('edInverseTermId').value);
