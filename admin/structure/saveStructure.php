@@ -830,7 +830,9 @@
                     //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
 					if($colName == "rty_TitleMask"){
                         //array_push($parameters, ""); //empty title mask - store only canonical!
+error_log("UPDATE TITLE MASK >>>>".$val);                        
 						$val = titlemask_make($val, $rtyID, 1, null, _ERR_REP_SILENT); //make canonical
+error_log("2.UPDATE TITLE MASK >>>>".$val);                        
                     }
                     
                     $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
@@ -901,7 +903,7 @@
 
 		global $db;
 
-        $dtyID = getDetailTypeConceptID($lclDtyID);
+        $dtyID = getDetailTypeConceptID($dtyID);
 
 		$ret = array();
 

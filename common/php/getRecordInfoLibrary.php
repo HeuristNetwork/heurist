@@ -1123,7 +1123,9 @@ error_log(">>>> ".$fields[$ind1]);
     if($ind2){
         $fields[$ind2] = $fields[$ind1]; //keep canonical
     }
+//error_log("BEFORE>>>>".$fields[$ind1]);    
     $fields[$ind1] = titlemask_make($fields[$ind1], $rtID, 2, null, _ERR_REP_SILENT);
+//error_log("AFTER>>>>".$fields[$ind1]);    
     return $fields;
 }
 

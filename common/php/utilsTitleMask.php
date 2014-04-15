@@ -114,7 +114,7 @@ function titlemask_value($mask, $rec_id) {
 function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN) {
 
     if (!$mask) {
-        return ($rep_mode==_ERR_REP_WARN)?"Title mask is not defined":"";
+        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined":"";
     }
 
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
@@ -128,9 +128,11 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
          * $matches[1][$i] contains the field plus surrounding whitespace and containing brackets and LEADING WHITESPACE
          *        (this is what we replace with an empty string if there is no substitution value available)
          */
-         if(!trim($matches[3][$i])) continue;
+         
+         if(!trim($matches[3][$i])) continue; //empty []
 
         $value = _titlemask__fill_field($matches[3][$i], $rt, $mode, $rec_id);
+        
         if(is_array($value)){
             //ERROR
             if($rep_mode==_ERR_REP_WARN){
@@ -363,8 +365,8 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
             return $rec_values['rec_Modified'];
         }
 
-        $rdt_id = _titlemask__get_dt_field($rt, $rdt_id, 'dty_ID'); //local dt id
-        $dt_type = _titlemask__get_dt_field($rt, $rdt_id, 'dty_Type');
+        $rdt_id = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'dty_ID'); //local dt id
+        $dt_type = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'dty_Type');
 
         $details = $rec_values['rec_Details'];
 
@@ -407,7 +409,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
         }else if($mode==1){
             return $rdt_id; //concept code
         } else {
-            return _titlemask__get_dt_field($rt, $rdt_id, 'originalName');  //original name (with capital chars)
+            return _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');  //original name (with capital chars)
         }
     }
 }
@@ -420,7 +422,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
 * @param mixed $fieldname  - search value: name of attribute(field) of detail type: dty_ID, rst_DisplayName, dty_ConceptCode
 * @param mixed $field - result filed
 */
-function _titlemask__get_dt_field($rt, $search_fieldname, $result_fieldname='dty_ConceptCode'){
+function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldname='dty_ConceptCode'){
 
     $rdr = _titlemask__get_rec_detail_types($rt);
 
@@ -430,7 +432,7 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $result_fieldname='dty
     //search in record type structure
     if(@$rdr[$search_fieldname]){  //search by dty_ID, rst_DisplayName, dty_ConceptCode
         return $rdr[$search_fieldname][$result_fieldname];
-    }else{
+    }else if($mode!=1) { //allow to search among all fields
         //if not found in structure - search among all detail types
         $rdt = _titlemask__get_detail_types();
         if(@$rdt[$search_fieldname]){
@@ -467,7 +469,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
     
-        $rdt_id = _titlemask__get_dt_field($rt, $field_name);  //get concept code
+        $rdt_id = _titlemask__get_dt_field($rt, $field_name, $mode);  //get concept code
         if(!$rdt_id){
             //ERROR
             return array("Field name '$field_name' not recognised");
@@ -478,12 +480,12 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
         $parent_field_name = $matches[1];
-        $rdt_id = _titlemask__get_dt_field($rt, $parent_field_name);
+        $rdt_id = _titlemask__get_dt_field($rt, $parent_field_name, $mode);
         if($rdt_id){
 
             $inner_field_name = $matches[2];
 
-            $dt_type = _titlemask__get_dt_field($rt, $rdt_id, 'dty_Type');
+            $dt_type = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'dty_Type');
             if($dt_type=="enum" || $dt_type=="relationtype"){
 
                 if(!$inner_field_name || strcasecmp($inner_field_name,'term')==0){
@@ -501,7 +503,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if($mode==0){
                         return _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $inner_field_name);
                     }else{
-                        return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, 'originalName')) . "." .$inner_field_name;
+                        return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')) . "." .$inner_field_name;
                     }
 
                 }else{
@@ -552,7 +554,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
         }else{ //convert  coded<->human
 
-            $inner_rec_type = _titlemask__get_dt_field($rt, $rdt_id, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+            $inner_rec_type = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
             $inner_rec_type = explode(",",$inner_rec_type);
             foreach ($inner_rec_type as $rtID){
                 $rtid = intval($rtID);
@@ -561,10 +563,10 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if(is_array($inner_rdt)){
                         return $inner_rdt; //ERROR
                 }else if ($inner_rdt) {
-                    return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, 'originalName')) . "." . $inner_rdt;
+                    return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')) . "." . $inner_rdt;
                 }
             }
-            return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, 'originalName')). ($inner_field_name? ".".$inner_field_name:"");
+            return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')). ($inner_field_name? ".".$inner_field_name:"");
 
         }
     }

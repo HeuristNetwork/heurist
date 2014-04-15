@@ -617,7 +617,7 @@ function _onEditMask(){
     var maskvalue = document.getElementById("rty_TitleMask").value;
 
     Hul.popupURL(top, top.HEURIST.basePath +
-        "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
+        "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
         {
             "close-on-blur": false,
             "no-resize": true,

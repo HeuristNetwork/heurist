@@ -54,7 +54,9 @@ function EditRecStructure() {
 	_isReserved = false,
 	_rty_Status,
 	myDTDrags = {},
-    _fieldMenu = null;
+    _fieldMenu = null,
+    db;
+
 
 	/**
 	* Initialization of input form
@@ -62,6 +64,9 @@ function EditRecStructure() {
 	* Reads GET parameters, creates TabView and triggers init of first tab
 	*/
 	function _init() {
+
+        db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                                            (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		// read GET parameters
 		if (location.search.length > 1) {
@@ -233,7 +238,7 @@ function EditRecStructure() {
                 formatter:expansionFormatter
             },
 			{
-				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
+				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:false
 			},
 			{
 				key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
@@ -412,9 +417,8 @@ function EditRecStructure() {
                     '</div></div>'+
                     */
                     '<span><label class="input-header-cell">Default&nbsp;Value:</label>'+
-                    '<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
-                    '<div><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
-                    '</span></span>'+
+                    '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
+                    '</span>'+
                     
                     // Minimum values
 					'<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
@@ -459,7 +463,7 @@ function EditRecStructure() {
 
 					// Base field definitions  (button)
                     '<div>'+
-                    '<div style="text-align: right;"><input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
+                    '<div style="margin-left: 470;"><input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
                     'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');">'+
                     
                     // Save and cancel (buttons)
@@ -618,7 +622,7 @@ function EditRecStructure() {
 
 				var elLink = oArgs.target;
 				var oRecord = this.getRecord(elLink);
-				var dty_ID = oRecord.getData("rst_ID");
+				var rst_ID = oRecord.getData("rst_ID");
 
 				// result listener for delete operation
 				function __updateAfterDelete(context) {
@@ -638,11 +642,9 @@ function EditRecStructure() {
 				}
                 
 				if(elLink.hash === "#edit"){
-					_onAddEditFieldType(dty_ID, 0);
+					_onAddEditFieldType(rst_ID, 0); //NOT USED
 				}else if(elLink.hash === "#delete"){
 
-						var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-											(top.HEURIST.database.name?top.HEURIST.database.name:''));
 						var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 
 						function _onCheckEntries(context)
@@ -653,9 +655,9 @@ function EditRecStructure() {
 
 								var sWarn;
 								if(context[rty_ID]){
-									sWarn = "This field #"+dty_ID+" '"+dty_name+"' is utilized in this record type title mask. You have to edit title mask in Essentials > Record types / fields\n Still wish to delete this field?";
+									sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilized in this record type title mask. You have to edit title mask in Essentials > Record types / fields\n Still wish to delete this field?";
 								}else{
-									sWarn =  "Delete field # "+dty_ID+" '"+dty_name+"' from this record structure?";
+									sWarn =  "Delete field # "+rst_ID+" '"+dty_name+"' from this record structure?";
 								}
 
 								var r=confirm(sWarn);
@@ -664,7 +666,7 @@ function EditRecStructure() {
 									_doExpliciteCollapse(null ,false); //force collapse this row
 
 									var callback = __updateAfterDelete;
-									var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
+									var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID;
 									_isServerOperationInProgress = true;
 									Hul.getJsonData(baseurl, callback, params);  
 								}
@@ -673,7 +675,7 @@ function EditRecStructure() {
 						}
 
 						var callback = _onCheckEntries;
-						var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID; 
+						var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID; 
 						top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 				}
@@ -741,9 +743,6 @@ function EditRecStructure() {
 	{
 		//save all changes
 		_doExpliciteCollapse(null, true);
-
-		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		var url = top.HEURIST.basePath +
 		"admin/structure/fields/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
@@ -1006,22 +1005,18 @@ function EditRecStructure() {
                         disabledTerms = "";
                     }
 
-					recreateTermsPreviewSelector(rst_type,
+					recreateTermsPreviewSelector(rst_ID, rst_type,
 						allTerms,
 						disabledTerms,
 						edt_def.value); //default value
 
-					//editedTermTree, editedDisabledTerms);
-					//Dom.setStyle(edt_def, "visibility", "hidden");
-                    Dom.setStyle(edt_def.parentNode, "display", "none");
+                    //Dom.setStyle(edt_def.parentNode, "display", "none");
 
 				}else{
 					edt.parentNode.parentNode.style.display = "none";
-					//Dom.setStyle(edt_def, "visibility", "visible");
-                    //Dom.setStyle(edt_def, "width", "150px");
                     Dom.setStyle(edt_def.parentNode, "display", "inline-block");
-					var el = document.getElementById("termsDefault");
-					Dom.setStyle(el, "display", "none");
+					//var el = document.getElementById("termsDefault");
+					//Dom.setStyle(el, "display", "none");
 				}
 
 			}else if(fieldnames[k] === "rst_PtrFilteredIDs"){
@@ -1203,8 +1198,6 @@ function EditRecStructure() {
 			}
 
 			//
-			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _addNewSeparator;
 			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
@@ -1262,7 +1255,7 @@ function EditRecStructure() {
 			index_toinsert = 0;
 		}else{
 			var rec = _myDataTable.getRecord(index_toinsert>=recs.getLength()?recs.getLength()-1:index_toinsert);
-			order = Number(rec.getData('rst_DisplayOrder')) + 1;
+			order = Number(rec.getData('rst_DisplayOrder'));
 		}
 
 		//moves detail types to
@@ -1353,9 +1346,53 @@ function EditRecStructure() {
 			_saveUpdates(false);
             
             $("#recStructure_toolbar").hide();
+            
+            _updateOrderAfterInsert();
 		}
 
 	}//end _addDetails
+    
+    function _updateOrderAfterInsert() {
+
+        var recs = _myDataTable.getRecordSet(),
+        len = recs.getLength(),
+        neworder = [],
+        isChanged = false,
+        i;
+
+        //loop through current records and see if this has been added before
+        for ( i = 0; i < len; i++ )
+        {
+            var rec = _myDataTable.getRecord(i);
+            var data = rec.getData();
+            //if it's been added already, update it
+            if(data.rst_DisplayOrder !== i){
+                data.rst_DisplayOrder = i;
+
+                _myDataTable.updateRow(i, data);
+
+                if(_updatedDetails.indexOf(data.rst_ID)<0){
+                    _updatedDetails.push(data.rst_ID);
+                }
+                top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
+                isChanged = true;
+            }
+            neworder.push(data.rst_ID);
+        }
+
+        if(isChanged){
+            //index if field rst_DisplayOrder
+            var field_index = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
+
+            if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(field_index)<0){
+                _updatedFields.push(field_index);
+            }
+            top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
+            _saveUpdates(false);
+        }
+    }
+    
+    
 
 	/**
 	* Clears _updateXXX arrays
@@ -1443,8 +1480,6 @@ function EditRecStructure() {
 				_isServerOperationInProgress = false;
 			};
 //DEBUG alert(str);
-			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
 			var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
@@ -1480,6 +1515,53 @@ function EditRecStructure() {
 
 			return false;
 	}
+    
+    /**
+    * verify titlemask, some fields may be removed while editing rectype structure
+    * (similar in editRectypeTitle.js)
+    */
+    function _checkForTitleMask(callback)
+    {
+        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
+        var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+
+        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var squery = "rty_id="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db+"&check=1";
+
+        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+                var obj = xhr.responseText;
+                if(obj===""){
+                    if(callback){
+                        callback.call();
+                    }
+                }else{
+                    confirm('Apparently you removed some field(s) that are in use in Title Mask. '+obj);
+                    //show edit title mask
+                    Hul.popupURL(top, top.HEURIST.basePath +
+                        "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
+                        {
+                            "close-on-blur": false,
+                            "no-resize": true,
+                            height: 800,
+                            width: 800,
+                            callback: function(newvalue) {
+                                typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
+                                
+                                var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
+                                            defs:{rty_ID:[{common:[newvalue],dtFields:[]}]}}};
+                                var str = JSON.stringify(oRectype);
+                                
+                                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                                var callback = null;// updateResult;
+                                var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
+                                Hul.getJsonData(baseurl, callback, params);                                
+                            }
+                    });
+                }
+
+            }, squery);
+    }    
+    
     
     function _addFieldMenu(e){
         
@@ -1822,7 +1904,9 @@ function EditRecStructure() {
 
 		closeWin:function(){
 			if(_checkForRequired()){
-		 		window.close(null);
+                
+                _checkForTitleMask(function(){ window.close(null); });
+		 		
 			}else{
 				alert("You should normally have at least one required field, often a name or title field");
 			}
@@ -1862,7 +1946,7 @@ function onAddNewDetail(){
 		var dim = top.HEURIST.util.innerDimensions(top);
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
-		popupSelect = Hul.popupURL(top, top.HEURIST.basePath +
+		popupSelect = Hul.popupURL(window, top.HEURIST.basePath +
 		"admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
@@ -2087,7 +2171,7 @@ function _preventSel(event){
 		event.target.selectedIndex=0;
 }
 function _setDefTermValue(event){
-
+/*
 	var el = event.target,
 		name = el.parentElement.attributes.name.nodeValue; //item('id').nodeValue;
 
@@ -2095,6 +2179,7 @@ function _setDefTermValue(event){
 
 	var edt_def = Dom.get('ed'+name);
 	edt_def.value =  event.target.value;
+*/    
 }
 
 /**
@@ -2104,7 +2189,7 @@ function _setDefTermValue(event){
 * @allTerms - JSON string with terms
 * @disabledTerms  - JSON string with disabled terms
 */
-function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalue ) {
+function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms, defvalue ) {
 
 				allTerms = Hul.expandJsonStructure(allTerms);
 				disabledTerms = Hul.expandJsonStructure(disabledTerms);
@@ -2122,7 +2207,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 					*/
 
 					var parent1 = document.getElementById("termsPreview"),
-						parent2 = document.getElementById("termsDefault");
+						parent2 = document.getElementById("termsDefault_"+rst_ID);
 
 					function __recreate(parent, onchangehandler, bgcolor, _defvalue, isdefselector){
 						var i;
@@ -2131,6 +2216,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 						}
 
 						el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
+                        el_sel.id = 'ed'+rst_ID+'_rst_DefaultValue';
 						el_sel.style.backgroundColor = bgcolor;
 						el_sel.onchange =  onchangehandler;
 						el_sel.className = "previewList"; //was for enum only?
@@ -2189,6 +2275,9 @@ function _onDispNameChange(event){
     }
 }
 
+//
+//   dty_ID (=rst_ID) - field type ID
+//
 function _onAddEditFieldType(dty_ID, dtg_ID){
 
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
@@ -2221,12 +2310,12 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type];
 					//update
 					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
-						recreateTermsPreviewSelector(rst_type,
+						recreateTermsPreviewSelector(dty_ID, rst_type,
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_JsonTermIDTree],
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){
-						recreateRecTypesPreview(rst_type,
+						recreateRecTypesPreview(dty_ID, rst_type,
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs], null);
 					}
 

@@ -1005,12 +1005,14 @@ function RectypeManager() {
         //this.location.replace(URL);
 
         var dim = Hul.innerDimensions(this.window);
-
+        
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": false,
                 height: dim.h*0.9,
                 width: 860,
+                "no-close": true,
+                closeCallback: function(){ alert('kiki'); },
                 callback: function(context) {
                     if(Hul.isnull(context)) {
                         // Canceled
@@ -1475,6 +1477,8 @@ function icon_refresh(rectypeID) {
         }
     }
 }
+
+
 /*
 
 function ellipsis(e) {
