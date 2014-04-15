@@ -378,18 +378,16 @@ function EditRecStructure() {
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
 
+                    // Name / prompt
 					'<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell">'+
                     '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
-                    '<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
-                    'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');" style="margin-left:100px;">'+
-
-                    '</div></div>'+
-
-					// Field width
-					'<div class="input-row"><div class="input-header-cell">Field width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
+      
+                    // Field width
+                    '</div><div class="input-cell">&nbsp;&nbsp;&nbsp;Field width:&nbsp;</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
                     'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
 
+                    // Help text
 					'<div class="input-row">'+
                     '<div class="input-header-cell" style="vertical-align:top">Help text (under field):</div>'+
                     '<div class="input-cell">'+
@@ -405,25 +403,30 @@ function EditRecStructure() {
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
+                    
+                    // Minimum values
 					'<span id="ed'+rst_ID+'_spanMinValue" style="visibility:hidden;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
-					'<input id="ed'+rst_ID+
-					// Minimum values
+					'<input id="ed'+rst_ID+                   
 					'_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Repeatability
-					'<div class="input-row" id="divRepeatability"><div class="input-header-cell">Repeatability :</div>'+
+					'<div class="input-row" id="divRepeatability">'+
+                    '<div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell" title="Determines whether multiple values can be entered for this field" >'+
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
 					'<option value="repeatable">repeatable</option>'+
 					'<option value="limited">limited</option>'+ //IJ request HIDE IT 2012-10-12
 					'</select>'+
+                    
 					// Maximum values
 					'<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Maximum number of values which are permitted in data entry" style="width:20px; text-align:center;" size="2" '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span>'+
+                    '</div>'+
+                    '</div>'+
 
 					// Terms - enums and relmarkers
 					'<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
@@ -438,9 +441,9 @@ function EditRecStructure() {
 					'<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
 					'<div id="pointerPreview" class="input-cell" title="Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
+                    // TODO: the following message is not showing, whereas the one above does
 					'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition" and then "Select Record Types"</span>'+
 					'</div></div>'+
-
 
 					// Default value
 					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
@@ -448,7 +451,25 @@ function EditRecStructure() {
 					'<input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
                     '</div></div>'+
 
-					// Status
+					// Base field definitions  (button)
+                    '<div class="input-row"><div class="input-header-cell">Base field definition:</div>'+
+                    '<div class="input-cell"><input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
+                    'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');" style="margin-left:100px;">'+
+                    
+                    // Save and cancel (buttons)
+                    '<input id="btnSave_'+rst_ID+'" type="button" value="Save"'+
+                    'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);" />'+
+                    '<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
+                    'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 30px;"/>'+
+                    '</div>'+
+
+                    '<div id="optional" class="togglepnl"><a style="margin-left: 40px;" onMouseDown="'+
+                    "$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');"+
+                    '">more ...</a>'+
+
+                    '<div id="options" class="hidden" style="background-color:#ffffff;">'+
+
+                    // Status
 					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell" title="Determines the degree of authority assigned to this field - reserved is used for internal Heurist definitions, open is the lowest level"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
@@ -467,13 +488,8 @@ function EditRecStructure() {
 					'<option value="public">public</option>'+
 					'<option value="pending">pending</option></select></span>'+
                     '</div></div>'+
-
-					'<div style="text-align:right; margin:5	px 0">'+
-					'<input id="btnSave_'+rst_ID+'" type="button" value="Save" '+
-                    'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);" />'+
-					'<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
-                    'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 30px;"/>'+
-					'</div></div>';
+                    
+                    '</div></div>'
 
 				}
 			}
