@@ -376,7 +376,7 @@ function EditRecStructure() {
 					THIS IS FORM to edit detail structure. It is located on expandable row of table
 					*/
 					obj.liner_element.innerHTML =
-					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
+					'<div style="padding-left:30; padding-bottom:5; padding-right:5; background-color:#EEE">'+
 
                     // Name / prompt
 					'<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell">'+
@@ -403,9 +403,21 @@ function EditRecStructure() {
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
+
+                    // Default value
+                    /*
+                    '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
+                    '<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
+                    '<input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
+                    '</div></div>'+
+                    */
+                    '<span><label class="input-header-cell">Default&nbsp;Value:</label>'+
+                    '<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
+                    '<div><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
+                    '</span></span>'+
                     
                     // Minimum values
-					'<span id="ed'+rst_ID+'_spanMinValue" style="visibility:hidden;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
+					'<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+                   
 					'_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
@@ -445,29 +457,23 @@ function EditRecStructure() {
 					'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition" and then "Select Record Types"</span>'+
 					'</div></div>'+
 
-					// Default value
-					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
-					'<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
-					'<input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
-                    '</div></div>'+
-
 					// Base field definitions  (button)
-                    '<div class="input-row"><div class="input-header-cell">Base field definition:</div>'+
-                    '<div class="input-cell"><input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
-                    'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');" style="margin-left:100px;">'+
+                    '<div>'+
+                    '<div style="text-align: right;"><input id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
+                    'title="Allows modification of the underlying field definition (shared by all record types that use this base field)" onclick="_onAddEditFieldType('+rst_ID+');">'+
                     
                     // Save and cancel (buttons)
                     '<input id="btnSave_'+rst_ID+'" type="button" value="Save"'+
-                    'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);" />'+
+                    'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);"  style="margin:0 2px;"/>'+
                     '<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
-                    'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 30px;"/>'+
+                    'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 2px;"/>'+
                     '</div>'+
 
                     '<div id="optional" class="togglepnl"><a style="margin-left: 40px;" onMouseDown="'+
                     "$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');"+
                     '">more ...</a>'+
 
-                    '<div id="options" class="hidden" style="background-color:#ffffff;">'+
+                    '<div id="options" class="hidden" style="background-color:#EEE;">'+
 
                     // Status
 					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
@@ -1006,11 +1012,14 @@ function EditRecStructure() {
 						edt_def.value); //default value
 
 					//editedTermTree, editedDisabledTerms);
-					Dom.setStyle(edt_def, "visibility", "hidden");
+					//Dom.setStyle(edt_def, "visibility", "hidden");
+                    Dom.setStyle(edt_def.parentNode, "display", "none");
 
 				}else{
 					edt.parentNode.parentNode.style.display = "none";
-					Dom.setStyle(edt_def, "visibility", "visible");
+					//Dom.setStyle(edt_def, "visibility", "visible");
+                    //Dom.setStyle(edt_def, "width", "150px");
+                    Dom.setStyle(edt_def.parentNode, "display", "inline-block");
 					var el = document.getElementById("termsDefault");
 					Dom.setStyle(el, "display", "none");
 				}
