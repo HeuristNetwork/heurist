@@ -47,7 +47,7 @@ define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
 define('_ERROR_MSG', "Title mask not properly defined for this record type: please edit through Designer View > Essentials > Record types/fields");
-define('_EMPTY_MSG', "&lt;No data in title fields for this record&gt;");
+define('_EMPTY_MSG', "**** No data in title fields for this record ****");
 
 /**
 * Check that the given title mask is well-formed for the given reference type

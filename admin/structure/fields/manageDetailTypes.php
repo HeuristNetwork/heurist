@@ -90,7 +90,7 @@ require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 		<script src="../../../common/php/displayPreferences.php"></script>
 		<script src="../../../common/php/loadCommonInfo.php"></script>
 		<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
-		<script src="tabDragDrop.js"></script>
+        <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
 		<script src="manageDetailTypes.js"></script>
 
 

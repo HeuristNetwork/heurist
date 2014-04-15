@@ -591,7 +591,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				"no-resize": false,
 			height: 700,
 
-			width: 650,
+			width: 700,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){
