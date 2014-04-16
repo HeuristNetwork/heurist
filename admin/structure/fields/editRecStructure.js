@@ -238,7 +238,7 @@ function EditRecStructure() {
                 formatter:expansionFormatter
             },
 			{
-				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:false
+				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
 				key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
@@ -247,6 +247,11 @@ function EditRecStructure() {
 					elLiner.title = "Base field type: "+oRecord.getData("dty_Name")+"\n\n"+
 					"Help: "+oRecord.getData("rst_DisplayHelpText")+"\n\n"+
 					"For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
+                    var type = oRecord.getData("dty_Type");
+                    if(type=='separator'){
+                        $(elLiner).css("font-size","1.2em");
+                    }
+                    
 				}
 			},
 			{ key: "dty_Type", label: "Data Type", sortable:false, width:90,
@@ -389,9 +394,10 @@ function EditRecStructure() {
                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
       
                     // Field width
-                    '</div><div class="input-cell">&nbsp;&nbsp;&nbsp;Field width:&nbsp;</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
-                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
+                    '<span><label style="min-width:65px;width:65px">Field width:</label><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
+                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div></div>'+
 
+                    
                     // Help text
 					'<div class="input-row">'+
                     '<div class="input-header-cell" style="vertical-align:top">Help text (under field):</div>'+
@@ -427,7 +433,7 @@ function EditRecStructure() {
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Repeatability
-					'<div class="input-row" id="divRepeatability">'+
+					'<div class="input-row" id="divRepeatability'+rst_ID+'">'+
                     '<div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell" title="Determines whether multiple values can be entered for this field" >'+
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
@@ -473,8 +479,8 @@ function EditRecStructure() {
                     'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 2px;"/>'+
                     '</div>'+
 
-                    '<div id="optional" class="togglepnl"><a style="margin-left: 40px;" onMouseDown="'+
-                    "$('#options').slideToggle('fast'); $('#optional').toggleClass('show'); $('#options').toggleClass('hidden');"+
+                    '<div id="divMoreDefs'+rst_ID+'" class="togglepnl"><a style="margin-left: 40px;" onMouseDown="'+
+                    "$('#options').slideToggle('fast'); $('#divMoreDefs"+rst_ID+"').toggleClass('show'); $('#options').toggleClass('hidden');"+
                     '">more ...</a>'+
 
                     '<div id="options" class="hidden" style="background-color:#EEE;">'+
@@ -508,7 +514,7 @@ function EditRecStructure() {
 			// highlight listeners
 			_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
 			_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
-			_myDataTable.subscribe("rowClickEvent", _myDataTable.onEventSelectRow);
+			//ART16 _myDataTable.subscribe("rowClickEvent", _myDataTable.onEventSelectRow);
 
 			//
 			// Subscribe to a click event to bind to expand/collapse the row
@@ -1065,8 +1071,8 @@ function EditRecStructure() {
 
 		if(rst_type === "separator"){
 			//hide repeatability
-			var dr = Dom.get('divRepeatability');
-			Dom.setStyle(dr, "display", "none");
+			$('#divRepeatability'+rst_ID).hide();
+            $('#divMoreDefs'+rst_ID).hide();
 		}else{
 
 			//determine what is repeatability type
@@ -1104,7 +1110,7 @@ function EditRecStructure() {
 	/**
 	* adds separator field type
 	*/
-	function _onAddSeparator(){
+	function _onAddSeparator(index_toinsert){
 
 		//find seprator field type ID that is not yet added to this record strucuture
 		var ft_separator_id =  null;
@@ -1130,7 +1136,7 @@ function EditRecStructure() {
 
 		if(!Hul.isnull(ft_separator_id)){
 			_doExpliciteCollapse(null, true);
-			_addDetails(ft_separator_id);
+			_addDetails(ft_separator_id, index_toinsert);
 		}else{ //"not used" separator field type not found - create new one
 
 			var _detailType = [];//new Array();
@@ -1190,7 +1196,7 @@ function EditRecStructure() {
 								top.HEURIST.detailTypes = context.detailTypes;
 
 								_doExpliciteCollapse(null, true);
-								_addDetails(ft_separator_id);
+								_addDetails(ft_separator_id, index_toinsert);
 							}
 						}
 					}
@@ -1213,7 +1219,7 @@ function EditRecStructure() {
 	* This is function for global method addDetail. It is invoked after selection of detail types or creation of new one
 	* @param dty_ID_list - comma separated list of detail type IDs
 	*/
-	function _addDetails(dty_ID_list){
+	function _addDetails(dty_ID_list, index_toinsert){
 
 		var arrDty_ID = dty_ID_list.split(",");
 		if(Hul.isempty(dty_ID_list) || arrDty_ID.length<1) {
@@ -1233,21 +1239,23 @@ function EditRecStructure() {
 			rst = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
 		//find max order and index to insert
-		var recs = _myDataTable.getRecordSet();
-        var sels = _myDataTable.getSelectedRows();
-        
+	    var recs = _myDataTable.getRecordSet();
         var row_index, k, len = recs.getLength();
-        var index_toinsert;
-        for (row_index = 0; row_index < len; row_index++ )
-        {
-            var rec = _myDataTable.getRecord(row_index);
-            if(sels[0]==rec.getId()){
-                index_toinsert = row_index+1;
-                break;
+        
+        if(Hul.isnull(index_toinsert)){
+            var sels = _myDataTable.getSelectedRows();
+            
+            for (row_index = 0; row_index < len; row_index++ )
+            {
+                var rec = _myDataTable.getRecord(row_index);
+                if(sels[0]==rec.getId()){
+                    index_toinsert = row_index+1;
+                    break;
+                }
             }
-        }
-        if(index_toinsert==null){
-		    index_toinsert = recs.getLength()-1;
+            if(index_toinsert==null){
+		        index_toinsert = recs.getLength()-1;
+            }
         }
         
 		var order = 0;
@@ -1335,7 +1343,7 @@ function EditRecStructure() {
 			_myDataTable.addRows(data_toadd, index_toinsert);
 
             _myDataTable.unselectAllRows();
-			_myDataTable.selectRow(index_toinsert);
+			//ART16 _myDataTable.selectRow(index_toinsert);
 
 			// in case of addition - all fields were affected
 			_updatedFields = null;
@@ -1545,16 +1553,18 @@ function EditRecStructure() {
                             height: 800,
                             width: 800,
                             callback: function(newvalue) {
-                                typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
-                                
-                                var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
-                                            defs:{rty_ID:[{common:[newvalue],dtFields:[]}]}}};
-                                var str = JSON.stringify(oRectype);
-                                
-                                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                                var callback = null;// updateResult;
-                                var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
-                                Hul.getJsonData(baseurl, callback, params);                                
+                                if(newvalue!=""){
+                                    typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
+                                    
+                                    var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
+                                                defs:{rty_ID:[{common:[newvalue],dtFields:[]}]}}};
+                                    var str = JSON.stringify(oRectype);
+                                    
+                                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                                    var callback = null;// updateResult;
+                                    var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
+                                    Hul.getJsonData(baseurl, callback, params);                                
+                                }
                             }
                     });
                 }
@@ -1562,6 +1572,12 @@ function EditRecStructure() {
             }, squery);
     }    
     
+    var onMenuClick = function (eventName, eventArgs, subscriptionArg){
+            var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
+            var fname = clonearr.shift();
+            var args = clonearr;
+            top.HEURIST.util.executeFunctionByName(fname, window, args);
+    }
     
     function _addFieldMenu(e){
         
@@ -1571,9 +1587,9 @@ function EditRecStructure() {
         
         if(!rst_ID) return;
         
-        var index_toinsert = _getRecordById(rst_ID).row_index;
+        var index_toinsert = _getRecordById(rst_ID).row_index+1;
         _myDataTable.unselectAllRows();
-        _myDataTable.selectRow(index_toinsert);
+        //ART16 _myDataTable.selectRow(index_toinsert);
             
         var oMenu;
 
@@ -1591,11 +1607,11 @@ function EditRecStructure() {
         }
         oMenu = _fieldMenu;
         //_fieldMenu.hide();
-
+        
         var items = oMenu.getItems();
-        items[0].cfg.setProperty("onclick", { fn: onAddNewDetail, obj: [] } );
-        items[1].cfg.setProperty("onclick", { fn: onDefineNewType, obj: [] } );
-        items[2].cfg.setProperty("onclick", { fn: onAddSeparator, obj: [] } );
+        items[0].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["onAddNewDetail", index_toinsert] } );
+        items[1].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["onDefineNewType", index_toinsert] } );
+        items[2].cfg.setProperty("onclick", { fn: onMenuClick, obj: ["onAddSeparator", index_toinsert] } );
 
 
         oMenu.cfg.setProperty("context",
@@ -1603,6 +1619,8 @@ function EditRecStructure() {
         oMenu.show();
         
     }
+    
+    
 
 	//------------------- DRAG AND DROP ROUTINES
 
@@ -1872,8 +1890,8 @@ function EditRecStructure() {
 		* Adds new detail types from selection popup or new detail type after its definition
 		* @param dty_ID_list - comma separated list of detail type IDs
 		*/
-		addDetails:function(dty_ID_list){
-			_addDetails(dty_ID_list);
+		addDetails:function(dty_ID_list, index_toinsert){
+			_addDetails(dty_ID_list, index_toinsert);
 		},
 
 		/**
@@ -1894,8 +1912,8 @@ function EditRecStructure() {
 		initPreview:function(){
 			return _initPreview();
 		},
-		onAddSeparator: function(){
-			_onAddSeparator();
+		onAddSeparator: function(index_toinsert){
+			_onAddSeparator(index_toinsert);
 		},
         
         onAddFieldMenu: function(e){
@@ -1933,7 +1951,7 @@ function EditRecStructure() {
 /**
 * Invokes popup window to select and add field type from the existing
 */
-function onAddNewDetail(){
+function onAddNewDetail(index_toinsert){
 
 	if(Hul.isnull(popupSelect))
 	{
@@ -1955,7 +1973,7 @@ function onAddNewDetail(){
 
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){
-					editStructure.addDetails(detailTypesToBeAdded);
+					editStructure.addDetails(detailTypesToBeAdded, index_toinsert);
 				}
 				popupSelect = null;
 			}
@@ -1969,14 +1987,14 @@ function onAddNewDetail(){
 /**
 * Adds separator field type
 */
-function onAddSeparator(){
-		editStructure.onAddSeparator();
+function onAddSeparator(index_toinsert){
+		editStructure.onAddSeparator(index_toinsert);
 }
 
 /**
 * Invokes popup window to create and add new field type
 */
-function onDefineNewType(){
+function onDefineNewType(index_toinsert){
 
 		if(Hul.isnull(popupSelect))
 		{
@@ -1999,7 +2017,7 @@ function onDefineNewType(){
 
 						//new field type to be added
 						var dty_ID = Math.abs(Number(context.result[0]));
-						editStructure.addDetails(String(dty_ID));
+						editStructure.addDetails(String(dty_ID), index_toinsert);
 					}
 
 					popupSelect =  null;
