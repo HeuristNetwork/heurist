@@ -148,7 +148,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 								type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('structure/rectypes/manageRectypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
-                        <li><a href="#" onClick="loadContent('structure/import/browseRectypeTemplatesForImport.php?db=<?=HEURIST_DBNAME?>')"
+                        <li><a href="#" onClick="loadContent('structure/import/annotatedTemplate.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Browse documented record type templates on Heurist Network site and selectively import them">Browse templates</a></li>
                         <li><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
                                 title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
@@ -198,9 +198,9 @@ if (is_admin()) {
 							title="Add new / modify existing record types and their use of globally defined fields">Record types / fields</a></li>
 						<li><a href="#" onClick="loadContent('structure/rectypes/editRectypeConstraints.php?db=<?=HEURIST_DBNAME?>')"
 							title="Define constraints on the record types which can be related, and allowable relationship types">Record constraints</a></li>
-						<li  class="seperator"><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>')"
 								title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
-						<li><a href="#" onClick="loadContent('structure/fields/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
+						<li class="seperator"><a href="#" onClick="loadContent('structure/fields/manageDetailTypes.php?db=<?=HEURIST_DBNAME?>')"
 								title="Direct access to the global field definitions">Manage field types</a></li>
 						<li><a href="#" onClick="loadContent('structure/terms/editTerms.php?db=<?=HEURIST_DBNAME?>')"
 								title="Define terms used for relationship types and for other enumerated fields">Manage terms</a></li>

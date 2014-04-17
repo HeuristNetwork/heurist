@@ -27,14 +27,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
-
-    if(isForAdminOnly("to import structural elements")){
-       return;
-    }
-
 ?>
 <html>
 	<head>
@@ -44,6 +36,35 @@
 		<link rel=stylesheet href="../../../common/css/global.css">
 		<link rel=stylesheet href="../../../common/css/admin.css">
 
+        <script>
+if (!window['postMessage'])
+    alert("postMessage is not supported");
+else {
+    if (window.addEventListener) {
+        //alert("standards-compliant");
+        // For standards-compliant web browsers (ie9+)
+        window.addEventListener("message", function(event){alert('!!!!')}, false);
+    }
+    else {
+        //alert("not standards-compliant (ie8)");
+        window.attachEvent("onmessage", receiveMessage);
+    }
+}
+function receiveMessage(event)
+{
+            var message;
+            if (event.origin !== "http://heuristscholar.org"){
+            //if (false) {
+                message = 'You ("' + event.origin + '") are not worthy';
+            } else {
+                message = 'I got "' + event.data + '" from "' + event.origin + '"';
+                document.getElementById('header-full').style.display = 'none';
+                document.getElementById('topbar').style.display = 'none';
+                document.getElementById('footer').style.display = 'none';
+            }
+            alert(message);
+}        
+        </script>
 	</head>
 
 	<body>
