@@ -207,7 +207,8 @@ function _titlemask__get_detail_types() {
 
         while ($row = mysql_fetch_assoc($res)) {
 
-            if (is_numeric($row['dty_OriginatingDBID']) && is_numeric($row['dty_IDInOriginatingDB'])) {
+            if (is_numeric($row['dty_OriginatingDBID']) && $row['dty_OriginatingDBID']>0 && 
+            is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
                 $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
             } else if (HEURIST_DBID) {
                 $dt_cc = "" . HEURIST_DBID . "-" . $row['dty_ID'];
@@ -255,7 +256,9 @@ function _titlemask__get_rec_detail_types($rt) {
 
         while ($row = mysql_fetch_assoc($res)) {
 
-            if (is_numeric($row['dty_OriginatingDBID']) && is_numeric($row['dty_IDInOriginatingDB'])) {
+            if (is_numeric($row['dty_OriginatingDBID']) && $row['dty_OriginatingDBID']>0 && 
+            is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
+                
                 $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
             } else if (HEURIST_DBID) {
                 $dt_cc = "" . HEURIST_DBID . "-" . $row['dty_ID'];
@@ -488,14 +491,14 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
             $dt_type = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'dty_Type');
             if($dt_type=="enum" || $dt_type=="relationtype"){
 
-                if(!$inner_field_name || strcasecmp($inner_field_name,'term')==0){
-                    $inner_field_name = "label";
-                }else if(strcasecmp($inner_field_name,'internalid')==0){
-                    $inner_field_name = "id";
+                if(!$inner_field_name || strcasecmp($inner_field_name,'label')==0){
+                    $inner_field_name = "term";
+                }else if(strcasecmp($inner_field_name,'id')==0){
+                    $inner_field_name = "internalid";
                 }
 
-                if (strcasecmp($inner_field_name,'id')==0 ||
-                strcasecmp($inner_field_name,'label')==0 ||
+                if (strcasecmp($inner_field_name,'internalid')==0 ||
+                strcasecmp($inner_field_name,'term')==0 ||
                 strcasecmp($inner_field_name,'code')==0 ||
                 strcasecmp($inner_field_name,'conceptid')==0)
                 {
