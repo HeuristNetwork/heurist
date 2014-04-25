@@ -36,8 +36,8 @@
 	if (!@$_REQUEST['db']){// be sure to override default this should only be called on the Master Index server so point db master index dbname
 		$_REQUEST['db'] = "H3MasterIndex";
 	}
-	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
+	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 	mysql_connection_select("hdb_H3MasterIndex");
 
 	// Return all registered databases as a json string

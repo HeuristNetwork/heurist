@@ -111,12 +111,9 @@ Click the database icon on the left to view available record types in that datab
 
 				// Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
 				
-                // TODO: 6 feb 2014 This is the correct path for version 3.1.8 and above on the master index
                 $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
-                // TODO: 6 feb 2014 This is a temporary path for version 3.1.7 and below on the master index
-                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
                 
-//error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
+                error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
                 
 				$data = loadRemoteURLContent($reg_url, true); //without proxy
 

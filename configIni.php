@@ -29,7 +29,8 @@
 
 // Set the version number of the Heurist program
 
-$version = "3.1.6"; // required - DO NOT CHANGE - sets current program version number
+$version = "3.1.7"; // required - DO NOT CHANGE - sets current program version number
+                    // 3.1.7 published 26 April 2014
                     // 3.1.6 beta published 29 Nov 2013
 
 // Setting up server with multiple code versions
