@@ -258,7 +258,7 @@ function mode_file_selection() {
 <div class="actionButtons">
 	<input type="button" value="Cancel" onClick="window.close();" style="margin-right: 5px;">
     <input type="submit" value="Continue" style="font-weight: bold;">
-	</div>
+</div>
 <?php
 }
 

@@ -45,13 +45,9 @@
 <script src="../external/jquery/jquery-1.6.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 <!-- <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" /> -->
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 <!-- <script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script> -->
 <!-- Combo-handled YUI CSS files: -->
 <!--<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
@@ -64,6 +60,12 @@
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+
 <link rel=stylesheet href="../common/css/global.css" media="all">
 <link rel=stylesheet href="../common/css/search.css" media="all">
 
@@ -274,6 +276,12 @@
 								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
 								title="Update or add fields in existing records from delimited text" name="auto-popup">
 								CSV (update)</a></li>
+
+                            <li class="admin-only"><a href="../import/delimited/importCSV.php" class="large"
+                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/importCSV.php?db=' + database;" target="_blank"
+                                title="Import data from CSV" name="auto-popup">
+                                CSV (v2)</a></li>                                
+                                
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
 								title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimtied files)">
 								KML</a></li>
