@@ -5,14 +5,31 @@
 * @param _db - database name, if omit it takes from url parameter
 * @param _oninit - callback function, obtain parameter true if initialization is successeful
 * @returns hAPI Object
+*  
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+
 function hAPI(_db, _oninit) { //, _currentUser
-     var _className = "HAPI",
-         _version   = "0.4",
-         _database = null, //same as public property  @toremove
-         _region = 'en',
-         _regional = null, //localization resources
-         _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
+    var _className = "HAPI",
+    _version   = "0.4",
+    _database = null, //same as public property  @toremove
+    _region = 'en',
+    _regional = null, //localization resources
+    _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
 
 
 
@@ -38,7 +55,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         that.basePath = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';
         that.database = _database;
-        
+
         //path to old interface
         installDir = top.location.pathname.replace(/(((\?|admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
         that.basePathOld = top.location.protocol + '//'+top.location.host  + installDir;
@@ -48,31 +65,31 @@ function hAPI(_db, _oninit) { //, _currentUser
             _regional = regional;
             /*todo
             $.getScript(that.basePath+'/js/localization.js', function() {
-                  _regional = regional;
-             });
-             */
+            _regional = regional;
+            });
+            */
         }
 
         /*if(_currentUser){
-            that.currentUser = _currentUser;
+        that.currentUser = _currentUser;
         }else{}*/
-        
+
         // Get current user if logged in, and global database settings
         that.SystemMgr.sys_info(
-                function(response){
-                    var  success = (response.status == top.HAPI.ResponseStatus.OK);
-                    if(success){
-                        that.setCurrentUser(response.data.currentUser);
-                        that.sysinfo = response.data.sysinfo;
-                    }else{
-                        top.HEURIST.util.showMsgErr(response.message);
-                    }
-                    if(_oninit){
-                        _oninit(success);
-                    }
+            function(response){
+                var  success = (response.status == top.HAPI.ResponseStatus.OK);
+                if(success){
+                    that.setCurrentUser(response.data.currentUser);
+                    that.sysinfo = response.data.sysinfo;
+                }else{
+                    top.HEURIST.util.showMsgErr(response.message);
                 }
+                if(_oninit){
+                    _oninit(success);
+                }
+            }
         );
-        
+
     }
 
     /*
@@ -86,35 +103,35 @@ function hAPI(_db, _oninit) { //, _currentUser
     */
     function _callserver(action, request, callback){
 
-                 if(!request.db){
-                    request.db = _database;
-                 }
+        if(!request.db){
+            request.db = _database;
+        }
 
-                 var url = that.basePath+"php/api/"+action+".php"; //+(new Date().getTime());
-                 
-                 //top.HEURIST.ajax.getJsonData(url, callback, request);
-                 
-                 //note jQuery ajax does not properly in the loop - success callback does not work often   
-                 $.ajax({
-                         url: url,
-                         type: "POST",
-                         data: request,
-                         dataType: "json",
-                         cache: false,
-                         error: function(jqXHR, textStatus, errorThrown ) {
-                            if(callback){
-                                callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
-                                message: jqXHR.responseText });
-                            }
-                                //message:'Error connecting server '+textStatus});
-                         },
-                         success: function( response, textStatus, jqXHR ){
-                             if(callback){
-                                callback(response);
-                             }
-                         }
-                     });
-                 
+        var url = that.basePath+"php/api/"+action+".php"; //+(new Date().getTime());
+
+        //top.HEURIST.ajax.getJsonData(url, callback, request);
+
+        //note jQuery ajax does not properly in the loop - success callback does not work often   
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: request,
+            dataType: "json",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+                if(callback){
+                    callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
+                        message: jqXHR.responseText });
+                }
+                //message:'Error connecting server '+textStatus});
+            },
+            success: function( response, textStatus, jqXHR ){
+                if(callback){
+                    callback(response);
+                }
+            }
+        });
+
     }
 
     /**
@@ -123,24 +140,24 @@ function hAPI(_db, _oninit) { //, _currentUser
     * @returns {Object}
     function hUserMgr(){
 
-        var _currentUser = null,
-            _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
+    var _currentUser = null,
+    _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
 
-        var that = {
+    var that = {
 
-            // request {username: , password: }
-            // response HUser object
-            login: function(request, callback){
-                if(request) request.a = 'login';
-                 _callserver('usr_info', request, callback);
-            }
+    // request {username: , password: }
+    // response HUser object
+    login: function(request, callback){
+    if(request) request.a = 'login';
+    _callserver('usr_info', request, callback);
+    }
 
-            ,logout: function(callback){
-                 _callserver('usr_info', {a:'logout'}, callback);
-            }
+    ,logout: function(callback){
+    _callserver('usr_info', {a:'logout'}, callback);
+    }
 
 
-        }
+    }
 
     }
     */
@@ -180,26 +197,26 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             login: function(request, callback){
                 if(request) request.a = 'login';
-                 _callserver('usr_info', request, callback);
+                _callserver('usr_info', request, callback);
             }
-            
+
             ,reset_password: function(request, callback){
                 if(request) request.a = 'reset_password';
-                 _callserver('usr_info', request, callback);
+                _callserver('usr_info', request, callback);
             }
 
             /**
             * Log out
             */
             ,logout: function(callback){
-                 _callserver('usr_info', {a:'logout'}, callback);
+                _callserver('usr_info', {a:'logout'}, callback);
             }
 
             /**
             * Get current user if logged in, and global database settings
             */
             ,sys_info: function(callback){
-                 _callserver('usr_info', {a:'sysinfo'}, callback);
+                _callserver('usr_info', {a:'sysinfo'}, callback);
             }
 
             /**
@@ -209,9 +226,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,user_save: function(request, callback){
                 if(request) request.a = 'usr_save';
-                 _callserver('usr_info', request, callback);
+                _callserver('usr_info', request, callback);
             }
-            
+
             /**
             * Get user profile info form db - used in Admin part only?
             * @param request
@@ -219,7 +236,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,user_get: function(request, callback){
                 if(request) request.a = 'usr_get';
-                 _callserver('usr_info', request, callback);
+                _callserver('usr_info', request, callback);
             }
 
             /**
@@ -229,16 +246,16 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,save_prefs: function(request, callback){
                 if(request) request.a = 'save_prefs';
-                 _callserver('usr_info', request, callback);
+                _callserver('usr_info', request, callback);
             }
-            
+
             /**
             * Returns detailed description of groupfs for current user
             * 
             * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
             */
             ,mygroups: function(callback){
-                 _callserver('usr_info', {a:'groups'}, callback);
+                _callserver('usr_info', {a:'groups'}, callback);
             }
 
             /**
@@ -247,7 +264,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  response data - array of  svs_ID:[svs_Name, svs_Query, svs_UGrpID]
             */
             ,ssearch_get: function(callback){
-                 _callserver('usr_info', {a:'svs_get'}, callback);
+                _callserver('usr_info', {a:'svs_get'}, callback);
             }
 
             /**
@@ -260,8 +277,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             *   svs_UGrpID - user/group ID
             */
             ,ssearch_save: function(request, callback){
-                 if(request) request.a = 'svs_save';
-                 _callserver('usr_info', request, callback);
+                if(request) request.a = 'svs_save';
+                _callserver('usr_info', request, callback);
             }
 
             /**
@@ -269,8 +286,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             * request : {ids: list of records to be deleted}
             */
             ,ssearch_delete: function(request, callback){
-                 if(request) request.a = 'svs_delete';
-                 _callserver('usr_info', request, callback);
+                if(request) request.a = 'svs_delete';
+                _callserver('usr_info', request, callback);
             }
 
 
@@ -282,12 +299,12 @@ function hAPI(_db, _oninit) { //, _currentUser
             * 
             */
             ,get_defs: function(request, callback){
-                 _callserver('sys_structure', request, callback);
+                _callserver('sys_structure', request, callback);
             }
 
             /*
             ,databases: function(request, callback){
-                 _callserver('sys_databases', request, callback);
+            _callserver('sys_databases', request, callback);
             }*/
         }
         return that;
@@ -336,7 +353,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }else{
                     request = { a:'a' };
                 }
-                 _callserver('record_edit', request, callback);
+                _callserver('record_edit', request, callback);
             }
 
             /**
@@ -347,7 +364,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,save: function(request, callback){
                 if(request) request.a = 's';
-                 _callserver('record_edit', request, callback);
+                _callserver('record_edit', request, callback);
             }
 
             /**
@@ -359,7 +376,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,remove: function(request, callback){
                 if(request) request.a = 'd';
-                 _callserver('record_edit', request, callback);
+                _callserver('record_edit', request, callback);
             }
 
             /**
@@ -375,51 +392,51 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  callback - callback function or  $document we have trigger the event
             */
             ,search: function(request, callback){
-                
-               if(!$.isFunction(callback)){
+
+                if(!$.isFunction(callback)){
                     var document = callback;
                     if(!top.HEURIST.util.isnull(document)){
                         document.trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]); //gloal app event  
                     } 
                     callback = function(response)
-                        {
-                            var resdata = null;
-                            if(response.status == top.HAPI.ResponseStatus.OK){
-                                resdata = new hRecordSet(response.data);
-                            }else{
-                                top.HEURIST.util.showMsgErr(response.message);
-                            }
-                            if(!top.HEURIST.util.isnull(document)){
-                                  document.trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
-                            }
+                    {
+                        var resdata = null;
+                        if(response.status == top.HAPI.ResponseStatus.OK){
+                            resdata = new hRecordSet(response.data);
+                        }else{
+                            top.HEURIST.util.showMsgErr(response.message);
                         }
-               }
-               
-               if(top.HEURIST.util.isnull(request.l)){
-                  request.l = top.HAPI.get_prefs('search_limit');
-               }
-                
-               _callserver('record_search', request, callback);
+                        if(!top.HEURIST.util.isnull(document)){
+                            document.trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                        }
+                    }
+                }
+
+                if(top.HEURIST.util.isnull(request.l)){
+                    request.l = top.HAPI.get_prefs('search_limit');
+                }
+
+                _callserver('record_search', request, callback);
             }
 
             // find min and max values for
             // rt - record type
             // dt - detailtyep
             ,minmax: function(request, callback){
-                 if(request) request.a = 'minmax';
-                 _callserver('record_search', request, callback);
+                if(request) request.a = 'minmax';
+                _callserver('record_search', request, callback);
             }
 
             // find ranges for faceted search
             //             
             ,get_facets: function(request, callback){
-                 if(request) request.a = 'getfacets';
-                 _callserver('record_search', request, callback);
+                if(request) request.a = 'getfacets';
+                _callserver('record_search', request, callback);
             }
 
             //@TODO get full info for particular record
             ,get: function(request, callback){
-                 _callserver('record_get', request, callback);
+                _callserver('record_get', request, callback);
             }
 
             // add/save tag
@@ -430,14 +447,14 @@ function hAPI(_db, _oninit) { //, _currentUser
             //          tag_UGrpID
             ,tag_save: function(request, callback){
                 if(request) request.a = 'save';
-                 _callserver('record_tags', request, callback);
+                _callserver('record_tags', request, callback);
             }
             // remove tag
             // request  a: delete
             //          ids - list of tag ids to be deleted
             ,tag_delete: function(request, callback){
                 if(request) request.a = 'delete';
-                 _callserver('record_tags', request, callback);
+                _callserver('record_tags', request, callback);
             }
             // get list of tags for sepcified userid
             // request  a: search
@@ -447,8 +464,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             // responce  recIDs
             // 
             ,tag_get: function(request, callback){
-                 if(request) request.a = 'search';
-                 _callserver('record_tags', request, callback);
+                if(request) request.a = 'search';
+                _callserver('record_tags', request, callback);
             }
             // assign/remove list of tags for sepcified list of records
             // request  a: assign_remove
@@ -457,17 +474,17 @@ function hAPI(_db, _oninit) { //, _currentUser
             //          recIDs: cs list of record ids
             //          UGrpID
             ,tag_set: function(request, callback){
-                 if(request) request.a = 'set';
-                 _callserver('record_tags', request, callback);
+                if(request) request.a = 'set';
+                _callserver('record_tags', request, callback);
             }
-            
+
             // remove tag
             // request  a: replace
             //          ids - list of tag ids to be replaced and deleted
             //          new_id - new tag id
             ,tag_replace: function(request, callback){
-                 if(request) request.a = 'replace';
-                 _callserver('record_tags', request, callback);
+                if(request) request.a = 'replace';
+                _callserver('record_tags', request, callback);
             }
 
 
@@ -480,14 +497,14 @@ function hAPI(_db, _oninit) { //, _currentUser
             //          ulf_ExternalFileReference
             ,file_save: function(request, callback){
                 if(request) request.a = 'save';
-                 _callserver('record_files', request, callback);
+                _callserver('record_files', request, callback);
             }
             // remove file
             // request  a: delete
             //          ids - list of file ids to be deleted
             ,file_delete: function(request, callback){
                 if(request) request.a = 'delete';
-                 _callserver('record_files', request, callback);
+                _callserver('record_files', request, callback);
             }
             // get list of files for sepcified userid, media type and records
             // request  a: search
@@ -495,11 +512,11 @@ function hAPI(_db, _oninit) { //, _currentUser
             //          mediaType
             //          recIDs
             ,file_get: function(request, callback){
-                 if(request) request.a = 'search';
-                 _callserver('record_files', request, callback);
+                if(request) request.a = 'search';
+                _callserver('record_files', request, callback);
             }
-           
-            
+
+
         }
         return that;
     }
@@ -550,27 +567,27 @@ function hAPI(_db, _oninit) { //, _currentUser
         * @param user
         */
         setCurrentUser: function(user){
-                if(user){
-                    that.currentUser = user;
-                }else{
-                    that.currentUser = _guestUser;
-                }
+            if(user){
+                that.currentUser = user;
+            }else{
+                that.currentUser = _guestUser;
+            }
         },
-        
+
         /**
         * Returns true if currentUser ID > 0 (not guest)
         */
         is_logged: function(){
             return that.currentUser['ugr_ID']>0;
         },
-        
+
         /**
         * Returns true is current user is database owner
         */
         is_admin: function(){
             return that.currentUser['ugr_Admin'];
         },
-        
+
         /**
         * Returns true if currentUser is member of given group ID or itself  (similar on server is_admin2)
         * @param ug
@@ -579,7 +596,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             return (ug==0 || that.currentUser['ugr_ID']==ug ||
                 (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug]));
         },
-        
+
         /**
         * Return userGroup ID if currentUser is database owner or admin of given group
         * 
@@ -598,7 +615,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 return -1;
             }
         },
-        
+
         /**
         * Returns current user preferences
         * 
@@ -618,7 +635,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 return res;
             }
         },
-        
+
         is_ui_normal: function(){
             return (top.HAPI.get_prefs('layout_style')=='normal');
         },
@@ -636,23 +653,23 @@ function hAPI(_db, _oninit) { //, _currentUser
         SystemMgr: new hSystemMgr(),
 
         /*SystemMgr: function(){
-            return hSystemMgr();
+        return hSystemMgr();
         },*/
 
         RecordMgr: new hRecordMgr(),
 
         /*RecordMgr: function(){
-            return hRecordMgr();
+        return hRecordMgr();
         }*/
 
         /**
         * Returns function to string resouce according to current region setting
         */
         setLocale: function( region ){
-                if(_regional && _regional[region]){
-                        _region = region;
-                }
-                return _key;  //_key is function
+            if(_regional && _regional[region]){
+                _region = region;
+            }
+            return _key;  //_key is function
         }
     }
 

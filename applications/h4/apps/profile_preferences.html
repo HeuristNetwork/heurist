@@ -1,63 +1,85 @@
+<!--
+/**
+* Set user's preferences for session
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+
 <script type="text/javascript">
 
-function populateLanguages(){
-   var sel = $("#layout_language");
-   if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
+    function populateLanguages(){
+        var sel = $("#layout_language");
+        if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
 
-        var key;
-        sel.empty();
-        sel = sel.get(0);
-        for(key in regional){
-            if(key){
-                top.HEURIST.util.addoption(sel, key, regional[key].language);
+            var key;
+            sel.empty();
+            sel = sel.get(0);
+            for(key in regional){
+                if(key){
+                    top.HEURIST.util.addoption(sel, key, regional[key].language);
+                }
             }
         }
-   }
-}
+    }
 </script>
 
-  <form>
-  <fieldset>
-    <div>
-        <div class="header"><label for="layout_config">Layout configuration file</label></div>
-        <input type="text" name="layout_config" id="layout_config" class="text ui-widget-content ui-corner-all" />
-    </div>
-    <div>
-        <div class="header"><label for="layout_language">Language</label></div>
-        <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
-    </div>
-    <div>
-        <div class="header"><label for="layout_style">Style</label></div>
-        <select name="layout_style" id="layout_style" class="text ui-widget-content ui-corner-all" style="min-width:300px">
-            <option>johnson</option>
-            <option>normal</option>
-        </select>
-    </div>
+<form>
+    <fieldset>
+        <div>
+            <div class="header"><label for="layout_config">Layout configuration file</label></div>
+            <input type="text" name="layout_config" id="layout_config" class="text ui-widget-content ui-corner-all" />
+        </div>
+        <div>
+            <div class="header"><label for="layout_language">Language</label></div>
+            <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        </div>
+        <div>
+            <div class="header"><label for="layout_style">Style</label></div>
+            <select name="layout_style" id="layout_style" class="text ui-widget-content ui-corner-all" style="min-width:300px">
+                <option>johnson</option>
+                <option>normal</option>
+            </select>
+        </div>
 
-    <div>
-        <div class="header"><label for="layout_theme">Theme</label></div>
-        <div id="layout_theme"></div>
-        <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
-    </div>
+        <div>
+            <div class="header"><label for="layout_theme">Theme</label></div>
+            <div id="layout_theme"></div>
+            <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
+        </div>
 
-    <br />
-    <hr />
-    <br />
+        <br />
+        <hr />
+        <br />
 
-    <div>
-        <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
-        <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
-    </div>
-    <div>
-        <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
-        <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
-    </div>
-    <div>
-        <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
-        <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
-    </div>
+        <div>
+            <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
+            <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
+        <div>
+            <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
+            <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
+        <div>
+            <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
+            <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
 
-  </fieldset>
+    </fieldset>
   </form>
   <br />
   <p class="messages"></p>

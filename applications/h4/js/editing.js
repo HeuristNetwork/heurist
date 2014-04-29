@@ -2,18 +2,35 @@
 * Class UI for edit Heurist record. It has methods to add new or edit (HAPI.RecordMgr) existing record (it can search and load beforehand) 
 * 
 * @see editing_input.js
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
-function hEditing() {
-     var _className = "Editing",
-         _version   = "0.4";
 
-     var $container = null,  //html to have edit form
-         recdata = null,     //hRecordSet
-         recID = null,
-         rectypeID = null,
-         _isdialog = false,  //open edit as popup dialogue
-         _isaddnewrecord = false,
-         _inputs = null; //array of editing_input widgets
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+
+function hEditing() {
+    var _className = "Editing",
+    _version   = "0.4";
+
+    var $container = null,  //html to have edit form
+    recdata = null,     //hRecordSet
+    recID = null,
+    rectypeID = null,
+    _isdialog = false,  //open edit as popup dialogue
+    _isaddnewrecord = false,
+    _inputs = null; //array of editing_input widgets
 
     /**
     * Initialization
@@ -28,7 +45,7 @@ function hEditing() {
     */
     function _setcontainer(_container){
 
-         if (typeof container==="string") {
+        if (typeof container==="string") {
             $container = $("#"+container);
         }else{
             $container = $(_container);
@@ -53,24 +70,24 @@ function hEditing() {
     */
     function _add(_recordtype, _container){
 
-            _setcontainer(_container);
+        _setcontainer(_container);
 
-            _isaddnewrecord = true;
-            recdata = null;
+        _isaddnewrecord = true;
+        recdata = null;
 
-            top.HAPI.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
-                function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+        top.HAPI.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
+            function(response){
+                if(response.status == top.HAPI.ResponseStatus.OK){
 
-                        recdata = new hRecordSet(response.data);
-                        _load();
+                    recdata = new hRecordSet(response.data);
+                    _load();
 
-                    }else{
-                        top.HEURIST.util.showMsgErr(response);
-                    }
+                }else{
+                    top.HEURIST.util.showMsgErr(response);
                 }
+            }
 
-            );
+        );
     }
 
     /**
@@ -82,34 +99,34 @@ function hEditing() {
     */
     function _edit(_recdata, _container){
 
-            _setcontainer(_container);
+        _setcontainer(_container);
 
-            _isaddnewrecord = false;
-            recdata = null;
+        _isaddnewrecord = false;
+        recdata = null;
 
-            if ( _recdata && (typeof _recdata.isA == "function") && _recdata.isA("hRecordSet") ){
-                if(_recdata.length()>0){
-                    recdata = _recdata;
-                    _load();
-                }
-            } else if( !isNaN(parseInt(_recdata)) ) {
-
-                top.HAPI.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
-                    function(response){
-                        if(response.status == top.HAPI.ResponseStatus.OK){
-
-                            recdata = new hRecordSet(response.data);
-                            _load();
-
-                        }else{
-                            top.HEURIST.util.showMsgErr(response);
-                        }
-                    }
-                );
-
-            }else{
-                top.HEURIST.util.showMsgErr('Wrong parameters for record edit');
+        if ( _recdata && (typeof _recdata.isA == "function") && _recdata.isA("hRecordSet") ){
+            if(_recdata.length()>0){
+                recdata = _recdata;
+                _load();
             }
+        } else if( !isNaN(parseInt(_recdata)) ) {
+
+            top.HAPI.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
+                function(response){
+                    if(response.status == top.HAPI.ResponseStatus.OK){
+
+                        recdata = new hRecordSet(response.data);
+                        _load();
+
+                    }else{
+                        top.HEURIST.util.showMsgErr(response);
+                    }
+                }
+            );
+
+        }else{
+            top.HEURIST.util.showMsgErr('Wrong parameters for record edit');
+        }
     }
 
     /**
@@ -138,34 +155,34 @@ function hEditing() {
 
         //header: rectype and title
         var $header = $('<div>')
-                .css({'padding':'0.4em', 'border-bottom':'solid 1px #6A7C99'})
-                //.addClass('ui-widget-header ui-corner-all')
-                .appendTo($container);
+        .css({'padding':'0.4em', 'border-bottom':'solid 1px #6A7C99'})
+        //.addClass('ui-widget-header ui-corner-all')
+        .appendTo($container);
 
         $('<h2>' + recdata.fld(record, 'rec_Title') + '</h2>')
-                .appendTo($header);
+        .appendTo($header);
 
-       // control buttons - save and cancel         
+        // control buttons - save and cancel         
         var btn_div = $('<div>')
-            .css({position:'absolute', right:'0.4em', top:'0.4em'})
-            .appendTo($header);
-                
+        .css({position:'absolute', right:'0.4em', top:'0.4em'})
+        .appendTo($header);
+
         $('<button>', {text:top.HR('Save')})
-                .button().on("click", function(event){ _save(); } )
-                .appendTo(btn_div);
+        .button().on("click", function(event){ _save(); } )
+        .appendTo(btn_div);
         $('<button>', {text:top.HR('Cancel')})
-                .button().on("click", function(event){ if(_isdialog) $container.dialog( "close" ); } )
-                .appendTo(btn_div);
+        .button().on("click", function(event){ if(_isdialog) $container.dialog( "close" ); } )
+        .appendTo(btn_div);
 
         $('<div>')
-            .css('display','inline-block')
-            .append( $('<img>',{
-                    src:  top.HAPI.basePath+'assets/16x16.gif',
-                    title: '@todo rectypeTitle'.htmlEscape()
-                })
-                .css({'background-image':'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
-            .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>')
-            .appendTo($header);
+        .css('display','inline-block')
+        .append( $('<img>',{
+            src:  top.HAPI.basePath+'assets/16x16.gif',
+            title: '@todo rectypeTitle'.htmlEscape()
+            })
+            .css({'background-image':'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
+        .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>')
+        .appendTo($header);
 
 
         // create input controls - see editing_input.js
@@ -183,10 +200,10 @@ function hEditing() {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                   (top.HAPI.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
-                    rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
+                    (top.HAPI.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                        rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
-                        continue;
+                    continue;
                 }
 
                 var values = recdata.fld(record, dtID);
@@ -195,31 +212,31 @@ function hEditing() {
                 if( (rfrs[dtID][fi['dty_Type']])=="separator" || !values) continue;
                 var isempty = true;
                 $.each(values, function(idx,value){
-                        if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; }
+                if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; }
                 } );
                 if(isempty) continue;
                 */
                 if ( (rfrs[dtID][fi['dty_Type']])=="separator" ){
 
-                     $( "<h3>")
-                        .addClass('separator')
-                        .html(rfrs[dtID][fi['rst_DisplayName']])
-                        .appendTo( $fieldset );
+                    $( "<h3>")
+                    .addClass('separator')
+                    .html(rfrs[dtID][fi['rst_DisplayName']])
+                    .appendTo( $fieldset );
                     continue;
                 }
 
 
                 var inpt = $("<div>").editing_input(
-                          {
-                            recID: recID,
-                            rectypeID: rectypeID,
-                            dtID: dtID,
-                            rectypes: rectypes,
-                            values: values,
-                            readonly: false
-                          });
-                          
-                          inpt.appendTo($fieldset);
+                    {
+                        recID: recID,
+                        rectypeID: rectypeID,
+                        dtID: dtID,
+                        rectypes: rectypes,
+                        values: values,
+                        readonly: false
+                });
+
+                inpt.appendTo($fieldset);
 
                 _inputs.push(inpt);
 
@@ -229,18 +246,18 @@ function hEditing() {
 
         if (_isdialog) {
 
-                    $container.dialog({
-                        autoOpen: true,
-                        height: 640,
-                        width: 740,
-                        modal: true,
-                        resizable: true,
-                        draggable: true,
-                        title: top.HR(_isaddnewrecord?"Add new record":"Edit record"),
-                        resizeStop: function( event, ui ) {
-                            $container.css('width','100%');
-                        }                        
-                    });
+            $container.dialog({
+                autoOpen: true,
+                height: 640,
+                width: 740,
+                modal: true,
+                resizable: true,
+                draggable: true,
+                title: top.HR(_isaddnewrecord?"Add new record":"Edit record"),
+                resizeStop: function( event, ui ) {
+                    $container.css('width','100%');
+                }                        
+            });
 
         }
 
@@ -262,7 +279,7 @@ function hEditing() {
     */
     function _save(){
 
-//            array_push($details["t:".$key], $value);
+        //            array_push($details["t:".$key], $value);
 
         var ele, idx, details = {};
         for (idx in _inputs) {
@@ -275,22 +292,22 @@ function hEditing() {
             }
         }
 
-            var request = {ID: recID, RecTypeID: rectypeID, 'details': details};
+        var request = {ID: recID, RecTypeID: rectypeID, 'details': details};
 
 
-            top.HAPI.RecordMgr.save( request,
-                function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+        top.HAPI.RecordMgr.save( request,
+            function(response){
+                if(response.status == top.HAPI.ResponseStatus.OK){
 
-                        alert('Record saved');
+                    alert('Record saved');
 
-                    }else{
+                }else{
 
-                        top.HEURIST.util.showMsgErr(response);
-                    }
+                    top.HEURIST.util.showMsgErr(response);
                 }
+            }
 
-            );
+        );
 
         return true;
     }

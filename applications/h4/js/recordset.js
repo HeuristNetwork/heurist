@@ -1,23 +1,39 @@
 /**
 * Storage of records and its definitions (fields and structure)
+* 
 * @see recordSearch in db_recsearch.php
-* 
 * @param initdata
-* 
 * @returns {Object}
+* @see editing_input.js
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
 
-function hRecordSet(initdata) {
-     var _className = "hRecordSet",
-         _version   = "0.4";
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-     var count_total = 0,   //number of records in query  - not match to  length()
-         offset = 0,
-         //limit = 1000, use length()
-         fields = [],       //array of field names
-         records = [],      //array of values
-         structures = null;  //record structure definitions for all rectypes in this record set
-         
+
+function hRecordSet(initdata) {
+    var _className = "hRecordSet",
+    _version   = "0.4";
+
+    var count_total = 0,   //number of records in query  - not match to  length()
+    offset = 0,
+    //limit = 1000, use length()
+    fields = [],       //array of field names
+    records = [],      //array of values
+    structures = null;  //record structure definitions for all rectypes in this record set
+
     /**
     * Initialization
     */
@@ -32,12 +48,12 @@ function hRecordSet(initdata) {
     }
 
     /**
-     * convert wkt to
-     * format - 0 timemap, 1 google
-     * 
-     * @todo 2 - kml 
-     * @todo 3 - OpenLayers 
-     */
+    * convert wkt to
+    * format - 0 timemap, 1 google
+    * 
+    * @todo 2 - kml 
+    * @todo 3 - OpenLayers 
+    */
     function _parseCoordinates(type, wkt, format) {
 
         if(type==1 && typeof google.maps.LatLng != "function") {
@@ -81,65 +97,65 @@ function hRecordSet(initdata) {
 
 
         var bounds, southWest, northEast,
-            shape  = null,
-            points = []; //google points
+        shape  = null,
+        points = []; //google points
 
         if(matches && matches.length>0){
 
-        switch (type) {
-            case "p":
-            case "point":
+            switch (type) {
+                case "p":
+                case "point":
 
-                if(format==0){
-                    shape = { point:{lat: parseFloat(matches[2]), lon:parseFloat(matches[1]) } };
-                }else{
-                    point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+                    if(format==0){
+                        shape = { point:{lat: parseFloat(matches[2]), lon:parseFloat(matches[1]) } };
+                    }else{
+                        point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
 
-                    bounds = new google.maps.LatLngBounds(
-                                new google.maps.LatLng(point.lat() - 0.5, point.lng() - 0.5),
-                                new google.maps.LatLng(point.lat() + 0.5, point.lng() + 0.5));
-                    points.push(point);
-                }
+                        bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(point.lat() - 0.5, point.lng() - 0.5),
+                            new google.maps.LatLng(point.lat() + 0.5, point.lng() + 0.5));
+                        points.push(point);
+                    }
 
-            break;
+                    break;
 
-            case "r":  //rectangle
-            case "rect":
+                case "r":  //rectangle
+                case "rect":
 
-                if(matches.length<6){
-                    matches.push(matches[3]);
-                    matches.push(matches[4]);
-                }
+                    if(matches.length<6){
+                        matches.push(matches[3]);
+                        matches.push(matches[4]);
+                    }
 
-                var x0 = parseFloat(matches[0]);
-                var y0 = parseFloat(matches[2]);
-                var x1 = parseFloat(matches[5]);
-                var y1 = parseFloat(matches[6]);
+                    var x0 = parseFloat(matches[0]);
+                    var y0 = parseFloat(matches[2]);
+                    var x1 = parseFloat(matches[5]);
+                    var y1 = parseFloat(matches[6]);
 
-                if(format==0){
-                    shape  = [
-                        {lat: y0, lon: x0},
-                        {lat: y0, lon: x1},
-                        {lat: y1, lon: x1},
-                        {lat: y1, lon: x0},
+                    if(format==0){
+                        shape  = [
+                            {lat: y0, lon: x0},
+                            {lat: y0, lon: x1},
+                            {lat: y1, lon: x1},
+                            {lat: y1, lon: x0},
                         ];
 
                         shape = {polygon:shape};
-                }else{
+                    }else{
 
-                    southWest = new google.maps.LatLng(y0, x0);
-                    northEast = new google.maps.LatLng(y1, x1);
-                    bounds = new google.maps.LatLngBounds(southWest, northEast);
+                        southWest = new google.maps.LatLng(y0, x0);
+                        northEast = new google.maps.LatLng(y1, x1);
+                        bounds = new google.maps.LatLngBounds(southWest, northEast);
 
-                    points.push(southWest, new google.maps.LatLng(y0, x1), northEast, new google.maps.LatLng(y1, x0));
-                }
+                        points.push(southWest, new google.maps.LatLng(y0, x1), northEast, new google.maps.LatLng(y1, x0));
+                    }
 
-            break;
+                    break;
 
-            case "c":  //circle
-            case "circle":  //circle
+                case "c":  //circle
+                case "circle":  //circle
 
-                if(format==0){
+                    if(format==0){
 
                         var x0 = parseFloat(matches[1]);
                         var y0 = parseFloat(matches[2]);
@@ -153,55 +169,55 @@ function hRecordSet(initdata) {
                         }
                         shape = {polygon:shape};
 
-                }else{
-    /* ARTEM TODO
-                    var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-                    var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
-                    setstartMarker(centre);
-                    createcircle(oncircle);
-
-                    //bounds = circle.getBounds();
-    */
-                }
-
-            break;
-
-            case "l":  ///polyline
-            case "path":
-            case "polyline":
-
-            case "pl": //polygon
-            case "polygon":
-
-                shape = [];
-
-                var j;
-                var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-                for (j=0; j < matches.length; ++j) {
-                    var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
-
-                    var point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
-
-                    if(format==0){
-                        shape.push(point);
                     }else{
-                        points.push(new google.maps.LatLng(points.lat, points.lon));
+                        /* ARTEM TODO
+                        var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+                        var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
+                        setstartMarker(centre);
+                        createcircle(oncircle);
+
+                        //bounds = circle.getBounds();
+                        */
                     }
 
-                    if (point.lat < minLat) minLat = point.lat;
-                    if (point.lat > maxLat) maxLat = point.lat;
-                    if (point.lon < minLng) minLng = point.lon;
-                    if (point.lon > maxLng) maxLng = point.lon;
-                }
+                    break;
 
-                if(format==0){
-                    shape = (type=="l" || type=="polyline")?{polyline:shape}:{polygon:shape};
-                }else{
-                    southWest = new google.maps.LatLng(minLat, minLng);
-                    northEast = new google.maps.LatLng(maxLat, maxLng);
-                    bounds = new google.maps.LatLngBounds(southWest, northEast);
-                }
-        }
+                case "l":  ///polyline
+                case "path":
+                case "polyline":
+
+                case "pl": //polygon
+                case "polygon":
+
+                    shape = [];
+
+                    var j;
+                    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+                    for (j=0; j < matches.length; ++j) {
+                        var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+
+                        var point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
+
+                        if(format==0){
+                            shape.push(point);
+                        }else{
+                            points.push(new google.maps.LatLng(points.lat, points.lon));
+                        }
+
+                        if (point.lat < minLat) minLat = point.lat;
+                        if (point.lat > maxLat) maxLat = point.lat;
+                        if (point.lon < minLng) minLng = point.lon;
+                        if (point.lon > maxLng) maxLng = point.lon;
+                    }
+
+                    if(format==0){
+                        shape = (type=="l" || type=="polyline")?{polyline:shape}:{polygon:shape};
+                    }else{
+                        southWest = new google.maps.LatLng(minLat, minLng);
+                        northEast = new google.maps.LatLng(maxLat, maxLng);
+                        bounds = new google.maps.LatLngBounds(southWest, northEast);
+                    }
+            }
 
         }
 
@@ -216,56 +232,56 @@ function hRecordSet(initdata) {
         var aitems = [];
         var recID, item, shape;
         for(recID in records){
-        if(recID)
-        {
-            var record = records[recID];
+            if(recID)
+            {
+                var record = records[recID];
 
-            var
-            recName     = _getFieldValue(record, 'rec_Title'),
-            recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
+                var
+                recName     = _getFieldValue(record, 'rec_Title'),
+                recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
 
-            startDate   = _getFieldValue(record, 'dtl_StartDate'),
-            endDate     = _getFieldValue(record, 'dtl_EndDate'),
-            description = _getFieldValue(record, 'dtl_Description'),
-            type        = _getFieldValue(record, 'dtl_GeoType'),
-            wkt         = _getFieldValue(record, 'dtl_Geo');
+                startDate   = _getFieldValue(record, 'dtl_StartDate'),
+                endDate     = _getFieldValue(record, 'dtl_EndDate'),
+                description = _getFieldValue(record, 'dtl_Description'),
+                type        = _getFieldValue(record, 'dtl_GeoType'),
+                wkt         = _getFieldValue(record, 'dtl_Geo');
 
-            item = {
+                item = {
                     start: (startDate || ''),
                     end: (endDate && endDate!=startDate)?endDate:'',
                     placemarks:[],
                     title: recName,
-                                options:{
+                    options:{
 
-                                    description: description,
-                                    //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
-                                    //link: record.url,  //for timeline popup
-                                    recid: recID,
-                                    rectype: recTypeID,
-                                    //thumb: record.thumb_url,
-                                    icon: top.HAPI.iconBaseURL + recTypeID + '.png',
-                                    start: (startDate || ''),
-                                    end: (endDate && endDate!=startDate)?endDate:''
-                                    //,infoHTML: (infoHTML || ''),
-                                }
-                    };
+                        description: description,
+                        //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
+                        //link: record.url,  //for timeline popup
+                        recid: recID,
+                        rectype: recTypeID,
+                        //thumb: record.thumb_url,
+                        icon: top.HAPI.iconBaseURL + recTypeID + '.png',
+                        start: (startDate || ''),
+                        end: (endDate && endDate!=startDate)?endDate:''
+                        //,infoHTML: (infoHTML || ''),
+                    }
+                };
 
-             shape = _parseCoordinates(type, wkt, 0);
-             if(shape){
-                item.placemarks.push(shape);
-             }
+                shape = _parseCoordinates(type, wkt, 0);
+                if(shape){
+                    item.placemarks.push(shape);
+                }
 
-             aitems.push(item);
+                aitems.push(item);
         }}
 
-         var dataset = [
-                            {
-                                type: "basic",
-                                options: { items: aitems }
-                            }
-                        ];
+        var dataset = [
+            {
+                type: "basic",
+                options: { items: aitems }
+            }
+        ];
 
-         return dataset;
+        return dataset;
     }//end _toTimemap
 
     /**
@@ -291,12 +307,12 @@ function hRecordSet(initdata) {
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[28] && d[28][0]){
                     var g = d[28][0].split(' ');
 
-                        if(fldname=="dtl_Geo"){
-                            g.shift()
-                            return g.join(' ');
-                        }else{
-                            return g[0];
-                        }
+                    if(fldname=="dtl_Geo"){
+                        g.shift()
+                        return g.join(' ');
+                    }else{
+                        return g[0];
+                    }
                 }
             }
             return null;
@@ -332,18 +348,18 @@ function hRecordSet(initdata) {
         */
         getById: function(recID){
 
-           if ($.inArray(recID, records)) {
+            if ($.inArray(recID, records)) {
                 return records[recID];
-           }
-           /*
-           var i;
-           for(i=0; i<records.length; i++){
-                if(this.fld(records[i], 'rec_ID') == recID){
-                        return records[i];
-                }
-           }
-           */
-           return null;
+            }
+            /*
+            var i;
+            for(i=0; i<records.length; i++){
+            if(this.fld(records[i], 'rec_ID') == recID){
+            return records[i];
+            }
+            }
+            */
+            return null;
 
         },
 
@@ -383,7 +399,7 @@ function hRecordSet(initdata) {
         offset: function(){
             return offset;
         },
-        
+
         /**
         * Get all records s
         */
@@ -415,21 +431,21 @@ function hRecordSet(initdata) {
         /* record - hRecord or rectypeID
         getRecordStructure: function(record){
 
-            //record type
-            var rectypeID = null;
+        //record type
+        var rectypeID = null;
 
-            if (record || typeof(record) == "object" )
-            {
-                rectypeID = _getFieldValue(record, 'rty_RecTypeID');
-            }else{
-                rectypeID =  record;
-            }
+        if (record || typeof(record) == "object" )
+        {
+        rectypeID = _getFieldValue(record, 'rty_RecTypeID');
+        }else{
+        rectypeID =  record;
+        }
 
-            if(rectypeID && structures[rectypeID]){
-                return structures[rectypeID];
-            }else{
-                return null;
-            }
+        if(rectypeID && structures[rectypeID]){
+        return structures[rectypeID];
+        }else{
+        return null;
+        }
 
         },*/
 

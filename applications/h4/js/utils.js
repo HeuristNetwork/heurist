@@ -1,15 +1,31 @@
 /**
 *  Various utility functions
 * 
-*  @todo - split to generic utilities and UI utilities
+* @todo - split to generic utilities and UI utilities
+* @see editing_input.js
 * 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 
 if (!top.HEURIST){
     top.HEURIST = {};
 }
 if (! top.HEURIST.util) top.HEURIST.util = {
-    
+
 
     isnull: function(obj){
         return ( (typeof obj==="undefined") || (obj===null));
@@ -23,9 +39,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else{
             return (obj==="") || (obj==="null");    
         }
-        
+
     },
-    
+
     isNumber: function (n) {
         //return typeof n === 'number' && isFinite(n);
         return !isNaN(parseFloat(n)) && isFinite(n);
@@ -33,15 +49,15 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     getUrlQueryAndDomain: function(qsearch)            
     {
-            var domain = null;
-            if(qsearch && qsearch.indexOf('?')==0){
-                domain = top.HEURIST.util.getUrlParameter('w', qsearch);
-                qsearch = top.HEURIST.util.getUrlParameter('q', qsearch);
-            }
-            domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-            return [qsearch, domain];
+        var domain = null;
+        if(qsearch && qsearch.indexOf('?')==0){
+            domain = top.HEURIST.util.getUrlParameter('w', qsearch);
+            qsearch = top.HEURIST.util.getUrlParameter('q', qsearch);
+        }
+        domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+        return [qsearch, domain];
     },
-    
+
     getUrlParameter: function getUrlParameter(name, query){
 
         if(!query){
@@ -62,7 +78,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     isArrayNotEmpty: function (a){
         return (top.HEURIST.util.isArray(a) && a.length>0);
     },
-    
+
     isArray: function (a)
     {
         return Object.prototype.toString.apply(a) === '[object Array]';
@@ -106,8 +122,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
 
         var termLookup = terms.termsByDomainLookup[datatype],
-            termName,
-            termCode;
+        termName,
+        termCode;
 
         if(termLookup[termID]){
             termName = termLookup[termID][terms.fieldNamesToIndex['trm_Label']];
@@ -140,28 +156,28 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     //return term and its children as well as comma-separated list of non-disabled ancestors
     getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
+
         var termtree = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
-/*
+        /*
         function __setParents(parent, terms){
-        
-            for (var i=0; i<terms.length; i++)
-            {
-                if(!terms[i].parents){
-                    terms[i].parents = [];
-                }else{
-                    terms[i].parents = terms[i].parents.concat(parent.parents);    
-                }
-                terms[i].parents.unshift(parent);
-                
-                __setParents(terms[i], terms[i].children);
-            }
+
+        for (var i=0; i<terms.length; i++)
+        {
+        if(!terms[i].parents){
+        terms[i].parents = [];
+        }else{
+        terms[i].parents = terms[i].parents.concat(parent.parents);    
         }
-*/        
+        terms[i].parents.unshift(parent);
+
+        __setParents(terms[i], terms[i].children);
+        }
+        }
+        */        
         function __findTerm(termId, parent, terms)
         {
             for (var i=0; i<terms.length; i++){
-                
+
                 if(terms[i].id==termId){
                     return terms[i];
                 }else{
@@ -173,11 +189,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             }
             return null; //not found in this level
         }
-        
+
         var root = {id:null, text:top.HR('all'), children:termtree};
-            
+
         //__setParents(root, termtree);
-            
+
         return top.HEURIST.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
     },
 
@@ -195,7 +211,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
 
         if(needArray){
-            
+
         }else{
             selObj = createSelector(selObj, topOptions);
         }
@@ -203,7 +219,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
-        
+
         var terms = top.HEURIST.terms;
         if(!(datatype=="enum" || datatype=="relation") || !terms ){
             return needArray ?[] :selObj;
@@ -247,7 +263,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             termCode,
             arrterm = [],
             reslist2 = [];
-            
+
             for(termID in termSubTree) { // For every term in 'term'
                 termName = "";
                 termCode = "";
@@ -269,10 +285,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
             //sort by name
             arrterm.sort(function (a,b){
-                    return a[1]<b[1]?-1:1;
+                return a[1]<b[1]?-1:1;
             });
-            
-            
+
+
 
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) { // For every term in 'term'
@@ -296,7 +312,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
                 if(isHeader && depth==0) { // header term behaves like an option group
                     //opt.className +=  ' termHeader';
-                    
+
                     if(selObj){
 
                         new_optgroup = document.createElement("optgroup");
@@ -308,13 +324,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         }else{
                             optgroup.appendChild(new_optgroup);
                         }
-                    
+
                     }
 
                 }else{
-                    
+
                     if(selObj){
-                    
+
                         var opt = new Option(termName+termCode, termID);
                         opt.className = "depth" + (depth<7)?depth:7;
                         opt.depth = depth;
@@ -333,35 +349,35 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         new_optgroup = optgroup;
                     }
                 }
-                
+
                 var children = (hasChildren)?createSubTreeOptions( new_optgroup, depth+1, termSubTree[termID], localLookup, defaultTermID):[];
                 var k=0, cnt2 = children.length, termssearch=[];
                 for(;k<cnt2;k++){
                     /*if(!children[k].disabled || children[k].children.length>0){
-                        termssearch.push(children[k].id);
+                    termssearch.push(children[k].id);
                     }*/
                     termssearch = termssearch.concat( children[k].termssearch );
                 }
                 if(!isDisabled){ //} || children.length>0){
-                       termssearch.push(termID); //add itself
+                    termssearch.push(termID); //add itself
                 }
-                
+
                 reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
                 var parent = reslist2[reslist2.length-1];
                 for(k=0;k<cnt2;k++){
                     parent.children[k].parent = parent;
                 }
             } //for
-            
+
             return reslist2;
         }//end internal function
 
         var reslist = createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
         if(selObj){
-                if (!defaultTermID) selObj.selectedIndex = 0;
-                return selObj;
+            if (!defaultTermID) selObj.selectedIndex = 0;
+            return selObj;
         }else{
-                return reslist;
+            return reslist;
         }
     }
 
@@ -371,7 +387,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else{
             $(selObj).empty();
         }
-        
+
         if(top.HEURIST.util.isArray(topOptions)){
             var idx;
             if(topOptions){  //list of options that must be on top of list
@@ -382,55 +398,55 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         var title = topOptions[idx].title;
                         if(!top.HEURIST.util.isnull(title))
                         {
-                             if(!top.HEURIST.util.isnull(topOptions[idx].optgroup)){
+                            if(!top.HEURIST.util.isnull(topOptions[idx].optgroup)){
                                 var grp = document.createElement("optgroup");
                                 grp.label =  title;
                                 selObj.appendChild(grp);
-                             }else{
+                            }else{
                                 top.HEURIST.util.addoption(selObj, key, title);    
-                             }
-                             
+                            }
+
                         }
                     }
                 }
             }        
         }else if(!top.HEURIST.util.isempty(topOptions)){
-           top.HEURIST.util.addoption(selObj, '', topOptions); 
+            top.HEURIST.util.addoption(selObj, '', topOptions); 
         }
-        
-        
+
+
         return selObj;
     }
-    
+
     /**
     * create/fill SELECT for rectypes groups
     */
     ,createRectypeGroupSelect: function(selObj, topOptions) {
-        
+
         top.HEURIST.util.createSelector(selObj, topOptions);
 
         var rectypes = top.HEURIST.rectypes,
-            index;
+        index;
 
         if(!rectypes) return selObj;
 
 
         for (index in rectypes.groups){
-                    if (index == "groupIDToIndex" ){
-                      //rectypes.groups[index].showTypes.length < 1) 
-                      continue;
-                    }
-                    
-                    var name = rectypes.groups[index].name;
-                    if(!top.HEURIST.util.isnull(name)){
-                           top.HEURIST.util.addoption(selObj, rectypes.groups[index].id, name);
-                    }
+            if (index == "groupIDToIndex" ){
+                //rectypes.groups[index].showTypes.length < 1) 
+                continue;
+            }
+
+            var name = rectypes.groups[index].name;
+            if(!top.HEURIST.util.isnull(name)){
+                top.HEURIST.util.addoption(selObj, rectypes.groups[index].id, name);
+            }
         }
 
         return selObj;
-    
+
     }
-    
+
     /**
     * create/fill SELECT for rectypes
     *
@@ -441,7 +457,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         top.HEURIST.util.createSelector(selObj, topOptions);
 
         var rectypes = top.HEURIST.rectypes,
-            index;
+        index;
 
         if(!rectypes) return selObj;
 
@@ -449,7 +465,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(rectypeList){
 
             if(!top.HEURIST.util.isArray(rectypeList)){
-                   rectypeList = rectypeList.split(',');
+                rectypeList = rectypeList.split(',');
             }
 
             for (var idx in rectypeList)
@@ -459,29 +475,29 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     var name = rectypes.names[rectypeID];
                     if(!top.HEURIST.util.isnull(name))
                     {
-                         top.HEURIST.util.addoption(selObj, rectypeID, name);
+                        top.HEURIST.util.addoption(selObj, rectypeID, name);
                     }
                 }
             }
         }else{
             for (index in rectypes.groups){
-                    if (index == "groupIDToIndex" ||
-                      rectypes.groups[index].showTypes.length < 1) {
-                      continue;
-                    }
-                    var grp = document.createElement("optgroup");
-                    grp.label = rectypes.groups[index].name;
-                    selObj.appendChild(grp);
+                if (index == "groupIDToIndex" ||
+                    rectypes.groups[index].showTypes.length < 1) {
+                    continue;
+                }
+                var grp = document.createElement("optgroup");
+                grp.label = rectypes.groups[index].name;
+                selObj.appendChild(grp);
 
-                    for (var recTypeIDIndex in rectypes.groups[index].showTypes)
-                    {
-                          var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
-                          var name = rectypes.names[rectypeID];
+                for (var recTypeIDIndex in rectypes.groups[index].showTypes)
+                {
+                    var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
+                    var name = rectypes.names[rectypeID];
 
-                          if(!top.HEURIST.util.isnull(name)){
-                                var opt = top.HEURIST.util.addoption(selObj, rectypeID, name);
-                          }
+                    if(!top.HEURIST.util.isnull(name)){
+                        var opt = top.HEURIST.util.addoption(selObj, rectypeID, name);
                     }
+                }
             }
         }
 
@@ -496,36 +512,36 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     createRectypeDetailSelect: function(selObj, rectype, allowedlist, topOptions, needEmpty) {
 
         top.HEURIST.util.createSelector(selObj, topOptions);
-        
+
         var dtyID, details;
 
         if(Number(rectype)>0){
             //structure not defined 
             if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
             var rectypes = top.HEURIST.rectypes.typedefs[rectype];
-            
+
             if(!rectypes) return selObj;
             details = rectypes.dtFields;
-            
+
             var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-                fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
-            
+            fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+
             var arrterm = [];
-            
+
             for (dtyID in details){
-               if(dtyID){
+                if(dtyID){
 
-                   if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
-                   {
-                          var name = details[dtyID][fi];
+                    if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
+                    {
+                        var name = details[dtyID][fi];
 
-                          if(!top.HEURIST.util.isnull(name)){
-                                arrterm.push([dtyID, name]);
-                          }
-                   }
-               }
+                        if(!top.HEURIST.util.isnull(name)){
+                            arrterm.push([dtyID, name]);
+                        }
+                    }
+                }
             }
-            
+
             //sort by name
             arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
             //add to select
@@ -533,57 +549,57 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             for(;i<cnt;i++) {
                 top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
             }
-            
+
         }else{ //show all detail types
-        
+
             if(!top.HEURIST.detailtypes) return selObj;
-            
+
             var detailtypes = top.HEURIST.detailtypes;
             var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
-            
-            
+
+
             for (index in detailtypes.groups){
-                    if (index == "groupIDToIndex" ||
-                      detailtypes.groups[index].showTypes.length < 1) {   //ignore empty group
-                      continue;
-                    }
-                    
-                    var arrterm = [];
+                if (index == "groupIDToIndex" ||
+                    detailtypes.groups[index].showTypes.length < 1) {   //ignore empty group
+                    continue;
+                }
 
-                    for (var dtIDIndex in detailtypes.groups[index].showTypes)
+                var arrterm = [];
+
+                for (var dtIDIndex in detailtypes.groups[index].showTypes)
+                {
+                    var detailID = detailtypes.groups[index].showTypes[dtIDIndex];
+                    if(allowedlist==null || allowedlist.indexOf(detailtypes.typedefs[detailID].commonFields[fit])>=0)
                     {
-                          var detailID = detailtypes.groups[index].showTypes[dtIDIndex];
-                          if(allowedlist==null || allowedlist.indexOf(detailtypes.typedefs[detailID].commonFields[fit])>=0)
-                          {
-                              var name = detailtypes.names[detailID];
+                        var name = detailtypes.names[detailID];
 
-                              if(!top.HEURIST.util.isnull(name)){
-                                    arrterm.push([detailID, name]);
-                              }
-                          }
-                    }
-                    
-                    if(arrterm.length>0){
-                        var grp = document.createElement("optgroup");
-                        grp.label = detailtypes.groups[index].name;
-                        selObj.appendChild(grp);
-                        //sort by name
-                        arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
-                        //add to select
-                        var i=0, cnt= arrterm.length;
-                        for(;i<cnt;i++) {
-                            top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                        if(!top.HEURIST.util.isnull(name)){
+                            arrterm.push([detailID, name]);
                         }
                     }
-                    
+                }
+
+                if(arrterm.length>0){
+                    var grp = document.createElement("optgroup");
+                    grp.label = detailtypes.groups[index].name;
+                    selObj.appendChild(grp);
+                    //sort by name
+                    arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+                    //add to select
+                    var i=0, cnt= arrterm.length;
+                    for(;i<cnt;i++) {
+                        top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                    }
+                }
+
             }
-            
+
         }
 
 
         return selObj;
     },
-    
+
     /**
     *  Fills give SELECT selObj with list of current user groups
     */
@@ -601,11 +617,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                             groups = top.HAPI.currentUser.usr_GroupsList = response.data;
                             top.HEURIST.util.createUserGroupsSelect(selObj, groups, topOptions, callback);
                         }
-                    });
+                });
                 return;    
             }
         }
-        
+
         var idx;
         var addedontop = [];
         if(topOptions){  //list of options that must be on top of list
@@ -616,8 +632,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     var title = topOptions[idx].title;
                     if(!top.HEURIST.util.isnull(title))
                     {
-                         top.HEURIST.util.addoption(selObj, key, title);
-                         addedontop.push(key);
+                        top.HEURIST.util.addoption(selObj, key, title);
+                        addedontop.push(key);
                     }
                 }
             }
@@ -627,22 +643,22 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             for (var idx in groups)
             {
                 if(idx && addedontop.indexOf(idx)<0){
-                        var groupID = idx;
-                        var name = groups[idx][1];
-                        if(!top.HEURIST.util.isnull(name))
-                        {
-                            top.HEURIST.util.addoption(selObj, groupID, name);
-                        }
+                    var groupID = idx;
+                    var name = groups[idx][1];
+                    if(!top.HEURIST.util.isnull(name))
+                    {
+                        top.HEURIST.util.addoption(selObj, groupID, name);
+                    }
                 }
             }
         }
-        
+
         if(typeof callback === "function"){
             callback();
         }
-        
+
     },
-    
+
     showMsgErr: function(response){
         var msg;
         if(typeof response === "string"){
@@ -653,76 +669,76 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 msg = msg + '<br>' + response.message;
             }
             if(response.sysmsg){
-                
+
                 if(typeof response.sysmsg['join'] === "function"){
                     msg = msg + '<br>' +response.sysmsg.join('<br>');
                 }else{
                     msg = msg + '<br>' + response.sysmsg;
                 }
-                
+
             }
         }
-        
+
         top.HEURIST.util.showMsgDlg(msg, null, "Error");
     },
-    
+
     getMsgDlg: function(){
-            var $dlg = $( "#dialog-common-messages" );
-            if($dlg.length==0){
-                $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
-            }
-            return $dlg;
+        var $dlg = $( "#dialog-common-messages" );
+        if($dlg.length==0){
+            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+        }
+        return $dlg;
     },
 
     showMsgDlgUrl: function(url, buttons, title){
-        
+
         if(url){
             $dlg = top.HEURIST.util.getMsgDlg();
             $dlg.load(url, function(){
-                    top.HEURIST.util.showMsgDlg(null, buttons, title);    
+                top.HEURIST.util.showMsgDlg(null, buttons, title);    
             });
         }
     },
-    
+
     showMsgDlg: function(message, buttons, title){
-        
+
         if(!$.isFunction(top.HR)){
             alert(message);
             return;
         }
-        
+
         $dlg = top.HEURIST.util.getMsgDlg();
-        
+
         if(message!=null){
             $dlg.empty();
             $dlg.append('<span>'+top.HR(message)+'</span>');
         }
-        
+
         if(!title) title ='Info';
         if (typeof buttons === "function"){
 
             var titleYes = top.HR('Yes'),
-                titleNo = top.HR('No'),
-                callback = buttons;
-            
+            titleNo = top.HR('No'),
+            callback = buttons;
+
             buttons = {};
             buttons[titleYes] = function() {
-                    callback.call();
-                    $dlg.dialog( "close" );
-                };
+                callback.call();
+                $dlg.dialog( "close" );
+            };
             buttons[titleNo] = function() {
-                    $dlg.dialog( "close" );
-                };
+                $dlg.dialog( "close" );
+            };
         }else if(!buttons){
-            
+
             var titleOK = top.HR('OK');
             buttons = {};
             buttons[titleOK] = function() {
-                        $dlg.dialog( "close" );
+                $dlg.dialog( "close" );
             };
-            
+
         }
-        
+
         $dlg.dialog({
             title: top.HR(title),
             resizable: false,
@@ -731,70 +747,70 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             modal: true,
             buttons: buttons
         });
-        
+
     },
-    
+
     //@todo - redirect to error page
     redirectToError: function(message){
         top.HEURIST.util.showMsgDlg(message, null, 'Error');
     },
 
     checkLength: function( input, title, message, min, max ) {
-       var message_text = top.HEURIST.util.checkLength2( input, title, min, max );
-       if(message_text!=''){
-           
-                if(message){
-                    message.text(message_text);
-                    message.addClass( "ui-state-highlight" );
-                        setTimeout(function() {
-                            message.removeClass( "ui-state-highlight", 1500 );
-                        }, 500 );
-                }
-                
-           return false;
-       }else{
-           return true;
-       }
-       
+        var message_text = top.HEURIST.util.checkLength2( input, title, min, max );
+        if(message_text!=''){
+
+            if(message){
+                message.text(message_text);
+                message.addClass( "ui-state-highlight" );
+                setTimeout(function() {
+                    message.removeClass( "ui-state-highlight", 1500 );
+                    }, 500 );
+            }
+
+            return false;
+        }else{
+            return true;
+        }
+
     },
 
     checkLength2: function( input, title, min, max ) {
-        
+
         if ( (max>0 && input.val().length > max) || input.val().length < min ) {
-                input.addClass( "ui-state-error" );
-                if(max>0 && min>1){
-                    message_text = top.HR(title)+" "+top.HR("length must be between ") +
-                        min + " "+top.HR("and")+" " + max + ".";
-                }else if(min==1){
-                    message_text = top.HR(title)+" "+top.HR("required field");
-                }
-                
-                return message_text; 
-                
+            input.addClass( "ui-state-error" );
+            if(max>0 && min>1){
+                message_text = top.HR(title)+" "+top.HR("length must be between ") +
+                min + " "+top.HR("and")+" " + max + ".";
+            }else if(min==1){
+                message_text = top.HR(title)+" "+top.HR("required field");
+            }
+
+            return message_text; 
+
         } else {
-                return '';
+            return '';
         }
     },
-    
+
     checkRegexp:function ( o, regexp ) {
-      if ( !( regexp.test( o.val() ) ) ) {
-        o.addClass( "ui-state-error" );
-        return false;
-      } else {
-        return true;
-      }
+        if ( !( regexp.test( o.val() ) ) ) {
+            o.addClass( "ui-state-error" );
+            return false;
+        } else {
+            return true;
+        }
     }    
 
-    
 
-}//end util
+
+    }//end util
 
 String.prototype.htmlEscape = function() {
     return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
 
 if (!Array.prototype.indexOf)
-    {
+{
     Array.prototype.indexOf = function(elt /*, from*/)
     {
         var len = this.length;
