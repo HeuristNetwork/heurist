@@ -3289,6 +3289,8 @@ top.HEURIST.search = {
 			options = {height:dim.h*0.9, width:dim.w*0.5};
 		}else if (targ.className.match(/\blarge\b/)){
 			options = {height:dim.h*0.8, width:dim.w*0.8};
+        }else if (targ.className.match(/\bfixed\b/)){
+            options = {height:dim.h*0.8, width:800};
 		}
 		top.HEURIST.util.popupURL(top, targ.href, options);
 

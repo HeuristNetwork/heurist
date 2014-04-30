@@ -1,6 +1,8 @@
 
 $(function() {
     
+$("#div-progress").hide();
+    
 var select_rectype = $("#sa_rectype");
 createRectypeSelect( select_rectype.get(0), null, 'Select record type' );
 
@@ -18,14 +20,35 @@ select_rectype.change(function (event){
 
 getValues(0);
 
+//initvalues
+if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
+    select_rectype.val(form_vals.sa_rectype);
+}
+
 });
 
+function update_counts(added, updated, total){
+    $("#div-progress2").html("adde: "+added+" updated:"+updatred+"  total:"+total);
+}
+
+function doImport(){
+    $("#input_step").val(3);
+    forms[0].submit();
+}
+
+// load values for record
 function getValues(dest){
-    currentId = currentId + dest;
-    if(currentId<1) {
-        currentId=1;   
-    }else if (currentId>recCount){
-        currentId = recCount;
+    if(dest==0){
+        currentId=1;
+    }else if(dest==recCount){
+        currentId=recCount;
+    }else{
+        currentId = currentId + dest;
+        if(currentId<1) {
+            currentId=1;   
+        }else if (currentId>recCount){
+            currentId = recCount;
+        }
     }
     
                  $.ajax({
@@ -50,6 +73,7 @@ function getValues(dest){
     
 }
 
+//
 function verifyData()
 {
     var rectype = $("#sa_rectype").val();
@@ -70,6 +94,7 @@ function verifyData()
 return false;
 }
 
+//
 function createSelector(selObj, topOptions) {
         if(selObj==null){
             selObj = document.createElement("select");

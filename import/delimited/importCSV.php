@@ -30,13 +30,15 @@
 */
 
 /**
-* import_session:  columns:[col1,col2,col3, ...],    names of columns in file header 
+* import_session:  import_table, reccount, 
+*                  columns:[col1,col2,col3, ...],    names of columns in file header 
 *                  uniqcnt: [cnt1, cnt2, .... ],     count of uniq values per column  
 *                  mapping:[rt1.dt1, rt2.dt2, rt3.dt3],   mapping of value fields to rectype.detailtype  
 *                  indexes:[]   names of columns in importtable that contains record_ID
 */
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+require_once('importCSV_lib.php');
 
 $mysqli = mysqli_connection_overwrite(DATABASE);    
 
@@ -53,18 +55,34 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         
         <script src="../../external/jquery/jquery.js"></script>
         <script src="../../applications/h4/js/utils.js"></script>
+<style type="text/css">
+th, td
+{
+border: 1px solid black;
+}
+div#div-progress {
+    background-image: url(../../common/images/loading-animation-white.gif);
+    background-repeat: no-repeat;
+    background-position:center center;
+}
+div.analized{
+    background-color:#DDD;
+    border:black solid 1px;
+}
+</style>
     </head>
 
 <body class="popup">
 <?php
 $imp_session = null;
-if(@$_REQUEST["step1"]){
-    
-    if(intval(@$_REQUEST["import_id"])>0){
-        
-        $imp_session = get_import_session($_REQUEST["import_id"]);
-        
-    }else{
+$validationResults = null;
+if(intval(@$_REQUEST["import_id"])>0){
+   $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
+}
+$step = intval(@$_REQUEST["step"]);
+if(!$step) $step=0;
+
+if($step==1 && $imp_session==null){ //load session
     
         $val_separator = $_REQUEST["val_separator"];
         $csv_delimiter = $_REQUEST["csv_delimiter"];
@@ -72,30 +90,45 @@ if(@$_REQUEST["step1"]){
         $csv_enclosure = $_REQUEST["csv_enclosure"];
         
         $imp_session = postmode_file_selection();
-    }
-}else if(@$_REQUEST["step2"]){
-//start import
-    
 }
 
 //session is loaded - create full page
-if(is_array($imp_session)){
-    
-    $len = count($imp_session['columns']);
+if(is_array($imp_session)){ 
 ?>
 <script src="../../../common/php/loadCommonInfo.php"></script>
 <script src="../../common/js/utilsUI.js"></script>
 <script src="importCSV.js"></script>
 <script>
 var currentId = 1;
-var recCount = <?=$imp_session['uniqcnt'][$len]?>;
+var recCount = <?=$imp_session['reccount']?$imp_session['reccount']:0?>;
 var currentTable = "<?=$imp_session['import_table']?>";
 var currentDb = "<?=HEURIST_DBNAME?>";
+var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
 </script>
-
+<div id="div-progress">&nbsp;</div>
+<div id="div-progress2">&nbsp;</div>
+<?php    
+    ob_flush();flush();
+    
+    if($step>1){
+        if($step==2){  //verification
+            $res = validateImport($mysqli, $imp_session, $_REQUEST);
+        }else if($step==3){  //create records - load to import data to database
+            $res = doImport($mysqli, $imp_session, $_REQUEST);
+        }
+        if(is_array($res)){
+            $imp_session = $res;    
+        }else{
+            echo "<p style='color:red'>AERROR: ".$res."</p>";        
+        }
+    }
+    
+    $len = count($imp_session['columns']);
+?>
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifyData()">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-                <input type="hidden" name="step2" value="1">
+                <input type="hidden" name="step" id="input_step" value="2">
+                <input type="hidden" name="import_id" value="<?=$imp_session["import_id"]?>">
 
 <fieldset>
     <div>
@@ -106,34 +139,88 @@ var currentDb = "<?=HEURIST_DBNAME?>";
         <label for="sa_type0">Primary</label><input type="radio" checked="checked" name="sa_type" id="sa_type0" value="0" class="text" />
         <label for="sa_type1">Resource</label><input type="radio" name="sa_type" id="sa_type1" "value="1" class="text" />
     </div>
-    <div>
+    <!-- div>
         <label for="sa_addmode0">Insert</label><input type="radio" checked="checked" name="sa_addmode" id="sa_addmode0" value="0" class="text" />
         <label for="sa_addmode1">Update</label><input type="radio" name="sa_addmode" id="sa_addmode1" value="1" class="text" />
-    </div>
+    </div -->
     <br />
     <br />
 </fieldset>
-
-Total records: <?=$imp_session['uniqcnt'][$len]?><br />
-<table border="1">
+<br />
+<b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b><br /><br />
+<table style="width:100%" cellspacing="0" cellpadding="2">
 <thead>
-    <th>Column</th><th>Uniq</th><th>Mapping</th>
-    <th><a href="#" onclick="getValues(-1)">&lt;&lt;</a>Values<a href="#" onclick="getValues(1)">&gt;&gt;</a></th>
+    <th>Column</th><th>Unique<br/>values</th><th>Mapping</th>
+    <th width="30%">
+        <a href="#" onclick="getValues(0)"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
+        <a href="#" onclick="getValues(-1)"><img src="../../common/images/calendar-l-arrow.gif" /></a>
+        Values
+        <a href="#" onclick="getValues(1)"><img src="../../common/images/calendar-r-arrow.gif" /></a>
+        <a href="#" onclick="getValues(recCount)"><img src="../../common/images/calendar-rr-arrow.gif" /></a>
+    </th>
 </thead>
 <?php
 //table with list of columns and datatype selectors
 
+$sIndexes = "";
+$sRemain = "";
+$sProcessed = "";
+
 for ($i = 0; $i < $len; $i++) {     
-print '<tr><td>'.$imp_session['columns'][$i].'</td><td>'.$imp_session['uniqcnt'][$i].'</td>';
-print '<td><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"></select></td><td id="impval'.$i.'"> </td></tr>';
+    $s = '<tr><td>'.$imp_session['columns'][$i].'</td><td>'.$imp_session['uniqcnt'][$i].'</td>';
+
+    if(@$imp_session["mapping"][$i]){
+        $s = $s.'<td>'.$imp_session["mapping"][$i].'</td>';
+    }else{ ;
+        $s = $s.'<td><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"></select></td>';
+    }
+    $s = $s.'<td id="impval'.$i.'"> </td></tr>';
+
+    if(@$imp_session["mapping"][$i]){
+        $sProcessed = $sProcessed.$s;    
+    }else{
+
+        $rectype = array_search ( "field_".$i , $imp_session['indexes'], true );
+
+        if($rectype){
+            $sIndexes=$sIndexes.$s;    
+        }else {
+            $sRemain==$sRemain.$s;    
+        }
+    }
+}//for
+if($sIndexes){
+    print '<tr><td colspan="4">Record IDs</td></tr>'.$sIndexes;
 }
-//apply    
+if($sRemain){
+    print '<tr><td colspan="4">Remaining Data</td></tr>'.$sRemain;
+}
+if($sProcessed){
+    print '<tr><td colspan="4">Already imported</td></tr>'.$sProcessed;
+}
     
 ?>
 </table>        
-                <div class="actionButtons">
+                <div>
+                    <input type="submit" value="Analyse data in buffer" style="font-weight: bold;">
+<?php
+    $validationRes = @$imp_session['validation'];
+    if($validationRes){
+?>                    
+                    <div style="analized">
+                        <div style="display:inline:block">
+                            Records matched:&nbsp;<?=$validationRes['rec_to_update']?><br />
+                            New records to create:&nbsp;<?=$validationRes['rec_to_add']?><br />
+                            Rows with field errors:&nbsp;<?=$validationRes['rec_error']?><br />
+                        </div> 
+                        <div>
+                            <input type="button" value="Create records" onclick="doImport()" style="font-weight: bold;">
+                        </div>
+                    </div>
+<?php
+    }
+?>                    
                     <input type="button" value="Close" onClick="window.close();" style="margin-right: 5px;">
-                    <input type="submit" value="Continue" style="font-weight: bold;">
                 </div>
 <?php    
 }else{
@@ -143,7 +230,7 @@ print '<td><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"
 ?>
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-                <input type="hidden" name="step1" value="1">
+                <input type="hidden" name="step" value="1">
             
                 <div>
                      <label>Select existing session:</label>
@@ -287,19 +374,21 @@ error_log(">>>> ".print_r($fields, true)."  ".$len);
     }    
     
     $uniqcnt = $res->fetch_row();
+    $reccount = array_pop ( $uniqcnt );
    
-error_log("uniq>>>> ".print_r($uniqcnt, true)."  ".$len);
+//error_log("uniq>>>> ".print_r($uniqcnt, true)."  ".$len);
     //add record to import_log
-    $session = array("columns"=>$fields,   //names of columns in file header 
+    $session = array("reccount"=>$reccount,
+                     "import_table"=>$import_table,
+                     "columns"=>$fields,   //names of columns in file header 
                      "uniqcnt"=>$uniqcnt,   //count of uniq values per column  
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
-                     "indexes"=>array("rt_0") );  //names of columns in importtable that contains record_ID
+                     "indexes"=>array() );  //names of columns in importtable that contains record_ID
     
     $import_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
             array("imp_table"=>$import_table ,"imp_session"=>json_encode($session) ));    
     
     $session["import_id"] = $import_id;
-    $session["import_table"] = $import_table;
     
     return $session;
 }
@@ -327,8 +416,8 @@ function get_import_value($rec_id,$import_table){
 * @param mixed $import_id
 * @return mixed
 */
-function get_import_session($import_id){
-    global $mysqli;
+function get_import_session($mysqli, $import_id){
+    
     if($import_id && is_numeric($import_id)){
         
         $res = mysql__select_array2($mysqli, 
@@ -373,87 +462,5 @@ function get_list_import_sessions(){
     return $ret;
 }
 
-//a couple functions from h4/utils_db.php
-function mysql__select_array2($mysqli, $query) {
-        $result = null;
-        if($mysqli){
-            $res = $mysqli->query($query);
-            if($res){
-                $row = $res->fetch_row();
-                if($row){
-                    $result = $row;
-                }
-                $res->close();
-            }
-        }
-        return $result;
-}
-function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
-
-    $ret = null;
-
-    if (substr($table_prefix, -1) !== '_') {
-        $table_prefix = $table_prefix.'_';
-    }
-
-    $rec_ID = intval(@$record[$table_prefix.'ID']);
-    $isinsert = ($rec_ID<1);
-
-    if($isinsert){
-        $query = "INSERT into $table_name (";
-        $query2 = ') VALUES (';
-    }else{
-        $query = "UPDATE $table_name set ";
-    }
-
-    $params = array();
-    $params[0] = '';
-
-    foreach($record as $fieldname => $value){
-
-            if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
-                //$fieldname = $table_prefix.$fieldname;
-                continue;
-            }
-
-            if($isinsert){
-                $query = $query.$fieldname.', ';
-                $query2 = $query2.'?, ';
-            }else{
-                if($fieldname==$table_prefix."ID"){
-                    continue;
-                }
-                $query = $query.$fieldname.'=?, ';
-            }
-
-            $params[0] = $params[0].((substr($fieldname, -2) === 'ID')?'i':'s');
-            array_push($params, $value);
-    }
-
-    $query = substr($query,0,strlen($query)-2);
-    if($isinsert){
-        $query2 = substr($query2,0,strlen($query2)-2).")";
-        $query = $query.$query2;
-    }else{
-        $query = $query." where ".$table_prefix."ID=".$rec_ID;
-    }
-
-//DEBUG print $query."<br>";
-
-    $stmt = $mysqli->prepare($query);
-    if($stmt){
-        call_user_func_array(array($stmt, 'bind_param'), refValues($params));
-        if(!$stmt->execute()){
-            $ret = $mysqli->error;
-        }else{
-            $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
-        }
-        $stmt->close();
-    }else{
-        $ret = $mysqli->error;
-    }
-
-    return $ret;
-}
 
 ?>
