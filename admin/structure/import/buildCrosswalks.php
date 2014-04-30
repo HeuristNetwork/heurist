@@ -155,6 +155,9 @@
 		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
 		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
 		" -D$tempDBName < ../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
+        
+error_log("TEMP DB:".$tempDBName);
+        
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {
 			unlockDatabase();

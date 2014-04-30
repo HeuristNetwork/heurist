@@ -79,10 +79,11 @@ function EditRecStructure() {
 		}
 
 		// buttons on top and bottom of design tab
-        var hToolBar = '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
+        var hToolBar = '<div style=\"display:none;\">'+
         //<div style="display:inline-block; text-align:left">
         //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
         //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
+        
         '<input style="visibility:hidden ;width:0; color:red;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
         
         '<input type="button" style="visibility:hidden; width:0;" value="Define New Base Field Type" onClick="onDefineNewType()" '+
@@ -90,14 +91,19 @@ function EditRecStructure() {
         
         '<input type="button" style="visibility:hidden; width:0;" value="Add Section" onClick="onAddSeparator()" '+
         'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
+        '</div>'+
         
-        '<input type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
+            '<span style="float:right; text-align:right">'+
+            '<input type="button" value="Done" onClick="editStructure.closeWin();"/>'+
+            '</span>'+        
+        '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
+        '<input id="btn_addfield" type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
         'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
         // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button      ; margin:0 5px
         // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
         // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
         //'Add existing fields where possible &nbsp;&nbsp; '+
-        '</div>';   
+        '</div>';
         
 		Dom.get("recordTitle").innerHTML += hToolBar;
 		Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';

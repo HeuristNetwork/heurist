@@ -46,6 +46,7 @@ if(isForAdminOnly("to modify database structure")){
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+        
     </head>
 
     <body>
