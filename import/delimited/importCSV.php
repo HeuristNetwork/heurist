@@ -68,6 +68,9 @@ div#div-progress {
 div.analized{
     background-color:#DDD;
     border:black solid 1px;
+    width:500px;
+    display:inline-block;
+    padding:5px;
 }
 </style>
     </head>
@@ -95,7 +98,7 @@ if($step==1 && $imp_session==null){ //load session
 //session is loaded - create full page
 if(is_array($imp_session)){ 
 ?>
-<script src="../../../common/php/loadCommonInfo.php"></script>
+<script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
 <script src="../../common/js/utilsUI.js"></script>
 <script src="importCSV.js"></script>
 <script>
@@ -113,13 +116,13 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
     if($step>1){
         if($step==2){  //verification
             $res = validateImport($mysqli, $imp_session, $_REQUEST);
+            if(is_array($res)) $imp_session['validation'] = $res;
         }else if($step==3){  //create records - load to import data to database
             $res = doImport($mysqli, $imp_session, $_REQUEST);
+            if(is_array($res)) $imp_session = $res;
         }
-        if(is_array($res)){
-            $imp_session = $res;    
-        }else{
-            echo "<p style='color:red'>AERROR: ".$res."</p>";        
+        if(!is_array($res)){
+            echo "<p style='color:red'>ERROR: ".$res."</p>";        
         }
     }
     
@@ -150,7 +153,7 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
 <b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b><br /><br />
 <table style="width:100%" cellspacing="0" cellpadding="2">
 <thead>
-    <th>Column</th><th>Unique<br/>values</th><th>Mapping</th>
+    <th>Inport<br/>value<th>Unique<br/>values</th><th>Column</th><th width="310">Mapping</th>
     <th width="30%">
         <a href="#" onclick="getValues(0)"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
         <a href="#" onclick="getValues(-1)"><img src="../../common/images/calendar-l-arrow.gif" /></a>
@@ -166,13 +169,16 @@ $sIndexes = "";
 $sRemain = "";
 $sProcessed = "";
 
+"imp session: ".print_r($imp_session)."<br>";
+
+
 for ($i = 0; $i < $len; $i++) {     
-    $s = '<tr><td>'.$imp_session['columns'][$i].'</td><td>'.$imp_session['uniqcnt'][$i].'</td>';
+    $s = '<tr><td><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{hideFtSelect('.$i.');}"/></td><td>'.$imp_session['uniqcnt'][$i].'</td><td>'.$imp_session['columns'][$i].'</td>';
 
     if(@$imp_session["mapping"][$i]){
         $s = $s.'<td>'.$imp_session["mapping"][$i].'</td>';
     }else{ ;
-        $s = $s.'<td><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"></select></td>';
+        $s = $s.'<td>&nbsp;<span style="min-width:302px;display:none"><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"></select></span></td>';
     }
     $s = $s.'<td id="impval'.$i.'"> </td></tr>';
 
@@ -185,39 +191,42 @@ for ($i = 0; $i < $len; $i++) {
         if($rectype){
             $sIndexes=$sIndexes.$s;    
         }else {
-            $sRemain==$sRemain.$s;    
+            $sRemain=$sRemain.$s;    
         }
     }
 }//for
 if($sIndexes){
-    print '<tr><td colspan="4">Record IDs</td></tr>'.$sIndexes;
+    print '<tr><td colspan="5"><b>Record IDs</b></td></tr>'.$sIndexes;
 }
 if($sRemain){
-    print '<tr><td colspan="4">Remaining Data</td></tr>'.$sRemain;
+    print '<tr><td colspan="5"><b>Remaining Data</b></td></tr>'.$sRemain;
 }
 if($sProcessed){
-    print '<tr><td colspan="4">Already imported</td></tr>'.$sProcessed;
+    print '<tr><td colspan="5"><b>Already imported</b></td></tr>'.$sProcessed;
 }
     
 ?>
-</table>        
-                <div>
+</table> 
+<br/><br/>
+                <div style="vertical-align:middle;">
                     <input type="submit" value="Analyse data in buffer" style="font-weight: bold;">
 <?php
     $validationRes = @$imp_session['validation'];
     if($validationRes){
 ?>                    
-                    <div style="analized">
-                        <div style="display:inline:block">
+                    <div class="analized">
+                        <div style="display:inline-block">
                             Records matched:&nbsp;<?=$validationRes['rec_to_update']?><br />
                             New records to create:&nbsp;<?=$validationRes['rec_to_add']?><br />
                             Rows with field errors:&nbsp;<?=$validationRes['rec_error']?><br />
                         </div> 
-                        <div>
+                        <div style="float:right;vertical-align:middle;padding-top:10px">
                             <input type="button" value="Create records" onclick="doImport()" style="font-weight: bold;">
                         </div>
                     </div>
 <?php
+    }else{
+        print '<div style="width:500px;display:inline-block"></div>';
     }
 ?>                    
                     <input type="button" value="Close" onClick="window.close();" style="margin-right: 5px;">

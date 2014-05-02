@@ -22,7 +22,15 @@ getValues(0);
 
 //initvalues
 if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
-    select_rectype.val(form_vals.sa_rectype);
+    select_rectype.val(form_vals.sa_rectype).change();
+    
+    for (var key in form_vals){
+        if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
+            $('#cb'+key).attr('checked', true);
+            $('#'+key).parent().show();
+            $('#'+key).val(form_vals[key]);
+        }
+    }
 }
 
 });
@@ -31,9 +39,21 @@ function update_counts(added, updated, total){
     $("#div-progress2").html("adde: "+added+" updated:"+updatred+"  total:"+total);
 }
 
+//
 function doImport(){
     $("#input_step").val(3);
-    forms[0].submit();
+    document.forms[0].submit();
+}
+
+//
+function hideFtSelect(ind){
+    $sel = $('#sa_dt_'+ind);
+    if($sel.parent().is(":visible")){
+        $sel.val('');
+        $sel.parent().hide();
+    }else{
+        $sel.parent().show();
+    }
 }
 
 // load values for record
@@ -82,6 +102,8 @@ function verifyData()
         var select_fieldtype = $('select[id^="sa_dt_"][value!=""]');
         if(select_fieldtype.length>0){
             
+            return true;
+            
         }else{
             alert("Select at least one field type!");
         }
@@ -91,7 +113,7 @@ function verifyData()
         alert("Select record type!");
     }
 
-return false;
+    return false;
 }
 
 //

@@ -181,7 +181,7 @@ function doImport($mysqli, $imp_session, $params){
     
     array_push($mapping, "id");
     $query = "select ".($is_secondary?" distinct ":"").$query.$rt_field.", imp_id from ".$import_table;
-    $mysqli->query($query);
+    $res = $mysqli->query($query);
     if (!$res) {
         
         return "import table is empty";
