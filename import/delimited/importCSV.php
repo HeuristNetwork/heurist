@@ -114,20 +114,23 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
     ob_flush();flush();
     
     if($step>1){
+        $res = null;
         if($step==2){  //verification
             $res = validateImport($mysqli, $imp_session, $_REQUEST);
-            if(is_array($res)) $imp_session['validation'] = $res;
+            
         }else if($step==3){  //create records - load to import data to database
             $res = doImport($mysqli, $imp_session, $_REQUEST);
-            if(is_array($res)) $imp_session = $res;
         }
-        if(!is_array($res)){
+        if(is_array($res)) {
+            $imp_session = $res;
+        }else if($res && !is_array($res)){
             echo "<p style='color:red'>ERROR: ".$res."</p>";        
         }
     }
     
     $len = count($imp_session['columns']);
 ?>
+<div id="main_1">
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifyData()">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="step" id="input_step" value="2">
@@ -213,12 +216,16 @@ if($sProcessed){
 <?php
     $validationRes = @$imp_session['validation'];
     if($validationRes){
+        $err_cnt = count($validationRes['rec_error']);
+        if($err_cnt>0){
+            $err_cnt = $err_cnt." for ".$validationRes["err_message"]." <a href='#' onclick='showError()'>show</a>";
+        }
 ?>                    
                     <div class="analized">
                         <div style="display:inline-block">
                             Records matched:&nbsp;<?=$validationRes['rec_to_update']?><br />
                             New records to create:&nbsp;<?=$validationRes['rec_to_add']?><br />
-                            Rows with field errors:&nbsp;<?=$validationRes['rec_error']?><br />
+                            Rows with field errors:&nbsp;<?=$err_cnt?><br />
                         </div> 
                         <div style="float:right;vertical-align:middle;padding-top:10px">
                             <input type="button" value="Create records" onclick="doImport()" style="font-weight: bold;">
@@ -231,8 +238,37 @@ if($sProcessed){
 ?>                    
                     <input type="button" value="Close" onClick="window.close();" style="margin-right: 5px;">
                 </div>
+        </form>    
+</div>
+<div id="main_2" style="display:none;">
+<?php
+    if($validationRes){
+        print print_r(@$validationRes['rec_error'],true);
+        
+        $err_cnt = @$validationRes['rec_error'];
+        if(false && $err_cnt>0){
+            print "<table>";
+            //$row = $validationRes['rec_error'][0];
+            
+            //$imp_session['columns']
+            for ($i = 0; $i < $err_cnt; $i++) {     
+                print "<tr>"; //.print_r($validationRes['rec_error'][$i],true);
+                $row = $validationRes['rec_error'][$i];
+                if(is_array($row)){
+                    foreach($row as $idx=>$field) {     
+                        print "<td>".$field."</td>";
+                    }
+                }
+                print "</tr>";
+            }
+            print "</table>";
+        }
+    }    
+?>
+    <input type="button" value="Back" onClick="showError();">
+</div>
 <?php    
-}else{
+}else{ //================================================================================
     if($imp_session!=null){
         echo "<p color='red'>ERROR: ".$imp_session."</p>";        
     }
@@ -256,10 +292,10 @@ if($sProcessed){
                     <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 5px;">
                     <input type="submit" value="Continue" style="font-weight: bold;">
                 </div>
+        </form>    
 <?php
 }
 ?>        
-        </form>    
 </body>
 </html>
 <?php
@@ -395,7 +431,7 @@ error_log(">>>> ".print_r($fields, true)."  ".$len);
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID
     
     $import_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
-            array("imp_table"=>$import_table ,"imp_session"=>json_encode($session) ));    
+            array("ugr_id"=>get_user_id(), "imp_table"=>$import_table ,"imp_session"=>json_encode($session) ));    
     
     $session["import_id"] = $import_id;
     
@@ -408,7 +444,7 @@ error_log(">>>> ".print_r($fields, true)."  ".$len);
 * @param mixed $rec_id
 * @param mixed $import_table
 */
-function get_import_value($rec_id,$import_table){
+function get_import_value($rec_id, $import_table){
     global $mysqli;
     
     $query = "select * from $import_table where imp_id=".$rec_id;
@@ -451,6 +487,7 @@ function get_list_import_sessions(){
     
      $query = "CREATE TABLE IF NOT EXISTS `import_sessions` (
     `imp_ID` int(11) unsigned NOT NULL auto_increment,
+    `ugr_ID` int(11) unsigned NOT NULL,
     `imp_table` varchar(255) NOT NULL default '',
     `imp_session` text,
     PRIMARY KEY  (`imp_ID`))";
@@ -459,7 +496,7 @@ function get_list_import_sessions(){
     }    
 
     $ret = '<option value="0">select session...</option>';
-    $query = "select imp_ID, imp_table from import_sessions";
+    $query = "select imp_ID, imp_table from import_sessions where ugr_ID=".get_user_id();
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){

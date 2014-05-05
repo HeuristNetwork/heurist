@@ -1,5 +1,6 @@
 <?php
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 //a couple functions from h4/utils_db.php
 function mysql__select_array2($mysqli, $query) {
@@ -84,7 +85,7 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
     return $ret;
 }
 
-// import functions
+// import functions =====================================
 
 /**
 * take settings from $_REQUEST
@@ -93,24 +94,216 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 */
 function validateImport($mysqli, $imp_session, $params){
  
-  $validationRes = array( "rec_to_update"=>0, "rec_to_add"=>0, "rec_error"=>0 );  
+    $imp_session['validation'] = array( "rec_to_update"=>0, "rec_to_add"=>0, "rec_error"=>null, "err_message"=>null );  
+  
+    //rectype to import
+    $recordType = @$params['sa_rectype'];
+    $is_secondary = ($params['sa_type']==1);
     
- //1. Verify that all required field are mapped
+    if(intval($recordType)<1){
+        return "record type not defined";
+    }
+    
+    $import_table = $imp_session['import_table'];
+    $is_update = false;
+    $rt_field = null;
+    
+    //get field mapping and selection query from params 
+    $mapping = array();  //keeps fieldtypes for fields in import table
+    $sel_query = array();
+    foreach ($params as $key => $field_type) {
+        if(strpos($key, "sa_dt_")===0 && $field_type){
+            //get index 
+            $index = substr($key,6);
+            $field_name = "field_".$index;
+            
+            if($field_type=="id"){
+                $imp_session['indexes'][$recordType] = $field_name;
+            }else {
+                array_push($sel_query, $field_name);    
+                array_push($mapping, $field_type);
+                $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
+            }
+        }
+    }  
+  
+    //detect rectype in indexes 
+    if(@$imp_session['indexes'][$recordType]){ //exists - it means update
+        
+            $rt_field = $imp_session['indexes'][$recordType];
+            $is_update = true;
+            
+     }else{ //insert
+            //add new field in import table - to keep key values (primary index)
+            /*
+            $rt_field = "field_".count($imp_session['columns']);
+            array_push($imp_session['columns'], $recordType."  index" );
+            array_push($imp_session['uniqcnt'], 0);
+            if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id";
+            $imp_session['indexes'][$recordType] = $rt_field;
+            */
+    }
+    if(count($sel_query)<1){
+        return "mapping not defined";
+    }
+    
+    array_push($mapping, "id");
+    $select_query = "select ".($is_secondary?" distinct ":""). implode(",",$sel_query) 
+        . ", imp_id from ".$import_table;
+        
+        //"," . $rt_field.
+
+  //    
+  $recStruc = getRectypeStructures(array($recordType));  
+    
+ $missed = array();
+ $query_reqs = array();
+ $query_reqs_where = array();
+
+ $query_enum = array();
+ $query_enum_join = "";
+ $query_enum_where = array();
+
+ $query_res = array();
+ $query_res_join = "";
+ $query_res_where = array();
  
- //2. In DB: Verify that all required fields have values
+ $query_num = array();
+ $query_num_where = array();
  
- //3. In DB: Verify that enumeration fields have correct values
+ $query_date = array();
+ $query_date_where = array();
  
+ $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
+ $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+ foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
+     
+    //find among mappings
+    $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true);
+     
+    if($ft_vals[$idx_reqtype] == "required"){
+        if(!$field_name){
+            array_push($missed, $ft_vals[0]);
+        }else{
+            array_push($query_reqs, $field_name);
+            array_push($query_reqs_where, $field_name." is null or ".$field_name."=''");
+        }
+    }
+    
+    if($field_name){
+        
+        if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
+            array_push($query_enum, $field_name);
+            $trm1 = "trm".count($query_enum);
+            $query_enum_join  = $query_enum_join.
+     " left join defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ";
+            array_push($query_enum_where, $trm1.".trm_Label is null");
+            
+        }else if($ft_vals[$idx_fieldtype] == "resource"){
+            array_push($query_res, $field_name);
+            $trm1 = "rec".count($query_res);
+            $query_res_join  = $query_res_join.
+     " left join Records $trm1 on $trm1.rec_ID=$field_name ";
+            array_push($query_res_where, $trm1.".rec_ID is null");
+            
+        }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
+            
+            array_push($query_num, $field_name);
+            array_push($query_num_where, " concat('',$field_name * 1) != $field_name ");
+
+        }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
+
+            array_push($query_date, $field_name);
+            if($ft_vals[$idx_fieldtype] == "year"){
+                array_push($query_date_where, " concat('',$field_name * 1) != $field_name ");
+            }else{
+                array_push($query_date_where, "str_to_date($field_name, '%Y-%m-%d %H:%i:%s') is null ");
+            }
+            
+        }
+    
+    }
+ }
+ 
+ //1. Verify that all required field are mapped  =====================================================
+ if(count($missed)>0){
+     return "Required fields are missed in mapping: ".implode(",", $missed);
+ }
+ 
+ //2. In DB: Verify that all required fields have values =============================================
+ if(count($query_reqs)>0){
+     $query = "select imp_id, ".implode(",",$sel_query)
+        ." from $import_table "
+        ." where ".implode(" or ",$query_reqs_where);
+     $wrong_records = getWrongRecords($mysqli, $query, "required fields", $imp_session, $query_reqs);
+     if($wrong_records) return $wrong_records;
+ } 
+ //3. In DB: Verify that enumeration fields have correct values =====================================
+ /*
+ "select $field_name from $import_table "
+ ."left join defTerms trm1 on if(concat('',$field_name * 1) = $field_name,trm1.trm_ID=$field_name,trm1.trm_Label=$field_name) "
+ ." where trm1.trm_Label is null";
+ */
+ if(count($query_enum)>0){
+     $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table ".$query_enum_join
+                ." where ".implode(" or ",$query_enum_where);
+     $wrong_records = getWrongRecords($mysqli, $query, "fields mapped as enumeration", $imp_session, $query_enum);
+     if($wrong_records) return $wrong_records;
+ }
  //4. In DB: Verify resource fields
+ if(count($query_res)>0){
+     $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table ".$query_res_join
+                ." where ".implode(" or ",$query_res_where);
+     $wrong_records = getWrongRecords($mysqli, $query, "fields mapped as resources(pointers)", $imp_session, $query_res);
+     if($wrong_records) return $wrong_records;
+ }
  
  //5. Verify numeric fields
+ if(count($query_num)>0){
+     $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table "
+                ." where ".implode(" or ",$query_num_where);
+     $wrong_records = getWrongRecords($mysqli, $query, "fields mapped as numeric", $imp_session, $query_num);
+     if($wrong_records) return $wrong_records;
+ }
  
  //6. Verify datetime fields
+ if(count($query_date)>0){
+     $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table "
+                ." where ".implode(" or ",$query_date_where);
+     $wrong_records = getWrongRecords($mysqli, $query, "fields mapped as date", $imp_session, $query_date);
+     if($wrong_records) return $wrong_records;
+ }
  
  //7. TODO Verify geo fields
  
 
- return $validationRes;   
+ return $imp_session;   
+}
+
+function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checked){
+    
+    $res = $mysqli->query($query);
+    if($res){
+        $wrong_records = array();
+        while ($row = $res->fetch_row()){
+            array_push($wrong_records, $row);
+        }        
+        $res->close();
+        if(count($wrong_records)>0){
+            $imp_session['validation']["rec_error"] = $wrong_records;
+            $imp_session['validation']["field_checked"] = $fields_checked;
+            $imp_session['validation']["err_message"] = $message;
+            return $imp_session;
+        }
+        
+    }else{
+        return "Can not perform validation query: ".$message;
+    }
+    return null;
 }
 
 /**
@@ -131,13 +324,12 @@ function doImport($mysqli, $imp_session, $params){
     }
     
     $import_table = $imp_session['import_table'];
-    $tot_count = $imp_session['reccount'];
     $is_update = false;
     $rt_field = null;
     
-    //get field mapping mapping
-    $mapping = array();  //field index in import table TO field type
-    $query = "";
+    //get field mapping and selection query from params 
+    $mapping = array();  //keeps fieldtypes for fields in import table
+    $sel_query = "";
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_dt_")===0 && $field_type){
             //get index 
@@ -147,7 +339,7 @@ function doImport($mysqli, $imp_session, $params){
             if($field_type=="id"){
                 $imp_session['indexes'][$recordType] = $field_name;
             }else {
-                $query = $query.$field_name.", ";    
+                $sel_query = $sel_query.$field_name.", ";    
                 array_push($mapping, $field_type);
                 $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
             }
@@ -175,13 +367,13 @@ function doImport($mysqli, $imp_session, $params){
                 return "can not alter import session table, can not add new index field: " . $mysqli->error;
             }    
     }
-    if($query==""){
+    if($sel_query==""){
         return "mapping not defined";
     }
     
     array_push($mapping, "id");
-    $query = "select ".($is_secondary?" distinct ":"").$query.$rt_field.", imp_id from ".$import_table;
-    $res = $mysqli->query($query);
+    $sel_query = "select ".($is_secondary?" distinct ":""). $sel_query . $rt_field.", imp_id from ".$import_table;
+    $res = $mysqli->query($sel_query);
     if (!$res) {
         
         return "import table is empty";
@@ -193,6 +385,7 @@ function doImport($mysqli, $imp_session, $params){
         $rep_updated = 0;
         $errors = array();
         $warnings = array();
+        $tot_count = $imp_session['reccount'];
 
         while ($row = $res->fetch_row()){
             
@@ -214,7 +407,7 @@ function doImport($mysqli, $imp_session, $params){
             }
     
             //add-update Heurist record
-            /* temp
+            // temp
             $out = saveRecord($recordId, $recordType,
                 $recordURL,
                 $recordNotes,
@@ -232,7 +425,7 @@ function doImport($mysqli, $imp_session, $params){
                 null, //comment
                 null //+comment
             );    
-            */
+            
             $out = array("bibID"=>null);
             
             if (@$out['error']) {
@@ -268,16 +461,15 @@ function doImport($mysqli, $imp_session, $params){
         }//while
         $res->close();
     }    
+
     //save mapping into import_sesssion
-    
     $imp_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
-            array("imp_id"=>$imp_session["import_id"], "imp_table"=>$import_table ,"imp_session"=>json_encode($imp_session) ));    
+            array("imp_id"=>$imp_session["import_id"], "imp_session"=>json_encode($imp_session) ));    
     if(intval($imp_id)<1){
         return "can not save session";
     }else{
         return $imp_session;
     }
-            
 }
 
 

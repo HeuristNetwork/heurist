@@ -14,7 +14,8 @@ select_rectype.change(function (event){
     var rectype = (event)?Number(event.target.value):0;
     var select_fieldtype = $('select[id^="sa_dt_"]');
     select_fieldtype.each(function() {
-        createRectypeDetailSelect(this, rectype, allowed, '...', false);
+        createRectypeDetailSelect(this, rectype, allowed, 
+            [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}], false);
     });
 });
 
@@ -54,6 +55,21 @@ function hideFtSelect(ind){
     }else{
         $sel.parent().show();
     }
+}
+
+function showError(){
+    
+    $d1 = $('#main_1');
+    $d2 = $('#main_2');
+    
+    if($d1.is(":visible")){
+        $d1.hide();
+        $d2.show();
+    }else{
+        $d2.hide();
+        $d1.show();
+    }
+    
 }
 
 // load values for record
