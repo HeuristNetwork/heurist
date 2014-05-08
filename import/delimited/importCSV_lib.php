@@ -1,6 +1,5 @@
 <?php
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
-require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 //a couple functions from h4/utils_db.php
 function mysql__select_array2($mysqli, $query) {
@@ -17,6 +16,21 @@ function mysql__select_array2($mysqli, $query) {
         }
         return $result;
 }
+function mysql__select_array3($mysqli, $query) {
+        $result = null;
+        if($mysqli){
+            $res = $mysqli->query($query);
+            if ($res){
+                $matches = array();
+                while ($row = $res->fetch_row()){
+                    $matches[$row[0]] = $row[1];
+                }
+                $res->close();
+            }
+        }
+        return $result;
+}
+
 function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
     $ret = null;
@@ -67,7 +81,8 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
         $query = $query." where ".$table_prefix."ID=".$rec_ID;
     }
 
-//DEBUG print $query."<br>";
+//DEBUG print 
+error_log(" upfate: ".$query);
 
     $stmt = $mysqli->prepare($query);
     if($stmt){
@@ -118,11 +133,11 @@ function validateImport($mysqli, $imp_session, $params){
             $field_name = "field_".$index;
             
             if($field_type=="id"){
-                $imp_session['indexes'][$recordType] = $field_name;
+                //AA $imp_session['indexes'][$recordType] = $field_name;
             }else {
                 array_push($sel_query, $field_name);    
-                array_push($mapping, $field_type);
-                $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
+                $mapping[$field_type] = $field_name;
+                //AA $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
             }
         }
     }  
@@ -147,14 +162,16 @@ function validateImport($mysqli, $imp_session, $params){
         return "mapping not defined";
     }
     
-    array_push($mapping, "id");
+    //AA array_push($mapping, "id");
     $select_query = "select ".($is_secondary?" distinct ":""). implode(",",$sel_query) 
         . ", imp_id from ".$import_table;
         
         //"," . $rt_field.
 
-  //    
-  $recStruc = getRectypeStructures(array($recordType));  
+ //    
+ $recStruc = getRectypeStructures(array($recordType));  
+ $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
+ $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
     
  $missed = array();
  $query_reqs = array();
@@ -174,12 +191,15 @@ function validateImport($mysqli, $imp_session, $params){
  $query_date = array();
  $query_date_where = array();
  
- $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
- $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
  foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
      
     //find among mappings
-    $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true);
+    $field_name = @$mapping[$ft_id];
+    if(!$field_name){
+       $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previos session
+    }
+     
+    if($field_name) error_log($field_name."=>".$recordType.".".$ft_id);     
      
     if($ft_vals[$idx_reqtype] == "required"){
         if(!$field_name){
@@ -235,6 +255,8 @@ function validateImport($mysqli, $imp_session, $params){
      $query = "select imp_id, ".implode(",",$sel_query)
         ." from $import_table "
         ." where ".implode(" or ",$query_reqs_where);
+        
+//error_log("check empty: ".$query);
      $wrong_records = getWrongRecords($mysqli, $query, "required fields", $imp_session, $query_reqs);
      if($wrong_records) return $wrong_records;
  } 
@@ -326,6 +348,14 @@ function doImport($mysqli, $imp_session, $params){
     $import_table = $imp_session['import_table'];
     $is_update = false;
     $rt_field = null;
+    $recStruc = getRectypeStructures(array($recordType));
+    $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
+    $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
+    
+    $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+    //get terms name=>id
+    $terms_enum = null;
+    $terms_relation = null;
     
     //get field mapping and selection query from params 
     $mapping = array();  //keeps fieldtypes for fields in import table
@@ -342,6 +372,8 @@ function doImport($mysqli, $imp_session, $params){
                 $sel_query = $sel_query.$field_name.", ";    
                 array_push($mapping, $field_type);
                 $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
+                    //$recTypeName."  ".$recStruc[$recordType]['dtFields'][$field_type][$idx_name]; 
+                        
             }
             
             
@@ -356,10 +388,11 @@ function doImport($mysqli, $imp_session, $params){
             
      }else{ //insert
             //add new field in import table - to keep key values (primary index)
-            $rt_field = "field_".count($imp_session['columns']);
-            array_push($imp_session['columns'], $recordType."  index" );
+            $index = count($imp_session['columns']);
+            $rt_field = "field_".$index;
+            array_push($imp_session['columns'], $recTypeName."  index" );
             array_push($imp_session['uniqcnt'], 0);
-            if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id";
+            if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id"; //$recTypeName."(id# $recordType) ID";
             $imp_session['indexes'][$recordType] = $rt_field;
         
             $altquery = "alter table ".$import_table." add column ".$rt_field." int(10) unsigned";
@@ -371,8 +404,18 @@ function doImport($mysqli, $imp_session, $params){
         return "mapping not defined";
     }
     
-    array_push($mapping, "id");
-    $sel_query = "select ".($is_secondary?" distinct ":""). $sel_query . $rt_field.", imp_id from ".$import_table;
+    array_push($mapping, "id"); //las field is row# - imp_id
+    if($is_secondary){
+        $sel_query = "select ". $sel_query . ($is_update?"":$rt_field.",") 
+                    . " group_concat(imp_id) from ".$import_table
+                    . " group by ". $sel_query . ($is_update?"":$rt_field);    
+        
+    }else{ //@todo: remove this - to avoid duplications
+        $sel_query = "select ". $sel_query . $rt_field.", imp_id from ".$import_table;
+    }
+    
+//error_log($sel_query);
+    
     $res = $mysqli->query($sel_query);
     if (!$res) {
         
@@ -402,7 +445,29 @@ function doImport($mysqli, $imp_session, $params){
                 }else if($field_type=="notes"){
                     $recordNotes = $row[$index];
                 }else{
-                    $details["t:".$field_type] = array("1"=>$row[$index]);
+                    
+                    $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
+                    if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
+                            && !ctype_digit($row[$index])) {
+                                
+                        $value = null;        
+                    
+                        if($ft_vals[$idx_fieldtype] == "enum"){
+                            if(!$terms_enum)
+                            $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
+                            $value = @$terms_enum[$row[$index]];
+                        }else if($ft_vals[$idx_fieldtype] == "relationtype"){
+                            if(!$terms_relation)
+                            $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
+                            $value = @$terms_relation[$row[$index]];
+                        }
+                        
+                        $details["t:".$field_type] = array("1"=>$value);    
+                        
+                    }else{
+                        $details["t:".$field_type] = array("1"=>$row[$index]);    
+                    }
+                    
                 }
             }
     
@@ -426,15 +491,14 @@ function doImport($mysqli, $imp_session, $params){
                 null //+comment
             );    
             
-            $out = array("bibID"=>null);
-            
             if (@$out['error']) {
                 //print "<div style='color:red'>Error: ".implode("; ",$out["error"])."</div>";
                 return "can not insert record ".implode("; ",$out["error"]);
             }else{
                 if($recordId==null){
                     
-                    $updquery = "update ".$import_table." set ".$rt_field."=".$out["bibID"]." where imp_id=".$row[count($row)-1];
+                    $updquery = "update ".$import_table." set ".$rt_field."=".$out["bibID"]." where imp_id in (".end($row).")";
+//error_log(">>>>".$updquery);
                     if(!$mysqli->query($updquery)){
                         return "can not update import table (set record id)";
                     }
@@ -464,7 +528,7 @@ function doImport($mysqli, $imp_session, $params){
 
     //save mapping into import_sesssion
     $imp_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
-            array("imp_id"=>$imp_session["import_id"], "imp_session"=>json_encode($imp_session) ));    
+            array("imp_ID"=>$imp_session["import_id"], "imp_session"=>json_encode($imp_session) ));    
     if(intval($imp_id)<1){
         return "can not save session";
     }else{

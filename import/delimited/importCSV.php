@@ -38,6 +38,8 @@
 */
 
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 require_once('importCSV_lib.php');
 
 $mysqli = mysqli_connection_overwrite(DATABASE);    
@@ -129,6 +131,11 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
     }
     
     $len = count($imp_session['columns']);
+  
+/* DEBUG  
+echo "<div>imp session: ".print_r($imp_session)."<br>";
+echo "REUQEST: ".print_r($_REQUEST)."</div>";
+*/
 ?>
 <div id="main_1">
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifyData()">
@@ -142,8 +149,8 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
         <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
     <div>
-        <label for="sa_type0">Primary</label><input type="radio" checked="checked" name="sa_type" id="sa_type0" value="0" class="text" />
-        <label for="sa_type1">Resource</label><input type="radio" name="sa_type" id="sa_type1" "value="1" class="text" />
+        <input type="radio" <?=@$_REQUEST['sa_type']==1?"":"checked"?> name="sa_type" id="sa_type0" value="0" class="text" />&nbsp;<label for="sa_type0">Primary</label>
+        <input type="radio" <?=@$_REQUEST['sa_type']==1?"checked":""?> name="sa_type" id="sa_type1" value="1" class="text" />&nbsp;<label for="sa_type1">Resource</label>
     </div>
     <!-- div>
         <label for="sa_addmode0">Insert</label><input type="radio" checked="checked" name="sa_addmode" id="sa_addmode0" value="0" class="text" />
@@ -171,27 +178,43 @@ var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
 $sIndexes = "";
 $sRemain = "";
 $sProcessed = "";
-
-"imp session: ".print_r($imp_session)."<br>";
-
+$recStruc = getAllRectypeStructures(true);
+$idx_dt_name = $recStruc['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+//$idx_rt_name = $recStruc['commonNamesToIndex']['rty_Name'];
 
 for ($i = 0; $i < $len; $i++) {     
-    $s = '<tr><td><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{hideFtSelect('.$i.');}"/></td><td>'.$imp_session['uniqcnt'][$i].'</td><td>'.$imp_session['columns'][$i].'</td>';
+    
+    $isProcessed = @$imp_session["mapping"]["field_".$i];
+    $isIndex = false;
+    
+    if($isProcessed){
+        $checkbox = '<td>&nbsp;</td>'; //processed
+    }else{
+        $isIndex = (array_search ( "field_".$i , $imp_session['indexes'], true )!==false);
+        
+        $checkbox = '<td><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{hideFtSelect('.$i.');}"/></td>';
+    }
+    
+    $s = '<tr>'.$checkbox.'<td>'.$imp_session['uniqcnt'][$i].'</td><td>'.$imp_session['columns'][$i].'</td>';
 
-    if(@$imp_session["mapping"][$i]){
-        $s = $s.'<td>'.$imp_session["mapping"][$i].'</td>';
+    if($isProcessed){
+        
+        $rt_dt = explode(".",$isProcessed);
+        $recTypeName = $recStruc['names'][$rt_dt[0]];//['commonFields'][ $idx_rt_name ];
+        $dt_Name = intval($rt_dt[1])>0?$recStruc['typedefs'][$rt_dt[0]]['dtFields'][$rt_dt[1]][$idx_dt_name]:$rt_dt[1];
+
+        $s = $s.'<td>'.$recTypeName.' '.$dt_Name.'  ('.$rt_dt[0].'.'.$rt_dt[1].')</td>';
     }else{ ;
-        $s = $s.'<td>&nbsp;<span style="min-width:302px;display:none"><select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px"></select></span></td>';
+        $s = $s.'<td>&nbsp;<span style="min-width:302px;display:none">'
+               .'<select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px" '
+               . ($isIndex?'class="indexes"':'').'></select></span></td>';
     }
     $s = $s.'<td id="impval'.$i.'"> </td></tr>';
 
-    if(@$imp_session["mapping"][$i]){
+    if($isProcessed){
         $sProcessed = $sProcessed.$s;    
     }else{
-
-        $rectype = array_search ( "field_".$i , $imp_session['indexes'], true );
-
-        if($rectype){
+        if($isIndex){
             $sIndexes=$sIndexes.$s;    
         }else {
             $sRemain=$sRemain.$s;    
@@ -386,7 +409,7 @@ error_log(">>>> ".print_r($fields, true)."  ".$len);
         $query = $query."`field_".$i."` varchar(250), ";
         $columns = $columns."field_".$i.",";
         $counts = $counts."count(distinct field_".$i."),";
-        array_push($mapping,0);
+        //array_push($mapping,0);
     }
     $query = $query." PRIMARY KEY (`imp_ID`))";
 

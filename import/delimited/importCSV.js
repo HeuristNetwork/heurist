@@ -14,8 +14,15 @@ select_rectype.change(function (event){
     var rectype = (event)?Number(event.target.value):0;
     var select_fieldtype = $('select[id^="sa_dt_"]');
     select_fieldtype.each(function() {
-        createRectypeDetailSelect(this, rectype, allowed, 
-            [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}], false);
+        
+        var allowed_ft = allowed;
+        var topitems = [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}];
+        if($(this).hasClass('indexes')){
+            allowed_ft = ["resource"];
+            topitems = [{key:'',title:'...'}];
+        }
+        
+        createRectypeDetailSelect(this, rectype, allowed_ft, topitems, false);
     });
 });
 
