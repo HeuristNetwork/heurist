@@ -113,7 +113,7 @@ function validateImport($mysqli, $imp_session, $params){
   
     //rectype to import
     $recordType = @$params['sa_rectype'];
-    $is_secondary = ($params['sa_type']==1);
+    $is_secondary = ($params['sa_type']==0);
     
     if(intval($recordType)<1){
         return "record type not defined";
@@ -132,21 +132,29 @@ function validateImport($mysqli, $imp_session, $params){
             $index = substr($key,6);
             $field_name = "field_".$index;
             
+            array_push($sel_query, $field_name);
+            
             if($field_type=="id"){
                 //AA $imp_session['indexes'][$recordType] = $field_name;
             }else {
-                array_push($sel_query, $field_name);    
+                //AA array_push($sel_query, $field_name);    
                 $mapping[$field_type] = $field_name;
                 //AA $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
             }
         }
     }  
+    if(count($sel_query)<1){
+        return "mapping not defined";
+    }
   
     //detect rectype in indexes 
     if(@$imp_session['indexes'][$recordType]){ //exists - it means update
         
             $rt_field = $imp_session['indexes'][$recordType];
             $is_update = true;
+            
+            $select_query_update = "select count(distinct ".$rt_field.") from ".$import_table;
+            $select_query_insert = null;
             
      }else{ //insert
             //add new field in import table - to keep key values (primary index)
@@ -157,16 +165,26 @@ function validateImport($mysqli, $imp_session, $params){
             if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id";
             $imp_session['indexes'][$recordType] = $rt_field;
             */
-    }
-    if(count($sel_query)<1){
-        return "mapping not defined";
+            
+            if($is_secondary){
+                $select_query_update = "select ". implode(",",$sel_query).", count(*) "
+                            . " from ".$import_table
+                            . " group by ". implode(",",$sel_query);
+            }else{
+                
+                $select_query_update = "select count(*) from ".$import_table;
+                
+            }
+            
+            //$select_query = "select ".($is_secondary?" distinct ":""). implode(",",$sel_query) 
+            //                . " from ".$import_table;
     }
     
-    //AA array_push($mapping, "id");
-    $select_query = "select ".($is_secondary?" distinct ":""). implode(",",$sel_query) 
-        . ", imp_id from ".$import_table;
-        
-        //"," . $rt_field.
+    //find records to update
+    
+    //find records to insert
+    
+    
 
  //    
  $recStruc = getRectypeStructures(array($recordType));  
@@ -175,20 +193,25 @@ function validateImport($mysqli, $imp_session, $params){
     
  $missed = array();
  $query_reqs = array();
+ $query_reqs_nam = array();
  $query_reqs_where = array();
 
  $query_enum = array();
  $query_enum_join = "";
+ $query_enum_nam = array();
  $query_enum_where = array();
 
  $query_res = array();
  $query_res_join = "";
+ $query_res_nam = array();
  $query_res_where = array();
  
  $query_num = array();
+ $query_num_nam = array();
  $query_num_where = array();
  
  $query_date = array();
+ $query_date_nam = array();
  $query_date_where = array();
  
  foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
@@ -199,7 +222,7 @@ function validateImport($mysqli, $imp_session, $params){
        $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previos session
     }
      
-    if($field_name) error_log($field_name."=>".$recordType.".".$ft_id);     
+  //DEBUG  if($field_name) error_log($field_name."=>".$recordType.".".$ft_id);     
      
     if($ft_vals[$idx_reqtype] == "required"){
         if(!$field_name){
@@ -211,6 +234,8 @@ function validateImport($mysqli, $imp_session, $params){
     }
     
     if($field_name){
+        
+        //$field_alias = $imp_session['columns'][substr($field_name,6)];
         
         if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
             array_push($query_enum, $field_name);
@@ -257,7 +282,7 @@ function validateImport($mysqli, $imp_session, $params){
         ." where ".implode(" or ",$query_reqs_where);
         
 //error_log("check empty: ".$query);
-     $wrong_records = getWrongRecords($mysqli, $query, "required fields", $imp_session, $query_reqs);
+     $wrong_records = getWrongRecords($mysqli, $query, "required fields are null or empty", $imp_session, $query_reqs);
      if($wrong_records) return $wrong_records;
  } 
  //3. In DB: Verify that enumeration fields have correct values =====================================
@@ -339,7 +364,7 @@ function doImport($mysqli, $imp_session, $params){
     
     //rectype to import
     $recordType = @$params['sa_rectype'];
-    $is_secondary = ($params['sa_type']==1);
+    $is_secondary = ($params['sa_type']==0);
     
     if(intval($recordType)<1){
         return "record type not defined";
@@ -534,6 +559,77 @@ function doImport($mysqli, $imp_session, $params){
     }else{
         return $imp_session;
     }
+}
+
+
+/*
+* put your comment there...
+* 
+* @param mixed $rec_id
+* @param mixed $import_table
+*/
+function get_import_value($rec_id, $import_table){
+    global $mysqli;
+    
+    $query = "select * from $import_table where imp_id=".$rec_id;
+    $res = mysql__select_array2($mysqli, $query);
+                
+//error_log(">>>".$query."  ".json_encode($res));
+                
+    header('Content-type: text/javascript');
+    print json_encode($res);
+}
+
+/**
+* 
+* @param mixed $import_id
+* @return mixed
+*/
+function get_import_session($mysqli, $import_id){
+    
+    if($import_id && is_numeric($import_id)){
+        
+        $res = mysql__select_array2($mysqli, 
+                "select imp_session, imp_table from import_sessions where imp_id=".$import_id);
+        
+        $session = json_decode($res[0], true);
+        $session["import_id"] = $import_id;
+        $session["import_table"] = $res[1];
+    
+        return $session;    
+    }else{
+        return "Can not load import session id#".$import_id;       
+    }
+}
+/**
+* put your comment there...
+*  
+*/
+function get_list_import_sessions(){
+    
+    global $mysqli;
+    
+     $query = "CREATE TABLE IF NOT EXISTS `import_sessions` (
+    `imp_ID` int(11) unsigned NOT NULL auto_increment,
+    `ugr_ID` int(11) unsigned NOT NULL,
+    `imp_table` varchar(255) NOT NULL default '',
+    `imp_session` text,
+    PRIMARY KEY  (`imp_ID`))";
+    if (!$mysqli->query($query)) {
+        return "can not create import session table: " . $mysqli->error;
+    }    
+
+    $ret = '<option value="0">select session...</option>';
+    $query = "select imp_ID, imp_table from import_sessions"; //" where ugr_ID=".get_user_id();
+    $res = $mysqli->query($query);
+    if ($res){
+        while ($row = $res->fetch_row()){
+            $ret = $ret.'<option value="'.$row[0].'">'.$row[1].'</option>';
+        }
+        $res->close();
+    }    
+    //return "can not load list of sessions: " . $mysqli->error;
+    return $ret;
 }
 
 

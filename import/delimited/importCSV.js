@@ -41,10 +41,10 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     }
 }
 
-});
+}); //end init function
 
 function update_counts(added, updated, total){
-    $("#div-progress2").html("adde: "+added+" updated:"+updatred+"  total:"+total);
+    $("#div-progress2").html("added: "+added+" updated:"+updatred+"  total:"+total);
 }
 
 //
@@ -64,18 +64,10 @@ function hideFtSelect(ind){
     }
 }
 
-function showError(){
+function showRecords(divname){
     
-    $d1 = $('#main_1');
-    $d2 = $('#main_2');
-    
-    if($d1.is(":visible")){
-        $d1.hide();
-        $d2.show();
-    }else{
-        $d2.hide();
-        $d1.show();
-    }
+    $('div[id^="main_"]').hide();
+    $('div[id="main_'+divname+'"]').show();
     
 }
 
