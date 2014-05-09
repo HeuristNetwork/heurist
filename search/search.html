@@ -263,25 +263,32 @@
                                 Crosstabs</a></li>
 
 							<li><div class="separator">IMPORT</div></li>
+                             
                             <li class="admin-only"><a href="../import/utilities/manageFilesUpload.php" class="large"
                                 onClick="this.href = top.HEURIST.baseURL +'import/utilities/manageFilesUpload.php?db=' + database;" target="_blank"
-                                title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uloaded files" name="auto-popup">
-                                Upload data files</a></li>
-
-							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
-								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
-								title="Import data from delimited text for one record type at a time" target="_blank">
-								CSV</a></li>
-							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" class="large"
-								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
-								title="Update or add fields in existing records from delimited text" name="auto-popup">
-								CSV (update)</a></li>
+                                title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uloaded files"
+                                name="auto-popup">Upload data files WIP</a></li>
+                            
+                            <li><a href="../import/utilities/convertTagsToCSV.php" class="large"
+                                onClick="this.href = top.HEURIST.baseURL +'import/utilities/convertTagsToCSV.php?db=' + database;" target="_blank"
+                                title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values" 
+                                name="auto-popup">Tag-value to CSV</a></li>
 
                             <li class="admin-only"><a href="../import/delimited/importCSV.php" class="fixed"
                                 onClick="this.href = top.HEURIST.baseURL +'import/delimited/importCSV.php?db=' + database;" target="_blank"
-                                title="Import data from CSV" name="auto-popup">
-                                CSV (v2)</a></li>                                
+                                title="Import data from delimited text file. Supports matching, record creation, record update." name="auto-popup">
+                                Delimited with match</a></li>                                
                                 
+							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
+								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
+								title="Import data from delimited text for one record type at a time" target="_blank">
+								CSV add (old)</a></li>
+                                
+							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" class="large"
+								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
+								title="Update or add fields in existing records from delimited text" name="auto-popup">
+								CSV update (old)</a></li>
+
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
 								title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimtied files)">
 								KML</a></li>
