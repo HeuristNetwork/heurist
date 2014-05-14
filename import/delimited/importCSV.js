@@ -1,4 +1,31 @@
+/**
+* importCSV.js: UI for delimeted data import
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0   
+*/
 
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+/**
+* Init function - it is invoked on document ready
+* 
+* 1) Fills rectype select
+* 2) Assign onchange for this select - to load list of fields for selected rectype
+* 3) Loads values for record from import table
+* 4) Init values for mapping form (checkboxes and selected field in dropdowns)
+*/
 $(function() {
     
 $("#div-progress").hide();
@@ -9,6 +36,9 @@ createRectypeSelect( select_rectype.get(0), null, 'Select record type' );
 var allowed = Object.keys(top.HEURIST.detailTypes.lookups);
 allowed.splice(allowed.indexOf("separator"),1);
 allowed.splice(allowed.indexOf("relmarker"),1);
+allowed.splice(allowed.indexOf("file"),1);
+allowed.splice(allowed.indexOf("geo"),1);
+
 
 select_rectype.change(function (event){
     var rectype = (event)?Number(event.target.value):0;
@@ -24,35 +54,73 @@ select_rectype.change(function (event){
         
         createRectypeDetailSelect(this, rectype, allowed_ft, topitems, false);
     });
+    
+    //hide all checkboxes on rectype change
+    $('input[id^="cbsa_dt_"]').each(function(){
+        $(this).attr('checked', false);
+        $(this).parent().hide();
+    });
 });
 
+//Loads values for record from import table
 getValues(0);
 
-//initvalues
+//init values for mapping form
 if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     select_rectype.val(form_vals.sa_rectype).change();
     
     for (var key in form_vals){
         if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
-            $('#cb'+key).attr('checked', true);
-            $('#'+key).parent().show();
+            //$('#'+key).parent().show();
             $('#'+key).val(form_vals[key]);
+            $('#cb'+key).attr('checked', true);
+            $('#cb'+key).parent().show();
         }
     }
 }
 
 }); //end init function
 
+//
+// Update progress counter for record update/insert
+//
 function update_counts(added, updated, total){
     $("#div-progress2").html("added: "+added+" updated:"+updatred+"  total:"+total);
 }
 
+//
+// Start import
 //
 function doImport(){
     $("#input_step").val(3);
     document.forms[0].submit();
 }
 
+function showUpdMode(event){
+    if(event.target.value==1){
+        $("#divUpdateMode").show();   
+    }else{
+        $("#divUpdateMode").hide();
+    }
+}
+
+//
+// show/hide checkbox on fieldtype select
+//
+function showFtSelect(ind){
+    $sel = $('#sa_dt_'+ind);
+    $ch = $('#cbsa_dt_'+ind);
+    if($sel.val()==''){
+        $ch.parent().hide();
+        $ch.attr('checked', false);
+    }else{
+        $ch.parent().show();
+        $ch.attr('checked', true);
+    }
+}
+
+//
+// show/hide fieldtype select on checkbox click
 //
 function hideFtSelect(ind){
     $sel = $('#sa_dt_'+ind);
@@ -64,6 +132,9 @@ function hideFtSelect(ind){
     }
 }
 
+//
+// Show error, matched or new records 
+//
 function showRecords(divname){
     
     $('div[id^="main_"]').hide();
@@ -71,7 +142,9 @@ function showRecords(divname){
     
 }
 
-// load values for record
+//
+// Loads values for record from import table
+//
 function getValues(dest){
     if(dest==0){
         currentId=1;
@@ -109,6 +182,8 @@ function getValues(dest){
 }
 
 //
+// onsubmit event listener - basic validation that at least one field is mapped
+//
 function verifyData()
 {
     var rectype = $("#sa_rectype").val();
@@ -131,6 +206,8 @@ function verifyData()
     return false;
 }
 
+//
+// create SELECT element (see h4/utils)
 //
 function createSelector(selObj, topOptions) {
         if(selObj==null){
@@ -169,6 +246,9 @@ function createSelector(selObj, topOptions) {
         return selObj;
 }
     
+//
+// create rectype SELECT element (see h4/utils)
+//
 function createRectypeSelect(selObj, rectypeList, topOptions) {
 
         createSelector(selObj, topOptions);
@@ -221,6 +301,9 @@ function createRectypeSelect(selObj, rectypeList, topOptions) {
         return selObj;
 }
 
+//
+// create detailtype SELECT element (see h4/utils)
+//
 function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, showAll) {
 
         createSelector(selObj, topOptions);
@@ -236,7 +319,8 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
             details = rectypes.dtFields;
             
             var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-                fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+                fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
+                fir = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
             
             var arrterm = [];
             
@@ -248,7 +332,7 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
                           var name = details[dtyID][fi];
 
                           if(!top.HEURIST.util.isnull(name)){
-                                arrterm.push([dtyID, name]);
+                                arrterm.push([dtyID, name+' ['+details[dtyID][fit]+']', (details[dtyID][fir]=="required")]);
                           }
                    }
                }
@@ -259,7 +343,10 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                var opt = top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                if(arrterm[i][2]){
+                    opt.className = "required";
+                }                
             }
             
         }else if(showAll){ //show all detail types

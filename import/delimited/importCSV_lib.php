@@ -1,7 +1,34 @@
 <?php
+
+/**
+* importCSV_lib.php: functions for delimeted data import
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0   
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 
 //a couple functions from h4/utils_db.php
+/**
+* returns first row for given query
+* 
+* @param mixed $mysqli
+* @param mixed $query
+*/
 function mysql__select_array2($mysqli, $query) {
         $result = null;
         if($mysqli){
@@ -16,6 +43,12 @@ function mysql__select_array2($mysqli, $query) {
         }
         return $result;
 }
+/**
+* return all rows as index with key as first column in result set
+* 
+* @param mixed $mysqli
+* @param mixed $query
+*/
 function mysql__select_array3($mysqli, $query) {
         $result = null;
         if($mysqli){
@@ -31,6 +64,14 @@ function mysql__select_array3($mysqli, $query) {
         return $result;
 }
 
+/**
+* insert/update - creates and executes the parmetrized query
+* 
+* @param mixed $mysqli
+* @param mixed $table_name
+* @param mixed $table_prefix
+* @param mixed $record
+*/
 function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
     $ret = null;
@@ -82,7 +123,7 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
     }
 
 //DEBUG print 
-error_log(" upfate: ".$query);
+//error_log(" upfate: ".$query);
 
     $stmt = $mysqli->prepare($query);
     if($stmt){
@@ -103,15 +144,19 @@ error_log(" upfate: ".$query);
 // import functions =====================================
 
 /**
-* take settings from $_REQUEST
+* 1) Performs mapping validation (required fields, enum, pointers, numeric/date)
+* 2) Counts matched (update) and new records
 * 
 * @param mixed $mysqli
 */
 function validateImport($mysqli, $imp_session, $params){
- 
-    $imp_session['validation'] = array( "rec_to_update"=>0, "rec_to_add"=>0, "rec_error"=>null, "err_message"=>null );  
+
+    //add result of validation to session 
+    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "err_message"=>null );  
+    
+    
   
-    //rectype to import
+    //get rectype to import
     $recordType = @$params['sa_rectype'];
     $is_secondary = ($params['sa_type']==0);
     
@@ -123,8 +168,8 @@ function validateImport($mysqli, $imp_session, $params){
     $is_update = false;
     $rt_field = null;
     
-    //get field mapping and selection query from params 
-    $mapping = array();  //keeps fieldtypes for fields in import table
+    //get field mapping and selection query from _REQUEST(params)
+    $mapping = array();  // fieldtype ID => fieldname in import table
     $sel_query = array();
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_dt_")===0 && $field_type){
@@ -132,10 +177,12 @@ function validateImport($mysqli, $imp_session, $params){
             $index = substr($key,6);
             $field_name = "field_".$index;
             
-            array_push($sel_query, $field_name);
+            //all mapped fields - they will be used in validation query
+            array_push($sel_query, $field_name); 
             
             if($field_type=="id"){
                 //AA $imp_session['indexes'][$recordType] = $field_name;
+                $rt_field = $field_name;
             }else {
                 //AA array_push($sel_query, $field_name);    
                 $mapping[$field_type] = $field_name;
@@ -146,64 +193,101 @@ function validateImport($mysqli, $imp_session, $params){
     if(count($sel_query)<1){
         return "mapping not defined";
     }
+    
+    if(!$rt_field && @$imp_session['indexes'][$recordType]){
+        $rt_field = $imp_session['indexes'][$recordType];
+    }
   
-    //detect rectype in indexes 
-    if(@$imp_session['indexes'][$recordType]){ //exists - it means update
-        
-            $rt_field = $imp_session['indexes'][$recordType];
-            $is_update = true;
+           
+   if($rt_field){ //index field is defined
+            //select all mapped fields   .$rt_field.", "
+            $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
+            ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$rt_field;
             
-            $select_query_update = "select count(distinct ".$rt_field.") from ".$import_table;
-            $select_query_insert = null;
+   }else{
+            //if index field is not specified
+            $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table;
             
-     }else{ //insert
-            //add new field in import table - to keep key values (primary index)
-            /*
-            $rt_field = "field_".count($imp_session['columns']);
-            array_push($imp_session['columns'], $recordType."  index" );
-            array_push($imp_session['uniqcnt'], 0);
-            if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id";
-            $imp_session['indexes'][$recordType] = $rt_field;
-            */
-            
-            if($is_secondary){
-                $select_query_update = "select ". implode(",",$sel_query).", count(*) "
-                            . " from ".$import_table
-                            . " group by ". implode(",",$sel_query);
-            }else{
+            $i = 1;
+            $select_query_join = " left join Records on rec_RecTypeID=".$recordType;
+            foreach ($mapping as $field_type => $field_name) {
+                $select_query = $select_query . " left join recDetails d".$i." on d".$i.".dtl_Value=".$field_name;
+                $select_query_join = $select_query_join . " and rec_ID=d".$i.".dtl_RecID";
                 
-                $select_query_update = "select count(*) from ".$import_table;
-                
+                $i++;    
             }
+            $select_query = $select_query . $select_query_join;
+   }
             
-            //$select_query = "select ".($is_secondary?" distinct ":""). implode(",",$sel_query) 
-            //                . " from ".$import_table;
+        
+    $imp_session['validation']['mapped_fields'] = $sel_query;        
+    //find records to update
+    $res = $mysqli->query($select_query . " where rec_ID is not null");
+    if($res){
+        $fres = $mysqli->query('select found_rows()');
+        $row = $fres->fetch_row(); 
+        $imp_session['validation']['count_update'] = $row[0];
+        if($row[0]>0){
+            $imp_session['validation']['recs_update'] = array();
+            $cnt = 0;
+            while ($row = $res->fetch_row()){
+                array_push($imp_session['validation']['recs_update'], $row);
+                $cnt++;
+                if($cnt>99) break;
+            }
+        }
+    }else{
+        return "Can not execute query to calculate number of records to be updated";
     }
     
-    //find records to update
-    
     //find records to insert
+    $res = $mysqli->query($select_query . " where rec_ID is null");
+//error_log(">>>>".$select_query. " where rec_ID is null");    
+    if($res){
+        $fres = $mysqli->query('select found_rows()');
+        $row = $fres->fetch_row(); 
+        $imp_session['validation']['count_insert'] = $row[0];
+        if($row[0]>0){
+            $imp_session['validation']['recs_insert'] = array();
+            $cnt = 0;
+            while ($row = $res->fetch_row()){
+                array_push($imp_session['validation']['recs_insert'], $row);
+                $cnt++;
+                if($cnt>99) break;
+            }
+        }
+    }else{
+        return "Can not execute query to calculate number of records to be inserted";
+    }
+            
+            
+            
+/*            
+$res = mysql_query($query);
+if (mysql_error()) {
+    error_log("queryError in getResultsPageAsync -".mysql_error());
+}
+$fres = mysql_query('select found_rows()');
+*/            
+
     
     
 
- //    
+ // fill array with field in import table to be validated 
  $recStruc = getRectypeStructures(array($recordType));  
  $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
  $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
     
  $missed = array();
- $query_reqs = array();
- $query_reqs_nam = array();
- $query_reqs_where = array();
+ $query_reqs = array(); //fieldname from import table
+ $query_reqs_where = array(); //where clause for validation
 
  $query_enum = array();
  $query_enum_join = "";
- $query_enum_nam = array();
  $query_enum_where = array();
 
  $query_res = array();
  $query_res_join = "";
- $query_res_nam = array();
  $query_res_where = array();
  
  $query_num = array();
@@ -214,6 +298,7 @@ function validateImport($mysqli, $imp_session, $params){
  $query_date_nam = array();
  $query_date_where = array();
  
+ //loop for all fields in record type structure
  foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
      
     //find among mappings
@@ -331,6 +416,15 @@ function validateImport($mysqli, $imp_session, $params){
  return $imp_session;   
 }
 
+/**
+* execute validation query and fill session array with validation results
+* 
+* @param mixed $mysqli
+* @param mixed $query
+* @param mixed $message
+* @param mixed $imp_session
+* @param mixed $fields_checked
+*/
 function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checked){
     
     $res = $mysqli->query($query);
@@ -341,7 +435,8 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
         }        
         $res->close();
         if(count($wrong_records)>0){
-            $imp_session['validation']["rec_error"] = $wrong_records;
+            $imp_session['validation']["count_error"] = count($wrong_records);
+            $imp_session['validation']["recs_error"] = array_slice($wrong_records,0,100);
             $imp_session['validation']["field_checked"] = $fields_checked;
             $imp_session['validation']["err_message"] = $message;
             return $imp_session;
@@ -382,8 +477,8 @@ function doImport($mysqli, $imp_session, $params){
     $terms_enum = null;
     $terms_relation = null;
     
-    //get field mapping and selection query from params 
-    $mapping = array();  //keeps fieldtypes for fields in import table
+    //get field mapping and selection query from _REQUEST(params)
+    $mapping = array();  // fieldtype ID => fieldname in import table
     $sel_query = "";
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_dt_")===0 && $field_type){
@@ -428,8 +523,30 @@ function doImport($mysqli, $imp_session, $params){
     if($sel_query==""){
         return "mapping not defined";
     }
+  
+/*
+       if($is_update){ //index field is defined
+                //select all mapped fields   .$rt_field.", "
+                $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
+                ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$rt_field;
+                
+       }else{
+                //if index field is not specified
+                $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table;
+                
+                $i = 1;
+                $select_query_join = " left join Records on rec_RecTypeID=".$recordType;
+                foreach ($mapping as $field_type => $field_name) {
+                    $select_query = $select_query . " left join recDetails d".$i." on d".$i.".dtl_Value=".$field_name;
+                    $select_query_join = $select_query_join . " and rec_ID=d".$i.".dtl_RecID";
+                    
+                    $i++;    
+                }
+                $select_query = $select_query . $select_query_join;
+       }
+*/    
     
-    array_push($mapping, "id"); //las field is row# - imp_id
+    array_push($mapping, "id"); //last field is row# - imp_id
     if($is_secondary){
         $sel_query = "select ". $sel_query . ($is_update?"":$rt_field.",") 
                     . " group_concat(imp_id) from ".$import_table
@@ -563,7 +680,7 @@ function doImport($mysqli, $imp_session, $params){
 
 
 /*
-* put your comment there...
+* Get values for given ID from imort table (to preview values on UI)
 * 
 * @param mixed $rec_id
 * @param mixed $import_table
@@ -581,6 +698,7 @@ function get_import_value($rec_id, $import_table){
 }
 
 /**
+* Loads import sessions by ID
 * 
 * @param mixed $import_id
 * @return mixed
@@ -601,9 +719,9 @@ function get_import_session($mysqli, $import_id){
         return "Can not load import session id#".$import_id;       
     }
 }
+
 /**
-* put your comment there...
-*  
+* Loads all sessions for current user (to populate dropdown)
 */
 function get_list_import_sessions(){
     
@@ -630,6 +748,57 @@ function get_list_import_sessions(){
     }    
     //return "can not load list of sessions: " . $mysqli->error;
     return $ret;
+}
+
+//
+// render the list of records as a table
+//
+function renderRecords($type, $imp_session){
+    
+        ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
+        ///DEBUG print print_r(@$validationRes['rec_error'],true);
+        
+        $cnt = $imp_session['validation']['count_'.$type];
+        $records = $imp_session['validation']['recs_'.$type];
+        $mapped_fields = $imp_session['validation']['mapped_fields'];
+
+        //print print_r( @$imp_session['validation']['field_checked'], true);
+        if($cnt>count($records)){
+            print "<div>First 100 records of ".$cnt."</div>";
+        }
+        print '<table border="0">'; // class="tbmain"
+        if($type=="error"){
+            $checked_fields = $imp_session['validation']['field_checked'];
+            print "<thead><th>Line #</th>";
+        }else{
+            $checked_fields = array(); 
+        }
+        
+            
+            foreach($mapped_fields as $field_name) {
+                
+                $colname = @$imp_session['columns'][substr($field_name,6)];
+                if(array_search($field_name, $checked_fields)!==false){
+                    $colname = "<i>".$colname."</i>";
+                }
+                
+                print "<th>".$colname."</th>";
+            }
+            print "</thead>";
+            foreach ($records as $row) {  
+
+                print "<tr>";
+                if(is_array($row)){
+                    foreach($row as $value) {     
+                        print "<td>".($value?$value:"&nbsp;")."</td>";
+                    }
+                }
+                print "</tr>";
+            }
+        print "</table>";
+        
+        print '<input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+    
 }
 
 

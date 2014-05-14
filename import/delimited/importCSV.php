@@ -1,33 +1,24 @@
 <?php
-/*
-* Copyright (C) 2005-2013 University of Sydney
+/**
+* importCSV.php: UI for delimeted data import
 *
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0   
 */
 
-/**
-* importCSV.php
-* save, load mappings for csv import
-*
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2014 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.6.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-    * @param includeUgrps=1 will output user and group information in addition to definitions
-    * @param approvedDefsOnly=1 will only output Reserved and Approved definitions
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
+
 
 /**
 * import_session:  import_table, reccount, 
@@ -90,21 +81,33 @@ div.header{
     display:inline-block;
     font-weight: bold;
 }
+.truncate {
+  width: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.required{
+    font-weight: bold;
+}
 </style>
     </head>
 
 <body class="popup">
-USER_ID:<?=get_user_id()?>
 <?php
+//USER_ID:=get_user_id()
 $imp_session = null;
 $validationResults = null;
+
+//load session
 if(intval(@$_REQUEST["import_id"])>0){
    $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
 }
 $step = intval(@$_REQUEST["step"]);
 if(!$step) $step=0;
 
-if($step==1 && $imp_session==null){ //load session
+//first step - load file into import table
+if($step==1 && $imp_session==null){ 
         echo '<div id="div-progress" class="loading">Please wait, file is processing on server</div>';
         ob_flush();flush();
     
@@ -116,7 +119,7 @@ if($step==1 && $imp_session==null){ //load session
         $imp_session = postmode_file_selection();
 }
 
-//session is loaded - create full page
+//session is loaded - render second step page
 if(is_array($imp_session)){ 
 ?>
         <script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
@@ -179,10 +182,47 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 
 
     <div class="input-line">
-        <div class="header"><label for="sa_rectype">Select record type to import</label></div>
+        <div class="header"><label for="sa_rectype">Select record type</label></div>
         <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
     <div>
+        <div class="header"><label for="sa_rectype">Action mode</label></div><br/>
+        <div style="padding-left:30px;display: inline-block; width:180px">
+        <input type="radio" <?=@$_REQUEST['sa_mode']==1?"":"checked"?> name="sa_mode" id="sa_mode0" 
+                value="0" class="text" onchange="showUpdMode(event)" />&nbsp;
+        <label for="sa_type1">Search / match</label><br>
+        
+        <input type="radio" <?=@$_REQUEST['sa_mode']==1?"checked":""?> name="sa_mode" id="sa_mode1" 
+                value="1" class="text" onchange="showUpdMode(event)"/>&nbsp;
+        <label for="sa_type0">Insert / update records</label>
+        </div>
+        <div style="display: inline-block;">
+            <div class="help" style="font-size:0.8em;padding-bottom: 4px;">Select key fields and find record ID to unique identification of import record. Heurist database is not affected</div>
+            <div class="help" style="font-size:0.8em">Create/update records in Heurist database according to record ID field</div>
+        </div>
+    </div>
+    <div id="divUpdateMode" style="display:none;">
+        <div class="header"><label for="sa_rectype">Policy for fields in case Record Update</label></div><br/>
+        <div style="padding-left:30px;display: inline-block;">
+        <input type="radio" <?=@$_REQUEST['sa_upd']>0?"":"checked"?> name="sa_upd" id="sa_upd0" value="0" class="text" />&nbsp;
+        <label for="sa_upd0">Retain existing values and append new data as repeat values</label><br/>
+        
+        <input type="radio" <?=@$_REQUEST['sa_upd']==1?"checked":""?> name="sa_upd" id="sa_upd1" value="1" class="text" />&nbsp;
+        <label for="sa_upd1">Add new data only if field is empty (new data ignored for non-empty fields)</label><br/>
+        
+        <input type="radio" <?=@$_REQUEST['sa_upd']==2?"checked":""?> name="sa_upd" id="sa_upd2" value="2" class="text" />&nbsp;
+        <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
+        </div>
+        <div style="padding-left:30px;display: inline-block; vertical-align: top;">
+        <input type="radio" <?=@$_REQUEST['sa_upd2']>0?"":"checked"?> name="sa_upd2" id="sa_upd20" value="0" class="text" />&nbsp;
+        <label for="sa_upd20">Retain existing if no new data supplied for record</label><br/>
+        
+        <input type="radio" <?=@$_REQUEST['sa_upd2']==1?"checked":""?> name="sa_upd2" id="sa_upd21" value="1" class="text" />&nbsp;
+        <label for="sa_upd21">Delete existing if no new data supplied for record</label>
+        </div>
+    </div>
+<!--    
+    <div style="display:none;">
         <div class="header"><label for="sa_rectype">Match / create</label></div><br/>
         <div style="padding-left:30px;display: inline-block; width:180px">
         <input type="radio" <?=@$_REQUEST['sa_type']==1?"":"checked"?> name="sa_type" id="sa_type1" value="0" class="text" />&nbsp;
@@ -196,21 +236,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
             <div class="help" style="font-size:0.8em">Primary records = the main items representing by this table.<br>Do matching first before update to create record key columns</div>
         </div>
     </div>
-    <div>
-        <div class="header"><label for="sa_rectype">Update</label></div><br/>
-        <div style="padding-left:30px">
-        <input type="radio" <?=@$_REQUEST['sa_upd']>0?"":"checked"?> name="sa_upd" id="sa_upd0" value="0" class="text" />&nbsp;
-        <label for="sa_upd0">Update fields</label>
-        
-        <input type="radio" <?=@$_REQUEST['sa_upd']==1?"checked":""?> name="sa_upd" id="sa_upd1" value="1" class="text" />&nbsp;
-        <label for="sa_upd1">Add to existing values</label>
-        
-        <input type="radio" <?=@$_REQUEST['sa_upd']==2?"checked":""?> name="sa_upd" id="sa_upd2" value="2" class="text" />&nbsp;
-        <label for="sa_upd2">Replace existing values</label>
-        </div>
-    </div>
     
-    <!-- div>
+     div>
         <label for="sa_addmode0">Insert</label><input type="radio" checked="checked" name="sa_addmode" id="sa_addmode0" value="0" class="text" />
         <label for="sa_addmode1">Update</label><input type="radio" name="sa_addmode" id="sa_addmode1" value="1" class="text" />
     </div -->
@@ -221,7 +248,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 <b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b><br /><br />
 <table style="width:100%" cellspacing="0" cellpadding="2" class="tbmain">
 <thead>
-    <th>Inport<br/>value</th><th>Unique<br/>values</th><th>Column</th><th width="310">Mapping</th>
+    <th>Inport<br/>value</th><th>Unique<br/>values</th><th style="max-width:100px;">Column</th><th width="310">Mapping</th>
     <th width="30%">
         <a href="#" onclick="getValues(0)"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
         <a href="#" onclick="getValues(-1)"><img src="../../common/images/calendar-l-arrow.gif" /></a>
@@ -231,8 +258,9 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
     </th>
 </thead>
 <?php
-//table with list of columns and datatype selectors
-
+//
+// render mapping table with list of columns and datatype selectors
+//
 $sIndexes = "";
 $sRemain = "";
 $sProcessed = "";
@@ -249,11 +277,11 @@ for ($i = 0; $i < $len; $i++) {
         $checkbox = '<td>&nbsp;</td>'; //processed
     }else{
         $isIndex = (array_search ( "field_".$i , $imp_session['indexes'], true )!==false);
-        
-        $checkbox = '<td align="right"><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{hideFtSelect('.$i.');}"/></td>';
+        //hideFtSelect('.$i.');
+        $checkbox = '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{return false;}"/></span></td>';
     }
     
-    $s = '<tr>'.$checkbox.'<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td>'.$imp_session['columns'][$i].'</td>';
+    $s = '<tr>'.$checkbox.'<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
 
     if($isProcessed){
         
@@ -263,8 +291,8 @@ for ($i = 0; $i < $len; $i++) {
 
         $s = $s.'<td>'.$recTypeName.' '.$dt_Name.'  ('.$rt_dt[0].'.'.$rt_dt[1].')</td>';
     }else{ ;
-        $s = $s.'<td>&nbsp;<span style="min-width:302px;display:none">'
-               .'<select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px" '
+        $s = $s.'<td>&nbsp;<span style="min-width:302px;">'
+               .'<select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="min-width:300px" onchange="{showFtSelect('.$i.');}"'
                . ($isIndex?'class="indexes"':'').'></select></span></td>';
     }
     $s = $s.'<td id="impval'.$i.'"> </td></tr>';
@@ -298,19 +326,26 @@ if($sProcessed){
                         <div class="help" style="font-size: 0.8em;"><br></div>
                     </div>
 <?php
+//
+// render validation result box
+//
+
     $validationRes = @$imp_session['validation'];
     if($validationRes){
-        $err_cnt = count($validationRes['rec_error']);
-        
-        $show_err     = ($err_cnt>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
-        $show_matched = $validationRes['rec_to_update']>0?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
-        $show_new     = $validationRes['rec_to_add']>0?"<a href='#' onclick='showRecords(\"create\")'>show</a>" :"&nbsp;";
+        $cnt_error   = intval(@$validationRes['count_error']);
+        $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
+
+        $cnt_update  = intval(@$validationRes['count_update']);
+        $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
+
+        $cnt_insert  = intval(@$validationRes['count_insert']);
+        $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
 ?>                    
                     <div class="analized">
                         <table style="display: inline-block; border:none" border="0">
-                            <tr><td>Records matched:</td><td><?=$validationRes['rec_to_update']?></td><td><?=$show_matched?></td></tr>
-                            <tr><td>New records to create:</td><td><?=$validationRes['rec_to_add']?></td><td><?=$show_new?></td></tr>
-                            <tr><td>Rows with field errors:</td><td><?=$err_cnt?></td><td><?=$show_err?></td></tr>
+                            <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
+                            <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
+                            <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
                             <input type="button" value="Create records" onclick="doImport()" style="font-weight: bold;">
@@ -328,57 +363,59 @@ if($sProcessed){
                 </div>
         </form>    
 </div>
-<div id="main_error" style="display:none;">
-        <h4>RECORDS WITH FIELD ERRORS</h4>
-        <hr width="100%" />
-        <div>
-            Message: <?=$validationRes['err_message']?>
-        </div>
 <?php
-    if($validationRes){
-        ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
-        ///DEBUG print print_r(@$validationRes['rec_error'],true);
-        
-        $err_cnt = count($validationRes['rec_error']);
-        if($err_cnt>0){
-            print '<table class="tbmain">';
-            print "<thead><th>Line #</th>";
-            
-            foreach($validationRes['field_checked'] as $field_name) {
-                
-                $colname = @$imp_session['columns'][substr($field_name,6)];
-                
-                print "<th>".$colname."</th>";
-            }
-            print "</thead>";
-            foreach ($validationRes['rec_error'] as $row) {  
-
-                print "<tr>";
-                if(is_array($row)){
-                    foreach($row as $value) {     
-                        print "<td>".($value?$value:"&nbsp;")."</td>";
-                    }
-                }
-                print "</tr>";
-            }
-            print "</table>";
-        }
-    }    
+if($validationRes){
+    if($cnt_error>0){    
 ?>
-    <input type="button" value="Back" onClick="showRecords('mapping');">
-</div>
-<?php    
-}else{ //================================================================================
+    <div id="main_error" style="display:none;">
+            <h4>RECORDS WITH FIELD ERRORS</h4>
+            <hr width="100%" />
+            <div>
+                Message: <?=@$validationRes['err_message']?>
+            </div>
+<?php
+            renderRecords( 'error', $imp_session );
+            print "</div>";
+    }
+    if($cnt_insert>0){    
+?>
+    <div id="main_insert" style="display:none;">
+            <h4>RECORDS TO BE CREATED</h4>
+            <hr width="100%" />
+<?php
+            renderRecords( 'insert', $imp_session );
+            print "</div>";
+    }
+    if($cnt_update>0){    
+?>
+    <div id="main_update" style="display:none;">
+            <h4>RECORDS TO BE UPDATED</h4>
+            <hr width="100%" />
+<?php
+            renderRecords( 'update', $imp_session );
+            print "</div>";
+    }
+}
+
+
+// PAGE STEP 1 ================================================================================
+}else{ 
     if($imp_session!=null){
         echo "<p color='red'>ERROR: ".$imp_session."</p>";        
     }
 ?>
 <script type="text/javascript">
+//
+// submit form on new file upload
+//
 function doUpload(){
     $("#div-progress").show();
     $(document.forms[0]).hide();
     document.forms[0].submit();
 }
+//
+// submit form on session select
+//
 function doSelectSession(){
     $("#div-progress").html('Loading selected session');
     $("#div-progress").show();
@@ -422,6 +459,9 @@ function doSelectSession(){
 </html>
 <?php
 
+//
+// get file from _REQUEST and call import to db if everything is OK
+//
 function postmode_file_selection() {
 
 /*****DEBUG****/// error_log("postmode_file_selection");
@@ -466,10 +506,12 @@ function postmode_file_selection() {
     return $error;
 }
 
-//read header (1st line)
-//create temporary table import_datetime
-//load file into table
-//add record to import_log
+//
+// read header (1st line)
+// create temporary table import_datetime
+// load file into table
+// add record to import_log
+//
 function postmode_file_load_to_db($filename) {
 
     global $csv_delimiter,$csv_linebreak,$csv_enclosure,$mysqli;
