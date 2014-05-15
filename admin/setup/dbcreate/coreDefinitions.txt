@@ -9,7 +9,6 @@
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
  -- http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=H3CoreDefinitions
- -- 31/3/2014: IJ. Decided to use a more comprehensive core set based on H3ReferenceSet
 
 -- This file is used, through the buildCrosswalks function, to populate a blank Heurist
 -- database structure with a minimal set of essential record type, detail type etc. definitions
@@ -18,7 +17,7 @@
 -- OUTPUT FROM getDBStructureAsSQL.php STARTS HERE
 -- -----------------------------------------------------------------------------------------------------
 
--- Heurist Definitions Exchange File generated: 22 Apr 2014 @ 06:20
+-- Heurist Definitions Exchange File generated: 16 May 2014 @ 07:44
 -- Installation = http://heuristscholar.org/h3-ao/
 -- Database = H3CoreDefinitions
 -- Program Version: 3.1.6
@@ -564,11 +563,12 @@
 ('3','Notes','2','A simple record type for taking notes','[2-1]', '[1]','Notes','approved', '2','Notes','3', 'viewable','1','1','', '0','','','normal', '1','1','1'),
 ('4','Organisation','0','Organisations (companies, universities, granting bodies, museums, libraries etc.)','[2-2]: [2-1]', '[2]: [1]','Organisations','approved', '2','Organisation','4', 'viewable','1','1','', '0','','','normal', '1','1','1'),
 ('5','Digital media item','0','Digital media files - typically image, sound, video - uploaded to the database or external reference','[2-1]', '[1]','Digital media items','reserved', '2','Digital media file','5', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('6','Aggregation','0','A record which describes a static or dynamic collection of records and their filtering and layout, or acts as a root to which other records point, or both','[2-1]', '[1]','Aggregations','reserved', '2','Aggregation','6', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('6','Aggregation','0','A record which describes a static or dynamic collection of records and their filtering and layout, or acts as a root to which other records point, or both','[2-1]', '[1]','Aggregations','reserved', '2','Aggregation','6', 'viewable','1','4','', '0','','','normal', '0','1','1'),
 ('7','Blog post','0','Blog post used to construct blogs, the text of the post is stored in the WYSIWYG text field','[2-1]', '[1]','Blog posts','reserved', '2','Blog post','7', 'viewable','0','4','', '0','','','normal', '0','1','1'),
-('8','Interpretive annotation','0','Metadata about a date, spatial extent or other interpretation of information','[2-1] - by [2-15.recTitle] [2-10] transcribed by [2-14.recTitle]', '[1] - by [15.recTitle] [10] transcribed by [14.recTitle]','Interpretive annotations','reserved', '2','Interpretation','8', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('8','Interpretive annotation','0','Metadata about a date, spatial extent or other interpretation of information','[2-1] - by [2-15.recTitle] [2-10] transcribed by [2-14.recTitle]', '[1] - by [15.recTitle] [10] transcribed by [14.recTitle]','Interpretive annotations','reserved', '2','Interpretation','8', 'viewable','1','4','', '0','','','normal', '0','1','1'),
 ('9','Email','0','An email including content and metadata, often derived from an email forwarded or ccd to the database\'s linked IMAP server from a user\'s account','[2-1] from: [2-24] on: [2-9]', '[1] from: [24] on: [9]','Emails','reserved', '2','Email','9', 'viewable','0','4','', '0','','','normal', '0','1','1'),
-('10','Person','33','A standard record for a person, may be thinned down (eg. removal of modern day contact information) or expanded with additional information as required.','[2-1], [2-18] ([2-19.label]) ([2-10])', '[1], [18] ([10])','Persons','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '1','1','1'),
+('10','Person - detailed','33','A standard record for a person, may be thinned down (eg. removal of modern day contact information) or expanded with additional information as required.','[2-1], [2-18] ([2-19.label]) ([2-10])', '[1], [18] ([10])','Persons - detailed','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('11','Person - minimal','33','A standard record for a person with minimal information','[2-1], [2-18]', '[1], [18] ([10])','Persons - minimal','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '0','1','1'),
 >>EndData>>
 
  
@@ -778,6 +778,13 @@
 ('1712','5', '58','Attribution','Please rename to an appropriate heading within each record structure', '','004','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1713','10', '28','Birth place (mappable)','A geospatial object providing a mappable location for the record - can be used for any type of record with spatial location', 'Used to store standard geographical information. Can be a point, line or polygon. This detail can be thought of as an encapsulation of various sub details - e.g. latitude and longitude - which would otherwise need to be managed in separate details and therefore be more challenging to manage','012','0', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
 ('1714','10', '26','Birth place (country)','Country. The list is prepopulated, but can be extended, and includes 2 and 3 letter country codes', '','011','0', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
+('1715','11', '1','Family name','Family name of person', '','001','40', '','1','', 'required','viewable','reserved','open', '2','61', '1','1','1', '','', '','','1'),
+('1716','11', '3','Short description','Short description of the person eg. 100 words, for use in annotated lists/web pages', '','006','80', '','0','', 'optional','viewable','approved','open', '2','67', '1','0','0', '','', '','','1'),
+('1717','11', '10','Birth date','Date of Birth (year or year-month or year-month-day)', '','003','10', '','2','', 'optional','viewable','approved','open', '2','64', '1','0','1', '','', '','','1'),
+('1720','11', '18','Given name(s)','The given name or names of the person placed in their normal order', '','002','40', '','1','', 'recommended','viewable','reserved','open', '2','62', '1','0','0', '','', '','','1'),
+('1722','11', '20','Gender','Gender of the person', '','005','30', '','0','', 'optional','viewable','approved','open', '2','66', '1','0','0', '','', '','','1'),
+('1733','11', '69','Additional information','Please rename to an appropriate heading within each record structure', '','004','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1734','11', '70','Common information','Please rename to an appropriate heading within each record structure', '','000','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 >>EndData>>
 
  
@@ -1071,4 +1078,4 @@
 
  
 
-  
+ 
