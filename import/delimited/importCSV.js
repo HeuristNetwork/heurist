@@ -41,7 +41,11 @@ allowed.splice(allowed.indexOf("geo"),1);
 
 
 select_rectype.change(function (event){
-    var rectype = (event)?Number(event.target.value):0;
+    
+    var sel = event && event.target;
+    if(!sel) return;
+    
+    var rectype = Number(sel.value);
     var select_fieldtype = $('select[id^="sa_dt_"]');
     select_fieldtype.each(function() {
         
@@ -60,6 +64,28 @@ select_rectype.change(function (event){
         $(this).attr('checked', false);
         $(this).parent().hide();
     });
+    
+    //matching table
+    var select_fieldtype = $('select[id^="sa_keyfield_"]');
+    select_fieldtype.each(function() {
+        
+        var allowed_ft = allowed;
+        var topitems = [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}];
+        createRectypeDetailSelect(this, rectype, allowed_ft, topitems, false);
+    });
+    
+    //hide all checkboxes on rectype change
+    $('input[id^="cbsa_keyfield_"]').each(function(){
+        $(this).attr('checked', false);
+        $(this).parent().hide();
+    });
+    
+    //uncheck id field radiogroup
+    $("#rb_dt_new").attr('checked', true);
+    $('tr[class^="idfield_"]').hide();
+    $(".idfield_"+rectype).show();
+    $("#new_idfield").val(rectype?top.HEURIST.rectypes.names[rectype]+' ID':'');
+    
 });
 
 //Loads values for record from import table
@@ -69,6 +95,7 @@ getValues(0);
 if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     select_rectype.val(form_vals.sa_rectype).change();
     
+    //init inport form
     for (var key in form_vals){
         if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
             //$('#'+key).parent().show();
@@ -77,7 +104,29 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
             $('#cb'+key).parent().show();
         }
     }
+    
+    //init matching form
+    for (var key in form_vals){
+        if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
+            //$('#'+key).parent().show();
+            $('#'+key).val(form_vals[key]);
+            $('#cb'+key).attr('checked', true);
+            $('#cb'+key).parent().show();
+        }
+    }    
+    
+    if(form_vals[new_idfield]){
+        $("#new_idfield").val(form_vals["new_idfield"]);
+        //$("#rb_dt_new").attr('checked', form_vals["idfield"]=="field_new");
+    }
+    var rb = $('input[id^="rb_dt__"][value="'+form_vals["idfield"]+'"]');
+    if(rb.length>0){
+        rb.attr('checked', true);
+    }
+    
 }
+
+showUpdMode();
 
 }); //end init function
 
@@ -89,18 +138,24 @@ function update_counts(added, updated, total){
 }
 
 //
-// Start import
+// Start import OR records IDs assign
 //
-function doImport(){
+function doDatabaseUpdate(){
     $("#input_step").val(3);
     document.forms[0].submit();
 }
 
-function showUpdMode(event){
-    if(event.target.value==1){
-        $("#divUpdateMode").show();   
+//
+// switch modes
+//
+function showUpdMode(){
+    
+    if($("#sa_mode1").is(":checked")){
+        $(".importing").show();   
+        $(".matching").hide();   
     }else{
-        $("#divUpdateMode").hide();
+        $(".importing").hide();
+        $(".matching").show();   
     }
 }
 
@@ -110,6 +165,17 @@ function showUpdMode(event){
 function showFtSelect(ind){
     $sel = $('#sa_dt_'+ind);
     $ch = $('#cbsa_dt_'+ind);
+    if($sel.val()==''){
+        $ch.parent().hide();
+        $ch.attr('checked', false);
+    }else{
+        $ch.parent().show();
+        $ch.attr('checked', true);
+    }
+}
+function showFtSelect2(ind){
+    $sel = $('#sa_keyfield_'+ind);
+    $ch = $('#cbsa_keyfield_'+ind);
     if($sel.val()==''){
         $ch.parent().hide();
         $ch.attr('checked', false);
@@ -174,6 +240,8 @@ function getValues(dest){
                                 for(i=1; i<response.length;i++){
                                     if($("#impval"+(i-1)).length>0)
                                         $("#impval"+(i-1)).html(response[i]);    
+                                    if($("#impval_"+(i-1)).length>0)
+                                        $("#impval_"+(i-1)).html(response[i]);    
                                 }
                              }
                          }
@@ -184,20 +252,38 @@ function getValues(dest){
 //
 // onsubmit event listener - basic validation that at least one field is mapped
 //
-function verifyData()
+function verifySubmit()
 {
     var rectype = $("#sa_rectype").val();
     if(rectype>0){
+        
+        if( $("#sa_mode0").is(":checked")){ //matching
 
-        var select_fieldtype = $('select[id^="sa_dt_"][value!=""]');
-        if(select_fieldtype.length>0){
+            var cb_keyfields = $('input[id^="cbsa_keyfield_"]:checked');
+            if(cb_keyfields.length>0){
+                
+                var cb_idfield = $('input[id^="rb_dt_"]:checked');
+                if(cb_idfield.length>0){
+                    return true;
+                }else{
+                    alert("To search/match records you have to select ID field or define new one");
+                }
+
+            }else{
+                alert("To search/match records you have to select at least one key field in import data");
+            }
             
-            return true;
             
-        }else{
-            alert("Select at least one field type!");
+            
+        }else{ //importing
+
+            var select_fieldtype = $('select[id^="sa_dt_"][value!=""]');
+            if(select_fieldtype.length>0){
+                return true;
+            }else{
+                alert("You have to map import data to record's fields. Select at least one field type!");
+            }
         }
-
         
     }else{
         alert("Select record type!");

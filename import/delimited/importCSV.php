@@ -53,7 +53,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <script src="../../external/jquery/jquery.js"></script>
         <script src="../../applications/h4/js/utils.js"></script>
 <style type="text/css">
-table.tbmain th, table.tbmain td
+.tbmain th, .tbmain td
 {
 border: 0.5px solid gray;
 }
@@ -82,13 +82,16 @@ div.header{
     font-weight: bold;
 }
 .truncate {
-  width: 50px;
+  width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .required{
     font-weight: bold;
+}
+.help{
+    font-size:0.8em;
 }
 </style>
     </head>
@@ -136,20 +139,43 @@ if(is_array($imp_session)){
     
     if($step>1){
         $res = null;
-        if($step==2){  //verification
         
-            echo '<div id="div-progress" class="loading">Please wait, mapping validation in progress</div>';
-            ob_flush();flush();
-        
-            $res = validateImport($mysqli, $imp_session, $_REQUEST);
+        if($sa_mode==0){ //matching
             
-        }else if($step==3){  //create records - load to import data to database
+            if($step==2){  //find
+            
+                echo '<div id="div-progress" class="loading">Please wait, matching in progress</div>';
+                ob_flush();flush();
+            
+                $res = matchingSearch($mysqli, $imp_session, $_REQUEST);
+                
+            }else if($step==3){  //assign ids
+            
+                echo '<div id="div-progress2"></div>';
+                echo '<div id="div-progress" class="loading">Please wait, assign of records ids</div>';
+                ob_flush();flush();
+            
+                $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
+            }
+            
+        }else{//importing
         
-            echo '<div id="div-progress2"></div>';
-            echo '<div id="div-progress" class="loading">Please wait, records are creating/updating</div>';
-            ob_flush();flush();
+            if($step==2){  //verification
+            
+                echo '<div id="div-progress" class="loading">Please wait, mapping validation in progress</div>';
+                ob_flush();flush();
+            
+                $res = validateImport($mysqli, $imp_session, $_REQUEST);
+                
+            }else if($step==3){  //create records - load to import data to database
+            
+                echo '<div id="div-progress2"></div>';
+                echo '<div id="div-progress" class="loading">Please wait, records are creating/updating</div>';
+                ob_flush();flush();
+            
+                $res = doImport($mysqli, $imp_session, $_REQUEST);
+            }
         
-            $res = doImport($mysqli, $imp_session, $_REQUEST);
         }
         if(is_array($res)) {
             $imp_session = $res;
@@ -175,7 +201,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 <br/><br/><br/>
         </div>
 
-        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifyData()">
+        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="step" id="input_step" value="2">
                 <input type="hidden" name="import_id" value="<?=$imp_session["import_id"]?>">
@@ -189,19 +215,19 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <div class="header"><label for="sa_rectype">Action mode</label></div><br/>
         <div style="padding-left:30px;display: inline-block; width:180px">
         <input type="radio" <?=@$_REQUEST['sa_mode']==1?"":"checked"?> name="sa_mode" id="sa_mode0" 
-                value="0" class="text" onchange="showUpdMode(event)" />&nbsp;
-        <label for="sa_type1">Search / match</label><br>
+                value="0" class="text" onchange="showUpdMode()" />&nbsp;
+        <label for="sa_mode0">Search / match</label><br>
         
         <input type="radio" <?=@$_REQUEST['sa_mode']==1?"checked":""?> name="sa_mode" id="sa_mode1" 
-                value="1" class="text" onchange="showUpdMode(event)"/>&nbsp;
-        <label for="sa_type0">Insert / update records</label>
+                value="1" class="text" onchange="showUpdMode()"/>&nbsp;
+        <label for="sa_mode1">Insert / update records</label>
         </div>
         <div style="display: inline-block;">
-            <div class="help" style="font-size:0.8em;padding-bottom: 4px;">Select key fields and find record ID to unique identification of import record. Heurist database is not affected</div>
-            <div class="help" style="font-size:0.8em">Create/update records in Heurist database according to record ID field</div>
+            <div class="help" style="padding-bottom: 4px;">Select key fields and find record ID to unique identification of import record. Heurist database is not affected</div>
+            <div class="help">Create/update records in Heurist database according to record ID field</div>
         </div>
     </div>
-    <div id="divUpdateMode" style="display:none;">
+    <div class="importing">
         <div class="header"><label for="sa_rectype">Policy for fields in case Record Update</label></div><br/>
         <div style="padding-left:30px;display: inline-block;">
         <input type="radio" <?=@$_REQUEST['sa_upd']>0?"":"checked"?> name="sa_upd" id="sa_upd0" value="0" class="text" />&nbsp;
@@ -246,9 +272,63 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 
 <br />
 <b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b><br /><br />
-<table style="width:100%" cellspacing="0" cellpadding="2" class="tbmain">
+<div class="matching">
+<span class="help">Select one on more key to unique identification of record and matching with existing ones</span>
+<table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
 <thead>
-    <th>Inport<br/>value</th><th>Unique<br/>values</th><th style="max-width:100px;">Column</th><th width="310">Mapping</th>
+    <th>Key<br/>field</th><th>Unique<br/>values</th><th>Column</th><th>Mapping</th>
+    <th width="300px">
+        <a href="#" onclick="getValues(0)"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
+        <a href="#" onclick="getValues(-1)"><img src="../../common/images/calendar-l-arrow.gif" /></a>
+        Values
+        <a href="#" onclick="getValues(1)"><img src="../../common/images/calendar-r-arrow.gif" /></a>
+        <a href="#" onclick="getValues(recCount)"><img src="../../common/images/calendar-rr-arrow.gif" /></a>
+    </th>
+</thead>
+<?php
+//
+// render matching table 
+//
+for ($i = 0; $i < $len; $i++) {     
+    print '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'.$i.'" value="field_'.$i.'"/></span></td>';
+    print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
+    
+    print '<td><span style="min-width:302px;">'
+               .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="min-width:300px" onchange="{showFtSelect2('.$i.');}">'
+               . '</select></span></td>';    
+    print '<td id="impval_'.$i.'"> </td></tr>';
+      
+}
+
+?>
+</table>
+<h4>ID field</h4>
+<span class="help">Select the existing ID field (values will be overwritten) for selected rectype or define new ID field</span>
+<table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+<?php
+$ischecked = false;
+for ($i = 0; $i < $len; $i++) {     
+    
+   //'.(@$_REQUEST['idfield']=="field_".$i?"checked":"").' 
+   //($ischecked?"":"checked")
+    
+   $rectype = @$imp_session['indexes']["field_".$i];
+   if($rectype){
+       $ischecked = $ischecked || @$_REQUEST['idfield']=="field_".$i;
+       print '<tr class="idfield_'.$rectype.'">'
+                .'<td align="center"><input type="radio" name="idfield" id="rb_dt_'.$i.'" value="field_'.$i.'" /></td>'
+                .'<td class="truncate">'.$imp_session['columns'][$i].'</td></tr>';
+   }
+}
+?>
+    <tr><td align="center" width="40"><input type="radio" name="idfield" id="rb_dt_new" value="field_new" /></td>
+                <td><input name="new_idfield" id="new_idfield" type="text" size="100"/></td></tr>
+</table>
+</div>
+
+<table class="importing tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+<thead>
+    <th>Import<br/>value</th><th>Unique<br/>values</th><th style="max-width:100px;">Column</th><th width="310">Mapping</th>
     <th width="30%">
         <a href="#" onclick="getValues(0)"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
         <a href="#" onclick="getValues(-1)"><img src="../../common/images/calendar-l-arrow.gif" /></a>
@@ -277,8 +357,9 @@ for ($i = 0; $i < $len; $i++) {
         $checkbox = '<td>&nbsp;</td>'; //processed
     }else{
         $isIndex = (array_search ( "field_".$i , $imp_session['indexes'], true )!==false);
+        $checkbox = '<td align="right">&nbsp;<span style="display:none"><input type="checkbox" id="cbsa_dt_'.$i.'"/></span></td>';
         //hideFtSelect('.$i.');
-        $checkbox = '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'.$i.'" onclick="{return false;}"/></span></td>';
+        
     }
     
     $s = '<tr>'.$checkbox.'<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
@@ -322,8 +403,9 @@ if($sProcessed){
 <br/><br/>
                 <div style="vertical-align:middle;">
                     <div style="display:inline-block">  
-                        <input type="submit" value="Analyse data in buffer" style="font-weight: bold;">
-                        <div class="help" style="font-size: 0.8em;"><br></div>
+                        <span class="matching"><input type="submit" value="Start search/match" style="font-weight: bold;"></span>
+                        <span class="importing"><input type="submit" value="Analyse data in buffer" style="font-weight: bold;"></span>
+                        <div class="help"><br></div>
                     </div>
 <?php
 //
@@ -345,10 +427,14 @@ if($sProcessed){
                         <table style="display: inline-block; border:none" border="0">
                             <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
                             <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
+<?php        if($sa_mode==0){ ?>                            
+                            <tr><td>&nbsp;</td></tr>
+<?php        } else { ?>                            
                             <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
+<?php        }        ?>                            
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
-                            <input type="button" value="Create records" onclick="doImport()" style="font-weight: bold;">
+                            <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" onclick="doDatabaseUpdate()" style="font-weight: bold;">
                         </div>
                     </div>
 <?php
@@ -358,7 +444,7 @@ if($sProcessed){
 ?>                  
                     <div style="display:inline-block">  
                         <input type="button" value="Close" onClick="window.close();" style="margin-right: 5px;">
-                        <div class="help" style="font-size: 0.8em;">Unprocessed data is <br>retained in buffer</div>
+                        <div class="help">Unprocessed data is <br>retained in buffer</div>
                     </div>
                 </div>
         </form>    
@@ -594,12 +680,7 @@ function postmode_file_load_to_db($filename) {
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID
     
-    $import_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
-            array("ugr_id"=>get_user_id(), "imp_table"=>$import_table ,"imp_session"=>json_encode($session) ));    
-    
-    $session["import_id"] = $import_id;
-    
-    return $session;
+    return saveSession($mysqli, $session);
 }
 
 ?>

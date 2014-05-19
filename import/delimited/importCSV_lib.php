@@ -140,6 +140,222 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
     return $ret;
 }
+// matching functions ===================================
+
+/**
+* Finds record ids in heurist database by key fields
+* 
+* @param mixed $mysqli
+* @param mixed $imp_session
+* @param mixed $params
+*/
+function matchingSearch($mysqli, $imp_session, $params){
+    
+    //add result of validation to session 
+    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "err_message"=>null );  
+    $import_table = $imp_session['import_table'];
+    
+    //get rectype to import
+    $recordType = @$params['sa_rectype'];
+    
+    if(intval($recordType)<1){
+        return "record type not defined";
+    }
+    
+    //get fields that will be used in search
+    $sel_query = array();
+    $select_query_join_rec = " left join Records on rec_RecTypeID=".$recordType;
+    $select_query_join_det = "";
+    foreach ($params as $key => $field_type) {
+        if(strpos($key, "sa_keyfield_")===0 && $field_type){
+            //get index 
+            $index = substr($key,12);
+            $field_name = "field_".$index;
+        
+            array_push($sel_query, $field_name); 
+            
+            $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
+            $select_query_join_det = $select_query_join_det . 
+                " left join recDetails d".$index." on d".$index.".dtl_Value=".$field_type." and d".$index.".dtl_Value=".$field_name;
+        }            
+    }  
+    if(count($sel_query)<1){
+        return "no one key field is selected";
+    }
+        
+    //query to search record ids
+    $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query).", rec_ID from ".$import_table
+                    .$select_query_join_det.$select_query_join_rec;
+    
+
+//DEBUG error_log(">>>".$select_query);
+    array_push($sel_query, "rec_ID");
+    $imp_session['validation']['mapped_fields'] = $sel_query;        
+    //find records to update
+    $res = $mysqli->query($select_query . " where rec_ID is not null");
+    if($res){
+        $fres = $mysqli->query('select found_rows()');
+        $row = $fres->fetch_row(); 
+        $imp_session['validation']['count_update'] = $row[0];
+        if($row[0]>0){
+            $imp_session['validation']['recs_update'] = array();
+            $cnt = 0;
+            while ($row = $res->fetch_row()){
+                array_push($imp_session['validation']['recs_update'], $row);
+                $cnt++;
+                if($cnt>99) break;
+            }
+        }
+    }else{
+        return "Can not execute query to calculate number of records to be updated";
+    }
+    
+    //find records to insert
+    $res = $mysqli->query($select_query . " where rec_ID is null");
+//error_log(">>>>".$select_query. " where rec_ID is null");    
+    if($res){
+        $fres = $mysqli->query('select found_rows()');
+        $row = $fres->fetch_row(); 
+        $imp_session['validation']['count_insert'] = $row[0];
+        if($row[0]>0){
+            $imp_session['validation']['recs_insert'] = array();
+            $cnt = 0;
+            while ($row = $res->fetch_row()){
+                array_push($imp_session['validation']['recs_insert'], $row);
+                $cnt++;
+                if($cnt>99) break;
+            }
+        }
+    }else{
+        return "Can not execute query to calculate number of records to be inserted";
+    }
+    
+    
+    return $imp_session; 
+}
+
+/**
+* Assign record ids to field in import table
+* 
+* @param mixed $mysqli
+* @param mixed $imp_session
+* @param mixed $params
+*/
+function matchingAssign($mysqli, $imp_session, $params){
+    
+    $import_table = $imp_session['import_table'];
+    
+    //get rectype to import
+    $recordType = @$params['sa_rectype'];
+    
+    if(intval($recordType)<1){
+        return "record type not defined";
+    }
+    
+    $id_field = @$params['idfield'];
+    
+    if(!$id_field){
+        return "ID field not defined";
+    }
+    
+    if($id_field=="field_new"){ //add new field into import table
+        
+            $index = count($imp_session['columns']);
+            $id_field = "field_".$index;
+            array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
+            array_push($imp_session['uniqcnt'], 0);
+            
+            $imp_session["mapping"][$id_field] = $recordType.".id"; //$recTypeName."(id# $recordType) ID";
+            $imp_session['indexes'][$id_field] = $recordType;
+        
+            $altquery = "alter table ".$import_table." add column ".$id_field." int(10) ";
+            if (!$mysqli->query($altquery)) {
+                return "can not alter import session table, can not add new index field: " . $mysqli->error;
+            }    
+    }
+    
+    //get fields that will be used in search
+    $sel_query = array();
+    $select_query_join_rec = " left join Records on rec_RecTypeID=".$recordType;
+    $select_query_join_det = "";
+    foreach ($params as $key => $field_type) {
+        if(strpos($key, "sa_keyfield_")===0 && $field_type){
+            //get index 
+            $index = substr($key,12);
+            $field_name = "field_".$index;
+        
+            array_push($sel_query, $field_name); 
+            
+            $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
+            $select_query_join_det = $select_query_join_det . 
+                " left join recDetails d".$index." on d".$index.".dtl_Value=".$field_type." and d".$index.".dtl_Value=".$field_name;
+        }            
+    }  
+    if(count($sel_query)<1){
+        return "no one key field is selected";
+    }
+        
+    //query to search record ids
+   
+    //to update - assign existing rec_ID from heurist
+    
+    //SET SQL_SAFE_UPDATES=1; 
+    //matched records
+    $updquery = "update ".$import_table.$select_query_join_det.$select_query_join_rec." set ".$id_field."=rec_ID where rec_ID is not null and imp_id>0";
+    
+error_log("1>>>>".$updquery);
+    if(!$mysqli->query($updquery)){
+        return "can not update import table (set record id)";
+    }
+    
+    //new records   ".implode(",",$sel_query).",
+    $select_query = "select group_concat(imp_id) from ".$import_table
+                    . $select_query_join_det.$select_query_join_rec
+                    . " group by ". implode(",",$sel_query);
+    $res = $mysqli->query($select_query);
+    if($res){
+        $ind = -1;
+        while ($row = $res->fetch_row()){
+            $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".end($row).")";
+error_log("2>>>>".$updquery);            
+            if(!$mysqli->query($updquery)){
+                return "can not update import table: mark records for insert";
+            }
+            $ind--;
+        }    
+    }else{
+        return "can not perform query - find unmatched records";
+    }    
+    
+    //calculate distinct number of ids
+    $row = mysql__select_array2($mysqli, "select count(distinct ".$id_field.") from ".$import_table);
+    if(is_array($row)){
+
+            $index = intval(substr($id_field, 6));
+            $imp_session['uniqcnt'][$index] = $row[0];
+        
+            //save index field into import_sesssion
+            $imp_session = saveSession($mysqli, $imp_session);
+            if(!is_array($imp_session)){
+                return $imp_session;
+            }
+    }
+
+/*    
+    $updquery0 =  "SET @pos := -1";
+    $updquery1 = "update ".$import_table.$select_query_join_det.$select_query_join_rec." set ".$id_field."=( SELECT @pos := @pos - 1 ) where rec_ID is null and imp_id>0 group by ". implode(",",$sel_query);
+    
+error_log("2>>>>".$updquery1);
+    
+    $mysqli->query($updquery0);
+    if(!$mysqli->query($updquery1)){
+        return "can not update import table: mark records for insert";
+    }
+*/
+
+    return $imp_session;
+}
+
 
 // import functions =====================================
 
@@ -154,8 +370,6 @@ function validateImport($mysqli, $imp_session, $params){
     //add result of validation to session 
     $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "err_message"=>null );  
     
-    
-  
     //get rectype to import
     $recordType = @$params['sa_rectype'];
     $is_secondary = ($params['sa_type']==0);
@@ -458,14 +672,14 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
 function doImport($mysqli, $imp_session, $params){
     
     //rectype to import
+    $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
-    $is_secondary = ($params['sa_type']==0);
+    $is_secondary = ($params['sa_type']==0);   //@todo - NOTUSED ANYMORE
     
     if(intval($recordType)<1){
         return "record type not defined";
     }
     
-    $import_table = $imp_session['import_table'];
     $is_update = false;
     $rt_field = null;
     $recStruc = getRectypeStructures(array($recordType));
@@ -669,11 +883,27 @@ function doImport($mysqli, $imp_session, $params){
     }    
 
     //save mapping into import_sesssion
+    return saveSession($mysqli, $imp_session);
+}
+
+/**
+* update record in import session table
+* 
+* @param mixed $mysqli
+* @param mixed $imp_session
+*/
+function saveSession($mysqli, $imp_session){
+    
     $imp_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
-            array("imp_ID"=>$imp_session["import_id"], "imp_session"=>json_encode($imp_session) ));    
+            array("imp_ID"=>@$imp_session["import_id"], 
+                  "ugr_id"=>get_user_id(), 
+                  "imp_table"=>$imp_session["import_table"],
+                  "imp_session"=>json_encode($imp_session) ));    
+                  
     if(intval($imp_id)<1){
         return "can not save session";
     }else{
+        $imp_session["import_id"] = $imp_id;
         return $imp_session;
     }
 }
