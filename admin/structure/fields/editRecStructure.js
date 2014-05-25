@@ -225,7 +225,7 @@ function EditRecStructure() {
                 label: "Add",
                 sortable:false, width:10,
                 formatter: function(elLiner, oRecord, oColumn, oData) {
-                    elLiner.innerHTML = "<img src='../../../common/images/add-record-small.png' title='Click to add new field or section header' style='cursor:pointer;' "+
+                    elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' title='Click to add new field or section header' style='cursor:pointer;' "+
                     " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldMenu(event);}' >";
                 }
             },
@@ -667,7 +667,7 @@ function EditRecStructure() {
 
 								var sWarn;
 								if(context[rty_ID]){
-									sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilized in this record type title mask. You have to edit title mask in Essentials > Record types / fields\n Still wish to delete this field?";
+									sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
 								}else{
 									sWarn =  "Delete field # "+rst_ID+" '"+dty_name+"' from this record structure?";
 								}
@@ -1549,7 +1549,7 @@ function EditRecStructure() {
                         callback.call();
                     }
                 }else{
-                    confirm('Apparently you removed some field(s) that are in use in Title Mask. '+obj);
+                    alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
                     //show edit title mask
                     Hul.popupURL(top, top.HEURIST.basePath +
                         "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
@@ -1932,7 +1932,7 @@ function EditRecStructure() {
                 _checkForTitleMask(function(){ window.close(null); });
 		 		
 			}else{
-				alert("You should normally have at least one required field, often a name or title field");
+				alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
 			}
 		},
 
