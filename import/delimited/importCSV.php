@@ -53,9 +53,24 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <script src="../../external/jquery/jquery.js"></script>
         <script src="../../applications/h4/js/utils.js"></script>
 <style type="text/css">
-.tbmain th, .tbmain td
+.tbmain th, .subh
 {
-border: 0.5px solid gray;
+    border-left: 0.5px solid gray;
+    border-bottom: 0.5px solid gray;
+}
+.subh
+{
+    border-top: 0.5px solid gray;
+}
+.tbmain td
+{
+    border-left: 0.5px solid gray;
+}
+.tbmain
+{
+    border-top: 0.5px solid gray;
+    border-right: 0.5px solid gray;
+    border-bottom: 0.5px solid gray;
 }
 div.loading {
     width:90%;
@@ -192,7 +207,7 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
 */
 ?>
 <div id="main_mapping">
-        <h4>IMPORT DATA Step 2</h4>
+        <h4>IMPORT DATA Step 2 <font color="red">Work in Progress</font></h4>
         <hr width="100%" />
         <div class="help">
 If the spreadsheet data is complex, this function will allow you to progressively import columns which identify subsidiary entities (record types) such as place, organisation, collection, series, artist etc. The first step is to match key fields and create new records from unmatched rows. This will create a new column ending in ID. This can be used as the key field to import additional columns. Once all subsidiary entities have been matched and imported, you can import the primary entity type representing by the table.
@@ -304,7 +319,7 @@ for ($i = 0; $i < $len; $i++) {
 </table>
 <h4>ID field</h4>
 <span class="help">Select the existing ID field (values will be overwritten) for selected rectype or define new ID field</span>
-<table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+<table style="width:100%" cellspacing="0" cellpadding="2">
 <?php
 $ischecked = false;
 for ($i = 0; $i < $len; $i++) {     
@@ -389,13 +404,13 @@ for ($i = 0; $i < $len; $i++) {
     }
 }//for
 if($sIndexes){
-    print '<tr><td colspan="5"><b>Record IDs</b></td></tr>'.$sIndexes;
+    print '<tr><td class="subh" colspan="5"><b>Record IDs</b></td></tr>'.$sIndexes;
 }
 if($sRemain){
-    print '<tr><td colspan="5"><b>Remaining Data</b></td></tr>'.$sRemain;
+    print '<tr><td class="subh" colspan="5"><b>Remaining Data</b></td></tr>'.$sRemain;
 }
 if($sProcessed){
-    print '<tr><td colspan="5"><b>Already imported</b></td></tr>'.$sProcessed;
+    print '<tr><td class="subh" colspan="5"><b>Already imported</b></td></tr>'.$sProcessed;
 }
     
 ?>
@@ -513,7 +528,7 @@ function doSelectSession(){
                 Please wait, file is uploading (time required will depend on your network connection speed)
         </div>
 
-        <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1</h4>
+        <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1 <font color="red">Work in Progress</font></h4>
         <hr width="100%" />
         
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
@@ -585,7 +600,7 @@ function postmode_file_selection() {
         }
 
         if (!$error) {    // move on to the next stage!
-            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name']);    
+            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name']);    
         }
     }
 
@@ -598,7 +613,7 @@ function postmode_file_selection() {
 // load file into table
 // add record to import_log
 //
-function postmode_file_load_to_db($filename) {
+function postmode_file_load_to_db($filename, $original) {
 
     global $csv_delimiter,$csv_linebreak,$csv_enclosure,$mysqli;
 
@@ -675,6 +690,7 @@ function postmode_file_load_to_db($filename) {
     //add record to import_log
     $session = array("reccount"=>$reccount,
                      "import_table"=>$import_table,
+                     "import_name"=>$original."  ".date(),
                      "columns"=>$fields,   //names of columns in file header 
                      "uniqcnt"=>$uniqcnt,   //count of uniq values per column  
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  

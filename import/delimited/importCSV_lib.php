@@ -897,7 +897,7 @@ function saveSession($mysqli, $imp_session){
     $imp_id = mysql__insertupdate($mysqli, "import_sessions", "imp", 
             array("imp_ID"=>@$imp_session["import_id"], 
                   "ugr_id"=>get_user_id(), 
-                  "imp_table"=>$imp_session["import_table"],
+                  "imp_table"=>$imp_session["import_name"],
                   "imp_session"=>json_encode($imp_session) ));    
                   
     if(intval($imp_id)<1){
@@ -938,11 +938,11 @@ function get_import_session($mysqli, $import_id){
     if($import_id && is_numeric($import_id)){
         
         $res = mysql__select_array2($mysqli, 
-                "select imp_session, imp_table from import_sessions where imp_id=".$import_id);
+                "select imp_session from import_sessions where imp_id=".$import_id);
         
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
-        $session["import_table"] = $res[1];
+        //$session["import_table"] = $res[1];
     
         return $session;    
     }else{

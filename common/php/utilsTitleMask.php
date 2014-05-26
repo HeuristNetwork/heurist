@@ -17,9 +17,11 @@
 /**
 * utilsTitleMask.php
 * Three important functions in this file:
+* 
 *   check_title_mask($mask, $rt) => returns an error string if there is a fault in the given mask for the given reference type
-*   fill_title_mask($mask, $rec_id, $rt) => returns the filled-in title mask for this bibliographic entry
+*   fill_title_mask($mask, $rec_id, $rt) => returns the filled-in title mask for this record entry
 *   titlemask_make($mask, $rt, $mode, $rec_id=null) => converts titlemask to coded, humanreadable or fill mask with values
+* 
 * Various other utility functions starting with _titlemask__ may be ignored and are unlikely to invade your namespaces.
 * 
 * Note that title masks have been updated (Artem Osmakov late 2013) to remove the awkward storage of two versions - 'canonical' and human readable. 
@@ -91,7 +93,7 @@ function fill_title_mask($mask, $rec_id, $rt=null){
 * @param mixed $rec_id
 */
 function titlemask_value($mask, $rec_id) {
-   $rec_value = _titlemask__get_record_value($rec_id);
+   $rec_value = _titlemask__get_record_value($rec_id, true);
    if($rec_value){
         $rt = $rec_value['rec_RecTypeID'];
         return titlemask_make($mask, $rt, 0, $rec_id, _ERR_REP_WARN);
@@ -102,26 +104,33 @@ function titlemask_value($mask, $rec_id) {
 
 /*
 * Converts titlemask to coded, human readable or fill mask with values
-* In case of invalid titlemask it returns either general warning, errormessage or empty string (see $rep_mode)
+* In case of invalid titlemask it returns either general warning, error message or empty string (see $rep_mode)
 *
 * @param mixed $mask - titlemask
 * @param mixed $rt - record type
-* @param mixed $mode - 0 value, 1 coded, 2 - human readable
+* @param mixed $mode - 0 value, 1 coded, 2 - human readable 
 * @param mixed $rec_id - record id for value mode
-* @param mixed $rep_mode
+* @param mixed $rep_mode - output in case failure: 0 - general message(_ERR_REP_WARN), 1- detailed message, 2 - empty string (_ERR_REP_SILENT)
 * @return string
 */
 function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN) {
 
+    if($rec_id){
+        _titlemask__get_record_value($rec_id, true); //keep recvalue in static   
+    }
+    
     if (!$mask) {
-        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined":"";
+        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined":_titlemask__get_forempty($rec_id, $rt);
     }
 
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
         return $mask;    // nothing to do -- no substitutions
 
     $replacements = array();
-    for ($i=0; $i < count($matches[1]); ++$i) {
+    $len = count($matches[1]);
+    $fields_err = 0;
+    $fields_blank = 0;
+    for ($i=0; $i < $len; ++$i) {
         /* $matches[3][$i] contains the field name as supplied (the string that we look up),
          * $matches[2][$i] contains the field plus surrounding whitespace and containing brackets
          *        (this is what we replace if there is a substitution)
@@ -129,7 +138,7 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
          *        (this is what we replace with an empty string if there is no substitution value available)
          */
          
-         if(!trim($matches[3][$i])) continue; //empty []
+        if(!trim($matches[3][$i])) continue; //empty []
 
         $value = _titlemask__fill_field($matches[3][$i], $rt, $mode, $rec_id);
         
@@ -140,16 +149,18 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             }else if($rep_mode==_ERR_REP_MSG){
                 return $value;
             }else{
-                return "";
+                $fields_err++; //return "";
             }
-        }else if ($value){
+        }else if (null==$value || trim($value)==""){
+            $replacements[$matches[1][$i]] = "";
+            $fields_blank++;
+            
+        }else{
             if($mode==0){ //value
                 $replacements[$matches[2][$i]] = $value;
-            }else{ //coded
+            }else{ //coded or human readable
                 $replacements[$matches[2][$i]] = "[$value]";
             }
-        }else{
-            $replacements[$matches[1][$i]] = "";
         }
     }
 
@@ -157,10 +168,16 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
     }
-
+    
     $title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
 
-    if($mode==0){
+
+    if($mode==0){  //fill the mask with values
+    
+        if($rep_mode==_ERR_REP_SILENT && $fields_blank==$len && $rec_id){ //If all the title mask fields are blank
+            $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
+        }
+    
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
 
@@ -177,8 +194,11 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
 
-        if($title==""){
-            if($rep_mode==_ERR_REP_MSG){
+        if($title=="" || $fields_err==$len){
+            
+            if($rep_mode==_ERR_REP_SILENT){
+                $title = _titlemask__get_forempty($rec_id);
+            }else if($rep_mode==_ERR_REP_MSG){
                 return array(_EMPTY_MSG);
             }else{
                 return _EMPTY_MSG;
@@ -190,6 +210,36 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
 }
 
 //-------------- inner functions -----------------
+
+/**
+* If the title mask is blank or contains no valid fields, build the title using the values of the first three 
+* data fields (excluding memo fields) truncated to 40 characters if longer, separated with pipe symbols
+*/
+function _titlemask__get_forempty($rec_id, $rt){
+    
+    $rdr = _titlemask__get_rec_detail_types($rt);
+    //$rec_values = _titlemask__get_record_value($rec_id);
+    
+    $allowed = array("freetext", "enum", "float", "date", "relmarker", "integer", "year", "boolean");
+    $cnt = 0;
+    $title = array();
+    foreach($rdr as $dt_id => $detail){
+            if( is_numeric($dt_id) && in_array($detail['dty_Type'], $allowed) ){
+                 $val = _titlemask__get_field_value($dt_id, $rt, 0, $rec_id);                
+                 $val = trim(substr($val,0,40));
+                 if($val){
+                    array_push($title, $val);
+                    $cnt++;
+                    if($cnt>2) break;
+                 }
+            } 
+    }
+    $title = implode("|", $title);
+    if(!$title){
+        $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
+    }
+    return $title;
+}
 
 
 /*
@@ -249,7 +299,8 @@ function _titlemask__get_rec_detail_types($rt) {
             .' dty_OriginatingDBID, dty_IDInOriginatingDB, dty_ID '
             .' from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID '
             .' where rst_RequirementType in ("required", "recommended", "optional") '
-            .' and rst_RecTypeID='.$rt;
+            .' and rst_RecTypeID='.$rt
+            .' order by rst_DisplayOrder';
 
         $res = mysql_query($query);
         $rdr[$rt] = array();
@@ -274,6 +325,7 @@ function _titlemask__get_rec_detail_types($rt) {
         }
     }
     return $rdr[$rt];
+
 }
 
 /*
@@ -281,14 +333,14 @@ function _titlemask__get_rec_detail_types($rt) {
 *
 * @param mixed $rec_id
 */
-function _titlemask__get_record_value($rec_id) {
-/* it leads to memory exhaustion
+function _titlemask__get_record_value($rec_id, $reset=false) {
+/* it leads to memory exhaustion  */  
     static $records;
 
-    if (! $records) {
+    if ($reset || !$records) {
         $records = array();
     }
-*/    
+    
     $records = array();
 
    if(!@$records[$rec_id]){
@@ -341,6 +393,7 @@ function _titlemask__get_enum_value($enum_id, $enum_param_name)
 
     return $ret;
 }
+
 
 /*
 * Returns value for given detail type
@@ -422,8 +475,8 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
 * returns  dty_ConceptCode, dty_Type or original name (not lowercased)
 *
 * @param mixed $rt - record type
-* @param mixed $fieldname  - search value: name of attribute(field) of detail type: dty_ID, rst_DisplayName, dty_ConceptCode
-* @param mixed $field - result filed
+* @param mixed $search_fieldname  - search value: name of attribute(field) of detail type: dty_ID, rst_DisplayName, dty_ConceptCode
+* @param mixed $result_fieldname - result filed
 */
 function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldname='dty_ConceptCode'){
 
@@ -446,7 +499,7 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldna
 }
 
 /*
-* replace title masl tag to value, coded (concept codes) or textual representation
+* replace title mask tag to value, coded (concept codes) or textual representation
 *
 * @param mixed $field_name - mask tag
 * @param mixed $rt - record type
