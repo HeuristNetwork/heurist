@@ -55,7 +55,8 @@ function EditRecStructure() {
 	_rty_Status,
 	myDTDrags = {},
     _fieldMenu = null,
-    db;
+    db,
+    warningPopupID = null;
 
 
 	/**
@@ -1549,8 +1550,27 @@ function EditRecStructure() {
                         callback.call();
                     }
                 }else{
-                    alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
-                    //show edit title mask
+                    //alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
+                    var ele = document.getElementById("dlgWrongTitleMask");
+                    
+                    warningPopupID = Hul.popupTinyElement(window, ele,
+                                { "no-titlebar": false, "no-close": false, width: 320, height:100 });
+                    
+                    
+                }
+
+            }, squery);
+    }    
+    
+    //show edit title mask
+    function _doEditTitleMask(){
+        top.HEURIST.util.closePopupLast();
+        //top.HEURIST.util.closePopup(warningPopupID);
+        warningPopupID = null;        
+        //top.HEURIST.util.closePopupAll();
+        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
+        var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+       
                     Hul.popupURL(top, top.HEURIST.basePath +
                         "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
                         {
@@ -1559,24 +1579,10 @@ function EditRecStructure() {
                             height: 800,
                             width: 800,
                             callback: function(newvalue) {
-                                if(newvalue!=""){
-                                    typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
-                                    
-                                    var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
-                                                defs:{rty_ID:[{common:[newvalue],dtFields:[]}]}}};
-                                    var str = JSON.stringify(oRectype);
-                                    
-                                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                                    var callback = null;// updateResult;
-                                    var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
-                                    Hul.getJsonData(baseurl, callback, params);                                
-                                }
+
                             }
                     });
-                }
-
-            }, squery);
-    }    
+    }
     
     var onMenuClick = function (eventName, eventArgs, subscriptionArg){
             var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
@@ -1924,6 +1930,16 @@ function EditRecStructure() {
         
         onAddFieldMenu: function(e){
            _addFieldMenu(e);
+        },
+        
+        doEditTitleMask: function(){
+            _doEditTitleMask();
+        },
+        
+        closeWarningPopup: function(){
+            top.HEURIST.util.closePopupLast();
+            //top.HEURIST.util.closePopup(warningPopupID);
+            warningPopupID = null;        
         },
 
 		closeWin:function(){

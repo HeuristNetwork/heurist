@@ -402,10 +402,11 @@ var updateResult = function(context) {
             }
 
             context.changeTitleMask = false;
-            if(rectypeID>0 &&
+            /* art 2014-05-26 - now it updates in editRectypeTitle
+            if(rectypeID>0 &
                 document.getElementById("rty_TitleMask").value !== _keepTitleMask){
                 context.changeTitleMask = true;
-            }
+            }*/
 
             rectypeID = Math.abs(rectypeID);
 

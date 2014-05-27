@@ -120,7 +120,7 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
     }
     
     if (!$mask) {
-        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined":_titlemask__get_forempty($rec_id, $rt);
+        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?_titlemask__get_forempty($rec_id, $rt):"");
     }
 
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
@@ -149,6 +149,7 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
             }else if($rep_mode==_ERR_REP_MSG){
                 return $value;
             }else{
+                $replacements[$matches[1][$i]] = "";
                 $fields_err++; //return "";
             }
         }else if (null==$value || trim($value)==""){
@@ -165,6 +166,9 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
     }
 
     if($mode==0){
+        if($fields_err==$len){
+            return _titlemask__get_forempty($rec_id, $rt);  
+        }
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
     }
@@ -174,7 +178,9 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
 
     if($mode==0){  //fill the mask with values
     
-        if($rep_mode==_ERR_REP_SILENT && $fields_blank==$len && $rec_id){ //If all the title mask fields are blank
+//error_log("111>>> ".$rep_mode);
+    
+        if($fields_blank==$len && $rec_id){ //If all the title mask fields are blank
             $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
         }
     
@@ -194,10 +200,10 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
 
-        if($title=="" || $fields_err==$len){
+        if($title==""){
             
             if($rep_mode==_ERR_REP_SILENT){
-                $title = _titlemask__get_forempty($rec_id);
+                $title = _titlemask__get_forempty($rec_id, $rt);
             }else if($rep_mode==_ERR_REP_MSG){
                 return array(_EMPTY_MSG);
             }else{

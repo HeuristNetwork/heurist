@@ -1023,6 +1023,7 @@ function RectypeManager() {
         });
     }
 
+    //art 2014-05-26 - NOT USED ANYMORE now it updates in editRectypeTitle
     function _updateTitleMask(rty_ID){
         var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
 

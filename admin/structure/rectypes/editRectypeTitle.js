@@ -44,7 +44,8 @@ function EditRectypeTitle() {
 
     var _className = "EditRectypeTitle",
     _rectypeID,
-    _varsTree; //treeview object
+    _varsTree, //treeview object
+    _db;
 
     /**
      * Initialization of input form
@@ -70,12 +71,12 @@ function EditRectypeTitle() {
             return;
         }else{
 
-            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+            _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
             //find variables for given rectypeID and create variable tree
             var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
-            "&ver=1&w=all&stype=&db="+db  + "&q=type:" + _rectypeID; //"&q=id:146433";
+            "&ver=1&w=all&stype=&db="+_db  + "&q=type:" + _rectypeID; //"&q=id:146433";
             top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
         }
     }//end _init
@@ -462,11 +463,9 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         var rec_type = top.HEURIST.parameters.rectypeID;
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
         var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
+        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
@@ -475,7 +474,7 @@ function EditRectypeTitle() {
                     if (sel.selectedIndex>0){
 
                         var rec_id = sel.value;
-                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+encodeURIComponent(mask)+"&db="+db;
+                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+encodeURIComponent(mask)+"&db="+_db;
                         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                                 var obj2 = xhr.responseText;
                                 document.getElementById('testResult').innerHTML = obj2;
@@ -491,31 +490,80 @@ function EditRectypeTitle() {
     }
 
     /**
-     *
+     * First step: check title mask
      */
-    function _doCheck(callback)
+    function _doSave_Step1_Verification()
     {
         var mask = document.getElementById('rty_TitleMask').value;
-        var rec_type = top.HEURIST.parameters.rectypeID;
-
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        //var rec_type = top.HEURIST.parameters.rectypeID;
 
         var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check=1";
+        var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-                if(obj===""){
-                    if(callback){
-                        callback.call();
-                    }
+               var obj = xhr.responseText;
+               if(obj===""){
+                    _doSave_Step2_SaveRectype();
                }else{
                     alert(obj);
-                }
+               }
 
             }, squery);
     }
+    /**
+    * Second step - update record type definition
+    */
+    function _doSave_Step2_SaveRectype(){
+                    
+            var newvalue = document.getElementById('rty_TitleMask').value;
+            if(newvalue != top.HEURIST.parameters.mask){
+                
+                var typedef = top.HEURIST.rectypes.typedefs[_rectypeID];
+                
+                typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
+                
+                var _defs = {};
+                _defs[_rectypeID] = [{common:[newvalue],dtFields:[]}];
+                var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
+                            defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
+                var str = JSON.stringify(oRectype);
+                
+                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var callback = _updateTitleMask;// updateResult;
+                var params = "method=saveRT&db="+_db+"&data=" + encodeURIComponent(str);
+                Hul.sendRequest(baseurl, function(xhr) {
+                    _updateTitleMask();
+                    /*var obj = xhr.responseText;
+                    if(obj===""){
+                        _updateTitleMask();
+                    }else{
+                        alert(obj);
+                    }*/
+                }, params);                                
+            }else{
+                window.close(newvalue);
+            }                    
+            
+    }
+    /**
+    * Third step - update records - change title
+    */
+    function _updateTitleMask(){
+        var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
+
+        Hul.popupURL(top, URL, {
+                "close-on-blur": false,
+                "no-resize": true,
+                height: 400,
+                width: 400,
+                callback: function(context) {
+                }
+        });
+        
+        var edMask = document.getElementById('rty_TitleMask');
+        window.close(edMask.value);
+    }
+    
 
     /**
     * Artem: do not remove this - it is used for debug
@@ -611,8 +659,8 @@ function EditRectypeTitle() {
         doTest:function(){
             _doTest();
         },
-        doCheck:function(callback){
-            _doCheck(callback);
+        doSave:function(){
+            _doSave_Step1_Verification();
         },
         doInsert:function(){
             _doInsert();
