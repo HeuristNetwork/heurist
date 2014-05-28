@@ -4866,6 +4866,7 @@ top.HEURIST.search = {
 			demark;
 		for (var i=0; i < autoPopups.length; ++i) {
 			autoPopups[i].onclick = top.HEURIST.search.autoPopupLink;
+            if(!autoPopups[i].href) continue;
 			demark = autoPopups[i].href.search(/\?/);
 			if (demark === -1) {
 				autoPopups[i].href += "?db=" + (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");

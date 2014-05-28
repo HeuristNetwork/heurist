@@ -216,12 +216,15 @@
 							<li><div class="separator">PROFILE</div></li>
 
 							<li><a href="../admin/profile/editPreferences.html" name="auto-popup"
+                                onClick="{return false;}" 
 								title="Display preferences">Preferences</a></li>
 
 							<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" class="portrait" name="auto-popup"
+                                onClick="{return false;}" 
 								title="Delete, combine, rename your personal tags">Manage tags</a></li>
 
 							<li><a href="../admin/profile/manageReminders.php" name="auto-popup"
+                                    onClick="{return false;}" 
 									title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 
 							<li><a href="../export/backup/exportMyDataPopup.php" name="auto-popup" class="small"
@@ -230,9 +233,11 @@
 							<li><div class="separator">ACCESS</div></li>
 
 							<li><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
+                                onClick="{return false;}" 
 								title="List of groups you are member of">My User Groups</a></li>
 
 							<li style="padding-bottom: 10px"><a href="../admin/ugrps/editUser.html" name="auto-popup"
+                                onClick="{return false;}" 
 								title="User personal information">My User Info</a></li>
 
 							<!--
@@ -253,6 +258,7 @@
 							<li><div class="separator">DATABASE</div></li>
 
 							<li><a href="../common/connect/getListOfDatabases.php?popup=1" name="auto-popup" class="portrait"
+                                onClick="{return false;}" 
 								title="Navigate to and login to another Heurist database">
 								Open (new window)</a></li>
 
@@ -265,47 +271,52 @@
 							<li><div class="separator">IMPORT</div></li>
                              
                             <li class="admin-only"><a href="../import/utilities/manageFilesUpload.php" class="large"
-                                onClick="this.href = top.HEURIST.baseURL +'import/utilities/manageFilesUpload.php?db=' + database;" target="_blank"
+                                onClick="{return false;}" target="_blank"
                                 title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uloaded files"
                                 name="auto-popup">Upload data files WIP</a></li>
                             
                             <li><a href="../import/utilities/convertTagsToCSV.php" class="large"
-                                onClick="this.href = top.HEURIST.baseURL +'import/utilities/convertTagsToCSV.php?db=' + database;" target="_blank"
+                                onClick="{return false;}" target="_blank"
                                 title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values" 
                                 name="auto-popup">Tag-value to CSV</a></li>
 
                             <li class="admin-only"><a href="../import/delimited/importCSV.php" class="fixed"
-                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/importCSV.php?db=' + database;" target="_blank"
+                                onClick="{return false;}" target="_blank"
                                 title="Import data from delimited text file. Supports matching, record creation, record update." name="auto-popup">
                                 Delimited with match</a></li>                                
                                 
 							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
-								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
+								onClick="{return false;}"
 								title="Import data from delimited text for one record type at a time" target="_blank">
 								CSV add (old)</a></li>
                                 
 							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" class="large"
-								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
+								onClick="{return false;}" target="_blank"
 								title="Update or add fields in existing records from delimited text" name="auto-popup">
 								CSV update (old)</a></li>
 
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup"
+                                onClick="{return false;}" 
 								title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimtied files)">
 								KML</a></li>
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
+                                onClick="{return false;}" 
 								title="Import bibliographic exchange format files">
 								Bibliography</a></li>
                             <li><a href="../import/biblio/syncZotero.php" name="auto-popup"  class="seperator"
+                                onClick="{return false;}" 
                                 title="Sync Zotero">
                                 Sync Zotero</a></li>
 							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php" class="large"
-								onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
+                                onClick="{return false;}" target="_blank"
 								title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
 								Files in situ</a></li>
 							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup"
+                                onClick="{return false;}" 
 								title="Harvest email from a designated IMAP email server (set in configuration)">
 								Email</a></li>
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
+                                onClick="{return false;}" 
 								title="Import web links from a browser bookmarks file or an html web page file">
 								Hyperlinks</a></li>
 
