@@ -31,7 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
@@ -113,7 +112,7 @@ Click the database icon on the left to view available record types in that datab
 				
                 $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
                 
-                error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
+//DEBUG error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
                 
 				$data = loadRemoteURLContent($reg_url, true); //without proxy
 

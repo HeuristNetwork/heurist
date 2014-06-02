@@ -29,15 +29,17 @@
 $(function() {
     
 $("#div-progress").hide();
-    
+
 var select_rectype = $("#sa_rectype");
-createRectypeSelect( select_rectype.get(0), null, 'Select record type' );
+createRectypeSelect( select_rectype.get(0), null, 'select...' );
 
 var allowed = Object.keys(top.HEURIST.detailTypes.lookups);
 allowed.splice(allowed.indexOf("separator"),1);
 allowed.splice(allowed.indexOf("relmarker"),1);
 allowed.splice(allowed.indexOf("file"),1);
 allowed.splice(allowed.indexOf("geo"),1);
+//
+document.title = "Import Records from "+currentSessionName;
 
 
 select_rectype.change(function (event){
@@ -46,11 +48,12 @@ select_rectype.change(function (event){
     if(!sel) return;
     
     var rectype = Number(sel.value);
+    //fiel detailtypes selects for import
     var select_fieldtype = $('select[id^="sa_dt_"]');
     select_fieldtype.each(function() {
         
         var allowed_ft = allowed;
-        var topitems = [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}];
+        var topitems = [{key:'',title:'...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
         if($(this).hasClass('indexes')){
             allowed_ft = ["resource"];
             topitems = [{key:'',title:'...'}];
@@ -59,32 +62,73 @@ select_rectype.change(function (event){
         createRectypeDetailSelect(this, rectype, allowed_ft, topitems, false);
     });
     
-    //hide all checkboxes on rectype change
-    $('input[id^="cbsa_dt_"]').each(function(){
-        $(this).attr('checked', false);
-        $(this).parent().hide();
-    });
-    
-    //matching table
+    //fill detailtype selects for matching table
     var select_fieldtype = $('select[id^="sa_keyfield_"]');
     select_fieldtype.each(function() {
         
         var allowed_ft = allowed;
-        var topitems = [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'notes',title:'Record Notes'}];
+        var topitems = [{key:'',title:'...'},{key:'id',title:'Record ID'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
         createRectypeDetailSelect(this, rectype, allowed_ft, topitems, false);
     });
     
-    //hide all checkboxes on rectype change
-    $('input[id^="cbsa_keyfield_"]').each(function(){
-        $(this).attr('checked', false);
+    //uncheck and enable all checkboxes on rectype change
+    $('input[id^="cbsa_dt_"]').attr('checked', false); //false);
+    $('input[id^="cbsa_dt_"]').attr('disabled',false); 
+    
+    $('input[id^="cbsa_keyfield_"]').attr('checked', false);
+    $('input[id^="cbsa_dt_"]').parent().hide();
+    $('input[id^="cbsa_keyfield_"]').parent().hide();
+    
+    //hide all selects
+    $('select[id^="sa_keyfield_"]').each(function(){
+        $(this).val('');
+        $(this).parent().hide();
+    });
+    $('select[id^="sa_dt_"]').each(function(){
+        $(this).val('');
         $(this).parent().hide();
     });
     
-    //uncheck id field radiogroup
-    $("#rb_dt_new").attr('checked', true);
-    $('tr[class^="idfield_"]').hide();
-    $(".idfield_"+rectype).show();
-    $("#new_idfield").val(rectype?top.HEURIST.rectypes.names[rectype]+' ID':'');
+    $('#btnStartMatch').hide();
+    $('#btnStartImport').hide();
+    
+    //id field 
+    if(rectype){
+        $("#div_idfield").show();
+        $('input[id^="cbsa_dt_"]').parent().show();
+        $('input[id^="cbsa_keyfield_"]').parent().show();
+        
+        //uncheck id field radiogroup - matching
+        $("#new_idfield").val(rectype?top.HEURIST.rectypes.names[rectype]+' ID':'');
+        //$('input[id^="rb_dt_"]').attr('checked', false);
+        $('tr[class^="idfield_"]').hide(); //hide all
+        var sel_rt = $('tr[class^="idfield_'+rectype+'"]');
+        //check existing by default
+        if(sel_rt.length>0){  //select first from existng
+            sel_rt.show();  //show current only
+            $(sel_rt[0]).children(':first').children(':first').attr('checked', true);
+            $("#idf_reuse").show();
+        }else{ //select new field
+            $("#rb_dt_new").attr('checked', true);
+            $("#idf_reuse").hide();
+        }
+        
+        //import -- id radiogroup
+        $('span[class^="idfield_"]').hide(); //hide all
+        $('span[class^="idfield_"]').children(':first').attr('checked', false); //uncheck all
+        sel_rt = $('span[class^="idfield_'+rectype+'"]');
+        
+        if(sel_rt.length<1){
+            //alert("There are no fields for selected record type defined as ID field");
+        }else{
+            sel_rt.show();  //show current only    
+        }
+        
+        $("#recid_field").val('');
+
+    }else{
+        $("#div_idfield").hide();
+    }
     
 });
 
@@ -95,39 +139,65 @@ getValues(0);
 if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     select_rectype.val(form_vals.sa_rectype).change();
     
-    //init inport form
+    //init import form
     for (var key in form_vals){
         if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
-            //$('#'+key).parent().show();
+            ($('#'+key).parent()).show();
             $('#'+key).val(form_vals[key]);
-            $('#cb'+key).attr('checked', true);
-            $('#cb'+key).parent().show();
+            //*$('#cb'+key).attr('checked', 'checked');
+            document.getElementById('cb'+key).checked = true;
+            //$('#cb'+key).parent().show();
+            isbtnvis = true;
         }
     }
+    onFtSelect(-1);
     
     //init matching form
     for (var key in form_vals){
         if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
-            //$('#'+key).parent().show();
+            $('#'+key).parent().show();
             $('#'+key).val(form_vals[key]);
-            $('#cb'+key).attr('checked', true);
-            $('#cb'+key).parent().show();
+            /*$('#cb'+key).attr('checked', 'checked');
+            $('#cb'+key).attr('checked', 'true');
+            $('#cb'+key).prop('checked', 'checked');
+            $('#cb'+key).prop('checked', true);*/
+            document.getElementById('cb'+key).checked = true;
+            //$('#cb'+key).parent().show();
         }
     }    
+    onFtSelect2(-1);
     
-    if(form_vals[new_idfield]){
-        $("#new_idfield").val(form_vals["new_idfield"]);
+    //init id field radiogroup for matching
+    if(form_vals["new_idfield"]){
+        $("#new_idfield").val(form_vals["new_idfield"]); //name of new id field
         //$("#rb_dt_new").attr('checked', form_vals["idfield"]=="field_new");
     }
-    var rb = $('input[id^="rb_dt__"][value="'+form_vals["idfield"]+'"]');
+    var rb = $('input[id^="rb_dt_"][value="'+form_vals["idfield"]+'"]');
     if(rb.length>0){
         rb.attr('checked', true);
     }
     
+    //init id fields for import
+    rb = $('input[id^="recid_"][value="'+form_vals["recid"]+'"]');
+    if(rb.length>0){
+        rb.attr('checked', true);
+    }
+    $("#recid_field").val(form_vals["recid_field"]);
+    if(form_vals["recid_field"]!=''){
+        onRecIDselect(form_vals["recid_field"].substr(6));
+        
+        //TODO!!!! $(".analized").show();
+    }
+    
 }
 
-showUpdMode();
+$( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
+        $("#sa_mode").val(ui.newTab.index());
+        showUpdMode();    
+  } });
 
+   showUpdMode();
+  
 }); //end init function
 
 //
@@ -150,19 +220,33 @@ function doDatabaseUpdate(){
 //
 function showUpdMode(){
     
-    if($("#sa_mode1").is(":checked")){
+    if( $("#sa_mode").val()=="1" ){
         $(".importing").show();   
         $(".matching").hide();   
     }else{
         $(".importing").hide();
         $(".matching").show();   
     }
+    $(".analized").hide();
 }
 
 //
 // show/hide checkbox on fieldtype select
 //
-function showFtSelect(ind){
+function onFtSelect(ind){
+    
+    if($('select[id^="sa_dt_"][value!=""]').length>0){
+        $('#btnStartImport').show();
+    }else{
+        $('#btnStartImport').hide();
+    }
+    
+    if(ind>=0){
+        $(".analized").hide();
+    }
+    
+    return; 
+    
     $sel = $('#sa_dt_'+ind);
     $ch = $('#cbsa_dt_'+ind);
     if($sel.val()==''){
@@ -173,7 +257,24 @@ function showFtSelect(ind){
         $ch.attr('checked', true);
     }
 }
-function showFtSelect2(ind){
+// on matching field select
+function onFtSelect2(ind){
+    
+    //var sels = $('select[id^="sa_keyfield_"]');
+    
+    if($('select[id^="sa_keyfield_"][value!=""]').length>0){
+    //if( $( 'select[id^="sa_keyfield_"]' ).not( '[value=""]' ).length>0 ){  value!=""
+        $('#btnStartMatch').show();
+    }else{
+        $('#btnStartMatch').hide();
+    }
+    
+    if(ind>=0){
+        $(".analized").hide();
+    }
+    
+    return;
+    
     $sel = $('#sa_keyfield_'+ind);
     $ch = $('#cbsa_keyfield_'+ind);
     if($sel.val()==''){
@@ -184,17 +285,59 @@ function showFtSelect2(ind){
         $ch.attr('checked', true);
     }
 }
-
 //
 // show/hide fieldtype select on checkbox click
 //
-function hideFtSelect(ind){
+function showHideSelect(ind){
     $sel = $('#sa_dt_'+ind);
-    if($sel.parent().is(":visible")){
+    $ch = $('#cbsa_dt_'+ind);
+    if($ch.is(":checked")){
+        $sel.parent().show();
+    }else{
+        $(".analized").hide();
         $sel.val('');
         $sel.parent().hide();
-    }else{
+    }
+}
+
+function showHideSelect2(ind){
+    $sel = $('#sa_keyfield_'+ind);
+    $ch = $('#cbsa_keyfield_'+ind);
+    if($ch.is(":checked")){
         $sel.parent().show();
+    }else{
+        $(".analized").hide();
+        $sel.val('');
+        $sel.parent().hide();
+    }
+}
+
+//
+// on RecordID selection - disable checkbox, set value for hidden recid_field
+//
+function onRecIDselect(ind){
+    
+    /*if($("#recid_field").val()!=''){
+        //enable previous
+        var ind2 = $("#recid_field").val().substr(6);
+        $("#cbsa_dt_"+ind2).attr('disabled','');
+    }*/
+    
+    $('input[id^="cbsa_dt_"]').attr('disabled',false); //enable all
+    
+    //disable for current
+    $("#cbsa_dt_"+ind).attr('disabled',true); //'disabled');
+    $("#cbsa_dt_"+ind).attr('checked', false);
+    showHideSelect(ind);
+    $("#recid_field").val('field_'+ind);
+}
+
+function onUpdateModeSet(event){
+    
+    if ($("#sa_upd2").is(":checked")) {
+        $("#divImport2").css('display','inline-block');
+    }else{
+        $("#divImport2").css('display','none');
     }
 }
 
@@ -212,17 +355,19 @@ function showRecords(divname){
 // Loads values for record from import table
 //
 function getValues(dest){
+  if(currentTable && recCount>0){
+    
     if(dest==0){
         currentId=1;
     }else if(dest==recCount){
         currentId=recCount;
     }else{
         currentId = currentId + dest;
-        if(currentId<1) {
-            currentId=1;   
-        }else if (currentId>recCount){
-            currentId = recCount;
-        }
+    }
+    if(currentId<1) {
+        currentId=1;   
+    }else if (currentId>recCount){
+        currentId = recCount;
     }
     
                  $.ajax({
@@ -232,21 +377,33 @@ function getValues(dest){
                          dataType: "json",
                          cache: false,
                          error: function(jqXHR, textStatus, errorThrown ) {
-                              alert('Error connecting server '+textStatus);
+                              //alert('Error connecting server. '+textStatus);
                          },
                          success: function( response, textStatus, jqXHR ){
                              if(response){
+                                 
                                 var i;
+                                $("#currrow_0").html(response[0]);      
+                                $("#currrow_1").html(response[0]);
                                 for(i=1; i<response.length;i++){
+                                    var isIdx = ($('input[id^="rb_dt_"][value="field_'+(i-1)+'"]').size()>0);
+                                    var sval = response[i];
+                                    if(isIdx && response[i]<0){
+                                        sval = "&lt;New Record&gt;";
+                                    }else if(sval==""){
+                                        sval = "&nbsp;";
+                                    }
+                                    
                                     if($("#impval"+(i-1)).length>0)
-                                        $("#impval"+(i-1)).html(response[i]);    
+                                        $("#impval"+(i-1)).html(sval);    
                                     if($("#impval_"+(i-1)).length>0)
-                                        $("#impval_"+(i-1)).html(response[i]);    
+                                        $("#impval_"+(i-1)).html(sval);  
                                 }
                              }
                          }
                      });
-    
+  }
+  return false;    
 }
 
 //
@@ -257,7 +414,7 @@ function verifySubmit()
     var rectype = $("#sa_rectype").val();
     if(rectype>0){
         
-        if( $("#sa_mode0").is(":checked")){ //matching
+        if( $("#sa_mode").val()!="1"){ //matching
 
             var cb_keyfields = $('input[id^="cbsa_keyfield_"]:checked');
             if(cb_keyfields.length>0){
@@ -291,7 +448,6 @@ function verifySubmit()
 
     return false;
 }
-
 //
 // create SELECT element (see h4/utils)
 //

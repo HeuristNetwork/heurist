@@ -77,7 +77,9 @@ $rec_id = intval(@$_REQUEST['recID']);
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-	<script src="../../external/jquery/jquery-1.6.min.js"></script>
+    <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+	<!-- <script src="../../external/jquery/jquery-1.6.min.js"></script> -->
+    
 	<!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
 	<script type="text/javascript" src="../../records/files/initViewer.js"></script -->
 	<script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->

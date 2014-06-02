@@ -32,7 +32,7 @@
     <link rel=stylesheet href="../../common/css/global.css" media="all">
     <link rel=stylesheet href="crosstabs.css" media="all">
 
-    <script src="../../external/jquery/jquery-1.6.min.js"></script>
+    <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 
 </head>
 <body style="padding:5px;overflow-x:auto;" class="popup">
