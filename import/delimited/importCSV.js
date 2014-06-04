@@ -112,8 +112,11 @@ select_rectype.change(function (event){
             $("#rb_dt_new").attr('checked', true);
             $("#idf_reuse").hide();
         }
-        
+
         //import -- id radiogroup
+        $('option[class^="idfield_"]').hide(); //hide all
+        $('option[class^="idfield_'+rectype+'"]').show(); //hide all
+        /*
         $('span[class^="idfield_"]').hide(); //hide all
         $('span[class^="idfield_"]').children(':first').attr('checked', false); //uncheck all
         sel_rt = $('span[class^="idfield_'+rectype+'"]');
@@ -122,7 +125,7 @@ select_rectype.change(function (event){
             //alert("There are no fields for selected record type defined as ID field");
         }else{
             sel_rt.show();  //show current only    
-        }
+        }*/
         
         $("#recid_field").val('');
 
@@ -178,25 +181,23 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     }
     
     //init id fields for import
-    rb = $('input[id^="recid_"][value="'+form_vals["recid"]+'"]');
-    if(rb.length>0){
-        rb.attr('checked', true);
-    }
     $("#recid_field").val(form_vals["recid_field"]);
     if(form_vals["recid_field"]!=''){
-        onRecIDselect(form_vals["recid_field"].substr(6));
-        
+        onRecIDselect2(); //(form_vals["recid_field"].substr(6));
         //TODO!!!! $(".analized").show();
     }
     
 }
 
-$( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
+  $( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
         $("#sa_mode").val(ui.newTab.index());
         showUpdMode();    
   } });
 
    showUpdMode();
+   
+   $("#analized").show();
+
   
 }); //end init function
 
@@ -210,9 +211,16 @@ function update_counts(added, updated, total){
 //
 // Start import OR records IDs assign
 //
-function doDatabaseUpdate(){
-    $("#input_step").val(3);
-    document.forms[0].submit();
+function doDatabaseUpdate(cnt_insert_nonexist_id){
+    
+    var r = true;
+    if(cnt_insert_nonexist_id>0){
+        r = confirm("Your input data contains "+cnt_insert_nonexist_id+" rows with record IDs in the selected ID column which do not exist in the database. Do you want to proceed and create new records with these specific IDs?")
+    }
+    if(r){
+        $("#input_step").val(3);
+        document.forms[0].submit();
+    }
 }
 
 //
@@ -235,11 +243,25 @@ function showUpdMode(){
 //
 function onFtSelect(ind){
     
-    if($('select[id^="sa_dt_"][value!=""]').length>0){
+    var isok = false;
+    var cb_keyfields = $('input[id^="cbsa_dt_"]:checked');
+    if(cb_keyfields.length>0){
+        isok = true;
+        cb_keyfields.each(function(){
+            isok  = isok && ($('select[id="'+this.id.substr(2)+'"]').val()!="");
+        });
+    }
+    if(isok){
         $('#btnStartImport').show();
     }else{
         $('#btnStartImport').hide();
     }
+    
+    /*if($('select[id^="sa_dt_"][value!=""]').length>0){
+        $('#btnStartImport').show();
+    }else{
+        $('#btnStartImport').hide();
+    }*/
     
     if(ind>=0){
         $(".analized").hide();
@@ -260,14 +282,26 @@ function onFtSelect(ind){
 // on matching field select
 function onFtSelect2(ind){
     
-    //var sels = $('select[id^="sa_keyfield_"]');
-    
-    if($('select[id^="sa_keyfield_"][value!=""]').length>0){
-    //if( $( 'select[id^="sa_keyfield_"]' ).not( '[value=""]' ).length>0 ){  value!=""
+    var isok = false;
+    var cb_keyfields = $('input[id^="cbsa_keyfield_"]:checked');
+    if(cb_keyfields.length>0){
+        isok = true;
+        cb_keyfields.each(function(){
+            isok  = isok && ($('select[id="'+this.id.substr(2)+'"]').val()!="");
+        });
+    }
+    if(isok){
         $('#btnStartMatch').show();
     }else{
         $('#btnStartMatch').hide();
     }
+    
+    /*
+    if($('select[id^="sa_keyfield_"][value!=""]').length>0){
+        $('#btnStartMatch').show();
+    }else{
+        $('#btnStartMatch').hide();
+    }*/
     
     if(ind>=0){
         $(".analized").hide();
@@ -294,10 +328,10 @@ function showHideSelect(ind){
     if($ch.is(":checked")){
         $sel.parent().show();
     }else{
-        $(".analized").hide();
         $sel.val('');
         $sel.parent().hide();
     }
+    onFtSelect(ind);
 }
 
 function showHideSelect2(ind){
@@ -306,13 +340,22 @@ function showHideSelect2(ind){
     if($ch.is(":checked")){
         $sel.parent().show();
     }else{
-        $(".analized").hide();
         $sel.val('');
         $sel.parent().hide();
     }
+    onFtSelect2(ind);
 }
 
 //
+//
+//
+function onRecIDselect2(){
+    var fld = $("#recid_field").val();
+    var ind = fld.substr(6);
+    onRecIDselect(ind);
+}
+
+// 
 // on RecordID selection - disable checkbox, set value for hidden recid_field
 //
 function onRecIDselect(ind){
@@ -324,12 +367,14 @@ function onRecIDselect(ind){
     }*/
     
     $('input[id^="cbsa_dt_"]').attr('disabled',false); //enable all
-    
-    //disable for current
-    $("#cbsa_dt_"+ind).attr('disabled',true); //'disabled');
-    $("#cbsa_dt_"+ind).attr('checked', false);
-    showHideSelect(ind);
-    $("#recid_field").val('field_'+ind);
+    if(ind>=0){
+        
+        //disable for current
+        $("#cbsa_dt_"+ind).attr('disabled',true); //'disabled');
+        $("#cbsa_dt_"+ind).attr('checked', false);
+        showHideSelect(ind);
+        //$("#recid_field").val('field_'+ind);
+    }
 }
 
 function onUpdateModeSet(event){

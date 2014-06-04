@@ -435,33 +435,86 @@ function validateImport($mysqli, $imp_session, $params){
         $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 100";
         $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
     }else{
-        //$select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
-        //    ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$$id_field;
-        // where rec_ID is null
+        
+        $cnt_recs_insert_nonexist_id = 0;
+        
+        //validate selected record ID field
+        if(!@$imp_session['indexes']){ //in case id field from original set of columns we have to verify that its value is valid
+        
+            $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
+            ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$id_field;
+         //"where rec_ID is null and rec_RecTypeID=".$recordType;
+         
+             //find recid with different rectype
+             $query = "select imp_id, ".implode(",",$sel_query).", ".$id_field
+                ." from ".$import_table 
+                ." left join Records on rec_ID=".$id_field
+                ." where rec_RecTypeID<>".$recordType;
+        //error_log("check wrong rt: ".$query);
+             $wrong_records = getWrongRecords($mysqli, $query, "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", $imp_session, array($id_field));
+             if($wrong_records) {
+                array_push($imp_session['validation']['mapped_fields'], $id_field);
+                return $wrong_records;          
+             }
+             
+             //find record ID that are not exists in HDB - to insert
+             $query = "select count(imp_id) "
+                ." from ".$import_table 
+                ." left join Records on rec_ID=".$id_field
+                ." where ".$id_field.">0 and rec_ID is null";
+             $row = mysql__select_array2($mysqli, $select_query);   
+             if($row && $row[0]>0){
+                $cnt_recs_insert_nonexist_id = $row[0];
+             }
+        }
         
        // find records to update
-       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field.">0";
+       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
+        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
        $row = mysql__select_array2($mysqli, $select_query);
-       if($row){
+       if($row && $row[0]>0){
            $imp_session['validation']['count_update'] = $row[0];
            //find first 100 records to display
-           $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field.">0 ORDER BY ".$id_field." LIMIT 100";
+           $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
+           ." FROM ".$import_table
+           ." left join Records on rec_ID=".$id_field
+           ." WHERE rec_ID is not null and ".$id_field.">0"
+           ." ORDER BY ".$id_field." LIMIT 100";
 //error_log("2.upd >>>>".$select_query);           
            $imp_session['validation']['recs_update'] = mysql__select_array3($mysqli, $select_query, false);
        }else{
             return "Can not execute query to calculate number of records to be updated";
        }
        // find records to insert
-       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0";
+       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0";
        $row = mysql__select_array2($mysqli, $select_query);
-       if($row){
+       if($row && $row[0]>0){
            $imp_session['validation']['count_insert'] = $row[0];
            //find first 100 records to display
-           $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field.">0 LIMIT 100";
+           $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0 LIMIT 100";
 //error_log("1.ins >>>>".$select_query);           
            $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
        }else{
             return "Can not execute query to calculate number of records to be inserted";
+       }
+       //additional query for non-existing IDs
+       if($cnt_recs_insert_nonexist_id>0){
+           
+               $imp_session['validation']['count_insert_nonexist_id'] = $cnt_recs_insert_nonexist_id;
+               $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
+           
+               $select_query = "SELECT imp_id, ".implode(",",$sel_query)
+                ." FROM ".$import_table 
+                ." LEFT JOIN Records on rec_ID=".$id_field
+                ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 100";
+                $res = mysql__select_array3($mysqli, $select_query, false);
+                if($res && count($res)>0){
+                    if(@$imp_session['validation']['recs_insert']){
+                        $imp_session['validation']['recs_insert'] = array_merge($imp_session['validation']['recs_insert'], $res);    
+                    }else{
+                        $imp_session['validation']['recs_insert'] = $res;
+                    }
+                }
        }
            
     }//id_field defined
@@ -654,14 +707,32 @@ function doImport($mysqli, $imp_session, $params){
     //rectype to import
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
-    $is_secondary = false; //NOT USED
+    $id_field = @$params['recid_field']; //record ID field is always defined explicitly
     
     if(intval($recordType)<1){
         return "record type not defined";
     }
+
+    //get field mapping and selection query from _REQUEST(params)
+    $field_types = array();  // idx => fieldtype ID 
+    $sel_query = array();
+    foreach ($params as $key => $field_type) {
+        if(strpos($key, "sa_dt_")===0 && $field_type){
+            //get index 
+            $index = substr($key,6);
+            $field_name = "field_".$index;
+            
+            //all mapped fields - they will be used in validation query
+            array_push($sel_query, $field_name); 
+            array_push($field_types, $field_type);
+            $imp_session["mapping"][$field_name] = $recordType.".".$field_type; // to keep used
+        }
+    }  
+    if(count($sel_query)<1){
+        return "mapping not defined";
+    }
     
-    $is_update = false;
-    $rt_field = null;
+    //indexes
     $recStruc = getRectypeStructures(array($recordType));
     $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
     $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
@@ -670,89 +741,20 @@ function doImport($mysqli, $imp_session, $params){
     //get terms name=>id
     $terms_enum = null;
     $terms_relation = null;
-    
-    //get field mapping and selection query from _REQUEST(params)
-    $mapping = array();  // fieldtype ID => fieldname in import table
-    $sel_query = "";
-    foreach ($params as $key => $field_type) {
-        if(strpos($key, "sa_dt_")===0 && $field_type){
-            //get index 
-            $index = substr($key,6);
-            $field_name = "field_".$index;
-            
-            if($field_type=="id"){
-                $imp_session['indexes'][$recordType] = $field_name;
-            }else {
-                $sel_query = $sel_query.$field_name.", ";    
-                array_push($mapping, $field_type);
-                $imp_session["mapping"][$field_name] = $recordType.".".$field_type;
-                    //$recTypeName."  ".$recStruc[$recordType]['dtFields'][$field_type][$idx_name]; 
-                        
-            }
-            
-            
-        }
-    }
 
-    //detect rectype in indexes 
-    if(@$imp_session['indexes'][$recordType]){ //exists - it means update
-        
-            $rt_field = $imp_session['indexes'][$recordType];
-            $is_update = true;
-            
-     }else{ //insert
-            //add new field in import table - to keep key values (primary index)
-            $index = count($imp_session['columns']);
-            $rt_field = "field_".$index;
-            array_push($imp_session['columns'], $recTypeName."  index" );
-            array_push($imp_session['uniqcnt'], 0);
-            if(!$is_secondary) $imp_session["mapping"][$rt_field] = $recordType.".id"; //$recTypeName."(id# $recordType) ID";
-            $imp_session['indexes'][$recordType] = $rt_field;
-        
-            $altquery = "alter table ".$import_table." add column ".$rt_field." int(10) unsigned";
-            if (!$mysqli->query($altquery)) {
-                return "can not alter import session table, can not add new index field: " . $mysqli->error;
-            }    
+    if($id_field){  //last field is row# - imp_id
+        array_push($field_types, "id");
+        $id_field_idx = count($field_types)-1;
     }
-    if($sel_query==""){
-        return "mapping not defined";
-    }
-  
-/*
-       if($is_update){ //index field is defined
-                //select all mapped fields   .$rt_field.", "
-                $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
-                ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$rt_field;
-                
-       }else{
-                //if index field is not specified
-                $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table;
-                
-                $i = 1;
-                $select_query_join = " left join Records on rec_RecTypeID=".$recordType;
-                foreach ($mapping as $field_type => $field_name) {
-                    $select_query = $select_query . " left join recDetails d".$i." on d".$i.".dtl_Value=".$field_name;
-                    $select_query_join = $select_query_join . " and rec_ID=d".$i.".dtl_RecID";
-                    
-                    $i++;    
-                }
-                $select_query = $select_query . $select_query_join;
-       }
-*/    
     
-    array_push($mapping, "id"); //last field is row# - imp_id
-    if($is_secondary){
-        $sel_query = "select ". $sel_query . ($is_update?"":$rt_field.",") 
+    $select_query = "select ". implode(",", $sel_query) 
+                    . ", ". ($id_field?$id_field.", ":"") 
                     . " group_concat(imp_id) from ".$import_table
-                    . " group by ". $sel_query . ($is_update?"":$rt_field);    
+                    . " group by ". implode(",", $sel_query) . ", " . ($is_update?"":$rt_field);    
         
-    }else{ //@todo: remove this - to avoid duplications
-        $sel_query = "select ". $sel_query . $rt_field.", imp_id from ".$import_table;
-    }
-    
 //error_log($sel_query);
     
-    $res = $mysqli->query($sel_query);
+    $res = $mysqli->query($select_query);
     if (!$res) {
         
         return "import table is empty";
@@ -765,6 +767,8 @@ function doImport($mysqli, $imp_session, $params){
         $errors = array();
         $warnings = array();
         $tot_count = $imp_session['reccount'];
+        
+        $rec_added = array(); // negative index => record ID in HDB
 
         while ($row = $res->fetch_row()){
             
@@ -772,10 +776,22 @@ function doImport($mysqli, $imp_session, $params){
             $recordURL = null;
             $recordNotes = null;
             $details = array();
+            
+            //detect 
+            if($id_field){
+                $id = $row[$id_field_idx];
+                if($id>0){ //update
+                    
+                }
+            }
+            
         
-            foreach ($mapping as $index => $field_type) {
-                if($field_type=="id" && $is_update){
+            foreach ($field_types as $index => $field_type) {
+                if($field_type=="id"){
                     $recordId = $row[$index];
+                    if($recordId<0){
+                        $recordId = null;
+                    }
                 }else if($field_type=="url"){
                     $recordURL = $row[$index];
                 }else if($field_type=="scratchpad"){
@@ -789,12 +805,15 @@ function doImport($mysqli, $imp_session, $params){
                         $value = null;        
                     
                         if($ft_vals[$idx_fieldtype] == "enum"){
-                            if(!$terms_enum)
-                            $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
+                            if(!$terms_enum) { //find ALL term IDs
+                                $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
+                            }
                             $value = @$terms_enum[$row[$index]];
+                            
                         }else if($ft_vals[$idx_fieldtype] == "relationtype"){
-                            if(!$terms_relation)
-                            $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
+                            if(!$terms_relation){ //find ALL relation IDs
+                                $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
+                            }
                             $value = @$terms_relation[$row[$index]];
                         }
                         

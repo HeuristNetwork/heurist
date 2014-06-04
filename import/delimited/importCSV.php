@@ -119,7 +119,7 @@ div.header{
     font-weight: bold;
 }
 .help{
-    font-size:0.8em;
+    font-size:10pt;
 }
 </style>
     </head>
@@ -326,7 +326,9 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <li><a href="#import">Insert / update records</a></li>
     </ul>    
     <div id="matching">
-        <span class="help">Select one or more of the input columns to match input rows with records in the database. Matched rows will be identified by record ID. Unmatched rows will be marked for creation of new records<br/><br/></span>
+        <span class="help">Select one or more of the input columns to match input rows with records in the database. Matched rows will be identified by record ID. Unmatched rows will be marked for creation of new records</span>
+        <span class="help">Select import columns and matching to database fields for the selected record type<br/><br/></span>
+        
 <!--        
         <span class="help">Select key fields and find record ID to unique identification of import record. Heurist database is not affected<br/><br/></span>
 -->
@@ -364,9 +366,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         </div>
     
         <div>
+        <br/>
         
-        <span class="help">Select import columns and matching to database fields for the selected record type</span>
-        <input type="hidden" name="recid_field" id="recid_field" />
         <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
         <thead><tr>
             <th>Key<br/>field</th><th>Unique<br/>values</th><th>Column</th><th>Mapping</th>
@@ -401,8 +402,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
     </div>
 <!-- ************************************************************************************ -->    
     <div id="import">
-        <span class="help">Create/update records in Heurist database according to record ID field<br/></span>    
-    
+        <span class="help">Choose the ID column identifying the records to be inserted or updated from the dropdown. Choose the data fields to be updated from the table.<br/></span>
+           
         <div style="padding-left:30px;">
             <div class="header"><label>Update mode settings</label></div><br/>
             <div style="padding-left:30px;display: inline-block;">
@@ -426,13 +427,35 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
             <label for="sa_upd21">Delete existing if no new data supplied for record</label>
             </div>
         </div>    
-        
-    
-        <span class="help">Choose the ID column identifying the records to be inserted or updated from the dropdown. Choose the data fields to be updated from the table.</span>
+        <br/>
+        <div>
+            <label for="recid_field">Choose column identifying the records to be updated</label>
+            <select id="recid_field" onchange="{onRecIDselect2()}">
+                <option value="">select...</option>
+        <?php   
+        //created ID fields     
+        for ($i = 0; $i < $len; $i++) {     
+                $rectype = @$imp_session['indexes']["field_".$i];
+                $isIndex = ($rectype!=null);
+                if($isIndex){
+                    print '<option class="idfield_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
+                }            
+        }
+        //all other fields
+        for ($i = 0; $i < $len; $i++) {     
+                $rectype = @$imp_session['indexes']["field_".$i];
+                $isIndex = ($rectype!=null);
+                if(!$isIndex){
+                    print '<option value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
+                }            
+        }
+        ?>
+            </select>
+        </div>
+        <br/>
         
         <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
         <thead><tr>
-            <th>ID<br/>field</th>
             <th>Import<br/>value</th><th>Unique<br/>values</th><th style="max-width:100px;">Column</th><th width="310">Mapping</th>
             <th width="30%" style="text-align: left;padding-left: 16px;">
                 <a href="#" onclick="getValues(0);return false;"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
@@ -463,15 +486,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
             }else{
                 $rectype = @$imp_session['indexes']["field_".$i];
                 $isIndex = ($rectype!=null);
-                if($isIndex){
-                    $idradio = '<td align="center">&nbsp;'
-                        .'<span class="idfield_'.$rectype.'">'
-                        .'<input type="radio" name="recid" id="recid_'.$i.'" value="field_'.$i.'" onchange="{onRecIDselect('.$i.')}" /></span></td>';
-                }else{
-                    $idradio = '<td>&nbsp;</td>';
-                }
-                $checkbox = $idradio
-                .'<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'.$i.'" onchange="{showHideSelect('.$i.');}"/></span></td>';
+                $checkbox = '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'.$i.'" onchange="{showHideSelect('.$i.');}"/></span></td>';
             }
             
             $s = '<tr>'.$checkbox.'<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
@@ -544,6 +559,9 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 
         $cnt_insert  = intval(@$validationRes['count_insert']);
         $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
+        
+        $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
+        
 ?>                    
                     <td><div class="analized">
                         <table style="display: inline-block; border:none" border="0">
@@ -556,7 +574,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 <?php        }        ?>                            
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
-                            <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" onclick="doDatabaseUpdate()" style="font-weight: bold;">
+                            <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" 
+                                onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>)" style="font-weight: bold;">
                         </div>
                     </div></td>
 <?php
