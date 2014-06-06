@@ -98,24 +98,40 @@ select_rectype.change(function (event){
         $('input[id^="cbsa_dt_"]').parent().show();
         $('input[id^="cbsa_keyfield_"]').parent().show();
         
+        //ID field
         //uncheck id field radiogroup - matching
-        $("#new_idfield").val(rectype?top.HEURIST.rectypes.names[rectype]+' ID':'');
-        //$('input[id^="rb_dt_"]').attr('checked', false);
-        $('tr[class^="idfield_"]').hide(); //hide all
-        var sel_rt = $('tr[class^="idfield_'+rectype+'"]');
-        //check existing by default
-        if(sel_rt.length>0){  //select first from existng
-            sel_rt.show();  //show current only
-            $(sel_rt[0]).children(':first').children(':first').attr('checked', true);
-            $("#idf_reuse").show();
-        }else{ //select new field
-            $("#rb_dt_new").attr('checked', true);
-            $("#idf_reuse").hide();
+        var sval = rectype?top.HEURIST.rectypes.names[rectype]+' ID':'';
+        $("#new_idfield").val(sval);
+        $("#new_idfield2").val(sval);
+        
+        //matching -- id fields
+        $('option[class^="idfield2_"]').hide(); //hide all
+        var sel_rt = $('option[class="idfield2_'+rectype+'"]');
+        sel_rt.show(); //show for this rt only
+        if(sel_rt.length>0){
+            $('#div_idfield_exist').show();
+            $('#div_idfield_new').hide();
+            $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
+            if(sel_rt.length==1){
+                $("#span1").html('"'+sel_rt.html()+'"  as a field name');
+                $("#span3").html('this field name');
+            }else{
+                $("#span1").html(sel_rt.length+' columns');
+                $("#span3").html('one of existing columns');
+            }
+        }else{
+            $('#div_idfield_exist').hide();
+            $('#div_idfield_new').show();
         }
-
+        
         //import -- id radiogroup
         $('option[class^="idfield_"]').hide(); //hide all
-        $('option[class^="idfield_'+rectype+'"]').show(); //hide all
+        sel_rt = $('option[class^="idfield_'+rectype+'"]');
+        sel_rt.show(); //show for this rt only
+        if(sel_rt.length>0)
+            $('#idfield_separator').show();
+        else
+            $('#idfield_separator').hide();
         /*
         $('span[class^="idfield_"]').hide(); //hide all
         $('span[class^="idfield_"]').children(':first').attr('checked', false); //uncheck all
@@ -132,6 +148,8 @@ select_rectype.change(function (event){
     }else{
         $("#div_idfield").hide();
     }
+    $(".analized").hide();
+
     
 });
 
@@ -171,13 +189,23 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     onFtSelect2(-1);
     
     //init id field radiogroup for matching
-    if(form_vals["new_idfield"]){
-        $("#new_idfield").val(form_vals["new_idfield"]); //name of new id field
-        //$("#rb_dt_new").attr('checked', form_vals["idfield"]=="field_new");
-    }
-    var rb = $('input[id^="rb_dt_"][value="'+form_vals["idfield"]+'"]');
-    if(rb.length>0){
-        rb.attr('checked', true);
+    if(form_vals["idfield"]){
+        $("#rb_idfield1").attr("checked", true);
+        onExistingIDfieldSelect();
+        $("#idfield").val(form_vals["idfield"]);
+    }else{
+        if(form_vals["new_idfield"]){
+            var sel_rt = $('option[class="idfield2_'+form_vals.sa_rectype+'"]');
+            sel_rt = sel_rt.filter(function () { return $(this).html() == form_vals["new_idfield"]; });
+            if(sel_rt.length==1){
+                $("#rb_idfield1").attr("checked", true);
+                onExistingIDfieldSelect();
+                $("#idfield").val(sel_rt[0].value);
+            }else{
+                $("#new_idfield").val(form_vals["new_idfield"]); //name of new id field
+                $("#new_idfield2").val(form_vals["new_idfield"]); //name of new id field
+            }
+        }
     }
     
     //init id fields for import
@@ -196,7 +224,7 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
 
    showUpdMode();
    
-   $("#analized").show();
+   $(".analized").show();
 
   
 }); //end init function
@@ -222,6 +250,26 @@ function doDatabaseUpdate(cnt_insert_nonexist_id){
         document.forms[0].submit();
     }
 }
+
+//
+//
+//
+function onExistingIDfieldSelect(){
+            //var sel_rt = $('option[class^="idfield2_"]').filter(':visible'); //do not work
+            var rectype = $("#sa_rectype").val();
+            var sel_rt = $('option[class="idfield2_'+rectype+'"]');
+            if(sel_rt.length>1){//more than 1 field defined for record type
+                $('#rb_idfield1_div').show();    
+            }
+            $('#rb_idfield0_div').hide();
+            
+            var sel = $('#idfield');
+            if(sel[0].selectedIndex==0){
+                sel.val(sel_rt[0].value);
+            }
+}
+        
+        
 
 //
 // switch modes
@@ -380,7 +428,7 @@ function onRecIDselect(ind){
 function onUpdateModeSet(event){
     
     if ($("#sa_upd2").is(":checked")) {
-        $("#divImport2").css('display','inline-block');
+        $("#divImport2").css('display','block');
     }else{
         $("#divImport2").css('display','none');
     }
@@ -431,7 +479,7 @@ function getValues(dest){
                                 $("#currrow_0").html(response[0]);      
                                 $("#currrow_1").html(response[0]);
                                 for(i=1; i<response.length;i++){
-                                    var isIdx = ($('input[id^="rb_dt_"][value="field_'+(i-1)+'"]').size()>0);
+                                    var isIdx = ($('option[class^="idfield2_"][value="field_'+(i-1)+'"]').size()>0);
                                     var sval = response[i];
                                     if(isIdx && response[i]<0){
                                         sval = "&lt;New Record&gt;";
@@ -464,11 +512,19 @@ function verifySubmit()
             var cb_keyfields = $('input[id^="cbsa_keyfield_"]:checked');
             if(cb_keyfields.length>0){
                 
-                var cb_idfield = $('input[id^="rb_dt_"]:checked');
-                if(cb_idfield.length>0){
+                if ( ($("#div_idfield_new").is(":visible") && $("#new_idfield").val()=='') 
+                     || 
+                     ($("#div_idfield_exist").is(":visible") && $("#rb_idfield0").is(":checked") && $("#new_idfield").val()=='') 
+                    ){
+                    
+                        alert("To search/match records you have to define New column to hold record identifiers");
+                    
+                }else if($("#div_idfield_exist").is(":visible") && $("#idfield").val()==''){
+
+                        alert("If you wish to redo the matching, select column for ID field");
+                    
+                }else {
                     return true;
-                }else{
-                    alert("To search/match records you have to select ID field or define new one");
                 }
 
             }else{

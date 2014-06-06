@@ -188,7 +188,8 @@ function matchingSearch($mysqli, $imp_session, $params){
             }else{
                 $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
                 $select_query_join_det = $select_query_join_det . 
-                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type." and d".$index.".dtl_Value=".$field_name;
+                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type.
+                 " and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
             }
         }            
     }  
@@ -196,9 +197,12 @@ function matchingSearch($mysqli, $imp_session, $params){
         return "no one key field is selected";
     }
         
-    //query to search record ids
-    $select_query = "select SQL_CALC_FOUND_ROWS distinct rec_ID, 0, ".implode(",",$sel_query)." from ".$import_table
-                    .$select_query_join_det.$select_query_join_rec." where rec_ID is not null";
+    //query to search record ids                distinct 
+    $select_query = "SELECT SQL_CALC_FOUND_ROWS rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
+                    ." FROM ".$import_table
+                    .$select_query_join_det.$select_query_join_rec
+                    ." WHERE rec_ID is not null"
+                    ." GROUP BY rec_ID, ".implode(",",$sel_query);
 
 //DEBUG error_log(">>>".$select_query);
     //array_push($sel_query, "rec_ID");
@@ -223,10 +227,12 @@ function matchingSearch($mysqli, $imp_session, $params){
     }
     
     //find records to insert
-    $select_query = "select SQL_CALC_FOUND_ROWS distinct imp_id, ".implode(",",$sel_query)." from ".$import_table
-                    .$select_query_join_det.$select_query_join_rec." where rec_ID is null";
+    $select_query = "SELECT SQL_CALC_FOUND_ROWS group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
+                    .$select_query_join_det.$select_query_join_rec
+                    ." WHERE rec_ID is null "
+                    ." GROUP BY ".implode(",",$sel_query);
     $res = $mysqli->query($select_query);
-//error_log(">>>>".$select_query. " where rec_ID is null");    
+//  error_log(">>>>".$select_query. " where rec_ID is null");    
     if($res){
         $fres = $mysqli->query('select found_rows()');
         $row = $fres->fetch_row(); 
@@ -267,14 +273,10 @@ function matchingAssign($mysqli, $imp_session, $params){
     }
     
     $id_field = @$params['idfield'];
-    
-    if(!$id_field){
-        return "ID field not defined";
-    }
-    
     $field_count = count($imp_session['columns']);
     
-    if($id_field==("field_".$field_count)){ //add new field into import table
+    if(!$id_field){ //add new field into import table
+            //ID field not defined, create new field
         
             $id_field = "field_".$field_count;
             array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
@@ -306,7 +308,8 @@ function matchingAssign($mysqli, $imp_session, $params){
             }else{
                 $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
                 $select_query_join_det = $select_query_join_det . 
-                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type." and d".$index.".dtl_Value=".$field_name;
+                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type
+                 ." and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
             }
         }            
     }  
@@ -320,12 +323,12 @@ function matchingAssign($mysqli, $imp_session, $params){
     
     //SET SQL_SAFE_UPDATES=1; 
     //reset all values 
-    $updquery = "update ".$import_table." set ".$id_field."=NULL where imp_id";
+    $updquery = "UPDATE ".$import_table." SET ".$id_field."=NULL WHERE imp_id";
     if(!$mysqli->query($updquery)){
         return "can not update import table (clear record id field)";
     }
     //matched records
-    $updquery = "update ".$import_table.$select_query_join_det.$select_query_join_rec." set ".$id_field."=rec_ID where rec_ID is not null and imp_id>0";
+    $updquery = "UPDATE ".$import_table.$select_query_join_det.$select_query_join_rec." SET ".$id_field."=rec_ID WHERE rec_ID is not null and imp_id>0";
     
 //DEBUG error_log("1>>>>".$updquery);
     if(!$mysqli->query($updquery)){
@@ -345,7 +348,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     if($res){
         $ind = -1;
         while ($row = $res->fetch_row()){
-            $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".end($row).")";
+            $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".$row[0].")";  //end($row)
 //DEBUG error_log("3>>>>".$updquery);            
             if(!$mysqli->query($updquery)){
                 return "can not update import table: mark records for insert";
@@ -363,7 +366,7 @@ function matchingAssign($mysqli, $imp_session, $params){
             $index = intval(substr($id_field, 6));
             $imp_session['uniqcnt'][$index] = $row[0];
         
-            //save index field into import_sesssion
+            //save index field into import_session
             $imp_session = saveSession($mysqli, $imp_session);
             if(!is_array($imp_session)){
                 return $imp_session;
@@ -438,13 +441,11 @@ function validateImport($mysqli, $imp_session, $params){
         
         $cnt_recs_insert_nonexist_id = 0;
         
-        //validate selected record ID field
-        if(!@$imp_session['indexes']){ //in case id field from original set of columns we have to verify that its value is valid
+        // validate selected record ID field
+        // in case id field is not created on match step (it is from original set of columns)
+        // we have to verify that its values are valid
+        if(!@$imp_session['indexes'][$id_field]){ 
         
-            $select_query = "select SQL_CALC_FOUND_ROWS distinct ".implode(",",$sel_query)." from ".$import_table
-            ." left join Records on rec_RecTypeID=".$recordType." and rec_ID=".$id_field;
-         //"where rec_ID is null and rec_RecTypeID=".$recordType;
-         
              //find recid with different rectype
              $query = "select imp_id, ".implode(",",$sel_query).", ".$id_field
                 ." from ".$import_table 
@@ -742,15 +743,16 @@ function doImport($mysqli, $imp_session, $params){
     $terms_enum = null;
     $terms_relation = null;
 
-    if($id_field){  //last field is row# - imp_id
+    $select_query = "SELECT ". implode(",", $sel_query) 
+                    . ", ". ($id_field?$id_field.", ":"") 
+                    . " imp_id "  //last field is row# - imp_id
+                    . " FROM ".$import_table;
+
+    if($id_field){  //add to list of columns
         array_push($field_types, "id");
         $id_field_idx = count($field_types)-1;
+        $select_query = $select_query." ORDER BY ".$id_field;
     }
-    
-    $select_query = "select ". implode(",", $sel_query) 
-                    . ", ". ($id_field?$id_field.", ":"") 
-                    . " group_concat(imp_id) from ".$import_table
-                    . " group by ". implode(",", $sel_query) . ", " . ($is_update?"":$rt_field);    
         
 //error_log($sel_query);
     
@@ -768,7 +770,8 @@ function doImport($mysqli, $imp_session, $params){
         $warnings = array();
         $tot_count = $imp_session['reccount'];
         
-        $rec_added = array(); // negative index => record ID in HDB
+        $records_added = array(); //keep negative index => record ID in HDB
+        $previos_recordId = null;
 
         while ($row = $res->fetch_row()){
             
@@ -777,11 +780,22 @@ function doImport($mysqli, $imp_session, $params){
             $recordNotes = null;
             $details = array();
             
+            $is_update = false;
+            
             //detect 
             if($id_field){
-                $id = $row[$id_field_idx];
-                if($id>0){ //update
+                $recordId = $row[$id_field_idx];
+                if($previos_recordId!=$recordId){ //next record ID
                     
+                }
+                
+                if($recordId>0){ //update
+                    // find original record in HDB
+
+                    // Retain existing values and append new data as repeat values
+                    
+                }else { //insert
+                    $recordId = null;
                 }
             }
             
@@ -1072,7 +1086,7 @@ function renderRecords($type, $imp_session){
                 print "<tr>";
                 if(is_array($row)){
                     foreach($row as $value) {     
-                        print "<td>".($value?$value:"&nbsp;")."</td>";
+                        print "<td class='truncate'>".($value?$value:"&nbsp;")."</td>";
                     }
                 }
                 print "</tr>";
@@ -1083,5 +1097,39 @@ function renderRecords($type, $imp_session){
     
 }
 
+/*
+delimiter $$
 
+CREATE DEFINER=`root`@`localhost` FUNCTION `trim_spaces`(`dirty_string` text, `trimChar` varchar(1))
+    RETURNS text
+    LANGUAGE SQL
+    NOT DETERMINISTIC
+    CONTAINS SQL
+    SQL SECURITY DEFINER
+    COMMENT ''
+BEGIN
+  declare cnt,len int(11) ;
+  declare clean_string text;
+  declare chr,lst varchar(1);
+
+  set len=length(dirty_string);
+  set cnt=1;  
+  set clean_string='';
+
+ while cnt <= len do
+      set  chr=right(left(dirty_string,cnt),1);           
+
+      if  chr <> trimChar OR (chr=trimChar AND lst <> trimChar ) then  
+          set  clean_string =concat(clean_string,chr);
+      set  lst=chr;     
+     end if;
+
+     set cnt=cnt+1;  
+  end while;
+
+  return clean_string;
+END
+$$
+delimiter ;
+*/
 ?>

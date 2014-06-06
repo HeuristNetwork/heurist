@@ -119,7 +119,7 @@ div.header{
     font-weight: bold;
 }
 .help{
-    font-size:10pt;
+    font-size:0.9em;
 }
 </style>
     </head>
@@ -206,6 +206,10 @@ if($step==1 && $imp_session==null){
         $csv_linebreak = $_REQUEST["csv_linebreak"];
         $csv_enclosure = $_REQUEST["csv_enclosure"];
         
+        if($csv_delimiter=="tab") {
+            $csv_delimiter = "\t";
+        }
+        
         $imp_session = postmode_file_selection();
 }
 
@@ -236,6 +240,8 @@ if(is_array($imp_session)){
                 ob_flush();flush();
             
                 $res = matchingSearch($mysqli, $imp_session, $_REQUEST);
+                
+//error_log(print_r($res, true));
                 
             }else if($step==3){  //assign ids
                 
@@ -299,25 +305,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <div class="header"><label for="sa_rectype">Select record type</label></div>
         <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:290px"></select>
     </div>
-<!--    
-    <div>
-        <div class="header"><label>Action mode</label></div><br/>
-        <table style="padding-left:30px; width:600px">
-        <tr><td>
-                <input type="radio" <?=@$_REQUEST['sa_mode']==1?"":"checked"?> name="sa_mode" id="sa_mode0" 
-                        value="0" class="text" onchange="showUpdMode()" />&nbsp;
-                <label for="sa_mode0"><b>Search / match</b></label>
-        </td><td>
-                <input type="radio" <?=@$_REQUEST['sa_mode']==1?"checked":""?> name="sa_mode" id="sa_mode1" 
-                        value="1" class="text" onchange="showUpdMode()"/>&nbsp;
-                <label for="sa_mode1"><b>Insert / update records</b></label>
-        </td></tr><tr class="help"><td><span class="help">
-            Select one or more of the input columns to match input rows with records in the database. Matched rows will be identified by record ID. Unmatched rows will be marked for creation of new records</span>
-        </td><td><span class="help">Choose the ID column identifying the records to be inserted or updated from the dropdown. Choose the data fields to be updated from the table.</span>
-        </td><tr>
-        </table>
-    </div>
--->
+
 <input type="hidden" value="<?=@$_REQUEST['sa_mode']?>" name="sa_mode" id="sa_mode"/> 
 
 <div id="tabs_actions">
@@ -333,38 +321,48 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <span class="help">Select key fields and find record ID to unique identification of import record. Heurist database is not affected<br/><br/></span>
 -->
         <div id="div_idfield" style="padding-left:30px;display:none;">
-                <!-- div class="header"><label>ID field</label></div -->
-                
-                <span id="idf_reuse">To redo the matching, re-use one of existing fields</span>
-                
-                <table cellspacing="0" cellpadding="2" width="90%">
-                <?php
-                //radiobuttons - list of all ID fields
-                for ($i = 0; $i < $len; $i++) {     
+
+                <div id="div_idfield_new">
+                    <label for="new_idfield">New column to hold record identifiers</label>
+                    <input id="new_idfield" name="new_idfield" type="text" size="20" /><br />                        
+                    <span class="help">(you may wish to change this to identify a specific use of the entity represented by the key columns selected)</span>
                     
-                   //'.(@$_REQUEST['idfield']=="field_".$i?"checked":"").' 
-                   //($ischecked?"":"checked")
-                    
-                   $rectype = @$imp_session['indexes']["field_".$i];
-                   if($rectype){
-                       print '<tr class="idfield_'.$rectype.'">'
-                                .'<td align="center" width="5">'
-                                .'<input type="radio" name="idfield" id="rb_dt_'.$i.'" value="field_'.$i.'" /></td>'   //radio
-                                .'<td align="left" class="truncate">'.$imp_session['columns'][$i].'</td></tr>';                                        //name
-                   }
+                </div>
+                <div id="div_idfield_exist" style="display: none;">
+                    <span>You have already used <span id="span1">Person ID as a field name&nbsp;</span> to hold the IDs of <span id="span2">Person</span> records (which may later be used as a Pointer Field in Update mode).<br /></span>
+                    <input type="radio" id="rb_idfield0" name="idfield0" checked="checked" 
+                            onchange="{$('#rb_idfield1_div').hide(); $('#rb_idfield0_div').show();$('#idfield').val('')}"/>
+                    <label for="rb_idfield0">I wish to use a distinct field name</label>
+                        <div id="rb_idfield0_div" style="padding-left: 30px;">
+                            <label for="new_idfield2">Enter new field name</label>
+                            <input id="new_idfield2" type="text" size="20" onchange="{$('#new_idfield').val(event.target.value)}"/>
+                        </div>
+                    <div>
+                    <input type="radio" id="rb_idfield1" name="idfield0" 
+                            onchange="{onExistingIDfieldSelect()}" />
+                    <label for="rb_idfield1">I wish to redo the matching, re-using <span id="span3">this field name</span></label>
+                        <div id="rb_idfield1_div" style="display: none; padding-left: 30px;">
+                            <label for="idfield">Select column</label>
+                            <select id="idfield" name="idfield">
+                                <option value="" disabled="disabled">select...</option>
+                 <?php
+                //list of all ID fields
+                for ($i = 0; $i < $len; $i++) { 
+                    $rectype = @$imp_session['indexes']["field_".$i];
+                    $isIndex = ($rectype!=null);
+                    if($isIndex){
+                        print '<option class="idfield2_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
+                    }            
                 }
-                ?>
-                    <tr><td colspan="2"><span id="idf_new">Enter new field name to hold record identifiers</span></td></tr>
-                    <tr>
-                        <td align="center" width="5">
-                            <input type="radio" name="idfield" id="rb_dt_new" value="field_<?=$len?>" checked="checked" />
-                        </td><td align="left">
-                            <input name="new_idfield" id="new_idfield" type="text" size="20"/>
-                            <span class="help">(you may wish to change this to identify a specific use of the entity represented by the key columns selected)</span>
-                        </td></tr>
-                </table>
+                ?>                       
+                            </select>
+                        </div>
+                      </div>    
+                </div>
+
         </div>
     
+        <!-- matching table-->
         <div>
         <br/>
         
@@ -402,11 +400,10 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
     </div>
 <!-- ************************************************************************************ -->    
     <div id="import">
-        <span class="help">Choose the ID column identifying the records to be inserted or updated from the dropdown. Choose the data fields to be updated from the table.<br/></span>
+        <span class="help">Choose the ID column identifying the records to be inserted or updated from the dropdown. Choose the data fields to be updated from the table.<br/><br/></span>
            
         <div style="padding-left:30px;">
-            <div class="header"><label>Update mode settings</label></div><br/>
-            <div style="padding-left:30px;display: inline-block;">
+            <div style="padding-left:30px;">
             <input type="radio" <?=@$_REQUEST['sa_upd']>0?"":"checked"?> name="sa_upd" id="sa_upd0" value="0" class="text" 
                     onchange="{onUpdateModeSet()}"/>&nbsp;
             <label for="sa_upd0">Retain existing values and append new data as repeat values</label><br/>
@@ -419,28 +416,32 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
                     onchange="{onUpdateModeSet()}" />&nbsp;
             <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
             </div>
-            <div style="padding-left:10px;display: <?=@$_REQUEST['sa_upd']==2?"inline-block":"none"?>; vertical-align: top;" id="divImport2">
+            <div style="padding-left:60px;font-size:0.9em;display: <?=@$_REQUEST['sa_upd']==2?"block":"none"?>; vertical-align: top;" id="divImport2">
             <input type="radio" <?=@$_REQUEST['sa_upd2']>0?"":"checked"?> name="sa_upd2" id="sa_upd20" value="0" class="text" />&nbsp;
-            <label for="sa_upd20">Retain existing if no new data supplied for record</label><br/>
+            <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br/>
             
             <input type="radio" <?=@$_REQUEST['sa_upd2']==1?"checked":""?> name="sa_upd2" id="sa_upd21" value="1" class="text" />&nbsp;
-            <label for="sa_upd21">Delete existing if no new data supplied for record</label>
+            <label for="sa_upd21" style="font-size:0.9em;">Delete existing if no new data supplied for record</label>
             </div>
         </div>    
         <br/>
         <div>
             <label for="recid_field">Choose column identifying the records to be updated</label>
             <select id="recid_field" onchange="{onRecIDselect2()}">
-                <option value="">select...</option>
+                <option value="" disabled="disabled">select...</option>
         <?php   
         //created ID fields     
+        $hasc = false;
         for ($i = 0; $i < $len; $i++) {     
                 $rectype = @$imp_session['indexes']["field_".$i];
                 $isIndex = ($rectype!=null);
                 if($isIndex){
+                    $hasc = true;
                     print '<option class="idfield_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
                 }            
         }
+        if($hasc)
+            print '<option id="idfield_separator" value="0" disabled="disabled" >-------</option>';
         //all other fields
         for ($i = 0; $i < $len; $i++) {     
                 $rectype = @$imp_session['indexes']["field_".$i];
@@ -580,7 +581,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
                     </div></td>
 <?php
     }else{
-        print '<div style="width:500px;display:inline-block"></div>';
+        print '<td></td>';
     }
 ?>                  
                     <td style="text-align:right;width:30%">  
@@ -668,7 +669,7 @@ function doSelectSession(){
                     <label>Or upload new CSV file:</label><input type="file" size="50" name="import_file">
                 </div>
                 <div class="input-line">
-                    Field separator: <select name="csv_delimiter"><option value="," selected>comma</option><option value="\t">tab</option></select>&nbsp;&nbsp;&nbsp;
+                    Field separator: <select name="csv_delimiter"><option value="," selected>comma</option><option value="tab">tab</option></select>&nbsp;&nbsp;&nbsp;
                     <!-- Multi-value separator: <select name="val_separator"><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp; -->
                     Line separator: <input name="csv_linebreak" value="\n">&nbsp;&nbsp;&nbsp;
                     Quote: <select name="csv_enclosure"><option selected value='"'>"</option><option value="'">'</option></select><br/><br/>
