@@ -103,6 +103,7 @@ select_rectype.change(function (event){
         var sval = rectype?top.HEURIST.rectypes.names[rectype]+' ID':'';
         $("#new_idfield").val(sval);
         $("#new_idfield2").val(sval);
+        $("#idfield").val('');
         
         //matching -- id fields
         $('option[class^="idfield2_"]').hide(); //hide all
@@ -143,6 +144,7 @@ select_rectype.change(function (event){
             sel_rt.show();  //show current only    
         }*/
         
+        
         $("#recid_field").val('');
 
     }else{
@@ -165,7 +167,7 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
         if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
             ($('#'+key).parent()).show();
             $('#'+key).val(form_vals[key]);
-            //*$('#cb'+key).attr('checked', 'checked');
+            //$('#cb'+key).attr('checked', true);
             document.getElementById('cb'+key).checked = true;
             //$('#cb'+key).parent().show();
             isbtnvis = true;
@@ -226,14 +228,17 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
    
    $(".analized").show();
 
+   if(form_vals['error_message']){
+       alert(form_vals['error_message']);
+   }
   
 }); //end init function
 
 //
 // Update progress counter for record update/insert
 //
-function update_counts(added, updated, total){
-    $("#div-progress2").html("added: "+added+" updated:"+updatred+"  total:"+total);
+function update_counts(processed, added, updated, total){
+    $("#div-progress2").html("Added: "+added+" Updated:"+updated+". Processed "+processed+" of "+total);
 }
 
 //
@@ -399,8 +404,10 @@ function showHideSelect2(ind){
 //
 function onRecIDselect2(){
     var fld = $("#recid_field").val();
-    var ind = fld.substr(6);
-    onRecIDselect(ind);
+    if(fld){
+        var ind = fld.substr(6);
+        onRecIDselect(ind);
+    }
 }
 
 // 

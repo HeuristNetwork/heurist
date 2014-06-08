@@ -115,8 +115,9 @@ div.header{
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.required{
+.required { 
     font-weight: bold;
+    color:red;
 }
 .help{
     font-size:0.9em;
@@ -183,7 +184,6 @@ $sa_mode = @$_REQUEST['sa_mode'];
 $step = intval(@$_REQUEST["step"]);
 if(!$step) $step=0;
 
-echo '<div id="div-progress2"></div>';
 echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
 ob_flush();flush();
 
@@ -263,18 +263,29 @@ if(is_array($imp_session)){
 //error_log(print_r($res, true));
                 
             }else if($step==3){  //create records - load to import data to database
-            
-                echo '<script>showProgressMsg("Please wait, records are creating/updating")</script>';
+?>
+<div id="main_import_result">
+        <h4>IMPORT DATA RESULTS</h4>
+        <hr width="100%" />            
+        <div id="div-progress2"></div>
+        <div>
+<?php
                 ob_flush();flush();
             
                 $res = doImport($mysqli, $imp_session, $_REQUEST);
+?>   
+        </div>
+        <br /><br /><input type="button" value="Back" onClick="showRecords('mapping');">;             
+</div><!-- main_import_result -->  
+<?php                
             }
         
         }
         if(is_array($res)) {
             $imp_session = $res;
         }else if($res && !is_array($res)){
-            echo "<p style='color:red'>ERROR: ".$res."</p>";        
+            echo '<script>form_vals["error_message"] = "'.$res.'";</script>';
+            //echo "<p style='color:red'>ERROR: ".$res."</p>";        
         }
     }
     
@@ -331,7 +342,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
                 <div id="div_idfield_exist" style="display: none;">
                     <span>You have already used <span id="span1">Person ID as a field name&nbsp;</span> to hold the IDs of <span id="span2">Person</span> records (which may later be used as a Pointer Field in Update mode).<br /></span>
                     <input type="radio" id="rb_idfield0" name="idfield0" checked="checked" 
-                            onchange="{$('#rb_idfield1_div').hide(); $('#rb_idfield0_div').show();$('#idfield').val('')}"/>
+                            onchange="{/*$('#rb_idfield1_div').hide();*/$('#rb_idfield0_div').show();$('#idfield').val('')}"/>
                     <label for="rb_idfield0">I wish to use a distinct field name</label>
                         <div id="rb_idfield0_div" style="padding-left: 30px;">
                             <label for="new_idfield2">Enter new field name</label>
@@ -427,7 +438,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <br/>
         <div>
             <label for="recid_field">Choose column identifying the records to be updated</label>
-            <select id="recid_field" onchange="{onRecIDselect2()}">
+            <select id="recid_field" name="recid_field" onchange="{onRecIDselect2()}">
                 <option value="" disabled="disabled">select...</option>
         <?php   
         //created ID fields     
@@ -483,7 +494,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
             $isIndex = false;
             
             if($isProcessed){
-                $checkbox = '<td>&nbsp;</td><td align="center"><input type="checkbox" disabled="disabled" /></td>'; //processed
+                $checkbox = '<td align="center"><input type="checkbox" disabled="disabled" /></td>'; //processed
             }else{
                 $rectype = @$imp_session['indexes']["field_".$i];
                 $isIndex = ($rectype!=null);
@@ -796,8 +807,10 @@ function postmode_file_load_to_db($filename, $original) {
         ." CHARACTER SET UTF8"
         ." FIELDS TERMINATED BY '".$csv_delimiter."' "
         ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
-        ." LINES TERMINATED BY '\n' "   //".$csv_linebreak."
+        ." LINES TERMINATED BY '".$csv_linebreak."' "   //".$csv_linebreak."
         ." IGNORE 1 LINES (".$columns.")";
+    
+error_log(">>>".$query);
         
     if (!$mysqli->query($query)) {
         return "can not import data: " . $mysqli->error;
