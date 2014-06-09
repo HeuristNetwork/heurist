@@ -201,7 +201,7 @@ if($step==1 && $imp_session==null){
         echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
         ob_flush();flush();
     
-        $val_separator = $_REQUEST["val_separator"];
+        //$val_separator = $_REQUEST["val_separator"];
         $csv_delimiter = $_REQUEST["csv_delimiter"];
         $csv_linebreak = $_REQUEST["csv_linebreak"];
         $csv_enclosure = $_REQUEST["csv_enclosure"];
@@ -210,7 +210,57 @@ if($step==1 && $imp_session==null){
             $csv_delimiter = "\t";
         }
         
-        $imp_session = postmode_file_selection();
+        if(@$_REQUEST["filename"]){
+            $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], false);    
+        }else{
+            $imp_session = postmode_file_selection();    
+        }
+        
+        if(is_array($imp_session) && @$imp_session['warning']){ 
+?>
+<script type="text/javascript">
+$( function(){ $("#div-progress").hide(); });
+//
+// submit form for second attempt of file upload
+//
+function doUpload2(){
+    showProgressMsg('Please wait');
+    $(document.forms[0]).hide();
+    document.forms[0].submit();
+}
+//
+// reload 
+//
+function doReload(){
+    $("#step").val(0);
+    doUpload2();
+}
+</script>
+        <h4><?=$imp_session['warning']?></h4>
+        <hr width="100%" />
+        
+        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+                <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
+                <input type="hidden" id="step" name="step" value="1">
+                <input type="hidden" name="filename" value="<?=$imp_session['filename']?>">
+                <input type="hidden" name="original" value="<?=$imp_session['original']?>">
+            
+                <input type="hidden" name="csv_delimiter" value="<?=$_REQUEST['csv_delimiter']?>">
+                <input type="hidden" name="csv_linebreak" value="<?=$_REQUEST['csv_linebreak']?>">
+                <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
+
+                <div class="actionButtons">
+                    <input type="button" value="Cancel" onClick="doReload();" style="margin-right: 5px;">
+                    <input type="button" value="Continue" style="font-weight: bold;" onclick="doUpload2()">
+                </div>
+        </form>            
+</body>
+</html>
+<?php 
+exit;           
+        }
+        
+        
 }
 
 //session is loaded - render second step page
@@ -643,10 +693,11 @@ if($validationRes){
 // PAGE STEP 1 ================================================================================
 }else{ 
     if($imp_session!=null){
-        echo "<p color='red'>ERROR: ".$imp_session."</p>";        
+        echo "<p style='color:red'>ERROR: ".$imp_session."</p>";        
     }
 ?>
 <script type="text/javascript">
+$( function(){ $("#div-progress").hide(); });
 //
 // submit form on new file upload
 //
@@ -738,7 +789,7 @@ function postmode_file_selection() {
         }
 
         if (!$error) {    // move on to the next stage!
-            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name']);    
+            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name'], true);    
         }
     }
 
@@ -751,7 +802,7 @@ function postmode_file_selection() {
 // load file into table
 // add record to import_log
 //
-function postmode_file_load_to_db($filename, $original) {
+function postmode_file_load_to_db($filename, $original, $is_first_turn) {
 
     global $csv_delimiter,$csv_linebreak,$csv_enclosure,$mysqli;
 
@@ -762,8 +813,12 @@ function postmode_file_load_to_db($filename, $original) {
             else return 'file could not be read';
     }
     
+    $lb = str_replace("\\n", "\n", $csv_linebreak);
+    $lb = str_replace("\\r", "\r", $lb);
+    $lb = str_replace("\\t", "\t", $lb);
+//error_log(">>>>".$lb);    
     // read header
-    $line = stream_get_line($handle, 1000000, "\n");//$csv_linebreak);
+    $line = stream_get_line($handle, 1000000, $lb);
     fclose($handle);
     if(!$line){
         return "empty header line";
@@ -772,6 +827,17 @@ function postmode_file_load_to_db($filename, $original) {
     //get fields
     $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
     $len = count($fields);
+    
+    if($is_first_turn && $len==1){
+        $temp_file = tempnam(sys_get_temp_dir(), $filename);
+        if (move_uploaded_file($filename, $temp_file)) {
+            return array("warning"=>"You appear to have only one value per line. This probably indicates that you have selected the wrong separator type. Continue?",
+                     "filename"=>$temp_file, "original"=>$original );
+        }else {
+            return "Failed to keep the uploaded file '$temp_file'.";
+        }
+    }
+    
     $import_table = "import".date("YmdHis");
     
     if($len>200){
@@ -815,7 +881,10 @@ function postmode_file_load_to_db($filename, $original) {
         
     if (!$mysqli->query($query)) {
         return "can not import data: " . $mysqli->error;
-    }    
+    } 
+    if(!$is_first_turn){
+        unlink($filename);
+    }   
     
     //calculate uniq values    
     $query = "select ".$counts." from ".$import_table;

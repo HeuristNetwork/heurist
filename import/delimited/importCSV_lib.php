@@ -342,7 +342,8 @@ function matchingAssign($mysqli, $imp_session, $params){
     }
     
     //new records   ".implode(",",$sel_query).",
-    /*OLD*/ $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
+    $mysqli->query("SET SESSION group_concat_max_len = 1000000");
+    $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
                     . $select_query_join_det.$select_query_join_rec
                     . " WHERE $id_field is NULL"
                     . " GROUP BY ". implode(",",$sel_query);
@@ -355,10 +356,23 @@ function matchingAssign($mysqli, $imp_session, $params){
     if($res){
         $ind = -1;
         while ($row = $res->fetch_row()){
-            $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".$row[0].")";  //end($row)
-//DEBUG error_log("3>>>>".$updquery);            
-            if(!$mysqli->query($updquery)){
-                return "can not update import table: mark records for insert";
+            
+            $ids = $row[0];
+            if(substr($ids, -1)==","){
+                $ids = substr($row[0], 0, -1);
+            }
+            $ids = explode(",",$ids);
+            $k = 0;
+            while ($k<count($ids)) {
+                $ids_part = array_slice($ids,$k,100);
+                
+                $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".implode(",",$ids_part).")";  //end($row)
+//DEBUG 
+//error_log("3>>>>".$updquery);            
+                if(!$mysqli->query($updquery)){
+                    return "can not update import table: mark records for insert";
+                }
+                $k = $k+100;
             }
             $ind--;
         }    
@@ -1045,9 +1059,11 @@ function doInsertUpdateRecord($recordId, $params, $details){
                 }
 
             }
+            
+            $step = ceil($tot_count/10);
+            if($step<1) $step=1;
    
-
-            if ($rep_processed % 1 == 0) { //25
+            if ($rep_processed % $step == 0) { //25
                 $tot_count = $imp_session['reccount'];
                 print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
                 ob_flush();

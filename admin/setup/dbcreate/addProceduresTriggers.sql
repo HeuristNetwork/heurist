@@ -675,6 +675,8 @@ DELIMITER $$
 --			from defRecTypes
 --			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 
+    delete from usrRecentRecords where rre_RecID = OLD.rec_ID;
+
 	-- need to change this to check the rectype's type = relationship
 --		if OLD.rec_RecTypeID = relRT then
 		if OLD.rec_RecTypeID = 1 then
