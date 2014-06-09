@@ -67,7 +67,7 @@
     $rep_errors_only = true;
 
     if(!file_exists($mapping_file) || !is_readable($mapping_file)){
-        die("Sorry, could not find/read mapping/configuration file for Zotero sync");
+        die("Sorry, could not find/read mapping/configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation");
     }
     $fh_data = simplexml_load_file($mapping_file);
     if($fh_data==null || is_string($fh_data)){
@@ -95,7 +95,8 @@
                         // find record type with such code (or concept code)
                         $rt_id = getRecTypeLocalID($arr['h3id']);
                         if($rt_id == null){
-                                array_push($mapping_rt_errors, "Rectype code is not recognized: ".$arr['h3id']."  ".$zType);
+                                array_push($mapping_rt_errors, "Record type ".$arr['h3id']."  ".$zType.
+                                    " was not found in the database (use Import Structure to obtain)");
                         }else{
 
                             $mapping_dt = array();
@@ -138,7 +139,7 @@
     }///foreach
 
     if( ($group_ID == null && $user_ID == null) || $api_Key == null){
-        die("Sorry, connection parameters are not defined in configuration file for Zotero sync");
+        die("Sorry, connection parameters are not defined in configuration file .../import/biblio/zoteroMap.xml");
     }
 
     $zotero = new phpZotero($api_Key);
@@ -162,7 +163,7 @@ if(!$step){
     }
     // 2) show mapping issues report
     if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
-        print "<div style='color:red'><br />Warning. There are problem in mapping file.<br />";
+        print "<div style='color:red'><br />Warning. There are problem in the mapping file (import/biblio/zoteroMap.xml)<br />";
         if(count($mapping_rt_errors)>0){
             print "<br />".implode("<br />",$mapping_rt_errors);
         }
