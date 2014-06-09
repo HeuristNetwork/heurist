@@ -15,20 +15,20 @@ echo "Use it as a guide - it will need editing appropriately for your setup"
 if [ -z $1 ] 
    then 
       echo -e "\n\n"
-      echo "Please supply version eg. h3.x.x or h3_alpha, h3_beta, h3_latest (this MUST exist as tar.bz2 on Google Code or script will not download Heurist code)" 
+      echo "Please supply version eg. h3.x.x-alpha, h3-alpha, h3-beta, h3-latest as given on the Google Code website (this MUST exist as a tar.bz2 file on http://heuristscholar.org/HEURIST/DISTRIBUTION)" 
       exit
    fi
  
 # Test download package is valid before we get half way and can't find it ...
-curl --range 0-100 https://heurist.googlecode.com/files/$1.tar.bz2 > /dev/null 2>&1
+curl --range 0-100  http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
 
 rc=$?
 if [ $rc -ne 0 ]
      then 
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check the Google Code website at https://code.google.com/p/heurist/downloads/list"
-        echo "The parameter should be eg. h3.1.4 or h3_latest - do not include the url path or .tar.bz2"
+        echo "Please check the Google Code website at https://code.google.com/p/heurist"
+        echo "The parameter should be eg. h3.1.4-alpha or h3-latest - do not include the url path or .tar.bz2"
         exit
      fi
       
@@ -91,7 +91,7 @@ sudo apachectl restart
 echo "Get Heurist code"
 echo -e "\n"
 
-sudo wget https://heurist.googlecode.com/files/$1.tar.bz2 -P /tmp
+sudo wget  http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2 -P /tmp
 
 cd /tmp
 
@@ -107,6 +107,24 @@ echo -e "\n"
 sudo chown -R apache:apache /var/www/html/$1/
 sudo chmod -R 755 /var/www/html/$1/
 sudo chcon -Rt httpd_sys_content_t $1/
+
+# GET THE EXTERNAL, HELP AND EXEMPLARS DIRECTORIES
+
+cd /var/www/html
+sudo mkdir HEURIST_SUPPORT
+cd HEURIST_SUPPORT
+
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+sudo tar -xjf external.tar.bz2
+sudo rm external.tar.bz2
+
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+sudo tar -xjf help.tar.bz2
+sudo rm help.tar.bz2
+
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
+sudo tar -xjf exemplars.tar.bz2
+sudo rm exemplars.tar.bz2
 
 # ----------------------------------------------------------------
 
