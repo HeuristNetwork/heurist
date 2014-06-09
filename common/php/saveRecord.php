@@ -87,12 +87,11 @@
         $now = date('Y-m-d H:i:s');
 
         $wg = ($wg>=0?$wg:get_user_id());
-        
+     
         // public records data
-        if (! $recordID) {  //new record
+        if (!$recordID || $recordID<0) {  //new record
             //		$log .= "- inserting record ";
-            
-            mysql__insert("Records", array(
+            $recheader = array(
                     "rec_RecTypeID" => $rectype,
                     "rec_URL" => $url,
                     "rec_ScratchPad" => $notes,
@@ -102,12 +101,19 @@
                     "rec_Added" => $now,
                     "rec_Modified" => $now,
                     "rec_AddedByImport" => ($modeImport>0?1:0)
-                ));
+                );
+            if($recordID<0){
+                $recordID = abs($recordID);
+                $recheader["rec_ID"] = $recordID;
+            }
+            
+            mysql__insert("Records", $recheader);
             if (mysql_error()) {
                 errSaveRec("database record insert error - " . mysql_error());
                 return $msgInfoSaveRec;
             }
             $recordID = mysql_insert_id();
+            
         }else{
             $res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
             $record = mysql_fetch_assoc($res);

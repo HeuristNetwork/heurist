@@ -228,7 +228,7 @@ if(is_array($imp_session)){
         var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
         </script>
 <?php    
-    
+    $mode_import_result = "";
     if($step>1){
         $res = null;
 
@@ -263,6 +263,7 @@ if(is_array($imp_session)){
 //error_log(print_r($res, true));
                 
             }else if($step==3){  //create records - load to import data to database
+                $mode_import_result = ' style="display:none"';
 ?>
 <div id="main_import_result">
         <h4>IMPORT DATA RESULTS</h4>
@@ -275,7 +276,7 @@ if(is_array($imp_session)){
                 $res = doImport($mysqli, $imp_session, $_REQUEST);
 ?>   
         </div>
-        <br /><br /><input type="button" value="Back" onClick="showRecords('mapping');">;             
+        <br /><br /><input type="button" value="Back" onClick="{showRecords('mapping');}">            
 </div><!-- main_import_result -->  
 <?php                
             }
@@ -296,7 +297,7 @@ echo "<div>imp session: ".print_r($imp_session)."<br>";
 echo "REUQEST: ".print_r($_REQUEST)."</div>";
 */
 ?>
-<div id="main_mapping">
+<div id="main_mapping"<?=$mode_import_result?>>
         <h4>IMPORT DATA Step 2 <font color="red">(Work in Progress)</font></h4>
         <hr width="100%" />
         <div class="help">
@@ -439,7 +440,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <div>
             <label for="recid_field">Choose column identifying the records to be updated</label>
             <select id="recid_field" name="recid_field" onchange="{onRecIDselect2()}">
-                <option value="" disabled="disabled">select...</option>
+                <option value="">select...</option>
         <?php   
         //created ID fields     
         $hasc = false;
@@ -810,7 +811,7 @@ function postmode_file_load_to_db($filename, $original) {
         ." LINES TERMINATED BY '".$csv_linebreak."' "   //".$csv_linebreak."
         ." IGNORE 1 LINES (".$columns.")";
     
-error_log(">>>".$query);
+//DEBUG error_log(">>>".$query);
         
     if (!$mysqli->query($query)) {
         return "can not import data: " . $mysqli->error;

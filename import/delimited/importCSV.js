@@ -26,7 +26,9 @@
 * 3) Loads values for record from import table
 * 4) Init values for mapping form (checkboxes and selected field in dropdowns)
 */
-$(function() {
+$( init );
+  
+function init() {
     
 $("#div-progress").hide();
 
@@ -167,8 +169,9 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
         if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
             ($('#'+key).parent()).show();
             $('#'+key).val(form_vals[key]);
-            //$('#cb'+key).attr('checked', true);
-            document.getElementById('cb'+key).checked = true;
+            //$('#cb'+key).attr('checked', 'checked');
+            var cb = document.getElementById('cb'+key);
+            if(cb) cb.checked = true;
             //$('#cb'+key).parent().show();
             isbtnvis = true;
         }
@@ -180,11 +183,12 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
         if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
             $('#'+key).parent().show();
             $('#'+key).val(form_vals[key]);
+            var cb = document.getElementById('cb'+key);
+            if(cb) cb.checked = true;
             /*$('#cb'+key).attr('checked', 'checked');
             $('#cb'+key).attr('checked', 'true');
             $('#cb'+key).prop('checked', 'checked');
             $('#cb'+key).prop('checked', true);*/
-            document.getElementById('cb'+key).checked = true;
             //$('#cb'+key).parent().show();
         }
     }    
@@ -232,7 +236,7 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
        alert(form_vals['error_message']);
    }
   
-}); //end init function
+} //end init function
 
 //
 // Update progress counter for record update/insert
