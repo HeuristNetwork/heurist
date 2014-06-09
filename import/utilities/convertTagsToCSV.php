@@ -23,7 +23,11 @@
     */
 
 
-    // TODO: report any unrecognised/misspelt tags
+    // TODO: upload file for processing rather than requiring user to place on server
+    
+    // TODO: recognise sub tags identified by Tag= within lines eg.  Death:  Place=Amiens Date=1915 
+    //       should be rendered as Death:Place and Death:Date columns 
+    //       (use : separator so you can have Death:Place and Birth:Place in same datafile)
 
 
 ?> 

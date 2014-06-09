@@ -4,13 +4,12 @@
     * getDBStructureAsXML.php: returns database definitions (rectypes, details etc.) as XML (HML)
     * 
     * @param includeUgrps=1 will output user and group information in addition to definitions
-    * @param approvedDefsOnly=1 will only output Reserved and Approved definitions
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     3.2   
     */
@@ -35,10 +34,6 @@
 
     // Normally jsut outputs definitions, this will include users/groups
     $includeUgrps=@$_REQUEST["includeUgrps"];    // returns null if not set
-
-    $approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];    // returns null if not set
-    // TO DO: filter for reserved and approved definitions only if this is set
-
 
     // Deals with all the database connections stuff
 
@@ -72,11 +67,14 @@
 
     // *** MOST IMPORTANT ***
     // ** Check this on structure import to make sure versions match **
-    // However use of XML tags allows import even if structure has evolved
+    // However use of XML tags should allow import even if structure has evolved
     print "\n<HeuristDBVersion>".HEURIST_DBVERSION."</HeuristDBVersion>"; 
 
 
-    // Now output each of the definition tables as data for an insert statement. 
+    // TODO: Also need to output general properties of the database set in Structure > Properties / dvanced Properties
+    
+    
+    // Output each of the definition tables in turn
 
     // ------------------------------------------------------------------------------------------
     // defRecTypeGroups
@@ -357,7 +355,8 @@
     // --------------------------------------------------------------------------------------
 
     function html_escape($s) {
-        // TODO: 6/6/14 - we used mysql_real_escape_string because we were producing SQL. Now we are producing XML, do we need it?
+        // TODO: 6/6/14 - we used mysql_real_escape_string because we were producing SQL. 
+        //       Now we are producing XML, we should revise this to appropriate escaping
         return(htmlspecialchars(mysql_real_escape_string($s)));
     } // html_escape
 
@@ -368,8 +367,6 @@
         // Specify fields with $row[fieldname] or $row['fieldname'] (in most cases the quotes
         // are unecessary although perhaps syntactically proper)
 
-        // *** If the order in these prints does not corresponmd with the order in the include files listing fields,
-        // data will load in the wrong fields and the crosswalking function will fail unpredictably ***
 
         switch ($fmt) {  // select the output formatting according to the table
 

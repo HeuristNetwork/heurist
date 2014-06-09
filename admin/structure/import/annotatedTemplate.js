@@ -83,9 +83,9 @@ function receiveMessage(event)
             var message;
             //if (event.origin !== "http://heuristscholar.org"){
             if (false) {
-                message = 'You ("' + event.origin + '") are not worthy';
+                message = 'Response: ("' + event.origin + '"), but not from HeuristScholar.org';
             } else {
-                message = 'I got "' + event.data + '" from "' + event.origin + '"';
+                message = 'RECORD TYPE IMPORT UNDER DEVELOPMENT LATE APRIL 2014. Response: "' + event.data + '" from "' + event.origin + '"';
                 
                 var dv = jQuery('#HeuristRecTypeSource');
                 

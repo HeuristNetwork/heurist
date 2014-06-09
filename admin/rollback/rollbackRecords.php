@@ -66,7 +66,8 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 <body class="popup">
 <div class="banner"><h2>Record rollback</h2></div>
 <div id="page-inner" style="overflow:auto">
-<div id=errorMsg><span>Warning! This function not yet debugged</span></div>
+<div id=errorMsg><span>This function has not yet been converted from Vsn 2</span></div>
+<div>Please advise Heurist developers if rollback is critical to your use of Heurist</div>
 <?php
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
