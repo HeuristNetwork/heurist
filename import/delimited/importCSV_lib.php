@@ -1246,6 +1246,18 @@ function get_list_import_sessions(){
 }
 
 //
+// print list of load data warnings
+//
+function renderWarnings($imp_session){
+    
+    $warnings = $imp_session['load_warnings'];
+    foreach ($warnings as $line) {
+        print $line."<br />";
+    }
+    print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+}
+
+//
 // render the list of records as a table
 //
 function renderRecords($type, $imp_session){

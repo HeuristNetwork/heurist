@@ -348,8 +348,17 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
 */
 ?>
 <div id="main_mapping"<?=$mode_import_result?>>
+
         <h4>IMPORT DATA Step 2 <font color="red">(Work in Progress)</font></h4>
         <hr width="100%" />
+        
+<?php
+if(@$imp_session['load_warnings']){
+    print "<div style='padding:20px;'><span style='color:red;font-weight:bold'>There are warnings on load data </span>".$imp_session['load_warnings'][0].
+        "&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'>show&gt;</a></div>";
+}
+?>        
+        
         <div class="help">
 If the spreadsheet data is complex, this function will allow you to progressively import columns which identify subsidiary entities (record types) such as place, organisation, collection, series, artist etc. The first step is to match key fields and create new records from unmatched rows. This will create a new column ending in ID. This can be used as the key field to import additional columns. Once all subsidiary entities have been matched and imported, you can import the primary entity type representing by the table.
 <br/><br/>
@@ -656,6 +665,18 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         </form>    
 </div>
 <?php
+
+if(@$imp_session['load_warnings']){
+?>
+    <div id="main_load_warnings" style="display:none;">
+            <h4>WARNINGS ON LOAD DATA</h4>
+            <hr width="100%" />
+<?php    
+            renderWarnings( $imp_session );
+            print "</div>";
+}
+
+
 if($validationRes){
     if($cnt_error>0){    
 ?>
@@ -717,7 +738,6 @@ function doSelectSession(){
 </script>
         <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1 <font color="red">Work in Progress</font></h4>
         <hr width="100%" />
-        
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="step" value="1">
@@ -736,6 +756,14 @@ function doSelectSession(){
                     <!-- Multi-value separator: <select name="val_separator"><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp; -->
                     Line separator: <input name="csv_linebreak" value="\n">&nbsp;&nbsp;&nbsp;
                     Quote: <select name="csv_enclosure"><option selected value='"'>"</option><option value="'">'</option></select><br/><br/>
+                </div>
+                <div class="help">
+If you have generated the text file on a Windows system, you might have to use LINE SEPARATOR '\r\n'                
+<br /><br />                 
+Interpret characters preceded by the escape character "\" as escape sequences. For example, "\t", "\n", and "\\" signify tab, newline, and backslash, respectively
+<br /><br />
+To avoid ambiguity, occurrences of the QUOTE character within a field value can be doubled and are interpreted as a single instance of the character. For example, if QUOTE '"' is specified, quotation marks are handled as shown here:
+"The ""BIG"" boss"  -> The "BIG" boss
                 </div>
                 <div class="actionButtons">
                     <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 5px;">
@@ -882,7 +910,21 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
     if (!$mysqli->query($query)) {
         return "can not import data: " . $mysqli->error;
     } 
-    if(!$is_first_turn){
+    
+    $warnings = array();
+    if ($info = $mysqli->info) {
+        if ($mysqli->warning_count) { 
+           array_push($warnings, $info);
+           $e = $mysqli->get_warnings(); 
+           do { 
+               array_push($warnings, $e->message); //$e->errno.": ".
+           } while ($e->next()); 
+        }         
+        /*if(strpos("$info", "Warnings: 0")===false){
+            $mysqli->query("SHOW WARNINGS");
+        }*/
+    }
+    if(!$is_first_turn && file_exists($filename)){
         unlink($filename);
     }   
     
@@ -906,7 +948,11 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID
     
-    return saveSession($mysqli, $session);
+    $session = saveSession($mysqli, $session);
+    if(count($warnings)>0){
+        $session['load_warnings'] = $warnings;
+    }
+    return $session;
 }
 
 ?>
