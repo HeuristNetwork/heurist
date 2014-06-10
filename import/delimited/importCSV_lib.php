@@ -232,8 +232,7 @@ function matchingSearch($mysqli, $imp_session, $params){
                     ." WHERE rec_ID is null "
                     ." GROUP BY ".implode(",",$sel_query);
     $res = $mysqli->query($select_query);
-//  
-error_log(">>>>".$select_query);    
+//DEBUG error_log(">>>>".$select_query);    
     if($res){
         $fres = $mysqli->query('select found_rows()');
         $row = $fres->fetch_row(); 
@@ -792,8 +791,21 @@ function doImport($mysqli, $imp_session, $params){
                     . " FROM ".$import_table;
 
     if($id_field){  //add to list of columns
-        $id_field_idx = count($field_types); //last one
-        $select_query = $select_query." ORDER BY ".$id_field;
+            $id_field_idx = count($field_types); //last one
+            $select_query = $select_query." ORDER BY ".$id_field;
+    }else{
+            //create id field by defauld
+            $field_count = count($imp_session['columns']);
+            $id_field_def = "field_".$field_count;
+            array_push($imp_session['columns'], "ID field for Record type #$recordType" );
+            
+            
+            $imp_session['indexes'][$id_field_def] = $recordType;
+        
+            $altquery = "alter table ".$import_table." add column ".$id_field_def." int(10) ";
+            if (!$mysqli->query($altquery)) {
+                return "can not alter import session table, can not add new index field: " . $mysqli->error;
+            }    
     }
         
 //error_log($sel_query);
@@ -808,6 +820,12 @@ function doImport($mysqli, $imp_session, $params){
         $rep_processed = 0;
         $rep_added = 0;
         $rep_updated = 0;
+        $tot_count = $imp_session['reccount'];
+        $first_time = true;
+        $step = ceil($tot_count/100);
+        if($step>100) $step = 100;
+        else if($step<1) $step=1;
+   
         
         $previos_recordId = null;
         $recordId = null;
@@ -825,7 +843,7 @@ function doImport($mysqli, $imp_session, $params){
                     //save data
                     if($previos_recordId!=null){ //perform action
                         $details = retainExisiting($details, $details2, $params);
-                        doInsertUpdateRecord($recordId, $params, $details); //$recordURL, $recordNotes, 
+                        doInsertUpdateRecord($recordId, $params, $details, $id_field); //$recordURL, $recordNotes, 
                     }
                     $previos_recordId = $recordId_in_import;
                     
@@ -893,32 +911,51 @@ function doImport($mysqli, $imp_session, $params){
                         }
                         
                     }else{
-                        $value = $row[$index];
+                        $value = trim(preg_replace('/([\s])\1+/', ' ', $row[$index]));
                     }
 
                     if($value  && 
                         ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                             //Add new data only if field is empty (new data ignored for non-empty fields)
                         
-                        $cnt = count(@$details["t:".$field_type])+1;
-                        $details["t:".$field_type][$cnt] = $value;
+                        if (!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false){
+                            $cnt = count(@$details["t:".$field_type])+1;
+                            $details["t:".$field_type][$cnt] = $value;
+                        }else{
+                            //DEBUG error_log(">>>>".$value."   ".print_r($details["t:".$field_type],true));
+                        }
                     }
                 }
             }//for import data
             
             if(!$id_field && count($details)>0){ //id field not defined - insert for each line
-                doInsertUpdateRecord($recordId, $params, $details);
+                doInsertUpdateRecord($recordId, $params, $details, $id_field_def);
             }
             
             $rep_processed++;
+            
+            if ($rep_processed % $step == 0) {
+                if($first_time){
+                    print '<script type="text/javascript">$("#div-progress").hide();</script>';
+                    $first_time = false;
+                }
+                print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
+                ob_flush();
+                flush();
+            }            
    
         }//while
         $res->close();
         
         if($id_field && count($details)>0){ //action for last record
             $details = retainExisiting($details, $details2, $params);
-            doInsertUpdateRecord($recordId, $params, $details);
+            doInsertUpdateRecord($recordId, $params, $details, $id_field);
         }
+        if(!$id_field){
+            array_push($imp_session['uniqcnt'], $rep_added);    
+        }
+        print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
+        
     }  
 
     //save mapping into import_sesssion
@@ -1004,13 +1041,13 @@ function findOriginalRecord($recordId){
 //
 //
 //
-function doInsertUpdateRecord($recordId, $params, $details){
+function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
     global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated;
 
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
-    $id_field = @$params['recid_field']; //record ID field is always defined explicitly
+    //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
     
             //add-update Heurist record
             $out = saveRecord($recordId, $recordType,
@@ -1060,15 +1097,7 @@ function doInsertUpdateRecord($recordId, $params, $details){
 
             }
             
-            $step = ceil($tot_count/10);
-            if($step<1) $step=1;
-   
-            if ($rep_processed % $step == 0) { //25
-                $tot_count = $imp_session['reccount'];
-                print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
-                ob_flush();
-                flush();
-            }
+
     
 }
 
