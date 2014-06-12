@@ -138,13 +138,16 @@
         }
     }///foreach
 
-    if( ($group_ID == null && $user_ID == null) || $api_Key == null){
-        die("Sorry, connection parameters are not defined in configuration file .../import/biblio/zoteroMap.xml");
-    }
+    $zotero = null;
+    
+if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
+   print "<div style='color:red'><br />Connection parameters are not defined in configuration file .../import/biblio/zoteroMap.xml</div></body></html>";
+   exit;
+}
 
-    $zotero = new phpZotero($api_Key);
-
-if(!$step){
+   $zotero = new phpZotero($api_Key);
+    
+if(!$step ){  //first step
 
     // 1) verify connection to zotero (get total count of top-level items in zotero)
     if($group_ID){
@@ -152,28 +155,48 @@ if(!$step){
     }else{
         $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
     }
-
-    $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19, strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
-
-    //print $items;
-
-    print "<div>Count items in Zotero: $totalitems";
-    if($totalitems>0){
-        print "<br /><br /><a href='syncZotero.php?step=1&cnt=".$totalitems."&db=".HEURIST_DBNAME."'><button>Start</button></a></div>";
-    }
-    // 2) show mapping issues report
-    if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
-        print "<div style='color:red'><br />Warning. There are problem in the mapping file (import/biblio/zoteroMap.xml)<br />";
-        if(count($mapping_rt_errors)>0){
-            print "<br />".implode("<br />",$mapping_rt_errors);
+    
+    $code = $zotero->getResponseStatus();
+    
+    if($code>499 ){
+        print "<div style='color:red'><br />Zotero Server Side Error. It returns response code: $code.<br /><br />"
+            ."Try this operatiobn later</div>";   
+    }else if($code>399){
+        $msg = "<div style='color:red'><br />Error. Can not connect to Zotero API. It returns response code: $code.<br /><br />";
+        if($code==401 || $code==403){
+            $msg = $msg."Verify API key in configuration file .../import/biblio/zoteroMap.xml";
+        }else if($code==404 ){
+            $msg = $msg."Verify User and Group ID in configuration file .../import/biblio/zoteroMap.xml";
+        }else if($code==407 ){
+            $msg = $msg."Proxy Authentication Required";
         }
-        if(count($mapping_dt_errors)>0){
-            print "<br /><br />Issues with detail types:<br />".implode("<br />",$mapping_dt_errors);
-        }
-        print "</div>";
-    }
+        print $msg."</div>";   
+    }else if(!items){
+        print "<div style='color:red'><br />Unrecognized Error. Can not connect to Zotero API. It returns response code: $code</div>";   
+    }else{
 
-}else if ($step=='1'){
+        $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19, strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
+
+        //print $items;
+
+        print "<div>Count items in Zotero: $totalitems</div>";
+        if($totalitems>0){
+            print "<div><br /><br /><a href='syncZotero.php?step=1&cnt=".$totalitems."&db=".HEURIST_DBNAME."'><button>Start</button></a></div>";
+        }
+        // 2) show mapping issues report
+        if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
+            print "<div style='color:red'><br />Warning. There are problem in the mapping file (import/biblio/zoteroMap.xml)<br />";
+            if(count($mapping_rt_errors)>0){
+                print "<br />".implode("<br />",$mapping_rt_errors);
+            }
+            if(count($mapping_dt_errors)>0){
+                print "<br /><br />Issues with detail types:<br />".implode("<br />",$mapping_dt_errors);
+            }
+            print "</div>";
+        }
+    
+    }
+}else if ($step=='1'){ //second step
 
     $alldettypes = getAllDetailTypeStructures();
     $allterms = getTerms();
@@ -890,6 +913,10 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
                 return $new_recid;
 }
 
+//isNullOrEmptyString
+function is_empty($question){
+    return (!isset($question) || trim($question)==='');
+}
 
 ?>
 
