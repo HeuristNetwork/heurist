@@ -164,7 +164,8 @@
             //		$log .= "- testing missing detatils ";
             $missed = "";
             while ($row = mysql_fetch_row($res)) {
-                $missed = $missed.$row[2]." ";
+                $conceptCode = getDetailTypeConceptID($row[1]);
+                $missed = $missed.$row[2]." (Code:".$conceptCode.") ";
             }
             /*****DEBUG****///error_log("MISSED ".$missed);
             // at least one missing field
