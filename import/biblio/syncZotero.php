@@ -537,12 +537,9 @@ function addMapping($arr, $zType)
                                             $res = getResourceMapping($dt_code);
                                             if(is_array($res)){
                                                 $mapping_dt[strval($arr['value'])] = $res;
-
 //DEBUG error_log(">>>>>".print_r($res, true));
-
                                             }else{
                                                 array_push($mapping_dt_errors, $arr['value'].$res." in ".$zType);
-                                                continue;
                                             }
 
                                         }else{
