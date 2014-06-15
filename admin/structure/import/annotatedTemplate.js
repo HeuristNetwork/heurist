@@ -1,3 +1,6 @@
+//
+// init postMessage events
+//
 if (!window['postMessage'])
     alert("postMessage is not supported");
 else {
@@ -12,6 +15,10 @@ else {
     }
 }
 
+// 
+// Send message to content of iframe 
+// (script in iframe replace div to button and send "check" request
+//
 function onFrameLoad(){
     
         //send message to frame    
@@ -25,17 +32,24 @@ function onFrameLoad(){
     
 }
 
+//
+// we can recieve 2 kind of messages
+// heurist:add:[rectypeid] and heurist:check:[rectypeid] 
+//
 function receiveMessage(event)
 {
             var message;
-            //if (event.origin !== "http://heuristnetwork.org"){
-            if (false) {
-                message = 'You ("' + event.origin + '") are not worthy';
+            if (event.origin !== "http://heuristnetwork.org"){
+            //if (false) {
+                //message = 'You ("' + event.origin + '") are not worthy';
             } else {
                 message = 'I got "' + event.data + '" from "' + event.origin + '"';
             }
             alert(message);
 }
+
+//function getRecord
+
 
 /*
     var ContentLocationInDOM = "#someNode > .childNode";
@@ -100,7 +114,7 @@ function receiveMessage(event)
                 //HeuristRecTypeSource
                 var rectypeid = dv.text(); 
                 if(rectypeid!==""){
-                dv.html(jQuery("<button>Import this Record type to my Heurist Database</button>").click(function(){sendMessage("add:"+rectypeid);} )).show();
+                dv.html(jQuery("<button>Import this Record type to my Heurist Database!</button>").click(function(){sendMessage("add:"+rectypeid);} )).show();
                 sendMessage("check:"+rectypeid);
                 }
                 }else if(event.data=="heuristexists"){
@@ -123,7 +137,7 @@ function sendMessage(rectypeid){
 
 }
 
-insert this code into wordpress  template/functions.php
+insert this code into wordpress  wp-content/themes/[name]/functions.php
 
 
 function my_custom_js() {

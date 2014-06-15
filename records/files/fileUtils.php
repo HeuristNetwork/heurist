@@ -64,8 +64,7 @@
           curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
       }
     }
-//DEBUG 
-error_log(" url = ". $url);
+//DEBUG error_log(" url = ". $url);
 
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);

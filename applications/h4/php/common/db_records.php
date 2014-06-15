@@ -793,6 +793,9 @@
         return true;
     }
 
+    //
+    // get terms from json string
+    //
     function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
 
         global $terms;
@@ -868,6 +871,32 @@
         return $offspring;
     }
 
+    //
+    //
+    //
+    function getTopMostTermParent($term_id, $domain, $topmost=null)
+    {
+        global $terms;
+
+        if(is_array($domain)){
+            $lvl = $domain;
+        }else{
+            $lvl = $terms['treesByDomain'][$domain];
+        }
+        foreach($lvl as $sub_term_id=>$childs){
+
+            if($sub_term_id == $term_id){
+                return $topmost?$topmost:$term_id;                
+            }else if( count($childs)>0 ) {
+                
+                $res = getTopMostTermParent($term_id, $childs, $topmost?$topmost:$sub_term_id );
+                if($res) return $res;
+            }
+        }
+
+        return null; //not found
+    }
+    
     function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
     {
         global $recstructures, $detailtypes;
@@ -902,7 +931,7 @@
             $terms = getTermsFromFormat($terms_ids, $domain);
 
             if (($cntTrm = count($terms)) > 0) {
-                if ($cntTrm == 1) {
+                if ($cntTrm == 1) { //vocabulary
                     $terms = getTermsByParent($terms[0], $domain);
                 }else{
                     $nonTerms = getTermsFromFormat($terms_none, $domain);

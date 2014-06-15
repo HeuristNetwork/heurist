@@ -175,7 +175,7 @@
 
                     // TODO: New URL should be active March 2014 when H3 on HeuristScholar.org updated to 3.1.8
                     // $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
-                    $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/getNextDBRegistrationID.php" . 
+                    $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
                     "?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;

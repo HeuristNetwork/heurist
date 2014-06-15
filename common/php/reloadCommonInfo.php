@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* reloadCommonInfo.pgp - returns definitions as json
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
