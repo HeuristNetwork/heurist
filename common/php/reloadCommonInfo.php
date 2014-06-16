@@ -58,7 +58,8 @@ if(@$_REQUEST['action']=='usageCount'){
 	$rv['detailTypes'] = getAllDetailTypeStructures(false);
 	$rv['terms'] = getTerms(false);
 }
-print json_format($rv, true);
+print json_encode($rv);
+//json_format($rv, true);
 
 ob_end_flush();
 ?>

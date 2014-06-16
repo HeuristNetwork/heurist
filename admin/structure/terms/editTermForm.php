@@ -35,7 +35,7 @@
 // User must be system administrator or admin of the owners group for this database
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__).'/../saveStructure.php');
+require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to modify database structure</span><p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
@@ -61,10 +61,12 @@ if (!is_admin()) {
             $meesage = "<div style='color:red'>Display name is mandatory!</div>";
         }else{
 
-            $db = mysqli_connection_overwrite(DATABASE); //artem's
+            $mysqli = mysqli_connection_overwrite(DATABASE); //artem's
 
             $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), $parent_id."-1",
                     array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['domain'], ($parent_id==0?null:$parent_id) ,"open",$_REQUEST['code']), null);
+                    
+            $mysqli->close();                            
 
             if(is_numeric($res)){
 

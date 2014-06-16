@@ -649,7 +649,7 @@ function returnErrorMsgPage($critical, $msg = null) {
 	}
 	if ($redirect) {
         
-error_log("REDIRECT TO ".$redirect);        
+//DEBUG  error_log("REDIRECT TO ".$redirect);        
         
 		if (defined('ISSERVICE')) {
 			echo "/*DEBUG: it happens in " . $_SERVER['PHP_SELF'] . " */ location.replace(\"" . $redirect . "\");";

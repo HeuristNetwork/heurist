@@ -60,7 +60,7 @@
         "rty_Type"=>"s",
         "rty_ShowURLOnEditForm" =>"i",
         "rty_ShowDescriptionOnEditForm" =>"i",
-        "rty_Modified"=>"i",
+        //"rty_Modified"=>"i",
         "rty_LocallyModified"=>"i"
     );
 
@@ -252,23 +252,30 @@
             $parameters = array("");
             $titleMask = null;
             $query = "";
+            $querycols = "";
             
             foreach ($commonNames as $colName) {
                 $val = array_shift($rt[0]['common']);
 
-                //keep value of text title mask to create canonical one
-                if($colName == "rty_TitleMask"){
-                    $titleMask = $val;
-                }
-
-                    if($query!="") {
-                        $query = $query.",";
+                if(@$rtyColumnNames[$colName]){
+                    //keep value of text title mask to create canonical one
+                    if($colName == "rty_TitleMask"){
+                        $titleMask = $val;
                     }
-                    $query = $query."?";
-                    $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
+
+                        if($query!="") {
+                            $query = $query.",";
+                            $querycols = $querycols.",";
+                        }
+                        $querycols = $querycols.$colName;
+                        $query = $query."?";
+                        $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
+                        
+//DEBUG error_log($colName."  ".$rtyColumnNames[$colName]." = ".$val);
+                }
             }
 
-            $query = "insert into defRecTypes ($colNames) values ($query)";
+            $query = "insert into defRecTypes ($querycols) values ($query)";
             
             $rows = execSQL($mysqli, $query, $parameters, true);
 
@@ -663,7 +670,7 @@
 
 			$colNames = join(",",$columnNames);
 			foreach ( $rt as $newRT) {
-
+                
 				$colValues = $newRT['values'];
 				$parameters = array(""); //list of field date types
 				$query = "";
@@ -681,7 +688,7 @@
 				if($rtg_Name){
 					$mysqli->query("select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name'");
 					if ($mysqli->affected_rows==1){
-						$ret['error'] = "There is already group with name '$rtg_Name'";
+						$ret['error'] = "There is already record type group with name '$rtg_Name'";
 						return $ret;
 					}
 				}
@@ -851,7 +858,7 @@
 				if($dtg_Name){
 					$mysqli->query("select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name'");
 					if ($mysqli->affected_rows==1){
-						$ret['error'] = "There is already group with name '$dtg_Name'";
+						$ret['error'] = "There is already detail group with name '$dtg_Name'";
 						return $ret;
 					}
 				}
@@ -1006,14 +1013,22 @@
 
 			$parameters = array(""); //list of field date types
 			$query = "";
+            $querycols = "";
 			foreach ($commonNames as $colName) {
 				$val = array_shift($dt['common']);
-				if($query!="") $query = $query.",";
-				$query = $query."?";
-                $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
+                if(@$dtyColumnNames[$colName]){
+                
+				    if($query!="") {
+                        $query = $query.",";   
+                        $querycols = $querycols.",";   
+                    }
+				    $query = $query."?";
+                    $querycols = $querycols.$colName;
+                    $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
+                }
 			}
 
-			$query = "insert into defDetailTypes ($colNames) values ($query)";
+			$query = "insert into defDetailTypes ($querycols) values ($query)";
 
 			$rows = execSQL($mysqli, $query, $parameters, true);
 

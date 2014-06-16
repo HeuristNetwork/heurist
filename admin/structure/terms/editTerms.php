@@ -99,7 +99,7 @@ require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 		</div>
 
 		<!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
-        <div id="tabContainer" class="yui-navset yui-navset-top" style="y:138; height:70%; width:400; max-width:300; float: left; overflow: hidden;"></div><br/>
+        <div id="tabContainer" class="yui-navset yui-navset-top" style="y:138; height:70%; width:300; max-width:300; float: left; overflow: hidden;"></div><br/>
 
 		<!-- Navigation: Search form to do partial match search on terms in the tree -->
         <div id="formSearch" style="display:block;height:136px;">

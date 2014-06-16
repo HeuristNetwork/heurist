@@ -15,7 +15,7 @@
 */
 
 /**
-* Import rectype via annotated templates
+* Import rectype via annotated templates  - load external descripton (from heuristnetwork.org) into frame
 * 
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
