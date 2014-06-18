@@ -80,6 +80,17 @@
             errSaveRec("cannot change existing record to private note, record save aborted");
             return $msgInfoSaveRec;
         }
+        
+        $rectypeName = null;
+        $res = mysql_query("select rty_Name from defRecTypes where rty_ID=".$rectype);
+        if ($res) {
+            $row = mysql_fetch_row($res);
+            if($row) $rectypeName = $row[0];
+        }
+        if(!$rectypeName){
+            errSaveRec("record type #$rectype is not valid");
+            return $msgInfoSaveRec;
+        }
 
         if ($vis && (!in_array(strtolower($vis),array('hidden','viewable','pending','public')))){
             $vis = null;
@@ -169,11 +180,15 @@
             }
             /*****DEBUG****///error_log("MISSED ".$missed);
             // at least one missing field
-            if($modeImport==2){
-                warnSaveRec("record is missing required field(s): ".$missed);
-            }else{
-                errSaveRec("record is missing required field(s): ".$missed);
-                return $msgInfoSaveRec;
+            if($missed){
+                $msg = "Missing data for Required field(s) in '$rectypeName'. You may need to make fields optional
+                    record is missing required field(s). Missed data: ".$missed;
+                if($modeImport==2){
+                    warnSaveRec($msg);
+                }else{
+                    errSaveRec($msg);
+                    return $msgInfoSaveRec;
+                }
             }
         }
         mysql_query("commit");// if we get to here we have a valid save of the core record.

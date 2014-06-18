@@ -219,7 +219,7 @@
                 doHarvest($dirs);
 
                 print "<div>Syncronization completed</div>";
-                print "<div style=\"color:green\">Total records created: $rep_counter </div>";
+                print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
                 /*if($rep_issues!=""){
                 print "<div>Problems: $rep_issues </div>";
                 }*/
@@ -306,6 +306,8 @@
                 $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
 
                 $rep_processed = 0;
+                $rep_added = 0;
+                $rep_updated = 0;
                 $rep_processed_dir = 0;
                 $rep_ignored = 0;
                 $f_items = null; //reference to items element
@@ -460,13 +462,13 @@
                                                 $recordNotes = readEXIF($filename);
 
                                             }else{
-                                                print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created</div>";
+                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">Error: failed to register, no record created</span></div>";
                                                 //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
                                                 $file_id = null;
                                             }
 
                                         }else{
-                                            print "<div style=\"color:#ff8844\">warning $filename_base file not found, no record created</div>";
+                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">File is referenced in fieldhelper.xml but not found on disk, no record created.</span></div>";
                                         }
                                     }
 
@@ -481,7 +483,7 @@
                                     //set title by default
                                     if (!array_key_exists("t:".$titleDT, $details)){
                                         $details["t:".$titleDT] = array("1"=>$filename);
-                                        print "<div style=\"color:#ff8844\">warning $filename_base No title recorded in XML manifest for this file, using file path + name</div>";
+                                        print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: no title recorded in XML manifest for this file, using file path + name</span></div>";
                                     }
 
                                     $new_md5 = null;
@@ -511,7 +513,7 @@
                                     );
 
                                     if (@$out['error']) {
-                                        print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";
+                                        print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".implode("; ",$out["error"])."</span></div>";
                                     }else{
                                         if($new_md5==null){
                                             $new_md5 = md5_file($filename);
@@ -519,22 +521,25 @@
                                         //update xml
                                         if($recordId==null){
                                             if($old_md5!=$new_md5){
-                                                print "<div style=\"color:#ff8844\">warning $filename_base Checksum differs from value in manifest, data file may have been changed</div>";
+                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: Checksum differs from value in manifest, data file may have been changed</span></div>";
                                             }
                                             $f_item->addChild("heurist_id", $out["bibID"]);
                                             $f_item->addChild("md5", $new_md5);
                                             $f_item->addChild("filesize", filesize($filename));
 
+                                            
+                                            $rep_added++;
                                         }else{
                                             $el_heuristid["heurist_id"] = $out["bibID"];
+                                            $rep_updated++;
                                         }
 
                                         if (@$out['warning']) {
-                                            print "<div style=\"color:#ff8844\">$filename_base Warning: ".implode("; ",$out["warning"])."</div>";
+                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: ".implode("; ",$out["warning"])."</span></div>";
                                         }
 
-                                        $rep_processed++;
                                     }
+                                    $rep_processed++;
 
                                 }else{
                                     $rep_ignored++;
@@ -557,8 +562,8 @@
                         print "<div style=\"color:red\">Manifest is either corrupted or empty</div>";
                         //$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
                     }else{
-                        if($rep_processed>0){
-                            print "<div>$rep_processed records created</div>";
+                        if($rep_processed>0){                         // $rep_add records added. $rep_updated records updated
+                            print "<div>$rep_processed files processed. $rep_added added. $rep_updated updated.</div>";
                         }
                         if($rep_ignored>0){
                             print "<div>$rep_ignored files already indexed</div>";
@@ -597,7 +602,7 @@ XML;
                 $cnt_files = 0;
                 $cnt_added = 0;
 
-                //for files in folder that are not specified in the directory
+                //for files in folder that are not specified in the manifest file
                 foreach ($all_files as $filename){
                     if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
@@ -623,7 +628,7 @@ XML;
                                 $recordNotes = readEXIF($filename);
 
                             }else{
-                                print "<div style=\"color:#ff8844\">warning $filename_base failed to register, no record created:  .$file_id</div>";
+                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: failed to register, no record created:  .$file_id</span></div>";
                                 //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
                                 $file_id = null;
                                 continue;
@@ -679,13 +684,12 @@ XML;
                                 null //+comment
                             );
 
-
                             /*****DEBUG****///error_log(">>>>>".filemtime($filename)."  ".date("Y/m/d H:i:s.", filemtime($filename)));
 
                             $f_item = $f_items->addChild("item");
-                            $f_item->addChild("filename", $flleinfo['basename']);
-                            $f_item->addChild("nativePath", $filename);
-                            $f_item->addChild("folder", $flleinfo['dirname']);
+                            $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));
+                            $f_item->addChild("nativePath", htmlspecialchars($filename));
+                            $f_item->addChild("folder", htmlspecialchars($flleinfo['dirname']));
                             $f_item->addChild("extension", $flleinfo['extension']);
                             //$f_item->addChild("DateTime", );
                             //$f_item->addChild("DateTimeOriginal", );
@@ -694,16 +698,19 @@ XML;
                             $f_item->addChild("device", "image");
                             $f_item->addChild("duration", "2000");
                             $f_item->addChild("original_metadata", "chk");
-                            $f_item->addChild("Name0", $flleinfo['basename']);
-                            $f_item->addChild("heurist_id", $out["bibID"]);
+                            $f_item->addChild("Name0", htmlspecialchars($flleinfo['basename']));
                             $f_item->addChild("md5", $new_md5);
                             $f_item->addChild("filesize", filesize($filename));
 
+                            
+                            if (@$out['error']) {
+                                print "<div>Fle: <i>$filename_base</i> <span style='color:red'>Error: ".implode("; ",$out["error"])."</span></div>";
+                            }else{
+                                $f_item->addChild("heurist_id", $out["bibID"]);
+                                $cnt_added++;
+                            }
+                            
                             $rep_processed_dir++;
-
-
-                            $cnt_added++;
-
                         }//check ext
 
                         $cnt_files++;
@@ -719,7 +726,7 @@ XML;
 
 
                 if($rep_processed_dir>0){
-                    print "<div style=\"color:green\">$rep_processed_dir records created (new entries added to manifest)</div>";
+                    print "<div style=\"color:green\">$rep_processed_dir processed. $cnt_added records created (new entries added to manifest)</div>";
                 }
                 print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.',0)</script>'."\n";
                 ob_flush();
