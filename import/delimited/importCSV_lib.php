@@ -170,11 +170,34 @@ function matchingSearch($mysqli, $imp_session, $params){
     if(intval($recordType)<1){
         return "record type not defined";
     }
+/*  EXAMPLE for update 
+    
+use hdb_BoRO_experiments;
+SELECT imp_id, field_1,field_2, d1.dtl_RecID, rec_ID, rec_RecTypeID
+FROM import20140428033030
+left join recDetails d1 on d1.dtl_DetailTypeID=1 and d1.dtl_Value=field_1
+left join Records on d1.dtl_RecID = rec_ID
+where rec_ID is null || 
+(rec_RecTypeID!=10 and imp_id not in 
+(SELECT  imp_id
+FROM import20140428033030, recDetails d1, recDetails d2, Records
+where d1.dtl_DetailTypeID=1 and d1.dtl_Value = field_1 
+and d2.dtl_DetailTypeID=18 and d2.dtl_Value = field_2
+and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
+    
+*/    
     
     //get fields that will be used in search
     $sel_query = array();
-    $select_query_join_rec = " left join Records on rec_RecTypeID=".$recordType;
+    
+    //for insert
+    $select_query_join_rec = array(); //" left join Records on "; //"rec_RecTypeID!=".$recordType;
     $select_query_join_det = "";
+    
+    //for update
+    $select_query_update_from = array($import_table, "Records");
+    $select_query_update_where = array("rec_RecTypeID=".$recordType);
+    
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_keyfield_")===0 && $field_type){
             //get index 
@@ -184,24 +207,33 @@ function matchingSearch($mysqli, $imp_session, $params){
             array_push($sel_query, $field_name); 
             
             if($field_type=="id" || $field_type=="url" || $field_type=="scratchpad"){
-                $select_query_join_rec = $select_query_join_rec." and rec_".$field_type."=".$field_name;
+                
+                array_push($select_query_join_rec, "rec_".$field_type."=".$field_name);
+                //$select_query_join_rec = $select_query_join_rec." and rec_".$field_type."=".$field_name;
+                
+                array_push($select_query_update_where, "rec_".$field_type."=".$field_name);
             }else{
-                $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
-                $select_query_join_det = $select_query_join_det . 
-                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type.
+                $where = "d".$index.".dtl_DetailTypeID=".$field_type.
                  " and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                
+                //$select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
+                array_push($select_query_join_rec, "rec_ID=d".$index.".dtl_RecID");
+                $select_query_join_det = $select_query_join_det . " left join recDetails d".$index." on ".$where;
+                
+                array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
+                array_push($select_query_update_from, "recDetails d".$index); 
             }
         }            
     }  
     if(count($sel_query)<1){
         return "no one key field is selected";
     }
+    
         
-    //query to search record ids                distinct 
+    //query to search record ids  FOR UPDATE               
     $select_query = "SELECT SQL_CALC_FOUND_ROWS rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
-                    ." FROM ".$import_table
-                    .$select_query_join_det.$select_query_join_rec
-                    ." WHERE rec_ID is not null"
+                    ." FROM ".implode(",",$select_query_update_from)
+                    ." WHERE ".implode(" and ",$select_query_update_where)
                     ." GROUP BY rec_ID, ".implode(",",$sel_query);
 
 //DEBUG error_log(">>>".$select_query);
@@ -223,14 +255,20 @@ function matchingSearch($mysqli, $imp_session, $params){
             }
         }
     }else{
-        return "Can not execute query to calculate number of records to be updated";
+        return "Can not execute query to calculate number of records to be updated ".$mysqli->error;
     }
     
-    //find records to insert
-    $select_query = "SELECT SQL_CALC_FOUND_ROWS group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
-                    .$select_query_join_det.$select_query_join_rec
-                    ." WHERE rec_ID is null "
-                    ." GROUP BY ".implode(",",$sel_query);
+    //FIND RECORDS FOR INSERT
+    $select_query = "SELECT SQL_CALC_FOUND_ROWS group_concat(imp_id), ".implode(",",$sel_query)
+                    ." FROM ".$import_table
+                    //.$select_query_join_det." left join Records on ".implode(" and ",$select_query_join_rec)
+                    //." WHERE rec_ID IS NULL || (rec_RecTypeID!=".$recordType." and imp_id not in "
+                    . " WHERE (imp_id NOT IN "
+                    ." (SELECT imp_id "
+                    ." FROM ".implode(",",$select_query_update_from)
+                    ." WHERE ".implode(" and ",$select_query_update_where)
+                    .")) GROUP BY ".implode(",",$sel_query);
+                    
     $res = $mysqli->query($select_query);
 //DEBUG error_log(">>>>".$select_query);    
     if($res){
@@ -298,8 +336,10 @@ function matchingAssign($mysqli, $imp_session, $params){
     
     //get fields that will be used in search
     $sel_query = array();
-    $select_query_join_rec = " left join Records on rec_RecTypeID=".$recordType;
-    $select_query_join_det = "";
+    //for update
+    $select_query_update_from = array($import_table, "Records");
+    $select_query_update_where = array("rec_RecTypeID=".$recordType);
+    
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_keyfield_")===0 && $field_type){
             //get index 
@@ -309,13 +349,16 @@ function matchingAssign($mysqli, $imp_session, $params){
             array_push($sel_query, $field_name); 
             
             if($field_type=="id" || $field_type=="url" || $field_type=="scratchpad"){
-                $select_query_join_rec = $select_query_join_rec." and rec_".$field_type."=".$field_name;
+                array_push($select_query_update_where, "rec_".$field_type."=".$field_name);
             }else{
-                $select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
-                $select_query_join_det = $select_query_join_det . 
-                 " left join recDetails d".$index." on d".$index.".dtl_DetailTypeID=".$field_type
-                 ." and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                $where = "d".$index.".dtl_DetailTypeID=".$field_type.
+                 " and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                
+                array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
+                array_push($select_query_update_from, "recDetails d".$index); 
             }
+            
+            
         }            
     }  
     if(count($sel_query)<1){
@@ -333,21 +376,31 @@ function matchingAssign($mysqli, $imp_session, $params){
         return "can not update import table (clear record id field)";
     }
     //matched records
-    $updquery = "UPDATE ".$import_table.$select_query_join_det.$select_query_join_rec." SET ".$id_field."=rec_ID WHERE rec_ID is not null and imp_id>0";
+    //OLD $updquery = "UPDATE ".$import_table.$select_query_join_det.$select_query_join_rec." SET ".$id_field."=rec_ID WHERE rec_ID is not null and imp_id>0";
     
-//DEBUG error_log("1>>>>".$updquery);
+    $updquery = "UPDATE ".implode(",",$select_query_update_from)." SET ".$id_field."=rec_ID WHERE "
+                         .implode(" and ",$select_query_update_where)." and imp_id>0";
+    
+//DEBUG  error_log("1>>>>".$updquery);
     if(!$mysqli->query($updquery)){
         return "can not update import table (set record id field)";
     }
     
     //new records   ".implode(",",$sel_query).",
     $mysqli->query("SET SESSION group_concat_max_len = 1000000");
-    $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
+    /*OLD $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
                     . $select_query_join_det.$select_query_join_rec
-                    . " WHERE $id_field is NULL"
-                    . " GROUP BY ". implode(",",$sel_query);
-    //$select_query = "select group_concat(imp_id) from ".$import_table
-    //                ." where $id_field is NULL";
+                    . " WHERE ".implode(" and ",$select_query_join_det_where)  //"$id_field is NULL"
+                    . " GROUP BY ". implode(",",$sel_query);*/
+
+    //FIND RECORDS FOR INSERT
+    $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)
+                    ." FROM ".$import_table
+                    . " WHERE (imp_id NOT IN "
+                    ." (SELECT imp_id "
+                    ." FROM ".implode(",",$select_query_update_from)
+                    ." WHERE ".implode(" and ",$select_query_update_where)
+                    .")) GROUP BY ".implode(",",$sel_query);
                     
 //DEBUG error_log("2>>>>".$select_query);
                     
@@ -1203,11 +1256,13 @@ function get_import_session($mysqli, $import_id){
     if($import_id && is_numeric($import_id)){
         
         $res = mysql__select_array2($mysqli, 
-                "select imp_session from import_sessions where imp_id=".$import_id);
+                "select imp_session, imp_table from import_sessions where imp_id=".$import_id);
         
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
-        //$session["import_table"] = $res[1];
+        if(!@$session["import_table"]){ //backward capability
+            $session["import_table"] = $res[1];
+        }
     
         return $session;    
     }else{
