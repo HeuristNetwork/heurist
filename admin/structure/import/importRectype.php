@@ -29,8 +29,8 @@
 //heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/importRectype.php?&db=artem_delete1&id=1126-15
 //heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/importRectype.php?&db=artem_delete1&id=1126-12
 
-$outputFormat = @$_REQUEST["output"]; //html (default) or json
-if($outputFormat!="json"){
+$outputFormat = null; //@$_REQUEST["output"]; //html (default) or json
+if($outputFormat=="json"){
     define('ISSERVICE',1);
 }
 
@@ -81,7 +81,7 @@ if(!@$data['rec_URL']){
     error_exit("Heurist master index returns wrong data for registered db #".$database_id);
 }
 //2. get definitions from remote database ----------------------------------------------------------
-$reg_url = $data['rec_URL'];
+$reg_url = $data['rec_URL'];         //base url for source database
 $reg_url = explode("?",$reg_url);
 
 $url_params = @$reg_url[1];
@@ -91,16 +91,22 @@ if(!$url_params || !$reg_url){
 }
 
 $reg_url = $reg_url."common/php/reloadCommonInfo.php?".$url_params;
+
+//print $reg_url."<br>";
+
 $defs = loadRemoteURLContent($reg_url);                    
 if (!$defs) {                            
     error_exit("Unable to contact source database, possibly due to timeout or proxy setting");    
 }
-//error_log($defs['rectypes']);
+//error_log(
+//print $defs['rectypes'];
 $defs = json_decode($defs, true);
 
 if (!($defs['rectypes'] && $defs['detailTypes'] && $defs['terms'])) {                            
     error_exit("Defintions from source database are invalid");    
 }
+
+$sourceIconURL = $defs['icon_url'];
 
 //DEBUG print $data;
 
@@ -123,6 +129,7 @@ $fields_correspondence = array();
 $fields_correspondence_existed = array();
 $rectypes_correspondence = array(); 
 $terms_correspondence = array(); //"enum"=>array(), "relation"=>array());
+$terms_correspondence_existed = array();
 $group_ft_ids = array();
 $group_rt_ids = array();
 
@@ -155,7 +162,7 @@ foreach ($imp_recordtypes as $recid){
     foreach ($fields as $ftId => $field){
         if(!in_array($ftId, $fields_correspondence)){
             
-            if($excludeDuplication){
+            if(true || $excludeDuplication){
                 $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
                 $local_ftId = findByConceptCode($ccode, $trg_fieldtypes['typedefs'], $idx_ccode);
                 
@@ -170,8 +177,10 @@ foreach ($imp_recordtypes as $recid){
               array_push($imp_fieldtypes, $ftId);
               
 //6. With list of all base field types: Return data for all terms used ------------------------------------------------
+//DEBUG print $field[0]."  ".$field[$idx_type]."<br>";
               if($field[$idx_type] == "enum" || $field[$idx_type] == "relationtype"){
                          //get top most vocabulary
+//DEBUG print "val>>>  ".$def_dts[$ftId]['commonFields'][$idx_terms]."<br>";                         
                          getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $field[$idx_type]);
               }
         }
@@ -240,11 +249,16 @@ foreach ($imp_recordtypes as $recId){
 $columnNames = $def_rts['commonFieldNames'];
 $dtFieldNames = $def_rts['dtFieldNames'];
 
-$idx_name = $def_rts['commonNamesToIndex']['rty_Name'];
+$idx_name        = $def_rts['commonNamesToIndex']['rty_Name'];
+$idx_origin_dbid = $def_rts['commonNamesToIndex']['rty_OriginatingDBID'];
+$idx_origin_id   = $def_rts['commonNamesToIndex']['rty_IDInOriginatingDB'];
+$idx_ccode       = $def_rts['commonNamesToIndex']['rty_ConceptID'];
+$idx_titlemask   = $def_rts['commonNamesToIndex']['rty_TitleMask'];
+$idx_titlemask_canonical = $def_rts['commonNamesToIndex']['rty_CanonicalTitleMask'];
 
-foreach ($imp_recordtypes as $recId){
-
-    $def_rectype = $def_rts[$recId]['commonFields'];
+foreach ($imp_recordtypes as $rtyID){
+    
+    $def_rectype = $def_rts[$rtyID]['commonFields'];
 
     //replace group id with local one
     $grp_id = $def_rectype[$idx_rt_grp];
@@ -253,14 +267,29 @@ foreach ($imp_recordtypes as $recId){
     //disambiguate name
     $def_rectype[$idx_name] = doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
     
-    $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false);
+    //assign canonical to title mask (since in DB we store only rty_TitleMask)
+    $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
+
+//DEBUG print "canonical:$def_rectype[$idx_titlemask_canonical]<br>";    
+    
+    //fill original ids if missed
+    if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
+        $codes = explode("-",$def_rectype[$idx_ccode]);
+        if($codes && count($codes)==2){
+            $def_rectype[$idx_origin_dbid] = $codes[0];
+            $def_rectype[$idx_origin_id] = $codes[1];
+        }
+    }
+
+    
+    $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false);
     
     if(is_numeric($res)){
         
-        $rtyID  = abs($res);
-        $rectypes_correspondence[$recId] = $rtyID;
+        $new_rtyID  = abs($res);
+        $rectypes_correspondence[$rtyID] = $new_rtyID;
         
-        
+        copyRectypeIcon($rtyID, $new_rtyID);
     }else{
         error_exit("Can not add record type for id#".$recId.". ".$res);
     }
@@ -315,16 +344,18 @@ $idx_name           = $def_dts['fieldNamesToIndex']['dty_Name'];
 $idx_terms_tree     = $def_dts['fieldNamesToIndex']['dty_JsonTermIDTree'];
 $idx_terms_disabled = $def_dts['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 $idx_constraints    = $def_dts['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
+$idx_origin_dbid = $def_dts['fieldNamesToIndex']['dty_OriginatingDBID'];
+$idx_origin_id   = $def_dts['fieldNamesToIndex']['dty_IDInOriginatingDB'];
+$idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
 
 foreach ($imp_fieldtypes as $ftId){
 
     $def_field = $def_dts[$ftId]['commonFields'];
-    array_shift($def_field); //remove dty_ID
     
     //replace grouop id
     $grp_id = $def_field[$idx_dt_grp];
     $def_field[$idx_dt_grp] = $group_ft_ids[$grp_id];
-    
+   
     //disambiguate name
     $def_field[$idx_name] = doDisambiguate($def_field[$idx_name], $trg_fieldtypes['names']);
     
@@ -338,8 +369,18 @@ foreach ($imp_fieldtypes as $ftId){
             $def_field[$idx_constraints] = replaceRecIds(@$def_field[$idx_constraints]);
     }
     
+    //fill original ids if missed
+    if($def_field[$idx_ccode] && (!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id])){
+        $codes = explode("-",$def_field[$idx_ccode]);
+        if($codes && count($codes)==2){
+            $def_field[$idx_origin_dbid] = $codes[0];
+            $def_field[$idx_origin_id] = $codes[1];
+        }
+    }
+    
 //DEBUG print print_r($def_field,true);
     
+    array_shift($def_field); //remove dty_ID
     $res = createDetailTypes($columnNames, array("common"=>$def_field));
     
     if(is_numeric($res)){
@@ -357,16 +398,16 @@ $idx_constraints    = $def_rts['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
 
 $dtFieldNames = $def_rts['dtFieldNames'];
 
-foreach ($imp_recordtypes as $recId){
-    if(@$rectypes_correspondence[$recId]){
+foreach ($imp_recordtypes as $rtyID){
+    if(@$rectypes_correspondence[$rtyID]){
         
         $fields = array();
-        foreach ($def_rts[$recId]['dtFields'] as $ftId => $def_field){
+        foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){
             
             if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
                     //change terms ids for enum and reltypes
-                    $def_field[$idx_terms_tree] = replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
-                    $def_field[$idx_terms_disabled] = replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
+                    $def_field[$idx_terms_tree] = ""; //replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
+                    $def_field[$idx_terms_disabled] = ""; //replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
                 
             }else if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
                     //change record ids for pointers
@@ -378,7 +419,7 @@ foreach ($imp_recordtypes as $recId){
 
 //DEBUG print print_r($fields, true);
         
-        $ret = updateRecStructure( $dtFieldNames , $rectypes_correspondence[$recId], array("dtFields"=>$fields));
+        $ret = updateRecStructure( $dtFieldNames , $rectypes_correspondence[$rtyID], array("dtFields"=>$fields));
         if(is_array($ret)){
         foreach($ret as $id=>$res2){
             foreach($res2 as $dtid=>$res){
@@ -388,8 +429,25 @@ foreach ($imp_recordtypes as $recId){
             }
         }
         }else{
-            error_exit("Can't update record type structure rectype#".$rectypes_correspondence[$recId].". ".$ret);   
+            error_exit("Can't update record type structure rectype#".$rectypes_correspondence[$rtyID].". ".$ret);   
         }
+    }
+}
+
+// VII. Update titlenasks with new ids --------------------------------------------------------------------------------
+$mysqli->commit();
+
+foreach ($imp_recordtypes as $rtyID){
+    if(@$rectypes_correspondence[$rtyID]){
+        
+            $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
+
+///DEBUG print "<br>mask before: ".$mask."  rty=".$rectypes_correspondence[$rtyID];
+        
+            $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
+            if(!is_numeric($res)){
+                error_exit($res);   
+            }
     }
 }
 
@@ -411,8 +469,8 @@ $trg_terms = getTerms();
 <hr />
 <b>Record types</b>
 <table border="1">
-<tr><th colspan="2">Source</th><th>&nbsp;</th><th colspan="2">Target</th></tr>
-<tr><th>ID</th><th>Name</th><th>Concept Code</th><th>ID</th><th>Name</th></tr>
+<tr><th colspan="2">Source</th><th>&nbsp;</th><th colspan="3">Target</th></tr>
+<tr><th>ID</th><th>Name</th><th>Concept Code</th><th>ID</th><th>Name</th><th></th></tr>
 <?php
     $idx_name  = $def_rts['commonNamesToIndex']['rty_Name'];
     $idx_ccode = $def_rts['commonNamesToIndex']["rty_ConceptID"];
@@ -422,7 +480,9 @@ $trg_terms = getTerms();
             ."</td><td>"
             .$def_rts[$imp_id]['commonFields'][$idx_ccode]
             ."</td><td>$trg_id</td><td>"
-            .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
+            .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
+            ."</td><td>".$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_titlemask_canonical]
+            ."</td></tr>";
     }
 ?>
 </table>
@@ -443,6 +503,33 @@ $trg_terms = getTerms();
             .$def_dts[$imp_id]['commonFields'][$idx_ccode]
             ."</td><td>$trg_id</td><td>"
             .$trg_fieldtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
+    }
+    
+?>
+</table>
+<br/><br/>
+<b>Terms</b>
+<table border="1">
+<tr><th colspan="2">Source</th><th>&nbsp;</th><th colspan="3">Target</th></tr>
+<tr><th>ID</th><th>Name</th><th>Concept Code</th><th>ID</th><th>Name</th></tr>
+<?php
+    $idx_name  = $defs['terms']['fieldNamesToIndex']['trm_Label'];
+    $idx_ccode = $defs['terms']['fieldNamesToIndex']["trm_ConceptID"];
+
+    foreach ($terms_correspondence as $imp_id=>$trg_id){
+        if($terms_correspondence_existed[$imp_id]) continue;
+        
+        if(@$defs['terms']['termsByDomainLookup']['enum'][$imp_id]){
+            $domain = 'enum';
+        }else{
+            $domain = 'relation';
+        }
+        
+        print "<tr><td>$imp_id</td><td>".$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_name]
+            ."</td><td>"
+            .$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_ccode]
+            ."</td><td>$trg_id</td><td>"
+            .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
     }
 ?>
 </table>
@@ -543,12 +630,29 @@ function replaceRecIds($constraints){
 function replaceTermIds( $sterms, $domain ) {
     global $terms_correspondence;
     
-    if($domain="relationtype") $domain = "relation";
+    if($sterms==null || $sterms=="") return $sterms;
+    
+    if($domain=="relationtype") $domain = "relation";
     // Import terms
-    foreach ($terms_correspondence as $importTermID=>$translatedTermID) {
-        //replace termID in string
-        $sterms = preg_replace("/\"".$importTermID."\"/","\"".$translatedTermID."\"",$sterms);
+
+//DEBUG print "<div> bef ".$sterms."<div>";
+    
+    if (strpos($sterms,"{")!== false) {
+        foreach ($terms_correspondence as $imp_id=>$trg_id) {
+            //replace termID in string
+            $sterms = preg_replace("/\"".$imp_id."\"/","\"".$trg_id."\"",$sterms);
+        }
+    }else{
+        $aterms = explode(",",$sterms);
+        $aterms_new = array();
+        foreach ($aterms as $imp_id) {
+           if(@$terms_correspondence[$imp_id]){
+               array_push($aterms_new, $terms_correspondence[$imp_id]);
+           }
+        }
+        $sterms = implode(",", $aterms_new);
     }
+//DEBUG print "<div> afer ".$sterms."<div>";    
     return $sterms;
 }
 
@@ -559,16 +663,19 @@ function replaceTermIds( $sterms, $domain ) {
 function getTopMostVocabulary($terms_ids, $domain){
     global $imp_terms;
     
-    if($domain="relationtype") $domain = "relation";
+    if($domain=="relationtype") $domain = "relation";
     
     //array of valid ids
     $terms_ids =  getTermsFromFormat($terms_ids, $domain);
+//DEBUG print "terms_ids= ".print_r($terms_ids, true)."<br>";    
     foreach ($terms_ids as $term_id){
           $topmost = getTopMostTermParent($term_id, $domain);
+//DEBUG print "topmost= ".$topmost."<br>";    
           if($topmost && !in_array($topmost, $imp_terms[$domain])){
                   array_push($imp_terms[$domain], $topmost);
           }
     }
+    
 }
 
 //
@@ -576,11 +683,14 @@ function getTopMostVocabulary($terms_ids, $domain){
 //
 function importVocabulary($term_id, $domain, $children=null){
     
-    global $defs, $imp_terms, $terms_correspondence, $trg_terms, $excludeDuplication;
+    global $defs, $imp_terms, $terms_correspondence, $terms_correspondence_existed, $trg_terms, $excludeDuplication;
 
     $terms = $defs['terms'];
     
     if($term_id==null){
+        
+//DEBUG print $domain." >>>  ".print_r(@$imp_terms[$domain], true);
+
         foreach($imp_terms[$domain] as $term_id){
             importVocabulary($term_id, $domain, @$terms['treesByDomain'][$domain][$term_id]);
         }
@@ -592,17 +702,22 @@ function importVocabulary($term_id, $domain, $children=null){
         $idx_inverseid = intval($terms['fieldNamesToIndex']["trm_InverseTermID"]);
         $idx_label = intval($terms['fieldNamesToIndex']["trm_Label"]);
         $idx_code  = intval($terms['fieldNamesToIndex']["trm_Code"]);
+        $idx_origin_dbid  = intval($terms['fieldNamesToIndex']["trm_OriginatingDBID"]);
+        $idx_origin_id  = intval($terms['fieldNamesToIndex']["trm_IDInOriginatingDB"]);
         
         $term_import = $terms['termsByDomainLookup'][$domain][$term_id];
         //find term by concept code among local terms
-        if($excludeDuplication){
+        if(true || $excludeDuplication){
             $new_term_id = findTermByConceptCode($term_import[$idx_ccode], $domain);
         }else{
             $new_term_id = null;
         }
-
-        //if not found add new term
-        if(!$new_term_id){
+        
+        if($new_term_id){
+             $terms_correspondence_existed[$term_id] = $new_term_id;
+        }else{
+            //if not found add new term
+            
             //change trm_InverseTermID, trm_ParentTermID
             $term_import[$idx_parentid] = @$terms_correspondence[$term_import[$idx_parentid]];
             $term_import[$idx_inverseid] = @$terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
@@ -613,21 +728,37 @@ function importVocabulary($term_id, $domain, $children=null){
             }else{
                 $lvl_src = $trg_terms['treesByDomain'][$domain];
             }
+
             //verify that code and label is unique for the same level in target(local) db
             $term_import[$idx_code] = doDisambiguateTerms($term_import[$idx_code], $lvl_src, $domain, $idx_code);
             $term_import[$idx_label] = doDisambiguateTerms($term_import[$idx_label], $lvl_src, $domain, $idx_label);
             
-            $new_term_id = updateTerms($columnNames, null, $term_import, null);    
-            if(!is_numeric($new_term_id)){
-                error_exit("Can't add term");
+            //fill original ids if missed
+            if($term_import[$idx_ccode] && (!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id])){
+                $codes = explode("-",$term_import[$idx_ccode]);
+                if($codes && count($codes)==2){
+                    $term_import[$idx_origin_dbid] = $codes[0];
+                    $term_import[$idx_origin_id] = $codes[1];
+                }
+            }
+
+//DEBUG print "<br>ADD ".print_r($term_import, true);
+            
+            $res = updateTerms($columnNames, null, $term_import, null);    
+            if(is_numeric($res)){
+                $new_term_id = $res;
+            }else{
+                error_exit("Can't add term ".print_r($term_import, true)."  ".$res);
             }
         }
         //fill $terms_correspondence    
         $terms_correspondence[$term_id] = $new_term_id;
         
         if($children){
-            foreach($children as $term_id){
-                importVocabulary($term_id, $domain, $children[$term_id]);
+            
+ //DEBUG print "<br>CHILDREN:".print_r($children, true);
+            foreach($children as $id=>$children2){
+                importVocabulary($id, $domain, $children2);
             }
         }
     }
@@ -637,8 +768,9 @@ function importVocabulary($term_id, $domain, $children=null){
 function removeLastNum($name){
 
         $k = strrpos($name," ");
-        if( $k>0 && is_numeric(substr($name, $k)) ){
-          $name.substr(0,$k);  
+
+        if( $k>0 && is_numeric(substr($name, $k+1)) ){
+           $name = substr($name,0,$k);  
         }
         return $name;    
 }
@@ -653,41 +785,45 @@ function removeLastNum($name){
 function doDisambiguateTerms($term_import, $lvl_src, $domain, $idx){        
         global $trg_terms;
         
+        if(!$term_import || $term_import=="") return $term_import;
+
         $found = 0;
-        $name = removeLastNum($term_import[$idx]);
+        $name = removeLastNum($term_import);
         
-        foreach($lvl_src as $trmId){
+        foreach($lvl_src as $trmId=>$childs){
               $name1 = removeLastNum($trg_terms['termsByDomainLookup'][$domain][$trmId][$idx]);
               if($name == $name1){
                 $found++;          
               }
         }
         if($found>0){
-            return $name." ".($found+1);
-        }else{
-            return $term_import[$idx];
+            $term_import = $name." ".($found+1);
         }
+//DEBUG print "<br>nam aft ".$term_import;
+            
+        return $term_import;
 }        
 //
 //
 //
 function doDisambiguate($newvalue, $entities){        
 
+        if(!$newvalue || $newvalue=="") return $newvalue;
+    
         $found = 0;
         $name = removeLastNum($newvalue);
         
         foreach($entities as $id=>$name1){
               $name1 = removeLastNum($name1);
               if($name == $name1){
-                $found++;          
+                    $found++;          
               }
         }
         if($found>0){
-            return $name." ".($found+1);
-        }else{
-            return $newvalue;
+            $newvalue = $name." ".($found+1);
         }
     
+       return $newvalue;
 }
 
 //
@@ -696,11 +832,11 @@ function doDisambiguate($newvalue, $entities){
 function findTermByConceptCode($ccode, $domain){
     global $trg_terms;
 
-    $terms = $trg_terms['termsByDomainLookup'][$type];
+    $terms = $trg_terms['termsByDomainLookup'][$domain];
     $idx_ccode = intval($trg_terms['fieldNamesToIndex']["trm_ConceptID"]);
 
     foreach ($terms as $term_id => $def) {
-        if(is_numeric($term_id) && $def[$term_id]==$ccode){
+        if(is_numeric($term_id) && $def[$idx_ccode]==$ccode){
                 return $term_id;
         }
     }
@@ -744,15 +880,15 @@ function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
             }
             $termIDs = explode(":",$temp);
         } else {
-            /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
+            /*****DEBUG****///echo ( "term array string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
             $termIDs = explode(",",$temp);
         }
         // Validate termIDs
-        /*****DEBUG****///error_log( "term IDS = ". print_r($termIDs,true));
-
         $TL = $terms['termsByDomainLookup'][$domain];
 
+        /*****DEBUG****///print ( $domain." term IDS = ". print_r($termIDs,true))."<br>".print_r($TL, true);
+        
         foreach ($termIDs as $trmID) {
             // check that the term valid
             if ( $trmID && array_key_exists($trmID,$TL) && !in_array($trmID, $validTermIDs)){ // valid trm ID
@@ -763,11 +899,13 @@ function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
 }
 
 //
-//
+//  Find vocabulary ID
 //
 function getTopMostTermParent($term_id, $domain, $topmost=null)
 {
-        global $terms;
+        global $defs;
+        
+        $terms = $defs['terms'];
 
         if(is_array($domain)){
             $lvl = $domain;
@@ -786,5 +924,24 @@ function getTopMostTermParent($term_id, $domain, $topmost=null)
         }
 
         return null; //not found
+}
+
+//
+// Copy record type icon and thumbnail from source to destination database
+//
+function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
+    global $sourceIconURL;
+    
+    $sourceURL = $sourceIconURL.$thumb.$source_RtyID.".png";
+    $targetPath = HEURIST_ICON_DIR.$thumb.$target_RtyID.".png";
+    
+//print "<br>sourcce=".$sourceURL;    
+//print "<br>path=".$targetPath;
+    
+    saveURLasFile($sourceURL, $targetPath);
+    
+    if($thumb==""){
+        copyRectypeIcon($source_RtyID, $target_RtyID, "thumb/th_");
+    }
 }
 ?>

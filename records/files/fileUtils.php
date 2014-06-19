@@ -91,11 +91,10 @@
    */
   function saveURLasFile($url, $filename)
   { //Download file from remote server
-
     $rawdata = loadRemoteURLContent($url);
     return saveAsFile($rawdata, $filename);
   }
-
+  
   function saveAsFile($rawdata, $filename)
   {
     if($rawdata){
@@ -226,5 +225,5 @@ function delFolderTree($dir, $rmdir) {
         return true;
     }
 }
-  
+
 ?>

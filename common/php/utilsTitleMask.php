@@ -114,6 +114,12 @@ function titlemask_value($mask, $rec_id) {
 * @return string
 */
 function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN) {
+    global $fields_correspondence;
+
+    if(isset($fields_correspondence)){
+        static $rdr;
+        $rdr = null;
+    }            
 
     if($rec_id){
         _titlemask__get_record_value($rec_id, true); //keep recvalue in static   
@@ -468,7 +474,7 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
             strcasecmp($rdt_id,'rectitle')==0 ||
             strcasecmp($rdt_id,'modified')==0){
                 return $rdt_id;
-        }else if($mode==1){
+        }else if($mode==1){ //convert to 
             return $rdt_id; //concept code
         } else {
             return _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');  //original name (with capital chars)
@@ -485,12 +491,12 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
 * @param mixed $result_fieldname - result filed
 */
 function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldname='dty_ConceptCode'){
-
+    
     $rdr = _titlemask__get_rec_detail_types($rt);
 
     $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
     //$search_fieldname = strtolower($search_fieldname);
-
+    
     //search in record type structure
     if(@$rdr[$search_fieldname]){  //search by dty_ID, rst_DisplayName, dty_ConceptCode
         return $rdr[$search_fieldname][$result_fieldname];
@@ -514,6 +520,7 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldna
 * @return mixed
 */
 function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
+    global $fields_correspondence;
 
     if (is_array($rt)){
         //ERROR
@@ -531,6 +538,10 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
     
+        if($mode==1 && isset($fields_correspondence)){
+            $field_name = replaceInCaseOfImport($field_name);
+        }
+    
         $rdt_id = _titlemask__get_dt_field($rt, $field_name, $mode);  //get concept code
         if(!$rdt_id){
             //ERROR
@@ -542,7 +553,17 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
         $parent_field_name = $matches[1];
+        
+        
+        if($mode==1 && isset($fields_correspondence)){  //special case
+//error_log( "RT=".$rt." original=".$parent_field_name );    //AAAA        
+            $parent_field_name = replaceInCaseOfImport($parent_field_name);
+        }//special case
+        
         $rdt_id = _titlemask__get_dt_field($rt, $parent_field_name, $mode);
+        
+//if(isset($fields_correspondence)) error_log( $parent_field_name."=>".$rdt_id );    //AAAA   
+        
         if($rdt_id){
 
             $inner_field_name = $matches[2];
@@ -565,7 +586,14 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if($mode==0){
                         return _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $inner_field_name);
                     }else{
-                        return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')) . "." .$inner_field_name;
+                        if($mode==1){
+                            $s1 = $rdt_id;
+                        }else{
+                            $s1 = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                        }
+                        
+error_log(  $s1. "." .$inner_field_name );         //AAAA              
+                        return $s1. "." .$inner_field_name;     
                     }
 
                 }else{
@@ -625,15 +653,42 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if(is_array($inner_rdt)){
                         return $inner_rdt; //ERROR
                 }else if ($inner_rdt) {
-                    return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')) . "." . $inner_rdt;
+                    
+                        if($mode==1){
+                            $s1 = $rdt_id;
+                        }else{
+                            $s1 = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                        }
+                        return $s1. "." .$inner_rdt;     
                 }
             }
-            return ( ($mode==1) ?$rdt_id :_titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName')). ($inner_field_name? ".".$inner_field_name:"");
-
+            
+            if($mode==1){
+                $s1 = $rdt_id;
+            }else{
+                $s1 = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+            }
+            return $s1. ($inner_field_name? ".".$inner_field_name:"");     
         }
     }
 
     return "";
+}
+
+//
+//
+//
+function replaceInCaseOfImport($dty_ID){
+    //special case - replace dty_ID in case of definition import
+    if(strpos($dty_ID,"-")===false && is_numeric($dty_ID)){ //this is not concept code and numeric
+        global $fields_correspondence;
+        if(isset($fields_correspondence) && count($fields_correspondence)>0 && @$fields_correspondence[$dty_ID]){
+//print "<br>>>>was ".$dty_ID;
+                $dty_ID = @$fields_correspondence[$dty_ID];
+//print "<br>>>>replace to ".$dty_ID;
+        }
+    }
+    return $dty_ID;
 }
 
 if (! function_exists('array_str_replace')) {

@@ -43,9 +43,29 @@ function receiveMessage(event)
             //if (false) {
                 //message = 'You ("' + event.origin + '") are not worthy';
             } else {
-                message = 'I got "' + event.data + '" from "' + event.origin + '"';
+                //message = 'I got "' + event.data + '" from "' + event.origin + '"';
+                
+                if(event.data.indexOf('heurist:add:RecTypeSource=')===0){
+                    
+                    var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+                    
+                    var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+                    var url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
+                    
+                    top.HEURIST.util.popupURL(top, url,
+                    {   "close-on-blur": true,
+                        "no-resize": false,
+                        height: 480,
+                        width: 620,
+                        callback: function(context) {
+                            if(! top.HEURIST.util.isnull(context)){
+                                //var recID = Math.abs(Number(context.result[0]));
+                            }
+                        }
+                    });
+                }
             }
-            alert(message);
+            //alert(message);
 }
 
 //function getRecord

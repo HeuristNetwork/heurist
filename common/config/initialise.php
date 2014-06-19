@@ -90,6 +90,7 @@ if (!$serverName) {
 define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
 define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/html
 $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
+define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
 $installDir = preg_replace("/\/(" . HEURIST_TOP_DIRS . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.

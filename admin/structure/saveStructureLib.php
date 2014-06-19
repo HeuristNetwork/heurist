@@ -240,7 +240,7 @@
     * @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
     * @return $ret an array of return values for the various data elements created or errors if they occurred
     **/
-    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields) {
+    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true) {
         global $mysqli, $rtyColumnNames;
         
         $ret = null;
@@ -259,7 +259,7 @@
 
                 if(@$rtyColumnNames[$colName]){
                     //keep value of text title mask to create canonical one
-                    if($colName == "rty_TitleMask"){
+                    if($convertTitleMask && $colName == "rty_TitleMask"){
                         $titleMask = $val;
                     }
 
@@ -292,7 +292,9 @@
                 }
 
                 //create canonical title mask
-                updateTitleMask($rtyID, $titleMask);
+                if($titleMask){
+                    updateTitleMask($rtyID, $titleMask);
+                }
 
                 //create icon and thumbnail
                 getRectypeIconURL($rtyID);
@@ -418,7 +420,7 @@
 
 				$res = execSQL($mysqli, $query, $parameters, true);
 				if(!is_numeric($res)){
-					$ret = "SQL error updating record type $rtyID in updateRectype: ".$res;
+					$ret = "SQL error updating record type $rtyID in updateTitleMask: ".$res;
 				}
 		}
 		return $ret;
@@ -1176,12 +1178,11 @@
 
 		if (count($colNames) && count($values))
 		{
-			$isInsert = (!is_numeric($trmID) && (strrpos($trmID, "-")>0));
+			$isInsert = ($trmID==null || (!is_numeric($trmID) && (strrpos($trmID, "-")>0)));
 
 			$query = "";
-			$fieldNames = "";
+            $querycols = "";
 			$parameters = array("");
-			$fieldNames = join(",",$colNames);
 
             $ch_parent_id = null;
             $ch_code = null;
@@ -1196,12 +1197,14 @@
 				if (array_key_exists($colName, $trmColumnNames)) {
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
-					if($query!="") $query = $query.",";
+					if($query!=""){
+                        $query = $query.",";
+                        $querycols = $querycols.",";
+                    } 
 
 					if($isInsert){
 						$query = $query."?";
-						//if($fieldNames!="") $fieldNames=$fieldNames.",";
-						//$fieldNames = $fieldNames.$colName;
+                        $querycols = $querycols.$colName;
 					}else{
 						$query = $query."$colName = ?";
 					}
@@ -1248,7 +1251,7 @@
 
                 $res = $mysqli->query($dupquery);
                 if ($mysqli->error) {
-                    $ret = "SQL error checking duplication values in terms: ".$mysqli->error;
+                    $ret = "SQL error checking duplication values in terms: ".$mysqli->error."  Query:".$dupquery;
                 } else {
                     $recCount = $res->num_rows;
                     if($recCount>0){
@@ -1262,7 +1265,7 @@
             //insert, update
 			if(!$ret && $query!=""){
 				if($isInsert){
-					$query = "insert into defTerms (".$fieldNames.") values (".$query.")";
+					$query = "insert into defTerms (".$querycols.") values (".$query.")";
 				}else{
 					$query = $query.", trm_LocallyModified=IF(trm_OriginatingDBID>0,1,0)";
 					$query = "update defTerms set ".$query." where trm_ID = $trmID";

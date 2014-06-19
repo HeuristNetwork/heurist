@@ -51,9 +51,11 @@ if(isForAdminOnly("to modify database structure")){
 
     <body>
         <script type="text/javascript" src="annotatedTemplate.js"></script>
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+        
+        <div class="banner"><h2>Import rectypes via Annotated templates</h2></div>
         <div>
-            <div class="banner"><h2>Import rectypes via Annotated templates</h2></div>
-
+        
             <iframe id="templates" onload="onFrameLoad()" src="http://heuristnetwork.org/annotated-templates" width="100%" height="100%" />
 <!--
  <button onclick="onFrameLoad()">Send</button>

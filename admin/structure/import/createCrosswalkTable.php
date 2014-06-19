@@ -322,7 +322,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 					for(i = 0; i < rectypeStructures[rty_ID].length; i++) {
 						if (rectypeStructures[rty_ID][i][3] == "reserved") {
-							dtyStatus = "<img src=\"../../common/images/lock_bw.png\">";
+							dtyStatus = "<img src=\"../../../common/images/lock_bw.png\">";
 						}else{
 							dtyStatus = rectypeStructures[rty_ID][i][3];
 						};
@@ -367,9 +367,9 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				}
 				var arrowElementSrc = document.getElementById("arrow"+rty_ID).src;
 				if(arrowElementSrc.indexOf("arrow_closed") != -1) {
-					document.getElementById("arrow"+rty_ID).src = "../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_open.png";
+					document.getElementById("arrow"+rty_ID).src = "../../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_open.png";
 				} else {
-					document.getElementById("arrow"+rty_ID).src = "../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png";
+					document.getElementById("arrow"+rty_ID).src = "../../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png";
 				}
 			}
 		});
