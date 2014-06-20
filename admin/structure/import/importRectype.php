@@ -84,13 +84,14 @@ if(!@$data['rec_URL']){
 $reg_url = $data['rec_URL'];         //base url for source database
 $reg_url = explode("?",$reg_url);
 
-$url_params = @$reg_url[1];
-$reg_url = @$reg_url[0];
-if(!$url_params || !$reg_url){
+$remote_url_params = @$reg_url[1];
+$remote_url = @$reg_url[0];
+if(!$remote_url_params || !$remote_url){
     error_exit("Heurist master index returns wrong data for registered db #".$database_id);
 }
 
-$reg_url = $reg_url."common/php/reloadCommonInfo.php?".$url_params;
+$reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
+
 
 //print $reg_url."<br>";
 
@@ -105,6 +106,15 @@ $defs = json_decode($defs, true);
 if (!($defs['rectypes'] && $defs['detailTypes'] && $defs['terms'])) {                            
     error_exit("Defintions from source database are invalid");    
 }
+//remote database
+$def_rts = $defs['rectypes']['typedefs'];
+$def_dts = $defs['detailTypes']['typedefs'];
+
+//3. Add the record type as the first element in a list.
+if(!@$def_rts[$rectype_id]){
+    //error_exit("Record type ".$rectype_id." not found among definitions of source database");    
+    error_exit("Sorry, record type $rectype_id was not found in registered database # $database_id. Please advise Heurist development team");
+}
 
 $sourceIconURL = $defs['icon_url'];
 
@@ -112,17 +122,11 @@ $sourceIconURL = $defs['icon_url'];
 
 //target(local) definitions
 $trg_rectypes = getAllRectypeStructures();
-$trg_fieldtypes = getAllDetailTypeStructures();
-$trg_terms = getTerms();
 
 //definitions to be imported - list of ids
 $imp_recordtypes = array();
 $imp_fieldtypes = array();
 $imp_terms = array("enum"=>array(), "relation"=>array());
-
-//remote database
-$def_rts = $defs['rectypes']['typedefs'];
-$def_dts = $defs['detailTypes']['typedefs'];
 
 //source id => target id
 $fields_correspondence = array();
@@ -133,20 +137,42 @@ $terms_correspondence_existed = array();
 $group_ft_ids = array();
 $group_rt_ids = array();
 
-
-//3. Add the record type as the first element in a list.
-if(!@$def_rts[$rectype_id]){
-    error_exit("Record type ".$rectype_id." not found among definitions of source database");    
+if(@$_REQUEST["import"] && count($_REQUEST["import"])>0){
+    
+    //rectypes that will be imported - list of source rectype ids
+    $imp_recordtypes = $_REQUEST["import"]; 
+    
+    //rectypes that will be omited out of export
+    $data = @$_REQUEST["correspondence"]; 
+    if($data){ //
+        $rectypes_correspondence = json_decode($data, true);
+        foreach($imp_recordtypes as $rty_id){
+            if(@$rectypes_correspondence[$rty_id]){
+                 //$rectypes_correspondence[$rty_id] = null;
+                 unset($rectypes_correspondence[$rty_id]);
+            }
+        }
+    }
+    
+//DEBUG    print "<br>Corr:".print_r($rectypes_correspondence, true);
+//DEBUG    print "<br>Import:".print_r($imp_recordtypes, true);
+}else{
+    //4. Parse record types in the list to identify any constrained record pointers or relmarkers to other record types. 
+    // Add these record types to the list. Call step repeatedly until no new record types are added to the list 
+    // Limit maximum number of repeats to 10
+    $imp_recordtypes_tree = array();
+    $imp_recordtypes_tree[$rectype_id] = findDependentRecordTypes($rectype_id, 0);
+    if(count($imp_recordtypes)>1 || count($rectypes_correspondence)>0){
+        renderPreviewForm();
+        exit();
+    }
+  
 }
 
-//4. Parse record types in the list to identify any constrained record pointers or relmarkers to other record types. 
-// Add these record types to the list. Call step repeatedly until no new record types are added to the list 
-// Limit maximum number of repeats to 10
-findDependentRecordTypes($rectype_id, 0);
+//other target definitions
+$trg_fieldtypes = getAllDetailTypeStructures();
+$trg_terms = getTerms();
 
-if(count($rectypes_correspondence)>0 && count($imp_recordtypes)==0){
-    error_exit("It appears that all record types are already in this database");
-}
 
 //5. With list of all record types, build a list of all the base field types:------------------------
     
@@ -157,16 +183,17 @@ $idx_terms = $def_dts['fieldNamesToIndex']['dty_JsonTermIDTree'];
 
 //DEBUG print ">>>>".print_r($trg_fieldtypes['typedefs'][1],true)."<br>";
 
-foreach ($imp_recordtypes as $recid){
-    $fields = $def_rts[$rectype_id]['dtFields'];
+foreach ($imp_recordtypes as $rty_id){
+    $fields = $def_rts[$rty_id]['dtFields'];
     foreach ($fields as $ftId => $field){
-        if(!in_array($ftId, $fields_correspondence)){
+        
+        if(!(@$fields_correspondence[$ftId] || in_array($ftId, $imp_fieldtypes) )){
             
             if(true || $excludeDuplication){
                 $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
                 $local_ftId = findByConceptCode($ccode, $trg_fieldtypes['typedefs'], $idx_ccode);
                 
-//DEBUG print $idx_ccode."  ".$ccode." = ".$local_ftId."<br/>";                
+//DEBUG print "<div>search: ".$ccode." = ".$ftId."=>".$local_ftId."</div>";                
                 if($local_ftId){
                     $fields_correspondence[$ftId] = $local_ftId;
                     $fields_correspondence_existed[$ftId] = $local_ftId;
@@ -187,6 +214,8 @@ foreach ($imp_recordtypes as $recid){
     }
 }
 
+//DEBUG print "<br>Field corresponence: ".print_r($fields_correspondence, true);
+
 //=====================================================================================================================               
 //7. Perform database action - add records, structure, fields and terms into our database -----------------------------
 $mysqli = mysqli_connection_overwrite(DATABASE); // mysqli
@@ -201,6 +230,8 @@ importVocabulary(null, "relation");
 
 $columnNames = array("rtg_Name","rtg_Order","rtg_Description");
 $idx_rt_grp = $def_rts['commonNamesToIndex']['rty_RecTypeGroupID'];
+
+//DEBUG print "<div>rectyppes: ".print_r($imp_recordtypes,true)."</div>";
 
 foreach ($imp_recordtypes as $recId){
 
@@ -266,7 +297,7 @@ foreach ($imp_recordtypes as $rtyID){
     
     //disambiguate name
     $def_rectype[$idx_name] = doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
-    
+
     //assign canonical to title mask (since in DB we store only rty_TitleMask)
     $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
@@ -296,6 +327,9 @@ foreach ($imp_recordtypes as $rtyID){
 }
 
 // IV. Add missed field type groups -----------------------------------------------------------------------------------
+//DEBUG print "<div>fieldtypes: ".print_r($imp_fieldtypes,true)."</div>";
+
+
 $columnNames = array("dtg_Name","dtg_Order","dtg_Description");
 $idx_dt_grp = $def_dts['fieldNamesToIndex']['dty_DetailTypeGroupID'];
 foreach ($imp_fieldtypes as $ftId){
@@ -356,8 +390,12 @@ foreach ($imp_fieldtypes as $ftId){
     $grp_id = $def_field[$idx_dt_grp];
     $def_field[$idx_dt_grp] = $group_ft_ids[$grp_id];
    
+//DEBUG print "<br>bef:".$ftId."  ".$def_field[$idx_name];
+    
     //disambiguate name
     $def_field[$idx_name] = doDisambiguate($def_field[$idx_name], $trg_fieldtypes['names']);
+    
+//DEBUG print "<br>after:".$def_field[$idx_name];    
     
     if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
             //change terms ids for enum and reltypes
@@ -414,10 +452,12 @@ foreach ($imp_recordtypes as $rtyID){
                     $def_field[$idx_constraints] = replaceRecIds(@$def_field[$idx_constraints]);
             }
             
+//DEBUG print "<div>Add:".$ftId." as ".@$fields_correspondence[$ftId]."!</div>";
+            
             $fields[ $fields_correspondence[$ftId] ] = $def_field;
         }
 
-//DEBUG print print_r($fields, true);
+//DEBUG print print_r($fields, true)."<br>";
         
         $ret = updateRecStructure( $dtFieldNames , $rectypes_correspondence[$rtyID], array("dtFields"=>$fields));
         if(is_array($ret)){
@@ -464,6 +504,9 @@ $trg_fieldtypes = getAllDetailTypeStructures();
 $trg_terms = getTerms();
 ?>    
 <html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+</head>
 <body>
 <h4>IMPORT COMPLETED</h4>
 <hr />
@@ -475,14 +518,18 @@ $trg_terms = getTerms();
     $idx_name  = $def_rts['commonNamesToIndex']['rty_Name'];
     $idx_ccode = $def_rts['commonNamesToIndex']["rty_ConceptID"];
 
-    foreach ($rectypes_correspondence as $imp_id=>$trg_id){
-        print "<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
+    foreach ($imp_recordtypes as $imp_id){
+        if(@$rectypes_correspondence[$imp_id]){
+            $trg_id = $rectypes_correspondence[$imp_id];
+    
+            print "<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
             ."</td><td>"
             .$def_rts[$imp_id]['commonFields'][$idx_ccode]
             ."</td><td>$trg_id</td><td>"
             .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
             ."</td><td>".$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_titlemask_canonical]
             ."</td></tr>";
+        }
     }
 ?>
 </table>
@@ -550,7 +597,15 @@ function error_exit($msg){
         header("Content-type: text/javascript");
         print json_format(array("error"=>$msg));
     }else{
-        print "ERROR: ".$msg."<br />";
+?>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+</head>
+<body>
+<div class="error" style="text-align:center;padding:40px;">ERROR: <?=$msg?></div>
+</body></html>
+<?php        
     }
     
     if(isset($mysqli)){
@@ -571,7 +626,7 @@ function findDependentRecordTypes($rectype_id, $depth){
     
     if(!$rectype_id || in_array($rectype_id, $imp_recordtypes) || $depth>9){
         //already in array
-        return;
+        return false;
     }
 
     $def_rts = $defs['rectypes']['typedefs'];
@@ -580,31 +635,43 @@ function findDependentRecordTypes($rectype_id, $depth){
     $idx_ccode = intval($def_rts['commonNamesToIndex']["rty_ConceptID"]);
     $idx_constraints = $def_dts['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
         
-    if($excludeDuplication){
-        $ccode = $def_rts[$rectype_id]['commonFields'][$idx_ccode];
+    $ccode = $def_rts[$rectype_id]['commonFields'][$idx_ccode];
+    
+    if(false && $excludeDuplication){
         $local_recid = findByConceptCode($ccode, $trg_rectypes['typedefs'], $idx_ccode);
-        if($local_recid){
+        if($local_recid){  //already exist
             $rectypes_correspondence[$rectype_id] = $local_recid;
-            return; //rectype with the same concert code is already in database
+            return false; //rectype with the same concept code is already in database
+        }
+    }else{
+        $correspondence = findByConceptCode($ccode, $trg_rectypes['typedefs'], $idx_ccode, true);
+        if(count($correspondence)>0){
+            $rectypes_correspondence[$rectype_id] = $correspondence[0];
         }
     }
 
     array_push($imp_recordtypes, $rectype_id);
+    
+    $res = array('correspondence'=>$correspondence, 'dependence'=>array());
 
     $fields = $def_rts[$rectype_id]['dtFields'];
     //loop all fields and check constraint for pointers and relmarkers
     foreach ($fields as $ftId => $field){
         if($field[$idx_type] == "resource" || $field[$idx_type] == "relmarker"){
             
-           $constraints = $def_dts[$ftId][$idx_constraints];
-           
-           $recids = explode(",", $constraints);
-           foreach ($recids as $recid){
-                 findDependentRecordTypes($recid, $depth+1);
+           $constraints = $def_dts[$ftId]['commonFields'][$idx_constraints];
+
+           $rty_ids = explode(",", $constraints);
+           foreach ($rty_ids as $rty_id){
+                 $dep = findDependentRecordTypes($rty_id, $depth+1);
+                 if($dep){
+                    $res['dependence'][$rty_id] = $dep;
+                 }
            }
         }
     }
     
+    return $res;
 }
 
 //
@@ -846,14 +913,20 @@ function findTermByConceptCode($ccode, $domain){
 //
 //  find by concept code in local definitions
 //
-function findByConceptCode($ccode, $entities, $idx_ccode){
+function findByConceptCode($ccode, $entities, $idx_ccode, $sall=false){
+    
+    $res = array();
 
     foreach ($entities as $id => $def) {
         if(is_numeric($id) && $def['commonFields'][$idx_ccode]==$ccode){
+            if($sall){
+                array_push($res, $id);
+            }else{
                 return $id;
+            }
         }
     }
-    return null;
+    return ($sall)?$res:null;
 }
 
 // a couple of function from h4/db_records.php
@@ -943,5 +1016,100 @@ function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
     if($thumb==""){
         copyRectypeIcon($source_RtyID, $target_RtyID, "thumb/th_");
     }
+}
+
+//===============================
+//
+// Show the form with list of record types to be imported
+//
+// array($rectype_id=>array('correspondence'=>$correspondence, 'dependence'=>array()));
+function renderPreviewForm(){
+    global $imp_recordtypes_tree, $imp_recordtypes, $rectypes_correspondence, $defs;
+        //if(count($imp_recordtypes)>1 || count($rectypes_correspondence)>0){
+    $end_s = count($imp_recordtypes)>1?'s':'';
+?>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+</head>
+<body>
+          
+<h4>REVIEW WHAT TO BE IMPORTED</h4>
+<hr /><br/>
+<form action="importRectype.php" method="POST">
+<input type="hidden" name='correspondence' value='<?=json_encode($rectypes_correspondence)?>' />
+<input type="hidden" name='db' value='<?=HEURIST_DBNAME?>' />
+<input type="hidden" name='id' value='<?=@$_REQUEST["id"]?>' />
+<?php
+if(count($imp_recordtypes)>1){
+    print "<div>The requested record type <b>"
+        .$defs['rectypes']['names'][$imp_recordtypes[0]]
+        ."</b> has related record types (they get pulled in through pointer fields and relationship markers). They will be imported as well.</div><br/>";
+}
+
+if(count($rectypes_correspondence)>0){    
+?>
+<table border="0">
+<tr><th>The requested<br>Record type<?=$end_s?></th><th>Already represented<br> in your database as: 
+</th><th>Mark to import<br>as new record type</th></tr>
+<?php
+    renderePreviewFormRelated($imp_recordtypes_tree, 0);
+?>
+</table>
+<br/>
+<div>Rectypes that are already represented in your database may have a different structure from the template you are importing, and you may therefore wish to continue with this import to create a new record type. Mark checkboxes in this case</div>
+<?php
+}else{
+    print "<table>";
+    renderePreviewFormRelated($imp_recordtypes_tree, 0); 
+    print "</table>";
+}
+?>
+                <div class="actionButtons">
+                    <input type="submit" value="Start Import" style="margin-right: 5px;">
+                    <input type="button" value="Cancel" style="font-weight: bold;" onclick=window.close()>
+                </div>
+</form>          
+</body></html>
+<?php
+}
+//
+//
+//
+function renderePreviewFormRelated($dep_rectypes, $level) {
+    global $defs, $trg_rectypes, $rectypes_correspondence, $remote_url, $remote_url_params;
+    
+    $remote_link = $remote_url."admin/adminMenu.php?".$remote_url_params;
+    
+    $def_rts = $defs['rectypes']['typedefs'];
+    $idx_ccode = $def_rts['commonNamesToIndex']['rty_ConceptID'];
+
+    foreach($dep_rectypes as $rectype_id=>$info){
+print "<tr><td style='padding-left:".($level*10)."px'>"
+        ."<a href='".$remote_link."&mode=rectype&rtID=".$rectype_id."' target='_blank'>"
+        .$defs['rectypes']['names'][$rectype_id]."</a> (concept ID ".$def_rts[$rectype_id]['commonFields'][$idx_ccode].")</td>";
+        
+        if(count($rectypes_correspondence)>0){        
+print "<td>";
+            //list of correspondence    
+            foreach($info['correspondence'] as $idx=>$local_rectype_id){
+print "<div><a href='../../adminMenu.php?db=".HEURIST_DBNAME."&mode=rectype&rtID=".$local_rectype_id."' target='_blank'>"
+                .$trg_rectypes['names'][$local_rectype_id]."</a></div>";
+            }
+
+            if(count($info['correspondence'])>0){
+print "</td><td align='center'><input type='checkbox' name='import[]' value='".$rectype_id."' />";
+            }else{
+print "&nbsp;</td><td><input type='hidden' name='import[]' value='".$rectype_id."' />&nbsp;";
+            }
+print "</td>";
+        }
+
+print "</tr>";
+
+       //list of dependent    
+      renderePreviewFormRelated($info['dependence'], $level+1);
+    }
+
 }
 ?>
