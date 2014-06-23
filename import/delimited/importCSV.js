@@ -92,7 +92,7 @@ select_rectype.change(function (event){
     });
     
     $('#btnStartMatch').hide();
-    $('#btnStartImport').hide();
+    $('#btnStartImport').attr("disabled", "disabled");// .hide();
     
     //id field 
     if(rectype){
@@ -248,11 +248,16 @@ function update_counts(processed, added, updated, total){
 //
 // Start import OR records IDs assign
 //
-function doDatabaseUpdate(cnt_insert_nonexist_id){
+function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     
     var r = true;
     if(cnt_insert_nonexist_id>0){
         r = confirm("Your input data contains "+cnt_insert_nonexist_id+" rows with record IDs in the selected ID column which do not exist in the database. Do you want to proceed and create new records with these specific IDs?")
+    }
+    if(r && cnt_errors>0){
+        r = confirm("There are errors in the data. It is better to fix these in the source file and then "+
+        "process it again, as uploading faulty data generally leads to major fix-up work. "+
+        "Are you sure you want to proceed?");
     }
     if(r){
         $("#input_step").val(3);
@@ -309,9 +314,9 @@ function onFtSelect(ind){
         });
     }
     if(isok){
-        $('#btnStartImport').show();
+        $('#btnStartImport').removeAttr("disabled"); //.show();
     }else{
-        $('#btnStartImport').hide();
+        $('#btnStartImport').attr("disabled", "disabled"); //.hide();
     }
     
     /*if($('select[id^="sa_dt_"][value!=""]').length>0){
@@ -453,7 +458,22 @@ function showRecords(divname){
     $('div[id^="main_"]').hide();
     $('div[id="main_'+divname+'"]').show();
     
+    if(divname=='error'){
+        if($( "#tabs_records" ).length>0){
+            $( "#tabs_records" ).tabs();    
+            
+            //$('div[id^="rec"]').hide();
+            //$( "#rec0" ).show();
+        }
+    }
+    
 }
+function initTabsRecs(){
+    if($( "#tabs_records" ).length>0){
+            $( "#tabs_records" ).tabs();    
+    }
+}
+
 
 //
 // Loads values for record from import table
@@ -686,7 +706,8 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
                           var name = details[dtyID][fi];
 
                           if(!top.HEURIST.util.isnull(name)){
-                                arrterm.push([dtyID, name+' ['+details[dtyID][fit]+']', (details[dtyID][fir]=="required")]);
+                                arrterm.push([dtyID, name+' ['+
+                                top.HEURIST.detailTypes.lookups[details[dtyID][fit]]+']', (details[dtyID][fir]=="required")]);
                           }
                    }
                }

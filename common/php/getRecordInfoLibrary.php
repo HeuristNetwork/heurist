@@ -893,11 +893,15 @@ function getRectypeDef($rtID) {
                         " left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID".
                         " where rty_ID=$rtID".
                         " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
-    $rtDef = mysql_fetch_row($res);
+    if($res){
+        $rtDef = mysql_fetch_row($res);
 
-    //special behaviour for rty_TitleMask
-    //it stores as cocept codes - need to convert it to human readable string
-    $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
+        //special behaviour for rty_TitleMask
+        //it stores as cocept codes - need to convert it to human readable string
+        $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
+    }else{
+        error_log('getRectypeDef: record type not found '.$rtID);
+    }
 
     return $rtDef;
 }

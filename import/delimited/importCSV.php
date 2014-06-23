@@ -352,12 +352,7 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
         <h4>IMPORT DATA Step 2 <font color="red">(Work in Progress)</font></h4>
         <hr width="100%" />
         
-<?php
-if(@$imp_session['load_warnings']){
-    print "<div style='padding:20px;'><span style='color:red;font-weight:bold'>There are warnings on load data </span>".$imp_session['load_warnings'][0].
-        "&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'>show&gt;</a></div>";
-}
-?>        
+      
         
         <div class="help">
 If the spreadsheet data is complex, this function will allow you to progressively import columns which identify subsidiary entities (record types) such as place, organisation, collection, series, artist etc. The first step is to match key fields and create new records from unmatched rows. This will create a new column ending in ID. This can be used as the key field to import additional columns. Once all subsidiary entities have been matched and imported, you can import the primary entity type representing by the table.
@@ -373,9 +368,16 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
 
 
     <div class="input-line">
-        <div class="header"><label for="sa_rectype">Select record type</label></div>
+        <div class="header"><label for="sa_rectype" style="color:red">Select record type</label></div>
         <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:290px"></select>
     </div>
+    
+<?php
+if(@$imp_session['load_warnings']){
+    print "<div style='padding:20px;'><span style='color:red;font-weight:bold'>There are warnings on load data </span>".$imp_session['load_warnings'][0].
+        "&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'>show&gt;</a></div>";
+}
+?>      
 
 <input type="hidden" value="<?=@$_REQUEST['sa_mode']?>" name="sa_mode" id="sa_mode"/> 
 
@@ -497,7 +499,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         </div>    
         <br/>
         <div>
-            <label for="recid_field">Choose column identifying the records to be updated</label>
+            <label for="recid_field" style="color:red">Choose column identifying the records to be updated</label>
             <select id="recid_field" name="recid_field" onchange="{onRecIDselect2()}">
                 <option value="">select...</option>
         <?php   
@@ -613,7 +615,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
                                 <input type="submit" value="Start search/match" style="font-weight: bold;">
                             </span>
                         </span>
-                        <span class="importing"><span id="btnStartImport" style="display: none"><input type="submit" value="Analyse data in buffer" style="font-weight: bold;"></span></span>
+                        <span class="importing"><span><input  id="btnStartImport" type="submit" 
+                                value="Analyse data in buffer" style="disabled:disabled;font-weight: bold;"></span></span>
                         <div class="help"><br></div>
                     </td>
 <?php
@@ -647,7 +650,7 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
                             <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" 
-                                onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>)" style="font-weight: bold;">
+                                onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;">
                         </div>
                     </div></td>
 <?php
@@ -684,9 +687,11 @@ if($validationRes){
             <h4>RECORDS WITH FIELD ERRORS</h4>
             <hr width="100%" />
             <div>
-                <font color="red"><?=@$validationRes['err_message']?></font><span class="help">&nbsp;(* indicates fields with invalid values)</span>
             </div><br />
 <?php
+//<span class="help">&nbsp;(* indicates fields with invalid values)</span>
+//                <font color="red"><@$validationRes['err_message']</font>
+
             renderRecords( 'error', $imp_session );
             print "</div>";
     }

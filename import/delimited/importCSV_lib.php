@@ -161,7 +161,7 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 function matchingSearch($mysqli, $imp_session, $params){
     
     //add result of validation to session 
-    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "err_message"=>null );  
+    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array());  
     $import_table = $imp_session['import_table'];
     
     //get rectype to import
@@ -473,7 +473,7 @@ error_log("2>>>>".$updquery1);
 function validateImport($mysqli, $imp_session, $params){
 
     //add result of validation to session 
-    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "err_message"=>null );  
+    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array() );  
     
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -508,7 +508,7 @@ function validateImport($mysqli, $imp_session, $params){
     
     if(!$id_field){ //ID field not defined - all records will be inserted
         $imp_session['validation']["count_insert"] = $imp_session['reccount'];
-        $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 100";
+        $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
         $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
     }else{
         
@@ -525,10 +525,13 @@ function validateImport($mysqli, $imp_session, $params){
                 ." left join Records on rec_ID=".$id_field
                 ." where rec_RecTypeID<>".$recordType;
         //error_log("check wrong rt: ".$query);
-             $wrong_records = getWrongRecords($mysqli, $query, "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", $imp_session, array($id_field));
-             if($wrong_records) {
-                array_push($imp_session['validation']['mapped_fields'], $id_field);
-                return $wrong_records;          
+             $wrong_records = getWrongRecords($mysqli, $query, "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", $imp_session, $id_field);
+             if(is_array($wrong_records) && count($wrong_records)>0) {
+                array_push($wrong_records['validation']['mapped_fields'], $id_field);
+//error_log(print_r($imp_session['validation']['mapped_fields'],true));
+                $imp_session = $wrong_records;   
+             }else if($wrong_records) {
+                return $wrong_records;
              }
              
              //find record ID that are not exists in HDB - to insert
@@ -557,7 +560,7 @@ function validateImport($mysqli, $imp_session, $params){
            ." FROM ".$import_table
            ." left join Records on rec_ID=".$id_field
            ." WHERE rec_ID is not null and ".$id_field.">0"
-           ." ORDER BY ".$id_field." LIMIT 100";
+           ." ORDER BY ".$id_field." LIMIT 5000";
 //DEBUG error_log("2.upd >>>>".$select_query);           
            $imp_session['validation']['recs_update'] = mysql__select_array3($mysqli, $select_query, false);
            
@@ -573,7 +576,7 @@ function validateImport($mysqli, $imp_session, $params){
            if( $row[0]>0 ){
                 $imp_session['validation']['count_insert'] = $row[0];
                 //find first 100 records to display
-                $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0 LIMIT 100";
+                $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0 LIMIT 5000";
 //DEBUG error_log("2.ins >>>>".$select_query);           
                 $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
            }
@@ -589,7 +592,7 @@ function validateImport($mysqli, $imp_session, $params){
                $select_query = "SELECT imp_id, ".implode(",",$sel_query)
                 ." FROM ".$import_table 
                 ." LEFT JOIN Records on rec_ID=".$id_field
-                ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 100";
+                ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000";
                 $res = mysql__select_array3($mysqli, $select_query, false);
                 if($res && count($res)>0){
                     if(@$imp_session['validation']['recs_insert']){
@@ -609,15 +612,15 @@ function validateImport($mysqli, $imp_session, $params){
  $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
     
  $missed = array();
- $query_reqs = array(); //fieldname from import table
+ $query_reqs = array(); //fieldnames from import table
  $query_reqs_where = array(); //where clause for validation
 
  $query_enum = array();
- $query_enum_join = "";
+ $query_enum_join = array();
  $query_enum_where = array();
 
  $query_res = array();
- $query_res_join = "";
+ $query_res_join = array();
  $query_res_where = array();
  
  $query_num = array();
@@ -655,29 +658,32 @@ function validateImport($mysqli, $imp_session, $params){
         if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
             array_push($query_enum, $field_name);
             $trm1 = "trm".count($query_enum);
-            $query_enum_join  = $query_enum_join.
-     " left join defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ";
-            array_push($query_enum_where, $trm1.".trm_Label is null");
+            array_push($query_enum_join, 
+     " defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ");
+            array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
             
         }else if($ft_vals[$idx_fieldtype] == "resource"){
             array_push($query_res, $field_name);
             $trm1 = "rec".count($query_res);
-            $query_res_join  = $query_res_join.
-     " left join Records $trm1 on $trm1.rec_ID=$field_name ";
-            array_push($query_res_where, $trm1.".rec_ID is null");
+            array_push($query_res_join, " Records $trm1 on $trm1.rec_ID=$field_name ");
+            array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($field_name is null or $field_name=''))");
             
         }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
             
             array_push($query_num, $field_name);
-            array_push($query_num_where, " concat('',$field_name * 1) != $field_name ");
+            array_push($query_num_where, "(concat('',$field_name * 1) != $field_name  and not ($field_name is null or $field_name=''))");
 
         }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
             array_push($query_date, $field_name);
             if($ft_vals[$idx_fieldtype] == "year"){
-                array_push($query_date_where, " concat('',$field_name * 1) != $field_name ");
+                array_push($query_date_where, "(concat('',$field_name * 1) != $field_name "
+                ."and not ($field_name is null or $field_name=''))");
             }else{
-                array_push($query_date_where, "str_to_date($field_name, '%Y-%m-%d %H:%i:%s') is null ");
+                array_push($query_date_where, "(str_to_date($field_name, '%Y-%m-%d %H:%i:%s') is null "
+                ."and str_to_date($field_name, '%d/%m/%Y') is null "
+                ."and str_to_date($field_name, '%d-%m-%Y') is null "
+                ."and not ($field_name is null or $field_name=''))");
             }
             
         }
@@ -694,14 +700,19 @@ function validateImport($mysqli, $imp_session, $params){
  }
  
  //2. In DB: Verify that all required fields have values =============================================
- if(count($query_reqs)>0){
+ $k=0;
+ foreach ($query_reqs as $field){
      $query = "select imp_id, ".implode(",",$sel_query)
         ." from $import_table "
-        ." where ".implode(" or ",$query_reqs_where);
-        
+        ." where ".$query_reqs_where[$k]; // implode(" or ",$query_reqs_where);
+     $k++;  
 //error_log("check empty: ".$query);
-     $wrong_records = getWrongRecords($mysqli, $query, "Required fields are null or empty", $imp_session, $query_reqs);
-     if($wrong_records) return $wrong_records;
+     $wrong_records = getWrongRecords($mysqli, $query, "This field is required - a value must be supplied for every record", $imp_session, $field);
+     if(is_array($wrong_records)) {
+        $imp_session = $wrong_records;   
+     }else if($wrong_records) {
+         return $wrong_records;
+     }
  } 
  //3. In DB: Verify that enumeration fields have correct values =====================================
  /*
@@ -710,40 +721,83 @@ function validateImport($mysqli, $imp_session, $params){
  ." where trm1.trm_Label is null";
  */
  $hwv = " have wrong values";
- if(count($query_enum)>0){
+ $k=0;
+ foreach ($query_enum as $field){
+ 
      $query = "select imp_id, ".implode(",",$sel_query)
-                ." from $import_table ".$query_enum_join
-                ." where ".implode(" or ",$query_enum_where);
-//DEBUG error_log("check enum: ".$query);                
-                
-     $wrong_records = getWrongRecords($mysqli, $query, "Fields mapped as enumeration".$hwv, $imp_session, $query_enum);
-     if($wrong_records) return $wrong_records;
+                ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
+                ." where ".$query_enum_where[$k];  //implode(" or ",$query_enum_where);
+//DEBUG  error_log("check enum: ".$query);                
+     $k++;
+     
+     //"Fields mapped as enumeration ".$hwv           
+     $wrong_records = getWrongRecords($mysqli, $query, "Term list values must match terms defined for the field",
+                    $imp_session, $field);
+     //if($wrong_records) return $wrong_records;
+     if(is_array($wrong_records)) {
+        $imp_session = $wrong_records;   
+     }else if($wrong_records) {
+         return $wrong_records;
+     }     
  }
  //4. In DB: Verify resource fields
- if(count($query_res)>0){
+ $k=0;
+ foreach ($query_res as $field){
+     
      $query = "select imp_id, ".implode(",",$sel_query)
-                ." from $import_table ".$query_res_join
-                ." where ".implode(" or ",$query_res_where);
-     $wrong_records = getWrongRecords($mysqli, $query, "Fields mapped as resources(pointers)".$hwv, $imp_session, $query_res);
-     if($wrong_records) return $wrong_records;
+                ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
+                ." where ".$query_res_where[$k]; //implode(" or ",$query_res_where);
+     $k++;
+     $wrong_records = getWrongRecords($mysqli, $query, 
+                                "Record pointer fields must reference an existing record in the database",
+                                $imp_session, $field);
+     //"Fields mapped as resources(pointers)".$hwv,                                 
+     //if($wrong_records) return $wrong_records;
+     if(is_array($wrong_records)) {
+        $imp_session = $wrong_records;   
+     }else if($wrong_records) {
+         return $wrong_records;
+     }     
  }
  
  //5. Verify numeric fields
- if(count($query_num)>0){
+ $k=0;
+ foreach ($query_num as $field){
+ 
      $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
-                ." where ".implode(" or ",$query_num_where);
-     $wrong_records = getWrongRecords($mysqli, $query, "Fields mapped as numeric".$hwv, $imp_session, $query_num);
-     if($wrong_records) return $wrong_records;
+                ." where ".$query_num_where[$k]; //implode(" or ",$query_num_where);
+                $k++;
+     $wrong_records = getWrongRecords($mysqli, $query, 
+        "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
+        $imp_session, $field);
+     // "Fields mapped as numeric".$hwv,    
+     //if($wrong_records) return $wrong_records;
+     if(is_array($wrong_records)) {
+        $imp_session = $wrong_records;   
+     }else if($wrong_records) {
+         return $wrong_records;
+     }     
  }
  
  //6. Verify datetime fields
- if(count($query_date)>0){
+ $k=0;
+ foreach ($query_date as $field){
+ 
      $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
-                ." where ".implode(" or ",$query_date_where);
-     $wrong_records = getWrongRecords($mysqli, $query, "Fields mapped as date".$hwv, $imp_session, $query_date);
-     if($wrong_records) return $wrong_records;
+                ." where ".$query_date_where[$k]; //implode(" or ",$query_date_where);
+                $k++;
+     $wrong_records = getWrongRecords($mysqli, $query, 
+        "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
+        $imp_session, $field);
+     //"Fields mapped as date".$hwv,    
+     //if($wrong_records) return $wrong_records;
+     if(is_array($wrong_records)) {
+        $imp_session = $wrong_records;   
+     }else if($wrong_records) {
+         return $wrong_records;
+     }     
  }
  
  //7. TODO Verify geo fields
@@ -762,18 +816,24 @@ function validateImport($mysqli, $imp_session, $params){
 */
 function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checked){
     
-    $res = $mysqli->query($query);
+    $res = $mysqli->query($query." LIMIT 5000");
     if($res){
         $wrong_records = array();
         while ($row = $res->fetch_row()){
             array_push($wrong_records, $row);
         }        
         $res->close();
-        if(count($wrong_records)>0){
-            $imp_session['validation']["count_error"] = count($wrong_records);
-            $imp_session['validation']["recs_error"] = array_slice($wrong_records,0,100);
-            $imp_session['validation']["field_checked"] = $fields_checked;
-            $imp_session['validation']["err_message"] = $message;
+        $cnt_error = count($wrong_records);
+        if($cnt_error>0){
+            $error = array();
+            $error["count_error"] = $cnt_error;
+            $error["recs_error"] = $wrong_records; //array_slice($wrong_records,0,100);
+            $error["field_checked"] = $fields_checked;
+            $error["err_message"] = $message;
+            
+            $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
+            array_push($imp_session['validation']['error'], $error);
+            
             return $imp_session;
         }
         
@@ -939,10 +999,10 @@ function doImport($mysqli, $imp_session, $params){
                 
                 if($field_type=="url"){
                     if($row[$index])
-                        $details['recordURL'] = $row[$index];
+                        $details['recordURL'] = trim($row[$index]);
                 }else if($field_type=="scratchpad"){
                     if($row[$index])
-                        $details['recordNotes'] = $row[$index];
+                        $details['recordNotes'] = trim($row[$index]);
                 }else{
                     
                     $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
@@ -965,6 +1025,12 @@ function doImport($mysqli, $imp_session, $params){
                         
                     }else{
                         $value = trim(preg_replace('/([\s])\1+/', ' ', $row[$index]));
+                        
+                        if($ft_vals[$idx_fieldtype] == "date") {
+                              $value = strtotime($value);
+                              $value = date('Y-m-d H:i:s', $value);
+                        }
+                        
                     }
 
                     if($value  && 
@@ -1320,50 +1386,106 @@ function renderRecords($type, $imp_session){
         ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
         ///DEBUG print print_r(@$validationRes['rec_error'],true);
         
-        $cnt = $imp_session['validation']['count_'.$type];
-        $records = $imp_session['validation']['recs_'.$type];
+        if($type=='error'){
+            $tabs = $imp_session['validation']['error'];
+        }else{
+            
+            $rec_tab = array();
+            $rec_tab['count_'.$type] = $imp_session['validation']['count_'.$type];
+            $rec_tab['recs_'.$type] = $imp_session['validation']['recs_'.$type];
+//error_log(print_r($imp_session['validation']['recs_'.$type], true))            ;
+            $tabs = array($rec_tab);
+        }
+        
+        if(count($tabs)>1){
+            $k = 0;
+
+            print '<div id="tabs_records"><ul>';
+            foreach($tabs as $rec_tab){
+                $colname = @$imp_session['columns'][substr($rec_tab['field_checked'],6)];
+
+                print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'</a></li>';
+                $k++;
+            }
+            print '</ul>';
+            $k++;
+        }
+        
+        $k = 0;
+        //$clr = array('red','lime','blue','green','white');
+        foreach($tabs as $rec_tab)
+        {
+        print '<div id="rec__'.$k.'">'; //' style="background-color:'.$clr[$k].'">';
+        $k++;
+                
+        $cnt = $rec_tab['count_'.$type];
+        $records = $rec_tab['recs_'.$type];
         $mapped_fields = $imp_session['validation']['mapped_fields'];
 
         //print print_r( @$imp_session['validation']['field_checked'], true);
         if($cnt>count($records)){
-            print "<div>First 100 records of ".$cnt."</div>";
+            print "<div class='error'><b>Only the first 5000 rows are shown</b></div>";
         }
-        print '<table class="tbmain"  cellspacing="0" cellpadding="2"><thead><tr>'; // class="tbmain"
+        
+//print "<div>MAPPED2: ".print_r($mapped_fields, true)."</div>";  $checked_field."|".
         if($type=="error"){
-            $checked_fields = $imp_session['validation']['field_checked'];
+            $checked_field = $rec_tab['field_checked'];
+            print "<div class='error'>Values in red are invalid<br/></div>";
+            print "<div>".$rec_tab['err_message']."<br/><br/></div>";
         }else{
-            $checked_fields = array(); 
+            $checked_field = null;
         }
+            
+        
+        print '<table class="tbmain"  cellspacing="0" cellpadding="2"><thead><tr>'; // class="tbmain"
 
         if($type=="update"){
             print '<th>Record ID</th>';
         }
             print '<th>Line #</th>';
             
+            $m=1;
+            $err_col = 0;
             foreach($mapped_fields as $field_name) {
                 
                 $colname = @$imp_session['columns'][substr($field_name,6)];
-                if(array_search($field_name, $checked_fields)!==false){
-                    $colname = "<i>".$colname."*</i>";
+                if($field_name==$checked_field){
+                    $colname = "<i><font color='red'>".$colname."</font></i>";
+                    $err_col = $m;
                 }
-                
+                $m++;
                 print "<th>".$colname."</th>";
             }
             
             print "</tr></thead>";
+            if($records && is_array($records))            
             foreach ($records as $row) {  
 
                 print "<tr>";
                 if(is_array($row)){
+                    $m=0;
                     foreach($row as $value) {     
-                        print "<td class='truncate'>".($value?$value:"&nbsp;")."</td>";
+                        $value = ($value?$value:"&nbsp;");
+                        if($err_col==$m){
+                            $value = "<font color='red'>".$value."</font>";
+                        }
+                        print "<td class='truncate'>".$value."</td>";
+                        
+                        $m++;
                     }
                 }
                 print "</tr>";
             }
-        print "</table>";
+        print "</table></div>";
+        
+        }//tabs
+    
+        if(count($tabs)>1){
+            print '</div>';
+        }
         
         print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+        //print '<input type="button" value="Back" onClick="initTabsRecs();">';
     
 }
 

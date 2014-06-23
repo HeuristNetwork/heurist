@@ -93,9 +93,9 @@
 		<div id="page-inner">
 
 			These checks look for invalid record pointers within the Heurist database. These should arise rarely.
-			<p> Click the hyperlinked number at the start of each row to open an edit form on that record. Look for pointer fields which do not display data or dispaly a warning.
+			<p> Click the hyperlinked number at the start of each row to open an edit form on that record. Look for pointer fields which do not display data or dispaly a warning. </p>
 
-			<hr>
+			<hr />
 
 			<div>
 				<h3>Records with record pointers to the wrong rec_RecTypeID</h3>
@@ -116,11 +116,29 @@
 				?>
 			</table>
 			[end of list]
-			<p>
+			<p />
 
-			<hr>
+			<hr />
 
 			<?php
+            
+                $wasdeleted = 0;
+                if(@$_REQUEST['fixpointers']=="1"){
+                
+                    $query = 'delete d from recDetails d
+                        left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
+                        left join Records b on b.rec_ID = d.dtl_Value
+                        where dt.dty_Type = "resource"
+                        and b.rec_ID is null';
+                    $res = mysql_query( $query );
+                    if(! $res )
+                    {
+                        print "<div class='error'>Can not delete invalid pointers from Records.</div>";
+                    }else{
+                        $wasdeleted = mysql_affected_rows();
+                    }            
+                }
+            
 				$res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
 				from recDetails
 				left join defDetailTypes on dty_ID = dtl_DetailTypeID
@@ -133,6 +151,14 @@
 				while ($row = mysql_fetch_assoc($res))
 				$bibs[$row['dtl_RecID']] = $row;
 
+                if(count($bibs)==0){
+                    print "<div><h3>All records have valid pointers</h3></div>";
+                    if($wasdeleted>1){
+                        print "<div>$wasdeleted invalid pointers were removed from database</div>";    
+                    }else if($wasdeleted>0){
+                        print "<div>$wasdeleted invalid pointer was removed from database</div>";    
+                    }
+                }else{
 			?>
 			<div>
 				<h3>Records with record pointers to non-existent records</h3>
@@ -140,6 +166,9 @@
 					<a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show results as search)</a>
 					<a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
 				</span>
+                <div>To fix the inconsistencies, please click here: 
+                    <button onclick="window.open('listRecordPointerErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">Delete these pointers</button>
+                </div>
 			</div>
 			<table>
 			<?php
@@ -155,8 +184,12 @@
 				}
 				print "</table>\n";
 			?>
+            </table>
 			[end of list]
-			<p><hr>
+            <?php
+                }
+            ?>
+			<br/><hr/>
 
 		</div>
 	</body>
