@@ -79,12 +79,12 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 
 		$time = 0;
-		if ($_REQUEST['session_type'] == 'public') {
+		if ($_REQUEST['session_type'] == 'public') { //expire on exit
 			$time = 0;
 		} else if ($_REQUEST['session_type'] == 'shared') {
 			$time = time() + 24*60*60;
 		} else if ($_REQUEST['session_type'] == 'remember') {
-			$time = time() + 7*24*60*60;
+			$time = time() + 365*24*60*60;
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
 		}
 		setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
