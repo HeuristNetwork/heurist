@@ -461,19 +461,10 @@ function showRecords(divname){
     if(divname=='error'){
         if($( "#tabs_records" ).length>0){
             $( "#tabs_records" ).tabs();    
-            
-            //$('div[id^="rec"]').hide();
-            //$( "#rec0" ).show();
         }
     }
     
 }
-function initTabsRecs(){
-    if($( "#tabs_records" ).length>0){
-            $( "#tabs_records" ).tabs();    
-    }
-}
-
 
 //
 // Loads values for record from import table

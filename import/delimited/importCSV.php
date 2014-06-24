@@ -110,7 +110,7 @@ div.header{
     font-weight: bold;
 }
 .truncate {
-  max-width: 150px;
+  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -759,12 +759,17 @@ function doSelectSession(){
                 <div class="input-line">
                     Field separator: <select name="csv_delimiter"><option value="," selected>comma</option><option value="tab">tab</option></select>&nbsp;&nbsp;&nbsp;
                     <!-- Multi-value separator: <select name="val_separator"><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp; -->
-                    Line separator: <input name="csv_linebreak" value="\n">&nbsp;&nbsp;&nbsp;
+                    Line separator: <select name="csv_linebreak">
+                                        <option selected value="\r\n">Windows</option>
+                                        <option value="\n">Unix</option>
+                                        <option value="\r">Mac</option>
+                                    </select>
+                    <!-- <input name="csv_linebreak" value="\n"> -->&nbsp;&nbsp;&nbsp;
                     Quote: <select name="csv_enclosure"><option selected value='"'>"</option><option value="'">'</option></select><br/><br/>
                 </div>
                 <div class="help">
-If you have generated the text file on a Windows system, you might have to use LINE SEPARATOR '\r\n'                
-<br /><br />                 
+<!--If you have generated the text file on a Windows system, you might have to use LINE SEPARATOR '\r\n'                
+<br /><br />-->                 
 Interpret characters preceded by the escape character "\" as escape sequences. For example, "\t", "\n", and "\\" signify tab, newline, and backslash, respectively
 <br /><br />
 To avoid ambiguity, occurrences of the QUOTE character within a field value can be doubled and are interpreted as a single instance of the character. For example, if QUOTE '"' is specified, quotation marks are handled as shown here:

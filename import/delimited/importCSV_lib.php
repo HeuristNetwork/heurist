@@ -189,14 +189,19 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
     
     //get fields that will be used in search
     $sel_query = array();
+    $mapped_fields = array();
     
     //for insert
-    $select_query_join_rec = array(); //" left join Records on "; //"rec_RecTypeID!=".$recordType;
-    $select_query_join_det = "";
+    //NOT USED $select_query_join_rec = array();  " left join Records on "; //"rec_RecTypeID!=".$recordType;
+    //NOT USED $select_query_join_det = "";
     
     //for update
     $select_query_update_from = array($import_table, "Records");
     $select_query_update_where = array("rec_RecTypeID=".$recordType);
+    
+    $detDefs = getAllDetailTypeStructures(true);
+    $detDefs = $detDefs['typedefs'];
+    $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
     
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_keyfield_")===0 && $field_type){
@@ -204,30 +209,53 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             $index = substr($key,12);
             $field_name = "field_".$index;
         
-            array_push($sel_query, $field_name); 
+            array_push($sel_query, $field_name);
+            $mapped_fields[$field_name] = $field_type; 
             
             if($field_type=="id" || $field_type=="url" || $field_type=="scratchpad"){
                 
-                array_push($select_query_join_rec, "rec_".$field_type."=".$field_name);
-                //$select_query_join_rec = $select_query_join_rec." and rec_".$field_type."=".$field_name;
-                
+                //array_push($select_query_join_rec, "rec_".$field_type."=".$field_name);
                 array_push($select_query_update_where, "rec_".$field_type."=".$field_name);
             }else{
-                $where = "d".$index.".dtl_DetailTypeID=".$field_type.
-                 " and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
                 
-                //$select_query_join_rec = $select_query_join_rec . " and rec_ID=d".$index.".dtl_RecID";
-                array_push($select_query_join_rec, "rec_ID=d".$index.".dtl_RecID");
-                $select_query_join_det = $select_query_join_det . " left join recDetails d".$index." on ".$where;
+                $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
+                
+                $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
+                
+                if( $dt_type == "enum" ||  $dt_type == "relationtype") {
+                
+                    //if fieldname is numeric - compare it with dtl_Value directly
+                    $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
+     ." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
+            
+                    array_push($select_query_update_from, "defTerms t".$index); 
+            
+                }else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
+                    
+                    $where = $where.
+                    " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
+                       
+                }else{
+                
+                    $where = $where.
+                    " REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                 
+                }
+                
+                //array_push($select_query_join_rec, "rec_ID=d".$index.".dtl_RecID");
+                //$select_query_join_det = $select_query_join_det . " left join recDetails d".$index." on ".$where;
                 
                 array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
                 array_push($select_query_update_from, "recDetails d".$index); 
             }
+            
         }            
     }  
     if(count($sel_query)<1){
         return "no one key field is selected";
     }
+    
+    $imp_session['validation']['mapped_fields'] = $mapped_fields;        
     
         
     //query to search record ids  FOR UPDATE               
@@ -238,7 +266,6 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
 
 //DEBUG error_log(">>>".$select_query);
     //array_push($sel_query, "rec_ID");
-    $imp_session['validation']['mapped_fields'] = $sel_query;        
     //find records to update
     $res = $mysqli->query($select_query);
     if($res){
@@ -251,7 +278,7 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             while ($row = $res->fetch_row()){
                 array_push($imp_session['validation']['recs_update'], $row);
                 $cnt++;
-                if($cnt>99) break;
+                if($cnt>4999) break;
             }
         }
     }else{
@@ -261,8 +288,6 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
     //FIND RECORDS FOR INSERT
     $select_query = "SELECT SQL_CALC_FOUND_ROWS group_concat(imp_id), ".implode(",",$sel_query)
                     ." FROM ".$import_table
-                    //.$select_query_join_det." left join Records on ".implode(" and ",$select_query_join_rec)
-                    //." WHERE rec_ID IS NULL || (rec_RecTypeID!=".$recordType." and imp_id not in "
                     . " WHERE (imp_id NOT IN "
                     ." (SELECT imp_id "
                     ." FROM ".implode(",",$select_query_update_from)
@@ -281,7 +306,7 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             while ($row = $res->fetch_row()){
                 array_push($imp_session['validation']['recs_insert'], $row);
                 $cnt++;
-                if($cnt>99) break;
+                if($cnt>4999) break;
             }
         }
     }else{
@@ -340,6 +365,10 @@ function matchingAssign($mysqli, $imp_session, $params){
     $select_query_update_from = array($import_table, "Records");
     $select_query_update_where = array("rec_RecTypeID=".$recordType);
     
+    $detDefs = getAllDetailTypeStructures(true);
+    $detDefs = $detDefs['typedefs'];
+    $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
+    
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_keyfield_")===0 && $field_type){
             //get index 
@@ -351,8 +380,30 @@ function matchingAssign($mysqli, $imp_session, $params){
             if($field_type=="id" || $field_type=="url" || $field_type=="scratchpad"){
                 array_push($select_query_update_where, "rec_".$field_type."=".$field_name);
             }else{
-                $where = "d".$index.".dtl_DetailTypeID=".$field_type.
-                 " and REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                
+                $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
+                
+                $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
+                
+                if( $dt_type == "enum" ||  $dt_type == "relationtype") {
+                
+                    //if fieldname is numeric - compare it with dtl_Value directly
+                    $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
+     ." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
+            
+                    array_push($select_query_update_from, "defTerms t".$index); 
+            
+                }else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
+                    
+                    $where = $where.
+                    " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
+                       
+                }else{
+                
+                    $where = $where.
+                    " REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                 
+                }
                 
                 array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
                 array_push($select_query_update_from, "recDetails d".$index); 
@@ -376,12 +427,10 @@ function matchingAssign($mysqli, $imp_session, $params){
         return "can not update import table (clear record id field)";
     }
     //matched records
-    //OLD $updquery = "UPDATE ".$import_table.$select_query_join_det.$select_query_join_rec." SET ".$id_field."=rec_ID WHERE rec_ID is not null and imp_id>0";
-    
     $updquery = "UPDATE ".implode(",",$select_query_update_from)." SET ".$id_field."=rec_ID WHERE "
                          .implode(" and ",$select_query_update_where)." and imp_id>0";
     
-//DEBUG  error_log("1>>>>".$updquery);
+//DEBUG error_log("matched records 1>>>>".$updquery);
     if(!$mysqli->query($updquery)){
         return "can not update import table (set record id field)";
     }
@@ -402,7 +451,7 @@ function matchingAssign($mysqli, $imp_session, $params){
                     ." WHERE ".implode(" and ",$select_query_update_where)
                     .")) GROUP BY ".implode(",",$sel_query);
                     
-//DEBUG error_log("2>>>>".$select_query);
+//DEBUG error_log("records to insert 2>>>>".$select_query);
                     
     $res = $mysqli->query($select_query);
     if($res){
@@ -489,6 +538,7 @@ function validateImport($mysqli, $imp_session, $params){
     
     //get field mapping and selection query from _REQUEST(params)
     $mapping = array();  // fieldtype ID => fieldname in import table
+    $mapped_fields = array(); 
     $sel_query = array();
     foreach ($params as $key => $field_type) {
         if(strpos($key, "sa_dt_")===0 && $field_type){
@@ -499,12 +549,15 @@ function validateImport($mysqli, $imp_session, $params){
             //all mapped fields - they will be used in validation query
             array_push($sel_query, $field_name); 
             $mapping[$field_type] = $field_name;
+            
+            $mapped_fields[$field_name] = $field_type; 
         }
     }  
     if(count($sel_query)<1){
         return "mapping not defined";
     }
-    $imp_session['validation']['mapped_fields'] = $sel_query;
+    
+    $imp_session['validation']['mapped_fields'] = $mapped_fields;
     
     if(!$id_field){ //ID field not defined - all records will be inserted
         $imp_session['validation']["count_insert"] = $imp_session['reccount'];
@@ -527,7 +580,7 @@ function validateImport($mysqli, $imp_session, $params){
         //error_log("check wrong rt: ".$query);
              $wrong_records = getWrongRecords($mysqli, $query, "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", $imp_session, $id_field);
              if(is_array($wrong_records) && count($wrong_records)>0) {
-                array_push($wrong_records['validation']['mapped_fields'], $id_field);
+                $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
 //error_log(print_r($imp_session['validation']['mapped_fields'],true));
                 $imp_session = $wrong_records;   
              }else if($wrong_records) {
@@ -827,7 +880,7 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
         if($cnt_error>0){
             $error = array();
             $error["count_error"] = $cnt_error;
-            $error["recs_error"] = $wrong_records; //array_slice($wrong_records,0,100);
+            $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
             
@@ -907,7 +960,7 @@ function doImport($mysqli, $imp_session, $params){
             $id_field_idx = count($field_types); //last one
             $select_query = $select_query." ORDER BY ".$id_field;
     }else{
-            //create id field by defauld
+            //create id field by default
             $field_count = count($imp_session['columns']);
             $id_field_def = "field_".$field_count;
             array_push($imp_session['columns'], "ID field for Record type #$recordType" );
@@ -1026,7 +1079,7 @@ function doImport($mysqli, $imp_session, $params){
                     }else{
                         $value = trim(preg_replace('/([\s])\1+/', ' ', $row[$index]));
                         
-                        if($ft_vals[$idx_fieldtype] == "date") {
+                        if($value!="" && $ft_vals[$idx_fieldtype] == "date") {
                               $value = strtotime($value);
                               $value = date('Y-m-d H:i:s', $value);
                         }
@@ -1424,7 +1477,7 @@ function renderRecords($type, $imp_session){
 
         //print print_r( @$imp_session['validation']['field_checked'], true);
         if($cnt>count($records)){
-            print "<div class='error'><b>Only the first 5000 rows are shown</b></div>";
+            print "<div class='error'><b>Only the first ".count($records)." of ".$cnt." rows are shown</b></div>";
         }
         
 //print "<div>MAPPED2: ".print_r($mapped_fields, true)."</div>";  $checked_field."|".
@@ -1436,23 +1489,35 @@ function renderRecords($type, $imp_session){
             $checked_field = null;
         }
             
+        if(count($records)>25)    
+        print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
         
-        print '<table class="tbmain"  cellspacing="0" cellpadding="2"><thead><tr>'; // class="tbmain"
+        print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
 
         if($type=="update"){
             print '<th>Record ID</th>';
         }
             print '<th>Line #</th>';
             
+            
+            $detDefs = getAllDetailTypeStructures(true);
+            $detLookup = $detDefs['lookups'];
+            $detDefs = $detDefs['typedefs'];
+            $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
+            
             $m=1;
             $err_col = 0;
-            foreach($mapped_fields as $field_name) {
+            foreach($mapped_fields as $field_name=>$dt_id) {
                 
                 $colname = @$imp_session['columns'][substr($field_name,6)];
                 if($field_name==$checked_field){
-                    $colname = "<i><font color='red'>".$colname."</font></i>";
+                    $colname = "<font color='red'>".$colname."</font>";
                     $err_col = $m;
                 }
+                
+                $colname = $colname.'<br><font style="font-size:10px;font-weight:normal">'
+                    .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id)."</font>";
+                
                 $m++;
                 print "<th>".$colname."</th>";
             }
@@ -1469,7 +1534,7 @@ function renderRecords($type, $imp_session){
                         if($err_col==$m){
                             $value = "<font color='red'>".$value."</font>";
                         }
-                        print "<td class='truncate'>".$value."</td>";
+                        print "<td>".$value."</td>"; // class='truncate'
                         
                         $m++;
                     }
@@ -1485,7 +1550,6 @@ function renderRecords($type, $imp_session){
         }
         
         print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
-        //print '<input type="button" value="Back" onClick="initTabsRecs();">';
     
 }
 
