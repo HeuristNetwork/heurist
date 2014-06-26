@@ -201,22 +201,30 @@ if($step==1 && $imp_session==null){
         echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
         ob_flush();flush();
     
-        //$val_separator = $_REQUEST["val_separator"];
-        $csv_delimiter = $_REQUEST["csv_delimiter"];
-        $csv_linebreak = $_REQUEST["csv_linebreak"];
-        $csv_enclosure = $_REQUEST["csv_enclosure"];
-        
-        if($csv_delimiter=="tab") {
-            $csv_delimiter = "\t";
-        }
-        
-        if(@$_REQUEST["filename"]){
+
+        if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
             $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], false);    
         }else{
             $imp_session = postmode_file_selection();    
         }
+
+        if(is_array($imp_session) && @$imp_session['errors']){ //preprocessing
+
+            $col_count = $imp_session['$col_count'];
+            $errors = $imp_session['errors'];
+            
+            print "<h4>ERROR. Wrong field count in parsed data. Expected ".$col_count."</h4><hr width='100%' />";
+            
+            print "<table><tr><th>Line#</th><th>Columns</th><th>Raw data</th></tr>";
+            
+            foreach($errors as $err){
+                print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
+            }
+            print "</table></body></html>";
+            
+            exit();
         
-        if(is_array($imp_session) && @$imp_session['warning']){ 
+        }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
 ?>
 <script type="text/javascript">
 $( function(){ $("#div-progress").hide(); });
@@ -248,7 +256,17 @@ function doReload(){
                 <input type="hidden" name="csv_delimiter" value="<?=$_REQUEST['csv_delimiter']?>">
                 <input type="hidden" name="csv_linebreak" value="<?=$_REQUEST['csv_linebreak']?>">
                 <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
-
+<?php
+$fields = @$_REQUEST['fields'];
+if($fields){
+    $k=0;
+    foreach($fields as $field){
+        print '<input type="checkbox" id="field_'.$k.'" name="datefield[]" value="'.$k.'" />';
+        print '<label for="field_'.$k.'" >'.$field.'</label><br />';        
+        $k++;
+    }
+}
+?>
                 <div class="actionButtons">
                     <input type="button" value="Cancel" onClick="doReload();" style="margin-right: 5px;">
                     <input type="button" value="Continue" style="font-weight: bold;" onclick="doUpload2()">
@@ -760,7 +778,8 @@ function doSelectSession(){
                     Field separator: <select name="csv_delimiter"><option value="," selected>comma</option><option value="tab">tab</option></select>&nbsp;&nbsp;&nbsp;
                     <!-- Multi-value separator: <select name="val_separator"><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp; -->
                     Line separator: <select name="csv_linebreak">
-                                        <option selected value="\r\n">Windows</option>
+                                        <option selected value="auto">Auto detect</option>
+                                        <option value="\r\n">Windows</option>
                                         <option value="\n">Unix</option>
                                         <option value="\r">Mac</option>
                                     </select>
@@ -842,8 +861,26 @@ function postmode_file_selection() {
 //
 function postmode_file_load_to_db($filename, $original, $is_first_turn) {
 
-    global $csv_delimiter,$csv_linebreak,$csv_enclosure,$mysqli;
+    global $mysqli;
 
+    //$val_separator = $_REQUEST["val_separator"];
+    $csv_delimiter = $_REQUEST["csv_delimiter"];
+    $csv_linebreak = $_REQUEST["csv_linebreak"];
+    $csv_enclosure = $_REQUEST["csv_enclosure"];
+    
+    if($csv_delimiter=="tab") {
+        $csv_delimiter = "\t";
+    }
+            
+    if($csv_linebreak=="auto"){
+        ini_set('auto_detect_line_endings', true);
+        $lb = null;
+    }else{
+        $lb = str_replace("\\n", "\n", $csv_linebreak);
+        $lb = str_replace("\\r", "\r", $lb);
+        $lb = str_replace("\\t", "\t", $lb);
+    }
+    
     $handle = @fopen($filename, "r");
     if (!$handle) {
             if (! file_exists($filename)) return 'file does not exist';
@@ -851,12 +888,13 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
             else return 'file could not be read';
     }
     
-    $lb = str_replace("\\n", "\n", $csv_linebreak);
-    $lb = str_replace("\\r", "\r", $lb);
-    $lb = str_replace("\\t", "\t", $lb);
 //error_log(">>>>".$lb);    
     // read header
-    $line = stream_get_line($handle, 1000000, $lb);
+    if($csv_linebreak=="auto"){ 
+        $line = fgets($handle, 1000000);
+    }else{
+        $line = stream_get_line($handle, 1000000, $lb);
+    }
     fclose($handle);
     if(!$line){
         return "empty header line";
@@ -865,23 +903,35 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
     //get fields
     $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
     $len = count($fields);
+
+    if($len>200){
+        return "too many columns ".$len;
+    }
     
-    if($is_first_turn && $len==1){
+    if($is_first_turn){
         $temp_file = tempnam(sys_get_temp_dir(), $filename);
         if (move_uploaded_file($filename, $temp_file)) {
-            return array("warning"=>"You appear to have only one value per line. This probably indicates that you have selected the wrong separator type. Continue?",
+            if($len==1){
+                return array("warning"=>"You appear to have only one value per line. This probably indicates that you have selected the wrong separator type. Continue?",
                      "filename"=>$temp_file, "original"=>$original );
+            }else{
+                return array("warning"=>"Please verify the list of fields and select ones that are date type",
+                     "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
+            }
         }else {
             return "Failed to keep the uploaded file '$temp_file'.";
         }
     }
     
+    //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
+    $preproc = preprocess_uploaded_file($filename);
+
+    if(count($preproc['errors'])>0){
+        return array("errors"=>$preproc['errors']);
+    }
+    
     $import_table = "import".date("YmdHis");
     
-    if($len>200){
-        return "too many columns ".$len;
-    }
-
 //error_log(">>>> ".print_r($fields, true)."  ".$len);
     
     //create temporary table import_datetime
@@ -912,8 +962,9 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
         ." CHARACTER SET UTF8"
         ." FIELDS TERMINATED BY '".$csv_delimiter."' "
         ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
-        ." LINES TERMINATED BY '".$csv_linebreak."' "   //".$csv_linebreak."
-        ." IGNORE 1 LINES (".$columns.")";
+        ." LINES TERMINATED BY '\n'"  //.$csv_linebreak."' "   //".$csv_linebreak."
+        //." IGNORE 1 LINES 
+        ." (".$columns.")";
     
 //DEBUG error_log(">>>".$query);
         
@@ -954,6 +1005,8 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
                      "import_table"=>$import_table,
                      "import_name"=>($original."  ".date("Y-m-d H:i:s")),
                      "columns"=>$fields,   //names of columns in file header 
+                     "memos"=>$preproc['memos'], 
+                     "multivals"=>$preproc['multivals'],
                      "uniqcnt"=>$uniqcnt,   //count of uniq values per column  
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID
@@ -963,6 +1016,131 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
         $session['load_warnings'] = $warnings;
     }
     return $session;
+}
+
+/*
+Read file
+
+Add error to log if wrong field count
+Identify memo fields by presence of \r within text and flag
+Identify repeating value fields and flag - will not be used as key fields
+Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line 
+Convert dates to standardised format.
+
+Write processed file
+
+return 3 arrays: 
+    errors
+    memos
+    multivalues
+*/
+function preprocess_uploaded_file($filename){
+    
+    $errors = array();
+    $memos = array();
+    $multivals = array();
+    $datefields = @$_REQUEST["datefield"];
+    
+    $csv_delimiter = $_REQUEST["csv_delimiter"];
+    $csv_linebreak = $_REQUEST["csv_linebreak"];
+    $csv_enclosure = $_REQUEST["csv_enclosure"];
+    
+    if($csv_delimiter=="tab") {
+        $csv_delimiter = "\t";
+    }
+            
+    if($csv_linebreak=="auto"){
+        ini_set('auto_detect_line_endings', true);
+        $lb = null;
+    }else{
+        $lb = str_replace("\\n", "\n", $csv_linebreak);
+        $lb = str_replace("\\r", "\r", $lb);
+        $lb = str_replace("\\t", "\t", $lb);
+    }
+    
+    $handle = @fopen($filename, "r");
+    if (!$handle) {
+            if (! file_exists($filename)) return 'file does not exist';
+            else if (! is_readable($filename)) return 'file is not readable';
+            else return 'file could not be read';
+    }
+    
+//error_log(">>>>".$lb);    
+    // read header
+    if($csv_linebreak=="auto"){ 
+        //$line = fgets($handle, 4096);
+    }else{}
+
+    $len = 0;
+    $header = null;
+    
+    $temp_name = tempnam(sys_get_temp_dir(), $filename);
+    if (!is_writable($temp_name)) {
+        return "can not save preprocessed file $temp_name";
+    }
+    if (!$handle_wr = fopen($temp_name, 'w')) {
+         return "Cannot open file ($temp_name)";
+    }
+    
+    
+    $line_no = 0;
+    while (!feof($handle)) {
+        $line = stream_get_line($handle, 1000000, $lb);
+        $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+        if($len==0){
+            $header = $fields;
+            $len = count($fields);
+        }else{
+            $line_no++;
+            if($len!=count($fields)){
+                 // Add error to log if wrong field count
+                 array_push($errors, array("cnt"=>count($fields), "no"=>$line_no, "line"=>substr($line,0,2000)));
+                 if(count($errors)>100) break;
+            }else{
+                $k=0;
+                $newfields = array();
+                foreach($fields as $field){
+
+                    //Identify repeating value fields and flag - will not be used as key fields                    
+                    if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
+                        array_push($multivals, $k);
+                    }
+                    if( !in_array($k, $memos) && strpos($field, '\\r')!==false ){
+                        array_push($memos, $k);
+                    }
+                    
+                    //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line 
+                    if(in_array($k, $memos)){
+                        $field = trim($field);
+                    }else{
+                        $field = trim(preg_replace('/([\s])\1+/', ' ', $field));    
+                    }
+
+                    //Convert dates to standardised format.                    
+                    if(in_array($k, $datefields) && $field!=""){
+                           $field = strtotime($field);
+                            $field = date('Y-m-d H:i:s', $field);
+                    }
+                    
+                    //Doubling up as an escape for quote marks
+                    $field = addslashes($field);
+                    
+                    array_push($newfields, $csv_enclosure.$field.$csv_enclosure);
+                    $k++;
+                }
+                
+                $line = implode($csv_delimiter, $newfields)."\n";
+                if (fwrite($handle_wr, $line) === FALSE) {
+                    return "Cannot write to file ($temp_name)";
+                }
+            }
+        }
+        
+    }
+    fclose($handle);
+    fclose($handle_wr);
+    
+    return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals );
 }
 
 ?>
