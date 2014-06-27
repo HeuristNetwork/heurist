@@ -230,15 +230,15 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             
                     array_push($select_query_update_from, "defTerms t".$index); 
             
-                }else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
+                /*}else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
                     
                     $where = $where.
                     " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
-                       
+                */      
                 }else{
                 
-                    $where = $where.
-                    " REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                    $where = $where." (d".$index.".dtl_Value=".$field_name.")";
+                    //" REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
                  
                 }
                 
@@ -393,15 +393,15 @@ function matchingAssign($mysqli, $imp_session, $params){
             
                     array_push($select_query_update_from, "defTerms t".$index); 
             
-                }else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
+                /*}else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
                     
                     $where = $where.
                     " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
-                       
+                */       
                 }else{
                 
-                    $where = $where.
-                    " REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
+                    $where = $where." (d".$index.".dtl_Value=".$field_name.")";
+                    //" REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
                  
                 }
                 
@@ -1059,43 +1059,62 @@ function doImport($mysqli, $imp_session, $params){
                 }else{
                     
                     $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
-                    $value = null;        
-                    if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
-                            && !ctype_digit($row[$index])) {
                     
-                        if($ft_vals[$idx_fieldtype] == "enum"){
-                            if(!$terms_enum) { //find ALL term IDs
-                                $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
-                            }
-                            $value = @$terms_enum[$row[$index]];
-                            
-                        }else if($ft_vals[$idx_fieldtype] == "relationtype"){
-                            if(!$terms_relation){ //find ALL relation IDs
-                                $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
-                            }
-                            $value = @$terms_relation[$row[$index]];
-                        }
-                        
+                    if(strpos($row[$index],"|")!==false){
+                        $values = explode("|", $row[$index]);
                     }else{
-                        $value = trim(preg_replace('/([\s])\1+/', ' ', $row[$index]));
-                        
-                        if($value!="" && $ft_vals[$idx_fieldtype] == "date") {
-                              $value = strtotime($value);
-                              $value = date('Y-m-d H:i:s', $value);
-                        }
-                        
+                        $values = array($row[$index]);
                     }
-
-                    if($value  && 
-                        ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
-                            //Add new data only if field is empty (new data ignored for non-empty fields)
+                    
+                    foreach ($values as $r_value)
+                    {
+                        $value = null;
                         
-                        if (!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false){
-                            $cnt = count(@$details["t:".$field_type])+1;
-                            $details["t:".$field_type][$cnt] = $value;
+                        if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
+                                && !ctype_digit($r_value)) {
+                        
+                            if($ft_vals[$idx_fieldtype] == "enum"){
+                                if(!$terms_enum) { //find ALL term IDs
+                                    $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
+                                }
+                                $value = @$terms_enum[$r_value];
+                                
+                            }else if($ft_vals[$idx_fieldtype] == "relationtype"){
+                                if(!$terms_relation){ //find ALL relation IDs
+                                    $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
+                                }
+                                $value = @$terms_relation[$r_value];
+                            }
+                            
                         }else{
-                            //DEBUG error_log(">>>>".$value."   ".print_r($details["t:".$field_type],true));
+                            //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
+                            
+                            $value = trim($r_value);
+                            
+                            if($value!="") {
+                                if($ft_vals[$idx_fieldtype] == "date") {
+                                      //$value = strtotime($value);
+                                      //$value = date('Y-m-d H:i:s', $value);
+                                }else{
+                                    //replace \\r to\r \\n to \n
+                                    $value = str_replace("\\r", "\r", $value);
+                                    $value = str_replace("\\n", "\n", $value);
+                                }
+                            }
                         }
+
+                        if($value  && 
+                            ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
+                                //Add new data only if field is empty (new data ignored for non-empty fields)
+                            
+                            if (!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false){
+                                $cnt = count(@$details["t:".$field_type])+1;
+                                $details["t:".$field_type][$cnt] = $value;
+                            }else{
+                                //DEBUG error_log(">>>>".$value."   ".print_r($details["t:".$field_type],true));
+                            }
+                        }
+                    
                     }
                 }
             }//for import data

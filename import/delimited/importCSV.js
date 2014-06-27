@@ -50,7 +50,7 @@ select_rectype.change(function (event){
     if(!sel) return;
     
     var rectype = Number(sel.value);
-    //fiel detailtypes selects for import
+    //fill detailtypes selects for import
     var select_fieldtype = $('select[id^="sa_dt_"]');
     select_fieldtype.each(function() {
         
@@ -159,21 +159,31 @@ select_rectype.change(function (event){
 
 //Loads values for record from import table
 getValues(0);
-
+var isbtnvis = false;
+    
 //init values for mapping form
 if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     select_rectype.val(form_vals.sa_rectype).change();
     
     //init import form
     for (var key in form_vals){
-        if(key.indexOf('sa_dt_')==0 && form_vals[key]!=''){
+        if((key.indexOf('sa_dt_')==0 && form_vals[key]!='') ||
+           (key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''))
+        {
+            var fieldname = form_vals[key];
+            if(key.indexOf('sa_keyfield_')==0){
+                key = 'sa_dt_'+key.substr(12);
+                //alert(key+'  '+form_vals[key]);
+            }
+            
             ($('#'+key).parent()).show();
-            $('#'+key).val(form_vals[key]);
+            $('#'+key).val(fieldname);   //select
             //$('#cb'+key).attr('checked', 'checked');
-            var cb = document.getElementById('cb'+key);
+            var cb = document.getElementById('cb'+key);  //checkbox
             if(cb) cb.checked = true;
             //$('#cb'+key).parent().show();
             isbtnvis = true;
+            form_vals.sa_mode = 1;
         }
     }
     onFtSelect(-1);
@@ -215,8 +225,9 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     }
     
     //init id fields for import
-    $("#recid_field").val(form_vals["recid_field"]);
-    if(form_vals["recid_field"]!=''){
+    var id_field = form_vals["recid_field"] || form_vals["idfield"];
+    $("#recid_field").val(id_field);
+    if(id_field !=''){
         onRecIDselect2(); //(form_vals["recid_field"].substr(6));
         //TODO!!!! $(".analized").show();
     }
@@ -227,6 +238,8 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
         $("#sa_mode").val(ui.newTab.index());
         showUpdMode();    
   } });
+  
+   //$("#sa_mode").val("1");
 
    showUpdMode();
    

@@ -203,28 +203,10 @@ if($step==1 && $imp_session==null){
     
 
         if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
-            $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], false);    
+            $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], (@$_REQUEST["preprocess"]=="1"));    
         }else{
             $imp_session = postmode_file_selection();    
         }
-
-        if(is_array($imp_session) && @$imp_session['errors']){ //preprocessing
-
-            $col_count = $imp_session['$col_count'];
-            $errors = $imp_session['errors'];
-            
-            print "<h4>ERROR. Wrong field count in parsed data. Expected ".$col_count."</h4><hr width='100%' />";
-            
-            print "<table><tr><th>Line#</th><th>Columns</th><th>Raw data</th></tr>";
-            
-            foreach($errors as $err){
-                print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
-            }
-            print "</table></body></html>";
-            
-            exit();
-        
-        }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
 ?>
 <script type="text/javascript">
 $( function(){ $("#div-progress").hide(); });
@@ -244,6 +226,33 @@ function doReload(){
     doUpload2();
 }
 </script>
+<?php        
+        if(is_array($imp_session) && @$imp_session['errors']){ //preprocessing
+
+            $col_count = $imp_session['col_count'];
+            $errors = $imp_session['errors'];
+            
+            print "<h4>ERROR. Wrong field count in parsed data. Expected field count:".$col_count." </h4><hr width='100%' />";
+            
+            print "<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>";
+            
+            foreach($errors as $err){
+                print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
+            }
+?>            
+            </table>
+            <div class="actionButtons">
+                    <input type="button" value="Cancel" 
+                        onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}" 
+                        style="margin-right: 5px;">
+            </div>
+</body>
+</html>    
+<?php            
+            exit();
+        
+        }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
+?>
         <h4><?=$imp_session['warning']?></h4>
         <hr width="100%" />
         
@@ -256,15 +265,19 @@ function doReload(){
                 <input type="hidden" name="csv_delimiter" value="<?=$_REQUEST['csv_delimiter']?>">
                 <input type="hidden" name="csv_linebreak" value="<?=$_REQUEST['csv_linebreak']?>">
                 <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
+                <input type="hidden" name="csv_dateformat" value="<?=$_REQUEST['csv_dateformat']?>">
+                
 <?php
-$fields = @$_REQUEST['fields'];
+$fields = @$imp_session['fields'];                  
 if($fields){
     $k=0;
     foreach($fields as $field){
-        print '<input type="checkbox" id="field_'.$k.'" name="datefield[]" value="'.$k.'" />';
+        print '&nbsp;&nbsp;<input type="checkbox" id="field_'.$k.'" name="datefield[]" value="'.$k.'" />&nbsp;&nbsp;';
         print '<label for="field_'.$k.'" >'.$field.'</label><br />';        
         $k++;
     }
+}else{
+        print '<input type="hidden" name="preprocess" value="1">';
 }
 ?>
                 <div class="actionButtons">
@@ -275,10 +288,8 @@ if($fields){
 </body>
 </html>
 <?php 
-exit;           
+            exit();           
         }
-        
-        
 }
 
 //session is loaded - render second step page
@@ -317,6 +328,7 @@ if(is_array($imp_session)){
                 ob_flush();flush();
             
                 $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
+                $sa_mode = 1; //switch to import
             }
             
         }else{//importing
@@ -397,7 +409,7 @@ if(@$imp_session['load_warnings']){
 }
 ?>      
 
-<input type="hidden" value="<?=@$_REQUEST['sa_mode']?>" name="sa_mode" id="sa_mode"/> 
+<input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/> 
 
 <div id="tabs_actions">
     <ul>
@@ -630,7 +642,12 @@ if(@$imp_session['load_warnings']){
                     <td width="30%">  
                         <span class="matching">
                             <span id="btnStartMatch" style="display: none">
+                            <!--
                                 <input type="submit" value="Start search/match" style="font-weight: bold;">
+                            -->    
+                                <input type="button" value="Start search / match / Assign IDs" 
+                                    onclick="doDatabaseUpdate(0, 0)" style="font-weight: bold;">
+                                
                             </span>
                         </span>
                         <span class="importing"><span><input  id="btnStartImport" type="submit" 
@@ -784,7 +801,8 @@ function doSelectSession(){
                                         <option value="\r">Mac</option>
                                     </select>
                     <!-- <input name="csv_linebreak" value="\n"> -->&nbsp;&nbsp;&nbsp;
-                    Quote: <select name="csv_enclosure"><option selected value='"'>"</option><option value="'">'</option></select><br/><br/>
+                    Quote: <select name="csv_enclosure"><option selected value='2'>"</option><option value="1">'</option></select>
+                    Date format: <select name="csv_dateformat"><option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select><br/><br/>
                 </div>
                 <div class="help">
 <!--If you have generated the text file on a Windows system, you might have to use LINE SEPARATOR '\r\n'                
@@ -859,14 +877,14 @@ function postmode_file_selection() {
 // load file into table
 // add record to import_log
 //
-function postmode_file_load_to_db($filename, $original, $is_first_turn) {
+function postmode_file_load_to_db($filename, $original, $is_preprocess) {
 
     global $mysqli;
 
     //$val_separator = $_REQUEST["val_separator"];
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
-    $csv_enclosure = $_REQUEST["csv_enclosure"];
+    $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
     
     if($csv_delimiter=="tab") {
         $csv_delimiter = "\t";
@@ -908,7 +926,7 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
         return "too many columns ".$len;
     }
     
-    if($is_first_turn){
+    if($is_preprocess){
         $temp_file = tempnam(sys_get_temp_dir(), $filename);
         if (move_uploaded_file($filename, $temp_file)) {
             if($len==1){
@@ -926,9 +944,13 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
     //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
     $preproc = preprocess_uploaded_file($filename);
 
+//DEBUG print print_r($preproc, true);
+    
     if(count($preproc['errors'])>0){
         return array("errors"=>$preproc['errors']);
     }
+    
+    $filename = $preproc['filename'];
     
     $import_table = "import".date("YmdHis");
     
@@ -985,7 +1007,7 @@ function postmode_file_load_to_db($filename, $original, $is_first_turn) {
             $mysqli->query("SHOW WARNINGS");
         }*/
     }
-    if(!$is_first_turn && file_exists($filename)){
+    if(!$is_preprocess && file_exists($filename)){
         unlink($filename);
     }   
     
@@ -1043,7 +1065,8 @@ function preprocess_uploaded_file($filename){
     
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
-    $csv_enclosure = $_REQUEST["csv_enclosure"];
+    $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
+    $csv_dateformat = $_REQUEST["csv_dateformat"];
     
     if($csv_delimiter=="tab") {
         $csv_delimiter = "\t";
@@ -1064,12 +1087,6 @@ function preprocess_uploaded_file($filename){
             else if (! is_readable($filename)) return 'file is not readable';
             else return 'file could not be read';
     }
-    
-//error_log(">>>>".$lb);    
-    // read header
-    if($csv_linebreak=="auto"){ 
-        //$line = fgets($handle, 4096);
-    }else{}
 
     $len = 0;
     $header = null;
@@ -1085,13 +1102,27 @@ function preprocess_uploaded_file($filename){
     
     $line_no = 0;
     while (!feof($handle)) {
-        $line = stream_get_line($handle, 1000000, $lb);
+        
+        if($csv_linebreak=="auto" || $lb==null){ 
+            $line = fgets($handle, 1000000);
+        }else{
+            $line = stream_get_line($handle, 1000000, $lb);
+        }
+
+        
         $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+        
+//DEBUG  print $line_no."   ".print_r($fields, true)."<br>";
+//DEBUG ob_flush();flush();
+
         if($len==0){
             $header = $fields;
             $len = count($fields);
         }else{
             $line_no++;
+            
+            if(trim($line)=="") continue;
+            
             if($len!=count($fields)){
                  // Add error to log if wrong field count
                  array_push($errors, array("cnt"=>count($fields), "no"=>$line_no, "line"=>substr($line,0,2000)));
@@ -1118,14 +1149,21 @@ function preprocess_uploaded_file($filename){
 
                     //Convert dates to standardised format.                    
                     if(in_array($k, $datefields) && $field!=""){
-                           $field = strtotime($field);
-                            $field = date('Y-m-d H:i:s', $field);
+                           if(is_numeric($field) && abs($field)<99999){ //year????
+                               
+                           }else{
+                                if($csv_dateformat==1){
+                                    $field = str_replace("/","-",$field);
+                                }
+                                $field = strtotime($field);
+                                $field = date('Y-m-d H:i:s', $field);
+                           }
                     }
                     
                     //Doubling up as an escape for quote marks
                     $field = addslashes($field);
-                    
-                    array_push($newfields, $csv_enclosure.$field.$csv_enclosure);
+                    $field = $csv_enclosure.$field.$csv_enclosure;
+                    array_push($newfields, $field);
                     $k++;
                 }
                 
@@ -1139,6 +1177,10 @@ function preprocess_uploaded_file($filename){
     }
     fclose($handle);
     fclose($handle_wr);
+    
+    unlink($filename);
+    
+//DEBUG print "Saved to file: ".$temp_name."<br>";
     
     return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals );
 }
