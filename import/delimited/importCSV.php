@@ -127,6 +127,8 @@ div.header{
 
 <body class="popup">
 <script type="text/javascript">
+
+var currentDb = "<?=HEURIST_DBNAME?>"; 
 //
 //
 //
@@ -147,8 +149,6 @@ function doClearSession(session_id){
    }
     
    if( confirm(msg) ) {
-       
-      var currentDb = "<?=HEURIST_DBNAME?>"; 
        
                  $.ajax({
                          url: top.HEURIST.basePath+'import/delimited/importCSV.php',
@@ -175,6 +175,14 @@ function doClearSession(session_id){
                      });
    }
 }
+//
+// submit form for second attempt of file upload
+//
+function doUpload2(){
+    showProgressMsg('Please wait');
+    $(document.forms[0]).hide();
+    document.forms[0].submit();
+}
 </script>
 <?php
 //USER_ID:=get_user_id()
@@ -194,7 +202,8 @@ if(intval(@$_REQUEST["import_id"])>0){
    $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
 }
 
-
+//print "SESSION 0    :".print_r($imp_session, true);
+//DEBUG print "STEP  :".$step;
 
 //first step - load file into import table
 if($step==1 && $imp_session==null){ 
@@ -210,14 +219,7 @@ if($step==1 && $imp_session==null){
 ?>
 <script type="text/javascript">
 $( function(){ $("#div-progress").hide(); });
-//
-// submit form for second attempt of file upload
-//
-function doUpload2(){
-    showProgressMsg('Please wait');
-    $(document.forms[0]).hide();
-    document.forms[0].submit();
-}
+
 //
 // reload 
 //
@@ -226,7 +228,7 @@ function doReload(){
     doUpload2();
 }
 </script>
-<?php        
+<?php
         if(is_array($imp_session) && @$imp_session['errors']){ //preprocessing
 
             $col_count = $imp_session['col_count'];
@@ -294,6 +296,87 @@ if($fields){
 
 //session is loaded - render second step page
 if(is_array($imp_session)){ 
+
+        if(@$_REQUEST["mvm"]){
+print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); });</script>';            
+            if($_REQUEST["mvm"]==1){
+?>
+        <h4>VERIFY MATCHING FOR MULTIVALUE INDEX</h4>
+        <hr width="100%" />
+  
+        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+                <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
+                <input type="hidden" name="mvm" value="2">
+                <input type="hidden" name="step" value="1">
+
+                <input type="hidden" name="import_id" value="<?=$_REQUEST["import_id"]?>">
+                <input type="hidden" name="sa_rectype" value="<?=$_REQUEST['sa_rectype']?>">
+                <input type="hidden" name="sa_keyfield" value="<?=$_REQUEST['sa_keyfield']?>">
+                <input type="hidden" name="sa_keyfield_type" value="<?=$_REQUEST['sa_keyfield_type']?>">
+            
+                <input type="hidden" name="idfield" value="<?=$_REQUEST['idfield']?>">
+                <input type="hidden" name="new_idfield" value="<?=$_REQUEST['new_idfield']?>">
+                <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
+                <div class="actionButtons">
+                    <input type="button" value="Cancel" onClick="{window.close(null);}" style="margin-right: 5px;">
+                    <input type="button" value="Continue" style="font-weight: bold;" onclick="doUpload2()">
+                </div>
+        </form>  
+        <table width="100%">
+<?php
+
+                $res = matchingMultivalues($mysqli, $imp_session, $_REQUEST);
+                //print results of matching
+                //$records = $res[1]; // imp_id => ids
+                $pairs = $res[0];   // values => ids
+           
+                $sError = '';
+                $sInsert = '';
+                $sFound = '';
+           
+                foreach($pairs as $value =>$id){
+                    
+                    if(!is_numeric($id)){
+                        //error
+                        $sError = $sError.'<tr><td>'.$value.'</td><td align="center">'.$id.'</td></tr>';
+                    }else if($id<0){
+                        //insert
+                        $sInsert = $sInsert.'<tr><td colspan="2">'.$value.'</td></tr>';
+                    }else{
+                        //found
+                        $sFound = $sFound.'<tr><td>'.$value.'</td><td align="center">'.$id.'</td></tr>';
+                    } 
+                }
+                
+                if($sError!=''){
+                    print '<tr><th align="left">Disambiguation</th><th>Instances</th></tr>'.$sError;
+                }
+                if($sInsert!=''){
+                    print '<tr><th colspan="2" align="left">New records to be inserted</th></tr>'.$sInsert;
+                }
+                if($sFound!=''){
+                    print '<tr><th colspan="2" align="left">Records found</th></tr><tr><th>Value</th><th>ID</th></tr>'.$sFound;
+                }
+                print '</table>';
+
+            }else if($_REQUEST["mvm"]==2){
+
+                $imp_session = assignMultivalues($mysqli, $imp_session, $_REQUEST);
+                if(is_array($imp_session)){
+                    print '<input type="button" value="Done! Close me" onClick="{window.close(111);}" style="margin-right: 5px;">';
+                }else{
+                    print "Error: ".$imp_session;
+                }
+            }
+?> 
+           
+</body>
+</html>   
+<?php            
+            exit();
+        }
+       
+
 ?>
         <script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
         <script src="../../common/js/utilsUI.js"></script>
@@ -303,10 +386,10 @@ if(is_array($imp_session)){
         var recCount = <?=$imp_session['reccount']?$imp_session['reccount']:0?>;
         var currentTable = "<?=$imp_session['import_table']?>";
         var currentSessionName = "<?=$imp_session['import_name']?>";
-        var currentDb = "<?=HEURIST_DBNAME?>";
         var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
         </script>
 <?php    
+
     $mode_import_result = "";
     if($step>1){
         $res = null;
@@ -394,7 +477,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="step" id="input_step" value="2">
-                <input type="hidden" name="import_id" value="<?=$imp_session["import_id"]?>">
+                <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
+                <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
 
 
     <div class="input-line">
@@ -484,9 +568,13 @@ if(@$imp_session['load_warnings']){
         //
         // render matching table 
         //
+        
+        
         for ($i = 0; $i < $len; $i++) {     
             print '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'.$i.'" value="field_'.$i
-                    .'" onchange="{showHideSelect2('.$i.');}"/></span></td>';
+                    .'" onchange="{showHideSelect2('.$i.');}" '
+                    .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'')
+                    .'/></span></td>';
             print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
             
             print '<td style="width:306px;">&nbsp;<span style="display:none;">'
@@ -519,7 +607,7 @@ if(@$imp_session['load_warnings']){
                     onchange="{onUpdateModeSet()}" />&nbsp;
             <label for="sa_upd2">Add and replace all existing value(s) for the record with new data</label>
             </div>
-            <div style="padding-left:60px;font-size:0.9em;display: <?=@$_REQUEST['sa_upd']==2?"block":"none"?>; vertical-align: top;" id="divImport2">
+            <div style="padding-left:60px;font-size:0.9em;vertical-align: top;display:<?=(@$_REQUEST['sa_upd']==2?"block":"none")?>" id="divImport2">
             <input type="radio" <?=@$_REQUEST['sa_upd2']>0?"":"checked"?> name="sa_upd2" id="sa_upd20" value="0" class="text" />&nbsp;
             <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br/>
             
@@ -646,7 +734,7 @@ if(@$imp_session['load_warnings']){
                                 <input type="submit" value="Start search/match" style="font-weight: bold;">
                             -->    
                                 <input type="button" value="Start search / match / Assign IDs" 
-                                    onclick="doDatabaseUpdate(0, 0)" style="font-weight: bold;">
+                                    onclick="doMatching()" style="font-weight: bold;">
                                 
                             </span>
                         </span>
@@ -1029,6 +1117,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
                      "columns"=>$fields,   //names of columns in file header 
                      "memos"=>$preproc['memos'], 
                      "multivals"=>$preproc['multivals'],
+                     "csv_enclosure"=>$_REQUEST['csv_enclosure'],
                      "uniqcnt"=>$uniqcnt,   //count of uniq values per column  
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID

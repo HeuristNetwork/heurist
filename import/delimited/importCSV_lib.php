@@ -22,6 +22,12 @@
 
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 
+// global variable for progress report
+$rep_processed = 0;
+$rep_added = 0;
+$rep_updated = 0;
+
+
 //a couple functions from h4/utils_db.php
 /**
 * returns first row for given query
@@ -235,8 +241,10 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
                     $where = $where.
                     " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
                 */      
-                }else{
+                }else if(false && $dt_type == "freetext"){
                 
+                    $where = $where." (REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=".$field_name.")";
+                }else{
                     $where = $where." (d".$index.".dtl_Value=".$field_name.")";
                     //" REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
                  
@@ -317,6 +325,7 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
     return $imp_session; 
 }
 
+//=================================================================
 /**
 * Assign record ids to field in import table
 * 
@@ -334,15 +343,13 @@ function matchingAssign($mysqli, $imp_session, $params){
     if(intval($recordType)<1){
         return "record type not defined";
     }
-    
+
     $id_field = @$params['idfield'];
     $field_count = count($imp_session['columns']);
     
 //DEBUG error_log(">>>".$id_field);    
-    
     if(!$id_field){ //add new field into import table
             //ID field not defined, create new field
-        
             $id_field = "field_".$field_count;
             array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
             array_push($imp_session['uniqcnt'], 0);
@@ -468,8 +475,7 @@ function matchingAssign($mysqli, $imp_session, $params){
                 $ids_part = array_slice($ids,$k,100);
                 
                 $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".implode(",",$ids_part).")";  //end($row)
-//DEBUG 
-//error_log("3>>>>".$updquery);            
+//DEBUG error_log("3>>>>".$updquery);            
                 if(!$mysqli->query($updquery)){
                     return "can not update import table: mark records for insert";
                 }
@@ -510,6 +516,202 @@ error_log("2>>>>".$updquery1);
     return $imp_session;
 }
 
+//====================================================================
+/**
+* special case - multivalue index field
+* 
+* @param mixed $mysqli
+* @param mixed $imp_session
+* @param mixed $params
+*/
+function matchingMultivalues($mysqli, $imp_session, $params){
+
+//DEBUG print "SESSION:".print_r($imp_session, true);
+    
+    $import_table = $imp_session['import_table'];
+    
+    //get rectype to import
+    $recordType = @$params['sa_rectype'];
+    
+    if(intval($recordType)<1){
+        return "record type not defined";
+    }
+
+//get search query
+    $field_name = null;
+    $select_query_update_from = array("Records");
+    $select_query_update_where = array("rec_RecTypeID=".$recordType);
+    
+    $field_type = $params['sa_keyfield_type'];
+    $field_name = $params['sa_keyfield'];
+        
+    if($field_type=="url"){ // || $field_type=="id" || $field_type=="scratchpad"){
+        array_push($select_query_update_where, "rec_".$field_type."=?");
+    }else{
+        
+        $where = "d".$index.".dtl_DetailTypeID=".$field_type." and (d".$index.".dtl_Value=?)";
+        
+        array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
+        array_push($select_query_update_from, "recDetails d".$index); 
+    }
+   
+//query to search record ids
+    $search_query = "SELECT rec_ID "
+                    ." FROM ".implode(",",$select_query_update_from)
+                    ." WHERE ".implode(" and ",$select_query_update_where);
+
+//print ">>>>".$search_query;
+                    
+    $search_stmt = $mysqli->prepare($search_query);
+    $search_stmt->bind_param('s', $field_value);
+    $search_stmt->bind_result($rec_ID);
+    
+//already founded IDs    
+    $pairs = array();
+    $records = array();
+    
+//loop all records
+    $select_query = "SELECT imp_id, ".$field_name." FROM ".$import_table;
+    $res = $mysqli->query($select_query);
+    if($res){
+        $ind = -1;
+        while ($row = $res->fetch_row()){
+//split multivalue field
+            $ids = array();
+            $values = getMultiValues($row[1], $params['csv_enclosure']);
+            foreach($values as $idx=>$value){
+                if($value && $value!="" && !@$pairs[$value]){
+//search for ID 
+                    $field_value = $value;
+                    $search_stmt->execute();
+                    $fnd = 0;
+                    while ($search_stmt->fetch()) {
+                        //keep pair ID => key value
+                        $pairs[$value] = $rec_ID;
+                        $fnd++;
+                    }
+                    if($fnd==0){
+                          $pairs[$value] = $ind;
+                          $ind--;
+                    }else if($fnd>1){
+                          $pairs[$value] = 'Found:'.$fnd; //Disambiguation!
+                    }
+                }
+                array_push($ids, $pairs[$value]);
+            }
+            $records[$row[0]] = implode("|", $ids);
+        }//while import table
+    }
+    $search_stmt->close();
+
+    return array($pairs, $records);
+}
+
+/**
+* Assign multivalues IDs
+* 
+* @param mixed $mysqli
+* @param mixed $imp_session
+* @param mixed $params
+* @return mixed
+*/
+function assignMultivalues($mysqli, $imp_session, $params){
+
+    $pairs = matchingMultivalues($mysqli, $imp_session, $params); 
+    $records = $pairs[1]; // imp_id => ids
+    $pairs = $pairs[0];   // values => ids
+    
+    $import_table = $imp_session['import_table'];
+    
+    //get rectype to import
+    $recordType = @$params['sa_rectype'];
+    
+    if(intval($recordType)<1){
+        return "record type not defined";
+    }
+
+    $id_field = @$params['idfield'];
+    $field_count = count($imp_session['columns']);
+    
+    if(!$id_field || $id_field=="null"){ 
+//add new field into import table
+            //ID field not defined, create new field
+            $id_field = "field_".$field_count;
+            array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
+            array_push($imp_session['uniqcnt'], 0);
+            
+            $imp_session['indexes'][$id_field] = $recordType;
+        
+            $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
+            if (!$mysqli->query($altquery)) {
+                return "can not alter import session table, can not add new index field: " . $mysqli->error;
+            }    
+    }    
+    
+    //get field type 
+    $field_type = $params['sa_keyfield_type'];
+    
+//add NEW records    
+    $newrecs = array();
+    $details= array( "t:".$field_type => array() );
+    $rep_processed=0;
+    $rep_added   = 0;
+    $rep_updated = 0;
+    foreach($pairs as $value => $rec_ID){
+        if($rec_ID<0){
+           $details["t:".$field_type][0] = $value;
+           $newrecs[$rec_ID] = doInsertUpdateRecord(null, $params, $details, null);
+        }
+    }
+
+//update values in import table
+    foreach($records as $imp_id => $ids){
+        $ids = explode("|",$ids);
+        $newids = array();
+        foreach($ids as $id){
+            if($id<0) $id = $newrecs[$id];
+            array_push($newids,$id);
+        }
+        //update
+        $updquery = "update ".$import_table." set ".$id_field."='".implode('|',$newids)
+            ."' where imp_id = ".$imp_id;
+//DEBUG     print ("3>>>>".$updquery);            
+        if(!$mysqli->query($updquery)){
+            return "can not update import table: set ids for multivalue";
+        }
+    }
+    
+    $imp_session = saveSession($mysqli, $imp_session);
+    return $imp_session;
+}
+
+/**
+* Split multivalue field
+* 
+* @param array $values
+* @param mixed $csv_enclosure
+*/
+function getMultiValues($values, $csv_enclosure){
+
+        $nv = array();
+        $values =  explode("|", $values);                          
+        if(count($values)==1){
+           array_push($nv, trim($values[0])); 
+        }else{
+
+            $csv_enclosure = ($csv_enclosure==1)?"'":'"'; //need to remove quotes for multivalues fields
+
+            foreach($values as $idx=>$value){
+                if($value!=""){
+                if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
+                     $value = substr($value,1,strlen($value)-2);
+                }
+                    array_push($nv, $value);
+                }
+            }
+        }
+        return $nv;
+}
 
 // import functions =====================================
 
@@ -896,11 +1098,6 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
     return null;
 }
 
-// global variable for progress report
-$rep_processed = 0;
-$rep_added = 0;
-$rep_updated = 0;
-
 /**
 * create or update records
 * 
@@ -934,7 +1131,7 @@ function doImport($mysqli, $imp_session, $params){
             //all mapped fields - they will be used in validation query
             array_push($sel_query, $field_name); 
             array_push($field_types, $field_type);
-            $imp_session["mapping"][$field_name] = $recordType.".".$field_type; // to keep used
+            //TEMP ART $imp_session["mapping"][$field_name] = $recordType.".".$field_type; // to keep used
         }
     }  
     if(count($sel_query)<1){
@@ -1038,7 +1235,7 @@ function doImport($mysqli, $imp_session, $params){
                 
             }
             else
-            { //INSERT - id field is not defined - always insert for each line in import data
+            { //INSERT - if field is not defined - always insert for each line in import data
                  $recordId = null;
                  $details = array();
             }
@@ -1061,27 +1258,35 @@ function doImport($mysqli, $imp_session, $params){
                     $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
                     
                     if(strpos($row[$index],"|")!==false){
-                        $values = explode("|", $row[$index]);
+                        $values = getMultiValues($row[$index], $params['csv_enclosure']);
                     }else{
                         $values = array($row[$index]);
                     }
                     
-                    foreach ($values as $r_value)
+                    foreach ($values as $idx=>$r_value)
                     {
                         $value = null;
+                        $r_value = trim($r_value);
                         
                         if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
                                 && !ctype_digit($r_value)) {
+                                    
+                            $r_value = mb_strtolower($r_value);        
                         
                             if($ft_vals[$idx_fieldtype] == "enum"){
                                 if(!$terms_enum) { //find ALL term IDs
-                                    $terms_enum = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='enum'");
+                                    $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
+//print print_r($terms_enum, true);
+//print " try to find=".@$terms_enum['Mentioned In Despatches'];
                                 }
                                 $value = @$terms_enum[$r_value];
-                                
+/*                                
+                                $value = array_search($r_value, $terms_enum, true);
+                                if($value===false) $value = null;
+*/                                
                             }else if($ft_vals[$idx_fieldtype] == "relationtype"){
                                 if(!$terms_relation){ //find ALL relation IDs
-                                    $terms_relation = mysql__select_array3($mysqli, "select trm_Label, trm_ID from defTerms where trm_Domain='relation'");
+                                    $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
                                 }
                                 $value = @$terms_relation[$r_value];
                             }
@@ -1101,6 +1306,7 @@ function doImport($mysqli, $imp_session, $params){
                                     $value = str_replace("\\n", "\n", $value);
                                 }
                             }
+                            
                         }
 
                         if($value  && 
@@ -1111,7 +1317,8 @@ function doImport($mysqli, $imp_session, $params){
                                 $cnt = count(@$details["t:".$field_type])+1;
                                 $details["t:".$field_type][$cnt] = $value;
                             }else{
-                                //DEBUG error_log(">>>>".$value."   ".print_r($details["t:".$field_type],true));
+                                //DEBUG 
+                                //print (">>>>".$value."   ".print_r($details["t:".$field_type],true)."<br>");
                             }
                         }
                     
@@ -1236,6 +1443,10 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
     global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated;
 
+//DEBUG print "RecordId=".$recordId."<br>";        
+//print print_r($details, true);        
+
+    
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
     //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
@@ -1265,7 +1476,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             }else{
                 if($recordId!=$out["bibID"]){ //}==null){
                     
-                    if($recordId==null || $recordId>0){
+                    if($id_field && ($recordId==null || $recordId>0)){
                         $updquery = "UPDATE ".$import_table
                             ." SET ".$id_field."=".$out["bibID"]
                             ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
@@ -1288,8 +1499,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
             }
             
-
-    
+            return @$out["bibID"];
 }
 
 

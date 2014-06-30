@@ -259,6 +259,58 @@ function update_counts(processed, added, updated, total){
 }
 
 //
+// Start search/matching
+//
+function doMatching(){
+
+    //detect if this is multivalue matching
+    var cb_keyfields1 = $('input[id^="cbsa_keyfield_"]:checked');
+    var cb_keyfields2 = $('input[id^="cbsa_keyfield_"][multivalue="yes"]:checked');
+    if(cb_keyfields1.length==0){
+        alert('You have to select one or more KEY fields for matching');
+    }else if(cb_keyfields1.length>1 && cb_keyfields2.length>0){
+        alert('You selected Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');        
+    }else if(cb_keyfields2.length>0){
+        
+        var id = cb_keyfields1.val().substr(6);
+        
+        //show special matching case in new popup
+        var  url = top.HEURIST.basePath+'import/delimited/importCSV.php?db='+currentDb
+        +'&mvm=1&step=1'
+        +'&import_id='+$('#import_id').val()
+        +'&sa_rectype='+$('#sa_rectype').val()
+        +'&sa_keyfield_type='+$("#sa_keyfield_"+id).val()
+        +'&sa_keyfield='+cb_keyfields1.val()
+        +'&csv_enclosure='+$('#csv_enclosure').val()
+        +'&idfield='+$('#idfield').val()
+        +'&new_idfield='+$('#new_idfield').val();
+
+        
+        function __onclose(){
+                        //reload this page
+                        //window.location.href='importCSV.php?db='+currentDb;
+                        $("#input_step").val(1);
+                        doUpload2();
+        }
+        
+        top.HEURIST.util.popupURL(top, url,
+            {   "close-on-blur": false,
+                "no-resize": false,
+            height: 700,
+            width: 700,
+                callback: function(context) {
+                    if(!top.HEURIST.util.isnull(context)){
+                        __onclose();
+                        //window.close();
+                    }
+                }
+            });        
+        
+    }else{
+        doDatabaseUpdate(0,0);    
+    }
+}
+//
 // Start import OR records IDs assign
 //
 function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
@@ -273,6 +325,7 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
         "Are you sure you want to proceed?");
     }
     if(r){
+        
         $("#input_step").val(3);
         document.forms[0].submit();
     }
