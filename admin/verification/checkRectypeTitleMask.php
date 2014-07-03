@@ -191,7 +191,7 @@ function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $mode) {
     */
 		echo "\n";
 	}else{
-		echo "checking type mask $mask for recType $rtID and rec $recID <br/>";
+		echo "checking title mask $mask for record type $rtID and record $recID <br/>";
 		echo fill_title_mask($mask, $recID, $rtID);
 	}
 }

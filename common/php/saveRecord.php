@@ -356,8 +356,8 @@
 
             mysql_query($deleteDetailsQuery);
             if (mysql_error()) {
-                errSaveRec("db error while deleteing details for field types (" . implode(",", $fieldtypesToDelete) . ") for record ID ".$recordID." error : ".mysql_error());
-                return array("error" => "recordID = $recordID rectype = $recordType ");
+                errSaveRec("db error while deleting details for field types (" . implode(",", $fieldtypesToDelete) . ") for record ID ".$recordID." error : ".mysql_error());
+                return array("error" => "record ID = $recordID record type = $recordType ");
             }
         }
         
@@ -479,7 +479,7 @@
                                 }
                             }else{
                                 errSaveRec("invalid resource reference '".$val."' for detail type '".$bdtID);
-                                return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+                                return array("error" => "record ID = $recordID record type = $recordType detailtype = $bdtID".
                                     ($bdID ? " detailID = $bdID":""));
                             }
                         }
@@ -500,7 +500,7 @@
 
                         if ($ulf_ID==null || mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".$ulf_ID)) <= 0){
                             errSaveRec("invalid file pointer '".$val."' for detail type '".$bdtID);
-                            return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+                            return array("error" => "record ID = $recordID record type = $recordType detailtype = $bdtID".
                                 ($bdID ? " detailID = $bdID":""));
                         }
                         $bdFileID = intval($ulf_ID);
@@ -514,7 +514,7 @@
                         if ($row[0]) {
                             // bad object!  Go stand in the corner.
                             errSaveRec("invalid geographic value '".$val."' for detail type '".$bdtID);
-                            return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+                            return array("error" => "record ID = $recordID record type = $recordType detailtype = $bdtID".
                                 ($bdID ? " detailID = $bdID":""));
                         }
                         $bdVal = '"' . mysql_real_escape_string($geoType) . '"';
@@ -553,7 +553,7 @@
         $resDel = mysql_query($deleteDetailIDsQuery);
         if (mysql_error()) {
             errSaveRec("db error while finding details to be deleted for record ID ".$recordID." error : ".mysql_error());
-            return array("error" => "recordID = $recordID rectype = $recordType ");
+            return array("error" => "record ID = $recordID record type = $recordType ");
         }
 
         // find details to be deleted
@@ -583,7 +583,7 @@
 //            mysql_query($deleteDetailsQuery);
             if (mysql_error()) {
                 errSaveRec("db error while deleteing details (" . implode(",", $deleteIDs) . ") for record ID ".$recordID." error : ".mysql_error());
-                return array("error" => "recordID = $recordID rectype = $recordType ");
+                return array("error" => "record ID = $recordID record type = $recordType ");
             }
 //            $retval["deleted"] = $deleteIDs;
         }
@@ -595,7 +595,7 @@
                 mysql_query($update);
                 if (mysql_error()) {
                     errSaveRec("db error while running '" . $update . "' for record ID ".$recordID." error : ".mysql_error());
-                    return array("error" => "recordID = $recordID rectype = $recordType ");
+                    return array("error" => "record ID = $recordID record type = $recordType ");
                 }
             }
             $retval["updated"] = $updateIDs;
@@ -607,7 +607,7 @@
             $first_bd_id = mysql_insert_id();
             if (mysql_error()) {
                 errSaveRec("db error while inserting '" . $insertQueryValues . "' for record ID ".$recordID." error : ".mysql_error());
-                return array("error" => "recordID = $recordID rectype = $recordType ");
+                return array("error" => "record ID = $recordID record type = $recordType ");
             }
             $retval["inserted"] = range($first_bd_id, $first_bd_id + count($insertQueryValues) - 1);
         }
@@ -619,7 +619,7 @@
                 mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . $valueSet);
                 if (mysql_error()) {
                     errSaveRec("db error while inserting '" . $valueSet . "' for record ID ".$recordID." error : ".mysql_error());
-                    return array("error" => "recordID = $recordID rectype = $recordType ");
+                    return array("error" => "record ID = $recordID record type = $recordType ");
                 }
                 $new_bdID = mysql_insert_id();
                 $translated[$translatedIDs[$j]]['new_bdID'] = $new_bdID;

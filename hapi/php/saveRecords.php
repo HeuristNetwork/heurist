@@ -93,7 +93,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 										"rec_FlagTemporary" => 1,
 										"rec_Added" => date('Y-m-d H:i:s')));
 			if (mysql_error()) {
-				array_push($out["record"], array("error" => " creating temporary record nonce = $nonce rectype = "
+				array_push($out["record"], array("error" => " creating temporary record nonce = $nonce record type = "
 																.@$record["type"]." error : ".mysql_error(),
 												"record" => $record,
 												"nonce" => $nonce));
@@ -103,7 +103,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 				$_REQUEST["records"][$nonce]["id"] = $id;
 			}
 		}else{
-			array_push($out["record"], array("error" => " creating temporary record nonce = $nonce no rectype given",
+			array_push($out["record"], array("error" => " creating temporary record nonce = $nonce no record type given",
 											"record" => $record,
 											"nonce" => $nonce));
 			$_REQUEST["records"][$nonce]["id"] = -1;

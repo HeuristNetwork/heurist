@@ -90,7 +90,7 @@ function import() {
 		!$sourceDBID || !is_numeric($sourceDBID)|| !$importRtyID || !is_numeric($importRtyID)) {
 		makeLogEntry("importParameters", -1, "One or more required import parameters not supplied or incorrect form ( ".
 					"importingDBName={name of target DB} sourceDBID={reg number of source DB or 0} ".
-					"importRtyID={numeric ID of rectype} tempDBName={temp db name where source DB type data are held}");
+					"importRtyID={numeric ID of record type} tempDBName={temp db name where source DB type data are held}");
 		$error = true;
 	}
 
@@ -417,7 +417,8 @@ function importRectype($importRty) {
 							"where rst_OriginatingDBID = ".$rtsFieldDef["rst_OriginatingDBID"].
 							" AND rst_IDInOriginatingDB = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
 			if ( mysql_num_rows($resRstExist)) {
-				makeLogEntry("<b>Error</b> Importing Field", $rtsFieldDef["rst_ID"], " '".$rtsFieldDef["rst_DisplayName"]."' already exists detail type #$importFieldDtyID rectype #$importRtyID");
+				makeLogEntry("<b>Error</b> Importing Field", $rtsFieldDef["rst_ID"], " '".$rtsFieldDef["rst_DisplayName"].
+                    "' already exists detail type #$importFieldDtyID record type #$importRtyID");
 				makeLogEntry("", -1, ". Originating DBID = ".$rtsFieldDef["rst_OriginatingDBID"]." Originating Field #".$rtsFieldDef["rst_IDInOriginatingDB"]);
 //				$error = true;
 			}
