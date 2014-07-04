@@ -1,31 +1,24 @@
 <?php
 
-    /*
-    * Copyright (C) 2005-2013 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
     /**
     * verifyInstallation.php
     * Verifies presence and correct versions for external JS components, Help, fiel directories and so forth
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @copyright   (C) 2005-2013 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.1.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0   
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
     */
 
     // SHHOUKLDN'T NEED THESE, SHOUDL BE ABLE TO RUN STANDALONE
@@ -79,20 +72,20 @@
         It assumes that all instances of Heurist are located in subdirectories in a common location (generally /var/www/html/HEURIST)<br />
         and point to the same Heurist filestore (generally .../HEURIST/HEURIST_FILESTORE, which is often a simlink to the real storage location).<br /> 
         Checks include: external javascript functions; help system; exemplars; root file upload directory; index.html in parent. <br />
-        
+
         <h3>Please run this using the latest instance on your server eg. h3-alpha</h3><br />
         If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
         <hr>
         <br />
-        
-        Verification under development March 2014 <br />
+
+        Verification under development July 2014 <br />
         <?php
 
 
 
         ?>
-    <br />
-    <hr>
-    <br /> Verification complete. Please note any errors listed above.
+        <br />
+        <hr>
+        <br /> Verification complete. Please note any errors listed above.
     </body>
 </html>

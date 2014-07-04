@@ -35,25 +35,32 @@
 <p>After creating a new database, please use the links on the left to follow these steps (you can return to this page to review the steps): </p>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Database &gt;<u>Properties</u></div>
-    <div class="detail">set information about the database, including ownership and some general behaviours</div>
+    <div class="detail">Set information about the database, including ownership and some general behaviours</div>
+</div>
+<div class="detailRow">
+    <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Browse templates</u></div>
+    <div class="detail">Browse and download record type definitions documented on the Heurist network web site. <br />
+        In addition to saving a great deal of time, the documentation helps you learn about the best ways of setting up Heurist structures.<br />
+        The record type definitions downloaded can later be modified to your requirements.</div>
 </div>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Import Structure</u></div>
-    <div class="detail">find and download common record type definitions which will get you started rapidly 
-        (the record type definitions can in most cases be modified to your requirements)</div>
+    <div class="detail">Find and download common record type definitions from any registered Heurist database, including the specially 
+        curated databases set up by the Heurist developers. <br />The record type definitions downloaded can later be modified 
+        to your requirements.</div>
 </div>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Record types / fields</u></div>
-    <div class="detail">modify the record types and fields describing them, and add new record types, fields and terms</div>
+    <div class="detail">Modify the record types and fields describing them, and add new record types, fields and terms</div>
 </div>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Record constraints</u></div>
-    <div class="detail">define the overall constraints on relationships between records 
+    <div class="detail">Define the overall constraints on relationships between records 
         (which types can be related together using which relationship types)</div>
 </div>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
-    <div class="detail">register the database with the central HeuristScholar.org index. 
+    <div class="detail">Register the database with the central HeuristScholar.org index.<br /> 
         This will give your database a unique code and allow Heurist to check for new versions of
         the software and database formats. <br/>It also allows other databases to import structural elements 
         (record types, field types and terms) but does NOT confer any form of access to data in this database</div>

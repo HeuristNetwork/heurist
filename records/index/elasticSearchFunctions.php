@@ -1,32 +1,25 @@
 <?php
 
-    /*
-    * Copyright (C) 2005-2014 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
     /**
-    * Functions to index and search for records using Elastic Search
+    * elasticSearchFunctions.php: Functions to index and search for records using Elastic Search
     *
-
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.2.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0   
     */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
+
 
     /* 
     Elastic Search creates indexes automatically and updates the index record when new data is supplied for an existing key 
@@ -103,7 +96,7 @@
 
         $jsonData = "{";
 
-        print "updateRecordIndexEntry: about to index recID = $recID<br />";
+        print "$recID ";
         error_log("updateRecordIndexEntry: about to index recID = $recID");
 
         // Add the record level data: 
@@ -112,7 +105,7 @@
         "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
         "from Records where rec_ID=$recID"; // omits scratchpad
         $res = mysql_query($query);
-        
+
         if (($res) && ($row[3] != $recTypeID)) {// record type has changed
 
             // TODO: Delete index for old record type before updating index for new record type
@@ -160,12 +153,12 @@
         $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
 
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-        
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
         // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
-                   
+
         $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d'$jsonData'";    
-        
+
         // If the index and type do not exist, the index is created autiomatically according to
         // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html   
         //
@@ -179,9 +172,9 @@
         // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d'{Title:""}'
         // just to get the index started. This is a pain. Is it something wrong with the construction of the URL?
         // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
-        
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------       
-        
+
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------       
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL); // have to reset before can set to PUT
         curl_setopt($ch, CURLOPT_PUT, true);
@@ -338,7 +331,7 @@
             for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
                 buildIndexForRectype ($dbName, $i);    
             }                                       
-        return(0);            
+            return(0);            
         }      
     } // buildAllIndices
 

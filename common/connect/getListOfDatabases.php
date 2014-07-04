@@ -92,7 +92,8 @@
 	}
 
 
-    print "<br /><div>Click on the database name to open in new window</div>";
+    print "<br /><div>Click on the database name to open in a new tab. ".
+        "Databases are filtered by default to show only those to which you have access</div>";
 	print "<ul class='dbList'>";
 
 	$list = mysql__getdatabases(false, $email, $role);
