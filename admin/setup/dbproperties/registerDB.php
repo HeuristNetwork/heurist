@@ -1,52 +1,44 @@
 <?php
 
-    /*
-    * Copyright (C) 2005-2013 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
     /**
     * registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
     * metadata in the index database, sets registration code in sysIdentification table.
     *
+    * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2013 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.1.0
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @version     3.0   
     */
 
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
-    if(isForAdminOnly("to register a database with the Heurist master index")){
+    if (isForAdminOnly("to register a database with the Heurist master index")){
         return;
     }
 
     $sError = null;
+
     /*
     $user_id = get_user_id();
     // User must be system administrator or admin of the owners group for this database
     if (!is_admin()) {
     $sError = "You must be logged in as system administrator to register a database";
-    }else  if (get_user_id() != 2) {
+    } else  if (get_user_id() != 2) {
     $sError = "Only the owner/creator of the database (user #2) may register the database. ".
     "<br/><br/>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database";
     return;
@@ -59,11 +51,12 @@
     // Registering user must be a real user so that there is an email address and password to attach to the registration record.
     // which rules out using the Database Managers group. Since other users will be unable to login and edit this record, it's better
     // to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
+
     $res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
+
     if(mysql_num_rows($res) == 0) {
         $sError = "Warning<br/><br/>Unable to read your email address from user table";
     }else{
-
         $row = mysql_fetch_row($res);
         $usrEmail = $row[0]; // Get the current user's email address from UGrps table
         $usrPassword = $row[1];
@@ -72,7 +65,8 @@
         $usrLastName = $row[4];
 
         if(!$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword){
-            $sError = "Warning<br/><br/>Please edit your user profile to specify your full name, login and email address before registering this database";
+            $sError = "Warning<br/><br/>Please edit your user profile to specify your full name, ".
+            "login and email address before registering this database";
         }
     }
 
@@ -84,8 +78,8 @@
         return;
     }
 
-
 ?>
+
 <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
 <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
@@ -96,17 +90,22 @@
         <title>Register Database with Heurist Master Index at HeuristScholar.org</title>
     </head>
 
+    <script type="text/javascript">
+        function hideRegistrationForm() {
+            document.getElementById("registerDBForm").style.display = "none";
+    } </script>
+
     <!-- Database registration form -->
 
     <body class="popup">
         <div class="banner"><h2>Register Database with Heurist Master Index at HeuristScholar.org</h2></div>
         <div id="page-inner" style="overflow:auto">
-        <h3>Registration</h3>
+            <h3>Registration</h3>
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
                     <div class='input-header-cell'><b>Database Description</b></div><div class='input-cell'>
                         <input type="text" maxlength="1000" size="80" name="dbDescription">
-                        <input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" >
+                        <input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" >
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
                         <div  style="margin-top: 15px; margin-bottom: 20px;">
                             <br/>Note: After registering the database, you will be asked to log in to a Heurist database (H3MasterIndex). 
@@ -120,7 +119,11 @@
 
             <?php
 
-                $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
+                $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
+                    "from sysIdentification where `sys_ID`='1'");
+
+                // TODO: remove debug
+                error_log("Hiding registration form");
 
                 // Start by hiding the registration/title edit form
                 echo '<script type="text/javascript">';
@@ -140,30 +143,66 @@
                 $dbDescription = $row[2];
                 $ownerGrpID = $row[3];
 
-                /*****DEBUG****///error_log('registerDB.php: current dbid = '.$dbID.'   user ID = '.$user_id.' user email = '.$usrEmail);
-
                 // Check if database has already been registered
 
-                if (isset($dbID) && ($dbID != 0)) { // already registered, display info and link to H3MasterIndex edit
+                if (isset($dbID) && ($dbID != 0)) 
+                { // already registered, display info and link to H3MasterIndex edit
                     echo '<script type="text/javascript">';
                     echo 'document.getElementById("registerDBForm").style.display = "none";';
                     echo '</script>';
                     echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE." </div></div>";
-                    echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div><div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
-                    echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
+                    echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div>".
+                    "<div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
+                    echo "<div class='input-row'><div class='input-header-cell'>Description:</div>".
+                    "<div class='input-cell'>". $dbDescription . "</div></div>";
                     $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
-                    echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
-                    <a href=$url target=_blank>Click here to edit</a> (login as person who registered this database - note: use EMAIL ADDRESS as username)
-                    </div></div>";
-                } else { // New registration, display registration form
+                    echo "<div class='input-row'><div class='input-header-cell'><b>Please edit the collection metadata ".
+                    "describing this database:</b></div><div class='input-cell'>".
+                    "<a href=$url target=_blank style='color:red;'>Click here to edit</a> (login as person who registered this database - ".
+                    " note: use EMAIL ADDRESS as username)</div></div>";
+                } // existing registration
+                else 
+                { // New registration, display registration form
                     echo '<script type="text/javascript">';
                     echo 'document.getElementById("registerDBForm").style.display = "block";';
                     echo '</script>';
+                } // new registration
+
+                // Do the work of registering the database if a suitable title is set
+
+                // TODO: remove debug
+                error_log("About to test length");
+
+                if(isset($_POST['dbDescription'])) {
+                    if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1022) {
+                        $dbDescription = $_POST['dbDescription'];
+                        echo '<script type="text/javascript">';
+                        echo 'document.getElementById("registerDBForm").style.display = "none";';
+                        echo '</script>';
+                        error_log("About to call registerDatabase");
+                        registerDatabase(); // this does all the work of registration
+                    } else {
+                        echo "<b>The database description should be an informative description ".
+                        "of the content, of at least 40 characters (max 1000)</b>";
+                    }
                 }
+
+            ?>
+
+            <!-- Explanation for the user -->
+
+            <div class="separator_row" style="margin:20px 0;"></div>
+            <h3>Suggested workflow for new databases:</h3>
+
+            <?php include("newDBWorkflowDescription.inc");  ?>
+
+            <?
 
                 function registerDatabase() {
                     $heuristDBname = rawurlencode(HEURIST_DBNAME);
-                    global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, $usrName, $usrFirstName, $usrLastName, $dbDescription;
+                    global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, 
+                    $usrName, $usrFirstName, $usrLastName, $dbDescription;
+
                     $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
 
                     $usrEmail = rawurlencode($usrEmail);
@@ -173,8 +212,7 @@
                     $usrPassword = rawurlencode($usrPassword);
                     $dbDescriptionEncoded = rawurlencode($dbDescription);
 
-                    // TODO: New URL should be active March 2014 when H3 on HeuristScholar.org updated to 3.1.8
-                    // $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
+                    // TODO: New URL should be active July 2014 when H3 on HeuristScholar.org updated to 3.1.8
                     $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
                     "?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
@@ -182,38 +220,49 @@
 
                     // TODO: remove debug
                     error_log("DB Registration attempt with URL: ".$reg_url);
-                    
+
                     $data = loadRemoteURLContent($reg_url);
                     if (!$data) {                            
-                            die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
+                        die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
                             "URL requested: <a href='$reg_url'>$reg_url</a>");
                     }
 
                     if ($data) {
-                        $dbID = intval($data); // correct return of data is just the registration number
-                                               // we probably need a better formatted return with some tags to ensure we are getting the right thing
+                        $dbID = intval($data); // correct return of data is just the registration number. we probably need a 
+                        // better formatted return with some tags to ensure we are getting the right thing
                     }
 
                     if ($dbID == 0) { // Unable to allocate a new database identifier
                         $decodedData = explode(',', $data);
                         $errorMsg = $decodedData[0];
                         error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
-                        $msg = "Problem allocating a database identifier from the Heurist master index, returned the following instead of registration number:\n" .
-                            substr($data, 0, 25)." ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                        $msg = "Problem allocating a database identifier from the Heurist master index, " .
+                        "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
+                        " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
                         echo $msg . "<br />";
                         return;
-                    } else if($dbID == -1) { // old title update function, should no longer be called
+                    } 
+                    else if($dbID == -1) 
+                    { // old title update function, should no longer be called
                         $res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
-                        echo "<div class='input-row'><div class='input-header-cell'>Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
-                    } else { // We have got a new dbID, set the assigned dbID in sysIdentification
-                        $res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
+                        echo "<div class='input-row'><div class='input-header-cell'>".
+                        "Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
+                    } else 
+                    { // We have got a new dbID, set the assigned dbID in sysIdentification
+                        $res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
+                            "`sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
                         if($res) {
-                            echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE."</div></div>";
-                            echo "<div class='input-row'><div class='input-header-cell'>Registration successful, database ID allocated is</div><div class='input-cell'>" . $dbID . "</div></div>";
-                            echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
+                            echo "<div class='input-row'><div class='input-header-cell'>Database:</div>" .
+                            "<div class='input-cell'>".DATABASE."</div></div>";
+                            echo "<div class='input-row'><div class='input-header-cell'>".
+                            "Registration successful, database ID allocated is</div>".
+                            "<div class='input-cell'>" . $dbID . "</div></div>";
+                            echo "<div class='input-row'><div class='input-header-cell'></div>".
+                            "<div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
                             $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
-                            echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
-                            <a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself) </div></div>";
+                            echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div>".
+                            "<div class='input-cell'><a href=$url target=_blank>Click here to edit</a> " . 
+                            "(login - if asked - as yourself) </div></div>";
                         ?>
                         <script> // automatically call H3MasterIndix metadata edit form for this database
                             window.open("<?=$url?>",'_blank');
@@ -229,39 +278,10 @@
                         } // unable to write db identification record
                     } // successful new DB ID
                 } // registerDatabase()
-            ?>
-
-            <script type="text/javascript">
-                function registerDB() {
-                    document.getElementById("registerDBForm").style.display = "none";
-                }
-            </script>
-
-
-            <?php
-
-                // Do the work of registering the database if a suitable title is set
-
-                if(isset($_POST['dbDescription'])) {
-                    if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1022) {
-                        $dbDescription = $_POST['dbDescription'];
-                        echo '<script type="text/javascript">';
-                        echo 'document.getElementById("registerDBForm").style.display = "none";';
-                        echo '</script>';
-                        registerDatabase(); // this does all the work of registration
-                    } else {
-                        echo "<b>The database description should be an informative description of the content, of at least 40 characters (max 1000)</b>";
-                    }
-                }
 
             ?>
 
-            <!-- Explanation for the user -->
 
-            <div class="separator_row" style="margin:20px 0;"></div>
-            <h3>Suggested workflow for new databases:</h3>
-
-            <?php include("newDBWorkflowDescription.inc");  ?>
         </div>
     </body>
 </html>
