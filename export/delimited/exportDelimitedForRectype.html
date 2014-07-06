@@ -84,12 +84,11 @@
 
         <!-- <h2>Delimited text file data export (CSV/TSV)</h2 -->
         <p>
-            This function exports data for specified fields of a selected record type in comma or tab delimited format (CSV/TSV).<br />
-            An additional query string using normal Heurist query structure can be used to select a subset of the record type.<br />
+            This function exports data for specified fields of a selected record type in comma or tab delimited format (CSV/TSV).
+            An additional query string using normal Heurist query structure can be used to select a subset of the record type.
             Due to the limitations of the delimited text format, only one record type can be exported at a time.
-        </p>
 
-        <div style="padding-top:10px; width:900px"> <!-- Determines width of output text area -->
+        <div style="width:750px"> </div> <!-- Determines width of output text area -->
 
         <div class="input-row">
             <label class="input-header-cell">
@@ -99,30 +98,28 @@
 
         <div class="input-row">
             <label class="input-header-cell">
-                Heurist query string (optional) - provides additional filtering</label>
+                Additional filter (Heurist query string - optional)</label>
             <div class="input-cell"><input type="text"  style="width:280px;" id="queryInput" onkeydown="clearOutput()"/></div>
         </div>
 
         <div class="input-row">
             <label class="input-header-cell">
                 Select fields to export (use ctrl or shift to multi-select)</label>
-            <div class="input-cell" id="select-detail-type"><select size="4"></select></div>
+            <div class="input-cell" id="select-detail-type"><select size="15"></select></div>
             <!-- TODO: Artem, if I set the size to 15, it starts out 15, but as soon as I select a record type it resets to 4 -->
         </div>
 
         <div class="input-row">
             <label class="input-header-cell">
-                Use delimeter</label>
-            <div class="input-cell"><select style="width:80px" id="delimiterSelect" onchange="refreshRecordData()">
-                <option value=",">comma</option><option value="\t">tab</option></select></div>
+                Field delimeter</label>
+            <div class="input-cell">
+                <select style="width:80px" id="delimiterSelect" onchange="refreshRecordData()">
+                    <option value="," selected>comma</option><option value="\t" >tab</option></select>
+                &nbsp;&nbsp;&nbsp;Quotemark for text fields:
+                <select  style="width:40px" id="quoteSelect" onchange="refreshRecordData()">
+                    <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option></select><br/>
+                </div>
         </div>
-
-        <div class="input-row">
-            <label class="input-header-cell">
-                Enclose text fields in quotemarks</label>
-            <div class="input-cell"><select  style="width:40px" id="quoteSelect" onchange="refreshRecordData()">
-                <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option></select><br/><br/>
-            </div>
 
             <div class="input-row">
                 <label class="input-header-cell">
@@ -143,10 +140,10 @@
 
         </div>
 
-        <!-- Waste of space: simply duplicates the header row which most people will select anyway -->
+        <!-- List of fields above output box, but also used in building data so cannot be removed -->
         <div id="export-detail-map" style="padding-top:10px;"></div>
 
-        <!-- Count of records + instrcutions to cut and paste -->
+        <!-- Count of records + instructions to cut and paste -->
         <div id="results"></div>
 
         <!-- CSV data -->

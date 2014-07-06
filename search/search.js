@@ -13,7 +13,7 @@
 */
 
 /**
-* search.js 
+* search.js
 * JS for the main Heurist search page:
 * functions are installed as  top.HEURIST.search.*
 * search data is loaded into  top.HEURIST.search.results.*
@@ -22,7 +22,7 @@
 * them from workgroup keywords.  The code still refers to both as keywords.
 * -kj, 2007-08-13
 * Note: now there are tags (user) and wgTags (workgroup)
-* 
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -179,7 +179,7 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
-        
+
         if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" || top.HEURIST.search.results.infoByDepth[0].count==0){
             $("#related-toggle").hide();
         }else{
@@ -240,8 +240,8 @@ top.HEURIST.search = {
 	loadSearch: function() {
 		if (! top.HEURIST.parameters["q"]) {
 			top.HEURIST.registerEvent(window, "contentloaded",
-			function() { 
-                    document.getElementById("search-status").className = "noquery"; 
+			function() {
+                    document.getElementById("search-status").className = "noquery";
             });
 			return;
 		}
@@ -493,11 +493,11 @@ top.HEURIST.search = {
 						$("#showrelated" + i).addClass("loaded");
 					}
                     var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(i);
-                    
+
 					//filterRelated results with noPush
 					top.HEURIST.search.filterRelated(i,true,true);
 					// expand level
-                    
+
 					if (!(layoutSrch && layoutSrch[i][1] && layoutSrch[i][1].toLowerCase() == "c")) { // no c following the view designator so expand
 						$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
 						$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Level "+i+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+i+"\"></span>").append(sToggleoff);
@@ -687,7 +687,7 @@ top.HEURIST.search = {
 		expandSearchMenuItem.id = "showrelated"+level;
 		expandSearchMenuItem.className = "showrelated level" + level;
 		filterDiv.appendChild(expandSearchMenuItem);
-        
+
         var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
         $("#"+expandSearchMenuItem.id).append(sToggleoff);
 	},
@@ -742,8 +742,8 @@ top.HEURIST.search = {
 			filterDiv.appendChild(showSearchResults);
 		}
 		if(level>0){// create load-show-hide  with count banner for a related level
-        
-        
+
+
 			var showRelatedMenuItem = document.createElement("div");
 			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Load Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
@@ -752,7 +752,7 @@ top.HEURIST.search = {
 
             var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
             $("#"+showRelatedMenuItem.id).append(sToggleoff);
-            
+
 			if (!$(resultsDiv).hasClass('collapsed')) {
 				resultsDiv.className += " collapsed";
 			}
@@ -971,10 +971,10 @@ top.HEURIST.search = {
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
         var sToggleoff = top.HEURIST.search.getLink_toggleOff_loadRelatedRecords(level);
-        
+
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {  //loaded
-        
+
 			if ($("#results-level" + level).hasClass("collapsed")) {
 				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>").append(sToggleoff);
 				top.HEURIST.search.setSelectedCount();
@@ -992,12 +992,12 @@ top.HEURIST.search = {
 		}
 		top.HEURIST.search.updateMapRelated();
 	},
-    
+
     getLink_toggleOff_loadRelatedRecords: function(level){
-        
+
         if(level==1){
             return "<a onclick=\"top.HEURIST.util.setDisplayPreference('loadRelatedOnSearch','false');top.HEURIST.search.clearRelatesRows();$('#related-toggle').show();\" "+
-                      " style='{background-image:none;}' href=\"#\" "+ 
+                      " style='{background-image:none;}' href=\"#\" "+
                       "title=\"Turns off searches for records linked to the current search results by relationships or pointers. Improves performance where display or navigation to related records is not needed\">turn off</a>";
         }else{
             return "<span></span>";
@@ -1911,10 +1911,10 @@ top.HEURIST.search = {
 			document.getElementById("search-status").className = "noresult"
 				+ (top.HEURIST.parameters["w"] == "bookmark" ? "" : " all");
 			document.getElementById("resource-count").innerHTML = "";
-            
+
             $("#related-toggle").hide();
-            
-            
+
+
 			return;
 		}
 
@@ -2176,7 +2176,7 @@ top.HEURIST.search = {
 		return keepVal;
 	},
 
-    // if record type is not selected show all utilized detail types 
+    // if record type is not selected show all utilized detail types
 	createUsedDetailTypeSelector: function (useIDs) {
 		var detailTypes = top.HEURIST.detailTypes;
 		var fieldValSelect = document.getElementById("field-select");
@@ -2240,7 +2240,7 @@ top.HEURIST.search = {
 		sortbyValSelect.appendChild(grp);
 
 		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
-        
+
         //sort field by name - Ian's request by 2013/11/12
         var fld = [];
         for (var dtID in fields){
@@ -2744,7 +2744,7 @@ top.HEURIST.search = {
 			var sid = cmb[2];
 
 			var innerHTML = "";
-            
+
             try {
                 var facet_params = $.parseJSON(cmb[1]);
             }
@@ -2767,14 +2767,14 @@ top.HEURIST.search = {
 
 		printSavedSearchAsMenuItem = function(cmb) {
 			var sid = cmb[2];
-            
+
             var innerHTML = "";
 
             try {
                 var facet_params = $.parseJSON(cmb[1]);
             }
             catch (err) {
-            
+
 			innerHTML = '<li><a style="padding-right:20px" href="#" onclick="{top.HEURIST.search.savedSearchExecute('+sid+');}">'+ cmb[0] + "</a>";
 
 			innerHTML += '<span class="sf-edit-icons"><img title="edit" src="' +top.HEURIST.basePath+'common/images/edit_pencil_9x11.gif" '+
@@ -3286,7 +3286,7 @@ top.HEURIST.search = {
 		if (targ.className.match(/\bsmall\b/)){
 			options =  {height:dim.h*0.5, width:dim.w*0.5};
 		}else if (targ.className.match(/\bportrait\b/)){
-			options = {height:dim.h*0.9, width:dim.w*0.5};
+			options = {height:dim.h*0.95, width:dim.w*0.5};
 		}else if (targ.className.match(/\blarge\b/)){
 			options = {height:dim.h*0.8, width:dim.w*0.8};
         }else if (targ.className.match(/\bfixed\b/)){
@@ -4362,7 +4362,7 @@ top.HEURIST.search = {
 						(rtFilter ? "&" + rtFilter : "") +
 						(relFilter ? "&" + relFilter : "") +
 						(ptrFilter ? "&" + ptrFilter : "") +
-						"&db=" + database + 
+						"&db=" + database +
                         (ishuni?'&file=1':'');
 
 		window.open(sURL, '_blank');
