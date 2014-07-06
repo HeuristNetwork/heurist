@@ -98,7 +98,7 @@ div.loading {
 div.input-line{
     height:3em;
 }
-div.analized{
+div.analized, div.analized2{
     background-color:#DDD;
     border:black solid 1px;
     display:inline-block;
@@ -273,8 +273,12 @@ function doReload(){
 $fields = @$imp_session['fields'];                  
 if($fields){
     $k=0;
+        print '&nbsp;&nbsp;DATE&nbsp;&nbsp;MEMO<br />';
     foreach($fields as $field){
-        print '&nbsp;&nbsp;<input type="checkbox" id="field_'.$k.'" name="datefield[]" value="'.$k.'" />&nbsp;&nbsp;';
+        print '&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="d_field_'.$k.'" name="datefield[]" value="'.$k.'" ';
+        print 'onchange="{if(this.checked) document.getElementById(\'m_field_'.$k.'\').checked = false; }"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        print '<input type="checkbox" id="m_field_'.$k.'" name="memofield[]" value="'.$k.'" ';
+        print 'onchange="{if(this.checked) document.getElementById(\'d_field_'.$k.'\').checked = false; }"  />&nbsp;&nbsp;';
         print '<label for="field_'.$k.'" >'.$field.'</label><br />';        
         $k++;
     }
@@ -297,26 +301,21 @@ if($fields){
 //session is loaded - render second step page
 if(is_array($imp_session)){ 
 
-        if(@$_REQUEST["mvm"]){
+        if(false && @$_REQUEST["mvm"]){
 print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); });</script>';            
             if($_REQUEST["mvm"]==1){
 ?>
-        <h4>VERIFY MATCHING FOR MULTIVALUE INDEX</h4>
+        <h4>INDEX KEYS GENERATED FROM MULTIVALUE FIELD</h4>
         <hr width="100%" />
   
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
-                <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="mvm" value="2">
-                <input type="hidden" name="step" value="1">
-
-                <input type="hidden" name="import_id" value="<?=$_REQUEST["import_id"]?>">
-                <input type="hidden" name="sa_rectype" value="<?=$_REQUEST['sa_rectype']?>">
-                <input type="hidden" name="sa_keyfield" value="<?=$_REQUEST['sa_keyfield']?>">
-                <input type="hidden" name="sa_keyfield_type" value="<?=$_REQUEST['sa_keyfield_type']?>">
-            
-                <input type="hidden" name="idfield" value="<?=$_REQUEST['idfield']?>">
-                <input type="hidden" name="new_idfield" value="<?=$_REQUEST['new_idfield']?>">
-                <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
+<?php
+    foreach ($_REQUEST as $name=>$value){
+        if($name!='mvm')
+            print '<input type="hidden" name="'.$name.'" value="'.$value.'">';
+    }
+?>
                 <div class="actionButtons">
                     <input type="button" value="Cancel" onClick="{window.close(null);}" style="margin-right: 5px;">
                     <input type="button" value="Continue" style="font-weight: bold;" onclick="doUpload2()">
@@ -335,6 +334,10 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
                 $sFound = '';
            
                 foreach($pairs as $value =>$id){
+                    
+                    $value = explode("|",$value);
+                    array_shift($value); //remove first element
+                    $value = implode(";&nbsp;&nbsp;",$value);
                     
                     if(!is_numeric($id)){
                         //error
@@ -396,7 +399,7 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
 
         if($sa_mode==0){ //matching
             
-            if($step==2){  //find
+            if($step==2){  //find  - NOT USED ANYMORE
             
                 echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
                 ob_flush();flush();
@@ -411,7 +414,7 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
                 ob_flush();flush();
             
                 $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
-                $sa_mode = 1; //switch to import
+                //$sa_mode = 1; ART switch to import  autimatically???
             }
             
         }else{//importing
@@ -477,6 +480,8 @@ Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importin
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                 <input type="hidden" name="step" id="input_step" value="2">
+                <input type="hidden" id="mvm" name="mvm" value="0">
+                <input type="hidden" id="multifield" name="multifield" value="">
                 <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
                 <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
 
@@ -574,6 +579,7 @@ if(@$imp_session['load_warnings']){
             print '<td align="right">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'.$i.'" value="field_'.$i
                     .'" onchange="{showHideSelect2('.$i.');}" '
                     .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'')
+                    .' column="'.$imp_session['columns'][$i].'"'
                     .'/></span></td>';
             print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
             
@@ -752,6 +758,9 @@ if(@$imp_session['load_warnings']){
         $cnt_error   = intval(@$validationRes['count_error']);
         $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
 
+        $cnt_disamb   = count(@$validationRes['disambiguation']);
+        $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
+        
         $cnt_update  = intval(@$validationRes['count_update']);
         $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
 
@@ -766,14 +775,16 @@ if(@$imp_session['load_warnings']){
                             <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
                             <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
 <?php        if($sa_mode==0){ ?>                            
-                            <tr><td>&nbsp;</td></tr>
+                            <tr><td>Rows with disambiguation:</td><td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
 <?php        } else { ?>                            
                             <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
 <?php        }        ?>                            
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
+<?php if($sa_mode==1){  ?>                     
                             <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" 
                                 onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;">
+<?php } ?>                                
                         </div>
                     </div></td>
 <?php
@@ -834,6 +845,15 @@ if($validationRes){
             <hr width="100%" />
 <?php
             renderRecords( 'update', $imp_session );
+            print "</div>";
+    }
+    if($cnt_disamb>0){    
+?>
+    <div id="main_disamb" style="display:none;">
+            <h4>DISAMBIGUATION</h4>
+            <hr width="100%" />
+<?php
+            renderDisambiguation( 'disamb', $imp_session );
             print "</div>";
     }
 }
@@ -1021,7 +1041,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
                 return array("warning"=>"You appear to have only one value per line. This probably indicates that you have selected the wrong separator type. Continue?",
                      "filename"=>$temp_file, "original"=>$original );
             }else{
-                return array("warning"=>"Please verify the list of fields and select ones that are date type",
+                return array("warning"=>"Please verify the list of fields and select ones that are DATE or MEMO type",
                      "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
             }
         }else {
@@ -1050,7 +1070,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     $counts = "";
     $mapping = array();
     for ($i = 0; $i < $len; $i++) {     
-        $query = $query."`field_".$i."` varchar(250), ";
+        $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" text, ":" varchar(300), " ) ; 
         $columns = $columns."field_".$i.",";
         $counts = $counts."count(distinct field_".$i."),";
         //array_push($mapping,0);
@@ -1148,9 +1168,12 @@ return 3 arrays:
 function preprocess_uploaded_file($filename){
     
     $errors = array();
-    $memos = array();
+    $memos = array();  //multiline fields
     $multivals = array();
     $datefields = @$_REQUEST["datefield"];
+    $memofields = @$_REQUEST["memofield"];
+    if(!$datefields) $datefields = array();
+    if(!$memofields) $memofields = array();
     
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
@@ -1225,7 +1248,7 @@ function preprocess_uploaded_file($filename){
                     if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
                         array_push($multivals, $k);
                     }
-                    if( !in_array($k, $memos) && strpos($field, '\\r')!==false ){
+                    if( !in_array($k, $memos) && (in_array($k, $memofields) || strpos($field, '\\r')!==false) ){
                         array_push($memos, $k);
                     }
                     

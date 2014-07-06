@@ -155,7 +155,7 @@ select_rectype.change(function (event){
     $(".analized").hide();
 
     
-});
+}); //end record type change
 
 //Loads values for record from import table
 getValues(0);
@@ -183,7 +183,8 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
             if(cb) cb.checked = true;
             //$('#cb'+key).parent().show();
             isbtnvis = true;
-            form_vals.sa_mode = 1;
+            //ART 0307  - switch to import automatically ???
+            // form_vals.sa_mode = 1;
         }
     }
     onFtSelect(-1);
@@ -268,23 +269,52 @@ function doMatching(){
     var cb_keyfields2 = $('input[id^="cbsa_keyfield_"][multivalue="yes"]:checked');
     if(cb_keyfields1.length==0){
         alert('You have to select one or more KEY fields for matching');
-    }else if(cb_keyfields1.length>1 && cb_keyfields2.length>0){
-        alert('You selected Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');        
+    }else if(cb_keyfields2.length>1){
+        //alert('You selected more than one Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');        
+        //alert('You selected Key field with multivalues (values separated by |). This field can be the only ONE. Unselect other fields');        
+        var lst = [];
+        cb_keyfields2.each(function(){
+            lst.push($(this).attr('column'));
+            //lst.push($("#sa_key"+id).children("option").is("selected").text());
+        });
+        
+        
+        alert('You have selected more than one multi-value column ('+lst.join(',')+')\r\n'+
+'You may only have one multi-value column in your key columns, since there is no way to work out the correct combination of multiple values across multiple columns. Please rationalise your data to allow matching with zero or one multi-value key fields.');        
+        
     }else if(cb_keyfields2.length>0){
         
-        var id = cb_keyfields1.val().substr(6);
-        
+        r = confirm('You have a multi-value column ('+cb_keyfields2.attr('column')+') in your key columns. The record identifier column created by this matching process will have multiple values corresponding with the number of values in this column for each record.\r\n\r\n'+
+'When used as the key field in the insert/update step, a record will be created for each value. When used as a data field, the data field will have repeated values in the record.');
+
+        if(r){
+            $("#mvm").val(1);
+            $("#multifield").val(cb_keyfields2.val());
+
+            doDatabaseUpdate(0,0);
+        }
+        return;
+
+//OLD WAY
+/*        
         //show special matching case in new popup
         var  url = top.HEURIST.basePath+'import/delimited/importCSV.php?db='+currentDb
         +'&mvm=1&step=1'
         +'&import_id='+$('#import_id').val()
         +'&sa_rectype='+$('#sa_rectype').val()
-        +'&sa_keyfield_type='+$("#sa_keyfield_"+id).val()
-        +'&sa_keyfield='+cb_keyfields1.val()
         +'&csv_enclosure='+$('#csv_enclosure').val()
         +'&idfield='+$('#idfield').val()
         +'&new_idfield='+$('#new_idfield').val();
 
+        cb_keyfields1.each(function(){
+                var id = $(this).val();
+                url = url + "&sa_key"+id+"="+$("#sa_key"+id).val();
+        });
+        url = url + "&multifield="+cb_keyfields2.val();
+        
+        //var id = cb_keyfields1.val().substr(6);
+        //+'&sa_keyfield_type='+$("#sa_keyfield_"+id).val()
+        //+'&sa_keyfield='+cb_keyfields1.val()
         
         function __onclose(){
                         //reload this page
@@ -305,7 +335,7 @@ function doMatching(){
                     }
                 }
             });        
-        
+*/        
     }else{
         doDatabaseUpdate(0,0);    
     }
@@ -322,10 +352,12 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     if(r && cnt_errors>0){
         r = confirm("There are errors in the data. It is better to fix these in the source file and then "+
         "process it again, as uploading faulty data generally leads to major fix-up work. "+
-        "Are you sure you want to proceed?");
+        "Are you sure you want to proceed?\r\n\r\n"+
+        "Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n\r\n"+
+        "BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
+        );
     }
     if(r){
-        
         $("#input_step").val(3);
         document.forms[0].submit();
     }
@@ -356,10 +388,10 @@ function onExistingIDfieldSelect(){
 //
 function showUpdMode(){
     
-    if( $("#sa_mode").val()=="1" ){
+    if( $("#sa_mode").val()=="1" ){   // import
         $(".importing").show();   
         $(".matching").hide();   
-    }else{
+    }else{                            // matching
         $(".importing").hide();
         $(".matching").show();   
     }
