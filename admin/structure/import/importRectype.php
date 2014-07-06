@@ -267,8 +267,11 @@ foreach ($imp_recordtypes as $recId){
             array(array("values" =>
              array($grp_name, $src_group['order'], $src_group['description']))) );
              
-        if( is_numeric(@$res['result']) ){
-            $group_rt_ids[$grp_id] = $res['result'];
+        $new_grp_id = @$res['result'];     
+        
+        if( is_numeric($new_grp_id) ){
+            $group_rt_ids[$grp_id] = $new_grp_id;
+            $trg_rectypes['groups'][$new_grp_id] = array('name'=>$grp_name);
         }else{
             error_exit("Can't add record type group '".$grp_name."'. ".@$res['error']);
         }
@@ -319,6 +322,7 @@ foreach ($imp_recordtypes as $rtyID){
         
         $new_rtyID  = abs($res);
         $rectypes_correspondence[$rtyID] = $new_rtyID;
+        $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name];
         
         copyRectypeIcon($rtyID, $new_rtyID);
     }else{
@@ -360,9 +364,13 @@ foreach ($imp_fieldtypes as $ftId){
         $res = createDettypeGroups($columnNames,
             array(array("values" =>
              array($grp_name, $src_group['order'], $src_group['description']))) );
+             
+        $new_grp_id = @$res['result'];
         
-        if(is_numeric(@$res['result'])){
-            $group_ft_ids[$grp_id] = $res['result'];
+        if(is_numeric($new_grp_id)){
+            $group_ft_ids[$grp_id] = $new_grp_id;
+            $trg_fieldtypes['groups'][$new_grp_id] = array('name'=>$grp_name);
+
         }else{
             error_exit("Can't add field type group for '".$grp_name."'. ".$res['error']);
         }
@@ -382,6 +390,8 @@ $idx_origin_dbid = $def_dts['fieldNamesToIndex']['dty_OriginatingDBID'];
 $idx_origin_id   = $def_dts['fieldNamesToIndex']['dty_IDInOriginatingDB'];
 $idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
 
+print "ADD FIELDTYPES<br>";
+
 foreach ($imp_fieldtypes as $ftId){
 
     $def_field = $def_dts[$ftId]['commonFields'];
@@ -394,8 +404,7 @@ foreach ($imp_fieldtypes as $ftId){
     
     //disambiguate name
     $def_field[$idx_name] = doDisambiguate($def_field[$idx_name], $trg_fieldtypes['names']);
-    
-//DEBUG print "<br>after:".$def_field[$idx_name];    
+//DEBUG if(strpos($def_field[$idx_name],"eader")>0) print "<br>after:".$def_field[$idx_name];    
     
     if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
             //change terms ids for enum and reltypes
@@ -423,6 +432,7 @@ foreach ($imp_fieldtypes as $ftId){
     
     if(is_numeric($res)){
         $fields_correspondence[$ftId] = abs($res);
+        $trg_fieldtypes['names'][abs($res)] = $def_field[$idx_name-1]; //new name
     }else{
         error_exit("Can't add field type for id#".$ftId.". ".$res);
     }
@@ -886,6 +896,11 @@ function doDisambiguate($newvalue, $entities){
                     $found++;          
               }
         }
+        
+if($name1=="Header"){
+print ">>>".$newvalue." found ".$found."<br>";    
+}
+        
         if($found>0){
             $newvalue = $name." ".($found+1);
         }
