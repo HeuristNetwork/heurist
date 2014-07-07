@@ -335,8 +335,8 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
 */
 function matchingAssign($mysqli, $imp_session, $params){
     
-    //special case       
-    if(@$params['mvm']>0){
+    //Now we always use it
+    if(true || @$params['mvm']>0){
         return assignMultivalues($mysqli, $imp_session, $params);
     }
     
@@ -352,7 +352,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     $id_field = @$params['idfield'];
     $field_count = count($imp_session['columns']);
     
-
+    
     if(!$id_field){ //add new field into import table
             //ID field not defined, create new field
             $id_field_idx = $field_count;
@@ -554,6 +554,16 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $multivalue_field_name = $params['multifield']; //name of multivalue field
     $multivalue_field_name_idx = 0;
     
+    //disambiguation resolution 
+    $disamb_ids = @$params['disamb_id'];   //record ids
+    $disamb_keys = @$params['disamb_key'];  //key values
+    $disamb_resolv = array();
+    if($disamb_keys){
+        foreach($disamb_keys as $idx => $keyvalue){
+            $disamb_resolv[$keyvalue] = $disamb_ids[$idx];
+        }
+    }
+    
     //get rectype to import
     $recordType = @$params['sa_rectype'];
     
@@ -691,6 +701,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                         //keep pair ID => key value
                         $disamb[$rec_ID] = $rec_Title; //get value from binding
                     }
+                    
                     if(count($disamb)==0){
                           $new_id = $ind;
                           $ind--;
@@ -699,16 +710,22 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                           $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']);
                           array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query) 
                           
-                    }else if(count($disamb)>1){
-                          $new_id= 'Found:'.count($disamb); //Disambiguation!
-                          $disambiguation[$keyvalue] = $disamb;
-                    }else{
+                    }else if(count($disamb)==1 || @$disamb_resolv[$keyvalue]){
+                                
+                          if(count($disamb)>1){
+                            $rec_ID = $disamb_resolv[$keyvalue];
+                          }
+
                           $new_id = $rec_ID;
                           $rec = $row;
                           $rec[0] = $imp_id;
                           array_unshift($rec, $rec_ID);
                           $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']);
                           array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query) 
+                            
+                    }else{
+                          $new_id= 'Found:'.count($disamb); //Disambiguation!
+                          $disambiguation[$keyvalue] = $disamb;
                     }
                     $pairs[$keyvalue] = $new_id;
                     array_push($ids, $new_id);
@@ -844,7 +861,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
     $imp_session['indexes_keyfields'][$id_field] = $imp_session['validation']['mapped_fields'];        
     
 //DEBUG print "<br>mapped_fields  ".$id_field."   ".print_r($imp_session['validation']['mapped_fields'],true); 
-print "<br>indexes_keyfields ".print_r($imp_session['indexes_keyfields'],true);   //DEBUG
+//DEBUG print "<br>indexes_keyfields ".print_r($imp_session['indexes_keyfields'],true);   //DEBUG
     
 //add NEW records    
     $rep_processed=0;
@@ -860,6 +877,7 @@ print "<br>indexes_keyfields ".print_r($imp_session['indexes_keyfields'],true); 
         }
     }
 */
+    //NOT USED ANYMORE
     if($is_create_records){
     
         $newrecs = array();
@@ -1996,28 +2014,32 @@ function renderDisambiguation($type, $imp_session){
     if(count($records)>25)    
         print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
         
-    print '<div>The following rows match with multiple records. This may be due to the existence of duplicate records in your database, but it is more likely to indicate that you have not chosen all the fields required to correctly disambiguate the incoming rows against existing data records.';
-    print '<br/><br/>If you proceed, the first matching record will be chosen - this may not be the correct record if you have used an incompete set of fields for matching.</div>';    
-        
+    print '<div>The following rows match with multiple records. This may be due to the existence of duplicate records in your database, but it is more likely to indicate that you have not chosen all the fields required to correctly disambiguate the incoming rows against existing data records.</div>';
+    print '<br/><br/>';
+    
     print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>'; // class="tbmain"
 
     
-    foreach($records as $value =>$disamb){
+    foreach($records as $keyvalue =>$disamb){
                     
-        $value = explode("|",$value);
+        $value = explode("|",$keyvalue);
         array_shift($value); //remove first element
-        $value = implode(";&nbsp;&nbsp;",$value);
+        $value = implode(";&nbsp;&nbsp;",$value); //keyvalue
         
-        print '<tr><td>'.$value.'</td><td>'.count($disamb).'</td><td><select>';
+        print '<tr><td>'.$value.'</td><td>'.count($disamb).'</td><td>';
         
+        print '<input type="hidden" name="disamb_key[]" value="'.addslashes($keyvalue).'"/><select name="disamb_id[]">';
+                                    
         foreach($disamb as $rec_ID =>$rec_Title){
             print '<option value="'.$rec_ID.'">'.$rec_Title.'</option>';
         }
         print '</select></td></tr>';
     }
     
-    print "</table>";
-    print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+    print "</table><br />";
+    print '<div>If you proceed without verification, the first matching record will be chosen - this may not be the correct record if you have used an incompete set of fields for matching.</div>';    
+    print '<div>Select correct matching and press "Proceed" button to finalize matching step and assign IDS</div><br/>';    
+    print '<input type="button" value="Back" onClick="showRecords(\'mapping\');">&nbsp;&nbsp;<input type="button" value="Proceed" onClick="doMatching()">';
     
 }
 

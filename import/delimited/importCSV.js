@@ -93,6 +93,7 @@ select_rectype.change(function (event){
     
     $('#btnStartMatch').hide();
     $('#btnStartImport').attr("disabled", "disabled");// .hide();
+    $('#btnStartImport').css('color','#CCC');
     
     //id field 
     if(rectype){
@@ -102,16 +103,22 @@ select_rectype.change(function (event){
         
         //ID field
         //uncheck id field radiogroup - matching
-        var sval = rectype?top.HEURIST.rectypes.names[rectype]+' ID':'';
-        $("#new_idfield").val(sval);
-        $("#new_idfield2").val(sval);
         $("#idfield").val('');
         
         //matching -- id fields
         $('option[class^="idfield2_"]').hide(); //hide all
         var sel_rt = $('option[class="idfield2_'+rectype+'"]');
         sel_rt.show(); //show for this rt only
+        
+        var sval = rectype? (top.HEURIST.rectypes.names[rectype]+' ID'+(sel_rt.length>0?sel_rt.length+1:'')) :'';
+        $("#new_idfield").val(sval);
+        $("#new_idfield2").val(sval);
+        
         if(sel_rt.length>0){
+            $("#rb_idfield1").attr("checked", true); //ART new
+            onExistingIDfieldSelect();
+            $("#idfield").val(sel_rt[0].value);
+
             $('#div_idfield_exist').show();
             $('#div_idfield_new').hide();
             $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
@@ -152,7 +159,7 @@ select_rectype.change(function (event){
     }else{
         $("#div_idfield").hide();
     }
-    $(".analized").hide();
+    $(".analized2").hide();  //hide after rectype change
 
     
 }); //end record type change
@@ -226,7 +233,13 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     }
     
     //init id fields for import
-    var id_field = form_vals["recid_field"] || form_vals["idfield"];
+    var id_field = '';
+    if(!top.HEURIST.util.isempty(form_vals["recid_field"])){
+        id_field = form_vals["recid_field"];
+    }else if(!top.HEURIST.util.isempty( $("#idfield").val() )){
+        id_field = $("#idfield").val();
+    }
+//alert("ID:"+id_field+'  1:'+form_vals["recid_field"]+' 2:'+$("#idfield").val());
     $("#recid_field").val(id_field);
     if(id_field !=''){
         onRecIDselect2(); //(form_vals["recid_field"].substr(6));
@@ -236,15 +249,17 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
 }
 
   $( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
-        $("#sa_mode").val(ui.newTab.index());
-        showUpdMode();    
+        showUpdMode(ui.newTab.index());    
   } });
   
-   //$("#sa_mode").val("1");
-
-   showUpdMode();
+  
+    if(form_vals.auto_switch_to_import==1){
+        $( "#tabs_actions" ).tabs( "option", "active", 1 );
+    }else{
+        showUpdMode();
+    }
    
-   $(".analized").show();
+   $(".analized2").show();
 
    if(form_vals['error_message']){
        alert(form_vals['error_message']);
@@ -352,8 +367,8 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     if(r && cnt_errors>0){
         r = confirm("There are errors in the data. It is better to fix these in the source file and then "+
         "process it again, as uploading faulty data generally leads to major fix-up work. "+
-        "Are you sure you want to proceed?\r\n\r\n"+
-        "Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n\r\n"+
+        "Are you sure you want to proceed?\r\n"+
+        "Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n"+
         "BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
         );
     }
@@ -386,7 +401,11 @@ function onExistingIDfieldSelect(){
 //
 // switch modes
 //
-function showUpdMode(){
+function showUpdMode(newval){
+    
+    if(!top.HEURIST.util.isnull(newval)){
+        $("#sa_mode").val(newval);
+    }
     
     if( $("#sa_mode").val()=="1" ){   // import
         $(".importing").show();   
@@ -413,8 +432,10 @@ function onFtSelect(ind){
     }
     if(isok){
         $('#btnStartImport').removeAttr("disabled"); //.show();
+        $('#btnStartImport').css('color','#666');
     }else{
         $('#btnStartImport').attr("disabled", "disabled"); //.hide();
+        $('#btnStartImport').css('color','#CCC');
     }
     
     /*if($('select[id^="sa_dt_"][value!=""]').length>0){
@@ -424,7 +445,7 @@ function onFtSelect(ind){
     }*/
     
     if(ind>=0){
-        $(".analized").hide();
+        $(".analized2").hide();
     }
     
     return; 
@@ -464,7 +485,7 @@ function onFtSelect2(ind){
     }*/
     
     if(ind>=0){
-        $(".analized").hide();
+        $(".analized2").hide();
     }
     
     return;

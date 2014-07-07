@@ -301,6 +301,7 @@ if($fields){
 //session is loaded - render second step page
 if(is_array($imp_session)){ 
 
+        //NOT USED ANYMORE
         if(false && @$_REQUEST["mvm"]){
 print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); });</script>';            
             if($_REQUEST["mvm"]==1){
@@ -399,7 +400,7 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
 
         if($sa_mode==0){ //matching
             
-            if($step==2){  //find  - NOT USED ANYMORE
+            if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
             
                 echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
                 ob_flush();flush();
@@ -413,8 +414,15 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
                 echo '<script>showProgressMsg("Please wait, assign of records ids")</script>';
                 ob_flush();flush();
             
-                $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
-                //$sa_mode = 1; ART switch to import  autimatically???
+                $res = assignMultivalues($mysqli, $imp_session, $_REQUEST);
+                //NOT USED ANYMORE $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
+                
+                if(is_array($res) && count(@$res['validation']['disambiguation'])>0){
+                    print '<script>form_vals["error_message"] = "There is disambiguation for your matching criteria. Please resolve it before proceed further";</script>';
+                }else{
+                    print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
+                    //$sa_mode = 1; //ART switch to import  autimatically???
+                }
             }
             
         }else{//importing
@@ -451,7 +459,7 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
         if(is_array($res)) {
             $imp_session = $res;
         }else if($res && !is_array($res)){
-            echo '<script>form_vals["error_message"] = "'.$res.'";</script>';
+            print '<script>form_vals["error_message"] = "'.$res.'";</script>';
             //echo "<p style='color:red'>ERROR: ".$res."</p>";        
         }
     }
@@ -463,6 +471,14 @@ echo "<div>imp session: ".print_r($imp_session)."<br>";
 echo "REUQEST: ".print_r($_REQUEST)."</div>";
 */
 ?>
+<form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
+        <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
+        <input type="hidden" name="step" id="input_step" value="2">
+        <input type="hidden" id="mvm" name="mvm" value="0">
+        <input type="hidden" id="multifield" name="multifield" value="">
+        <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
+        <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
+
 <div id="main_mapping"<?=$mode_import_result?>>
 
         <h4>IMPORT DATA Step 2 <font color="red">(Work in Progress)</font></h4>
@@ -476,14 +492,6 @@ If the spreadsheet data is complex, this function will allow you to progressivel
 Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importing-data">HeuristNetwork.org/archive/importing-data</a> for a detailed explanation and examples of record import.        
 <br/><br/><br/>
         </div>
-
-        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
-                <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-                <input type="hidden" name="step" id="input_step" value="2">
-                <input type="hidden" id="mvm" name="mvm" value="0">
-                <input type="hidden" id="multifield" name="multifield" value="">
-                <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
-                <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
 
 
     <div class="input-line">
@@ -745,7 +753,7 @@ if(@$imp_session['load_warnings']){
                             </span>
                         </span>
                         <span class="importing"><span><input  id="btnStartImport" type="submit" 
-                                value="Analyse data in buffer" style="disabled:disabled;font-weight: bold;"></span></span>
+                                value="Prepare insertion/update" style="disabled:disabled;font-weight: bold;"></span></span>
                         <div class="help"><br></div>
                     </td>
 <?php
@@ -770,21 +778,28 @@ if(@$imp_session['load_warnings']){
         $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
         
 ?>                    
-                    <td><div class="analized">
+                    <td><div class="analized2">
                         <table style="display: inline-block; border:none" border="0">
                             <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
                             <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
 <?php        if($sa_mode==0){ ?>                            
-                            <tr><td>Rows with disambiguation:</td><td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
+                            <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with disambiguation:</font></td><td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
 <?php        } else { ?>                            
                             <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
 <?php        }        ?>                            
                         </table>
                         <div style="float:right;vertical-align:middle;padding-top:10px">
 <?php if($sa_mode==1){  ?>                     
-                            <input type="button" value="<?=(($sa_mode==0)?'Assign IDs':'Create records')?>" 
-                                onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;">
-<?php } ?>                                
+                            <span class="importing"><input type="button" value="Create records" onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+<?php }
+      if($cnt_disamb>0){
+?>            
+                            <span class="matching"><input type="button" value="Resolve Disambiguation" onclick="showRecords('disamb')" style="font-weight: bold;">
+<?php }else{ ?>
+                            <span class="matching"><input type="button" value="Continue" title="Go to Import step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
+<?php
+      }
+?>            
                         </div>
                     </div></td>
 <?php
@@ -799,10 +814,9 @@ if(@$imp_session['load_warnings']){
                     </td>
                 </tr>
                 </table>
-        </form>    
 </div>
 <?php
-
+//Warnings that SQL command LOAD DATA generates
 if(@$imp_session['load_warnings']){
 ?>
     <div id="main_load_warnings" style="display:none;">
@@ -858,6 +872,7 @@ if($validationRes){
     }
 }
 
+print '</form>';    
 
 // PAGE STEP 1 ================================================================================
 }else{ 
