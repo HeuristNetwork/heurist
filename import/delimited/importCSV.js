@@ -271,7 +271,7 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
 // Update progress counter for record update/insert
 //
 function update_counts(processed, added, updated, total){
-    $("#div-progress2").html("Added: "+added+" Updated:"+updated+". Processed "+processed+" of "+total);
+    $("#div-progress2").html("Added: "+added+" Updated:"+updated+". Processed "+processed+" records of "+total+" rows");
 }
 
 //

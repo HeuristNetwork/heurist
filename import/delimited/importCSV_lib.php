@@ -64,7 +64,7 @@ function mysql__select_array3($mysqli, $query, $withindex=true) {
                 $result = array();
                 while ($row = $res->fetch_row()){
                     if($withindex){
-                        $result[$row[0]] = $row[1];
+                        $result[$row[0]] = stripAccents(trim($row[1]));
                     }else{
                         array_push($result, $row);
                     }
@@ -562,7 +562,12 @@ function matchingMultivalues($mysqli, $imp_session, $params){
         foreach($disamb_keys as $idx => $keyvalue){
             $disamb_resolv[$keyvalue] = $disamb_ids[$idx];
         }
+        
+        print "<br>dis resolv ".print_r($disamb_resolv, true);
     }
+    
+    
+    
     
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -667,6 +672,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $tmp_idx_insert = array(); //to keep indexes
     $tmp_idx_update = array(); //to keep indexes
     
+    
 //loop all records
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
     $res = $mysqli->query($select_query);
@@ -677,9 +683,10 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $row[0] = $params_dt;
             
             $multivalue = $row[$multivalue_field_name_idx];    
-
+            $multivalue = $row[$multivalue_field_name_idx];    
+            
             $ids = array();
-//split multivalue field
+            //split multivalue field
             $values = getMultiValues($multivalue, $params['csv_enclosure']);
             foreach($values as $idx=>$value){
                 $row[$multivalue_field_name_idx] = $value;
@@ -687,10 +694,12 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                 $fc = $row;
                 array_shift($fc);
                 $fc = trim(implode("", $fc));
-                if($fc=="") continue;
+
+                if($fc==null || $fc=="") continue;       //key is empty
+                
                 
                 $keyvalue = implode("|", $row);
-                
+
                 if(!@$pairs[$keyvalue]){  //was $value && $value!="" && 
 //search for ID 
 
@@ -707,22 +716,22 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                           $ind--;
                           $rec = $row;
                           $rec[0] = $imp_id;
-                          $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']);
+                          $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
                           array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query) 
-                          
-                    }else if(count($disamb)==1 || @$disamb_resolv[$keyvalue]){
+//DEBUG print "<br>push :".print_r($imp_session['validation']['recs_insert'], true);                            
+                    }else if(count($disamb)==1 || @$disamb_resolv[addslashes($keyvalue)]){
                                 
                           if(count($disamb)>1){
-                            $rec_ID = $disamb_resolv[$keyvalue];
+//DEBUG print "<br> ".$keyvalue."   ".@$disamb_resolv[addslashes($keyvalue)].".";
+                            $rec_ID = $disamb_resolv[addslashes($keyvalue)];
                           }
 
                           $new_id = $rec_ID;
                           $rec = $row;
                           $rec[0] = $imp_id;
                           array_unshift($rec, $rec_ID);
-                          $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']);
+                          $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']); //keep index in rec_update
                           array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query) 
-                            
                     }else{
                           $new_id= 'Found:'.count($disamb); //Disambiguation!
                           $disambiguation[$keyvalue] = $disamb;
@@ -730,18 +739,24 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                     $pairs[$keyvalue] = $new_id;
                     array_push($ids, $new_id);
                 }else{ //already found
-                    if(@$tmp_idx_insert[$keyvalue]){
-                        $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][1] .= (",".$imp_id);
-                    }else if(@$tmp_idx_update[$keyvalue]){
-                        $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (",".$imp_id);
+                
+                    if(array_key_exists($keyvalue, $tmp_idx_insert)){
+                        $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
+                        
+//DEBUG print "<br> added key=".$keyvalue."   idx=".$tmp_idx_insert[$keyvalue]."  line=".$imp_id;                        
+                    }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
+                        $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
                     }
                     //$imp_session['validation']['recs_update'][]
-                    
+                    array_push($ids, $pairs[$keyvalue]);
                 }
-            }
+            }//foreach multivalues
             $records[$imp_id] = implode("|", $ids);   //IDS to be added to import table
         }//while import table
     }
+    
+//DEBUG print "<br>".print_r($imp_session['validation']['recs_insert'], true);
+    
     $search_stmt->close();         
                     
 /*   OLD  WORK                 
@@ -792,8 +807,8 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $imp_session['validation']['count_update'] = count($imp_session['validation']['recs_update']);
     $imp_session['validation']['count_insert'] = count($imp_session['validation']['recs_insert']);
     $imp_session['validation']['disambiguation'] = $disambiguation;
-    $imp_session['validation']['pairs'] = $pairs;
-    $imp_session['validation']['records'] = $records;
+    $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
+    $imp_session['validation']['records'] = $records; //imp_id(line#) => list of records ids
 
     return $imp_session;
 }
@@ -811,8 +826,8 @@ function assignMultivalues($mysqli, $imp_session, $params){
 
     $imp_session = matchingMultivalues($mysqli, $imp_session, $params); 
     if(is_array($imp_session)){
-       $records = $imp_session['validation']['records']; // imp_id => ids
-       $pairs = $imp_session['validation']['pairs'];   // values => ids
+       $records = $imp_session['validation']['records']; //imp_id(line#) => list of records ids
+       $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
        $disambiguation = $imp_session['validation']['disambiguation'];
     }else{
         return $imp_session;
@@ -841,7 +856,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
             //ID field not defined, create new field
             $id_field = "field_".$field_count;
             array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
-            array_push($imp_session['uniqcnt'], 0);
+            array_push($imp_session['uniqcnt'], count($pairs));
             array_push($imp_session['multivals'], $field_count);
             
             $imp_session['indexes'][$id_field] = $recordType;
@@ -850,6 +865,9 @@ function assignMultivalues($mysqli, $imp_session, $params){
             if (!$mysqli->query($altquery)) {
                 return "can not alter import session table, can not add new index field: " . $mysqli->error;
             }    
+    }else{
+            $index = intval(substr($id_field, 6));
+            $imp_session['uniqcnt'][$index] = count($pairs);    
     }    
     
     //get field type 
@@ -905,7 +923,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
                         if(( $dt_type == "enum" ||  $dt_type == "relationtype")
                             && !ctype_digit($r_value)) {
                                         
-                                $r_value = mb_strtolower($r_value);        
+                                $r_value = stripAccents(mb_strtolower($r_value)); 
                             
                                 if($dt_type == "enum"){
                                     if(!$terms_enum) { //find ALL term IDs
@@ -1402,7 +1420,7 @@ function doImport($mysqli, $imp_session, $params){
         $is_mulivalue_index = false;
     }
     
-//DEBUG print "IS MULTI ".$is_mulivalue_index."<<  ".print_r(@$imp_session['indexes_keyfields'][$id_field], true);
+//DEBUG print "<br>IS MULTI ".$is_mulivalue_index."<<  ".print_r(@$imp_session['indexes_keyfields'][$id_field], true);
     
     if(intval($recordType)<1){
         return "record type not defined";
@@ -1460,7 +1478,6 @@ function doImport($mysqli, $imp_session, $params){
             }    
     }
         
-//error_log($sel_query);
     
     $res = $mysqli->query($select_query);
     if (!$res) {
@@ -1486,6 +1503,8 @@ function doImport($mysqli, $imp_session, $params){
         
         $new_record_ids = array();
         $imp_id = null;
+        
+        $pairs = array(); // for multivalue rec_id => new_rec_id
 
         while ($row = $res->fetch_row()){
             
@@ -1497,6 +1516,11 @@ function doImport($mysqli, $imp_session, $params){
             }
             
         foreach($id_field_values as $idx2 => $recordId_in_import){
+
+
+            if(@$pairs[$recordId_in_import]){
+                 $recordId_in_import = $pairs[$recordId_in_import];
+            }
             
             //detect mode
             if($recordId_in_import){ //id field defined - detect insert or update
@@ -1507,7 +1531,8 @@ function doImport($mysqli, $imp_session, $params){
                     //save data
                     if($previos_recordId!=null && !$is_mulivalue_index){ //perform action
                         $details = retainExisiting($details, $details2, $params);
-                        doInsertUpdateRecord($recordId, $params, $details, $id_field); //$recordURL, $recordNotes, 
+                        //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
+                        doInsertUpdateRecord($recordId, $params, $details, $id_field); 
                     }
                     $previos_recordId = $recordId_in_import;
                     
@@ -1579,13 +1604,13 @@ function doImport($mysqli, $imp_session, $params){
                         if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
                                 && !ctype_digit($r_value)) {
                                     
-                            $r_value = mb_strtolower($r_value);        
-                        
+                            $r_value = stripAccents(mb_strtolower($r_value)); 
+//print "<br>>>>".$r_value;
                             if($ft_vals[$idx_fieldtype] == "enum"){
                                 if(!$terms_enum) { //find ALL term IDs
                                     $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
 //print print_r($terms_enum, true);
-//print " try to find=".@$terms_enum['Mentioned In Despatches'];
+//print " <br>try to find=".@$terms_enum["Medaille d'Honneur des Epidemies"];
                                 }
                                 $value = @$terms_enum[$r_value];
 /*                                
@@ -1620,8 +1645,13 @@ function doImport($mysqli, $imp_session, $params){
                         if($value  && 
                             ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                                 //Add new data only if field is empty (new data ignored for non-empty fields)
+                         
+//DEBUG print "<br>".$value."   >>".print_r($details["t:".$field_type], true)."   >>".print_r($details2["t:".$field_type], true);
                             
-                            if (!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false){
+                            if ((!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false) //no duplications
+                                && 
+                               (!@$details2["t:".$field_type] || array_search($value, $details2["t:".$field_type], true)===false))
+                            {
                                 $cnt = count(@$details["t:".$field_type])+1;
                                 $details["t:".$field_type][$cnt] = $value;
                             }else{
@@ -1637,13 +1667,18 @@ function doImport($mysqli, $imp_session, $params){
             //add - update record for 2 cases: idfield not defined, idfield is multivalue
             if(!$id_field && count($details)>0){ //id field not defined - insert for each line
             
-                    $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def);
+                   $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def);
+                    
             }else if ($is_mulivalue_index){ //idfield is multivalue
             
                    $details = retainExisiting($details, $details2, $params);
                    $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
                    if($new_id && is_numeric($new_id)) array_push($new_record_ids, $new_id);
                    $previos_recordId = null;
+                   
+                   if($recordId==null || $recordId<0){ //new records OR predefined id
+                        $pairs[$id_field_values[$idx2]] = $new_id;
+                   }
             }
             
             $rep_processed++;
@@ -1664,7 +1699,7 @@ function doImport($mysqli, $imp_session, $params){
                     $new_record_ids = array(); //to save in import table
             }
         
-        }//while
+        }//main  all recs in import table
         $res->close();
         
         if($id_field && count($details)>0 && !$is_mulivalue_index){ //action for last record
@@ -1813,7 +1848,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             );    
             
             if (@$out['error']) {
-                print "<div style='color:red'>Error: ".implode("; ",$out["error"])."</div>";
+                print "<div style='color:red'>Line: ".implode(",",$details['imp_id']).". Error: ".implode("; ",$out["error"])."</div>";
                 //return "can not insert record ".implode("; ",$out["error"]);
             }else{
                 if($recordId!=$out["bibID"]){ //}==null){
@@ -2050,6 +2085,7 @@ function renderRecords($type, $imp_session){
     
         ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
         ///DEBUG print print_r(@$validationRes['rec_error'],true);
+        $is_missed = false;
         
         if($type=='error'){
             $tabs = $imp_session['validation']['error'];
@@ -2093,10 +2129,13 @@ function renderRecords($type, $imp_session){
         }
         
 //print "<div>MAPPED2: ".print_r($mapped_fields, true)."</div>";  $checked_field."|".
+        
         if($type=="error"){
             $checked_field = $rec_tab['field_checked'];
             print "<div class='error'>Values in red are invalid<br/></div>";
             print "<div>".$rec_tab['err_message']."<br/><br/></div>";
+            
+            $is_missed = (strpos($rec_tab['err_message'], 'a value must be supplied')>0);
         }else{
             $checked_field = null;
         }
@@ -2143,10 +2182,19 @@ function renderRecords($type, $imp_session){
                     $m=0;
                     foreach($row as $value) {     
                         $value = ($value?$value:"&nbsp;");
-                        if($err_col==$m){
+                        if($err_col>0 && $err_col==$m){
+                            if($is_missed){
+                                 $value = "&lt;missed&gt;";
+                            }
                             $value = "<font color='red'>".$value."</font>";
                         }
-                        print "<td>".$value."</td>"; // class='truncate'
+                        if($m==0 || ($type=="update" && $m==1)){
+                            print "<td class='truncate'>";
+                        }else{
+                            print "<td>";
+                        }
+                        
+                        print $value."</td>"; // 
                         
                         $m++;
                     }
@@ -2163,6 +2211,10 @@ function renderRecords($type, $imp_session){
         
         print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
     
+}
+
+function stripAccents($stripAccents){
+  return strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
 }
 
 /*

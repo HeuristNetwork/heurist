@@ -110,7 +110,7 @@ div.header{
     font-weight: bold;
 }
 .truncate {
-  max-width: 200px;
+  max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -752,8 +752,12 @@ if(@$imp_session['load_warnings']){
                                 
                             </span>
                         </span>
-                        <span class="importing"><span><input  id="btnStartImport" type="submit" 
-                                value="Prepare insertion/update" style="disabled:disabled;font-weight: bold;"></span></span>
+                        <span class="importing"><span>
+                            <input  id="btnStartImport" type="submit" 
+                                value="Prepare insertion/update" style="disabled:disabled;font-weight: bold; width:20em"><br/><br/>
+                            <input type="button" value="<< Previous" style="font-weight: bold; width:20em"
+                                title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
+                        </span></span>
                         <div class="help"><br></div>
                     </td>
 <?php
@@ -783,7 +787,7 @@ if(@$imp_session['load_warnings']){
                             <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
                             <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
 <?php        if($sa_mode==0){ ?>                            
-                            <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with disambiguation:</font></td><td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
+                            <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td><td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
 <?php        } else { ?>                            
                             <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
 <?php        }        ?>                            
@@ -796,7 +800,7 @@ if(@$imp_session['load_warnings']){
 ?>            
                             <span class="matching"><input type="button" value="Resolve Disambiguation" onclick="showRecords('disamb')" style="font-weight: bold;">
 <?php }else{ ?>
-                            <span class="matching"><input type="button" value="Continue" title="Go to Import step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
+                            <span class="matching"><input type="button" value="Next >>" title="Go to Import step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
 <?php
       }
 ?>            
