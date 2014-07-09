@@ -1,0 +1,65 @@
+<html>
+
+<head>
+
+ <link rel=stylesheet href=../css/heurist.css>
+ <title>Heurist Setup</title>
+
+ <script>
+  function installXPI (href) {
+    if (typeof(InstallTrigger) != 'undefined') {
+      var xpi = {'Heurist-Zotero Synchroniser': href};
+      InstallTrigger.install(xpi);
+    } else {
+      alert("You must be using Firefox to install the Heurist-Zotero Synchroniser.");
+    }
+  }
+ </script>
+
+</head>
+
+<body width=600 height=500>
+
+<h2>Zotero synchroniser setup</h2>
+<hr>
+
+<h3>What is Zotero?</h3>
+
+<p>Zotero is an academic bookmarking plugin for Firefox which is able to harvest 
+bibliographic data from a growing list of web sites, such as publishjer web 
+sites, citation indexes and so forth. It operates on a single computer.</p>
+
+<h3>What is the synchroniser?</h3>
+
+<p>The Zotero synchroniser is another Firefox plugin which exports references 
+stored in Zotero to Heurist. If the references are later edited in Zotero, the 
+synchroniser will re-export them to Heurist. At the present time, the 
+synchronisation is one-way.<h3>Firefox plugin</h3>
+
+<div>Like Zotero, this tool will only work with Firefox 2.0 and later (since Zotero will 
+  only work with Firefox 2.0, there's not much point in making it otherwise).<p>
+  Note: a Heurist button will appear next to the Zotero button in the status bar 
+  - it will not appear until Zotero has been installed (the order of 
+  installation is unimportant). , A right-mouse context menu is also added to 
+  Zotero.</div>
+
+<br>
+<br>
+<div style="text-align: center;">
+ <b><a href=../../zotero_synchroniser/zoterosync.xpi onclick="installXPI(this.href); return false;">Click here to install plugin</a></b>
+</div>
+
+
+<div style="text-align: center;">
+ &nbsp;</div>
+
+
+<div style="text-align: center;">
+ Please note: 11 Jan 2008 - there are some problems with the synchroniser 
+ (doesn't recognise Zotero's date format correctly, support for additional 
+ record types) which we are currently working on</div>
+
+
+</div>
+</body>
+</html>
