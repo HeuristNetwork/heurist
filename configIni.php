@@ -29,7 +29,8 @@
 
 // Set the version number of the Heurist program
 
-$version = "3.1.7"; // required - DO NOT CHANGE - sets current program version number
+$version = "3.2.0"; // required - DO NOT CHANGE - sets current program version number
+                    // 3.2.0 alpha 8th July 2014
                     // 3.1.7 published 26 April 2014
                     // 3.1.6 beta published 29 Nov 2013
 
@@ -53,7 +54,7 @@ $dbHost = ""; // leave blank for localhost
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. Password cannot be null
-// IMPORTANT NOTE: 
+// IMPORTANT NOTE:
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 // @todo: allow MySQL password other than root - currently (Dec 2013) gives error if not root
 $dbAdminUsername = "root"; // required, MUST be 'root'
@@ -64,7 +65,7 @@ $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
 // Password cannot be null
-// IMPORTANT NOTE: 
+// IMPORTANT NOTE:
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 $dbReadonlyUsername = "root"; // required , could use a username with universal read (select) access
 $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
@@ -90,11 +91,11 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 
 // [folders]
 // The default root pathname of a directory where Heurist can store uploaded files eg. images, pdfs, as well as record type icons, templates,
-// output files, scratch space and so forth. This directory need not be web accessible - leaving it off the web protects the uploaded data, 
+// output files, scratch space and so forth. This directory need not be web accessible - leaving it off the web protects the uploaded data,
 // although filenames are obfuscated when uploaded.
-// Correction: Dec 2013 and @todo: needs to be web accessible b/c record type icons in these directories are accessed directly 
+// Correction: Dec 2013 and @todo: needs to be web accessible b/c record type icons in these directories are accessed directly
 // PHP must have permissions to be able to create subdirectories of this directory for each Heurist database and write files within them.
-// For instance, if you set $defaultRootFileUploadPath = "/srv/HeuristUploadDir/"; then, when running Heurist with db=xyz, uploaded files 
+// For instance, if you set $defaultRootFileUploadPath = "/srv/HeuristUploadDir/"; then, when running Heurist with db=xyz, uploaded files
 // will be loaded into /srv/HeuristUploadDir/xyz/, and new databases will be created with a subdirectory in /srv/HeuristUploadDir
 $defaultRootFileUploadPath = ""; // recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
 
