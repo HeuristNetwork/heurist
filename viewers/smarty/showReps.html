@@ -123,10 +123,10 @@
 }
 
 .insert-popup{
-  visibility:visible;  
+  visibility:visible;
 }
 .insert-intree{
-  display:none;  
+  display:none;
 }
 
 </style>
@@ -137,8 +137,8 @@ function insertVar(isloop, isif){
     if(showReps){
         showReps.insertSelectedVars( null, isloop, isif );
     }
-}            
-            
+}
+
 </script>
 </head>
 
@@ -162,9 +162,9 @@ function insertVar(isloop, isif){
         <tr><td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, false )">Insert field</button></td>
         <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, true )">Insert test (if ..)</button></td></tr>
         <tr class="ins_isloop"><td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, false )">Insert within repeat</button></td>
-        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, true )">Insert test (if ..) within repeat</button></td></tr>    
+        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, true )">Insert test (if ..) within repeat</button></td></tr>
     </table>
-    
+
     <br />
     <b>Note</b><br />
     <div>For repeating value fields (including pointers) you should first insert a repeat by clicking "repeat" next to name of field</div><br />
@@ -240,8 +240,8 @@ function insertVar(isloop, isif){
 			<div><label>Insert</label><a href="javascript:void(0)" title="ForEach repeat to loop through all records in the current query or selection" onClick="showReps.insertRootForEach()">Records repeat</a>
             <div style="float:right;display:none">in popup&nbsp;<input type="checkbox" checked="checked" onclick="insertMode(event)"/>&nbsp;</div><br>
 			</div>
-			<div><label></label><a href="../../help/smarty_reports.html" title="Read full documentation on the Smarty templating language" target="_blank">Smarty Help</a></div>
-            
+			<div><label></label><a href="../../context_help/smarty_reports.html" title="Read full documentation on the Smarty templating language" target="_blank">Smarty Help</a></div>
+
 		</div>
 		<div id="treeContainer">
 			<div id="varsTree" class="ygtv"></div>
@@ -443,16 +443,16 @@ if(isInited){
 		var elem = event.target;
 		window.showReps.setQueryMode(elem.value);
 	}
-    
+
     function insertMode(event){
             //$(".insert-popup").css("visibility",event.target.checked?"visible":"hidden")
 //            $(".insert-intree").css("visibility",event.target.checked?"hidden":"visible")
-            
+
             if(event.target.checked){
-                $(".insert-popup").show();    
+                $(".insert-popup").show();
                 $(".insert-intree").hide();
             }else{
-                $(".insert-popup").hide();    
+                $(".insert-popup").hide();
                 $(".insert-intree").show();
             }
     }

@@ -187,7 +187,7 @@
                     top.HEURIST.util.getJsonData(surl, function(context) {
                         if( !top.HEURIST.util.isEmptyVar(context) ){
                             var surl = top.HEURIST.basePath+"admin/verification/listFieldTypeDefinitionErrorsCompact.php?db="+dbname+"&data="+ JSON.stringify(context);
-                            top.HEURIST.util.popupURL(top, surl, {width:480, height:420});     
+                            top.HEURIST.util.popupURL(top, surl, {width:480, height:420});
                         }
 
                     });
@@ -348,12 +348,12 @@
             <div id=dbname ></div>
         </a>
         <!-- message of the day TODO: FIX OR REMOVE, SEEMS THIS IS NOT DISPLAYED ALTHOUGH IT IS IN PAGE SOURCE-->
-        <div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
+        <div id="message"> Heurist 3 : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
         <!-- quicklinks -->
         <div id="quicklinks">
             <div id="logged-in" style="height:22px"></div>
             <ul id=quicklink-cell>
-                <li><a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li>
+                <li><a href="../../context_help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li>
                 <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report to the Heurist developers"><b>Report bug</b></a></li>
                 <li><a id=contact-link href="mailto:info@heuristscholar.org"><b>Contact us</b></a></li>
             </ul>
@@ -429,7 +429,7 @@
                 <b>Relationships</b>
                 <span id=desc>Links between related records</span>
             </div>
-            
+
             <div class="sidebar-nav" style="text-align:right;">
 
             <!-- TODO: Remove. This code is deprecated by new Save, Save-and-close methodology
@@ -446,7 +446,7 @@
                         onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
                 </div>
                 -->
-                
+
                 <div id="close-button2"  style="text-align:right;">
                     <input type=button name=save-button value="Close" style="margin-top:46px;" onClick="top.HEURIST.edit.closeEditWindow();">
                 </div>
@@ -460,8 +460,8 @@
             <div id="search-nav" class="sidebar-nav"></div>
         </div>
         <!-- end sidebar -->
-        
-        
+
+
         <!-- page -->
         <div id=page>
             <!-- banner -->
@@ -488,8 +488,8 @@
             </div>
         </div>
         <!-- end page -->
-        
-        
+
+
         <script>
             top.HEURIST.whenLoaded("display-preferences", function() {
                 var canCloseWindow = false;
@@ -524,8 +524,8 @@
                 top.HEURIST.util.setHelpDiv(helpLink,null);
             });
         </script>
-        
-        
+
+
         <!-- footer -->
         <div id=footer>
             <div id="rty_description" class="help"></div>
@@ -542,8 +542,8 @@
             </span>
         </div>
         <!-- end footer -->
-        
-        
+
+
         <div style="position: absolute;">
             <div id="workgroup-editor" style="display: none;">
                 <div>
@@ -551,7 +551,7 @@
                 </div>
                 <div class="detailRow"> <!-- pulldown list of potential owner workgroups -->
                     <label for=new-workgroup-value>Record is editable by</label>
-                    <select id=new-workgroup-value class=in></select> 
+                    <select id=new-workgroup-value class=in></select>
                 </div>
                 <div class="detailRow">
                     <input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>
@@ -659,7 +659,7 @@
             }
             top.HEURIST.contentLoaded();
             top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
-            
+
             function setEditMode(){
                 if(top.HEURIST.util.getDisplayPreference('record-edit-advancedmode')=="true"){
                     $(".edit-mode-depended").css('display','block');

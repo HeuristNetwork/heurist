@@ -1413,7 +1413,7 @@ top.HEURIST.search = {
 				" <br>Existing users:\n" +
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				// " <br><br>New users:\n" +
-				// " <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
+				// " <div id=tour-button><a href=" +top.HEURIST.basePath+ "context_help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
 				registrationButton+
 				"</div>";
 
@@ -2167,7 +2167,8 @@ top.HEURIST.search = {
 		var keepVal = sortbyValSelect.value;
 
 		sortbyValSelect.innerHTML = '<option value="t">record title</option>'+
-									'<option value="rt">record type</option>'+
+                                    '<option value="id">record id</option>'+
+                                    '<option value="rt">record type</option>'+
 									'<option value="u">record URL</option>'+
 									'<option value="m">date modified</option>'+
 									'<option value="a">date added</option>'+
@@ -4640,7 +4641,7 @@ top.HEURIST.search = {
 		                { text: "Advanced search", title: "Advanced search function builds complex search strings through an easy form-based interface",
 		                			onclick:{ fn: onMenuClick, obj: ["launchAdvancedSearch"] }},
 		                { text: "Advanced search help", title: "Detailed description of the syntax for advanced search strings",
-		                			url:"../help/advanced_search.html", target:"_blank"},
+		                			url:"../context_help/advanced_search.html", target:"_blank"},
 		                { text: "Save search as ..." , title: "Save current results set as a Saved Search, either personal or shared with workgroup members",
 		                			onclick:{ fn: onMenuClick, obj: ["savedSearchEdit", 0] }},
 		                { text: "Open selection in new window", title: "Launch selected records in a new search window",

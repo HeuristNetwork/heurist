@@ -11,7 +11,7 @@
     * @copyright   (C) 2005-2014 University of Sydney    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0   
+    * @version     3.2
     */
 
     /*
@@ -24,20 +24,20 @@
 
 
     // TODO: upload file for processing rather than requiring user to place on server
-    
-    // TODO: recognise sub tags identified by Tag= within lines eg.  Death:  Place=Amiens Date=1915 
-    //       should be rendered as Death:Place and Death:Date columns 
+
+    // TODO: recognise sub tags identified by Tag= within lines eg.  Death:  Place=Amiens Date=1915
+    //       should be rendered as Death:Place and Death:Date columns
     //       (use : separator so you can have Death:Place and Birth:Place in same datafile)
 
 
-?> 
+?>
 
 <html>
     <head>
         <title>Convert tag-value files to CSV</title>
     </head>
     <body>
-    
+
     <h3>Convert tag-value files to CSV</h3>
 
         <?php
@@ -50,7 +50,7 @@
                 foreach ($fields as $fld) {
                     if (!$first) echo ','; // separators required before field
                     echo $arr[$fld];
-                    $first = FALSE; 
+                    $first = FALSE;
                 }
                 echo '<br />';
             } // processRecord
@@ -62,8 +62,8 @@
             // Step 1 = get filename and delimiter Step 2 = process file
             $step = @$_REQUEST['step'];
 
-            if ($step != '2'){ // step 1 = get filename  
-                
+            if ($step != '2'){ // step 1 = get filename
+
                 print "Note: This function simply operates on a text file; it is independent of any database.<br />
                     The first line should contain a list of comma-separated tags, starting with the tag which will be
                     encountered at the start of each record (normally the Record ID tag). This tag marks the end of the previous record.<br />
@@ -101,7 +101,7 @@
 
                 $topOfFile = TRUE; // flag we are just starting so no record to write out
 
-                $handle = fopen($myFile, 'r'); 
+                $handle = fopen($myFile, 'r');
                 if ($handle == FALSE) {
                     echo 'Unable to open '.$myFile;
                     die;
@@ -124,12 +124,12 @@
                 $startOfRecordTag=$fields[0];
                 $count = 1;
 
-                while (!feof($handle)) { 
+                while (!feof($handle)) {
 
                     $data = trim(fgets($handle, 10000)); $count++; // read a line, max 10K
 
                     // skip blank lines
-                    while ((strlen($data) == 0) && (!feof($handle))) { // ignore blank lines 
+                    while ((strlen($data) == 0) && (!feof($handle))) { // ignore blank lines
                         $data = trim(fgets($handle, 10000)); $count++; // read another line
                     } // skipping blank lines
 
@@ -144,7 +144,7 @@
                     $res = trim(strtoupper(stristr($data, ' ', true))); // first word of string
                     $val = trim(stristr($data, ' ', false)); // rest of string
                     if ($res === false ) { // not space, try tab NOTE: THIS DOES NOT WORK?
-                        $res = trim(strtoupper(stristr($data, '\t', true)));            
+                        $res = trim(strtoupper(stristr($data, '\t', true)));
                         $val = trim(stristr($data, '\t', false)); // rest of string
                     }
 
@@ -160,7 +160,7 @@
                     } // end processing start of record
 
                     // data value - line with tag which is not start of record
-                    else { 
+                    else {
                         $danger = "'" . '"' . ','; // characters requiring enclosure in ""
                         if (strpbrk ($val , $danger) == FALSE) { // false if $danger not matched
                             $needsQuotes = FALSE;
@@ -181,7 +181,7 @@
 
                 } // end loop through lines
 
-                fclose($handle); 
+                fclose($handle);
 
                 // report errors encountered
                 echo '<br /><hr><br />';
@@ -194,4 +194,4 @@
         ?>
 
     </body>
- </html> 
+ </html>
