@@ -1121,14 +1121,14 @@ function validateImport($mysqli, $imp_session, $params){
             return "Can not execute query to calculate number of records to be updated!";
        }
        // find records to insert
-       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0";
+       $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
 //DEBUG error_log("1.ins >>>>".$select_query);           
        $row = mysql__select_array2($mysqli, $select_query);
        if($row){
            if( $row[0]>0 ){
                 $imp_session['validation']['count_insert'] = $row[0];
                 //find first 100 records to display
-                $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field." is null OR ".$id_field."<0 LIMIT 5000";
+                $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000"; //.$id_field." is null OR "
 //DEBUG error_log("2.ins >>>>".$select_query);           
                 $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
            }
@@ -1162,6 +1162,8 @@ function validateImport($mysqli, $imp_session, $params){
  $recStruc = getRectypeStructures(array($recordType));  
  $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
  $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+   
+ $dt_types = array();
     
  $missed = array();
  $query_reqs = array(); //fieldnames from import table
@@ -1204,6 +1206,8 @@ function validateImport($mysqli, $imp_session, $params){
     }
     
     if($field_name){
+        
+        $dt_types[$field_name] = $ft_vals[$idx_fieldtype];
         
         //$field_alias = $imp_session['columns'][substr($field_name,6)];
         
@@ -1251,14 +1255,20 @@ function validateImport($mysqli, $imp_session, $params){
      return "Required fields are missed in mapping: ".implode(",", $missed);
  }
  
+ if($id_field){ //validate only for defined records IDs
+     $only_for_specified_id = " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+ }else{
+     $only_for_specified_id = "";
+ }
+ 
  //2. In DB: Verify that all required fields have values =============================================
  $k=0;
  foreach ($query_reqs as $field){
      $query = "select imp_id, ".implode(",",$sel_query)
         ." from $import_table "
-        ." where ".$query_reqs_where[$k]; // implode(" or ",$query_reqs_where);
+        ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
      $k++;  
-//error_log("check empty: ".$query);
+//DEBUG print "check empty: ".$query;
      $wrong_records = getWrongRecords($mysqli, $query, "This field is required - a value must be supplied for every record", $imp_session, $field);
      if(is_array($wrong_records)) {
         $imp_session = $wrong_records;   
@@ -1272,19 +1282,38 @@ function validateImport($mysqli, $imp_session, $params){
  ."left join defTerms trm1 on if(concat('',$field_name * 1) = $field_name,trm1.trm_ID=$field_name,trm1.trm_Label=$field_name) "
  ." where trm1.trm_Label is null";
  */
+ if(!@$imp_session['csv_enclosure']){
+    $imp_session['csv_enclosure'] = $params['csv_enclosure'];
+ }
+ 
+ 
  $hwv = " have wrong values";
  $k=0;
  foreach ($query_enum as $field){
- 
-     $query = "select imp_id, ".implode(",",$sel_query)
-                ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
-                ." where ".$query_enum_where[$k];  //implode(" or ",$query_enum_where);
-//DEBUG  error_log("check enum: ".$query);                
-     $k++;
      
+     if(in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+     
+        $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table where ".$only_for_specified_id." 1";
+                
+        $idx = array_search($field, $sel_query)+1;
+                
+        $wrong_records = validateMultivalue($mysqli, $query, "Term list values must match terms defined for the field",
+                    $imp_session, $field, $dt_types, $idx);
+     
+     }else{
+ 
+        $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
+                ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
+//DEBUG  error_log("check enum: ".$query);                
      //"Fields mapped as enumeration ".$hwv           
-     $wrong_records = getWrongRecords($mysqli, $query, "Term list values must match terms defined for the field",
+        $wrong_records = getWrongRecords($mysqli, $query, "Term list values must match terms defined for the field",
                     $imp_session, $field);
+     }
+     
+     $k++;
+                    
      //if($wrong_records) return $wrong_records;
      if(is_array($wrong_records)) {
         $imp_session = $wrong_records;   
@@ -1298,7 +1327,7 @@ function validateImport($mysqli, $imp_session, $params){
      
      $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
-                ." where ".$query_res_where[$k]; //implode(" or ",$query_res_where);
+                ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
      $k++;
      $wrong_records = getWrongRecords($mysqli, $query, 
                                 "Record pointer fields must reference an existing record in the database",
@@ -1318,7 +1347,7 @@ function validateImport($mysqli, $imp_session, $params){
  
      $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
-                ." where ".$query_num_where[$k]; //implode(" or ",$query_num_where);
+                ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
                 $k++;
      $wrong_records = getWrongRecords($mysqli, $query, 
         "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
@@ -1338,7 +1367,7 @@ function validateImport($mysqli, $imp_session, $params){
  
      $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
-                ." where ".$query_date_where[$k]; //implode(" or ",$query_date_where);
+                ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
                 $k++;
      $wrong_records = getWrongRecords($mysqli, $query, 
         "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
@@ -1389,6 +1418,62 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
             return $imp_session;
         }
         
+    }else{
+        return "Can not perform validation query: ".$message;
+    }
+    return null;
+}
+
+function validateMultivalue($mysqli, $query, $message, $imp_session, $fields_checked, $dt_types, $field_idx){
+
+    $dt_type = $dt_types[$fields_checked];
+    
+    $terms = null;
+    if($dt_type == "enum"){
+        $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
+    }else if($ft_vals[$idx_fieldtype] == "relationtype"){
+        $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
+    }
+    
+    $res = $mysqli->query($query." LIMIT 5000");
+    if($res){
+        $wrong_records = array();
+        while ($row = $res->fetch_row()){
+
+              $is_error = false;
+              $newvalue = array();
+              $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure']);
+              foreach($values as $idx=>$r_value){
+              
+                  $r_value2 = stripAccents(mb_strtolower($r_value)); 
+                  if(!@$terms[$r_value2]){ //not found
+                        $is_error = true;
+                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                  }else{
+                        array_push($newvalue, $r_value);
+                  }
+              }
+              
+              if($is_error){
+                  $row[$field_idx] = implode("|", $newvalue);
+                  array_push($wrong_records, $row);
+              }
+        }
+        $res->close();
+        $cnt_error = count($wrong_records);
+        if($cnt_error>0){
+            $error = array();
+            $error["count_error"] = $cnt_error;
+            $error["recs_error"] = array_slice($wrong_records,0,1000);
+            $error["field_checked"] = $fields_checked;
+            $error["err_message"] = $message;
+            
+            $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
+            array_push($imp_session['validation']['error'], $error);
+            
+            return $imp_session;
+        }
+    
     }else{
         return "Can not perform validation query: ".$message;
     }
@@ -1462,7 +1547,7 @@ function doImport($mysqli, $imp_session, $params){
 
     if($id_field){  //add to list of columns
             $id_field_idx = count($field_types); //last one
-            $select_query = $select_query." ORDER BY ".$id_field;
+            $select_query = $select_query." WHERE (NOT(".$id_field." is null OR ".$id_field."='')) ORDER BY ".$id_field;
     }else{
             //create id field by default
             $field_count = count($imp_session['columns']);
@@ -2131,7 +2216,11 @@ function renderRecords($type, $imp_session){
 //print "<div>MAPPED2: ".print_r($mapped_fields, true)."</div>";  $checked_field."|".
         
         if($type=="error"){
-            $checked_field = $rec_tab['field_checked'];
+            $checked_field  = $rec_tab['field_checked'];
+            if(in_array(intval(substr($checked_field ,6)), $imp_session['multivals'])){
+                $checked_field = null; //highlight errors individually
+            }
+            
             print "<div class='error'>Values in red are invalid<br/></div>";
             print "<div>".$rec_tab['err_message']."<br/><br/></div>";
             
@@ -2184,7 +2273,7 @@ function renderRecords($type, $imp_session){
                         $value = ($value?$value:"&nbsp;");
                         if($err_col>0 && $err_col==$m){
                             if($is_missed){
-                                 $value = "&lt;missed&gt;";
+                                 $value = "&lt;missing&gt;";
                             }
                             $value = "<font color='red'>".$value."</font>";
                         }

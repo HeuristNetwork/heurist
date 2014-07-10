@@ -273,15 +273,27 @@ function doReload(){
 $fields = @$imp_session['fields'];                  
 if($fields){
     $k=0;
-        print '&nbsp;&nbsp;DATE&nbsp;&nbsp;MEMO<br />';
+?>    
+    <div class="help">Please check the list of columns read and select ones that contain dates (to be interpreted as a <b>date</b> field) or extended text strings (to be interpreted as a <b>memo</b> field)<br><br></div>
+    <table><tr><td>Unspecified</td><td>Date</td><td>Memo</td><td>&nbsp;</td></tr>
+<?php        
     foreach($fields as $field){
-        print '&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="d_field_'.$k.'" name="datefield[]" value="'.$k.'" ';
+?>      
+    <tr>
+    <td align="center"><input type="checkbox" id="u_field_<?=$k?>" checked="checked" onchange="{if(this.checked){document.getElementById('m_field_<?=$k?>').checked = false; document.getElementById('d_field_<?=$k?>').checked = false;}}" /></td>
+    <td align="center"><input type="checkbox" id="d_field_<?=$k?>" name="datefield[]" value="<?=$k?>" onchange="{document.getElementById('u_field_<?=$k?>').checked = !this.checked; if(this.checked) document.getElementById('m_field_<?=$k?>').checked = false;}" /></td>
+    <td align="center"><input type="checkbox" id="m_field_<?=$k?>" name="memofield[]" value="<?=$k?>" onchange="{document.getElementById('u_field_<?=$k?>').checked = !this.checked; if(this.checked) document.getElementById('d_field_<?=$k?>').checked = false;}" /></td>
+    <td><label><?=$field?></td>        
+    </tr>  
+<?php        
+/*        print '&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="d_field_'.$k.'" name="datefield[]" value="'.$k.'" ';
         print 'onchange="{if(this.checked) document.getElementById(\'m_field_'.$k.'\').checked = false; }"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         print '<input type="checkbox" id="m_field_'.$k.'" name="memofield[]" value="'.$k.'" ';
         print 'onchange="{if(this.checked) document.getElementById(\'d_field_'.$k.'\').checked = false; }"  />&nbsp;&nbsp;';
-        print '<label for="field_'.$k.'" >'.$field.'</label><br />';        
+        print '<label for="field_'.$k.'" >'.$field.'</label><br />';        */
         $k++;
     }
+    print '</table>';
 }else{
         print '<input type="hidden" name="preprocess" value="1">';
 }
@@ -611,7 +623,7 @@ if(@$imp_session['load_warnings']){
             <div style="padding-left:30px;">
             <input type="radio" <?=@$_REQUEST['sa_upd']>0?"":"checked"?> name="sa_upd" id="sa_upd0" value="0" class="text" 
                     onchange="{onUpdateModeSet()}"/>&nbsp;
-            <label for="sa_upd0">Retain existing values and append new data as repeat values</label><br/>
+            <label for="sa_upd0">Retain existing values and append distinct new data as repeat values (existing values are not duplicated)</label><br/>
             
             <input type="radio" <?=@$_REQUEST['sa_upd']==1?"checked":""?> name="sa_upd" id="sa_upd1" value="1" class="text" 
                     onchange="{onUpdateModeSet()}"/>&nbsp;
@@ -737,7 +749,8 @@ if(@$imp_session['load_warnings']){
     </div>
 </div>    
 <br />
-<b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b><br />
+<b>Records in buffer: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
+<div class="help" style="float:right;width:240px;text-align:right;">Unprocessed data is retained in buffer on exit</div><br />
 
                 <table style="vertical-align:middle;width:100%">
                     <tr>
@@ -752,13 +765,10 @@ if(@$imp_session['load_warnings']){
                                 
                             </span>
                         </span>
-                        <span class="importing"><span>
-                            <input  id="btnStartImport" type="submit" 
-                                value="Prepare insertion/update" style="disabled:disabled;font-weight: bold; width:20em"><br/><br/>
+                        <span class="importing">
                             <input type="button" value="<< Previous" style="font-weight: bold; width:20em"
                                 title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
-                        </span></span>
-                        <div class="help"><br></div>
+                        </span>
                     </td>
 <?php
 //
@@ -798,7 +808,7 @@ if(@$imp_session['load_warnings']){
 <?php }
       if($cnt_disamb>0){
 ?>            
-                            <span class="matching"><input type="button" value="Resolve Disambiguation" onclick="showRecords('disamb')" style="font-weight: bold;">
+                            <span class="matching"><input type="button" value="Resolve ambiguous matches" onclick="showRecords('disamb')" style="font-weight: bold;">
 <?php }else{ ?>
                             <span class="matching"><input type="button" value="Next >>" title="Go to Import step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
 <?php
@@ -811,10 +821,17 @@ if(@$imp_session['load_warnings']){
         print '<td></td>';
     }
 ?>                  
-                    <td style="text-align:right;width:30%">  
+                    <td style="width:30%">
+                        <span class="importing">
+                            <input  id="btnStartImport" type="submit" 
+                                value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold; width:20em">
+                        </span>
+
+                    <!-- 
                         <input type="button" value="Close" onClick="window.close();" style="margin-right: 5px;">
                         <input type="button" value="Clear" onclick="doClearSession(<?=$_REQUEST["import_id"]?>)">
                         <div class="help">Unprocessed data is <br>retained in buffer</div>
+                    -->    
                     </td>
                 </tr>
                 </table>
@@ -1060,7 +1077,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
                 return array("warning"=>"You appear to have only one value per line. This probably indicates that you have selected the wrong separator type. Continue?",
                      "filename"=>$temp_file, "original"=>$original );
             }else{
-                return array("warning"=>"Please verify the list of fields and select ones that are DATE or MEMO type",
+                return array("warning"=>"Please verify the list of columns",
                      "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
             }
         }else {
