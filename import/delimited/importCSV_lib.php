@@ -290,7 +290,7 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             }
         }
     }else{
-        return "Can not execute query to calculate number of records to be updated ".$mysqli->error;
+        return "SQL error: Can not execute query to calculate number of records to be updated ".$mysqli->error;
     }
 
     //FIND RECORDS FOR INSERT
@@ -318,7 +318,7 @@ and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
             }
         }
     }else{
-        return "Can not execute query to calculate number of records to be inserted";
+        return "SQL error: Can not execute query to calculate number of records to be inserted";
     }
     
     
@@ -357,7 +357,7 @@ function matchingAssign($mysqli, $imp_session, $params){
             //ID field not defined, create new field
             $id_field_idx = $field_count;
             $id_field = "field_".$field_count;
-            array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
+            array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "ID field for Record type #$recordType" );
             array_push($imp_session['uniqcnt'], 0);
             
             //$imp_session["mapping"][$id_field] = $recordType.".id"; //$recTypeName."(id# $recordType) ID";
@@ -368,7 +368,7 @@ function matchingAssign($mysqli, $imp_session, $params){
 //DEBUG error_log(">>>".$altquery);   
             
             if (!$mysqli->query($altquery)) {
-                return "can not alter import session table, can not add new index field: " . $mysqli->error;
+                return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
             }    
     }else{
             $id_field_idx = substr($id_dield,6);
@@ -451,7 +451,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     //reset all values 
     $updquery = "UPDATE ".$import_table." SET ".$id_field."=NULL WHERE imp_id>0";
     if(!$mysqli->query($updquery)){
-        return "can not update import table (clear record id field)";
+        return "SQL error: can not update import table (clear record id field). ".$updquery;
     }
     //matched records
     $updquery = "UPDATE ".implode(",",$select_query_update_from)." SET ".$id_field."=rec_ID WHERE "
@@ -459,7 +459,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     
 //DEBUG error_log("matched records 1>>>>".$updquery);
     if(!$mysqli->query($updquery)){
-        return "can not update import table (set record id field)";
+        return "SQL error: can not update import table (set record id field) ".$updquery;
     }
     
     //new records   ".implode(",",$sel_query).",
@@ -497,14 +497,14 @@ function matchingAssign($mysqli, $imp_session, $params){
                 $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".implode(",",$ids_part).")";  //end($row)
 //DEBUG error_log("3>>>>".$updquery);            
                 if(!$mysqli->query($updquery)){
-                    return "can not update import table: mark records for insert";
+                    return "SQL error: can not update import table: mark records for insert. ".$updquery;
                 }
                 $k = $k+100;
             }
             $ind--;
         }    
     }else{
-        return "can not perform query - find unmatched records";
+        return "SQL error: can not perform query - find unmatched records ".$select_query;
     }    
     
     //calculate distinct number of ids
@@ -565,9 +565,6 @@ function matchingMultivalues($mysqli, $imp_session, $params){
         
         print "<br>dis resolv ".print_r($disamb_resolv, true);
     }
-    
-    
-    
     
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -697,9 +694,11 @@ function matchingMultivalues($mysqli, $imp_session, $params){
 
                 if($fc==null || $fc=="") continue;       //key is empty
                 
-                
-                $keyvalue = implode("|", $row);
+                $fc = $row;
+                array_walk($fc, 'trim_lower_accent2');
 
+                $keyvalue = implode("|", $fc);
+                
                 if(!@$pairs[$keyvalue]){  //was $value && $value!="" && 
 //search for ID 
 
@@ -847,28 +846,36 @@ function assignMultivalues($mysqli, $imp_session, $params){
         return "record type not defined";
     }
 
-    $id_field = @$params['idfield'];
-    
+    $id_fieldname = @$params['idfield'];
+    $id_field = null;
     $field_count = count($imp_session['columns']);
     
-    if(!$id_field || $id_field=="null"){ 
-//add new field into import table
-            //ID field not defined, create new field
-            $id_field = "field_".$field_count;
-            array_push($imp_session['columns'], @$params['new_idfield']?$params['new_idfield'] : "Record type #$recordType index" );
-            array_push($imp_session['uniqcnt'], count($pairs));
-            array_push($imp_session['multivals'], $field_count);
-            
-            $imp_session['indexes'][$id_field] = $recordType;
+    if(!$id_fieldname || $id_fieldname=="null"){ 
+        $id_fieldname = "ID field for Record type #".$recordType; //not defined - create new one
+    }
+    $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
+    if($index!==false){ //this is existing field
+        $id_field  = "field_".$index;
+        $imp_session['uniqcnt'][$index] = count($pairs);
+    }
         
-            $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
-            if (!$mysqli->query($altquery)) {
-                return "can not alter import session table, can not add new index field: " . $mysqli->error;
-            }    
-    }else{
-            $index = intval(substr($id_field, 6));
-            $imp_session['uniqcnt'][$index] = count($pairs);    
-    }    
+    //add new field into import table
+    if(!$id_field){  
+        
+           $id_field = "field_".$field_count;
+           $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
+           if (!$mysqli->query($altquery)) {
+                return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
+           }
+           array_push($imp_session['columns'], $id_fieldname );
+           array_push($imp_session['uniqcnt'], count($pairs) );
+           if(@$params['idfield']){
+                array_push($imp_session['multivals'], $field_count ); //!!!!    
+           }
+    }                       
+    //define field as index in session
+    @$imp_session['indexes'][$id_field] = $recordType;
+    
     
     //get field type 
     $field_type = $params['sa_keyfield_type'];
@@ -923,7 +930,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
                         if(( $dt_type == "enum" ||  $dt_type == "relationtype")
                             && !ctype_digit($r_value)) {
                                         
-                                $r_value = stripAccents(mb_strtolower($r_value)); 
+                                $r_value = trim_lower_accent($r_value); 
                             
                                 if($dt_type == "enum"){
                                     if(!$terms_enum) { //find ALL term IDs
@@ -971,7 +978,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
                 ."' where imp_id = ".$imp_id;
 //DEBUG print ("3>>>>".$updquery);            
             if(!$mysqli->query($updquery)){
-                return "can not update import table: set ids for multivalue";
+                return "SQL error: can not update import table: set ID field ".$mysqli->error."    QUERY:".$updquery;
             }
         }
     }
@@ -1118,7 +1125,7 @@ function validateImport($mysqli, $imp_session, $params){
            
            }
        }else{
-            return "Can not execute query to calculate number of records to be updated!";
+            return "SQL error: Can not execute query to calculate number of records to be updated!";
        }
        // find records to insert
        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
@@ -1133,7 +1140,7 @@ function validateImport($mysqli, $imp_session, $params){
                 $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
            }
        }else{
-            return "Can not execute query to calculate number of records to be inserted";
+            return "SQL error: Can not execute query to calculate number of records to be inserted";
        }
        //additional query for non-existing IDs
        if($cnt_recs_insert_nonexist_id>0){
@@ -1419,7 +1426,7 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
         }
         
     }else{
-        return "Can not perform validation query: ".$message;
+        return "SQL error: Can not perform validation query: ".$query;
     }
     return null;
 }
@@ -1444,13 +1451,14 @@ function validateMultivalue($mysqli, $query, $message, $imp_session, $fields_che
               $newvalue = array();
               $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure']);
               foreach($values as $idx=>$r_value){
-              
-                  $r_value2 = stripAccents(mb_strtolower($r_value)); 
-                  if(!@$terms[$r_value2]){ //not found
-                        $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
-                  }else{
-                        array_push($newvalue, $r_value);
+                  $r_value2 = trim_lower_accent($r_value); 
+                  if($r_value2!=""){
+                      if(!@$terms[$r_value2]){ //not found
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                      }else{
+                            array_push($newvalue, $r_value);
+                      }
                   }
               }
               
@@ -1475,7 +1483,7 @@ function validateMultivalue($mysqli, $query, $message, $imp_session, $fields_che
         }
     
     }else{
-        return "Can not perform validation query: ".$message;
+        return "SQL error: Can not perform validation query: ".$query;
     }
     return null;
 }
@@ -1496,6 +1504,8 @@ function doImport($mysqli, $imp_session, $params){
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
+              
+//print "<br>INDEX :".$id_field;
                                                              
     //$is_mulivalue_index = $id_field && in_array(intval(substr($id_field,6)), $imp_session['multivals']);
     
@@ -1545,22 +1555,32 @@ function doImport($mysqli, $imp_session, $params){
                     . ", imp_id "  //last field is row# - imp_id
                     . " FROM ".$import_table;
 
+                    
+                    
+                    
     if($id_field){  //add to list of columns
             $id_field_idx = count($field_types); //last one
             $select_query = $select_query." WHERE (NOT(".$id_field." is null OR ".$id_field."='')) ORDER BY ".$id_field;
     }else{
             //create id field by default
-            $field_count = count($imp_session['columns']);
-            $id_field_def = "field_".$field_count;
-            array_push($imp_session['columns'], "ID field for Record type #$recordType" );
             
+            $id_fieldname = "ID field for Record type #".$recordType;
+            $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
             
-            $imp_session['indexes'][$id_field_def] = $recordType;
-        
-            $altquery = "alter table ".$import_table." add column ".$id_field_def." int(10) ";
-            if (!$mysqli->query($altquery)) {
-                return "can not alter import session table, can not add new index field: " . $mysqli->error;
-            }    
+            if($index!==false){ //this is existing field
+                $id_field  = "field_".$index;
+                $imp_session['indexes'][$id_field] = $recordType;
+            }else{
+                $field_count = count($imp_session['columns']);
+                $id_field_def = "field_".$field_count;
+                
+                $altquery = "alter table ".$import_table." add column ".$id_field_def." int(10) ";
+                if (!$mysqli->query($altquery)) {
+                    return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
+                }    
+                $imp_session['indexes'][$id_field_def] = $recordType;
+                array_push($imp_session['columns'], $id_fieldname);
+            }
     }
         
     
@@ -1689,7 +1709,7 @@ function doImport($mysqli, $imp_session, $params){
                         if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype") 
                                 && !ctype_digit($r_value)) {
                                     
-                            $r_value = stripAccents(mb_strtolower($r_value)); 
+                            $r_value = trim_lower_accent($r_value); 
 //print "<br>>>>".$r_value;
                             if($ft_vals[$idx_fieldtype] == "enum"){
                                 if(!$terms_enum) { //find ALL term IDs
@@ -1731,11 +1751,14 @@ function doImport($mysqli, $imp_session, $params){
                             ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                                 //Add new data only if field is empty (new data ignored for non-empty fields)
                          
-//DEBUG print "<br>".$value."   >>".print_r($details["t:".$field_type], true)."   >>".print_r($details2["t:".$field_type], true);
+
+                            $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
+                            $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
+//DEBUG print "<br>".$value."   >>".print_r($details2_lc, true)."   >>".print_r($details2["t:".$field_type], true);
                             
-                            if ((!@$details["t:".$field_type] || array_search($value, $details["t:".$field_type], true)===false) //no duplications
+                            if ((!@$details["t:".$field_type] || array_search(trim_lower_accent($value), $details_lc, true)===false) //no duplications
                                 && 
-                               (!@$details2["t:".$field_type] || array_search($value, $details2["t:".$field_type], true)===false))
+                               (!@$details2["t:".$field_type] || array_search(trim_lower_accent($value), $details2_lc, true)===false))
                             {
                                 $cnt = count(@$details["t:".$field_type])+1;
                                 $details["t:".$field_type][$cnt] = $value;
@@ -2094,7 +2117,7 @@ function get_list_import_sessions(){
     `imp_session` text,
     PRIMARY KEY  (`imp_ID`))";
     if (!$mysqli->query($query)) {
-        return "can not create import session table: " . $mysqli->error;
+        return "SQL error: can not create import session table: " . $mysqli->error;
     }    
 
     $ret = '<option value="0">select session...</option>';
@@ -2277,11 +2300,13 @@ function renderRecords($type, $imp_session){
                             }
                             $value = "<font color='red'>".$value."</font>";
                         }
+                        print "<td class='truncate'>";
+                        /*
                         if($m==0 || ($type=="update" && $m==1)){
                             print "<td class='truncate'>";
                         }else{
                             print "<td>";
-                        }
+                        }*/
                         
                         print $value."</td>"; // 
                         
@@ -2304,6 +2329,14 @@ function renderRecords($type, $imp_session){
 
 function stripAccents($stripAccents){
   return strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+}
+//
+function  trim_lower_accent($item){
+   return stripAccents(mb_strtolower(trim($item)));
+}
+//
+function  trim_lower_accent2(&$item, $key){
+    $item = trim_lower_accent($item);
 }
 
 /*

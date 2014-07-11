@@ -101,6 +101,9 @@ select_rectype.change(function (event){
         $('input[id^="cbsa_dt_"]').parent().show();
         $('input[id^="cbsa_keyfield_"]').parent().show();
         
+        $("#idfield").val(top.HEURIST.rectypes.names[rectype]+' ID');
+        
+/* OLD VERSION - FULLY WORK                
         //ID field
         //uncheck id field radiogroup - matching
         $("#idfield").val('');
@@ -133,7 +136,7 @@ select_rectype.change(function (event){
             $('#div_idfield_exist').hide();
             $('#div_idfield_new').show();
         }
-        
+*/     
         //import -- id radiogroup
         $('option[class^="idfield_"]').hide(); //hide all
         sel_rt = $('option[class^="idfield_'+rectype+'"]');
@@ -142,6 +145,8 @@ select_rectype.change(function (event){
             $('#idfield_separator').show();
         else
             $('#idfield_separator').hide();
+            
+            
         /*
         $('span[class^="idfield_"]').hide(); //hide all
         $('span[class^="idfield_"]').children(':first').attr('checked', false); //uncheck all
@@ -214,6 +219,11 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
     
     //init id field radiogroup for matching
     if(form_vals["idfield"]){
+        $("#idfield").val(form_vals["idfield"]);
+    }    
+    
+/* OLD VERION FULL WORK    
+    if(form_vals["idfield"]){
         $("#rb_idfield1").attr("checked", true);
         onExistingIDfieldSelect();
         $("#idfield").val(form_vals["idfield"]);
@@ -231,13 +241,13 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
             }
         }
     }
-    
+*/    
     //init id fields for import
     var id_field = '';
     if(!top.HEURIST.util.isempty(form_vals["recid_field"])){
         id_field = form_vals["recid_field"];
-    }else if(!top.HEURIST.util.isempty( $("#idfield").val() )){
-        id_field = $("#idfield").val();
+    //}else if(!top.HEURIST.util.isempty( $("#idfield").val() )){  @todo - idfield - is column label, not field_XXX
+    //    id_field = $("#idfield").val();
     }
 //alert("ID:"+id_field+'  1:'+form_vals["recid_field"]+' 2:'+$("#idfield").val());
     $("#recid_field").val(id_field);
@@ -297,62 +307,31 @@ function doMatching(){
         alert('You have selected more than one multi-value column ('+lst.join(',')+')\r\n'+
 'You may only have one multi-value column in your key columns, since there is no way to work out the correct combination of multiple values across multiple columns. Please rationalise your data to allow matching with zero or one multi-value key fields.');        
         
-    }else if(cb_keyfields2.length>0){
-        
-        r = confirm('You have a multi-value column ('+cb_keyfields2.attr('column')+') in your key columns. The record identifier column created by this matching process will have multiple values corresponding with the number of values in this column for each record.\r\n\r\n'+
+    }else{
+
+        var r = true;        
+        if(cb_keyfields2.length>0){
+            r = confirm('You have a multi-value column ('+cb_keyfields2.attr('column')+') in your key columns. The record identifier column created by this matching process will have multiple values corresponding with the number of values in this column for each record.\r\n\r\n'+
 'When used as the key field in the insert/update step, a record will be created for each value. When used as a data field, the data field will have repeated values in the record.');
 
-        if(r){
-            $("#mvm").val(1);
-            $("#multifield").val(cb_keyfields2.val());
+            if(r){
+                $("#mvm").val(1);
+                $("#multifield").val(cb_keyfields2.val());
+            }else{
+                return;
+            }
+        }
+        
+        //warn if id field already exists
+        var idfield = $("#idfield").val();
+        if(form_vals["idfield"]!=idfield && $('input[id^="cbsa_keyfield_"][column="'+idfield+'"]').length>0){
+              r = confirm('You specified as ID field the column that already exists. Its value will be overwritten. Please confirm');
+        }
 
+        if(r){
             doDatabaseUpdate(0,0);
         }
-        return;
-
-//OLD WAY
-/*        
-        //show special matching case in new popup
-        var  url = top.HEURIST.basePath+'import/delimited/importCSV.php?db='+currentDb
-        +'&mvm=1&step=1'
-        +'&import_id='+$('#import_id').val()
-        +'&sa_rectype='+$('#sa_rectype').val()
-        +'&csv_enclosure='+$('#csv_enclosure').val()
-        +'&idfield='+$('#idfield').val()
-        +'&new_idfield='+$('#new_idfield').val();
-
-        cb_keyfields1.each(function(){
-                var id = $(this).val();
-                url = url + "&sa_key"+id+"="+$("#sa_key"+id).val();
-        });
-        url = url + "&multifield="+cb_keyfields2.val();
-        
-        //var id = cb_keyfields1.val().substr(6);
-        //+'&sa_keyfield_type='+$("#sa_keyfield_"+id).val()
-        //+'&sa_keyfield='+cb_keyfields1.val()
-        
-        function __onclose(){
-                        //reload this page
-                        //window.location.href='importCSV.php?db='+currentDb;
-                        $("#input_step").val(1);
-                        doUpload2();
-        }
-        
-        top.HEURIST.util.popupURL(top, url,
-            {   "close-on-blur": false,
-                "no-resize": false,
-            height: 700,
-            width: 700,
-                callback: function(context) {
-                    if(!top.HEURIST.util.isnull(context)){
-                        __onclose();
-                        //window.close();
-                    }
-                }
-            });        
-*/        
-    }else{
-        doDatabaseUpdate(0,0);    
+            
     }
 }
 //
@@ -621,7 +600,7 @@ function getValues(dest){
                                 $("#currrow_1").html(response[0]);
                                 for(i=1; i<response.length;i++){
                                     var isIdx = ($('option[class^="idfield2_"][value="field_'+(i-1)+'"]').size()>0);
-                                    var sval = response[i];
+                                    var sval = response[i].substr(0,100);
                                     if(isIdx && response[i]<0){
                                         sval = "&lt;New Record&gt;";
                                     }else if(sval==""){

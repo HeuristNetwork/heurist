@@ -50,7 +50,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
 ?>
 <html>
     <head>
-        <title>Import Records from CSV (comma-separated values)</title>
+        <title>Import delimited text file (tab or comma separated)</title>
 
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
@@ -110,7 +110,7 @@ div.header{
     font-weight: bold;
 }
 .truncate {
-  max-width: 150px;
+  max-width: 100ex;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -430,7 +430,14 @@ print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); 
                 //NOT USED ANYMORE $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
                 
                 if(is_array($res) && count(@$res['validation']['disambiguation'])>0){
-                    print '<script>form_vals["error_message"] = "There is disambiguation for your matching criteria. Please resolve it before proceed further";</script>';
+                    //There is disambiguation for your matching criteria. Please resolve it before proceed further
+?>                    
+<script>
+    form_vals["error_message"] = "One or more rows in your file match multiple records in the database. "+
+        "Please click on \"Rows with ambiguous match\" to view and resolve these ambiguous matches.<br><br> "+
+        "If you have many such ambiguities you may need to select adidtional key fields or edit the incoming data file to add further matching information.";
+</script>;
+<?php
                 }else{
                     print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
                     //$sa_mode = 1; //ART switch to import  autimatically???
@@ -493,7 +500,7 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
 
 <div id="main_mapping"<?=$mode_import_result?>>
 
-        <h4>IMPORT DATA Step 2 <font color="red">(Work in Progress)</font></h4>
+        <h4>IMPORT DATA Step 2</h4>
         <hr width="100%" />
         
       
@@ -532,6 +539,13 @@ if(@$imp_session['load_warnings']){
 <!--        
         <span class="help">Select key fields and find record ID to unique identification of import record. Heurist database is not affected<br/><br/></span>
 -->
+        <div id="div_idfield" style="padding-left:30px;display:none;">
+                    <label for="idfield">Column to hold record identifiers</label>
+                    <input id="idfield" name="idfield" type="text" size="20" /><br />                        
+                    <span class="help">(you may wish to change this to identify a specific use of the entity represented by the key columns selected)</span>
+        </div>
+
+<!-- OLD VERSION - FULLY WORK        
         <div id="div_idfield" style="padding-left:30px;display:none;">
 
                 <div id="div_idfield_new">
@@ -573,6 +587,7 @@ if(@$imp_session['load_warnings']){
                 </div>
 
         </div>
+-->
     
         <!-- matching table-->
         <div>
@@ -608,7 +623,7 @@ if(@$imp_session['load_warnings']){
                        . '</select></span></td>';    
             print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
               
-        }
+        }                        
 
         ?>
         </table>
@@ -757,16 +772,13 @@ if(@$imp_session['load_warnings']){
                     <td width="30%">  
                         <span class="matching">
                             <span id="btnStartMatch" style="display: none">
-                            <!--
-                                <input type="submit" value="Start search/match" style="font-weight: bold;">
-                            -->    
                                 <input type="button" value="Start search / match / Assign IDs" 
                                     onclick="doMatching()" style="font-weight: bold;">
                                 
                             </span>
                         </span>
                         <span class="importing">
-                            <input type="button" value="<< Previous" style="font-weight: bold; width:20em"
+                            <input type="button" value="<< Previous" style="font-weight: bold;"
                                 title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
                         </span>
                     </td>
@@ -824,7 +836,7 @@ if(@$imp_session['load_warnings']){
                     <td style="width:30%">
                         <span class="importing">
                             <input  id="btnStartImport" type="submit" 
-                                value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold; width:20em">
+                                value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
                         </span>
 
                     <!-- 
@@ -920,7 +932,7 @@ function doSelectSession(){
     document.forms[0].submit();
 }
 </script>
-        <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1 <font color="red">Work in Progress</font></h4>
+        <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1</h4>
         <hr width="100%" />
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
                 <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
@@ -1284,7 +1296,7 @@ function preprocess_uploaded_file($filename){
                     if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
                         array_push($multivals, $k);
                     }
-                    if( !in_array($k, $memos) && (in_array($k, $memofields) || strpos($field, '\\r')!==false) ){
+                    if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
                         array_push($memos, $k);
                     }
                     

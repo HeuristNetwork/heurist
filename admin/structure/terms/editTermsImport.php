@@ -37,7 +37,7 @@
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 	//require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-	require_once(dirname(__FILE__).'/../saveStructure.php');
+	require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX != "")) return;
 
