@@ -1,519 +1,475 @@
 <!--
 
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* brief description of file
+* saveSearchPopup: Pppup dialogue for specifying saved searches including saved layouts
 *
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Stephen White   <stephen.white@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
 
 -->
 
 
 <html>
-	<head>
-		<link rel=stylesheet href="../../common/css/global.css">
-		<link rel=stylesheet href="../../common/css/search.css">
-		<title>Save search query, filter and layout</title>
-		<script>
-			var qparams = window.location.search;
+    <head>
+        <link rel=stylesheet href="../../common/css/global.css">
+        <link rel=stylesheet href="../../common/css/search.css">
+        <title>Save search query, filter rukes and search layout</title>
+        <script>
+            var qparams = window.location.search;
 
-			var ssid = Number(top.HEURIST.util.getUrlParameter("ssid", qparams)),
-				wgId = 0,
-				sLabel = "",
-				sQuery = "",
-				sAllOrBookmarks = "all",
-				sFilter = "",
-				sLayout = "",
-				sCurrentLayout = top.HEURIST.search.getLayoutString(true),
-                sCurrentLayoutNoWidth = top.HEURIST.search.getLayoutString(false),
-				sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
-				rtFilter,
-				relFilter,
-				ptrFilter;
+            var ssid = Number(top.HEURIST.util.getUrlParameter("ssid", qparams)),
+            wgId = 0,
+            sLabel = "",
+            sQuery = "",
+            sAllOrBookmarks = "all",
+            sFilter = "",
+            sLayout = "",
+            sCurrentLayout = top.HEURIST.search.getLayoutString(true),
+            sCurrentLayoutNoWidth = top.HEURIST.search.getLayoutString(false),
+            sSelids = top.HEURIST.search.getSelectedString()[1],//current selids
+            rtFilter,
+            relFilter,
+            ptrFilter;
 
-			if(sCurrentLayout.length > 1 && sCurrentLayout[0] > -1){
-				sCurrentLayout = sCurrentLayout[1];
-			}
+            if(sCurrentLayout.length > 1 && sCurrentLayout[0] > -1){
+                sCurrentLayout = sCurrentLayout[1];
+            }
             if(sCurrentLayoutNoWidth.length > 1 && sCurrentLayoutNoWidth[0] > -1){
                 sCurrentLayoutNoWidth = sCurrentLayoutNoWidth[1];
             }
-			if(ssid>0){
-				//load values from  top.HEURIST.user.savedSearches
-				//find it by ID
-				var ss = top.HEURIST.search.savedSearchFind(ssid);
+            if(ssid>0){
+                //load values from  top.HEURIST.user.savedSearches
+                //find it by ID
+                var ss = top.HEURIST.search.savedSearchFind(ssid);
 
-				if(ss===null){
-					//not found - show warning??
-				}else{
-					wgId = Number(ss[3]);
-					sLabel = ss[0];
-					sQuery = top.HEURIST.util.getUrlParameter("q", ss[1]);
-					sAllOrBookmarks = top.HEURIST.util.getUrlParameter("w", ss[1]);
-					// or it may taken from
-					if(top.HEURIST.util.isempty(sAllOrBookmarks)){
-						sAllOrBookmarks = (ss[4] == 1)?"all":"bookmark";
-					}
-					sSelids = getParams2("selids", ss[1]);
-					sLayout = getParams2("layout", ss[1]);
+                if(ss===null){
+                    //not found - show warning??
+                }else{
+                    wgId = Number(ss[3]);
+                    sLabel = ss[0];
+                    sQuery = top.HEURIST.util.getUrlParameter("q", ss[1]);
+                    sAllOrBookmarks = top.HEURIST.util.getUrlParameter("w", ss[1]);
+                    // or it may taken from
+                    if(top.HEURIST.util.isempty(sAllOrBookmarks)){
+                        sAllOrBookmarks = (ss[4] == 1)?"all":"bookmark";
+                    }
+                    sSelids = getParams2("selids", ss[1]);
+                    sLayout = getParams2("layout", ss[1]);
 
-					//extract filters from query
-					rtFilter = getParams2("rtfilters", ss[1]);
-					relFilter = getParams2("relfilters", ss[1]);
-					ptrFilter = getParams2("ptrfilters", ss[1]);
-				}
+                    //extract filters from query
+                    rtFilter = getParams2("rtfilters", ss[1]);
+                    relFilter = getParams2("relfilters", ss[1]);
+                    ptrFilter = getParams2("ptrfilters", ss[1]);
+                }
 
-			}else{
-				//load values from current search query
-				sLabel = "";//decodeURIComponent(top.HEURIST.parameters["label"]);
-				sQuery = top.HEURIST.parameters["q"];
-				sAllOrBookmarks = top.HEURIST.parameters["w"];
-				if(top.HEURIST.util.isempty(sAllOrBookmarks)){
-					sAllOrBookmarks = "all";
-				}
+            }else{
+                //load values from current search query
+                sLabel = "";//decodeURIComponent(top.HEURIST.parameters["label"]);
+                sQuery = top.HEURIST.parameters["q"];
+                sAllOrBookmarks = top.HEURIST.parameters["w"];
+                if(top.HEURIST.util.isempty(sAllOrBookmarks)){
+                    sAllOrBookmarks = "all";
+                }
 
-				rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
-				relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
-				ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
-				if (!sQuery) {
-					sQuery = top.HEURIST.util.getUrlParameter("q", qparams);
-					if (sQuery) {
-						sQuery = decodeURIComponent(sQuery);
-					}
-				}
-				if ( /*!sQuery || */sQuery.search(/_COLLECTED_/) !== -1) {
-					/*if (!sQuery) {// no query so nothing to save  ???? except filtering and layout!!!!
-						alert("There is no search string to save. Please enter a search and then save.");
-						setTimeout(function() { window.close(); }, 100);
-					}else{*/// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
-						setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, top.HEURIST.baseURL+'search/saved/saveCollectionPopup.html?db='+
-												(top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-													(top.HEURIST.database && top.HEURIST.database.name ?
-														top.HEURIST.database.name : "")), {width:650, height:380}
-																						  );},100);
-					//}
-				}
-			}
+                rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
+                relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
+                ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
+                if (!sQuery) {
+                    sQuery = top.HEURIST.util.getUrlParameter("q", qparams);
+                    if (sQuery) {
+                        sQuery = decodeURIComponent(sQuery);
+                    }
+                }
+                if ( /*!sQuery || */sQuery.search(/_COLLECTED_/) !== -1) {
+                    /*if (!sQuery) {// no query so nothing to save  ???? except filtering and layout!!!!
+                    alert("There is no search string to save. Please enter a search and then save.");
+                    setTimeout(function() { window.close(); }, 100);
+                    }else{*/// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
+                    setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, top.HEURIST.baseURL+'search/saved/saveCollectionPopup.html?db='+
+                        (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+                            (top.HEURIST.database && top.HEURIST.database.name ?
+                                top.HEURIST.database.name : "")), {width:650, height:380}
+                        );},100);
+                    //}
+                }
+            }
 
-			var f = new Array();
-			function _push(val){
-				if(top.HEURIST.util.isArray(val) && val.length>0){
-					if(!top.HEURIST.util.isempty(val[1])){
-						f.push(val[1]);
-					}
-				} else if(!top.HEURIST.util.isempty(val)){
-					f.push(val);
-				}
-			}
-			_push(rtFilter);
-			_push(relFilter);
-			_push(ptrFilter);
-			sFilter = f.join("&");
+            var f = new Array();
+            function _push(val){
+                if(top.HEURIST.util.isArray(val) && val.length>0){
+                    if(!top.HEURIST.util.isempty(val[1])){
+                        f.push(val[1]);
+                    }
+                } else if(!top.HEURIST.util.isempty(val)){
+                    f.push(val);
+                }
+            }
+            _push(rtFilter);
+            _push(relFilter);
+            _push(ptrFilter);
+            sFilter = f.join("&");
 
-			/*
-			*
-			*/
-			function getParams2(name, query){
-				var res = top.HEURIST.util.getUrlParameter(name, query)
-				if(res){ res = name+"="+res; }
-				return res;
-			}
+            /*
+            *
+            */
+            function getParams2(name, query){
+                var res = top.HEURIST.util.getUrlParameter(name, query)
+                if(res){ res = name+"="+res; }
+                return res;
+            }
 
-			/**
-			* Assigns values to UI controls
-			*/
-			top.HEURIST.registerEvent(window, "load", function() {
+            /**
+            * Assigns values to UI controls
+            */
+            top.HEURIST.registerEvent(window, "load", function() {
 
-					/* ARTEM wtf?
-					if (publish == "yes"){
-					document.getElementById("warning-message").innerHTML = "<b>Your search has not yet been saved</b>";
-					document.getElementById("save").value = "Save & publish";
-					}
-					if (mode == "rename") {
-					//this is for editing
-					}
-					*/
+                /* ARTEM wtf?
+                if (publish == "yes"){
+                document.getElementById("warning-message").innerHTML = "<b>Your search has not yet been saved</b>";
+                document.getElementById("save").value = "Save & publish";
+                }
+                if (mode == "rename") {
+                //this is for editing
+                }
+                */
 
-					if(ssid>0){ //editing
-						//destination is already fixed so hide interface
-						document.getElementById("divSaveDestination").style.display = "none";
-						document.getElementById("divSelectLayoutStyle").style.display = "none";
+                if(ssid>0){ //editing
+                    //destination is already fixed so hide interface
+                    document.getElementById("divSaveDestination").style.display = "none";
+                    document.getElementById("divSelectLayoutStyle").style.display = "none";
 
-						if(!sQuery){ //query not defined so saved filtered layout- filter & Layout only
-							document.getElementById("divQuery").style.display = "none";
-							document.getElementById("divSelids").style.display = "none";
-							//todo document.getElementById("rbSaveFilterAndLayout").checked = true;
-							//todo set height 160
-						}else{ //Saved search show only fields editable
-							//save any and all changes
-							//todo document.getElementById("rbSaveAll").checked = true;
-							if (sSelids){
-								document.getElementById("cbSelids").checked = true;
-							}
-							//todo set height 180
-						}
-					}else{
-						//fill save destination select
+                    if(!sQuery){ //query not defined so saved filtered layout- filter & Layout only
+                        document.getElementById("divQuery").style.display = "none";
+                        document.getElementById("divSelids").style.display = "none";
+                        //todo document.getElementById("rbSaveFilterAndLayout").checked = true;
+                        //todo set height 160
+                    }else{ //Saved search show only fields editable
+                        //save any and all changes
+                        //todo document.getElementById("rbSaveAll").checked = true;
+                        if (sSelids){
+                            document.getElementById("cbSelids").checked = true;
+                        }
+                        //todo set height 180
+                    }
+                }else{
+                    //fill save destination select
 
-						var iHTML,
-						selval = top.HEURIST.util.getDisplayPreference("savedSearchDest"), //value by default
-						selIndex = 0;
+                    var iHTML,
+                    selval = top.HEURIST.util.getDisplayPreference("savedSearchDest"), //value by default
+                    selIndex = 0;
 
-						var ele = document.getElementById("edSaveDestination");
+                    var ele = document.getElementById("edSaveDestination");
 
-						var optElem = document.createElement("option");
-						optElem.value = "";
-						optElem.innerHTML = (sAllOrBookmarks === "all") ?  '"All records" saved searches' : '"My bookmarks" saved searches';
-						ele.replaceChild(optElem, ele.firstElementChild );
+                    var optElem = document.createElement("option");
+                    optElem.value = "";
+                    optElem.innerHTML = (sAllOrBookmarks === "all") ?  '"All records" saved searches' : '"My bookmarks" saved searches';
+                    ele.replaceChild(optElem, ele.firstElementChild );
 
-						//list of all workgroups
-						for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
-							var wg = top.HEURIST.user.workgroups[i];
-							iHTML += "<option value=\"" + wg + "\">" + top.HEURIST.workgroups[wg].name + "</option>";
-							if(selval==wg){
-								selIndex =  i + 1;
-							}
-						}
-						document.getElementById("wg-options").innerHTML += iHTML;
+                    //list of all workgroups
+                    for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
+                        var wg = top.HEURIST.user.workgroups[i];
+                        iHTML += "<option value=\"" + wg + "\">" + top.HEURIST.workgroups[wg].name + "</option>";
+                        if(selval==wg){
+                            selIndex =  i + 1;
+                        }
+                    }
+                    document.getElementById("wg-options").innerHTML += iHTML;
 
-						ele.selectedIndex = selIndex; //value by default
-					}
+                    ele.selectedIndex = selIndex; //value by default
+                }
 
-					document.getElementById("edName").value = sLabel;
-					document.getElementById("edQuery").value = sQuery;
-					document.getElementById("edFilter").value = sFilter;
-					document.getElementById("edLayout").value = sLayout;
-					document.getElementById("edSelids").value = sSelids;
+                document.getElementById("edName").value = sLabel;
+                document.getElementById("edQuery").value = sQuery;
+                document.getElementById("edFilter").value = sFilter;
+                document.getElementById("edLayout").value = sLayout;
+                document.getElementById("edSelids").value = sSelids;
 
-					document.getElementById("cbSaveQuery").checked = (document.getElementById("edQuery").value != "");
-					document.getElementById("cbSaveFilter").checked = (document.getElementById("edFilter").value != "");
-					document.getElementById("cbSaveLayout").checked = (document.getElementById("edLayout").value != "");
+                document.getElementById("cbSaveQuery").checked = (document.getElementById("edQuery").value != "");
+                document.getElementById("cbSaveFilter").checked = (document.getElementById("edFilter").value != "");
+                document.getElementById("cbSaveLayout").checked = (document.getElementById("edLayout").value != "");
 
-					setSaveMode();
+                setSaveMode();
 
-					setTimeout(function() { document.getElementById('edName').focus() }, 10);
-			});
+                setTimeout(function() { document.getElementById('edName').focus() }, 10);
+            });
 
-			/*
-			* Save mode for new one
-			*/
-			function setSaveMode(){
+            /*
+            * Save mode for new one
+            */
+            function setSaveMode(){
 
-				var sq = document.getElementById("cbSaveQuery");
-				var sf = document.getElementById("cbSaveFilter");
-				var sl = document.getElementById("cbSaveLayout");
-				var si = document.getElementById("cbSelids");
+                var sq = document.getElementById("cbSaveQuery");
+                var sf = document.getElementById("cbSaveFilter");
+                var sl = document.getElementById("cbSaveLayout");
+                var si = document.getElementById("cbSelids");
 
-				sq.disabled = (document.getElementById("edQuery").value == "");
-				sf.disabled = (document.getElementById("edFilter").value == "");
-				sl.disabled = (document.getElementById("edLayout").value == "");
-				si.disabled = (document.getElementById("edSelids").value == "");
+                sq.disabled = (document.getElementById("edQuery").value == "");
+                sf.disabled = (document.getElementById("edFilter").value == "");
+                sl.disabled = (document.getElementById("edLayout").value == "");
+                si.disabled = (document.getElementById("edSelids").value == "");
 
-				if(!(sq.checked || sf.checked || sl.checked || si.checked)){
-					if(!sq.disabled){
-						sq.checked = true;
-					}else if(!sf.disabled){
-						sf.checked = true;
-					}else if(!sl.disabled){
-						sl.checked = true;
-					}else if(!si.disabled){
-						si.checked = true;
-					}
-				}
+                if(!(sq.checked || sf.checked || sl.checked || si.checked)){
+                    if(!sq.disabled){
+                        sq.checked = true;
+                    }else if(!sf.disabled){
+                        sf.checked = true;
+                    }else if(!sl.disabled){
+                        sl.checked = true;
+                    }else if(!si.disabled){
+                        si.checked = true;
+                    }
+                }
 
-				document.getElementById("btnSave").disabled = (!( (!sq.disabled && sq.checked) || (!sf.disabled && sf.checked) || (!sl.disabled && sl.checked) || (!si.disabled && si.checked) ));
-			}
-			/*
-			* change layout
-			*/
-			function onChangeLayout(){
-				var selectLayout = document.getElementById("slctLayout");
+                document.getElementById("btnSave").disabled = (!( (!sq.disabled && sq.checked) || (!sf.disabled && sf.checked) || (!sl.disabled && sl.checked) || (!si.disabled && si.checked) ));
+            }
+            /*
+            * change layout
+            */
+            function onChangeLayout(){
+                var selectLayout = document.getElementById("slctLayout");
                 var ele = document.getElementById("edLayout");
-				switch (selectLayout.value) {
-					case "":
-						ele.value = "";  //status quo
-						break;
-					case "layout":
-						ele.value = sCurrentLayout;  //entire layout
-						break;
+                switch (selectLayout.value) {
+                    case "":
+                        ele.value = "";  //status quo
+                        break;
+                    case "layout":
+                        ele.value = sCurrentLayout;  //entire layout
+                        break;
                     case "layout_wo_width":
                         ele.value = sCurrentLayoutNoWidth;  //entire layout
                         break;
-				    default:
-						ele.value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
-				}
+                    default:
+                        ele.value = "layout=srch:" + selectLayout.value;   //presentation: 1,2 colums or icon/thumb
+                }
 
                 var sl = document.getElementById("cbSaveLayout");
                 sl.checked = (ele.value!="");
 
-				setSaveMode();
-			}
+                setSaveMode();
+            }
 
-			/*
-			* Check unique name within group of saved searches
-			*/
-			/*
-			function check_old() {
-			var wg = document.getElementById("edSaveDestination").value;
-			if (wg) {
-			top.HEURIST.util.loadWorkgroupDetails(wg, checkCallback);
-			} else {
-			checkCallback();
-			}
-			}
 
-			function checkCallback() {
-			var wg = document.getElementById("edSaveDestination").value;
-			var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches; //top.HEURIST.workgroups[wg].savedSearches
+            function check(){
 
-			var val = document.getElementById("edName").value;
-			val = val.replace(/'|"/g, "");
-			if (val == "") {
-			document.getElementById("edName").value = "";
-			document.getElementById("message").innerHTML = "Enter a name";
-			return;
-			}
+                if(top.HEURIST.util.isempty(document.getElementById("edName").value)){
+                    document.getElementById("lblName").style.color = "red";
+                    document.getElementById("edName").focus();
+                }else{
+                    save();
+                }
+            }
 
-			if (savedSearches  &&  savedSearches.length) {
-			for (var i = 0; i < savedSearches.length; ++i) {
-			if (val == savedSearches[i][0]) {
-			document.getElementById("coverall").style.display = "block";
-			document.getElementById("alertBox").innerHTML =
-			"<p>A search with that name already exists.  "
-			+ "Do you want to overwrite it?</p>"
-			+ "<input type=hidden id=edName value=\""+val+"\">"
-			+ "<input type=hidden id=edSaveDestination value=\""+wg+"\">";
-			document.getElementById("alertBox").innerHTML += (wg > 0 ? "This is a <b>workgroup saved search</b>. Other workgroup members will be affected.": "");
-			document.getElementById("alertBox").innerHTML += "<input type=button value=overwrite onclick=save()>"
-			+ "<input type=button value=cancel onclick=window.close()>";
-			return;
-			}
-			}
-			}
-			save();
-			}
-			*/
+            /*
+            *
+            */
+            function save()
+            {
+                var cmb_label, cmb_url, cmb_workgroup, cmb_id;
 
-			function check(){
+                var isEdit = (ssid>0);
 
-				if(top.HEURIST.util.isempty(document.getElementById("edName").value)){
-					document.getElementById("lblName").style.color = "red";
-					document.getElementById("edName").focus();
-				}else{
-					save();
-				}
-			}
+                if(isEdit){
+                    cmb_id = ssid;
+                    cmb_workgroup = wgId;
+                }else{
+                    cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
+                }
+                var elname = document.getElementById("edName");
+                cmb_label = elname.value;
 
-			/*
-			*
-			*/
-			function save()
-			{
-				var cmb_label, cmb_url, cmb_workgroup, cmb_id;
+                if(cmb_label==""){
+                    alert("Name is mandatory");
+                    elname.focus();
+                    return;
+                }
 
-				var isEdit = (ssid>0);
-
-				if(isEdit){
-					cmb_id = ssid;
-					cmb_workgroup = wgId;
-				}else{
-					cmb_workgroup = Number(document.getElementById("edSaveDestination").value);
-				}
-				var elname = document.getElementById("edName");
-				cmb_label = elname.value;
-
-				if(cmb_label==""){
-					alert("Name is mandatory");
-					elname.focus();
-					return;
-				}
-
-				//warning if saved search with the same name already exists
-				if(!isEdit || cmb_label!=sLabel){ //sLabel - previous value
-						var ss = top.HEURIST.search.savedSearchFindByName(cmb_label);
-						if(ss!=null){
-                            alert("Search with name '"+cmb_label+"' already exists in "+
-                                    (ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+"'");
-                            elname.focus();
-                            return;
-                            /*
-							if(!confirm("Search with name '"+cmb_label+"' already exists in "+
-									(ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+
-									"'.\n Do you still wish to save it under specified name?" )){
-								elname.focus();
-								return;
-							}
-                            */
-						}
-				}
+                //warning if saved search with the same name already exists
+                if(!isEdit || cmb_label!=sLabel){ //sLabel - previous value
+                    var ss = top.HEURIST.search.savedSearchFindByName(cmb_label);
+                    if(ss!=null){
+                        alert("Search with name '"+cmb_label+"' already exists in "+
+                            (ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+"'");
+                        elname.focus();
+                        return;
+                        /*
+                        if(!confirm("Search with name '"+cmb_label+"' already exists in "+
+                        (ss[3]==0?'common list':" group '"+top.HEURIST.workgroups[ss[3]].name )+
+                        "'.\n Do you still wish to save it under specified name?" )){
+                        elname.focus();
+                        return;
+                        }
+                        */
+                    }
+                }
 
 
 
-				var query = new Array();
+                var query = new Array();
 
-				// -------- SEARCH QUERY --------------
+                // -------- SEARCH QUERY --------------
 
-				if (document.getElementById("cbSaveQuery").checked) // !document.getElementById("rbSaveFilterAndLayout").checked)
-				{
-					top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
+                if (document.getElementById("cbSaveQuery").checked) // !document.getElementById("rbSaveFilterAndLayout").checked)
+                {
+                    top.HEURIST.util.setDisplayPreference("savedSearchDest", cmb_workgroup);
 
-					var q = document.getElementById("edQuery").value;
-					//var w = params["w"]; //@todo - take from variable
+                    var q = document.getElementById("edQuery").value;
+                    //var w = params["w"]; //@todo - take from variable
 
-					if (cmb_workgroup > 0 ){
+                    if (cmb_workgroup > 0 ){
 
-						/* ARTEM - wtf
-						if (!bkmk_only.checked){
-						//for workgroup searches overwrite with all records search
-						top.HEURIST.parameters["w"] = "all";
-						} else {
-						top.HEURIST.parameters["w"] = "bookmark";
-						top.HEURIST.parameters["q"] = top.HEURIST.parameters["q"] + " user:" + top.HEURIST.get_user_id();
-						}
-						*/
+                        /* ARTEM - wtf
+                        if (!bkmk_only.checked){
+                        //for workgroup searches overwrite with all records search
+                        top.HEURIST.parameters["w"] = "all";
+                        } else {
+                        top.HEURIST.parameters["w"] = "bookmark";
+                        top.HEURIST.parameters["q"] = top.HEURIST.parameters["q"] + " user:" + top.HEURIST.get_user_id();
+                        }
+                        */
 
-						//for workgroups - search in bookmarks only
-						//ARTEM????? sAllOrBookmarks = "bookmark";
-						//wtf???? q = q + " user:" + top.HEURIST.get_user_id();
-					}
+                        //for workgroups - search in bookmarks only
+                        //ARTEM????? sAllOrBookmarks = "bookmark";
+                        //wtf???? q = q + " user:" + top.HEURIST.get_user_id();
+                    }
 
-					query.push("q="+q);
-					query.push("w="+sAllOrBookmarks);
-				}else{
-					cmb_workgroup = 0; //for filters we save for current user only
-				}
+                    query.push("q="+q);
+                    query.push("w="+sAllOrBookmarks);
+                }else{
+                    cmb_workgroup = 0; //for filters we save for current user only
+                }
 
-				// -------- FILTERS --------------
+                // -------- FILTERS --------------
 
-				if (document.getElementById("cbSaveFilter").checked && document.getElementById("edFilter").value != "") {
-					query.push(document.getElementById("edFilter").value);//TODO: validate format
-				}
+                if (document.getElementById("cbSaveFilter").checked && document.getElementById("edFilter").value != "") {
+                    query.push(document.getElementById("edFilter").value);//TODO: validate format
+                }
 
-				// -------- LAYOUT --------------
+                // -------- LAYOUT --------------
 
-				if (document.getElementById("cbSaveLayout").checked && document.getElementById("edLayout").value != "") {
-					query.push(document.getElementById("edLayout").value);//TODO: validate format
-				}
+                if (document.getElementById("cbSaveLayout").checked && document.getElementById("edLayout").value != "") {
+                    query.push(document.getElementById("edLayout").value);//TODO: validate format
+                }
 
-				// -------- Selids --------------
+                // -------- Selids --------------
 
-				if (document.getElementById("cbSelids").checked && document.getElementById("edSelids").value != "") {
-					query.push(document.getElementById("edSelids").value);//TODO: validate format
-				}
+                if (document.getElementById("cbSelids").checked && document.getElementById("edSelids").value != "") {
+                    query.push(document.getElementById("edSelids").value);//TODO: validate format
+                }
 
-				// --------
+                // --------
 
-				//save query
-				cmb_url = "?" + query.join("&");
+                //save query
+                cmb_url = "?" + query.join("&");
 
 
-				var saction = "save_search";
-				var _data = {svs_Name:cmb_label, svs_Query:cmb_url, svs_UGrpID:cmb_workgroup, svs_ID:cmb_id};
+                var saction = "save_search";
+                var _data = {svs_Name:cmb_label, svs_Query:cmb_url, svs_UGrpID:cmb_workgroup, svs_ID:cmb_id};
 
-				top.HEURIST.search.executeAction(saction, _data);
-				window.close();
-			}
+                top.HEURIST.search.executeAction(saction, _data);
+                window.close();
+            }
 
-		</script>
-		<style>
-			#message { color: red; }
-			#warning-message { color: #990000; }
-			input, select{ margin-top: 5px;}
+        </script>
+        <style>
+            #message { color: red; }
+            #warning-message { color: #990000; }
+            input, select{ margin-top: 5px;}
 
-			#btnSave {font-weight: bold;}
-			#coverall {background-color:RGBA(255,255,255,0.5);}
+            #btnSave {font-weight: bold;}
+            #coverall {background-color:RGBA(255,255,255,0.5);}
 
-			.llab{
-				width:80px;
-				text-align:right;
-				display:inline-block;
-			}
-			.fld{
-				width:270px;
-				height: 17px;
-				margin-left: 5px;
-			}
+            .llab{
+                width:100px;
+                text-align:right;
+                display:inline-block;
+            }
+            .fld{
+                width:270px;
+                height: 17px;
+                margin-left: 5px;
+            }
 
-		</style>
-	</head>
+        </style>
+    </head>
 
-	<body class="popup" width="440" height="260">
-		<!-- <div id="mainbody">-->
+    <body class="popup" width="500" height="420">
+        <!-- <div id="mainbody">-->
 
-		<label class="llab" id="lblName">Enter a name:</label>
-		<input class="fld" type="text" id="edName">
+        <label class="llab" id="lblName" style="color:red; padding-top:20px;">Saved search name</label>
+        <input class="fld" type="text" id="edName"
+        title="Please use a concise and informative name. It will appear in the navigation panel on the left of the search page" >
+        <div style="padding-left:110px;">Use concise name to appear in navigation panel on left of search</div>
 
-		<div id="divSelectLayoutStyle">
-			<label class="llab">Layout style:</label>
-			<select class="fld" id="slctLayout" onchange="onChangeLayout()" style="width:140px">
-				<option value="" selected>Status quo</option>
-				<option value="l">One column</option>
-				<option value="2">Two columns</option>
-				<option value="t">Thumbnails</option>
-				<option value="i">Icons</option>
-				<option value="layout">Current Layout (fixed width)</option>
+        <div id="divSelectLayoutStyle" style="padding-top:5px;">
+            <label class="llab">Layout style</label>
+            <select class="fld" id="slctLayout" onchange="onChangeLayout()" style="width:140px"
+                title="Status quo = search will not change layout. Current layout reproduces current layout of search page as far as possible">
+                <option value="" selected>Status quo</option>
                 <option value="layout_wo_width">Current Layout</option>
-			</select>
-		</div>
+                <option value="Status quo" disabled>---------------------</option>
+                <option value="l">One column</option>
+                <option value="2">Two columns</option>
+                <option value="t">Thumbnails</option>
+                <option value="i">Icons</option>
+                <!-- This is pretty much a useless option, just adds confusion
+                <option value="layout">Current Layout (fixed width)</option> -->
+            </select>
+            <div style="padding-left:110px;">Status quo or current layout recommended</div>
+        </div>
 
-		<div id="divSaveDestination">
-			<label class="llab">Add search to:</label>
-			<select class="fld" id="edSaveDestination">
-				<option value="">personal saved searches</option>
-				<optgroup label="workgroup saved searches" id="wg-options"></optgroup>
-			</select>
-		</div>
+        <div id="divSaveDestination" style="padding-top: 5px; padding-bottom: 10px;">
+            <label class="llab">Navigation section</label>
+            <select class="fld" id="edSaveDestination"
+            title="Saved searches in My Records / All records sections are visible only to you, those under a workgroup are visible to all members">
+                <option value="">personal saved searches</option>
+                <optgroup label="workgroup saved searches" id="wg-options"></optgroup>
+            </select>
+        <div style="padding-left:110px;">Determines navigation section in which saved search appears</div>
+        </div>
 
-		<div style="text-align: center; padding-bottom: 10px;" id="divSaveMode">
-			<input type=button value="Save" id="btnSave" onClick="check();">
-		</div>
-		<!--
-		<p id=warning-message></p>
-		<p id=message></p>
-		-->
-		<hr/>
+        <div style="text-align: left; padding-bottom: 15px; padding-top: 10px; padding-left: 250px;" id="divSaveMode">
+            <input type=button style="color: red;" value="Save search / layout" id="btnSave" onClick="check();">
+        </div>
+        <br />
+        <hr />
+
+        <div style="padding-top:20px; padding-bottom:10px;"><strong>Advanced:</strong>
+        </div>
+        <div id="divQuery"><label class="llab">Search query</label> <input class="fld" type="text" id="edQuery" onkeyup="setSaveMode()" />&nbsp;
+            <input type="checkbox" id="cbSaveQuery" style="vertical-align:text-bottom; display: inline;"
+                title="Check this box to include the query string in the saved search" onclick="setSaveMode()">
+        </div>
+        <div><label class="llab">Filter rules</label> <input class="fld" type="text" id="edFilter" onkeyup="setSaveMode()"/>&nbsp;
+            <input type="checkbox" id="cbSaveFilter" style="vertical-align:text-bottom; display: inline;"
+                title="Check this box to include the relationship filter rules in the saved search" onclick="setSaveMode()">
+        </div>
+        <div><label class="llab">Layout</label> <input class="fld" type="text" id="edLayout" onkeyup="setSaveMode()"/>&nbsp;
+            <input type="checkbox" id="cbSaveLayout" style="vertical-align:text-bottom; display: inline;"
+                title="Check this box to include the layout specifications in the saved search" onclick="setSaveMode()">
+        </div>
+        <div id="divSelids"><label class="llab" >Selected IDs</label> <input class="fld" type="text" id="edSelids" onkeyup="setSaveMode()"/>&nbsp;
+            <input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;"
+            title="Check this box to include the selected record IDs in the saved search">
+        </div>
 
 
-
-
-		<div><strong>Advanced:</strong></div>
-		<div id="divQuery"><label class="llab">Query:</label> <input class="fld" type="text" id="edQuery" onkeyup="setSaveMode()" />&nbsp;
-				<input type="checkbox" id="cbSaveQuery" style="vertical-align:text-bottom; display: inline;" title="Save Query" onclick="setSaveMode()"></div>
-		<div><label class="llab">Filters:</label> <input class="fld" type="text" id="edFilter" onkeyup="setSaveMode()"/>&nbsp;
-				<input type="checkbox" id="cbSaveFilter" style="vertical-align:text-bottom; display: inline;" title="Save Filter" onclick="setSaveMode()"></div>
-		<div><label class="llab">Layout:</label> <input class="fld" type="text" id="edLayout" onkeyup="setSaveMode()"/>&nbsp;
-				<input type="checkbox" id="cbSaveLayout" style="vertical-align:text-bottom; display: inline;" title="Save Layout" onclick="setSaveMode()"></div>
-		<div id="divSelids"><label class="llab" >Selected ids :</label> <input class="fld" type="text" id="edSelids" onkeyup="setSaveMode()"/>&nbsp;
-				<input type="checkbox" id="cbSelids" style="vertical-align:text-bottom; display: inline;" title="Save Selected Ids"></div>
-
-
-		<!--
-		<div id="coverall" style="display:none">
-		<div id="alertBox" ></div>
-		</div>
-		-->
-	</body>
+    </body>
 </html>
