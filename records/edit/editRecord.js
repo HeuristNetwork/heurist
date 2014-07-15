@@ -259,7 +259,7 @@ if (! top.HEURIST.edit) {
             if (firstName) {
                 top.HEURIST.edit.showModule(firstName);
             }
-            
+
         },
 
         userCanEdit: function() {
@@ -2412,13 +2412,13 @@ s
         }
         var    disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
-        
+
         var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
          if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour - show all
             allTerms = 0;
             disabledTerms = "";
          }
-        
+
         var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
                                                             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
                                                             (bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian doesn't want it (this.required!=="required"));
@@ -2451,7 +2451,7 @@ s
 
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-        
+
         var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
         if(Number(_dtyID)==top.HEURIST.magicNumbers['DT_RELATION_TYPE']) //specific behaviour - do not allow edit
         {
@@ -2460,7 +2460,7 @@ s
 
         var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
         var isVocabulary = !isNaN(Number(sAllTerms));
-        
+
         var urlSpan = this.document.createElement("span");
         //urlSpan.style.paddingLeft = "1em";
         urlSpan.style.color = "blue";
@@ -2519,8 +2519,8 @@ s
                     {
                         "close-on-blur": false,
                         "no-resize": true,
-                        height: 160,
-                        width: 400,
+                        height: 280,
+                        width: 650,
                         callback: function(context) {
                             if(context=="ok") {
                                 onSelecTermsUpdate(sAllTerms, "");

@@ -16,7 +16,7 @@
 
 /**
 * saveStructureLib.php. Functions to update the system structural definitions -
-* rectypes, detailtypes, terms and constraints. 
+* rectypes, detailtypes, terms and constraints.
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -189,7 +189,7 @@
 	**/
 	function deleteRecType($rtyID) {
         global $mysqli;
-        
+
 		$ret = array();
 		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
 		$res = $mysqli->query($query);
@@ -242,7 +242,7 @@
     **/
     function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true) {
         global $mysqli, $rtyColumnNames;
-        
+
         $ret = null;
 
         if (count($commonNames)) {
@@ -253,7 +253,7 @@
             $titleMask = null;
             $query = "";
             $querycols = "";
-            
+
             foreach ($commonNames as $colName) {
                 $val = array_shift($rt[0]['common']);
 
@@ -270,13 +270,13 @@
                         $querycols = $querycols.$colName;
                         $query = $query."?";
                         $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
-                        
+
 //DEBUG error_log($colName."  ".$rtyColumnNames[$colName]." = ".$val);
                 }
             }
 
             $query = "insert into defRecTypes ($querycols) values ($query)";
-            
+
             $rows = execSQL($mysqli, $query, $parameters, true);
 
             if($rows == "1062"){
@@ -306,14 +306,14 @@
         if ($ret ==  null) {
             $ret = "no data supplied for inserting record type";
         }
-        
+
         return $ret;
     }
-    
+
     /**
     * updateRectype - Function that updates rectypes in the defRecTypes table.and updates or inserts any
     * fields into the defRecStructure table for the given rtyID
-    * @author 
+    * @author
     * @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
     * @param $dtFieldNames an array valid column names in the defRecStructure table
     * @param $rtyID id of the rectype to update
@@ -323,7 +323,7 @@
 	function updateRectype($commonNames, $rtyID, $rt) {
 
 		global $mysqli, $rtyColumnNames;
-        
+
 		$ret = null;
 
 		$res = $mysqli->query("select rty_OriginatingDBID from defRecTypes where rty_ID = $rtyID");
@@ -358,13 +358,13 @@
                     //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
 					if($colName == "rty_TitleMask"){
                         //array_push($parameters, ""); //empty title mask - store only canonical!
-//error_log("UPDATE TITLE MASK >>>>".$val);                        
+//error_log("UPDATE TITLE MASK >>>>".$val);
 						$val = titlemask_make($val, $rtyID, 1, null, _ERR_REP_SILENT); //make canonical
 
                     }
-                    
+
                     $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
-                    
+
 				}
 			}
 
@@ -392,7 +392,7 @@
 		if ($ret == null) {
 			$ret = "no data supplied for updating record type - $rtyID";
 		}
-        
+
 		return $ret;
 
 	}
@@ -408,7 +408,7 @@
 		if($mask){
 				$val = titlemask_make($mask, $rtyID, 1, null, _ERR_REP_SILENT); //make coded
                 $parameters = addParam($parameters, "s", $val);
-                
+
                 /* DEPRECATED
 				$colName = "rty_CanonicalTitleMask";
 				$parameters[0] = "ss";//$parameters[0].$rtyColumnNames[$colName];
@@ -453,7 +453,7 @@
 				$ret[$row->rty_ID] = $row->rty_Name;
 			}
 		}
-        
+
 		return $ret;
 	}
 
@@ -529,7 +529,7 @@
 	function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
 		global $mysqli, $rstColumnNames;
-        
+
 		$ret = array(); //result
 		$ret[$rtyID] = array();
 
@@ -672,7 +672,7 @@
 
 			$colNames = join(",",$columnNames);
 			foreach ( $rt as $newRT) {
-                
+
 				$colValues = $newRT['values'];
 				$parameters = array(""); //list of field date types
 				$query = "";
@@ -1019,10 +1019,10 @@
 			foreach ($commonNames as $colName) {
 				$val = array_shift($dt['common']);
                 if(@$dtyColumnNames[$colName]){
-                
+
 				    if($query!="") {
-                        $query = $query.",";   
-                        $querycols = $querycols.",";   
+                        $query = $query.",";
+                        $querycols = $querycols.",";
                     }
 				    $query = $query."?";
                     $querycols = $querycols.$colName;
@@ -1163,7 +1163,7 @@
 	* @param $coldNames - array of field names
 	* @param $trmID - term id, in case new term this is string
 	* @param $values - array of values
-    * @param $ext_db - mysqli 
+    * @param $ext_db - mysqli
 	* @return $ret - if success this is ID of term, if failure - error string
 	*/
 	function updateTerms( $colNames, $trmID, $values, $ext_db) {
@@ -1200,7 +1200,7 @@
 					if($query!=""){
                         $query = $query.",";
                         $querycols = $querycols.",";
-                    } 
+                    }
 
 					if($isInsert){
 						$query = $query."?";
@@ -1255,7 +1255,7 @@
                 } else {
                     $recCount = $res->num_rows;
                     if($recCount>0){
-                        $ret = "Duplication of label or code is not allowed for same level terms";
+                        $ret = "Duplicate label or code not allowed terms at same level in tree";
                     }
                 }
 
@@ -1280,9 +1280,9 @@
 					if($isInsert){
 						$trmID = $ext_db->insert_id;
 					}
-                    
+
                     if($inverse_termid!=null){
-                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";    
+                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
                         execSQL($ext_db, $query, null, true);
                     }
 
@@ -1291,9 +1291,9 @@
 
 			}
 		} //if column names
-        
-        
-        
+
+
+
 
 		if ($ret==null){
 			$ret = "no data supplied for updating record structure - $trmID";
@@ -1301,7 +1301,7 @@
 
 		return $ret;
 	}
-    
+
 	/**
 	* recursive function
 	* @param $ret -- array of child

@@ -153,7 +153,7 @@ function DetailTypeEditor() {
 			_detailType[fi.dty_NonOwnerVisibility] = 'viewable';
 
 			Dom.get("dty_Type").disabled = false;
-            
+
             $("#topdiv_closebtn").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
 		}else{
 			var el = Dom.get("dty_Type"),
@@ -353,7 +353,7 @@ function DetailTypeEditor() {
 							prev.removeChild(prev.childNodes[1]);
 						}
 					}
-                    
+
                 if(!Hul.isempty(allTerms)) {
 					var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
 						el_sel.style.backgroundColor = "#cccccc";
@@ -439,8 +439,8 @@ function DetailTypeEditor() {
 				"close-on-blur": false,
 				"no-resize": true,
                 "no-close": true,
-				height: 180,
-				width: 420,
+				height: 280,
+				width: 650,
 				callback: function(context) {
 					if(context!="") {
 
@@ -599,7 +599,7 @@ function DetailTypeEditor() {
             _detailType[fi.dty_TermIDTreeNonSelectableIDs] = "";
             Dom.get('defineTerms').style.display = 'none';
          }
-        
+
 
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
@@ -702,7 +702,7 @@ function DetailTypeEditor() {
                 _updatedFields = [];
                 return "mandatory";
         }
-        
+
 		if(Dom.get("dty_HelpText").value==="") {
 				if(isShowWarn) {
 					alert("Help text is mandatory field");
@@ -884,11 +884,11 @@ function DetailTypeEditor() {
 						_recreateTermsVocabSelector(that.keepType, null);
 						_recreateTermsPreviewSelector(that.keepType, null, null);
 						_recreateRecTypesPreview(that.keepType, null);
-                        
+
                    if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                        _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 500, width:800, title:"Information", modal:true} );   
+                        _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 500, width:800, title:"Information", modal:true} );
                    }
-                        
+
 				}
 		}else{
 					el.value = that.keepType;  //rollback
@@ -973,9 +973,9 @@ function DetailTypeEditor() {
 			 *	handles change status event
 			 */
 			onSelectRectype : _onSelectRectype,
-            
+
             showOtherTerms: function(){
-                
+
                 var allTerms = Dom.get("dty_JsonTermIDTree").value;
                 var type = Dom.get("dty_Type").value;
                 if(type!="enum"){
@@ -984,7 +984,7 @@ function DetailTypeEditor() {
 
                 var el_sel = Dom.get("selVocab");
                 var vocab_id =  el_sel.value>0?el_sel.value:'';
-                
+
                 top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
                     {
                     "close-on-blur": false,
@@ -995,10 +995,10 @@ function DetailTypeEditor() {
                         _recreateTermsPreviewSelector(type, vocab_id, "");
                     }
                     });
-                
+
             },
-                    
-            
+
+
 			/**
 			 * Cancel form - checks if changes were made, shows warning and closes the window
 			 */
