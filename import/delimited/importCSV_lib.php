@@ -1084,7 +1084,9 @@ function validateImport($mysqli, $imp_session, $params){
                 ." left join Records on rec_ID=".$id_field
                 ." where rec_RecTypeID<>".$recordType;
         //error_log("check wrong rt: ".$query);
-             $wrong_records = getWrongRecords($mysqli, $query, "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", $imp_session, $id_field);
+             $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
+                "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.", 
+                "Wrong Record Types", $id_field);
              if(is_array($wrong_records) && count($wrong_records)>0) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
 //error_log(print_r($imp_session['validation']['mapped_fields'],true));
@@ -1276,7 +1278,9 @@ function validateImport($mysqli, $imp_session, $params){
         ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
      $k++;  
 //DEBUG print "check empty: ".$query;
-     $wrong_records = getWrongRecords($mysqli, $query, "This field is required - a value must be supplied for every record", $imp_session, $field);
+     $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
+                "This field is required - a value must be supplied for every record", 
+                "Missing Values", $field);
      if(is_array($wrong_records)) {
         $imp_session = $wrong_records;   
      }else if($wrong_records) {
@@ -1305,8 +1309,8 @@ function validateImport($mysqli, $imp_session, $params){
                 
         $idx = array_search($field, $sel_query)+1;
                 
-        $wrong_records = validateMultivalue($mysqli, $query, "Term list values must match terms defined for the field",
-                    $imp_session, $field, $dt_types, $idx);
+        $wrong_records = validateMultivalue($mysqli, $query, $imp_session, $field, $dt_types, $idx,
+                "Term list values must match terms defined for the field", "Wrong Terms");
      
      }else{
  
@@ -1315,8 +1319,9 @@ function validateImport($mysqli, $imp_session, $params){
                 ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
 //DEBUG  error_log("check enum: ".$query);                
      //"Fields mapped as enumeration ".$hwv           
-        $wrong_records = getWrongRecords($mysqli, $query, "Term list values must match terms defined for the field",
-                    $imp_session, $field);
+        $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
+                "Term list values must match terms defined for the field", 
+                "Wrong Terms", $field);
      }
      
      $k++;
@@ -1336,9 +1341,9 @@ function validateImport($mysqli, $imp_session, $params){
                 ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
                 ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
      $k++;
-     $wrong_records = getWrongRecords($mysqli, $query, 
+     $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
                                 "Record pointer fields must reference an existing record in the database",
-                                $imp_session, $field);
+                                "Wrong Pointers", $field);
      //"Fields mapped as resources(pointers)".$hwv,                                 
      //if($wrong_records) return $wrong_records;
      if(is_array($wrong_records)) {
@@ -1356,9 +1361,9 @@ function validateImport($mysqli, $imp_session, $params){
                 ." from $import_table "
                 ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
                 $k++;
-     $wrong_records = getWrongRecords($mysqli, $query, 
+     $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
         "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
-        $imp_session, $field);
+        "Wrong Numerics", $field);
      // "Fields mapped as numeric".$hwv,    
      //if($wrong_records) return $wrong_records;
      if(is_array($wrong_records)) {
@@ -1376,9 +1381,9 @@ function validateImport($mysqli, $imp_session, $params){
                 ." from $import_table "
                 ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
                 $k++;
-     $wrong_records = getWrongRecords($mysqli, $query, 
+     $wrong_records = getWrongRecords($mysqli, $query, $imp_session, 
         "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
-        $imp_session, $field);
+        "Wrong Dates", $field);
      //"Fields mapped as date".$hwv,    
      //if($wrong_records) return $wrong_records;
      if(is_array($wrong_records)) {
@@ -1402,7 +1407,7 @@ function validateImport($mysqli, $imp_session, $params){
 * @param mixed $imp_session
 * @param mixed $fields_checked
 */
-function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checked){
+function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked){
     
     $res = $mysqli->query($query." LIMIT 5000");
     if($res){
@@ -1418,6 +1423,7 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
+            $error["short_message"] = $short_messsage;
             
             $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
             array_push($imp_session['validation']['error'], $error);
@@ -1431,7 +1437,7 @@ function getWrongRecords($mysqli, $query, $message, $imp_session, $fields_checke
     return null;
 }
 
-function validateMultivalue($mysqli, $query, $message, $imp_session, $fields_checked, $dt_types, $field_idx){
+function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_types, $field_idx, $message, $short_messsage){
 
     $dt_type = $dt_types[$fields_checked];
     
@@ -1475,6 +1481,7 @@ function validateMultivalue($mysqli, $query, $message, $imp_session, $fields_che
             $error["recs_error"] = array_slice($wrong_records,0,1000);
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
+            $error["short_messsage"] = $short_messsage;
             
             $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
             array_push($imp_session['validation']['error'], $error);
@@ -2213,7 +2220,7 @@ function renderRecords($type, $imp_session){
             foreach($tabs as $rec_tab){
                 $colname = @$imp_session['columns'][substr($rec_tab['field_checked'],6)];
 
-                print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'</a></li>';
+                print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'<br><span style="font-size:0.7em">'.$rec_tab['short_message'].'</span></a></li>';
                 $k++;
             }
             print '</ul>';

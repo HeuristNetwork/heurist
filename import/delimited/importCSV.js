@@ -244,10 +244,11 @@ if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
 */    
     //init id fields for import
     var id_field = '';
+    var id_field_name = $("#idfield").val();
     if(!top.HEURIST.util.isempty(form_vals["recid_field"])){
         id_field = form_vals["recid_field"];
-    //}else if(!top.HEURIST.util.isempty( $("#idfield").val() )){  @todo - idfield - is column label, not field_XXX
-    //    id_field = $("#idfield").val();
+    }else if(!top.HEURIST.util.isempty( id_field_name )){ //find by name
+        id_field = $('#recid_field > option:contains("' + id_field_name + '")').val();
     }
 //alert("ID:"+id_field+'  1:'+form_vals["recid_field"]+' 2:'+$("#idfield").val());
     $("#recid_field").val(id_field);
