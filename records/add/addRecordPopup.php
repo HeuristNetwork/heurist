@@ -277,7 +277,7 @@
 
     </head>
 
-    <body class="popup" width=500 height=470 style="font-size: 11px;">
+    <body class="popup" width=500 height=500 style="font-size: 11px;">
 
 
         <div id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
@@ -285,15 +285,16 @@
                     print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
                 ?>
             </div>
-            <div class="input-row">
-                <div class="input-header-cell" style="color:red;">Type of record to add</div>
+            <div class="input-row" style=" margin-top: 20px;">
+                <div class="input-header-cell" style="color:red; font-weight:bold;">Type of record to add</div>
                 <div class="input-cell">
                     <?php
                         $res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
                             from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
                         where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
                     ?>
-                    <select name="ref_type"  title="New record type" style="margin: 3px;" id="rectype_elt">
+                    <select name="ref_type" style="font-weight:bold; margin: 3px; margin-bottom:10px;" id="rectype_elt"
+                        title="New record type" >
                         <option selected disabled value="0">select ...</option>
                         <?php
                             $section = "";
@@ -389,7 +390,8 @@
         </div>
 
 
-        <a id="show-adv-link" href="#">more ...</a>
+        <br />&nbsp;<br />
+        <a id="show-adv-link" href="#" style="font-weight: bold; margin-left:80px; margin-top: 20px;">more ... (hyperlink addition, tags)</a>
         <div id=advanced-section style="display: none;">
             <div class="input-row separator">
                 <div class="input-header-cell"><strong>Advanced</strong></div>
