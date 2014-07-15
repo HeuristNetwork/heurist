@@ -144,7 +144,7 @@
             function menuEntry($separator,$action,$actionFile,$actionLabel) {
                 if ($separator == '---') {print '<li class="seperator">';} else {print '<li>';};
                 print '<a href="#" onClick="loadContent(' . "'$actionFile'";
-                print ')" type="' . $actionLabel . '">' . $action . '</a></li>';
+                print ')" title="' . $actionLabel . '">' . $action . '</a></li>';
             } // menuEntry
         ?>
 
@@ -340,8 +340,8 @@
                             menuEntry('','',''.HEURIST_DBNAME.'',
                                 '');
                             // DATA QUALITY
-                            menuEntry('---','Verify record pointers','verification/listRecordPointerErrors.php?db='.HEURIST_DBNAME,
-                                'Find record pointer which point to an incorrect record type or to nothing at all');
+                            menuEntry('---','Verify data consistency','verification/listRecordPointerErrors.php?db='.HEURIST_DBNAME,
+                                'Find records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
 
                             menuEntry('','Verify field definitions','verification/listFieldTypeDefinitionErrors.php?db='.HEURIST_DBNAME,
                                 'Find field types with invalid terms or pointer record types');

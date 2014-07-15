@@ -190,7 +190,187 @@
                 }
             ?>
             <br/><hr/>
+<?php
+//------------------------------------    Any single value fields with mutliple values 
 
+                $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
+                    from recDetails, Records, defRecStructure
+                    where rec_ID = dtl_RecID and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+                    and rst_MaxValues=1
+                    GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
+                    HAVING COUNT(*) > 1');
+
+                $bibs = array();
+                while ($row = mysql_fetch_assoc($res)){
+                    array_push($bibs, $row);
+                    //$bibs[$row['dtl_RecID']] = $row;
+                }
+
+                if(count($bibs)==0){
+                    print "<div><h3>All records have valid single value fields</h3></div>";
+                }else{
+                ?>
+                <div>
+                    <h3>Records with single value fields with mutliple values</h3>
+                    <span>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                    </span>
+                </div>
+                <table>
+                    <?php
+                        $rec_id = null;
+                        foreach ($bibs as $row) {
+                            print '<tr>';
+                            if($rec_id!=$row['dtl_RecID']) {
+                        ?>                                    
+                            <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><a target=_new 
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?>
+                                </a></td>
+                            <td><?= $row['rec_Title'] ?></td>
+                        <?php        
+                                $rec_id = $row['dtl_RecID'];   
+                            }else{
+                                print '<td colspan="3"></td>';                                
+                            }
+                        ?>
+                            <td><?= $row['rst_DisplayName'] ?></td>
+                        </tr>
+                        <?php
+                        }
+                        print "</table>\n";
+                    ?>
+                </table>
+                [end of list]
+                <?php
+                }
+            ?>
+            <br/><hr/>
+
+<?php
+//------------------------------------    Any records with missing required values 
+
+                $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title
+from Records
+left join defRecStructure on rst_RecTypeID = rec_RecTypeID
+left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
+where rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
+and dtl_UploadedFileID is null and dtl_Geo is null
+order by rec_ID");
+
+                $bibs = array();
+                while ($row = mysql_fetch_assoc($res))
+                    array_push($bibs, $row);
+
+                if(count($bibs)==0){
+                    print "<div><h3>All records have valid required fields</h3></div>";
+                }else{
+                ?>
+                <div>
+                    <h3>Records with missed or empty required values</h3>
+                    <span>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                    </span>
+                </div>
+                <table>
+                    <?php
+                        $rec_id = null;
+                        foreach ($bibs as $row) {
+                            print '<tr>';
+                            if($rec_id!=$row['rec_ID']) {
+                        ?>                                    
+                            <td><input type=checkbox name="recCB" value=<?= $row['rec_ID'] ?>></td>
+                            <td><a target=_new 
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                    <?= $row['rec_ID'] ?>
+                                </a></td>
+                            <td><?= $row['rec_Title'] ?></td>
+                        <?php        
+                                $rec_id = $row['rec_ID'];   
+                            }else{
+                                print '<td colspan="3"></td>';                                
+                            }
+                        ?>                                
+                            <td><?= $row['rst_DisplayName'] ?></td>
+                        </tr>
+                        <?php
+                        }
+                        print "</table>\n";
+                    ?>
+                </table>
+                [end of list]
+                <?php
+                }
+            ?>
+            <br/><hr/>
+
+<?php
+//--------- Any records with details which are not in the list of detail types for that record, ie. not listed in defRecStructure 
+
+                $res = mysql_query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
+from Records
+left join recDetails on rec_ID = dtl_RecID
+left join defDetailTypes on dty_ID = dtl_DetailTypeID
+left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+where rst_ID is null
+");
+
+                $bibs = array();
+                while ($row = mysql_fetch_assoc($res))
+                    array_push($bibs, $row);
+
+                if(count($bibs)==0){
+                    print "<div><h3>All records have valid field set (no fields out of scope defined in record type strucutre)</h3></div>";
+                }else{
+                ?>
+                <div>
+                    <h3>Records with details which are not in the list of detail types for that record</h3>
+                    <span>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                    </span>
+                </div>
+                <table>
+                    <?php
+                        $rec_id = null;
+                        foreach ($bibs as $row) {
+                            print '<tr>';
+                            if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                        ?>                                    
+                            <td><input type=checkbox name="recCB" value=<?= $row['rec_ID'] ?>></td>
+                            <td><a target=_new 
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
+                                    <?= $row['rec_ID'] ?>
+                                </a></td>
+                            <!-- td><?= $row['rec_RecTypeID'] ?></td -->
+                            <td width="400px"><?= substr($row['rec_Title'],0,100)?></td>
+                        <?php        
+                                $rec_id = $row['rec_ID'];   
+                            }else{
+                                print '<td colspan="3"></td>';                                
+                            }
+                        ?>  
+                            <td><?= $row['dty_ID'] ?></td>
+                            <td><?= $row['dty_Name'] ?></td>
+                            <td><?= $row['dtl_Value'] ?></td>
+                        </tr>
+                        <?php
+                        }
+                        print "</table>\n";
+                    ?>
+                </table>
+                [end of list]
+                <?php
+                }
+            ?>
+            <br/><hr/>
+            
         </div>
     </body>
 </html>
