@@ -30,8 +30,8 @@
 
     <head>
         <script type=text/javascript>
-            function open_selected() {
-                var cbs = document.getElementsByName('recCB');
+            function open_selected(sname) {
+                var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
                     return false;
                 var ids = '';
@@ -39,11 +39,10 @@
                     if (cbs[i].checked)
                         ids = ids + cbs[i].value + ',';
                 }
-                var link = document.getElementById('selected_link');
-                if (!link)
-                    return false;
-                link.href = '../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
-                return true;
+                //var link = document.getElementById('selected_link');
+                //if (link) return false;
+                window.open('../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                return false;
             }
         </script>
 
@@ -160,7 +159,7 @@
                     <span>
                         <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB');">(show selected as search)</a>
                     </span>
                     <div>To fix the inconsistencies, please click here: 
                         <button onclick="window.open('listRecordPointerErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
@@ -201,9 +200,10 @@
                     HAVING COUNT(*) > 1');
 
                 $bibs = array();
+                $ids = array();
                 while ($row = mysql_fetch_assoc($res)){
                     array_push($bibs, $row);
-                    //$bibs[$row['dtl_RecID']] = $row;
+                    $ids[$row['dtl_RecID']] = 1;
                 }
 
                 if(count($bibs)==0){
@@ -213,9 +213,9 @@
                 <div>
                     <h3>Records with single value fields with mutliple values</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link2 onClick="return open_selected('recCB2');">(show selected as search)</a>
                     </span>
                 </div>
                 <table>
@@ -225,7 +225,7 @@
                             print '<tr>';
                             if($rec_id!=$row['dtl_RecID']) {
                         ?>                                    
-                            <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>></td>
                             <td><a target=_new 
                                     href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?>
@@ -262,8 +262,11 @@ and dtl_UploadedFileID is null and dtl_Geo is null
 order by rec_ID");
 
                 $bibs = array();
-                while ($row = mysql_fetch_assoc($res))
+                $ids = array();
+                while ($row = mysql_fetch_assoc($res)){
                     array_push($bibs, $row);
+                    $ids[$row['rec_ID']] = $row;
+                }
 
                 if(count($bibs)==0){
                     print "<div><h3>All records have valid required fields</h3></div>";
@@ -272,9 +275,9 @@ order by rec_ID");
                 <div>
                     <h3>Records with missed or empty required values</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link3 onClick="return open_selected('recCB3');">(show selected as search)</a>
                     </span>
                 </div>
                 <table>
@@ -284,7 +287,7 @@ order by rec_ID");
                             print '<tr>';
                             if($rec_id!=$row['rec_ID']) {
                         ?>                                    
-                            <td><input type=checkbox name="recCB" value=<?= $row['rec_ID'] ?>></td>
+                            <td><input type=checkbox name="recCB3" value=<?= $row['rec_ID'] ?>></td>
                             <td><a target=_new 
                                     href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                     <?= $row['rec_ID'] ?>
@@ -321,8 +324,11 @@ where rst_ID is null
 ");
 
                 $bibs = array();
-                while ($row = mysql_fetch_assoc($res))
+                $ids = array();
+                while ($row = mysql_fetch_assoc($res)){
                     array_push($bibs, $row);
+                    $ids[$row['rec_ID']] = $row;
+                }
 
                 if(count($bibs)==0){
                     print "<div><h3>All records have valid field set (no fields out of scope defined in record type strucutre)</h3></div>";
@@ -331,9 +337,9 @@ where rst_ID is null
                 <div>
                     <h3>Records with details which are not in the list of detail types for that record</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link4 onClick="return open_selected('recCB4');">(show selected as search)</a>
                     </span>
                 </div>
                 <table>
@@ -343,7 +349,7 @@ where rst_ID is null
                             print '<tr>';
                             if($rec_id==null || $rec_id!=$row['rec_ID']) {
                         ?>                                    
-                            <td><input type=checkbox name="recCB" value=<?= $row['rec_ID'] ?>></td>
+                            <td><input type=checkbox name="recCB4" value=<?= $row['rec_ID'] ?>></td>
                             <td><a target=_new 
                                     href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                     <?= $row['rec_ID'] ?>

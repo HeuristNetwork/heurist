@@ -78,8 +78,17 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 </head>
 <body style="padding:44px;" class="popup">
 
+    <script>
+        function showFinalMessage(smessage){
+             var ele = document.getElementById("topmessage");
+             ele.style.display = 'block';
+             ele.innerHTML = smessage;
+        }
+    </script>
+
     <div class="banner"><h2>FAIMS sync</h2></div>
     <div id="page-inner" style="margin:0px 5px; padding: 0.5em;">
+    <div id="topmessage" style="display:none"></div>
 <?php
 
     $step = @$_REQUEST['step'];
@@ -141,7 +150,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 /*debug print "<br>temp :".$tmp_name;
 print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
 
-                print "<h3>Extracting FAIMS database from tarball to ".$folder_proj."/db.sqlite3</h3><br>";
+                print "<h3>Extracting FAIMS database from tarball to<br />".$folder_proj."/db.sqlite3</h3><br>";
                 ob_flush();flush();
 
               
@@ -214,7 +223,7 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
 
-    print "<br />FAIMS db: ".$dbname_faims."<br /><br />";
+    print "<h3>Extracted: ".$dbname_faims."</h3><br />";
 
     if(!file_exists($dbname_faims)){
         print "DB file not found";
@@ -247,12 +256,17 @@ $dbfaims->exec("SELECT InitSpatialMetadata()");
 $rs = $dbfaims->query('SELECT sqlite_version()');
 while ($row = $rs->fetchArray())
 {
-  print "<h3>SQLite version: $row[0]</h3>&nbsp;";
+  print "<h3>Server running: SQLite version: $row[0]</h3>&nbsp;";
 }
 $rs = $dbfaims->query('SELECT spatialite_version()');
-while ($row = $rs->fetchArray())
-{
-  print "<h3>SpatiaLite version: $row[0]</h3>";
+if($rs){
+    while ($row = $rs->fetchArray())
+    {
+        print "<h3>Server running: SpatiaLite version: $row[0]</h3>";
+    }
+}else{
+        print "<div style='color:red; font-weight:bold;padding:10px'>Cannot detect SQLite SpatiaLite version. Please verify installation</div>";
+        exit();
 }
 
      print "<br>";
@@ -395,7 +409,7 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
                 $query = "INSERT INTO defDetailTypes (dty_Name, dty_HelpText, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?,?)";
                 $stmt = $mysqli->prepare($query);
                 if(!$stmt){
-                    print "ERROR ".$mysqli->error;
+                    print "<script>showFinalMessage('ERROR ".$mysqli->error."')</script>";
                     exit();
                 }
                 $fid = 'FAIMS.'.$attrID;
@@ -406,8 +420,8 @@ print  "H3 DT ".$row[0]."  (".$row[1].")  => FAIMS ".$attrID."<br/>";
 
                 $stmt->bind_param('sssss', $dtyName, $dtyDescr, $dtyDescr, $ftype, $fid);
                 if(!$stmt->execute()){
-print "ERROR! detail type not inserted ".$mysqli->error." ( based on ".$attrID." ".$row1[1]." ".$row1[3].").  ".$mysqli->error."<br/>";
-exit();
+                    print "<script>showFinalMessage('ERROR! detail type not inserted ".$mysqli->error."( based on ".$attrID." ".$row1[1]." ".$row1[3].")')</script>";
+                    exit();
                 }
 
                 $dtyId = $stmt->insert_id;
@@ -604,7 +618,7 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "ERROR - record type was not added !!!  ".$mysqli->error;
+                    print "<script>showFinalMessage('ERROR! record type not inserted ".$mysqli->error."')</script>";
                     exit();
                 }
 
@@ -746,7 +760,7 @@ print  "RT ".$row[0]."  ".$row[1]."  =>".$attrID."<br/>";
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "ERROR - record type was not added !!!  ".$mysqli->error;
+                    print "<script>showFinalMessage('ERROR! record type not inserted ".$mysqli->error."')</script>";
                     exit();
                 }
 

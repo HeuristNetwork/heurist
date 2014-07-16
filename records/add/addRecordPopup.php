@@ -369,12 +369,6 @@
                     </div> <!-- input-row workgroup -->
 
                 </div>
-
-                <div class="actionButtons">
-                    <input type="button" class="add" style="float:none;" value="Add Record" onClick="addRecord(event);">
-                    <input type="button" value="Cancel" onClick="cancelAdd(event);" id="note_cancel">
-                </div>
-
             </div>
 
             <!-- This checkbox hidden vsn 3.2 July 2014 - it makes no sense not to have it checked -->
@@ -387,6 +381,11 @@
                 </div>
             </div>
 
+            <div class="actionButtons">
+                <input type="button" class="add" style="float:none;" value="Add Record" onClick="addRecord(event);">
+                <input type="button" value="Cancel" onClick="cancelAdd(event);" id="note_cancel">
+            </div>
+        
         </div>
 
 

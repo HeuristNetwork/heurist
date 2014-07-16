@@ -1765,7 +1765,7 @@ s
         this.inputs = [];
         var defaultValue = (top.HEURIST.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
 
-        if (this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
+        if (true || this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
             for (var i=0; i < fieldValues.length; ++i) {
                 typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
