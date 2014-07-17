@@ -211,12 +211,9 @@
 		."Access them and add them (if desired) to your Heurist records at:\n\n"
 		.$notification_link
 		."\n\n"
-		."To add records, either click on the unfilled star left of the title\n"
-		."or check the ones you wish to add (click _show_ if no checkboxes showing)\n"
-		."and click _bookmark_ (show and bookmark are in the actions toolbar at\n"
-		."the top of the search results).\n\n\n"
-		."The record titles are:\n\n"
-		.$title_list;
+        ."To add records, either click on the unfilled star left of the title\n"
+        ."or select the ones you wish to add and then Selected > Bookmark\n\n"
+        .$title_list;
 
 		if ($_REQUEST['notify_group']) {
 			$email_headers = preg_replace('/Cc:[^\r\n]*\r\n/', '', $email_headers);
@@ -229,22 +226,22 @@
 			$count =  mysql_num_rows($res);
 			while ($row = mysql_fetch_assoc($res))
 				$email_headers .= "\r\nBcc: ".$row[USERS_EMAIL_FIELD];
-            
+
             $rv = sendEMail(get_user_name().' <'.$user_email.'>', $email_subject, $email_text, $email_headers, true);
             return ($rv=="ok") ?'Notification email sent to group '.$grpname.' ('.$count.' members)' :$rv;
-            
+
 		} else if ($_REQUEST['notify_person']) {
 			$res = mysql_query('select '.USERS_EMAIL_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_DATABASE.'.'.USERS_TABLE.' where '.USERS_ID_FIELD.'='.$_REQUEST['notify_person']);
 			$psn = mysql_fetch_assoc($res);
-            
+
             $rv = sendEMail($psn[USERS_EMAIL_FIELD], $email_subject, $email_text, $email_headers, true);
             return ($rv=="ok") ?'Notification email sent to '.addslashes($psn['fullname']) :$rv;
-            
+
 		} else if ($_REQUEST['notify_email']) {
-            
+
             $rv = sendEMail($_REQUEST['notify_email'], $email_subject, $email_text, $email_headers, true);
             return ($rv=="ok") ?'Notification email sent to '.addslashes($_REQUEST['notify_email']) :$rv;
-            
+
 		} else {
 			return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select a group, person, or enter an email address)</div>';
 		}
