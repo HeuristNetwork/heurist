@@ -369,7 +369,7 @@ function EditTerms() {
 						Dom.get('edInverseTermId').value = node_invers.data.id;
 						Dom.get('edInverseTerm').value = getParentLabel(node_invers);
 						Dom.get('btnInverseSetClear').value = 'clear';
-                        
+
                         Dom.get('divInverse').style.display = (node_invers.data.id==node.data.id)?'none':'block';
                         Dom.get('cbInverseTermItself').checked = (node_invers.data.id==node.data.id)?'checked':'';
                         Dom.get('cbInverseTermOther').checked = (node_invers.data.id==node.data.id)?'':'checked';
@@ -378,20 +378,20 @@ function EditTerms() {
 						Dom.get('edInverseTermId').value = '0';
 						Dom.get('edInverseTerm').value = '';
 						Dom.get('btnInverseSetClear').value = 'set';
-                        
+
                         Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
                         Dom.get('cbInverseTermItself').checked = '';
                         Dom.get('cbInverseTermOther').checked = 'checked';
 				}
-    
+
 				if(isExistingNode(node)){
 						Dom.get('div_btnAddChild').style.display = "inline-block";
-						Dom.get('btnDelete').value = "Delete Term";
-						Dom.get('btnSave').value = "Save";
+						Dom.get('btnDelete').value = "Delete";
+						Dom.get('btnSave').value = "Save changes";
 				}else{//new term
 						Dom.get('div_btnAddChild').style.display = "none";
 						Dom.get('btnDelete').value = "Cancel";
-						Dom.get('btnSave').value = "Save Term";
+						Dom.get('btnSave').value = "Save term";
 				}
 
                 Dom.get('divInverseType').style.display = (_currTreeView === _termTree2)?"block":"none";
@@ -456,28 +456,28 @@ function EditTerms() {
 			if(disable){
 				Dom.get("btnDelete").onclick = _disableWarning;
 				Dom.get("btnInverseSetClear").onclick = _disableWarning2;
-                
+
                 Dom.get("cbInverseTermItself").onclick= _disableWarning2;
                 Dom.get("cbInverseTermOther").onclick= _disableWarning2;
 			}else{
 				Dom.get("btnDelete").onclick = _doDelete;
 				Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
-                
+
                 Dom.get("cbInverseTermItself").onclick= _onInverseTypeClick;
                 Dom.get("cbInverseTermOther").onclick= _onInverseTypeClick;
 			}
 	}
-    
+
     /**
-    *         
+    *
     */
     function _onInverseTypeClick(){
-                
+
         if(Dom.get("cbInverseTermItself").checked){
-            Dom.get('edInverseTermId').value = Dom.get('edId').value;    
+            Dom.get('edInverseTermId').value = Dom.get('edId').value;
             Dom.get('divInverse').style.display = 'none';
         }else{
-            Dom.get('edInverseTermId').value = "0";    
+            Dom.get('edInverseTermId').value = "0";
             Dom.get('divInverse').style.display = 'block';
             Dom.get('btnInverseSetClear').value = 'set';
             Dom.get('edInverseTerm').value = "";
@@ -535,12 +535,12 @@ function EditTerms() {
 		var sDesc = Dom.get('edDescription').value.trim();
 		var sCode = Dom.get('edCode').value.trim();
 		var sStatus = Dom.get('trm_Status').value;
-		
+
         var iInverseId = Number(Dom.get('edInverseTermId').value);
 		iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
         var iInverseId_prev = Number(_currentNode.data.inverseid);
         iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
-        
+
 		var iParentId = Number(Dom.get('edParentId').value);
 		iParentId = (Number(iParentId)>0)?iParentId:null;
 		var iParentId_prev = Number(_currentNode.data.parent_id);
@@ -552,7 +552,7 @@ function EditTerms() {
 			(_currentNode.data.status !== sStatus) ||
 			(iParentId_prev !== iParentId) ||
             (iInverseId_prev !== iInverseId));
-            
+
 			//( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
 			//	Number(_currentNode.data.inverseid) !== iInverseId));
 
@@ -560,7 +560,7 @@ function EditTerms() {
 
             var swarn = "";
 			if(Hul.isempty(sName)){
-                swarn = "Field 'Display Name' is mandatory"
+                swarn = "Term (label) is mandatory - terms must have a term / label"
 			}else {
                 //IJ 2014-04-09 swarn = Hul.validateName(sName, "Field 'Display Name'");
             }
@@ -719,7 +719,7 @@ function EditTerms() {
 
 								_isSomethingChanged = true;
 								Dom.get('div_btnAddChild').style.display = "inline-block";
-								Dom.get('btnDelete').value = "Delete Term";
+								Dom.get('btnDelete').value = "Delete";
 								Dom.get('btnSave').value = "Save";
 								Dom.get('div_SaveMessage').style.display = "inline-block";
 								setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
@@ -1234,7 +1234,7 @@ function EditTerms() {
 				showFieldUpdater: function(){
 					_showFieldUpdater();
 				},
-                
+
 				getClass: function () {
 					return _className;
 				},

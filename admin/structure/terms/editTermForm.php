@@ -158,7 +158,7 @@
                     <label class="dtyLabel" style="color: red; margin-top:10px;">Term (label)</label>
                     <input id="trmName" name="name" style="width:150px;" value="<?=$term_name ?>"
                         title="Enter the term or concise label for the category. Terms pulldown will be alphabetic, use 01, 02 ... to force ordering"/>
-                    <div style="padding-left:155;padding-top:3px;">
+                    <div style="padding-left:155;padding-top:3px; font-size: smaller;">
                     The term or label describing the category. Term dropdowns are alphabetic. <br />Precede terms with 01, 02, 03 ... to control order if required.
                     </div>
                 </div>
@@ -167,7 +167,7 @@
                     <label class="dtyLabel">Description of term</label>
                     <input name="description" style="width:450px" value="<?=$term_desc?>"
                         title="Enter a concise but comprehesive description of the category represented by this term"/>
-                    <div style="padding-left:155;padding-top:3px;">
+                    <div style="padding-left:155;padding-top:3px; font-size: smaller;">
                         A concise but comprehensive description of this term or category
                     </div>
                 </div>
@@ -176,7 +176,7 @@
                     <label class="dtyLabel">Standard code</label>
                     <input name="code" style="width:80px" value="<?=$term_code?>"
                         title="Enter a textual or numeric code (such as a domain standard or international standard code) for this term"/>
-                    <div style="padding-left:155;padding-top:3px;">
+                    <div style="padding-left:155;padding-top:3px; font-size: smaller;">
                         A domain or international standard code for this term or category
                     </div>
                 </div>
