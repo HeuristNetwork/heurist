@@ -1,64 +1,70 @@
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* brief description of file
+* editRecord.js: Record editing functions loaaded by editRecord.html
 *
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @version     4.0
 */
 
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+// -----------------------------------------------------------------------------------------------------------------------
 
 if (! top.HEURIST.edit) {
 
     top.HEURIST.edit = {
-/**
- * struct for managing modules
- *
- * @type Object
- */
+
+        /**
+        * struct for managing modules (tabs, lefthand sidebar) in the edit form
+        *
+        * @type Object
+        */
         modules: {
             'public': { url: 'tabs/publicInfoTab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
-                    preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); }, title:"Shared information" },
+                preload: function()
+                { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); },
+                title:"Shared information" },
             'personal': { url: 'tabs/personalInfoTab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
-                    preload: function() { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
-                    disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() }, title:"Private information" },
+                preload: function()
+                { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
+                disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() },
+                title:"Private information" },
             'annotation': { url: 'tabs/annotationTab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
-                    preload: function() { return true; }, title:"Text" },
+                preload: function()
+                { return true; },
+                title:"Text" },
             'workgroups': { url: 'tabs/usergroupsTab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
-                    preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); },
-                    title:"Workgroup tags"},
+                preload: function()
+                { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); },
+                title:"Workgroup tags"},
             'relationships': { url: 'tabs/relationshipsTab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
-                    preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); }, title:"Relationships" }
+                preload: function()
+                { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); },
+                title:"Relationships" }
         },
-/**
- * load module by testing preload conditions if yes then fix up sidebar
- * then create iFrame with source for tab, create tab and add frame.
- *
- * @param name
- *
- * @returns {Boolean}
- */
+
+
+        /**
+        * load module by testing preload conditions. If yes then fix up sidebar
+        * then create iFrame with source for tab, create tab and add frame.
+        *
+        * @param name
+        *
+        * @returns {Boolean}
+        */
         loadModule: function(name) {
             if (! top.HEURIST.edit.modules[name]) return false;// unknown module, do not waste my time
             var module = top.HEURIST.edit.modules[name];
@@ -147,14 +153,17 @@ if (! top.HEURIST.edit) {
             tabHolder.appendChild(newIframe);
 
             return true;
-        },
-/**
- * show the named module
- *
- * @param name
- *
- * @returns {Boolean}
- */
+
+        }, // loadModule
+
+
+        /**
+        * show the named module
+        *
+        * @param name
+        *
+        * @returns {Boolean}
+        */
         showModule: function(name) {
             if (top.HEURIST.edit.preventTabSwitch) return false;
 
@@ -210,25 +219,34 @@ if (! top.HEURIST.edit) {
             top.HEURIST.edit.callOnShow(name);
 
             return true;
+
+        }, //showModule
+
+
+        /**
+        * call on show
+        *
+        * @param name
+        *
+        * @returns
+        */
+        callOnShow:function(name){
+            var modules = top.HEURIST.edit.modules;
+            if (modules[name].frame.contentWindow.onshow) {
+                modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);
+            }else{
+                setTimeout(function(){top.HEURIST.edit.callOnShow(name);},500);
+            }
         },
 
-/**
- * put your comment there...
- *
- */
-		callOnShow:function(name){
-			var modules = top.HEURIST.edit.modules;
-			if (modules[name].frame.contentWindow.onshow) {
-				modules[name].frame.contentWindow.onshow.call(modules[name].frame.contentWindow);
-			}else{
-				setTimeout(function(){top.HEURIST.edit.callOnShow(name);},500);
-			}
-		},
 
-/**
- * put your comment there...
- *
- */
+        /**
+        * load all modules (sidebar tabs)
+        *
+        * @param
+        *
+        * @returns
+        */
         loadAllModules: function() {
             // first, mark all modules as disabled ...
             var sidebarDiv = document.getElementById("sidebar");
@@ -259,9 +277,16 @@ if (! top.HEURIST.edit) {
             if (firstName) {
                 top.HEURIST.edit.showModule(firstName);
             }
+        }, // loadAllModules
 
-        },
 
+        /**
+        * test whether user can edit the record (user/workgroup is owner)
+        *
+        * @param
+        *
+        * @returns {Boolean}
+        */
         userCanEdit: function() {
             if (top.HEURIST.user.isInWorkgroup(parseInt(window.HEURIST.edit.record.workgroupID))){ // user is owner
                 return true;
@@ -269,6 +294,14 @@ if (! top.HEURIST.edit) {
             return false;
         },
 
+
+        /**
+        * test whether user can change the access settings for the record
+        *
+        * @param
+        *
+        * @returns {Boolean}
+        */
         userCanChangeAccess: function() {
             if (top.HEURIST.is_wgAdmin(parseInt(window.HEURIST.edit.record.workgroupID))){
                 return true;
@@ -276,6 +309,14 @@ if (! top.HEURIST.edit) {
             return false;
         },
 
+
+        /**
+        * make the form read only so data cannot be edited
+        *
+        * @param
+        *
+        * @returns
+        */
         setAllInputsReadOnly: function(readonly) {
             for (var i =0; i< top.HEURIST.edit.allInputs.length; i++) {
                 if (top.HEURIST.edit.allInputs[i].setReadonly) {
@@ -283,16 +324,18 @@ if (! top.HEURIST.edit) {
                 }
             }
         },
-/**
- * put your comment there...
- *
- */
+
+
+        /**
+        * put your comment there...
+        *
+        */
         showRecordProperties: function() {
             // fill in the toolbar fields with the details for this record
             //        document.getElementById('rectype-val').innerHTML = '';
             //        document.getElementById('rectype-val').appendChild(document.createTextNode(top.HEURIST.record.rectype));
             if (document) {
-                /* ARTEM 2012-10-08
+                /* TODO: remove? ARTEM commented out 2012-10-08
                 if (document.getElementById('rectype-img')) {
                 document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
                 }*/
@@ -310,8 +353,8 @@ if (! top.HEURIST.edit) {
                     if (top.HEURIST.edit.record.visibility) {
                         var recVis = top.HEURIST.edit.record.visibility;
                         var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
-                                            (recVis == "viewable")? "any logged-in user" :
-                                            (recVis == "pending")? "pending publication" : "public (autopublish)";
+                        (recVis == "viewable")? "any logged-in user" :
+                        (recVis == "pending")? "pending publication" : "public (autopublish)";
                         document.getElementById('workgroup-access').innerHTML = othersAccess;
                     } else {
                         document.getElementById('workgroup-access').innerHTML = 'visible';
@@ -331,30 +374,37 @@ if (! top.HEURIST.edit) {
                     }
                 }
             }
-        },
-/**
- * put your comment there...
- *
- */
+        }, // showRecordProperties
+
+
+        /**
+        * If user clicks on Personal tab and the record has not yet been bookmarked, give user option of doing so
+        *
+        */
         addMissingBookmark: function() {
             if (! top.HEURIST.edit.record.bibID) return;
-            if (confirm("You haven't bookmarked this record.\nWould you like to add a bookmark now?")) {
-                // only call the disabledFunction callback once -- a safeguard against infinite loops
+            if (confirm("You haven't bookmarked this record.\nWould you like to bookmark it now?")) {
+                // only call the disabledFunction callback ONCE -- a safeguard against infinite loops
                 top.HEURIST.edit.modules.personal.disabledFunction = null;
 
                 // add the bookmark, patch the record structure, and view the personal tab
-                top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/addBookmark.php?recID=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
-                    for (var i in vals) {
-                        top.HEURIST.edit.record[i] = vals[i];
-                    }
-                    top.HEURIST.edit.showModule("personal");
+                top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/addBookmark.php?recID="
+                    + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
+                        for (var i in vals) {
+                            top.HEURIST.edit.record[i] = vals[i];
+                        }
+                        top.HEURIST.edit.showModule("personal");
                 });
             }
         },
-/**
- * put your comment there...
- *
- */
+
+
+        /**
+        * Cancels saving of the record and reloads the page, after checking whether user wishes to abandon any changes
+        *
+        * @param needClose
+        *
+        */
         cancelSave: function(needClose) {
             // Cancel the saving of the record (reload the page)
             // Out of courtesy, check if there have been any changes that WOULD have been saved.
@@ -388,66 +438,83 @@ if (! top.HEURIST.edit) {
                 } else if (message != null){
                     top.location.reload();
                 } else if (message == null){
-                            document.getElementById("popup-nothingchanged").style.display = "block";
-                            setTimeout(function() {
-                                            document.getElementById("popup-nothingchanged").style.display = "none";
-                                  },500);
+                    document.getElementById("popup-nothingchanged").style.display = "block";
+                    setTimeout(function() {
+                        document.getElementById("popup-nothingchanged").style.display = "none";
+                        },500);
                 }
             }
 
-        },
+        },  // cancelSave
 
 
+        /**
+        * Saves the record
+        *
+        * @param callback
+        *
+        */
         save_record: function(callback){
             if(top.HEURIST.edit.is_something_chnaged()){
 
-                    top.HEURIST.edit.save(callback);
+                top.HEURIST.edit.save(callback);
 
             }else{ //nothing was changed
 
                 //always check required field
-                var publicWindow = top.HEURIST.edit.modules['public']  &&  top.HEURIST.edit.modules['public'].frame  &&  top.HEURIST.edit.modules['public'].frame.contentWindow;
+                var publicWindow = top.HEURIST.edit.modules['public']
+                &&  top.HEURIST.edit.modules['public'].frame
+                &&  top.HEURIST.edit.modules['public'].frame.contentWindow;
+
                 if(publicWindow && top.HEURIST.edit.requiredInputsOK(publicWindow.HEURIST.inputs, publicWindow)){
 
                     if(callback && typeof(callback)==="function")
                     {
-                            callback.call(this);
+                        callback.call(this);
 
                     } else if(callback){ //force close
 
-                            top.HEURIST.edit.closeEditWindow();
+                        top.HEURIST.edit.closeEditWindow();
 
                     }else{
-                            document.getElementById("popup-nothingchanged").style.display = "block";
-                            setTimeout(function() {
-                                            document.getElementById("popup-nothingchanged").style.display = "none";
-                                  },500);
+                        document.getElementById("popup-nothingchanged").style.display = "block";
+                        setTimeout(function() {
+                            document.getElementById("popup-nothingchanged").style.display = "none";
+                            },500);
                     }
                 }
             }
-        },
+        }, //save_record
+
 
         savePopup: null,
-/**
- * this is internal function that goes through all tabs and calls submit
- *
- */
+
+
+        /**
+        * this is an internal function that goes through all modules (sidebar tabs) and calls submit if ther is data to be saved
+        *
+        * @param callback
+        *
+        */
         save: function(callback) {
             // Attempt to save all the modules that need saving
-
             // Display a small saving window
-            /*
+            /* TODO: ? remove
             if (! top.HEURIST.edit.savePopup) {
             top.HEURIST.edit.savePopup = top.HEURIST.util.popupURL(top, "img/saving-animation.gif", { "no-save": true, "no-resize": true, "no-titlebar": true });
             }
             */
-            var personalWindow = top.HEURIST.edit.modules.personal  &&  top.HEURIST.edit.modules.personal.frame  &&  top.HEURIST.edit.modules.personal.frame.contentWindow;
+            var personalWindow = top.HEURIST.edit.modules.personal
+            &&  top.HEURIST.edit.modules.personal.frame
+            &&  top.HEURIST.edit.modules.personal.frame.contentWindow;
+
             if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
                 // personal tags field is empty -- popup the add tags dialogue
                 personalWindow.tagCheckDone = true;
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
-                    top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
+                    top.HEURIST.util.popupURL(top, top.HEURIST.basePath
+                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
                             if (tags) {
                                 personalWindow.document.getElementById("tags").value = tags;
                                 top.HEURIST.edit.changed("personal");
@@ -455,11 +522,10 @@ if (! top.HEURIST.edit) {
                             top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
 
                             setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
-                        } });
+                    } });
                     return;
                 }
             }
-
 
             for (var moduleName in top.HEURIST.edit.modules) {
                 var module = top.HEURIST.edit.modules[moduleName];
@@ -497,7 +563,7 @@ if (! top.HEURIST.edit) {
             // If we get here, then every module has been marked as unchanged (i.e. saved or equivalent)
             // Do whatever it is we need to do.
 
-            //setTimeout(function() { top.HEURIST.util.closePopup(top.HEURIST.edit.savePopup.id); }, 5000);
+            // TODO: ? remove :  setTimeout(function() { top.HEURIST.util.closePopup(top.HEURIST.edit.savePopup.id); }, 5000);
 
             top.HEURIST.edit.showRecordProperties();
             setTimeout(function() {
@@ -510,45 +576,53 @@ if (! top.HEURIST.edit) {
                     }
 
                     if(callback && typeof(callback)==="function"){
-                            callback.call(this);
+                        callback.call(this);
                     }else if (callback){
-                            top.HEURIST.edit.closeEditWindow();
+                        top.HEURIST.edit.closeEditWindow();
                     }
-                }, 1000);
-            }, 0);
-        },
-/**
- * put your comment there...
- *
- * @returns {Boolean}
- */
+                    }, 1000);
+                }, 0);
+        }, //save
+
+
+        /**
+        * detects whethere call resutls from addition of a new record or editing of an existing one
+        *
+        * @returns {Boolean}
+        */
         isAdditionOfNewRecord: function(){
             if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']){
                 return (top.HEURIST.parameters['fromadd']=="new_bib");
+                // new_bib is legacy term (bib = bibliographic record)
             }else{
                 return false
             }
         },
-/**
- * put your comment there...
- *
- * @param isCancel
- */
-        closeEditWindow: function(isCancel, needClose) {
 
-                // try to close this window, and restore focus to the window that opened it
-                try {
-                    var topOpener = top.opener;
-                    top.close();
-                    if (topOpener) topOpener.focus();
-                } catch (e) { }
-s
+
+        /**
+        * try to close the editing window and restore focus to the window that opened it
+        *
+        * @param isCancel
+        @ @param needClose
+        */
+        closeEditWindow: function(isCancel, needClose) {
+            // try to close this window, and restore focus to the window that opened it
+            try {
+                var topOpener = top.opener;
+                top.close();
+                if (topOpener) topOpener.focus();
+            } catch (e) { }
+            s
         },
-/**
- * put your comment there...
- *
- * @param moduleName
- */
+
+
+        /**
+        * marks the given module (sidebar tab) as changed (edited).
+        * Switches on Save and Save-and-close buttons, turns off close button
+        *
+        * @param moduleName
+        */
         changed: function(moduleName) {
             // mark the given module as changed
             if (! top.HEURIST.edit.modules[moduleName]) return;
@@ -567,44 +641,22 @@ s
             $("#close-button2").hide();
             $("#save-record-buttons2").show();
 
-
-            /*
-            // Enable save buttons
-            var sbs = document.getElementsByName("save-button");
-            for (var i=0; i < sbs.length; ++i)
-            sbs[i].disabled = false;
-            */
         },
-/**
- *
- *
- * @param moduleName
- */
+
+
+        /**
+        * mark the given module as unmodified
+        *
+        * @param moduleName
+        */
         unchanged: function(moduleName) {
-            // mark the given module as changed
-            if (! top.HEURIST.edit.modules[moduleName]) return;    // should raise an exception here ... FIXME
+            // mark the given module as unchanged
+            if (! top.HEURIST.edit.modules[moduleName]) return;    // TODO: should raise an exception here ... FIXME
 
             top.HEURIST.edit.modules[moduleName].changed = false;
             var link = document.getElementById(top.HEURIST.edit.modules[moduleName]['link-id']);
             link.className = link.className.replace(/(^|\s+)changed/, '');
             link.title = "";
-
-            /*
-            // Disable save buttons if there is nothing to save
-            var anyChanges = false;
-            var modules = top.HEURIST.edit.modules;
-            for (var moduleName in modules) {
-                if (modules[moduleName].changed) {
-                    anyChanges = true;
-                    break;
-                }
-            }
-            if (anyChanges) return;
-
-            var sbs = document.getElementsByName("save-button");
-            for (var i=0; i < sbs.length; ++i)
-            sbs[i].disabled = true;
-            */
 
             if(!top.HEURIST.edit.is_something_chnaged()){
                 $("#save-record-buttons").hide();
@@ -612,26 +664,27 @@ s
                 $("#save-record-buttons2").hide();
                 $("#close-button2").show();
             }
-
-
         },
-/**
- * put your comment there...
- *
- * @param sid
- * @param recid
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param sid
+        * @param recid
+        */
         navigate_torecord: function(sid, recid){
             top.HEURIST.edit.save_record(function(){
-                        location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
-                    });
+                location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
+            });
         },
 
-/**
- * put your comment there...
- *
- * @returns {Boolean}
- */
+
+        /**
+        * put your comment there...
+        *
+        * @returns {Boolean}
+        */
         is_something_chnaged: function(){
             var changed = false;
             for (var moduleName in top.HEURIST.edit.modules) {
@@ -642,33 +695,38 @@ s
             }
             return changed;
         },
-/**
- *
- *
- * @returns {String}
- */
+
+
+        /**
+        *
+        *
+        * @returns {String}
+        */
         onbeforeunload: function() {
             var changed = top.HEURIST.edit.is_something_chnaged();
             // FIXME ... we can do better than this
-            if (changed) return "You have made changes to the details for this record.  If you continue, all changes will be lost.";
+            if (changed) return "You have made changes to the data for this record.  If you continue, all changes will be lost.";
         },
 
-/**
- * put your comment there...
- *
- * @param detailTypeID
- */
+
+        /**
+        * put your comment there...
+        *
+        * @param detailTypeID
+        */
         getDetailTypeBasetype: function(detailTypeID) {
             var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
             return top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[dtyFieldNamesToDtIndexMap['dty_Type']];
         },
-/**
- * put your comment there...
- *
- * @param rectypeID
- *
- * @returns {Object}
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param rectypeID
+        *
+        * @returns {Object}
+        */
         getNonRecDetailTypedefs: function(rectypeID) {
             var non_recDTs = {};
             var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
@@ -683,12 +741,13 @@ s
             }
             return non_recDTs;
         },
-/**
- * put your comment there...
- *
- */
+
+
+        /**
+        * try to move focus to the first textbox on the page that will accept focus
+        *
+        */
         focusFirstElement: function() {
-            // try to move focus to the first textbox on the page that will accept focus
             var elts = document.forms[0].elements;
             for (var i=0; i < elts.length; ++i) {
                 if (elts[i].type == 'text') {
@@ -700,13 +759,16 @@ s
             }
         },
 
+
         allInputs: [],
-/**
-* creates a undeclared input separator on the fly
-*
-* @param label - the label for the separator
-* @param container -DOM element to attach this separator
-*/
+
+
+        /**
+        * creates an undeclared input separator on the fly
+        *
+        * @param label - the label for the separator
+        * @param container -DOM element to attach this separator
+        */
         createSeparator: function(label,container) {
             var dt = top.HEURIST.edit.createFakeDetailType("fakeSep",label,"separator",label,null,null,null)
             var rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,1);
@@ -717,22 +779,25 @@ s
             }
             return newSeparator;
         },
-/**
- * put your comment there...
- *
- * @param dt
- * @param rstDisplayName
- * @param rstDisplayHelpText
- * @param rstDefaultValue
- * @param rstRequirementType
- * @param rstMaxValues
- * @param rstTermIDs
- * @param rstPtrRectypeIDs
- * @param rstTermNonSelectableIDs
- *
- * @returns {Array}
- */
-        createFakeFieldRequirement: function(dt,rstDisplayName,rstDisplayHelpText,rstDefaultValue,rstRequirementType,rstMaxValues,rstTermIDs,rstPtrRectypeIDs,rstTermNonSelectableIDs) {
+
+
+        /**
+        * put your comment there...
+        *
+        * @param dt
+        * @param rstDisplayName
+        * @param rstDisplayHelpText
+        * @param rstDefaultValue
+        * @param rstRequirementType
+        * @param rstMaxValues
+        * @param rstTermIDs
+        * @param rstPtrRectypeIDs
+        * @param rstTermNonSelectableIDs
+        *
+        * @returns {Array}
+        */
+        createFakeFieldRequirement:
+        function(dt,rstDisplayName,rstDisplayHelpText,rstDefaultValue,rstRequirementType,rstMaxValues,rstTermIDs,rstPtrRectypeIDs,rstTermNonSelectableIDs) {
             var l = top.HEURIST.rectypes.typedefs.dtFieldNames.length;
             var i;
             var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
@@ -744,7 +809,8 @@ s
             ffr[fieldIndexMap['rst_DisplayName']] = (rstDisplayName ? rstDisplayName : (dt ? dt[dtyFieldNamesIndexMap['dty_Name']]:"fake Field"));
             ffr[fieldIndexMap['dty_FieldSetRectypeID']] = dt?dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']] : 0;
             ffr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
-            ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = rstTermNonSelectableIDs ? rstTermNonSelectableIDs : (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
+            ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] =
+            rstTermNonSelectableIDs ? rstTermNonSelectableIDs : (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
             ffr[fieldIndexMap['rst_MaxValues']] = rstMaxValues ? rstMaxValues : 1;
             ffr[fieldIndexMap['rst_MinValues']] = 0;
             ffr[fieldIndexMap['rst_CalcFunctionID']] = null;
@@ -766,19 +832,21 @@ s
             ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
             return ffr;
         },
-/**
- * put your comment there...
- *
- * @param dtyID
- * @param dtyName
- * @param dtyType
- * @param dtyHelpText
- * @param dtyTermIDs
- * @param dtyTermNonSelectableIDs
- * @param dtyPtrRectypeIDs
- *
- * @returns {Array}
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param dtyID
+        * @param dtyName
+        * @param dtyType
+        * @param dtyHelpText
+        * @param dtyTermIDs
+        * @param dtyTermNonSelectableIDs
+        * @param dtyPtrRectypeIDs
+        *
+        * @returns {Array}
+        */
         createFakeDetailType: function(dtyID,dtyName,dtyType,dtyHelpText,dtyTermIDs,dtyTermNonSelectableIDs,dtyPtrRectypeIDs) {
             var l = top.HEURIST.detailTypes.typedefs.commonFieldNames.length;
             var i;
@@ -805,18 +873,20 @@ s
             fdt[fieldIndexMap['dty_LocallyModified']] = 0;
             return fdt;
         },
-/**
- * put your comment there...
- *
- * @param recID
- * @param detailTypeID
- * @param rectypeID
- * @param fieldValues
- * @param container
- * @param stylename_prefix
- *
- * @returns {top.HEURIST.edit.inputs.BibDetailFreetextInput}
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param recID
+        * @param detailTypeID
+        * @param rectypeID
+        * @param fieldValues
+        * @param container
+        * @param stylename_prefix
+        *
+        * @returns {top.HEURIST.edit.inputs.BibDetailFreetextInput}
+        */
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
             // Get Detail Type info
             //0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
@@ -894,12 +964,14 @@ s
             }
             return newInput;
         },
-/**
- * put your comment there...
- *
- * @param dtyID
- * @param rtID
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param dtyID
+        * @param rtID
+        */
         getConstrainedRectypeList: function(dtyID,rtID) {    //saw TODO: change this to terms pass in scrRectypeID
             var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
             for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {    // saw TODO  need to change this to dTypeID for relmarkers
@@ -915,13 +987,15 @@ s
             }
             return listConstdRectype;
         },
-/**
- * put your comment there...
- *
- * @param dTypeID
- *
- * @returns {Object}
- */
+
+
+        /**
+        * put your comment there...
+        *
+        * @param dTypeID
+        *
+        * @returns {Object}
+        */
         getLookupConstraintsList: function(dTypeID) {    //saw TODO: change this to terms pass in scrRectypeID
             var rdtConstrainedLookups = {};
             var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
@@ -954,29 +1028,34 @@ s
             }
             return rdtConstrainedLookups;
         },
+
+
         /*
         uploadsDiv: null,
         uploadsInProgress: { counter: 0, names: {} },
         */
-        /**
-         * create snapshot for bookmark
-         */
-/**
- * put your comment there...
- *
- * @param fileInput
- */
-        uploadURL: function(fileInput) {
 
+
+        /**
+        * create snapshot for bookmark
+        */
+
+
+        /**
+        * Upload and create thumbnail for a file specified at a URL
+        *
+        * @param fileInput
+        */
+        uploadURL: function(fileInput) {
             //get URL.  ARTEM: WARNING! We assume that first element in allInputs is BibURLInput
             var sURL = top.HEURIST.edit.allInputs[0].inputs[0].value;
 
             if (top.HEURIST.util.isempty(sURL)){ // (typeof sURL==="undefined") || (sURL===null) || (sURL==="") || (sURL==="null") ){
-                alert('Specify URL first');
+                alert('Please specify URL first');
                 return;
             }
             if (sURL.indexOf('https:')==0){
-                alert('https protocol is not supported for thumbnail generation');
+                alert('Sorry, https protocol is not supported for thumbnail generation');
                 return;
             }
 
@@ -992,13 +1071,13 @@ s
 
         },
 
-        // callback function - on completion of URL download and saving it as file
-/**
- * put your comment there...
- *
- * @param element
- * @param fileDetails
- */
+
+        /**
+        * callback function - on completion of download from a URL and saving it as file
+        *
+        * @param element
+        * @param fileDetails
+        */
         fileInputURLsaved: function(element, fileDetails) {
 
             top.HEURIST.util.finishLoadingPopup();
@@ -1019,28 +1098,20 @@ s
             }
         },
 
+
         /**
-         * start uploadig as soon as user browsed the file
-         */
-/**
- * put your comment there...
- *
- * @param fileInput
- */
+        * Note: start uploading file as soon as user has browsed the file
+        */
+
+        /**
+        * Upload a local file to the database
+        *
+        * @param fileInput
+        */
         uploadFileInput: function(fileInput) {
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
             if (fileInput.value == "") return;
-            /* Ian request 2012-12
-            if (!confirm("By uploading this file you certify that you have copyright rights" +
-            " to upload this file and to make it available on the web through the Heurist" +
-            " interface. Note that although records can be restricted to specified workgroups," +
-            " this restriction can be changed by members of the workgroup, so all uploaded" +
-            " files should be regarded as publicly accessible.")) {
-            fileInput.value = "";
-            return;
-            }
-            */
             if (! windowRef.HEURIST.uploadsDiv  ||  ! this.document.getElementById("uploads")) {
                 var uploadsDiv = windowRef.HEURIST.uploadsDiv = this.document.body.appendChild(this.document.createElement("div"));
                 uploadsDiv.id = "uploads";
@@ -1080,13 +1151,15 @@ s
                     }
             });
         },
-/**
- * callback function - on completion of file upload
- *
- * @param element
- * @param uploadsDiv
- * @param fileDetails
- */
+
+
+        /**
+        * callback function - on completion of file upload
+        *
+        * @param element
+        * @param uploadsDiv
+        * @param fileDetails
+        */
         fileInputUploaded: function(element, uploadsDiv, fileDetails) {
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -1134,16 +1207,18 @@ s
                 if (windowRef.changed) windowRef.changed();
             }
         },
-/**
- * put your comment there...
- *
- * @param recID
- * @param rectypeID
- * @param fieldValues
- * @param container
- *
- * @returns {Array}
- */
+
+
+        /**
+        * Create input fields for this record
+        *
+        * @param recID
+        * @param rectypeID
+        * @param fieldValues
+        * @param container
+        *
+        * @returns {Array}
+        */
         createInputsForRectype: function(recID, rectypeID, fieldValues, container)
         {
             var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
@@ -1163,11 +1238,11 @@ s
             var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
             if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowDescriptionOnEditForm]!=="0"){
-                // If switched on, the record tyupe description field is display as a contextualisation at top of form
+                // If option switched on, the record type description field is displayed as a contextualisation at top of form
                 var e = document.getElementById("rty_description");
                 if(e){
                     var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
-                    //removed 2012-09-12 <span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] + ": </span>"
+                    //removed 2012-09-12 why? <span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] + ": </span>"
                     e.innerHTML = "<span>" +
                     top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Description] +"</span>";
                 }
@@ -1193,8 +1268,8 @@ s
 
                     /*IAN's super trick to avoid Stiv's fury
                     if(top.HEURIST.database.name == "Arts_eResearch"){
-                    	if([150,79,149,57,70,80,151,69,77,74,39].indexOf(Number(dtID))>=0) continue;
-					}*/
+                    if([150,79,149,57,70,80,151,69,77,74,39].indexOf(Number(dtID))>=0) continue;
+                    }*/
 
                     var newInput = top.HEURIST.edit.createInput(recID, dtID, rectypeID, fieldValues[dtID] || [], container);
                     if (newInput) {
@@ -1204,17 +1279,19 @@ s
             }
 
             return inputs;
-        },
-/**
- * put your comment there...
- *
- * @param recID
- * @param rectypeID
- * @param fieldValues
- * @param container
- *
- * @returns {Array}
- */
+        }, // createInputsForRectype
+
+
+        /**
+        * Creates input fields for data which is not part of the record structure definition but may be hanging around
+        *
+        * @param recID
+        * @param rectypeID
+        * @param fieldValues
+        * @param container
+        *
+        * @returns {Array}
+        */
         createInputsNotForRectype: function(recID, rectypeID, fieldValues, container) {
             var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 
@@ -1230,15 +1307,16 @@ s
             return inputs;
         },
 
-/**
-* Validates that all required fields have values.
-* Invoked onsubmit form in publicInfoTab
-*
-* @param inputs
-* @param windowRef
-*
-* @returns {Boolean}
-*/
+
+        /**
+        * Validates that all required fields have values.
+        * Invoked onsubmit form in publicInfoTab
+        *
+        * @param inputs
+        * @param windowRef
+        *
+        * @returns {Boolean}
+        */
         requiredInputsOK: function(inputs, windowRef) {
             // Return true if and only if all required fields have been filled in.
             // Otherwise, display a terse message describing missing fields.
@@ -1252,51 +1330,52 @@ s
             var missingFields = [];
             var firstInput = null;
 
-			//check duplication
-			var details = {};
-			var duplicatedInputs = [];
-			var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
+            //check duplication
+            var details = {};
+            var duplicatedInputs = [];
+            var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
             for (var i=0; i < inputs.length; ++i) {
 
-            	if (typeof(inputs[i].getValues) !== "function") {
-            		 continue;
-				}
+                if (typeof(inputs[i].getValues) !== "function") {
+                    continue;
+                }
 
-				var values = inputs[i].getValues();
-				var val = null;
-				if(values){
-					for (var j=0; j < values.length; ++j) {
-						if(values[j]){
-							val = null;
-							if(typeof(values[j])=="object"){
-								val = values[j].value;
-							}else{
-								val = values[j];
-							}
-							if(val){
-								var det_id = inputs[i].detailType[fi_id];
-								if(details[det_id]){
-									//check duplication
-									if(details[det_id].vals.indexOf(val)<0){
-										details[det_id].vals.push(val);
-									}else{
-										if(duplicatedInputs.indexOf(inputs[i].shortName)<0){
-											duplicatedInputs.push(inputs[i].shortName);
-										}
-									}
-								}else{
-									details[det_id] = {vals:[val]};
-								}
-							}
-						}
-					}
-				}
+                var values = inputs[i].getValues();
+                var val = null;
+                if(values){
+                    for (var j=0; j < values.length; ++j) {
+                        if(values[j]){
+                            val = null;
+                            if(typeof(values[j])=="object"){
+                                val = values[j].value;
+                            }else{
+                                val = values[j];
+                            }
+                            if(val){
+                                var det_id = inputs[i].detailType[fi_id];
+                                if(details[det_id]){
+                                    //check duplication
+                                    if(details[det_id].vals.indexOf(val)<0){
+                                        details[det_id].vals.push(val);
+                                    }else{
+                                        if(duplicatedInputs.indexOf(inputs[i].shortName)<0){
+                                            duplicatedInputs.push(inputs[i].shortName);
+                                        }
+                                    }
+                                }else{
+                                    details[det_id] = {vals:[val]};
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if(inputs[i].relManager){
                     var open_rels = inputs[i].relManager.openRelationships;
                     for (var k in open_rels) {
                         if(k && open_rels[k] && (!open_rels[k].isempty()) && open_rels[k].isvalid()==null){
-                            if(confirm("There is an unsaved relationship in this record.\n Press 'OK' to ignore this relationship.\n 'Cancel' to return to edit form")){
+                            if(confirm("There is an unsaved relationship in this record.\n "+
+                                "Click 'OK' to ignore this relationship.\n Click 'Cancel' to return to edit form")){
                                 //inputs[i].relManager.cancelAllOpen();
                             }else{
                                 return false;
@@ -1322,34 +1401,34 @@ s
             }//for inputs
 
             if(duplicatedInputs.length>0){
-				alert("There are duplicated values in your inputs:<br />" + duplicatedInputs.join("<br />"));
-				return false;
-			}
+                alert("There are duplicated values in your inputs:<br />" + duplicatedInputs.join("<br />"));
+                return false;
+            }
 
             if (missingFields.length == 0) {
 
                 return top.HEURIST.edit.datetimeInputsOK(inputs, windowRef)
 
             }else if (missingFields.length == 1) {
-            	//"There was a problem with one of your inputs:<br />" +
+                //"There was a problem with one of your inputs:<br />" +
                 alert(missingFields[0]);
             } else {    // many errors
-            	//"There were problems with your inputs:<br /> - " +
+                //"There were problems with your inputs:<br /> - " +
                 alert(missingFields.join("<br />"));
             }
 
             firstInput.focus();
             return false;
-        },
+        }, // requiredInputsOK
+
 
         /**
-         * verifies all date fields for valid input
-         * Non-temoporal values will be converted to YYYY-MM-DD format
-         *
-         * invoked from requiredInputsOK
-         */
+        * verifies all date fields for valid input
+        * Non-temporal values, ie. standard dates, will be converted to YYYY-MM-DD format
+        *
+        * invoked from requiredInputsOK
+        */
         datetimeInputsOK: function(inputs, windowRef) {
-
 
             var missingFields = [];
             var firstInput = null;
@@ -1368,19 +1447,22 @@ s
             if (missingFields.length == 0) {
                 return true;
             }else{
-                alert("There are problems with your datetime inputs (wrong format):<br /> - " + missingFields.join("<br /> - "));
+                alert("There are problems with your date-time inputs (incorrect format):<br /> - " + missingFields.join("<br /> - "));
                 firstInput.focus();
                 return false;
             }
-        },
-/**
- * put your comment there...
- *
- * @param name
- * @param value
- * @param parentElement
- * @param options
- */
+        }, // datetimeInputsOK
+
+
+        /**
+        * Function to create scratchpad which floats on top of other components and can be minimised
+        * TODO: scratchpad is very difficult to scale and control, reimplement as draggable righthand panel
+        *
+        * @param name
+        * @param value
+        * @param parentElement
+        * @param options
+        */
         createDraggableTextarea: function(name, value, parentElement, options) {
             var elt = parentElement;
             do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -1427,7 +1509,7 @@ s
                 descriptionDiv.innerHTML = "click to drag";
             }
             top.HEURIST.registerEvent(descriptionDiv, "mousedown", function(e) {
-                    return top.HEURIST.util.startMove(e, positionDiv, true);
+                return top.HEURIST.util.startMove(e, positionDiv, true);
             });
             headerTd.appendChild(descriptionDiv);
 
@@ -1470,7 +1552,6 @@ s
                 minimise();
             }
 
-
             var textareaTd = newTbody.appendChild(ownerDocument.createElement("tr")).appendChild(ownerDocument.createElement("td"));
             var iframeHack = textareaTd.appendChild(ownerDocument.createElement("iframe"));
             iframeHack.frameBorder = 0;    // cover any dropdowns etc; textarea then goes on top of the iframe
@@ -1497,18 +1578,22 @@ s
             parentElement.appendChild(positionDiv);
 
             return newTextarea;
-        },
+        }, // createDraggableTextarea
+
 
         calendarViewer: null,
-/**
- * put your comment there...
- *
- * @param dateBox
- * @param doc
- */
+
+        /**
+        * create a button to pop up standard calendar component
+        * see also makeTemporalButton for fuzzy date component
+        *
+        * @param dateBox
+        * @param doc
+        */
         makeDateButton: function(dateBox, doc) {
             var buttonElt = doc.createElement("input");
             buttonElt.type = "button";
+            buttonElt.title = "Pop up calendar widget to enter year-month-day dates";
             buttonElt.className = "date-button";
             if (dateBox.nextSibling)
                 dateBox.parentNode.insertBefore(buttonElt, dateBox.nextSibling);
@@ -1518,8 +1603,8 @@ s
             var callback = function(date) {
                 if (date) {
                     if(dateBox.value != date){
-                            var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
-                            if (windowRef.changed) windowRef.changed();
+                        var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
+                        if (windowRef.changed) windowRef.changed();
                     }
 
                     dateBox.value = date;
@@ -1536,7 +1621,6 @@ s
                 }
             }
 
-
             buttonElt.onclick = function() {
                 var date = dateBox.value;
                 if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
@@ -1546,17 +1630,21 @@ s
             }
 
             return buttonElt;
-        },
-/**
- * put your comment there...
- *
- * @param dateBox
- * @param doc
- */
+
+        }, // makeDateButton
+
+
+        /**
+        * create a button to pop up fuzzy date component
+        * see also makeDateButton for standard calendar component
+        *
+        * @param dateBox
+        * @param doc
+        */
         makeTemporalButton: function(dateBox, doc) {
             var buttonElt = doc.createElement("input");
             buttonElt.type = "button";
-            buttonElt.title = "Create a fuzzy date";
+            buttonElt.title = "Pop up widget to enter complex date information (uncertain, fuzzy, radiometric etc.)";
             buttonElt.className = "temporal-button";
             if (dateBox.dateButton)
                 dateBox.parentNode.insertBefore(buttonElt, dateBox.dateButton.nextSibling);
@@ -1570,61 +1658,9 @@ s
                 dateBox.dateButton.disabledStrictly = value;
                 dateBox.dateButton.style.visibility = value ?"hidden":"visible";
             }
-            /* AO: moved to temoralObjectLibrary.js
-            function decodeValue (inputStr) {
-            var str = inputStr;
-            disableCtrls(false);
 
-            if (str && str.search(/\|VER/) != -1) {    //we have a temporal
-            dateBox.strTemporal = str;
-            disableCtrls(true);
-            if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
-            str = str.match(/SRT=([^\|]+)/)[1];
-            }else if (str.search(/TYP=s/) != -1 ) {
-            if (str.match(/DAT=([^\|]+)/)) {
-            if (str.search(/COM=[^\|]+/) == -1) {
-            disableCtrls(false);
-            }
-            str = str.match(/DAT=([^\|]+)/)[1];
-            }else if (str.search(/COM=[^\|]+/) != -1) {
-            str = str.match(/COM=([^\|]+)/)[1];
-            disableCtrls(false);
-            }
-            }else if (str.search(/TYP=c/) != -1 ) { //c14 date
-            var bce = str.match(/BCE=([^\|]+)/);
-            bce = bce ? bce[1]: null;
-            var c14 = str.match(/BPD=([^\|]+)/);
-            c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
-            var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
-            suff += bce ? " BCE" : " BP";
-            var dvp = str.match(/DVP=P(\d+)Y/);
-            dvp = dvp ? dvp[1]: null;
-            var dev = str.match(/DEV=P(\d+)Y/);
-            dev = dev ? " ±" + dev[1] + " yr" + (dev[1]>1?"s":""):(dvp ? " +" + dvp + " yr" + (dvp>1?"s":""):" + ??");
-            var dvn = str.match(/DVN=P(\d+)Y/);
-            dev += dvp ? (dvn[1] ? " -" + dvn[1] + " yr" + (dvn[1]>1?"s":""): " - ??") : "";
-            str = c14 + dev + suff;
-            }else if (str.search(/TYP=p/) != -1 ) {// probable date
-            var tpq = str.match(/TPQ=([^\|]+)/);
-            tpq = tpq ? tpq[1]: null;
-            var taq = str.match(/TAQ=([^\|]+)/);
-            taq = taq ? taq[1]: null;
-            var pdb = str.match(/PDB=([^\|]+)/);
-            pdb = pdb ? pdb[1]: (tpq ? tpq:"");
-            var pde = str.match(/PDE=([^\|]+)/);
-            pde = pde ? pde[1]: (taq ? taq:"");
-            str = pdb + " – " + pde;
-            }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
-            var dat = str.match(/DAT=([^\|]+)/);
-            dat = dat ? dat[1]: "";
-            var rng = str.match(/RNG=P(\d*)(Y|M|D)/);
-            var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
-            rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
-            str = dat + rng;
-            }
-            }
-            return str;
-            }*/
+            /* Artem Osmakov 2013? : moved function decodeValue to temporalObjectLibrary.js */
+
             dateBox.initVal = dateBox.value;
             if (dateBox.value) {
                 disableCtrls(isTemporal(dateBox.value));
@@ -1672,11 +1708,12 @@ s
                     popupOptions.y = 0;
                 }
 
-                top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
+                top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?"
+                    + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
             }
 
             return buttonElt;
-        },
+        }, // makeTemporalButton
 
         addOption: function(document, dropdown, text, value) {
             var newOption = document.createElement("option");
@@ -1684,16 +1721,21 @@ s
             newOption.appendChild(document.createTextNode(text));
             return dropdown.appendChild(newOption);
         }
-    };
+
+    }; // top.HEURIST.edit
+
+    // -----------------------------------------------------------------------------------------------------------------------
+
 
     top.HEURIST.edit.inputs = { };
 
-/**
-* BibDetailInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldRequirements, fieldValues, parentElement, stylename_prefix) {
 
         if (arguments.length == 0) return;    // for prototyping
@@ -1704,12 +1746,13 @@ s
         //6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
         //10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
 
-        //recFieldRequirements
+        // recFieldRequirements
         //0,"rst_DisplayName" 1,"rst_DisplayHelpText" 2,"rst_DisplayExtendedDescription" 3,"rst_DefaultValue" 4,"rst_RequirementType"
         //5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder" 9,"rst_DisplayOrder"
         //10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs" 13,"rst_TermIDTreeNonSelectableIDs"
         //14,"rst_CalcFunctionID" 15,"rst_Status" 16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
         //18,"dty_FieldSetRectypeID"
+
         var thisRef = this;
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
@@ -1726,8 +1769,8 @@ s
         var required = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_RequirementType']];
         if (required == 'optional') required = "optional";
         else if (required == 'required') required = "required";
-        else if (required == 'recommended') required = "recommended";
-        else required = "";
+            else if (required == 'recommended') required = "recommended";
+                else required = "";
         this.required = required;
         var maxValue = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']];
         this.repeatable = ( Number(maxValue) != 1 );//saw TODO this really needs to check many exist
@@ -1736,7 +1779,6 @@ s
         parentElement.appendChild(this.row);
         this.row.className = stylename_prefix+"-row " + required;
         if (this.detailType[3] == "separator") this.row.className = "input-row separator";
-
 
         var lbl = this.document.createTextNode(recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]);
         this.headerCell = this.row.appendChild(this.document.createElement("div"));
@@ -1779,8 +1821,11 @@ s
                 this.addInput({"value" : defaultValue});
             }
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailInput
+
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.focus = function() { this.inputs[0].focus(); };
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly = function(readonly) {
         if (readonly) {
             this.inputCell.className += " readonly";
@@ -1802,8 +1847,11 @@ s
         for (var i=0; i < this.inputs.length; ++i) {
             this.inputs[i].readOnly = readonly;
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly
+
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { this.addInput(); };
+
     // 1. specify the correct name for element - based on record ID and detail type ID
     // 2. put element into inputs array
     // 3.
@@ -1826,9 +1874,11 @@ s
             */
             top.HEURIST.registerEvent(element, "keypress", function() { if (windowRef.changed) windowRef.changed(); });
         }
-        if (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "resource" || this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "relmarker") {    // dt_type
+        if (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "resource"
+            || this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "relmarker") {    // dt_type - pointer or relationship marker
             if (this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']]) {    // dt_constrain_rectype
-                this.constrainrectype = this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']]; // saw TODO  modify this to validate the list first.
+                this.constrainrectype = this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']];
+                // saw TODO  modify this to validate the list first.
             }
             else    this.constrainrectype = 0;
         }
@@ -1843,9 +1893,10 @@ s
         this.inputs.push(element);
         this.inputCell.insertBefore(element, this.promptDiv);
 
-        if (top.HEURIST.magicNumbers && (top.HEURIST.magicNumbers['DT_DOI'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_DOI']  ||
-                top.HEURIST.magicNumbers['DT_ISBN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISBN']  ||
-                top.HEURIST.magicNumbers['DT_ISSN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISSN'])
+        if (top.HEURIST.magicNumbers && (top.HEURIST.magicNumbers['DT_DOI']
+            && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_DOI']  ||
+            top.HEURIST.magicNumbers['DT_ISBN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISBN']  ||
+            top.HEURIST.magicNumbers['DT_ISSN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISSN'])
             &&  bdValue  &&  bdValue.value) { // DOI, ISBN, ISSN
             this.webLookup = this.document.createElement("a");
             if (this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_DOI']) {
@@ -1857,7 +1908,9 @@ s
             } else if (this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISSN']) {
                 var matches = bdValue.value.match(/(\d{4})-?(\d{3}[\dX])/);
                 if (matches) {
-                    this.webLookup.href = "http://www.oclc.org/firstsearch/periodicals/results_issn_search.asp?database=%25&fulltext=%22%22&results=paged&PageSize=25&issn1=" + matches[1] + "&issn2=" + matches[2];
+                    this.webLookup.href = "http://www.oclc.org/firstsearch/periodicals/results_issn_search.asp"+
+                    "?database=%25&fulltext=%22%22&results=paged&PageSize=25&issn1=" + matches[1] + "&issn2=" + matches[2]; // look up ISSN
+                    // TODO: Update OCLC lookup for ISSN, ISBN
                 }
             }
 
@@ -1875,9 +1928,13 @@ s
             }
         }
 
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper
+
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.getValue = function(input) { return { value: input.value }; };
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.getPrimaryValue = function(input) { return input? input.value : ""; };
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.inputOK = function(input) {
         // Return false only if the input doesn't match the regex for this input type
         if (! this.regex) return true;
@@ -1888,6 +1945,8 @@ s
         }
         return false;
     };
+
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.verify = function() {
         // Return true if at least one of this input's values is okay
         for (var i=0; i < this.inputs.length; ++i) {
@@ -1895,6 +1954,8 @@ s
         }
         return false;
     };
+
+
     top.HEURIST.edit.inputs.BibDetailInput.prototype.getValues = function() {
         // Return JS object representing the value(s) of this input
         var values = [];
@@ -1908,12 +1969,13 @@ s
         return values;
     };
 
-/**
-* BibDetailFreetextInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailFreetextInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailFreetextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
@@ -1923,86 +1985,91 @@ s
         var newInput = this.document.createElement("input");
         newInput.setAttribute("autocomplete", "off");
         newInput.type = "text";
+        newInput.title = "Enter a text string";  //ij
         newInput.className = "in";
         newInput.style.display = "block";
         if (bdValue) newInput.value = bdValue.value;
         this.addInputHelper.call(this, bdValue, newInput);
     };
 
-/**
-* BibDetailIntegerInput input
-*
-* @constructor
-* @return {Object}
-*/
+    /**
+    * BibDetailIntegerInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailIntegerInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
     top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.typeDescription = "an integer value";
     top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.regex = new RegExp("^\\s*-?\\d+\\s*$");    // obvious integer regex
 
-/**
-* BibDetailFloatInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailFloatInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailFloatInput = function() {
-    		top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments);
+        top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments);
 
-        	for (var i=0; i < this.inputs.length; ++i) {
+        for (var i=0; i < this.inputs.length; ++i) {
 
-        		this.inputs[i].onkeypress = function(event){
-                    if(event && event.charCode>0 && !event.ctrlKey){
-                        var newchar = String.fromCharCode(event.charCode);
-                        var oldval = event.target.value;
+            this.inputs[i].onkeypress = function(event){
+                if(event && event.charCode>0 && !event.ctrlKey){
+                    var newchar = String.fromCharCode(event.charCode);
+                    var oldval = event.target.value;
 
-                        if (newchar=="" || (oldval=="" && (newchar=="-" || newchar=="+")) ){
-                            return true;
-                        }else{
-
-                            var pos = top.HEURIST.util.getCaretPos(event.target);
-                            var newval = oldval.substr(0,pos)+newchar+oldval.substr(pos);
-
-                            var regex = top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
-                            var res = newval.match(regex);
-                            return (res!=null);
-                        }
-
-                    }else{
+                    if (newchar=="" || (oldval=="" && (newchar=="-" || newchar=="+")) ){
                         return true;
+                    }else{
+
+                        var pos = top.HEURIST.util.getCaretPos(event.target);
+                        var newval = oldval.substr(0,pos)+newchar+oldval.substr(pos);
+
+                        var regex = top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex;
+                        var res = newval.match(regex);
+                        return (res!=null);
                     }
 
-        		};
-			}
-    		//top.HEURIST.edit.inputs.BibDetailInput.prototype.verify
-    };
+                }else{
+                    return true;
+                }
+
+            };
+        }
+    }; // top.HEURIST.edit.inputs.BibDetailFloatInput
+
+
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.typeDescription = "a numeric value";
     top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex = new RegExp("^([+/-]?(([0-9]+(\\.)?)|([0-9]*\\.[0-9]+)))$");
     //"^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+))\\s*$");    // extended float regex
 
-/**
-* BibDetailYearInput input
-*
-* @constructor
-* @return {Object}
-* @deprecated
-*/
+
+    /**
+    * BibDetailYearInput input
+    *
+    * @constructor
+    * @return {Object}
+    * @deprecated
+    */
     top.HEURIST.edit.inputs.BibDetailYearInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailYearInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailYearInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
     top.HEURIST.edit.inputs.BibDetailYearInput.prototype.typeDescription = "a year, or \"in press\"";
     top.HEURIST.edit.inputs.BibDetailYearInput.prototype.regex = new RegExp("^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$", "i");
 
-/**
-* BibDetailDateInput input
-*
-* @constructor
-* @return {Object}
-* @deprecated
-*/
+
+    /**
+    * BibDetailDateInput input
+    *
+    * @constructor
+    * @return {Object}
+    * @deprecated
+    */
     top.HEURIST.edit.inputs.BibDetailDateInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
@@ -2019,22 +2086,26 @@ s
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in";
+        textElt.title = "Enter a standard format date (yyyy or yyyy-mm-dd)";  //ij
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
         top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
 
         top.HEURIST.edit.makeDateButton(textElt, this.document);
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
+
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.typeDescription = "a date value";
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.regex = new RegExp("\\S");
 
-/**
-* BibDetailTemporalInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailTemporalInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailTemporalInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
@@ -2051,27 +2122,31 @@ s
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in resource-date";
-        textElt.title = "Enter date";  //sw
+        textElt.title = "Enter a compound date (uncertain, fuzzy or radiometric)";  //ij sw
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
         top.HEURIST.registerEvent(textElt, "change", function() {
-                textElt.strTemporal = null;
-                if (windowRef.changed) windowRef.changed();
-        });
+            textElt.strTemporal = null;
+            if (windowRef.changed) windowRef.changed();
+        }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
+
+        // TODO: are these relevant any more?
         //    var isTemporal = /^\|\S\S\S=/.test(textElt.value);        //sw check the beginning of the string for temporal format
         //    var isDate = ( !isTemporal && /\S/.test(textElt.value));    //sw not temporal and has non - white space must be a date
         //    if (!isTemporal) top.HEURIST.edit.makeDateButton(textElt, this.document); //sw
 
         textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);
         top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
+
 
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(input) {
         return input && input.textElt ? (input.textElt.strTemporal ? input.textElt.strTemporal :
             (input.textElt.value ? input.textElt.value : "" )) : "";
     };
+
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
-    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a temporal value";
+    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a compound date value";
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S");
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.verifyTemporal = function(){
 
@@ -2079,11 +2154,11 @@ s
             var input = this.inputs[i];
 
             if(input && input.textElt)
-                {
+            {
                 if(input.textElt.strTemporal){
-                    continue; //it is assumed that temporal valus if it is set is validated
+                    continue; // it is assumed that temporal value, if it is set, is validated
                 }else if(input.textElt.value){
-                    //validate manually enterted date
+                    // validate manually entered date
                     try{
                         var tDate = TDate.parse(input.textElt.value);
                         input.textElt.value = tDate.toString();
@@ -2095,34 +2170,38 @@ s
         }
 
         return true;
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.verifyTemporal
 
-/**
-* BibDetailBlocktextInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailBlocktextInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailBlocktextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.typeDescription = "a text value";
-	top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.regex = new RegExp("\\S");
+    top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.regex = new RegExp("\\S");
     top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.addInput = function(bdValue) {
         var newInput = this.document.createElement("textarea");
         newInput.rows = "3";
         newInput.className = "in";
+        newInput.title = "Enter a single or multi-line (memo) text value"; //ij
         if (bdValue) newInput.value = bdValue.value;
 
         this.addInputHelper.call(this, bdValue, newInput);
     };
 
-/**
-* BibDetailResourceInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailResourceInput input
+    * Input for a record pointer (aka resource) field
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailResourceInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
@@ -2140,6 +2219,8 @@ s
             }
         }
     };
+
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdValue) {
         var thisRef = this;    // provide input reference for closures
 
@@ -2193,10 +2274,10 @@ s
         removeImg.title = "Remove this record reference";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         top.HEURIST.registerEvent(removeImg, "click", function() {
-                if (! newDiv.readOnly) {
-                    thisRef.clearResource(newDiv);
-                    if (windowRef.changed) windowRef.changed();
-                }
+            if (! newDiv.readOnly) {
+                thisRef.clearResource(newDiv);
+                if (windowRef.changed) windowRef.changed();
+            }
         });
 
         var editImg = newDiv.appendChild(this.document.createElement("img"));
@@ -2205,32 +2286,38 @@ s
         editImg.title = "Edit this record";
 
         top.HEURIST.registerEvent(editImg, "click", function() {
-                if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                    window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
-                        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
-                }
-                //                top.HEURIST.util.popupURL(window,
-                //                            top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
-                //                                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
-                //                            {callback: function(bibTitle) {
-                //                                if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
-                //                                }
-                //                            });
+            if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
+                window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
+            }
+            // TODO: remove?
+            //                top.HEURIST.util.popupURL(window,
+            //                            top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
+            //                                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
+            //                            {callback: function(bibTitle) {
+            //                                if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
+            //                                }
+            //                            });
         });
 
-        if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
+        if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]
+            &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
             // we've been given a search string for a record pointer field - pop up the search box
             top.HEURIST.registerEvent(windowRef.parent.frameElement, "heurist-finished-loading-popup", function() {
-                    thisRef.chooseResource(newDiv, bdValue.title);
+                thisRef.chooseResource(newDiv, bdValue.title);
             });
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput
+
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.getPrimaryValue = function(input) { return input? input.hiddenElt.value : ""; };
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResourceAuto = function() {
         this.chooseResource(this.inputs[0]);
     }
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = function(element, searchValue) {
-        if (this.choosing) return;    // we are already choosing a resource!
+        if (this.choosing) return;    // we are already choosing a record pointer (aka resource)!
         this.choosing = true;
         var thisRef = this;
 
@@ -2242,16 +2329,19 @@ s
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
         top.HEURIST.util.popupURL(window, url, {
-                callback: function(bibID, bibTitle) {
-                    if (bibID) element.input.setResource(element, bibID, bibTitle);
-                    thisRef.choosing = false;
-                    setTimeout(function() { element.textElt.focus(); }, 100);
-                    top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
-                },
-                height: (window.innerHeight<700?window.innerHeight-40:660)
+            callback: function(bibID, bibTitle) {
+                if (bibID) element.input.setResource(element, bibID, bibTitle);
+                thisRef.choosing = false;
+                setTimeout(function() { element.textElt.focus(); }, 100);
+                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+            },
+            height: (window.innerHeight<700?window.innerHeight-40:660)
         } );
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource
+
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.clearResource = function(element) { this.setResource(element, 0, ""); };
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.setResource = function(element, bibID, bibTitle) {
         element.textElt.title = element.textElt.value = element.textElt.defaultValue = bibTitle? bibTitle : "";
         element.hiddenElt.value = element.hiddenElt.defaultValue = bibID? bibID : "0";
@@ -2269,9 +2359,10 @@ s
         if (windowRef.changed) windowRef.changed();
     };
 
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.handlePossibleDragDrop = function(input, element) {
         /*
-        * Invoked by the mouseup property on resource textboxes.
+        * Invoked by the mouseup property on record pointer (aka resource) textboxes.
         * We can't reliably detect a drag-drop action, but this is our best bet:
         * if the mouse is released over the textbox and the value is different from what it *was*,
         * then automatically popup the search-for-resource box.
@@ -2284,9 +2375,11 @@ s
 
             element.input.chooseResource(element, searchValue);
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.handlePossibleDragDrop
+
+
     top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.calculateDroppedText = function(oldValue, newValue) {
-        // If a value is dropped onto a resource-pointer field which already has a value,
+        // If a value is dropped onto a record pointer field which already has a value,
         // the string may be inserted into the middle of the existing string.
         // Given the old value and the new value we can determine the dropped value.
         if (oldValue == "") return newValue;
@@ -2311,19 +2404,22 @@ s
             // No way to tell the difference -- we always return the former.
             return newValue.substring(i, i + newValue.length-oldValue.length);
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.calculateDroppedText
 
-/**
-* BibDetailBooleanInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailBooleanInput input
+    * Note: Boolean fields deprecated in Vsn 3, using enumerated (terms list) fields instead
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailBooleanInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.regex = new RegExp("^(?:true|false)$");
     top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.typeDescription = "either \"yes\" or \"no\"";
+
     top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput = function(bdValue) {
         var newInput = this.document.createElement("select");
         top.HEURIST.edit.addOption(this.document, newInput, "", "");
@@ -2342,22 +2438,21 @@ s
 
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.style.width = "4em";    // Firefox for Mac workaround -- otherwise dropdown is too narrow (has to be done after inserting into page)
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput
 
-    //
-    //
-    //
-/**
-* BibDetailDropdownInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailDropdownInput input
+    * Used for term list (enum) fields
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailDropdownInput = function() {top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments);};
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) {
-            return (input && input['selectedIndex']!=undefined && input.selectedIndex !== -1)? (input.options[input.selectedIndex].value) : "";
+        return (input && input['selectedIndex']!=undefined && input.selectedIndex !== -1)? (input.options[input.selectedIndex].value) : "";
     };
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
@@ -2371,6 +2466,7 @@ s
             }
         }
     };
+
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
 
@@ -2414,26 +2510,15 @@ s
 
 
         var _dtyID = this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
-         if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour - show all
+        if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour - show all
             allTerms = 0;
             disabledTerms = "";
-         }
+        }
 
         var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-                                                            this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-                                                            (bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian doesn't want it (this.required!=="required"));
+            this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
+            (bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian doesn't want it (this.required!=="required"));
 
-        /* removed by Ian request 2012-11-21
-        if(newInput.length>0){
-        var tempSelected = newInput.selectedIndex;
-        newInput.innerHTML = '<option disabled="disabled" value="">Select '+ this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + '</option>'+newInput.innerHTML;
-        if(!(bdValue && bdValue.value)){
-        newInput.selectedIndex = 0;
-        }else{
-        newInput.selectedIndex = tempSelected + 1;
-        }
-        }
-        */
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.style.width = "auto";
 
@@ -2443,9 +2528,9 @@ s
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
 
-
         return newInput;
-    }
+    } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
+
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
 
@@ -2471,6 +2556,7 @@ s
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
+        // TODO: Jul 14: cleanup all this commented out stuff (and above and below), is any of it relevant/useful?
         //var detailType = this.detailType;
         //var recFieldRequirements = this.recFieldRequirements;
         //urlSpan.comboboxSelector = newInput;
@@ -2487,7 +2573,7 @@ s
             //var disTerms = termHeaderList;
             //"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
 
-            //after updating of terms list we have to recreate the selector
+            //after updating of terms list we have to re-create the selector
             function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
                 if(editedTermTree || editedDisabledTerms) {
                     // recreate and replace combobox
@@ -2496,15 +2582,14 @@ s
 
                     _element.recreateSelector(_bdValue, true);
 
-                    /* update hidden fields
+                    /* update hidden fields  TODO: deprecated? do we need this any more?
                     Dom.get("dty_JsonTermIDTree").value = editedTermTree;
                     Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
                     _recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
                     */
                 }
                 top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
-            }
-
+            } // onSelecTermsUpdate
 
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -2527,8 +2612,8 @@ s
                             }
                             top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
                         }
-                });
-
+                    }
+                );
 
             }else{
                 top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
@@ -2542,14 +2627,15 @@ s
                     }
                 );
             }
-        };
+        }; // urlSpan.onclick
 
         this.inputCell.insertBefore(urlSpan, this.promptDiv);
         //this.inputCell.appendChild(urlSpan);
 
         this.linkSpan = urlSpan;
 
-    }
+    } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms
+
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
 
@@ -2567,22 +2653,28 @@ s
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link and if admin
 
         this.createSpanLinkTerms(bdValue);
-    };
+
+    }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
+
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     *  FILE UPLOAD input control
-     */
-/**
-* BibDetailFileInput - FILE UPLOAD input control
-*
-* @constructor
-* @return {Object}
-*/
+    *  FILE UPLOAD input control
+    */
+
+    /**
+    * BibDetailFileInput - FILE UPLOAD input control
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailFileInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.focus = function() { try { this.inputs[0].valueElt.focus(); } catch(e) { } };
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.typeDescription = "a file";
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.setReadonly = function(readonly) {
         this.parent.setReadonly.call(this, readonly);
         for (var i=0; i < this.inputs.length; ++i) {
@@ -2609,17 +2701,22 @@ s
                 }
             }
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailFileInput.prototype.setReadonly
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.addInput = function(bdValue) {
         var newDiv = this.document.createElement("div");
         this.addInputHelper.call(this, bdValue, newDiv);
-
         this.constructInput(newDiv, bdValue);
     };
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.replaceInput = function(inputDiv, bdValue) {
         inputDiv.innerHTML = "";
         this.constructInput(inputDiv, bdValue);
     };
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(inputDiv, bdValue) {
         var thisRef = this;    // for great closure
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2661,8 +2758,8 @@ s
             removeImg.title = "Remove this file";
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
             top.HEURIST.registerEvent(removeImg, "click", function() {
-                    thisRef.removeFile(inputDiv);
-                    if (windowRef.changed) windowRef.changed();
+                thisRef.removeFile(inputDiv);
+                if (windowRef.changed) windowRef.changed();
             });
             inputDiv.valueElt = hiddenElt;
             inputDiv.removeImg = removeImg;
@@ -2674,7 +2771,8 @@ s
         } else {
             if (top.HEURIST.browser.isEarlyWebkit) {    // old way of doing things
                 var newIframe = this.document.createElement("iframe");
-                newIframe.src = top.HEURIST.basePath+"records/files/uploadFileForm.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+                newIframe.src = top.HEURIST.basePath+"records/files/uploadFileForm.php?recID="
+                + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
                 newIframe.frameBorder = 0;
                 newIframe.style.width = "90%";
                 newIframe.style.height = "2em";
@@ -2695,6 +2793,7 @@ s
                 inputDiv.appendChild(fileElt);
 
                 var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+                // TODO: remove?
                 // top.HEURIST.registerEvent(fileElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
                 // (nowadays an uploaded file is automatically saved to the relevant record)
                 inputDiv.fileElt = fileElt;
@@ -2702,12 +2801,10 @@ s
                 var thisRef = this;
                 fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
                 inputDiv.className = "file-div empty";
-                //inputDiv.style.height = "40px";
-                //inputDiv.style.border = "solid 1px red"; debug
 
                 //additional button for Thumbnail Image - to create web snap shot
                 if(top.HEURIST.edit.record && top.HEURIST.edit.record.rectypeID &&
-                  Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+                    Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
                     var thumbElt = this.document.createElement("input");
                     thumbElt.name = inputDiv.name;
                     thumbElt.value = "Web page snapshot";
@@ -2717,7 +2814,6 @@ s
                     inputDiv.appendChild(thumbElt);
                     inputDiv.thumbElt = thumbElt;
                 }
-
             }
 
             inputDiv.link = "";
@@ -2728,10 +2824,12 @@ s
             this.onchange(inputDiv);
         }
 
-
         // FIXME: change references to RESOURCE to RECORD
         // FIXME: make sure that all changed() calls are invoked (esp. RESOURCES -- chooseResource, deleteResource ...)
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.removeFile = function(input) {
         // Remove the given file ... this involves hiding the hidden field, setting its value to 0, and perhaps adding a new file input
         if (input.hiddenElt) {
@@ -2757,7 +2855,10 @@ s
         }
 
         // FIXME: window.changed()
-    };
+
+    }; //top.HEURIST.edit.inputs.BibDetailFileInput.prototype.removeFile
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getFileData = function() {
         for (var i=0; i < this.inputs.length; ++i) {
             if(this.inputs[0].filedata){
@@ -2766,37 +2867,51 @@ s
         }
         return "";
     };
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.setFileData = function(_filedata) {
         if(this.inputs.length>0) {
             this.inputs[0].filedata = _filedata;
         }
     }
+
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getPrimaryValue = function(input) { return input? input.valueElt.value : ""; };
+
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.regex = new RegExp("\\S");
+
     /*
     *  END -------------------------------- FILE UPLOAD input control
     */
 
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
-/**
-* BibDetailGeographicInput input
-*
-* @constructor
-* @return {Object}
-*/
+
+
+    /**
+    * BibDetailGeographicInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailGeographicInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
-    top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex = new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
+    top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex =
+    new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.getPrimaryValue = function(input) { return input? input.input.value : ""; };
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic value";
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly = function(readonly) {
         this.parent.setReadonly.call(this, readonly);
         for (var i=0; i < this.inputs.length; ++i) {
             this.inputs[i].editLink.style.display = readonly? "none" : "";
             this.inputs[i].removeImg.style.display = readonly? "none" : "";
         }
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly
+
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.geoValueToDescription = function(geo) {
         function R(x) { return Math.round(x*10000000)/10000000 ; }
 
@@ -2809,7 +2924,10 @@ s
         }
 
         return { type: geoType, summary: geoSummary };
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.geoValueToDescription
+
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription = function(wkt) {
         // parse a well-known-text value and return the standard description (type + summary)
         var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\(?\(([-0-9.+, ]+?)\)/i);
@@ -2827,9 +2945,6 @@ s
             return { type: "Point", summary: X[0].toFixed(5)+", "+Y[0].toFixed(5) };
         }
         else if (typeCode == "l") {
-            /*       DELETE THIS
-            return { type: "Path", summary: "X,Y ("+Math.round(X.shift()*100000)/100000+","+Math.round(Y.shift()*100000)/100000+") - ("+Math.round(X.pop()*100000)/100000+","+Math.round(Y.pop()*100000)/100000+")" };
-            */
             return { type: "Path", summary: "X,Y ("+ X.shift().toFixed(5)+","+Y.shift().toFixed(5)+") - ("+X.pop().toFixed(5)+","+Y.pop().toFixed(5)+")" };
         }
         else {
@@ -2839,8 +2954,8 @@ s
             var type = "Unknown";
             if (typeCode == "pl") type = "Polygon";
             else if (typeCode == "r") type = "Rectangle";
-            else if (typeCode == "c") type = "Circle";
-            else if (typeCode == "l") type = "Path";
+                else if (typeCode == "c") type = "Circle";
+                    else if (typeCode == "l") type = "Path";
 
             var minX = X[0];
             var minY = Y[0];
@@ -2848,7 +2963,9 @@ s
             var maxY = Y.pop();
             return { type: type, summary: "X "+minX.toFixed(5)+","+maxX.toFixed(5)+" Y "+minY.toFixed(5)+","+maxY.toFixed(5) };
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
+
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(bdValue) {
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         var thisRef = this;
@@ -2895,25 +3012,25 @@ s
             }
 
             HAPI.PJ.store("gigitiser_geo_object", input.value, {
-                    height: 550,
-                    width: 780,
-                    callback: function(_, _, response) {
+                height: 550,
+                width: 780,
+                callback: function(_, _, response) {
 
-                        var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
-                        top.HEURIST.util.popupURL(
-                            windowRef,
-                            sURL,
-                            { callback: function(type, value)
-                                {
-                                    thisRef.setGeo(newDiv, value? (type+" "+value) : "");
-                                    top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
-                                }
+                    var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
+                    top.HEURIST.util.popupURL(
+                        windowRef,
+                        sURL,
+                        { callback: function(type, value)
+                            {
+                                thisRef.setGeo(newDiv, value? (type+" "+value) : "");
+                                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
                             }
-                        );
-                    }
+                        }
+                    );
+                }
             });
 
-        };
+        }; // editLink.onclick
 
         var editSpan = newDiv.appendChild(this.document.createElement("span"));
         editSpan.appendChild(editLink);
@@ -2924,8 +3041,8 @@ s
         removeImg.className = "delete-geo";
         removeImg.title = "Remove this geographic object";
         top.HEURIST.registerEvent(removeImg, "click", function() {
-                thisRef.removeGeo(newDiv);
-                if (windowRef.changed) windowRef.changed();
+            thisRef.removeGeo(newDiv);
+            if (windowRef.changed) windowRef.changed();
         });
 
         if (bdValue && bdValue.geo) {
@@ -2948,7 +3065,10 @@ s
         }
 
         newDiv.style.width = "auto";
-    };
+
+    }; //top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput
+
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(element, value) {
         if (! value) return; // "cancel"
 
@@ -2969,7 +3089,10 @@ s
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         if (windowRef.changed) windowRef.changed();
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo
+
+
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.removeGeo = function(input) {
         input.parentNode.removeChild(input);
 
@@ -2985,35 +3108,39 @@ s
         } else {
             this.addInput();
         }
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.removeGeo
 
 
-/**
-* BibDetailUnknownInput input
-*
-* @constructor
-* @return {Object}
-*/
+    /**
+    * BibDetailUnknownInput input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailUnknownInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
-    top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value";
+    top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value of unknown type";
+
     top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput = function(bdValue) {
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
         var newInput = this.document.createElement("div");
         newInput.appendChild(this.document.createTextNode("Input type \"" + this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] + "\" not implemented"));
         this.addInputHelper.call(this, bdValue, newInput);
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput
 
-/**
-* BibDetailSeparator input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailSeparator input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailSeparator = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailSeparator.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
-    top.HEURIST.edit.inputs.BibDetailSeparator.prototype.typeDescription = "record details separator";
+    top.HEURIST.edit.inputs.BibDetailSeparator.prototype.typeDescription = "record section heading / separator";
+
     top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue) {
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
@@ -3026,23 +3153,25 @@ s
             this.promptDiv.style.display = "none";
             newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput
 
-/**
-* BibDetailRelationMarker input
-*
-* @constructor
-* @return {Object}
-*/
+
+    /**
+    * BibDetailRelationMarker input
+    *
+    * @constructor
+    * @return {Object}
+    */
     top.HEURIST.edit.inputs.BibDetailRelationMarker = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.typeDescription = "record relationship marker";
-/**
-* put your comment there...
-*
-* @member
-* @param {Object} parentElement
-*/
+
+    /**
+    * put your comment there...
+    *
+    * @member
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
         if (cmd == "delete") {
             var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
@@ -3050,41 +3179,46 @@ s
                     { name: "recID", value: this.recID } ] };
             var thisRef = this;
             top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
-                    var val = eval(json.responseText);
-                    if (val && val.byRectype) {
-                        top.HEURIST.edit.record.relatedRecords = val;
-                    }else if(val.error) {
-                        alert(" There was an error: " + val.error);
-                    }
+                var val = eval(json.responseText);
+                if (val && val.byRectype) {
+                    top.HEURIST.edit.record.relatedRecords = val;
+                }else if(val.error) {
+                    alert(" There was an error on relationship marker: " + val.error);
+                }
             });
         }
         //    this.windowRef.changed();
-    };
+
+    }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification
+
 
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.getPrimaryValue = function(input) {
         //this.relManager
         return input? input.value : "";
     };
 
-/**
-* put your comment there...
-*
-* @constructor
-* @param {Object} parentElement
-*/
+
+    /**
+    * put your comment there...
+    *
+    * @constructor
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.duplicateInput = function() {
         //add new relationship
         this.relManager.allowAddNew();
 
         //this.addInput();
-    };
 
-/**
-* put your comment there...
-*
-* @constructor
-* @param {Object} parentElement
-*/
+    }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.duplicateInput
+
+
+    /**
+    * put your comment there...
+    *
+    * @constructor
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bdValue) {
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
@@ -3101,14 +3235,15 @@ s
         this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,
             this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification, true, false);
 
-    };
+    }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput
 
-/**
-* put your comment there...
-*
-* @constructor
-* @param {Object} parentElement
-*/
+
+    /**
+    * Addition of reminders (email notifications for this record)
+    *
+    * @constructor
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
         var elt = parentElement;
         do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -3144,13 +3279,15 @@ s
         removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
 
         parentElement.appendChild(this.reminderDiv);
-    };
-/**
-* put your comment there...
-*
-* @constructor
-* @param {Object} parentElement
-*/
+    }; // top.HEURIST.edit.Reminder
+
+
+    /**
+    * removal of reminders (emailnotifications for this record)
+    *
+    * @constructor
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.Reminder.prototype.remove = function() {
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
@@ -3159,31 +3296,33 @@ s
                 { name: "save-mode", value: "delete" } ] };
         var thisRef = this;
         top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
-                var val = eval(json.responseText);
-                if (val == 1) {
-                    /* deletion was successful */
-                    thisRef.reminderDiv.parentNode.removeChild(thisRef.reminderDiv);
+            var val = eval(json.responseText);
+            if (val == 1) {
+                /* deletion was successful */
+                thisRef.reminderDiv.parentNode.removeChild(thisRef.reminderDiv);
 
-                    /* find the reminder in HEURIST.edit.record ... */
-                    var reminders = windowRef.parent.HEURIST.edit.record.reminders;
-                    for (var i=0; i < reminders.length; ++i) {
-                        if (reminders[i].id == thisRef.reminderID) {
-                            reminders.splice(i, 1);
-                            break;
-                        }
+                /* find the reminder in HEURIST.edit.record ... */
+                var reminders = windowRef.parent.HEURIST.edit.record.reminders;
+                for (var i=0; i < reminders.length; ++i) {
+                    if (reminders[i].id == thisRef.reminderID) {
+                        reminders.splice(i, 1);
+                        break;
                     }
                 }
-                else {
-                    alert(val.error);
-                }
+            }
+            else {
+                alert(val.error);
+            }
         });
-    };
-/**
-* put your comment there...
-*
-* @constructor
-* @param {Object} parentElement
-*/
+    };  // top.HEURIST.edit.Reminder.prototype.remove
+
+
+    /**
+    * Editing reminder (email notification) input for this record, including targets and frequency
+    *
+    * @constructor
+    * @param {Object} parentElement
+    */
     top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
         var elt = parentElement;
         do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -3203,7 +3342,6 @@ s
             message: ""
         };
         this.details = reminderDetails;
-
 
         var thisRef = this;
 
@@ -3361,7 +3499,7 @@ s
         //td.style.verticalAlign = "baseline";
         //td.style.paddingTop = "10px";
         td.appendChild(this.document.createTextNode("You must Send (now) or Set (periodic) your reminder before saving record. " +
-                "Reminders are sent shortly after midnight (server time) on the reminder day."));
+            "Reminders are sent shortly after midnight (server time) on the reminder day."));
 
         var bibIDelt = this.document.createElement("input");
         bibIDelt.type = "hidden";
@@ -3373,21 +3511,26 @@ s
         addElt.name = "save-mode";
         addElt.value = "add";
         td.appendChild(addElt);
-    };
-/**
- * put your comment there...
- *
- * @type Window
- */
+
+    }; // top.HEURIST.edit.inputs.ReminderInput
+
+
+    /**
+    * Check if reminder (email notification) is empty
+    *
+    * @type Window
+    */
     top.HEURIST.edit.inputs.ReminderInput.prototype.isEmpty = function() {
         if (this.messageBox.value.match(/\S/)) return false;
         return true;
     };
-/**
- * put your comment there...
- *
- * @type Window
- */
+
+
+    /**
+    * Save reminder (email notification) information for this record
+    *
+    * @type Window
+    */
     top.HEURIST.edit.inputs.ReminderInput.prototype.save = function(immediate, auto) {
         // Verify inputs and save form via XHR
         // If "auto" is set, then we will abort silently rather than alert the user
@@ -3422,39 +3565,41 @@ s
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         var thisRef = this;
         top.HEURIST.util.xhrFormSubmit(this.messageBox.form, function(json) {
-                if (auto) return;
+            if (auto) return;
 
-                // callback
-                var vals = eval(json.responseText);
-                if (! vals) {
-                    alert("Oops - error while saving");
-                } else if (vals.error) {
-                    alert("Error while saving:\n" + vals.error);
-                } else if (immediate) {
-                    alert("Email sent");
-                } else {
-                    // Add the reminder to the record ...
-                    var newReminder = vals.reminder;
-                    windowRef.parent.HEURIST.edit.record.reminders.push(newReminder);
+            // callback
+            var vals = eval(json.responseText);
+            if (! vals) {
+                alert("Oops - error while saving reminder");
+            } else if (vals.error) {
+                alert("Error while saving reminder:\n" + vals.error);
+            } else if (immediate) {
+                alert("Email(s) sent");
+            } else {
+                // Add the reminder to the record ...
+                var newReminder = vals.reminder;
+                windowRef.parent.HEURIST.edit.record.reminders.push(newReminder);
 
-                    // ... remove the previous inputs ...
-                    thisRef.fieldset.parentNode.removeChild(thisRef.fieldset);
+                // ... remove the previous inputs ...
+                thisRef.fieldset.parentNode.removeChild(thisRef.fieldset);
 
-                    // ... add in the new reminder ...
-                    // FIXME: shouldn't use that getbyid
-                    new top.HEURIST.edit.Reminder(thisRef.document.getElementById("reminders"), newReminder);
+                // ... add in the new reminder ...
+                // FIXME: shouldn't use that getbyid
+                new top.HEURIST.edit.Reminder(thisRef.document.getElementById("reminders"), newReminder);
 
-                    // ... and add a new set of inputs.
-                    windowRef.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(thisRef.document.getElementById("reminders"));
-                }
+                // ... and add a new set of inputs.
+                windowRef.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(thisRef.document.getElementById("reminders"));
+            }
         });
-    };
 
-/**
- * put your comment there...
- *
- * @type Window
- */
+    }; // top.HEURIST.edit.inputs.ReminderInput.prototype.save
+
+
+    /**
+    * Editing the record level URL (URL set for internet bookmarks and optionally other record types)
+    *
+    * @type Window
+    */
     top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, required, displayValue, canEdit) {
         var elt = parentElement;
         do { elt = elt.parentNode; } while (elt.nodeType != 9 );// DOCUMENT_NODE
@@ -3524,7 +3669,6 @@ s
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
 
-
                 urlSpan.onclick = function() {
                     inputCell.removeChild(urlOutput);
                     inputCell.removeChild(urlSpan);
@@ -3532,12 +3676,14 @@ s
                 };
                 inputCell.appendChild(urlSpan);
             }
-
         }
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         top.HEURIST.registerEvent(this.inputs[0], "change", function() { if (windowRef.changed) windowRef.changed(); });
-    };
+
+    }; // top.HEURIST.edit.inputs.BibURLInput
+
+
     top.HEURIST.edit.inputs.BibURLInput.prototype.setReadonly = function(readonly) {
         if (readonly) {
             this.inputCell.className += " readonly";
@@ -3552,14 +3698,18 @@ s
             }
             this.inputCell.inputField.removeAttribute("disabled");
         }
-    };
+    }; // top.HEURIST.edit.inputs.BibURLInput.prototype.setReadonly
+
+
     top.HEURIST.edit.inputs.BibURLInput.prototype.focus = function() { this.inputs[0].focus(); };
+
     top.HEURIST.edit.inputs.BibURLInput.prototype.verify = function() {
         return (this.inputs[0].value != "");
     };
 
     top.HEURIST.fireEvent(window, "heurist-edit-js-loaded");
 }
+
 if (typeof HAPI == "undefined"){
     var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
     if (windowRef.HAPI) {

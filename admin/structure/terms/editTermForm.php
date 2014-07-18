@@ -101,7 +101,7 @@
             .dtyField {
                 padding-bottom: 10px;
                 padding-top: 3px;
-                display: inline-block;
+                display:inline-block;
             }
             .dtyLabel {
                 display: inline-block;
@@ -126,7 +126,7 @@
                     {
                         "close-on-blur": false,
                         "no-resize": false,
-                        height: 620,
+                        height: 620, // height and width of term tree editing popup
                         width: 900,
                         callback: function(needTreeReload) {
                             context_return_res = 'ok';
@@ -146,26 +146,30 @@
                 <input name="return_res" value="<?=$return_res?>" type="hidden" />
                 <input name="parent" value="<?=$parent_id?>" type="hidden" />
 
-                <div class="dtyField" style="padding-top:10px;">
-                <?=($parent_id==0?"<b>You are definining a top-level vocabulary</b>":"Adding to: <b>".$parent_name."</b>") ?>
+                <span style="float:centre; margin-left:145px;">
+                <?php
+                    echo $local_message; // success message or warnings about duplicate labels
+                ?>
+                </span>
+
+              <div style="padding-top:10px;">
+                    <?=($parent_id==0?"<b>You are definining a top-level vocabulary</b>":"Adding to: <b>".$parent_name."</b>") ?>
                 </div>
 
-        <?php
-            echo $local_message;
-        ?>
 
                 <div class="dtyField">
-                    <label class="dtyLabel" style="color: red; margin-top:10px;">Term (label)</label>
+                    <label class="dtyLabel" style="color:red; margin-top:10px;">Term (label)</label>
                     <input id="trmName" name="name" style="width:150px;" value="<?=$term_name ?>"
                         title="Enter the term or concise label for the category. Terms pulldown will be alphabetic, use 01, 02 ... to force ordering"/>
                     <div style="padding-left:155;padding-top:3px; font-size: smaller;">
-                    The term or label describing the category. Term dropdowns are alphabetic. <br />Precede terms with 01, 02, 03 ... to control order if required.
+                        The term or label describing the category. Term dropdowns are alphabetic.
+                        <br />Precede terms with 01, 02, 03 ... to control order if required.
                     </div>
                 </div>
 
                 <div class="dtyField">
                     <label class="dtyLabel">Description of term</label>
-                    <input name="description" style="width:450px" value="<?=$term_desc?>"
+                    <input name="description" style="width:350px" value="<?=$term_desc?>"
                         title="Enter a concise but comprehesive description of the category represented by this term"/>
                     <div style="padding-left:155;padding-top:3px; font-size: smaller;">
                         A concise but comprehensive description of this term or category
@@ -184,7 +188,7 @@
                 <div style="padding-top: 20px;">
                     <div style="float:left; text-align: right; padding-left:330px;">
                         <input id="btnSave" type="submit" style="font-weight:bold; color:black; " value="&nbsp;Add term&nbsp;"
-                        title="Add the term to the current vocabulary"/>&nbsp;&nbsp;
+                            title="Add the term to the current vocabulary"/>&nbsp;&nbsp;
                     </div>
                     <div style="display:inline-block; padding-left:30px;">
                         <input id="btnCancel" type="button" value="Finished" onClick="{window.close(context_return_res)}"

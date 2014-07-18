@@ -33,7 +33,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Manage Terms</title>
+        <title>Manage terms for term list fields and relationship type</title>
 
         <!-- YUI -->
         <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
@@ -71,6 +71,7 @@
         </style>
 
     </head>
+
     <body class="popup yui-skin-sam">
 
         <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
@@ -79,16 +80,18 @@
 
         <script type="text/javascript" src="editTerms.js"></script>
 
-        <div id="divBanner" class="banner"><h2>Manage Terms</h2></div>
+        <div id="divBanner" class="banner">
+            <h2>Manage terms for term list fields and relationship type</h2>
+        </div>
+
         <div id="page-inner">
 
             <div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
-                <div style="padding-left:120px"><input id="btnAddChild" type="button" value="Add Vocabulary (top level)" onClick="{editTerms.doAddChild(true)}"/>
-                </div>
-
                 <!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
-                <div id="tabContainer" class="yui-navset yui-navset-top" style="y:138; height:70%; width:300; max-width:300; float: left; overflow: hidden;"></div><br/>
+                <div id="tabContainer"
+                    class="yui-navset yui-navset-top" style="y:138; height:70%; width:300; max-width:300; float: left; overflow: hidden;">
+                </div><br/>
 
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
                 <div id="formSearch" style="display:block;height:136px;">
@@ -105,25 +108,33 @@
 
             <div id="formContainer" style="float: left; padding-bottom:5px; padding-left: 10px;">
 
-                <h3 id="formMessage" style="border-style: none;display:block;text-align:center;width:300px;">
+                <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
                 </h3>
-                Click button on the left to add a new vocabulary
+
+                <div style="margin-left:10px; padding-top:15px;">
+                    <input id="btnAddChild" type="button"
+                        value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
+                    <span style="margin-top:5px; margin-left:10px;"> Adds a new root to the tree</span>
+                </div>
 
                 <div id="deleteMessage" style="display:none;width:500px;">
-                    <h3 style="border-style: none;">Deleting Term</h3>
+                    <h3 style="margin-left:10px; border-style:none;">Deleting term</h3>
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:600px;">
-                    <h3 style="border-style: none;">Edit Selected Term</h3>
-                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
+                <div id="formEditor" style="display:none;width:500px;">
+                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;">Edit selected term / vocabulary</h3>
+
+                    <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
                         <div class="dtyField">
                             <label class="dtyLabel">ID:</label>
                             <input id="edId" readonly="readonly" style="width:50px"/>
                             <input id="edParentId" type="hidden"/>
-                            &nbsp;&nbsp;&nbsp;<div id="div_ConceptID" style="display: inline-block;"></div>
+                            &nbsp;&nbsp;&nbsp;
+                            <div id="div_ConceptID" style="display: inline-block;">
+                            </div>
                             <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                                 <b>term saved</b>
                             </div>
@@ -134,13 +145,13 @@
                                 <option selected="selected">open</option>
                                 <option>pending</option>
                                 <option>approved</option>
-                                <!-- put reserved option here for interal use only ? -->
+                                <!-- put reserved option here for internal use only ? -->
                             </select>
                         </div>
 
 
                         <div class="dtyField">
-                            <div style="display:inline-block;">
+                            <div style="float:left;">
                                 <label class="dtyLabel" style="color: red; margin-top:10px;">
                                     Term (label)</label>
                                 <input id="edName" style="width:160px"/>
@@ -154,8 +165,7 @@
 
                         <div class="dtyField">
                             <label class="dtyLabel">Description of term</label>
-                            <input id="edDescription" style="width:450px; margin-top:5px;"
-                                title=""/>
+                            <input id="edDescription" style="width:350px; margin-top:5px;" title=""/>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                 A concise but comprehensive description of this term or category
                             </div>
@@ -187,8 +197,6 @@
 
 
                         <!--
-                        <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>
-                        <p>To add terms to fields, edit the field and click the [Vocabulary] button</p>
                         NOTE: button labelling is set in the JS file
                         -->
                         <div style="display:inline-block; margin-top:30px;">
@@ -216,8 +224,8 @@
                     </div>
 
                     <div id="formAffected" style="display:none;padding:10px;width:480px;">
-                        <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>
-                        You have added terms to the term tree. Since terms are chosen individually for each field,
+                        <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS
+                        <p>You have added terms to the term tree. Since terms are chosen individually for each field,
                         you will need to update your selection for enumerated fields using these terms.
                         <p align="center">
                             <input id="btnUpdateFieldTypes" type="button" value="Update Field Types" onClick="{editTerms.showFieldUpdater()}" />
@@ -250,9 +258,10 @@
 
                 </div>
 
-                <div id="divApply" style="position: relative; text-align:right; display: block; margin:20px 0;">
-                    Note: new terms must be selected (selection window behind this one) <br>after addition to the tree, in order to appear in data entry pulldown lists<p>
-                    <input type="button" id="btnApply1" value="Close window" onclick="editTerms.applyChanges();" />
+                <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
+                    Warning: if a field uses individually selected terms, new terms must be selected in record structure edit
+                    <br />to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
+                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" />
                 </div>
 
             </div>
