@@ -285,6 +285,8 @@
                     print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
                 ?>
             </div>
+
+            <!-- Record type to be added -->
             <div class="input-row" style=" margin-top: 20px;">
                 <div class="input-header-cell" style="color:red; font-weight:bold;">Type of record to add</div>
                 <div class="input-cell">
@@ -322,11 +324,11 @@
             <div class="input-row">
 
                 <!-- Vsn 3.2 July 2014 - removed checkbox for display of settings, simply display them -->
-                <div class="input-header-cell" style="display:none;">Show access settings
+                <div class="input-header-cell" >Show access settings
                 </div>
                 <!-- No longer displayed, defaulted to checked -->
-                <div class="input-cell" style="display:none;">
-                    <input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" checked
+                <div class="input-cell" >
+                    <input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1"
                         onclick="showHideAccessSettings(this);"
                         style="vertical-align: middle; margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
                 </div>
@@ -382,15 +384,16 @@
             </div>
 
             <div class="actionButtons">
-                <input type="button" class="add" style="float:none;" value="Add Record" onClick="addRecord(event);">
-                <input type="button" value="Cancel" onClick="cancelAdd(event);" id="note_cancel">
+                <input type="button" class="add" style="float:left; margin-left:250px;" value="Add Record" onClick="addRecord(event);">
+                <input type="button" value="Cancel" style="float:left; margin-left:20px; margin-bottom:25px;" onClick="cancelAdd(event);" id="note_cancel">
             </div>
-        
+
         </div>
 
 
         <br />&nbsp;<br />
-        <a id="show-adv-link" href="#" style="font-weight: bold; margin-left:80px; margin-top: 20px;">more ... (hyperlink addition, tags)</a>
+        <a id="show-adv-link" href="#" style="font-weight: bold; margin-left:40px; ">
+            more ... (hyperlink addition, tags)</a>
         <div id=advanced-section style="display: none;">
             <div class="input-row separator">
                 <div class="input-header-cell"><strong>Advanced</strong></div>
