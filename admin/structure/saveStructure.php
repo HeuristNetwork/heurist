@@ -31,13 +31,14 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
     define('ISSERVICE',1);
+    header('Content-type: text/javascript; charset=utf-8');
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+//    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once('saveStructureLib.php');
 
 /*****DEBUG****///error_log(">>>".print_r($_REQUEST, true));
-    header('Content-type: text/javascript');
     $rv = array();
   
     if (!is_admin()) {
@@ -80,6 +81,7 @@ else
             $data = json_decode(urldecode(@$_REQUEST['data']), true);
         }
         $mysqli = mysqli_connection_overwrite(DATABASE); // mysqli
+        mysql_connection_overwrite(DATABASE); // need for getRecordInfoLibrary 
 
         switch ($method) {
             
@@ -114,7 +116,9 @@ else
                         array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
                     }
                 }
-                $rv['rectypes'] = getAllRectypeStructures();
+
+                $rv['rectypes'] = getAllRectypeStructures(false);
+                
                 break;
 
             case 'saveRTS': // Record type structure

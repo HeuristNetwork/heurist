@@ -40,7 +40,8 @@
 	// using ob_gzhandler makes this stuff up on IE6-
 	ini_set("zlib.output_compression_level", 5);
 	//ob_start('ob_gzhandler');
-
+    header("Content-type: text/javascript; charset=utf-8");
+    
 
 	require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 	require_once("dbMySqlWrappers.php");
@@ -48,7 +49,6 @@
 
 	mysql_connection_select(DATABASE);
 
-	header("Content-type: text/javascript");
 
 	// TODO: 5/9/11 Replace this clunky use of the sys_TableLastUpdated table to record the date of last update of defionition
 	// tables, involving a compelx set of triggers on add/update/delete (the latter not working in any case)
@@ -86,8 +86,7 @@
 
 	// $cache=true - use cache
 	//$cache = (!array_keys(@$_REQUEST, 'cache') || @$_REQUEST['cache']=="1");
-
-
+    
 	/* rectypes are an array of names sorted alphabetically, and lists of
 	primary (bibliographic) and other rectypes, also sorted alphbetically */
 	print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures(true)).";\n";

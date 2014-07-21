@@ -1024,6 +1024,7 @@ function getAllRectypeStructures($useCachedData = false) {
             return $rtStructs;
         }
     }
+    
     // NOTE: these are ordered to match the order of getRectypeStructureFieldColNames from DisplayName on
     $colNames = array("rst_RecTypeID", "rst_DetailTypeID",
                       //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
