@@ -672,11 +672,12 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			sel.remove(0);
 		}*/
 
-		var prev = Dom.get("previewListDiv"),
-		i, len = prev.children.length;
+		var prev = Dom.get("previewListDiv");
+        prev.innerHTML = "";
+		/*i, len = prev.children.length;
 		for (i = 0; i < len; i++) {
 			prev.removeChild(prev.childNodes[0]);
-		}
+		}*/
 
 
 		var termIDTree = _createTermArray(_selectedTermsTree.getRoot());
