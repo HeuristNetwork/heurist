@@ -139,21 +139,16 @@ echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist installed in /var/www/html/HEURIST/h3 -------------------------------------------"
 echo
-echo -e "Heurist can be accessed through the URL for /var/www/html/h3 or /var/www/html/heurist"
+echo "Heurist can be accessed through the URL for /var/www/html/h3 or /var/www/html/heurist"
 echo
 echo "CONFIGURATION:"
 echo "Edit /var/www/html/HEURIST/h3/configIni.php to set your MySQL root user + password - twice, clearly documented in file"
 echo "You can do this by: sudo nano /var/www/html/HEURIST/h3/configIni.php"
 echo
-echo "BUG WORKAROUND:"
-echo "There is a bug in creation of php.ini - please check whether /etc/php5/apache2/php.ini is blank"
-echo "If so, copy a valid php.ini file into this location, otherwise the search interface fails to "
-echo "load completely and a memcached error shows up in the Database Summary popup"
-echo
 echo "Note:"
 echo "There is normally limited space on /var/www, so you may wish to move HEURIST_FILESTORE from"
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
-echo "of space allocated, and add a simlink in /var/www/html/HEURIST "
+echo "of space allocated, such as /srv or /data, and add a simlink in /var/www/html/HEURIST "
 echo
 echo "---- Installation complete -------------------------------------------------------------------"
 echo

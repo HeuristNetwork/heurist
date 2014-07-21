@@ -44,65 +44,45 @@ echo "******* WARNING ********* Do not let your session time out or you will nee
 
 # -------------PRE-REQUISITES---------------------------------------------------------------------------------------------
 
-# Note: using apt-get rather than ap titude - the latter fixes problems automatically but is not always installed
-
-echo
-echo "You may get sudo errors unable-to-resolve-host below - this is normal, please do not be concerned"
-echo
+# Note: using apt-get rather than aptitude - the latter fixes problems automatically but is not always installed
 
 sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
 
+echo "Upgrading package versions from repositories"
+# update package list from the repositories
 sudo apt-get update > heurist_install.log
-
-# TODO erring on more is better, cleanup later
-sudo apt-get install tasksel software-properties-common python-software-properties -y >> heurist_install.log
-
-# needed by FAIMS module output
-sudo apt-get install zip unzip
-
-# contains backports of spatialite 3.1.0 RC 2 (aka 3.0.1 as released)
-
-echo "Repo added for spatiallite"
-if ! ls /etc/apt/sources.list.d/faims-mobile-web-*.list 2> /dev/null 1> /dev/null
-    then sudo add-apt-repository ppa:faims/mobile-web -y
-     sudo add-apt-repository ppa:ubuntugis/ppa -y
-fi
-
-sudo apt-get update >> heurist_install.log
+# install updated packages
 sudo apt-get upgrade -y >> heurist_install.log
 
-echo "System upgraded to latest versions, about to install LAMP stack, PHP 5 extensions, spatialLite"
+# TODO erring on more is better, tasksel not always installed, cleanup later
+sudo apt-get install tasksel software-properties-common python-software-properties -y >> heurist_install.log
+
+echo "System packages upgraded to latest versions, about to install LAMP stack"
 
 sudo tasksel install lamp-server
 
+echo "Installing PHP 5 extensions"
+
 sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-dev php-pear memcached php5-memcached sqlite3 pv php5-sqlite -y >> heurist_install.log
 
-# These could not be located - transferred from Artems RHEL script
-sudo apt-get install php5-pdo php5-mbstring
+# used by FAIMS and export/archiving functions
+sudo apt-get install zip unzip
 
-
-# ----- SQLite and SpatialLite ----------------------------------------------------
-
-echo "Adding sqlite3 and spatialite3 support from FAIMS Fedarch.org server"
-
-sudo apt-get build-dep libspatialite-dev -y >> heurist_install.log
-
-wget http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "Spatialite downloads from Fedarch dot org failed." }
-
-cd /tmp/
-
-tar -xzf libspatialite-4.1.1.tar.gz
-
-cd /tmp/libspatialite-4.1.1
-
-sudo ./configure | pv -p -s 9656 -e > /tmp/compile1.log
-sudo make | pv -p -s 115351 -e > /tmp/compile2.log
-sudo make install | pv -p -s 15628 -e > /tmp/compile3.log
+# mbstring (multilingual character handling) appears to be installed by default on Ubuntu
+# pdo appears to be installed by php5-mysql, but may also require pdo-mysql
+# pdo and mbstring could not be located on Ubuntu install - transferred from Artems RHEL script
+# sudo apt-get install php5-pdo php5-mbstring
+sudo apt-get install pdo-mysql
+sudo apt-get install php5-pdo
+sudo apt-get install php5-mbstring
 
 sudo ldconfig
 
 # this is only done because upload progress needs to compile. The lout. We should write it out of the system ...
-sudo apt-get build-dep php5 -y >> heurist_install.log
+# sudo apt-get build-dep php5 -y >> heurist_install.log
+
+# Only needed for uploadprogress, which we are getting rid of, remove when no longer needed
+sudo pecl install uploadprogress >> heurist_install.log
 
 
 # ----- PHP Ini ----------------------------------------------------
@@ -117,18 +97,16 @@ sed 's/;extension=php_sqlite3.dll/extension=php_sqlite3.dll/' < /etc/php5/apache
 sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
 # increase upload file size from default 2M
-sed 's/^upload_max_filesize = .*/upload_max_filesize = 100M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
-sed 's/^post_max_size.*/post_max_size = 101M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
 # TODO: PROBLEM @ 2/10/13 - php.ini is ending up empty. Need to copy a valid php.ini into /etc/php5/apache2/php.ini
 # otherwise the search interface fails to load completely and a memcached error shows up in the database summary popup
 
 sudo pear config-set php_ini /etc/php5/apache2/php.ini
 
-
 # ----- Apache restart ----------------------------------------------------
 
-sudo pecl install uploadprogress >> heurist_install.log
 
 sudo apache2ctl graceful
 
@@ -136,10 +114,16 @@ echo
 echo "Apache restarted"
 
 
-# ----- Heurist Prerequisites installed -------------------------------------------------------------------------------------------
-
 echo -e "\n\n\n\n"
 
-echo Please now run install_heurist_ubuntu.sh
-
+echo ----- Heurist Prerequisites installed --------------------------------------------------------------------
+echo
+echo Please check for any errors above
+echo
+echo "WARNING: Bug in creation of php.ini at 21/7/14 - please check whether /etc/php5/apache2/php.ini is blank"
+echo "         If so, copy a valid php.ini file into this location, otherwise the search interface fails to "
+echo "         load completely and a memcached error shows up in the Database Summary popup"
+echo
+echo
+echo Please now run install_heurist.sh
 echo
