@@ -69,7 +69,12 @@ header("Content-type: text/javascript");
 
 $infos = array();
 foreach ($uploadIDs as $uploadID) {
-	$info = uploadprogress_get_info($uploadID);		// provided by uploadprogress php module
+    
+    if(function_exists('uploadprogress_get_info')){
+	    $info = uploadprogress_get_info($uploadID);		// provided by uploadprogress php module
+    }else{
+        $info = null;
+    }
 
 	if ($info === null) {
 		$infos["$uploadID"] = array("done" => true);
