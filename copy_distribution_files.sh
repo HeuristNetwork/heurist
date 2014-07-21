@@ -1,71 +1,97 @@
 #! /bin/sh
-if [ -z $1 ] 
-   then echo "Please supply version eg. 3.x.x - insert appropriate sub-versions" 
+
+# copy_distribution_files.sh: Creates a distribution package in h3-build from a Heurist working directory
+
+# @package     Heurist academic knowledge management system
+# @link        http://HeuristNetwork.org
+# @copyright   (C) 2005-2014 University of Sydney
+# @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+# @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+# @version     3.2
+
+# Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+# Unless required by applicable law or agreed to in writing, software distributed under the License is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+# See the License for the specific language governing permissions and limitations under the License.
+
+if [ -z $1 ]
+   then echo "Usage:   sudo ./copy_distribution_files.sh. heurist-3.x.x.xxxx   - insert appropriate sub-versions and alpha or beta in x.x-xxxx"
    exit
    fi
 
 # copy_distribution_files.sh
 # --------------------------
-# This file copies all necessary (and some uncessary ..) Heurist vsn 3 distribution files 
-# from the current directory (any Heurist proram directory) to a temporary directory in the 
-# h3-setup directory in the same parent as the current directory.
-# Make sure the current directory is the up-to-date version you want to package. 
-# The script may require modification for other directory layouts
+# This file copies all necessary (and some uncessary ..) Heurist vsn 3 distribution files
+# from the current directory (any Heurist h3-xx program directory) to a temporary directory in the
+# h3-build directory in the same parent (/var/www/html/HEURIST) as the current directory.
+# Make sure the current directory is the up-to-date version you want to package.
+# The script is set up for the HeuristScholar server and may require modification for other directory layouts
 
 # RUN THIS FILE FROM AN h3-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
 
-# Expects h3-setup directory in same parent directory as h3-xx directory
-# Modified 9th dec 2013 to run on new virtual server, minor uopdates 9/6/14
-# Ian Johnson Dec 2013
- 
-echo -e "\n"
-# SAFE: will only remove from a directory called h3-setup
-#       will only remove files in the subdirectory specified by the parameter 
-echo Removing existing files from h3-setup/$1
-rm -rf ../h3-setup/$1/*
+# Expects h3-build directory in same parent directory as h3-xx directory (ie. /var/www/html/HEURIST)
+# Modified 9th dec 2013 to run on new virtual server, minor updates 9/6/14 and 16-20/7/14
 
-echo -e "\n" 
-echo copying files to ../h3-setup/$1
-# Remember to add any new directories here
-cp -r admin ../h3-setup/$1
-cp -r common ../h3-setup/$1
-cp -r export ../h3-setup/$1
-cp -r hapi ../h3-setup/$1
-cp -r import ../h3-setup/$1
-cp -r records ../h3-setup/$1
-cp -r search ../h3-setup/$1
-cp -r viewers ../h3-setup/$1
-cp -r applications ../h3-setup/$1
-cp -r documentation ../h3-setup/$1
 
-# Dec 2013 What was this for ??? I think it was the stored procedures, now superceded
-# cp -r MYSQL ../h3-setup/$1
+echo -e "\n\n\n\n"
+echo -------------------------------------------------------------------------------------------------
+echo
+echo "Heurist Vsn 3 distribution builder - run from /var/www/html/HEURIST/h3-xx program directory"
+
+# File paths specified with explicit h3-build to ensure it will only remove from this specific directory
+# and files in the subdirectory of this directory specified by the parameter
+
+echo
+echo removing existing h3-build/$1
+rm -rf ../h3-build/$1
+
+echo
+echo copying files to ../h3-build/$1
+
+mkdir ../h3-build/$1
 
 # Copy all the files in the root of h3-xx
-cp -r *.* ../h3-setup/$1
+cp -r *.* ../h3-build/$1
 
-# Copy the simlinked directories for external, help and exemplars as real directories 
-cp -r ../h3/external ../h3-setup/$1
-cp -r ../h3/help ../h3-setup/$1 
-cp -r ../h3/exemplars ../h3-setup/$1 
+# Remember to add any new directories here
+cp -r admin ../h3-build/$1
+cp -r applications ../h3-build/$1
+cp -r common ../h3-build/$1
+cp -r context_help ../h3-build/$1
+cp -r documentation ../h3-build/$1
+cp -r export ../h3-build/$1
+cp -r hapi ../h3-build/$1
+cp -r import ../h3-build/$1
+cp -r records ../h3-build/$1
+cp -r search ../h3-build/$1
+cp -r viewers ../h3-build/$1
 
-# remove the Heurist Project home page, only applicable to HeuristScholar.org
-# Dec 2013: we may be removing thuis anyway from the code as we move to a more managed Heurist web site
-# June 2014 has been updated some time ago so it should work on any Heurist site, now called parentDirectory_index.html
-# rm ../h3-setup/$1/index.html
+# Copy the simlinks for external, help and exemplars
+cp -r ../h3/external ../h3-build/$1
+cp -r ../h3/help ../h3-build/$1
+cp -r ../h3/exemplars ../h3-build/$1
 
-# Now zip it all up as a tarball for distribution on the Google code site
-echo -e "\n" 
-echo create tarball $1.tar.bz2
-rm -f ../h3-setup/$1.tar.bz2
-tar -cjf ../h3-setup/$1.tar.bz2 -C ../h3-setup/ $1/
-echo -e "\n" 
+# remove any superfluous files - add others as appropriate
+rm ../h3-build/$1/copy_distribution_files.sh
+rm ../h3-build/$1/install_heurist_*.sh
+rm ../h3-build/$1/install_prerequisites_*.sh
 
-echo -e "\n\n\n"
-echo Change to ../h3-setup and run the Google Code upload program:
-echo note: you MUST delete the upload from Google Code if it already exists
-echo -e "\n"
-echo gcode_wiki_upload.py -s \"EDIT IN TITLE HERE\" -p heurist --user=ijohnson222@gmail.com $1.tar.bz2
-echo -e "\n\n"
-echo "You may wish to rename and upload the tarball as h3_alpha, h3_beta or h3_latest"
-echo -e "\n\n"
+# Now zip it all up as a tarball for distribution on the Heurist web site
+echo
+echo creating tarball $1.tar.bz2
+rm -f ../h3-build/$1.tar.bz2
+tar -cjf ../h3-build/$1.tar.bz2 -C ../h3-build/ $1/
+echo
+
+# show what we have got in the directory
+ls -alt ../h3-build
+
+echo
+echo "Now copy  ../h3-build/$1.tar.bz2 to /var/www/html/HEURIST/DISTRIBUTION"
+echo
+echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
+echo and the installation is dependant on the filename parameter to find this folder
+echo
+echo Use:  cd ../h3-build  then  rm ../DISTRIBUTION/$1.tar.bz2  THEN  mv $1 ../h3-DISTRIBUTION
+echo

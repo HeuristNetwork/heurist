@@ -1,55 +1,32 @@
 <?php
 
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* configuration file for a Heurist instance
+* configIni.php: configuration file for this Heurist instance
 *
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.5
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
 */
 
-// Set the version number of the Heurist program
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-$version = "3.2.0"; // required - DO NOT CHANGE - sets current program version number
-                    // 3.2.0 alpha 8th July 2014
-                    // 3.1.7 published 26 April 2014
-                    // 3.1.6 beta published 29 Nov 2013
+// ***** ESSENTIAL INFORMATION *****
 
-// Setting up server with multiple code versions
-// ---------------------------------------------
-// Move the file heuristConfigIni.php to the parent directory of the codebase. It will
-// override the ConfigIni.php files in the individual codebases. This allows configIni.php files to exist
-// in multiple codebases on a single server and avoids the need for duplication of information or
-// the accidental distribution of passwords etc. if one of these codebases is used as a source.
+// Minimal requirement to get Heurist working:
 
-// [server]
-// enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
-// for example $serverName = "heuristscholar.org";  Be sure to include the port if not port 80
-$serverName = null; // override default taken from request header SERVER_NAME
+//     set MySQL root password (2 places, below)
 
-// [database]
-// enter the host name or IP address of your MySQL server, blank --> localhost
-// for example $dbHost = "heuristscholar.org";  will cause the code to use mysql on the server at heuristscholar.org
-$dbHost = ""; // leave blank for localhost
 
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
@@ -69,6 +46,33 @@ $dbAdminPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 $dbReadonlyUsername = "root"; // required , could use a username with universal read (select) access
 $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
+
+
+// --------------------------------------------------------------------------------------------
+
+// Setting up server with multiple code versions
+// ---------------------------------------------
+// Move the file heuristConfigIni.php to the parent directory of the codebase. It will
+// override the ConfigIni.php files in the individual codebases. This allows configIni.php files to exist
+// in multiple codebases on a single server and avoids the need for duplication of information or
+// the accidental distribution of passwords etc. if one of these codebases is used as a source.
+
+// --------------------------------------------------------------------------------------------
+
+// Set the version number of the Heurist program
+// *** DO NOT CHANGE ***
+$version = "3.2.0"; // sets current program version number
+                    // 3.2.0 alpha 8th July 2014, beta 21st July 2014
+
+// [server]
+// enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
+// for example $serverName = "heuristscholar.org";  Be sure to include the port if not port 80
+$serverName = null; // override default taken from request header SERVER_NAME
+
+// [database]
+// enter the host name or IP address of your MySQL server, blank --> localhost
+// for example $dbHost = "heuristscholar.org";  will cause the code to use mysql on the server at heuristscholar.org
+$dbHost = ""; // leave blank for localhost
 
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
 // from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
