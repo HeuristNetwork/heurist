@@ -1,10 +1,23 @@
- -- coreDefinitionsHuNI.txt: Database definitions for a new database with core HuNI database schema
- -- @author Ian Johnson 21/2/2014
- -- @copyright 2005-2014 University of Sydney
- -- @link: http://HeuristScholar.org
- -- @license http://www.gnu.org/licenses/gpl-3.0.txt
- -- @package Heurist academic knowledge management system
- -- @todo
+/**
+*
+* coreDefinitionsHuNI.txt: Database definitions for a new database with core HuNI database schema
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
  -- http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=H3HuNICore
@@ -16,24 +29,24 @@
 -- OUTPUT FROM getDBStructureAsSQL.php STARTS HERE
 -- -----------------------------------------------------------------------------------------------------
 
--- Heurist Definitions Exchange File generated: 21 Feb 2014 @ 14:56
--- Installation = http://heuristscholar.org/h3-ao/
+-- Heurist Definitions Exchange File generated: 22 Jul 2014 @ 17:01
+-- Installation = http://heuristscholar.org/h3-ij/
 -- Database = H3HuNICore
--- Program Version: 3.1.6
+-- Program Version: 3.2.0
 -- Database Version: 1.1.0
 
 -- RECORD TYPE GROUPS
 -- `rtg_ID`,`rtg_Name`,`rtg_Domain`,`rtg_Order`,`rtg_Description`
 
->>StartData>> ('1','HuNI Core EntityTypes','functionalgroup','001','The HuNI essential entity types'),
-('4','System Internals','functionalgroup','007','Record types used by the Heurist system for specific workflows and functions'),
+>>StartData>> ('1','HuNI Core EntityTypes','functionalgroup','000','The HuNI essential entity types'),
+('4','System Internals','functionalgroup','003','Record types used by the Heurist system for specific workflows and functions'),
 ('16','Additional core','functionalgroup','002','Other core entity types not defined by HuNI'),
-('20','HuNI Data Model','functionalgroup','000','The HuNI data model including data sourcces and mappings'),
+('20','HuNI Data Model','functionalgroup','001','The HuNI data model including data sourcces and mappings'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPE GROUPS
 
@@ -49,9 +62,9 @@
 ('106','Imported','255','This group contains all detailtypes that were imported from external databases'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- ONTOLOGIES
 
@@ -62,9 +75,9 @@
 ('3','CIDOC-CRM','CIDOC-CRM','', 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424','open', '2','CIDOC-CRM','3', '255','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- TERMS
 
@@ -392,38 +405,37 @@
 ('3005','Causes','0', '','open', '2','Causes','3005', '0','0','relation','0', '0','3113','1','2013-11-22 13:10:54','0', ''),
 ('3011','StartsAfter','3012', '','open', '2','StartsAfter','3011', '0','0','relation','0', '0','3270','1','2013-11-22 13:10:54','1', ''),
 ('3012','EndsBefore','3011', '','open', '2','EndsBefore','3012', '0','0','relation','0', '0','3270','1','2013-11-22 13:10:54','1', ''),
-('3083','IsNeiceOrNephewOf','3084', '','open', '2','IsNeiceOrNephewOf','3083', '0','0','relation','0', '0','3259','1','2013-11-22 13:10:54','1', ''),
-('3084','IsAuntOrUncleOf','3083', '','open', '2','IsAuntOrUncleOf','3084', '0','0','relation','0', '0','3259','1','2013-11-22 13:10:54','1', ''),
-('3087','IsBrotherOf','3442', '','open', '2','IsBrotherOf','3087', '0','0','relation','0', '0','3118','2','2013-11-22 13:10:54','0', ''),
-('3088','IsBrotherOrSisterInLaw','3088', '','open', '2','IsBrotherOrSisterInLaw','3088', '0','0','relation','0', '0','3258','1','2013-11-22 13:10:54','1', ''),
-('3089','IsParentOf','3090', '','open', '2','IsParentOf','3089', '0','0','relation','0', '2','3260','1','2013-11-22 13:10:54','1', ''),
-('3090','IsChildOf','3089', '','open', '2','IsChildOf','3090', '0','0','relation','0', '2','3261','1','2013-11-22 13:10:54','1', ''),
+('3083','Neice Or Nephew of','3084', '','open', '2','IsNeiceOrNephewOf','3083', '0','0','relation','0', '0','3259','1','2014-04-30 18:21:04','1', ''),
+('3084','Aunt Or Uncle of','3083', '','open', '2','IsAuntOrUncleOf','3084', '0','0','relation','0', '0','3259','1','2014-04-30 18:21:09','1', ''),
+('3087','Brother of','3442', '','open', '2','IsBrotherOf','3087', '0','0','relation','0', '0','3118','2','2014-04-30 18:19:29','1', ''),
+('3088','Brother Or Sister In Law of','3088', '','open', '2','IsBrotherOrSisterInLaw','3088', '0','0','relation','0', '0','3258','1','2014-04-30 18:33:48','1', ''),
+('3089','Parent of','3189', '','open', '2','IsParentOf','3089', '0','0','relation','0', '2','3260','1','2014-04-30 18:22:23','1', ''),
+('3090','Child of','3089', '','open', '2','IsChildOf','3090', '0','0','relation','0', '2','3261','1','2014-04-30 18:22:11','1', ''),
 ('3091','IsContemporaryWith','3091', '','open', '2','IsContemporaryWith','3091', '0','0','relation','0', '0','3269','1','2013-11-22 13:10:54','1', ''),
-('3092','IsCousinOf','3092', '','open', '2','IsCousinOf','3092', '0','0','relation','0', '0','3259','1','2013-11-22 13:10:54','1', ''),
-('3094','IsDaughterOrSonInLaw','3105', '','open', '2','IsDaughterOrSonInLaw','3094', '0','0','relation','0', '0','3258','1','2013-11-22 13:10:54','1', ''),
-('3095','IsFatherOf','3090', '','open', '2','IsFatherOf','3095', '0','0','relation','0', '0','3089','2','2013-11-22 13:10:54','0', ''),
-('3099','IsGrandFatherOf','3116', '','open', '2','IsGrandfatherOf','3099', '0','0','relation','0', '0','3115','2','2013-11-22 13:10:54','1', ''),
-('3100','IsGrandMotherOf','3116', '','open', '2','IsGrandmotherOf','3100', '0','0','relation','0', '0','3115','2','2013-11-22 13:10:54','1', ''),
-('3103','IsMarriedTo','3103', '','open', '2','IsMarriedTo','3103', '0','0','relation','0', '0','3258','1','2013-11-22 13:10:54','1', ''),
-('3104','IsMotherOf','3090', '','open', '2','IsMotherOf','3104', '0','0','relation','0', '0','3089','2','2013-11-22 13:10:54','0', ''),
-('3105','IsMotherOrFatherInLaw','3094', '','open', '2','IsMotherOrFatherInLaw','3105', '0','0','relation','0', '0','3258','1','2013-11-22 13:10:54','1', ''),
+('3092','Cousin of','3092', '','open', '2','IsCousinOf','3092', '0','0','relation','0', '0','3259','1','2014-04-30 18:21:15','1', ''),
+('3094','Daughter Or Son In Law of','3105', '','open', '2','IsDaughterOrSonInLaw','3094', '0','0','relation','0', '0','3258','1','2014-04-30 18:33:52','1', ''),
+('3095','Father of','3090', '','open', '2','IsFatherOf','3095', '0','0','relation','0', '0','3089','2','2014-04-30 18:21:37','1', ''),
+('3099','GrandFather of','3116', '','open', '2','IsGrandfatherOf','3099', '0','0','relation','0', '0','3115','2','2014-04-30 18:21:58','1', ''),
+('3100','GrandMother of','3116', '','open', '2','IsGrandmotherOf','3100', '0','0','relation','0', '0','3115','2','2014-04-30 18:22:05','1', ''),
+('3104','Mother of','3090', '','open', '2','IsMotherOf','3104', '0','0','relation','0', '0','3089','2','2014-04-30 18:21:43','1', ''),
+('3105','Mother Or Father In Law of','3094', '','open', '2','IsMotherOrFatherInLaw','3105', '0','0','relation','0', '0','3258','1','2014-04-30 18:34:04','1', ''),
 ('3108','IsRelatedTo','3108', '','open', '2','IsRelatedTo','3108', '0','0','relation','0', '0','3001','1','2013-11-22 13:10:54','0', ''),
 ('3110','4. Family','0', '','open', '2','Family','3110', '0','0','relation','0', '13','0','0','2013-11-22 13:10:54','1', ''),
 ('3113','3. Temporal','0', '','open', '2','Temporal','3113', '0','0','relation','0', '4','0','0','2013-11-22 13:10:54','1', ''),
-('3115','IsGrandParentOf','3116', '','open', '2','IsGrandparentOf','3115', '0','0','relation','0', '2','3260','1','2013-11-22 13:10:54','1', ''),
-('3116','IsGrandChildOf','3115', '','open', '2','IsGrandchildOf','3116', '0','0','relation','0', '2','3261','1','2013-11-22 13:10:54','1', ''),
-('3117','IsSisterOf','3118', '','open', '2','IsSisterOf','3117', '0','0','relation','0', '0','3118','2','2013-11-22 13:10:54','0', ''),
-('3118','IsSiblingOf','3118', '','open', '2','IsSiblingOf','3118', '0','0','relation','0', '2','3110','1','2013-11-22 13:10:54','0', ''),
-('3133','IsFamilyMemberOf','3133', 'Added from LORE','open', '2','IsFamilyMemberOf','3133', '0','0','relation','0', '0','3110','1','2013-11-22 13:10:54','0', ''),
+('3115','GrandParent of','3243', '','open', '2','IsGrandparentOf','3115', '0','0','relation','0', '2','3260','1','2014-04-30 18:22:40','1', ''),
+('3116','GrandChild of','3115', '','open', '2','IsGrandchildOf','3116', '0','0','relation','0', '2','3261','1','2014-04-30 18:22:28','1', ''),
+('3117','Sister of','3118', '','open', '2','IsSisterOf','3117', '0','0','relation','0', '0','3118','2','2014-04-30 18:19:35','1', ''),
+('3118','2. Siblings','3117', '','open', '2','IsSiblingOf','3118', '0','0','relation','0', '2','3110','1','2014-04-30 18:32:46','1', ''),
+('3133','7. Other Family Member of','3133', 'Added from LORE','open', '2','IsFamilyMemberOf','3133', '0','0','relation','0', '0','3110','1','2014-04-30 18:34:18','1', ''),
 ('3170','has_location','0', '','reserved', '2','has_location','3170', '0','0','relation','0', '0','3001','1','2013-11-22 13:10:54','1', ''),
-('3188','IsDaughterOf','3089', '','open', '2','IsDaughterOf','3188', '0','0','relation','0', '0','3090','2','2013-11-22 13:10:54','0', ''),
-('3189','IsSonOf','3089', '','open', '2','IsSonOf','3189', '0','0','relation','0', '0','3090','2','2013-11-22 13:10:54','0', ''),
-('3242','IsGrandSonOf','3115', '','open', '2','IsGrandSonOf','3242', '0','0','relation','0', '0','3116','2','2013-11-22 13:10:54','1', ''),
-('3243','IsGrandDaughterOf','3115', '','open', '2','IsGrandDaughterOf','3243', '0','0','relation','0', '0','3116','2','2013-11-22 13:10:54','1', ''),
-('3258','byMarriage','0', '','', '0','','0', '0','0','relation','0', '0','3110','1','2013-11-22 13:10:54','0', ''),
-('3259','Colateral relationships','0', 'Your parents siblings and their offspring','', '0','','0', '0','0','relation','0', '0','3110','1','2013-11-22 13:10:54','0', ''),
-('3260','Ancestors','0', '','', '0','','0', '0','0','relation','0', '0','3110','1','2013-11-22 13:10:54','0', ''),
-('3261','Descendants','0', 'Children and their children','', '0','','0', '0','0','relation','0', '0','3110','1','2013-11-22 13:10:54','0', ''),
+('3188','Daughter of','3089', '','open', '2','IsDaughterOf','3188', '0','0','relation','0', '0','3090','2','2014-04-30 18:22:17','1', ''),
+('3189','Son of','3089', '','open', '2','IsSonOf','3189', '0','0','relation','0', '0','3090','2','2014-04-30 18:22:22','1', ''),
+('3242','GrandSon of','3115', '','open', '2','IsGrandSonOf','3242', '0','0','relation','0', '0','3116','2','2014-04-30 18:22:32','1', ''),
+('3243','GrandDaughter of','3115', '','open', '2','IsGrandDaughterOf','3243', '0','0','relation','0', '0','3116','2','2014-04-30 18:22:40','1', ''),
+('3258','6. In Laws','3258', '','', '0','','0', '0','0','relation','0', '0','3110','1','2014-04-30 18:33:26','0', ''),
+('3259','5. Colateral relationships','3259', 'Your parents\' siblings and their offspring','', '0','','0', '0','0','relation','0', '0','3110','1','2014-04-30 18:33:20','0', ''),
+('3260','3. Ancestors','3261', '','', '0','','0', '0','0','relation','0', '0','3110','1','2014-04-30 18:32:59','0', ''),
+('3261','4. Descendants','3260', 'Children and their children','', '0','','0', '0','0','relation','0', '0','3110','1','2014-04-30 18:33:13','0', ''),
 ('3262','Contains','0', '','', '0','','0', '0','0','relation','0', '0','3269','1','2013-11-22 13:10:54','0', ''),
 ('3263','IsContainedWithin','0', '','', '0','','0', '0','0','relation','0', '0','3269','1','2013-11-22 13:10:54','0', ''),
 ('3264','IsCoterminousWith','0', '','', '0','','0', '0','0','relation','0', '0','3269','1','2013-11-22 13:10:54','0', ''),
@@ -598,7 +610,7 @@
 ('3439','Secretary','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:10','0', ''),
 ('3440','President','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:14','0', ''),
 ('3441','Chairman','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:19','0', ''),
-('3442','Treasurer','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:24','0', ''),
+('3442','Treasurer','3087', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-04-30 18:10:34','0', ''),
 ('3443','Member','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:31','0', ''),
 ('3444','Honorary Member','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:21:37','0', ''),
 ('3445','Owner','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 13:24:04','0', ''),
@@ -663,8 +675,8 @@
 ('3505','Employee','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 16:45:39','0', ''),
 ('3506','Client','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 16:46:12','0', ''),
 ('3507','isAssociatedWith','', '','open', '','','', '0','0','relation','0', '0','3437','1','2014-02-03 17:18:31','0', ''),
-('3508','junk','', '','open', '','','', '0','0','enum','0', '0','','1','2014-02-04 14:39:09','0', ''),
-('3509','junk1','', '','open', '','','', '0','0','enum','0', '0','3508','1','2014-02-04 14:39:13','0', ''),
+('3508','HuNI Concept Type','', '','open', '','','', '0','0','enum','0', '0','','1','2014-04-30 20:41:33','0', ''),
+('3509','Types need to be defined','', '','open', '','','', '0','0','enum','0', '0','3508','1','2014-04-30 20:41:50','0', ''),
 ('3510','Title type','', '','open', '','','', '0','0','enum','0', '0','','1','2014-02-11 14:28:10','0', ''),
 ('3511','Direct from publication','', '','open', '','','', '0','0','enum','0', '0','3510','1','2014-02-11 14:28:34','0', ''),
 ('3512','AustLit','', '','open', '','','', '0','0','enum','0', '0','3510','1','2014-02-11 14:28:39','0', ''),
@@ -699,43 +711,46 @@
 ('3541','Field Mapping','', '','open', '','','', '0','0','relation','0', '0','','1','2014-02-17 19:16:25','0', ''),
 ('3542','isDerivedFrom','3543', '','open', '','','', '0','0','relation','0', '0','3541','1','2014-02-17 19:28:54','0', ''),
 ('3543','Populates','3542', '','open', '','','', '0','0','relation','0', '0','3541','1','2014-02-18 17:27:59','0', ''),
+('3544','Husband of','3545', '','', '','','', '0','0','relation','0', '0','3546','1','2014-04-30 18:31:01','0', ''),
+('3545','Wife of','3544', '','', '','','', '0','0','relation','0', '0','3546','1','2014-04-30 18:31:27','0', ''),
+('3546','1. Marriage','', '','', '','','', '0','0','relation','0', '0','3110','1','2014-04-30 18:30:25','0', ''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD TYPES
 
 -- `rty_ID`, `rty_Name`, `rty_OrderInGroup`, `rty_Description`, `rty_TitleMask`, `rty_CanonicalTitleMask`, `rty_Plural`, `rty_Status`, `rty_OriginatingDBID`, `rty_NameInOriginatingDB`, `rty_IDInOriginatingDB`, `rty_NonOwnerVisibility`, `rty_ShowInLists`, `rty_RecTypeGroupID`, `rty_RecTypeModelIDs`, `rty_FlagAsFieldset`, `rty_ReferenceURL`, `rty_AlternativeRecEditor`, `rty_Type` , `rty_ShowURLOnEditForm`, `rty_ShowDescriptionOnEditForm`, `rty_LocallyModified`
 
->>StartData>> ('1','Record relationship','30','A relationship of a defined type between two records in the database, may include a time range over which the relationship is valid, and notes about the relationship','[Title for relationship] ([Source record.RecTitle] [Relationship Type] [Target record.RecTitle])', '[1] ([7.RecTitle] [6] [5.RecTitle])','Record relationships','reserved', '2','Record relationship','1', 'viewable','0','4','', '1','','','relationship', '0','1','1'),
-('2','Web site / page','1','A web site URL, typically a specific page (may be the home page of a website or specific pages or documents of interest)','[Page title]', '[1]','Web site / pages','reserved', '2','Web site / page','2', 'viewable','1','16','', '0','','','normal', '1','1','1'),
-('3','Notes','2','A simple record type for taking notes','[Title]', '[1]','Notes','approved', '2','Notes','3', 'viewable','1','16','', '0','','','normal', '1','1','1'),
-('4','Organisation','0','Organisations (companies, universities, granting bodies, museums, libraries etc.). Has some existence in its own right above and beyond just being a group of particular people. In essence is a social concept/agreement that occurs in time and may be related to people, places, other concepts etc. May have an existence as a legal entity but not necessarily.','[123.2-1]', '[2]: [1]','Organisations','approved', '2','Organisation','4', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('5','Digital media item','0','Digital media files - typically image, sound, video - uploaded to the database or external reference','[Title]', '[1]','Digital media items','reserved', '2','Digital media file','5', 'viewable','1','16','', '0','','','normal', '0','1','1'),
-('6','Aggregation','0','A record which describes a static or dynamic collection of records and their filtering and layout, or acts as a root to which other records point, or both','[Aggregation Name]', '[1]','Aggregations','reserved', '2','Aggregation','6', 'viewable','1','16','', '0','','','normal', '0','1','1'),
-('7','Blog post','0','Blog post used to construct blogs, the text of the post is stored in the WYSIWYG text field','[Title of post]', '[1]','Blog posts','reserved', '2','Blog post','7', 'viewable','0','4','', '0','','','normal', '0','1','1'),
-('8','Interpretive annotation','0','Metadata about a date, spatial extent or other interpretation of information','[Summary title] - by [Author(s).recTitle] [Validity date] transcribed by [Transcriber(s).recTitle]', '[1] - by [15.recTitle] [10] transcribed by [14.recTitle]','Interpretive annotations','reserved', '2','Interpretation','8', 'viewable','1','16','', '0','','','normal', '0','1','1'),
-('9','Email','0','An email including content and metadata, often derived from an email forwarded or ccd to the database\'s linked IMAP server from a user\'s account','[Subject] from: [Email of sender] on: [Date originally sent]', '[1] from: [24] on: [9]','Emails','reserved', '2','Email','9', 'viewable','0','4','', '0','','','normal', '0','1','1'),
-('10','Person','33','A standard record for a person, may be expanded with additional information as required. A natural person who was born, had/has a physical body. Exists independently in their own right. May be identified but can never be defined.','[Family name], [Given names] ([Birth Date])', '[1], [18] ([10])','Persons','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '1','1','1'),
-('13','Event (historical)','0','Historical events such as wars or other significant occurances. Something that happens in time and space and may involve people, places, organisations, works, concepts and possibly other entities. In essence it is something reified out of a continuous dynamic stream of interactions of entities in time and space. It may be bounded in various ways citing place, people, activities, state transitions and more. The boundaries may be definite or fuzzy. Reification occurs on the basis of being considered significant enough by someone that they wish to refer to it as an entity in its own right. Doesn\'t really have an independent existence: is dependent on all the other entities and their interactions.','[2-1] ([2-10]-[2-11])', '[1] ([10]-[11])','Event (historical)s','approved', '3','Event - historical','1007', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('14','Place (Location)','0','A real, spatial location. We will assume all spatial locations relate to Earth, and thus assume all locations are geo-locations. ie not on other planets, moons, in space or in fictional worlds or realms. Places in HuNI may be specified as a lat/long point (possibly extending for a certain distance) or as a lat/long bounded area. May have fuzzy boundaries. May change over time. Can still be a place even if HuNI does not have the information about the co-ordinates. However, if it is not a real place, or is quite doubtful or contentious eg Shangri-la, it should be modelled as a concept rather than a location.','[2-1]', '[1]','Place (Location)s','approved', '3','Place','1009', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('18','Time Period','0','A temporal period defined by a (potentially uncertain and/or fuzzy) start and end date. Should also include a spatial extent as periods are spatially specific eg. Chinese mediaeval is quite different from European','[2-1] [[ [2-10] - [2-11] ]] [96.label]', '','Time Periods','open', '','','', 'viewable','1','1','', '0','http://en.wikipedia.org/wiki/Periodization','','normal', '0','1','0'),
-('19','Concept','0','Something that essentially has only a mental existence, although it may relate to other kinds of entity in various ways. It can be written down, illustrated and communicated in other ways, but it\'s primary existence is in the mind.','[2-1] [[ [2-15.RecTitle] ]]', '','Concepts','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('20','Work','0','Something created by someone that has some independent existence, usually either physical or digital. Can be transferred from one person to another whilst retaining its essential form and structure eg it could be posted or sent via email. Once created, usually doesn\'t change, although it may be interactive eg a computer program. May have versions that are related but differ in some way.','[2-1]', '','Works','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('26','Person Name','0','An instance of the name of a person, allowing for multiple types of name (legal, stage, nickname) and names which change (eg. marriage, deed poll)','[2-1]', '','Person Names','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
-('27','Organisation Name','0','An instance of naming of an organisation. The naming can have a number of parts and be active over a specified time range.','[2-1]', '','Organisation Names','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('31','HuNI Field Description','0','A record describing a field in a HuNI entity type in the HuNI data model','[2-1] [[[147.label], [148.label]]] Entity: [150.label]', '','HuNI Field Descriptions','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','1'),
-('32','Work title','0','The title of a work including its language, title, subtitle etc.','[2-1]', '','Work titles','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('33','Work External Identifier','0','An external identifier of a work, ie a reference in an external database or cataloguing system','[2-1]', '','Work External Identifiers','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('34','Source field','0','Mapping for a data field in the given data source','[179.label] - [170] [[ [147.label], [148.label] ]]', '','Source fields','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','0'),
-('35','Data source','0','Description of a HuNI dataset','[2-2] - [2-1]', '','Data sources','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','0'),
+>>StartData>> ('1','Record relationship','30','A relationship of a defined type between two records in the database, may include a time range over which the relationship is valid, and notes about the relationship','', '[1] ([7.RecTitle] [6] [5.RecTitle])','Record relationships','reserved', '2','Record relationship','1', 'viewable','0','4','', '1','','','relationship', '0','1','1'),
+('2','Web site / page','1','A web site URL, typically a specific page (may be the home page of a website or specific pages or documents of interest)','', '[1]','Web site / pages','reserved', '2','Web site / page','2', 'viewable','1','16','', '0','','','normal', '1','1','1'),
+('3','Notes','2','A simple record type for taking notes','', '[1]','Notes','approved', '2','Notes','3', 'viewable','1','16','', '0','','','normal', '1','1','1'),
+('4','Organisation','0','Organisations (companies, universities, granting bodies, museums, libraries etc.). Has some existence in its own right above and beyond just being a group of particular people. In essence is a social concept/agreement that occurs in time and may be related to people, places, other concepts etc. May have an existence as a legal entity but not necessarily.','', '[2]: [1]','Organisations','approved', '2','Organisation','4', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('5','Digital media item','0','Digital media files - typically image, sound, video - uploaded to the database or external reference','', '[1]','Digital media items','reserved', '2','Digital media file','5', 'viewable','1','16','', '0','','','normal', '0','1','1'),
+('6','Aggregation','0','A record which describes a static or dynamic collection of records and their filtering and layout, or acts as a root to which other records point, or both','', '[1]','Aggregations','reserved', '2','Aggregation','6', 'viewable','1','16','', '0','','','normal', '0','1','1'),
+('7','Blog post','0','Blog post used to construct blogs, the text of the post is stored in the WYSIWYG text field','', '[1]','Blog posts','reserved', '2','Blog post','7', 'viewable','0','4','', '0','','','normal', '0','1','1'),
+('8','Interpretive annotation','0','Metadata about a date, spatial extent or other interpretation of information','', '[1] - by [15.recTitle] [10] transcribed by [14.recTitle]','Interpretive annotations','reserved', '2','Interpretation','8', 'viewable','1','16','', '0','','','normal', '0','1','1'),
+('9','Email','0','An email including content and metadata, often derived from an email forwarded or ccd to the database\'s linked IMAP server from a user\'s account','', '[1] from: [24] on: [9]','Emails','reserved', '2','Email','9', 'viewable','0','4','', '0','','','normal', '0','1','1'),
+('10','Person','33','A standard record for a person, may be expanded with additional information as required. A natural person who was born, had/has a physical body. Exists independently in their own right. May be identified but can never be defined.','[2-1], [2-18]', '[1], [18] ([10])','Persons','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '1','1','1'),
+('13','Event (historical)','0','Historical events such as wars or other significant occurances. Something that happens in time and space and may involve people, places, organisations, works, concepts and possibly other entities. In essence it is something reified out of a continuous dynamic stream of interactions of entities in time and space. It may be bounded in various ways citing place, people, activities, state transitions and more. The boundaries may be definite or fuzzy. Reification occurs on the basis of being considered significant enough by someone that they wish to refer to it as an entity in its own right. Doesn\'t really have an independent existence: is dependent on all the other entities and their interactions.','[2-1] [[ [2-10] - [2-11] ]]', '[1] ([10]-[11])','Event (historical)s','approved', '3','Event - historical','1007', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('14','Place (Location)','0','A real, spatial location. We will assume all spatial locations relate to Earth, and thus assume all locations are geo-locations. ie not on other planets, moons, in space or in fictional worlds or realms. Places in HuNI may be specified as a lat/long point (possibly extending for a certain distance) or as a lat/long bounded area. May have fuzzy boundaries. May change over time. Can still be a place even if HuNI does not have the information about the co-ordinates. However, if it is not a real place, or is quite doubtful or contentious eg Shangri-la, it should be modelled as a concept rather than a location.','', '[1]','Place (Location)s','approved', '3','Place','1009', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('18','Time Period','0','A temporal period defined by a (potentially uncertain and/or fuzzy) start and end date. Should also include a spatial extent as periods are spatially specific eg. Chinese mediaeval is quite different from European','', '','Time Periods','open', '','','', 'viewable','1','1','', '0','http://en.wikipedia.org/wiki/Periodization','','normal', '0','1','0'),
+('19','Concept','0','Something that essentially has only a mental existence, although it may relate to other kinds of entity in various ways. It can be written down, illustrated and communicated in other ways, but it\'s primary existence is in the mind.','', '','Concepts','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('20','Work','0','Something created by someone that has some independent existence, usually either physical or digital. Can be transferred from one person to another whilst retaining its essential form and structure eg it could be posted or sent via email. Once created, usually doesn\'t change, although it may be interactive eg a computer program. May have versions that are related but differ in some way.','', '','Works','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('26','Person Name','0','An instance of the name of a person, allowing for multiple types of name (legal, stage, nickname) and names which change (eg. marriage, deed poll)','', '','Person Names','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('27','Organisation Name','0','An instance of naming of an organisation. The naming can have a number of parts and be active over a specified time range.','', '','Organisation Names','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('31','HuNI Field Description','0','A record describing a field in a HuNI entity type in the HuNI data model','', '','HuNI Field Descriptions','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','0'),
+('32','Work title','0','The title of a work including its language, title, subtitle etc.','', '','Work titles','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('33','Work External Identifier','0','An external identifier of a work, ie a reference in an external database or cataloguing system','', '','Work External Identifiers','open', '','','', 'viewable','1','1','', '0','','','normal', '0','1','0'),
+('34','Source field','0','Mapping for a data field in the given data source','', '','Source fields','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','0'),
+('35','Data source','0','Description of a HuNI dataset','', '','Data sources','open', '','','', 'viewable','1','20','', '0','','','normal', '0','1','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPES
 
@@ -823,8 +838,8 @@
 ('105','Funding Amount','','freetext','Funding Amount', '','','open','1066', 'Funding Amount','207','106', '0','','', '','0','1','viewable','0'),
 ('106','HEADING 12','Please document the nature of this detail type (field)) ...','separator','Headings serve to break the data entry form up into sections', '','','open','3', 'HEADING 1','1053','106', '0','','', '','0','1','viewable','0'),
 ('107','Discipline','','enum','Discipline', '','','open','1066', 'Discipline','205','106', '0','{\"3377\":{\"3287\":{},\"3288\":{}}}','[\"3378\"]', '','0','1','viewable','0'),
-('108','Funding Source Reference','','resource','Funding Source Reference', '','','open','1066', 'Funding Source Reference','254','106', '0','','', '23','0','1','viewable','1'),
-('109','Grant Reference','','resource','Grant Reference', '','','open','1066', 'Grant Reference','253','106', '0','','', '22','0','1','viewable','1'),
+('108','Funding Source Reference','','resource','Funding Source Reference', '','','open','1066', 'Funding Source Reference','254','106', '0','','', '','0','1','viewable','1'),
+('109','Grant Reference','','resource','Grant Reference', '','','open','1066', 'Grant Reference','253','106', '0','','', '','0','1','viewable','1'),
 ('110','AeR Responsibility','Please document the nature of this detail type (field)) ...','enum','Person in AeR who created / is responsible for / manages the project', '','','open','1086', 'AeR Responsibility','97','106', '0','{\"3380\":{},\"3381\":{},\"3382\":{},\"3383\":{},\"3384\":{},\"3385\":{},\"3386\":{},\"3387\":{},\"3388\":{}}','', '','0','1','viewable','0'),
 ('111','Narrative of importance','Please document the nature of this detail type (field)) ...','blocktext','A narratie about he criticality of the project, including adherence to deadlines and consequences of delay/failure', '','','open','1086', 'Narrative of importance','98','106', '0','','', '','0','1','viewable','0'),
 ('112','Risks','Please document the nature of this detail type (field)) ...','blocktext','A summary of the major risks with the project and any solutions which might be put in place', '','','open','1086', 'Risks','99','106', '0','','', '','0','1','viewable','0'),
@@ -836,8 +851,8 @@
 ('118','Final cost (hours)','Please document the nature of this detail type (field)) ...','float','Final cost in hours - may be sum of several work completion items from different people', '','','open','1086', 'Final cost (hours)','95','106', '0','','', '','0','1','viewable','0'),
 ('119','Allocated to','Please document the nature of this detail type (field)) ...','enum','The person to whom a task is allocated', '','','open','1086', 'Allocated to','96','106', '0','3318','', '','0','1','viewable','0'),
 ('120','Firm deadline','Please document the nature of this detail type (field)) ...','enum','Degree to which the required date is firm or flexible', '','','open','1086', 'Firm deadline','101','106', '0','3329','', '','0','1','viewable','0'),
-('121','Work item','Please document the nature of this detail type (field)) ...','resource','A specific work item which can be allocated, costed and marked off', '','','open','1086', 'Work item','90','106', '0','','', '25','0','1','viewable','0'),
-('122','Work package >','Please document the nature of this detail type (field)) ...','resource','A work package linked to this record', '','','open','1086', 'Work package >','100','106', '0','','', '24','0','1','viewable','0'),
+('121','Work item','Please document the nature of this detail type (field)) ...','resource','A specific work item which can be allocated, costed and marked off', '','','open','1086', 'Work item','90','106', '0','','', '','0','1','viewable','0'),
+('122','Work package >','Please document the nature of this detail type (field)) ...','resource','A work package linked to this record', '','','open','1086', 'Work package >','100','106', '0','','', '','0','1','viewable','0'),
 ('123','Organisation Name','Please document the nature of this detail type (field)) ...','resource','An instance of naming of an organisation', '','','open','', '','','104', '0','','', '27','','1','viewable','0'),
 ('124','Primary (flag)','Please document the nature of this detail type (field)) ...','enum','Indicate which of several names is the one by which the organisation is most commonly known. Only mark one name as primary', '','','open','', '','','104', '0','3403','', '','','1','viewable','0'),
 ('125','Flourished from','Please document the nature of this detail type (field)) ...','date','Date at which organisation started flourishing', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
@@ -851,9 +866,9 @@
 ('133','ISBN','','freetext','ISBN', '','','open','3', 'ISBN','1011','106', '0','','', '','0','1','viewable','0'),
 ('134','HEADING 3','Please document the nature of this detail type (field)) ...','separator','Headings serve to break the data entry form up into sections', '','','open','3', 'HEADING 3','1056','106', '0','','', '','0','1','viewable','0'),
 ('135','URL','Please document the nature of this detail type (field)) ...','freetext','The URL of a resource or web page', '','','open','3', 'URL','1058','106', '0','','', '','0','1','viewable','0'),
-('136','ConferenceRef','','resource','ConferenceRef', '','','open','3', 'ConferenceRef','1014','106', '0','','', '29','0','1','viewable','0'),
+('136','ConferenceRef','','resource','ConferenceRef', '','','open','3', 'ConferenceRef','1014','106', '0','','', '','0','1','viewable','0'),
 ('137','Editor(s)','Please document the nature of this detail type (field)) ...','resource','Editor(s) of a work.', '','','open','3', 'Editor(s)','1013','106', '0','','', '10,4','0','1','viewable','0'),
-('138','Publication Reference','','resource','Publication Reference', '','','open','3', 'Publication Series Reference','1018','106', '0','','', '30','0','1','viewable','1'),
+('138','Publication Reference','','resource','Publication Reference', '','','open','3', 'Publication Series Reference','1018','106', '0','','', '','0','1','viewable','1'),
 ('139','Call number','Please document the nature of this detail type (field)) ...','freetext','Library or archive call number or ID', 'The library or archive call number or reference number used to identify and retrieve the item. It may be appropriate to add a code or abbreviation to the number to identify the library or collection.','','open','3', 'Call number','1019','106', '0','','', '','0','1','viewable','0'),
 ('140','Year - alternate','Please document the nature of this detail type (field)) ...','enum','An alternate statement when Year of publication is not available. eg: No date; In press', 'When no year or date of publication can be entered in the numerical field, the Year – alternate field should be used. ','','open','3', 'Year - alternate','1052','106', '0','5012','', '','0','1','viewable','0'),
 ('141','Editors','Please document the nature of this detail type (field)) ...','relmarker','The editors of a journal - may change, so date range should be included (under Options)', '','','open','3', 'Editors','1057','106', '0','{\"3429\":{},\"3430\":{},\"3431\":{}}','', '10','0','1','viewable','0'),
@@ -868,7 +883,7 @@
 ('150','HuNI Entity type','Please document the nature of this detail type (field)) ...','enum','A term defining a HuNI entity type to which this field belongs', '','','open','', '','','104', '0','3459','', '','','1','viewable','0'),
 ('151','HuNI XML tag','Please document the nature of this detail type (field)) ...','freetext','The XML tag to be used for this field in exporting to the HuNI aggregate', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
 ('152','Semantic URL','Please document the nature of this detail type (field)) ...','freetext','The URL of a semantic definition of the field', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
-('153','Detail record type','Please document the nature of this detail type (field)) ...','enum','The type of detail record (ie. group of attributes which may be repeated together)', '','','open','', '','','104', '0','{\"3478\":{},\"3523\":{},\"3477\":{},\"3476\":{},\"3522\":{},\"3552\":{},\"3553\":{},\"3515\":{}}','[]', '','','1','viewable','0'),
+('153','Detail record type','Please document the nature of this detail type (field)) ...','enum','The type of detail record (ie. group of attributes which may be repeated together)', '','','open','', '','','104', '0','{\"3478\":{},\"3523\":{},\"3477\":{},\"3476\":{},\"3522\":{},\"3515\":{}}','[]', '','','1','viewable','0'),
 ('154','Type of name','Please document the nature of this detail type (field)) ...','enum','The type of name being recorded for an organisation or person', '','','open','', '','','104', '0','3479','', '','','1','viewable','0'),
 ('155','Generated by HuNI','Please document the nature of this detail type (field)) ...','enum','Flags whether the fields are generated by HuNI or must be created and delivered by the source dataset', '','','open','', '','','104', '0','3488','', '','','1','viewable','0'),
 ('156','Modification notes','Please document the nature of this detail type (field)) ...','blocktext','Questions and notes about things which should be modified', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
@@ -896,11 +911,19 @@
 ('179','Source dataset entity type','Please document the nature of this detail type (field)) ...','enum','The entity type used in the source dataset', '','','open','', '','','104', '0','3525','', '','','1','viewable','0'),
 ('180','Source mappings','Please document the nature of this detail type (field)) ...','relmarker','Mapping of this field to fields in different data sources', '','','open','', '','','104', '0','3541','', '34','','1','viewable','0'),
 ('181','Target HuNI Mapping','Please document the nature of this detail type (field)) ...','relmarker','The entity type and field to which this source data field maps', '','','open','', '','','104', '0','3541','', '31','','1','viewable','0'),
+('182','Additional naming','Please document the nature of this detail type (field)) ...','resource','A reference to a Person Name record providing additional or secondary names', '','','open','', '','','104', '0','','', '26','','1','viewable','0'),
+('183','HuNI ID','Please document the nature of this detail type (field)) ...','float','Unique identifier provided by HuNI, enter 0 if not yet determined', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
+('184','Initials','Please document the nature of this detail type (field)) ...','freetext','A person\'s initials, separate with periods as in J.H.B. where B is the surname', '','','open','', '','','104', '0','','', '','','1','viewable','0'),
+('185','Identity (same as)','Please document the nature of this detail type (field)) ...','relmarker','Identify other person records referencing, or thought to reference, the same person', '','','open','', '','','104', '0','{\"3492\":{},\"3494\":{}}','[]', '10','','1','viewable','0'),
+('186','Associated with','Please document the nature of this detail type (field)) ...','relmarker','Associations of a person with another person, concept or place', '','','open','', '','','104', '0','{\"3108\":{},\"3170\":{},\"3437\":{\"3438\":{},\"3439\":{},\"3440\":{},\"3441\":{},\"3442\":{},\"3443\":{},\"3444\":{},\"3445\":{},\"3446\":{},\"3504\":{},\"3505\":{},\"3506\":{},\"3507\":{}}}','[\"3437\"]', '','','1','viewable','0'),
+('187','Family relationships','Please document the nature of this detail type (field)) ...','relmarker','Family relationships of a person', '','','open','', '','','104', '0','3110','', '10','','1','viewable','0'),
+('188','Flag primary name','Please document the nature of this detail type (field)) ...','enum','Flag if this is the primary name entry. Generally the most recognised name. Need not be any specific type of name.', '','','open','', '','','104', '0','3403','', '','','1','viewable','0'),
+('189','Concept type','Please document the nature of this detail type (field)) ...','enum','The type of concept being defined', '','','open','', '','','104', '0','3508','', '','','1','viewable','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD STRUCTURE
 
@@ -956,25 +979,25 @@
 ('58','9', '25','Email of recipients','Email addresses of all recipients of the email', 'Emails of all recipients of the email ','004','30', '','0','0', 'optional','viewable','approved','open', '2','58', '0','0','0', '','', '0','','0'),
 ('59','9', '3','Email Body','Content of the body/text of the email', '','005','60', '','0','0', 'optional','viewable','approved','open', '2','59', '1','0','1', '','', '0','','0'),
 ('60','9', '38','Attachments','Files attached to the email', 'Attached files','006','50', '','0','0', 'optional','viewable','approved','open', '2','60', '0','0','0', '','', '0','','0'),
-('61','10', '1','Family name','Family name of person', '','001','40', '','1','0', 'required','viewable','reserved','open', '2','61', '1','1','1', '','', '0','','1'),
-('62','10', '18','Given name(s)','The given name or names of the person placed in their normal order', '','002','40', '','1','0', 'recommended','viewable','reserved','open', '2','62', '1','0','0', '','', '0','','1'),
-('63','10', '19','Honorific','Title or grade - Prof, Dr, Sir etc., recommend omitting Mr, Mrs or Ms', '','007','60', '','1','0', 'optional','viewable','approved','open', '2','63', '1','0','1', '','', '0','','1'),
-('64','10', '10','Birth date','Date of Birth (year or year-month or year-month-day)', '','015','10', '','2','0', 'recommended','viewable','approved','open', '2','64', '1','0','1', '','', '0','','1'),
-('65','10', '27','Birth place as text','Name of location where person was born, use town or city and country eg. Penzance, UK', '','017','40', '','2','0', 'optional','viewable','approved','open', '2','65', '1','0','1', '','', '0','','1'),
-('66','10', '20','Birth Gender','Individual\'s gender as classified at Birth. We may consider adding another field to accommodate Gender changes later in life, if needed.', '','003','30', '528','0','0', 'required','viewable','approved','open', '2','66', '1','1','0', '','', '0','','1'),
-('67','10', '3','Short description','Short description of the person eg. 100 words, for use in annotated lists/web pages', '','006','80', '','0','0', 'recommended','viewable','approved','open', '2','67', '1','0','0', '','', '0','','1'),
-('68','10', '23','Email address','Email address(es) of the person, enter one address only on each line', '','028','60', '','0','0', 'optional','viewable','approved','open', '2','68', '0','0','1', '','', '0','','1'),
-('69','10', '17','Contact info or URL','Contact information - it is best to use the URL of a staff directory page to avoid the need to update contact details', '','029','60', '','0','0', 'optional','viewable','approved','open', '2','69', '0','0','0', '','', '0','','1'),
-('70','10', '37','NLA Party Identifier','NLA party identifier (Australia), also applies to Organisations', '','005','30', '','0','0', 'optional','viewable','approved','open', '2','70', '1','0','0', '','', '0','','1'),
-('71','10', '11','Death date','Date of death (year, or year-month or year-month-day)', 'Please provide an extended description for display on rollover ...','019','10', '','0','0', 'recommended','viewable','approved','open', '2','71', '1','0','1', '','', '0','','1'),
+('61','10', '1','Family name','Family name of person', '','002','40', '','1','0', 'required','viewable','reserved','open', '2','61', '1','1','1', '','', '0','','1'),
+('62','10', '18','Given name(s)','The given name or names of the person placed in their normal order', '','003','40', '','1','0', 'recommended','viewable','reserved','open', '2','62', '1','0','0', '','', '0','','1'),
+('63','10', '19','Honorific/Title','Title or grade - Prof, Dr, Sir etc., recommend omitting Mr, Mrs or Ms', '','006','60', '','1','0', 'optional','viewable','approved','open', '2','63', '1','0','1', '','', '0','','1'),
+('64','10', '10','Birth date','Date of Birth (year or year-month or year-month-day)', '','021','10', '','2','0', 'recommended','viewable','approved','open', '2','64', '1','0','1', '','', '0','','1'),
+('65','10', '27','Birth place as text','Name of location where person was born, use town or city and country eg. Penzance, UK', '','023','40', '','2','0', 'optional','viewable','approved','open', '2','65', '1','0','1', '','', '0','','1'),
+('66','10', '20','Birth Gender','Individual\'s gender as classified at Birth. We may consider adding another field to accommodate Gender changes later in life, if needed.', '','005','30', '528','0','0', 'required','viewable','approved','open', '2','66', '1','1','0', '','', '0','','1'),
+('67','10', '3','Short description/abstract','Short description of the person eg. 100 words, for use in annotated lists/web pages', '','013','80', '','0','0', 'recommended','viewable','approved','open', '2','67', '1','0','0', '','', '0','','1'),
+('68','10', '23','Email address','Email address(es) of the person, enter one address only on each line', '','036','60', '','0','0', 'optional','viewable','approved','open', '2','68', '0','0','1', '','', '0','','1'),
+('69','10', '17','Contact info or URL','Contact information - it is best to use the URL of a staff directory page to avoid the need to update contact details', '','037','60', '','0','0', 'optional','viewable','approved','open', '2','69', '0','0','0', '','', '0','','1'),
+('70','10', '37','NLA Party Identifier','NLA party identifier (Australia), also applies to Organisations', '','012','30', '','0','0', 'optional','viewable','approved','open', '2','70', '1','0','0', '','', '0','','1'),
+('71','10', '11','Death date','Date of death (year, or year-month or year-month-day)', 'Please provide an extended description for display on rollover ...','025','10', '','0','0', 'recommended','viewable','approved','open', '2','71', '1','0','1', '','', '0','','1'),
 ('1375','6', '1','Aggregation Name','The main name or title for the object. Title of a work, family name of person, name of organisation etc.', 'Please provide an extended description for display on rollover ...','000','40', '','1','0', 'required','viewable','open','open', '2','1375', '1','1','1', '','', '0','','1'),
 ('1376','6', '39','Thumbnail image','An image of approx. 200 pixels wide used to represent the record in search results and other compact listings', 'Please provide an extended description for display on rollover ...','011','60', '','0','0', 'optional','viewable','open','open', '2','1376', '1','0','1', '','', '0','','1'),
 ('1377','6', '3','Short summary','Notes about the aggregation, normally 100 - 200 words max. so usable in lists', 'Please provide an extended description for display on rollover ...','007','80', '','0','0', 'optional','viewable','open','open', '2','1377', '1','0','1', '','', '0','','1'),
 ('1379','6', '15','Creator - author, artist etc.','The person(s) or organisation(s) who created this record', 'May include authors, artists, organisations that sponsored a resource etc.','008','60', '','0','0', 'optional','viewable','open','open', '2','1379', '0','0','1', '','', '0','','1'),
 ('1380','6', '35','Copyright information','Copyright information, either a URL to a copyrigth statement or text describing the copyright', 'Please provide an extended description for display on rollover ...','009','100', '','0','0', 'optional','viewable','open','open', '2','1380', '1','0','1', '','', '0','','1'),
 ('1391','3', '4','Extended note','An extended version of the note and/or further detail', '','003','100', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1392','10', '57','Birth','Another separator field', '','014','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1393','10', '58','Contact info','Another separator field', '','027','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
+('1392','10', '57','Birth','Another separator field', '','020','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
+('1393','10', '58','Contact info','Another separator field', '','035','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1394','2', '4','Extended description','A more extensive description, often derived from text on the web page itself', '','010','100', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1395','7', '3','Short summary','Short summary, typically used in annotated lsitings, information popups and so forth. Aim for 100 - 200 words.', '','004','60', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1397','7', '15','Creator','The person or organisation who created the record/resource', 'May include authors, artists, organisations that sponsored a resource etc.','005','0', '','0','0', 'optional','viewable','open','open', '0','0', '0','0','1', '','', '0','','0'),
@@ -986,7 +1009,7 @@
 ('1403','6', '48','Heurist Layout String','A formatted string that can be interpretted by the Heurist Interface as specific layout.', 'Used to pre-configure the Heurist environment. Usually accompanying a query and/or a filter. The combination of these details enables the full current Heurist environment to be stored and/or sent to other users','004','80', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1404','6', '57','Aggregation fields','A heading for contact information', '','001','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1405','6', '58','Descriptive fields','A heading for the life history section of a person record', '','006','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1406','10', '39','Picture','An image used to represent the person. Typically ~ 200 pixels wide for display in search results and other compact listings', '','011','0', '','0','0', 'optional','viewable','approved','open', '0','0', '1','0','1', '','', '0','','0'),
+('1406','10', '39','Picture','An image used to represent the person. Typically ~ 200 pixels wide for display in search results and other compact listings', '','017','0', '','0','0', 'optional','viewable','approved','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1407','4', '57','Other information','A heading for contact information', '','021','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1408','4', '58','Type of organisation','A heading for the life history section of a person record', '','009','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1410','4', '17','Contact details or URL','Contact details, either as text or a URL to eg. a phonebook record or search', '','022','80', '','0','0', 'optional','viewable','approved','open', '0','0', '0','0','1', '','', '0','','0'),
@@ -1010,10 +1033,10 @@
 ('1428','5', '68','MD5 checksum','The calculated MD5 checksum for the file', '','016','40', '','0','0', 'optional','viewable','approved','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1429','5', '57','Technical information','A heading for contact information', '','008','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1430','2', '58','Location','Please rename to an appropriate heading within each record structure', '','004','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1432','10', '69','Descriptive information','Please rename to an appropriate heading within each record structure', '','004','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
+('1432','10', '69','Descriptive information','Please rename to an appropriate heading within each record structure', '','011','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1433','10', '70','Common information','Please rename to an appropriate heading within each record structure', '','000','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1434','10', '61','Multimedia >','Points to a multimedia record - use this in preference to a file field if you want to record additional metadata about the media file or use it in multiple records ', '','012','0', '','0','0', 'optional','viewable','open','open', '0','0', '','0','1', '','', '0','','0'),
-('1435','10', '38','Data files','An uploaded file or a reference to a file through a URI', 'A single detail of this type can be used to reference a file uploaded into Heurist or available via URL. Note that currently the URL must be publicly accessible','013','0', '','0','0', 'optional','viewable','open','open', '0','0', '','0','1', '','', '0','','0'),
+('1434','10', '61','Multimedia >','Points to a multimedia record - use this in preference to a file field if you want to record additional metadata about the media file or use it in multiple records ', '','018','0', '','0','0', 'optional','viewable','open','open', '0','0', '','0','1', '','', '0','','0'),
+('1435','10', '38','Data files','An uploaded file or a reference to a file through a URI', 'A single detail of this type can be used to reference a file uploaded into Heurist or available via URL. Note that currently the URL must be publicly accessible','019','0', '','0','0', 'optional','viewable','open','open', '0','0', '','0','1', '','', '0','','0'),
 ('1456','13', '1','Name of event','A succinct descriptive name for the event', '','000','60', '','1','0', 'required','viewable','reserved','open', '3','2079', '1','1','0', '','', '0','','1'),
 ('1457','13', '3','Description','Short summary of this event, up to 100 words, for use in popups, rollovers and listings', '','001','80', '','0','0', 'recommended','viewable','open','open', '3','2084', '1','0','0', '','', '0','','1'),
 ('1458','13', '8','Interpretation / discussion','The interpretation of this event (sources, discussion, alternatives etc.). More specific interpretations in the fields assoc. with spatial & temporal objects', '','002','50', '','0','0', 'recommended','viewable','open','open', '3','2085', '1','0','0', '','', '0','','1'),
@@ -1042,18 +1065,18 @@
 ('1481','14', '84','Name - alternate','Name - alternate', '','012','60', '','0','0', 'optional','viewable','open','open', '3','2284', '0','0','1', '','', '0','','1'),
 ('1482','14', '81','Additional','Headings serve to break the data entry form up into sections', '','007','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
 ('1483','14', '82','Location/time','Headings serve to break the data entry form up into sections', '','002','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
-('1496','10', '88','Death place','Place of person\'s death, reference to a Place record', '','020','0', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1497','10', '89','Birth place','Place of person\'s birth, reference to a Place record', '','016','0', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1498','10', '90','Death place as text','Place of person\'s death, expressed as a text', '','021','40', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1499','10', '4','Full biography','An extended description, use this where text will be limited and does not require any formatting, otherwise use the WYSIWYG text tab to enter formatted text', '','008','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1500','10', '91','Obituary','Text of obituary (or obituaries), include source', '','009','100', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1501','10', '92','Occupation(s)','Occupations practiced by the person', '','023','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1502','10', '93','Religious affiliation','The religious affiliation(s) of the person', '','024','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1503','10', '94','Cultural Heritage','The cultural heritage origin(s) of the person', '','025','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1504','10', '95','Indigenous','Whether the person is known to be or not to be of indigenous origin', '','026','0', '3344','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1505','10', '71','Death','Please rename to an appropriate heading within each record structure', '','018','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1506','10', '81','Life','Headings serve to break the data entry form up into sections', '','022','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1507','10', '82','Additional information','Headings serve to break the data entry form up into sections', '','010','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1496','10', '88','Death place','Place of person\'s death, reference to a Place record', '','026','0', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1497','10', '89','Birth place','Place of person\'s birth, reference to a Place record', '','022','0', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1498','10', '90','Death place as text','Place of person\'s death, expressed as a text', '','027','40', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1499','10', '4','Full biography','An extended description, use this where text will be limited and does not require any formatting, otherwise use the WYSIWYG text tab to enter formatted text', '','014','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1500','10', '91','Obituary','Text of obituary (or obituaries), include source', '','015','100', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1501','10', '92','Occupation(s)','Occupations practiced by the person', '','029','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1502','10', '93','Religious affiliation','The religious affiliation(s) of the person', '','030','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1503','10', '94','Cultural Heritage','The cultural heritage origin(s) of the person', '','031','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1504','10', '95','Indigenous','Whether the person is known to be or not to be of indigenous origin', '','032','0', '3344','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1505','10', '71','Death','Please rename to an appropriate heading within each record structure', '','024','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1506','10', '81','Life','Headings serve to break the data entry form up into sections', '','028','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1507','10', '82','Additional information','Headings serve to break the data entry form up into sections', '','016','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1508','18', '1','Period name','The main name or title for the object. Title of a work, family name of person, name of organisation etc.', '','000','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
 ('1509','18', '15','Author(s)','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','006','40', '','0','', 'optional','viewable','open','open', '1','', '','0','', '','', '','','1'),
 ('1510','18', '3','Short description','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','004','80', '','0','', 'recommended','viewable','open','open', '1','', '1','0','', '','', '','','1'),
@@ -1063,28 +1086,23 @@
 ('1516','18', '96','Spatial extent (region)','The spatial extent over which the time period applies', '','003','0', '141','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
 ('1517','18', '57','Metadata about definition','Please rename to an appropriate heading within each record structure', '','005','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1518','18', '97','Referencing','References to interpretations determining the naming and extent of the period', '','008','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1519','19', '1','Concept name','The main name or title for the concept', '','001','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
-('1520','19', '15','Author or Creator','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','004','40', '','0','', 'recommended','viewable','open','open', '1','', '','0','', '','', '','','1'),
-('1521','19', '3','Short summary','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','002','60', '','0','', 'recommended','viewable','open','open', '1','', '1','1','', '','', '','','1'),
-('1524','19', '57','Genesis metadata','Please rename to an appropriate heading within each record structure', '','003','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1525','19', '97','Referencing','References to interpretations determining the naming and extent of the period', '','005','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1526','19', '9','Date of creation','Enter a date either as a simple calendar date or through the temporal object popup (for complex/uncertain dates)', '','006','10', 'today','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1519','19', '1','Concept name','The main name or title for the concept', '','002','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
+('1520','19', '15','Author or Creator','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','006','40', '','0','', 'recommended','viewable','open','open', '1','', '','0','', '','', '','','1'),
+('1521','19', '3','Short summary','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','004','60', '','0','', 'recommended','viewable','open','open', '1','', '1','1','', '','', '','','1'),
+('1524','19', '57','Genesis metadata','Please rename to an appropriate heading within each record structure', '','005','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1525','19', '97','Referencing','References to interpretations determining the naming and extent of the period', '','007','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1526','19', '9','Date of creation','Enter a date either as a simple calendar date or through the temporal object popup (for complex/uncertain dates)', '','008','10', 'today','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1528','20', '15','Author/Creator(s)','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','006','40', '','0','', 'recommended','viewable','open','open', '1','', '','0','', '','', '','','1'),
 ('1529','20', '3','Description','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','005','60', '','0','', 'recommended','viewable','open','open', '1','', '1','0','', '','', '','','1'),
 ('1532','20', '98','Type of work','The broad category of the work', '','002','0', '','0','', 'required','viewable','open','open', '','', '','1','1', '','', '','','0'),
-('1533','19', '99','HuNI ID','A unique key identifying the entity, generated by HuNI', '','000','20', '','0','', 'recommended','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
-('1594','26', '1','Name / Title','The main name or title for the object. Title of a work, family name of person, name of organisation etc.', '','000','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','9'),
-('1595','26', '15','Author or Creator >','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','000','40', '','0','', 'optional','viewable','open','open', '1','', '','1','', '','', '','','9'),
-('1596','26', '3','Short summary','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','000','60', '','0','', 'recommended','viewable','open','open', '1','', '1','1','', '','', '','','9'),
-('1597','26', '39','Thumbnail image','An image of approx. 200 pixels wide used to represent the record in search results and other compact listings', '','000','60', '','0','', 'recommended','viewable','open','open', '1','', '1','1','', '','', '','','9'),
-('1598','26', '28','Mappable location','A geospatial object providing a mappable location for the record - can be used for any type of record with spatial location', 'Used to store standard geographical information. Can be a point, line or polygon. This detail can be thought of as an encapsulation of various sub details - e.g. latitude and longitude - which would otherwise need to be managed in separate details and therefore be more challenging to manage','000','40', '','0','', 'recommended','viewable','open','open', '1','', '1','1','', '','', '','','9'),
+('1594','26', '1','Name','The main part of the name being defined for the person: Family Name or other name by which the person is identified', '','004','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
 ('1599','4', '37','NLA Party Identifier','The NLA party identifier (Australia) for the organisation', '','001','10', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1601','4', '123','Organisation Name(s)','An instance of naming of an organisation', '','002','0', '','0','', 'required','viewable','open','open', '','', '','1','1', '','', '','','0'),
-('1602','27', '1','Organisation Name','The name of the organisation. Can be an official name or nickname', '','001','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
-('1604','27', '3','Notes','Short notes about this naming of the organisation, eg. the reasons, issues of uncertaintly and so forth', '','003','100', '','0','', 'recommended','viewable','open','open', '1','', '1','0','', '','', '','','1'),
-('1607','27', '124','Primary (flag)','Indicate which of several names is the one by which the organisation is most commonly known. Only mark one name as primary', '','000','0', '3404','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
-('1608','27', '10','Name used from','Starting date for this naming of the organisation', 'Note that this detail describes a temporal object and can be used to describe dates that have a level of uncertainty','004','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1609','27', '11','Name used to','Ending date for this naming of the organisation', 'Please provide an extended description for display on rollover ...','005','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1602','27', '1','Organisation Name','The name of the organisation. Can be an official name or nickname', '','004','40', '','0','', 'required','viewable','open','open', '1','', '1','1','', '','', '','','1'),
+('1604','27', '3','Notes','Short notes about this naming of the organisation, eg. the reasons, issues of uncertaintly and so forth', '','005','100', '','0','', 'recommended','viewable','open','open', '1','', '1','0','', '','', '','','1'),
+('1607','27', '124','Primary (flag)','Indicate which of several names is the one by which the organisation is most commonly known. Only mark one name as primary', '','001','0', '3404','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
+('1608','27', '10','Name used from','Starting date for this naming of the organisation', 'Note that this detail describes a temporal object and can be used to describe dates that have a level of uncertainty','007','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1609','27', '11','Name used to','Ending date for this naming of the organisation', 'Please provide an extended description for display on rollover ...','008','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1610','4', '125','Flourished from','Date at which organisation started flourishing', '','007','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1611','4', '126','Flourished to','Date at which organisation ceased flourishing', '','008','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1612','4', '127','Associated with occupation','Some organisation are specifically for artists, scientists etc. Choose occupations closely associated with the organisation\'s goals.', '','011','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
@@ -1145,11 +1163,33 @@
 ('1743','34', '179','Source dataset entity type','The entity type used in the source dataset', '','000','0', '','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
 ('1744','31', '180','Source mappings','Mapping of this field to fields in different data sources', '','009','0', '','0','', 'recommended','viewable','open','open', '','', '','0','1', '','', '','','0'),
 ('1745','34', '181','Target HuNI Mapping','The entity tyope and field to which this source data field maps', '','002','0', '','0','', 'recommended','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1746','10', '182','Additional naming','A reference to a Person Name record providing additional or secondary names', '','007','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1747','10', '183','HuNI ID','Unique identifier provided by HuNI, enter 0 if not yet determined', '','001','7', '0','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
+('1748','10', '184','Initials','A person\'s initials, separate with periods as in J.H.B. where B is the surname', '','004','10', '','0','', 'recommended','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1749','10', '125','Flourished from','Date at which person started flourishing - relevant for creatives', '','033','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1750','10', '126','Flourished to','Date at which person ceased flourishing - relevant for creatives', '','034','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1751','10', '185','Identity / different from','Identify other person records referencing, or thought to reference, the same person, or similar but not the same person', '','008','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1752','10', '186','Associated with','Associations of a person with another person, concept or place', '','009','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','9'),
+('1753','10', '187','Family relationships','Family relationships of a person', '','010','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1754','26', '188','Flag if primary name','Flag if this is the primary name entry. Generally the most recognised name. Need not be any specific type of name.', '','001','0', '3404','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
+('1755','26', '10','Start date','Start Date (may also include time and/or have fuzzy limits)', 'Note that this detail describes a temporal object and can be used to describe dates that have a level of uncertainty','008','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1756','26', '11','End date','End Date (may also include time and/or have fuzzy limits)', 'Please provide an extended description for display on rollover ...','009','10', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1757','26', '18','Given/additional names (if applicable)','Given names', '','005','40', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1758','26', '154','Type of name','The type of name being recorded for an organisation or person', '','002','0', '3480','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
+('1759','26', '19','Honorific','Title or honorific (Dr, Mrs, Ms, Professor, Sir etc.). Generally omit non-honorifics such as Mr, Mrs, Miss, Ms.', '','006','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1760','26', '57','Date range of name','Please rename to an appropriate heading within each record structure', '','007','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1761','26', '58','Naming','Please rename to an appropriate heading within each record structure', '','003','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1762','26', '69','Type of name','Please rename to an appropriate heading within each record structure', '','000','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1763','27', '57','Type of name','Please rename to an appropriate heading within each record structure', '','000','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1764','27', '58','Naming','Please rename to an appropriate heading within each record structure', '','003','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1765','27', '69','Dating','Please rename to an appropriate heading within each record structure', '','006','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1766','19', '189','Concept type','The type of concept being defined', '','003','0', '','0','', 'required','viewable','open','open', '','', '1','1','1', '','', '','','0'),
+('1767','19', '58','Concept','Please rename to an appropriate heading within each record structure', '','001','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RELATIONSHIP CONSTRAINTS
 
@@ -1157,9 +1197,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- FILE EXTENSIONS TO MIME TYPES
 
@@ -1350,9 +1390,9 @@
 ('zip','application/zip', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- Definitions translations
 
@@ -1360,9 +1400,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CALC FUNCTIONS
 
@@ -1370,9 +1410,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CROSSWALK
 
@@ -1380,9 +1420,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF LANGUAGE
 
@@ -1426,9 +1466,9 @@
 ('','YI','Yiddish',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF URL PREFIXES
 
@@ -1436,6 +1476,5 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+

@@ -1,31 +1,21 @@
-/*
-* Copyright (C) 2005-2013 University of Sydney
+/**
+* blankDBStructureDefinitionsOnly.sql: SQL file to create the definition tables for use in crosswalking
 *
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
 */
 
-/**
-* blankDBStructureDefinitionsOnly.sql: SQL file to create the definition tables for use in crosswalking 
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
 
  -- The rest of this file is a MySQL table creation script for the 10 (eventually more?)
@@ -40,7 +30,7 @@
 -- ***** THIS FILE MUST BE UPDATED IF THE DATABASE STRUCTURE IS CHANGED, see version # below
 --       Extract the relevant tables from blankDBStructure.sql
 
--- ***** Database version: 1.1  @ 13/9/2011 ******
+-- ***** Database version: 1.1.0  @ 13/9/2011, upodate 22 July 2014 ******
 
 -- -------------------------------------------------------------------------------------------------------
 
@@ -54,21 +44,20 @@
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
--- 
+--
 -- Host: localhost
 -- Generation Time: Oct 19, 2012 at 12:14 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
--- 
+--
 -- Database: 'hdb_H3CoreDefinitions'
--- 
-
+--
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defCalcFunctions'
--- 
+--
 
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
@@ -80,9 +69,9 @@ CREATE TABLE defCalcFunctions (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defCrosswalk'
--- 
+--
 
 CREATE TABLE defCrosswalk (
   crw_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key',
@@ -97,9 +86,9 @@ CREATE TABLE defCrosswalk (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defDetailTypeGroups'
--- 
+--
 
 CREATE TABLE defDetailTypeGroups (
   dtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Primary ID - Code for detail type groups',
@@ -112,9 +101,9 @@ CREATE TABLE defDetailTypeGroups (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defDetailTypes'
--- 
+--
 
 CREATE TABLE defDetailTypes (
   dty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Code for the detail type (field) - may vary between Heurist DBs',
@@ -146,9 +135,9 @@ CREATE TABLE defDetailTypes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defFileExtToMimetype'
--- 
+--
 
 CREATE TABLE defFileExtToMimetype (
   fxm_Extension varchar(10) NOT NULL COMMENT 'The file extension, indicates mimetype, icon and some beahviours',
@@ -163,9 +152,9 @@ CREATE TABLE defFileExtToMimetype (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defLanguages'
--- 
+--
 
 CREATE TABLE defLanguages (
   lng_NISOZ3953 char(3) NOT NULL COMMENT 'Three character NISO Z39.53 language code',
@@ -178,9 +167,9 @@ CREATE TABLE defLanguages (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defOntologies'
--- 
+--
 
 CREATE TABLE defOntologies (
   ont_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Ontology code, primary key',
@@ -201,9 +190,9 @@ CREATE TABLE defOntologies (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecStructure'
--- 
+--
 
 CREATE TABLE defRecStructure (
   rst_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key for the record structures table',
@@ -239,9 +228,9 @@ CREATE TABLE defRecStructure (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecTypeGroups'
--- 
+--
 
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
@@ -256,9 +245,9 @@ CREATE TABLE defRecTypeGroups (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRecTypes'
--- 
+--
 
 CREATE TABLE defRecTypes (
   rty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record type code, widely used to reference record types, primary key',
@@ -291,9 +280,9 @@ CREATE TABLE defRecTypes (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defRelationshipConstraints'
--- 
+--
 
 CREATE TABLE defRelationshipConstraints (
   rcs_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
@@ -317,9 +306,9 @@ CREATE TABLE defRelationshipConstraints (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defTerms'
--- 
+--
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
@@ -347,9 +336,9 @@ CREATE TABLE defTerms (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defTranslations'
--- 
+--
 
 CREATE TABLE defTranslations (
   trn_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
@@ -365,9 +354,9 @@ CREATE TABLE defTranslations (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table 'defURLPrefixes'
--- 
+--
 
 CREATE TABLE defURLPrefixes (
   urp_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'ID which will be stored as proxy for the URL prefix',
@@ -376,5 +365,4 @@ CREATE TABLE defURLPrefixes (
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
-
 
