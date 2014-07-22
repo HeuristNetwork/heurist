@@ -134,7 +134,7 @@
                         &nbsp;Bug report</a></li>
                 <li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
                     title="Click to clear and reload the internal working memory of Heurist" >
-                    Refresh memory</a></li>
+                    Refresh lists</a></li>
             </ul>
         </div> <!-- end quicklinks -->
 
@@ -177,7 +177,7 @@
                                 'and the data fields and rules which compose a record');
 
                             menuEntry('','Browse templates (Beta)','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
-                                'Browse documented record type templates on the Heurist Network site '.
+                                'Browse documented record type templates on HeuristNetwork.org '.
                                 'and selectively import them into the current database');
 
                             menuEntry('','Import structure','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,

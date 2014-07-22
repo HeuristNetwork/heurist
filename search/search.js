@@ -3284,12 +3284,15 @@ top.HEURIST.search = {
 		if (! targ.href  && targ.parentNode && targ.parentNode.href) targ = targ.parentNode;	// sometimes get the span, not the link
 		var dim = top.HEURIST.util.innerDimensions(window);
 		var options = null;
+        // control size of popup window
 		if (targ.className.match(/\bsmall\b/)){
 			options =  {height:dim.h*0.5, width:dim.w*0.5};
 		}else if (targ.className.match(/\bportrait\b/)){
-			options = {height:dim.h*0.95, width:dim.w*0.5};
-		}else if (targ.className.match(/\blarge\b/)){
-			options = {height:dim.h*0.8, width:dim.w*0.8};
+			options = {height:dim.h*0.90, width:dim.w*0.5};
+        }else if (targ.className.match(/\blarge\b/)){
+            options = {height:dim.h*0.8, width:dim.w*0.8};
+        }else if (targ.className.match(/\bverylarge\b/)){
+            options = {height:dim.h*0.95, width:dim.w*0.95};
         }else if (targ.className.match(/\bfixed\b/)){
             options = {height:dim.h*0.8, width:800};
 		}
@@ -4423,7 +4426,8 @@ top.HEURIST.search = {
 		top.HEURIST.search.submitSearchForm();
 	},
 
-	setContactLink: function() {
+    // appends useful debugging information as email subject to the contact-link object
+    setContactLink: function() {
 		document.getElementById("contact-link").href += "?subject=HEURIST%20v" + top.HEURIST.VERSION +
 														"%20user:" + top.HEURIST.get_user_username() +
 														(top.HEURIST.parameters["q"]
@@ -4869,6 +4873,7 @@ top.HEURIST.search = {
 			autoPopups[i].onclick = top.HEURIST.search.autoPopupLink;
             if(!autoPopups[i].href) continue;
 			demark = autoPopups[i].href.search(/\?/);
+            // Adds database parameter ?db= if there is no question mark, otherwise adds &db= to the end
 			if (demark === -1) {
 				autoPopups[i].href += "?db=" + (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
 			}else{
