@@ -31,9 +31,15 @@
 
     mysql_connection_select(DATABASE);
 
-    $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["addRecordDefaults"];
+    
+    $addRecDefaults   = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-defaults"];
+//    if(!$addRecDefaults)  //backward cap
+//    $addRecDefaults   = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["addRecordDefaults"]; //backward cap
     if ($addRecDefaults) {
         $defaults = explode(",",$addRecDefaults);
+        $showAccessRights = (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-showaccess"]!="false");
+    }else{
+        $showAccessRights = true;
     }
 ?>
 
@@ -88,8 +94,10 @@
                 }else{
                     var matches = location.search.match(/wg_id=(\d+)/);
                     buildworkgroupTagselect(matches ? matches[1] : null);
-                    $("#rec_NonOwnerVisibility").val(defAccess);
-                    $("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
+                    
+                    // now user has to define access right explicitly
+                    //$("#rec_NonOwnerVisibility").val(defAccess);
+                    //$("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
                 }
                 update_link();
 
@@ -179,20 +187,30 @@
                 var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
                 var vis = document.getElementById('rec_NonOwnerVisibility').value;
                 var kwdList = document.getElementById('tag');
+                var cbShowAccessRights = document.getElementById('restrict_elt');
                 var tags = $("#add-link-tags").val();
                 extra_parms = '&rec_owner=' + wg_id;
                 extra_parms += '&rec_visibility=' + vis;
-                if (document.getElementById('restrict_elt').checked) {
-                    if (wg_id || wg_id == 0) {
+                if (true || cbShowAccessRights.checked) {
+                    if (wg_id>=0) {
 
                         if (wg_id != usrID && kwdList.selectedIndex > 0) {
                             extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
                         }
                     }else {
                         alert('Please select a group to which this record shall be restricted');
+                        cbShowAccessRights.checked = true;
+                        showHideAccessSettings(cbShowAccessRights);
                         document.getElementById('rec_OwnerUGrpID').focus();
                         return;
                     }
+                }
+                if(vis=="-1"){
+                        alert('Please visibility type for users outside of owner group');
+                        cbShowAccessRights.checked = true;
+                        showHideAccessSettings(cbShowAccessRights);
+                        document.getElementById('rec_NonOwnerVisibility').focus();
+                        return;
                 }
 
                 rt = parseInt(document.getElementById('rectype_elt').value);
@@ -218,12 +236,14 @@
                 extra_parms += '<?= @$_REQUEST['t'] ? '&t='.$_REQUEST['t'] : '' ?>';
 
 
-                if (document.getElementById('defaults_elt').checked) {
+                if (true || document.getElementById('defaults_elt').checked) {  //always save
                     defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
                         "\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
-                    top.HEURIST.util.setDisplayPreference('addRecordDefaults', defaults.join(","));
+                        
+                    top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults.join(","));
+                    top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights.checked?"true":"false" );
                 }else{
-                    top.HEURIST.util.setDisplayPreference('addRecordDefaults', "");
+                    top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
                 }
 
 
@@ -232,6 +252,7 @@
             }
 
             function cancelAdd(e) {
+                /*
                 if (! e) e = window.event;
                 if (document.getElementById('defaults_elt').checked) {//save settings
                     var rt = parseInt(document.getElementById('rectype_elt').value);
@@ -241,10 +262,11 @@
                     var tags = $("#add-link-tags").val();
                     defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
                         "\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
-                    top.HEURIST.util.setDisplayPreference('addRecordDefaults', defaults.join(","));
+                    top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults.join(","));
                 }else{ //reset saved setting
-                    top.HEURIST.util.setDisplayPreference('addRecordDefaults', "");
+                    top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
                 }
+                */
                 window.close();
 
             }
@@ -280,7 +302,7 @@
     <body class="popup" width=500 height=500 style="font-size: 11px;">
 
 
-        <div id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
+        <div id=maintable<?= (@$_REQUEST['wg_id'] > 0 || $showAccessRights) ? "" : " class=hide_workgroup" ?>>
             <div><?php
                     print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
                 ?>
@@ -318,7 +340,7 @@
             </div>
 
 
-            <div class="input-row" style="text-align: center;" id="currSettings">
+            <div class="input-row" style="text-align: center;<?= (@$_REQUEST['wg_id']>0 || $showAccessRights) ? "display:none" : ""?>" id="currSettings">
             </div>
 
             <div class="input-row">
@@ -330,7 +352,7 @@
                 <div class="input-cell" >
                     <input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1"
                         onclick="showHideAccessSettings(this);"
-                        style="vertical-align: middle; margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
+                        style="vertical-align: middle; margin: 0; padding: 0;"<?= (@$_REQUEST['wg_id']>0 || $showAccessRights) ? " checked" : ""?>>
                 </div>
 
                 <div class="resource workgroup" style="margin:10px 0">
@@ -339,6 +361,11 @@
                         <div class="input-cell">
                             <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;"
                                 onChange="buildworkgroupTagselect(options[selectedIndex].value)">
+<?php
+ if(!$addRecDefaults){
+                                print '<option value="-1" selected>select...</option>';    
+ }
+?>
                                 <option value="0">Everyone (no restriction)</option>
                                 <?php
                                     print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").
@@ -362,6 +389,11 @@
                         <div class="input-header-cell">Outside this group record is</div>
                         <div class="input-cell">
                             <select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
+<?php
+ if(!$addRecDefaults){
+                                print '<option value="-1" selected>select...</option>';    
+ }
+?>
                                 <option value="hidden">Hidden (restricted to owners)</option>
                                 <option value="viewable">Viewable (logged-in users only)</option>
                                 <option value="pending">Pending (marked for potential publication)</option>
@@ -378,7 +410,7 @@
                 <div class="input-header-cell" title="Default to these values for future additions (until changed)">Set as defaults</div>
                 <div class="input-cell">
                     <input type="checkbox" name="use_as_defaults" id="defaults_elt" value="1" checked
-                        style="margin: 0; padding: 0; vertical-align: middle; "<?= $addRecDefaults ? " checked" : ""?>>
+                        style="margin: 0; padding: 0; vertical-align: middle;">
 
                 </div>
             </div>

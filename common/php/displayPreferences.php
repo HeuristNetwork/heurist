@@ -79,7 +79,6 @@
     "scratchpad-height" => 0,
     "scratchpad" => "hide",
 
-    "addRecordDefaults" => "",
     "applicationPanel" => "open",
     "sidebarPanel" => "open",
     "leftWidth" => 180,
@@ -115,7 +114,9 @@
     "report-output-limit" => "1000",   //report output limit for smarty and map
 
     "record-edit-date" => "", // TODO: what is this for, it is not set in profile
-    "record-edit-advancedmode" => "false"  //by default record editing comes up in stripped down 'simple' mode
+    "record-edit-advancedmode" => "false", //by default record editing comes up in stripped down 'simple' mode
+    "record-add-showaccess" => "true",     //show access right selectors in add record popup
+    "record-add-defaults" => ""            //default settings for new record in add record popup    
 
     // Notes: to add new preferences, add here, add in editPreferences (if required)
     );
