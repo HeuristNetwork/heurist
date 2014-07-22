@@ -1809,7 +1809,12 @@ if (! top.HEURIST.edit) {
 
         if (true || this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
             for (var i=0; i < fieldValues.length; ++i) {
-                typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
+                var ele = this.addInput( fieldValues[i] )
+                
+                if(!this.repeatable && i>0){
+                        $(ele).after('<div class="prompt" style="color:red">Repeated value for a single value field - please delete</div>');
+                }
+                //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
             if (fieldValues.length == 0) {
                 this.addInput({"value" :  defaultValue});    // add default value input make it look like bdvalue without id field
@@ -1990,6 +1995,7 @@ if (! top.HEURIST.edit) {
         newInput.style.display = "block";
         if (bdValue) newInput.value = bdValue.value;
         this.addInputHelper.call(this, bdValue, newInput);
+        return newInput;
     };
 
     /**
@@ -2092,6 +2098,7 @@ if (! top.HEURIST.edit) {
         top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
 
         top.HEURIST.edit.makeDateButton(textElt, this.document);
+        return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
 
 
@@ -2137,6 +2144,7 @@ if (! top.HEURIST.edit) {
 
         textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);
         top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
 
 
@@ -2192,6 +2200,8 @@ if (! top.HEURIST.edit) {
         if (bdValue) newInput.value = bdValue.value;
 
         this.addInputHelper.call(this, bdValue, newInput);
+        
+        return newInput;
     };
 
 
@@ -2307,6 +2317,8 @@ if (! top.HEURIST.edit) {
                 thisRef.chooseResource(newDiv, bdValue.title);
             });
         }
+        
+        return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput
 
 
@@ -2438,6 +2450,7 @@ if (! top.HEURIST.edit) {
 
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.style.width = "4em";    // Firefox for Mac workaround -- otherwise dropdown is too narrow (has to be done after inserting into page)
+        return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput
 
 
@@ -2653,7 +2666,7 @@ if (! top.HEURIST.edit) {
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link and if admin
 
         this.createSpanLinkTerms(bdValue);
-
+        return newInput;
     }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
 
 
@@ -2708,8 +2721,8 @@ if (! top.HEURIST.edit) {
         var newDiv = this.document.createElement("div");
         this.addInputHelper.call(this, bdValue, newDiv);
         this.constructInput(newDiv, bdValue);
+        return newDiv;
     };
-
 
     top.HEURIST.edit.inputs.BibDetailFileInput.prototype.replaceInput = function(inputDiv, bdValue) {
         inputDiv.innerHTML = "";
@@ -3065,7 +3078,8 @@ if (! top.HEURIST.edit) {
         }
 
         newDiv.style.width = "auto";
-
+    
+        return newDiv;
     }; //top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput
 
 
@@ -3128,6 +3142,7 @@ if (! top.HEURIST.edit) {
         var newInput = this.document.createElement("div");
         newInput.appendChild(this.document.createTextNode("Input type \"" + this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] + "\" not implemented"));
         this.addInputHelper.call(this, bdValue, newInput);
+        return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput
 
 
@@ -3153,6 +3168,7 @@ if (! top.HEURIST.edit) {
             this.promptDiv.style.display = "none";
             newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         }
+        return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput
 
 
@@ -3234,7 +3250,7 @@ if (! top.HEURIST.edit) {
             parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
         this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,
             this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification, true, false);
-
+        return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput
 
 
