@@ -40,8 +40,6 @@
 	// using ob_gzhandler makes this stuff up on IE6-
 	ini_set("zlib.output_compression_level", 5);
 	//ob_start('ob_gzhandler');
-    header("Content-type: text/javascript; charset=utf-8");
-    
 
 	require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 	require_once("dbMySqlWrappers.php");
@@ -68,6 +66,7 @@
 		exit();
 	}
 
+    header("Content-type: text/javascript; charset=utf-8");
 	header('Cache-Control: no-cache');
 	header('Pragma: no-cache');
 

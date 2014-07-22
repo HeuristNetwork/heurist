@@ -64,7 +64,6 @@ if (@$argv) {
 
 define('ISSERVICE',1);
 
-header("Content-type: text/javascript");
 //header('Content-type: text/xml; charset=utf-8');
 /*echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 */
@@ -74,8 +73,9 @@ require_once(dirname(__FILE__).'/../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
 
-mysql_connection_select(DATABASE);
+header("Content-type: text/javascript");
 
+mysql_connection_select(DATABASE);
 
 //----------------------------------------------------------------------------//
 //  Retrieve record- and detail- type metadata
@@ -749,4 +749,3 @@ function getRelationStructure() {
 echo json_format( getRelationStructure(), true);
 
 ?>
-

@@ -123,7 +123,7 @@
                     "from sysIdentification where `sys_ID`='1'");
 
                 // TODO: remove debug
-                error_log("Hiding registration form");
+                //error_log("Hiding registration form");
 
                 // Start by hiding the registration/title edit form
                 echo '<script type="text/javascript">';
@@ -171,7 +171,7 @@
                 // Do the work of registering the database if a suitable title is set
 
                 // TODO: remove debug
-                error_log("About to test length");
+                //error_log("About to test length");
 
                 if(isset($_POST['dbDescription'])) {
                     if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1022) {

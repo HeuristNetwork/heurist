@@ -31,13 +31,14 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
     define('ISSERVICE',1);
-    header('Content-type: text/javascript; charset=utf-8');
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 //    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once('saveStructureLib.php');
 
+    header('Content-type: text/javascript; charset=utf-8');
+    
 /*****DEBUG****///error_log(">>>".print_r($_REQUEST, true));
     $rv = array();
   

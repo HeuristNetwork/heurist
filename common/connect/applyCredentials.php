@@ -212,6 +212,8 @@ function reloadUserGroups($user_id){
 */
 function startMySession(){
 
+//DEBUG error_log("SESSION ID: ".@$_COOKIE['heurist-sessionid']);
+    
 	if (@$_COOKIE['heurist-sessionid']) {
 		session_id($_COOKIE['heurist-sessionid']);
 	} else {
@@ -219,8 +221,14 @@ function startMySession(){
 		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_SERVER_NAME);
 	}
 
-	session_cache_limiter('none');
+	//session_cache_limiter('none');
 	session_start();
+    
+/*error_log("USER NAME ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']);    
+if(!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']){
+    error_log(print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], true));
+}*/
+
 }
 
 /**

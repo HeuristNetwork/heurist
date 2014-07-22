@@ -43,9 +43,6 @@
 
     require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 
-    header("Content-type: text/javascript");
-
-
     /* An array of the properties that may be set, and default values. 
        Values may be edited for many of these in admin/profile/editPreferbneces.html
     */
@@ -137,9 +134,8 @@
     }
 
 //	if ($writeMode) return;	// suppress normal output
-
+    header("Content-type: text/javascript");
 ?>
-
 <!-- TODO: did someone mean to comment this stuff out? ... -->
 //document.domain = "<?= HEURIST_SERVER_NAME ?>";
 if (! document.body) {

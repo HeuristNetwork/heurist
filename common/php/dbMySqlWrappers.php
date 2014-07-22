@@ -406,7 +406,7 @@ function mysql__getdatabases($with_prefix = false, $email = null, $role = null, 
 				}
 				if ($query) {
 					$res2 = mysql_query($query);
-					if (mysql_num_rows($res2) < 1) {
+					if (!$res2 || mysql_num_rows($res2) < 1) {
 						continue;
 					}
 				} else {
