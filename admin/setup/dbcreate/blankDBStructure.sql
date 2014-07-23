@@ -1,31 +1,21 @@
-/*
-* Copyright (C) 2005-2013 University of Sydney
+/**
+* BlankDBStructure.sql: SQL file to create Heurist structures in a blank MySQL database
 *
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
 */
 
-/**
-* populateBlankDB.sql: SQL file to create Heurist structures in a blank MySQL database 
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
 
 \W -- warnings to standard out, OK for cammand line but not for phpMyAdmin
@@ -48,8 +38,10 @@
 --    *  blankDBStructureDefinitionsOnly.sql must be updated at the same time
 --    *  if there is any change of structure
 
---   * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
---   * DO NOT DELETE THEM
+--    * Database structure version 1.1.0
+
+--    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
+--    * DO NOT DELETE THEM
 
 -- ***************************************************************************
 
@@ -1011,15 +1003,6 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
 -- Insert a row to define the link between group 1 (dbowners) and group 3 (other users) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,3,'admin');
-
--- Add a debugging user for convenience of the Heurist team, make it a database owner group admin
-INSERT INTO `sysUGrps` ( `ugr_ID` , `ugr_Type` , `ugr_Name` , `ugr_LongName` , `ugr_Description` , `ugr_Password` ,
-`ugr_eMail` , `ugr_FirstName` , `ugr_LastName` , `ugr_Department`, `ugr_Organisation` , `ugr_City` , `ugr_State` ,
-`ugr_Postcode` , `ugr_Interests` , `ugr_Enabled` , `ugr_LastLoginTime` , `ugr_MinHyperlinkWords` , `ugr_LoginCount` ,
-`ugr_IsModelUser` ,`ugr_IncomingEmailAddresses` , `ugr_TargetEmailAddresses` , `ugr_URLs` , `ugr_FlagJT` , `ugr_Modified` )
-VALUES (4 , 'user', 'debug', 'debug user', NULL , '6RAQw1ULVIvIA', 'info@heuristscholar.org', 'debug', 'user',
-	'Arts eResearch' , 'University of Sydney' , NULL , NULL , NULL ,NULL , 'y', NULL , '3', '0', '0', NULL , NULL , NULL , '0', NOW( ));
-INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (4,1,'admin');
 
 
 -- defRectypegroups and defDetailtypeGroups are now inserted by coreDefinitions.txt

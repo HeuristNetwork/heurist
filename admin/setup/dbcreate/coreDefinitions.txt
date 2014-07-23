@@ -1,11 +1,24 @@
 
- -- coreDefinitions.txt: Database definitions for a new database
- -- @author Ian Johnson 11/1/2011
- -- @copyright 2005-2013 University of Sydney
- -- @link: http://HeuristScholar.org
- -- @license http://www.gnu.org/licenses/gpl-3.0.txt
- -- @package Heurist academic knowledge management system
- -- @todo
+/**
+*
+* coreDefinitions.txt: Database definitions for a new database derived from H3CoreDefinitions database
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
  -- THIS FILE IS USED TO CREATE A NEW DATABASE AND SHOULD BE FILLED WITH THE RESULTS FROM
  -- http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=H3CoreDefinitions
@@ -17,10 +30,10 @@
 -- OUTPUT FROM getDBStructureAsSQL.php STARTS HERE
 -- -----------------------------------------------------------------------------------------------------
 
--- Heurist Definitions Exchange File generated: 16 May 2014 @ 07:44
--- Installation = http://heuristscholar.org/h3-ao/
+-- Heurist Definitions Exchange File generated: 22 Jul 2014 @ 16:50
+-- Installation = http://heuristscholar.org/h3-ij/
 -- Database = H3CoreDefinitions
--- Program Version: 3.1.6
+-- Program Version: 3.2.0
 -- Database Version: 1.1.0
 
 -- RECORD TYPE GROUPS
@@ -31,9 +44,9 @@
 ('6','My record types','functionalgroup','001','A group (tab) for defining your own record types - you can delete this tab, create additional groups, rename this one using the button at the end of the tabs, and move record types between groups'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPE GROUPS
 
@@ -45,11 +58,12 @@
 ('101','Mapping / location','004','Base field types for handling mapping and geospatial data (including image types used for mapping)'),
 ('105','File Metadata','007','File metadata used in processing in situ file indexing and the import of FieldHelper manifests'),
 ('108','Events / time','005','Fields used for events and temporal/dating information'),
+('109','Imported','255','This group contains all detailtypes that were imported from external databases'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- ONTOLOGIES
 
@@ -60,9 +74,9 @@
 ('3','CIDOC-CRM','CIDOC-CRM','', 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424','open', '2','CIDOC-CRM','3', '255','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- TERMS
 
@@ -548,11 +562,16 @@
 ('5036','Performance','', '','', '3','Performance','5036', '1','0','enum','0', '0','5030','1','2013-09-10 13:34:13','0', ''),
 ('5037','Watercolour','', '','', '3','Watercolour','5037', '1','0','enum','0', '0','5032','1','2013-09-10 13:34:13','0', ''),
 ('5038','Oil painting','', '','', '3','Oil painting','5038', '1','0','enum','0', '0','5032','1','2013-09-10 13:34:13','0', ''),
+('5039','Place type','', '','open', '3','','5039', '1','0','enum','0', '0','','1','2014-02-28 13:21:03','0', ''),
+('5040','Adminstrative','', '','', '3','','5040', '1','0','enum','0', '0','5039','1','2014-02-28 13:21:32','0', ''),
+('5041','Geometric','', '','', '3','','5041', '1','0','enum','0', '0','5039','1','2014-02-28 13:21:40','0', ''),
+('5042','Thematic','', '','', '3','','5042', '1','0','enum','0', '0','5039','1','2014-02-28 13:22:13','0', ''),
+('5043','Conceptual','', '','', '3','','5043', '1','0','enum','0', '0','5039','1','2014-02-28 13:23:27','0', ''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD TYPES
 
@@ -567,13 +586,14 @@
 ('7','Blog post','0','Blog post used to construct blogs, the text of the post is stored in the WYSIWYG text field','[2-1]', '[1]','Blog posts','reserved', '2','Blog post','7', 'viewable','0','4','', '0','','','normal', '0','1','1'),
 ('8','Interpretive annotation','0','Metadata about a date, spatial extent or other interpretation of information','[2-1] - by [2-15.recTitle] [2-10] transcribed by [2-14.recTitle]', '[1] - by [15.recTitle] [10] transcribed by [14.recTitle]','Interpretive annotations','reserved', '2','Interpretation','8', 'viewable','1','4','', '0','','','normal', '0','1','1'),
 ('9','Email','0','An email including content and metadata, often derived from an email forwarded or ccd to the database\'s linked IMAP server from a user\'s account','[2-1] from: [2-24] on: [2-9]', '[1] from: [24] on: [9]','Emails','reserved', '2','Email','9', 'viewable','0','4','', '0','','','normal', '0','1','1'),
-('10','Person - detailed','33','A standard record for a person, may be thinned down (eg. removal of modern day contact information) or expanded with additional information as required.','[2-1], [2-18] ([2-19.label]) ([2-10])', '[1], [18] ([10])','Persons - detailed','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('10','Person - detailed','33','A standard record for a person, may be thinned down (eg. removal of modern day contact information) or expanded with additional information as required.','[2-1], [2-18] ([2-19.label]) ([2-10])', '[1], [18] ([10])','Persons - detailed','approved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '0','1','1'),
 ('11','Person - minimal','33','A standard record for a person with minimal information','[2-1], [2-18]', '[1], [18] ([10])','Persons - minimal','reserved', '2','Person','10', 'viewable','1','1','', '0','','','normal', '0','1','1'),
+('12','Place','0','A place is a humanly constructed definition of space, which may range in scale and sharpness of outline according to use','[2-1]', '[1]','Places','approved', '3','Place','1009', 'viewable','1','1','', '0','','','normal', '0','1','1'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DETAIL TYPES
 
@@ -593,8 +613,8 @@
 ('12','Heurist Query String','Heurist Query String','freetext','A string representing a valid Heurist query.', 'Please provide an extended description for display on rollover ...','','reserved','2', 'Query String','12','99', '0','','', '','','0','viewable','1'),
 ('13','Record pointer (unconstrained) >','General record pointer','resource','A pointer to any type of record, use apprporiately constrained pointers for preference', '','','approved','2', 'Record pointer','13','1', '0','','', '','','1','viewable','1'),
 ('14','Transcriber >','Record pointer constrained to person or organisation records','resource','Pointer to the person who transcribes or summarises interpretation information ', '','','approved','2', 'Transcriber of interpretation','14','8', '0','','', '10','','1','viewable','1'),
-('15','Author or Creator >','Record pointer constrained to person or organisation records','resource','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','','reserved','2', 'Creator - author, artist etc.','15','8', '0','','', '10,4','','1','viewable','1'),
-('16','Person >','Record pointer constrained to person records','resource','Pointer to a person record (use Author/Creator field type where organisations as well as people may apply)', '','','reserved','2', 'Pointer to Person','16','8', '0','','', '10','','1','viewable','1'),
+('15','Author or Creator >','Record pointer constrained to person or organisation records','resource','The person or organisation who created the record (author, organisation, artist etc.)', 'May include authors, artists, organisations that sponsored a resource etc.','','reserved','2', 'Creator - author, artist etc.','15','8', '0','','', '4,11','','1','viewable','1'),
+('16','Person >','Record pointer constrained to person records','resource','Pointer to a person record (use Author/Creator field type where organisations as well as people may apply)', '','','reserved','2', 'Pointer to Person','16','8', '0','','', '11','','1','viewable','1'),
 ('17','Contact details or URL','Please document the nature of this detail type (field)) ...','freetext','Contact details, either as text or a URL to eg. a phonebook record or search', '','','approved','2', 'Contact details or URL','17','8', '0','','', '','','1','viewable','1'),
 ('18','Given names','Name or name list additionally given to the represented object/entity ','freetext','Given names', '','','reserved','2', 'Given names','18','8', '0','','', '','','1','viewable','1'),
 ('19','Honorific','Prefix for the object\'s name representing status and/or achievement','enum','Title or honorific (Dr, Mrs, Ms, Professor, Sir etc.)', '','','approved','2', 'Honorific','19','8', '0','507','', '','','1','viewable','1'),
@@ -650,19 +670,22 @@
 ('125','Tiled image >','','resource','Tiled image reference', '','','open','3', 'Map image layer reference','1043','101', '0','','', '','0','1','viewable','1'),
 ('126','KML File','','file','KML File', '','','open','3', 'KML File','1044','101', '0','','', '','0','1','viewable','1'),
 ('131','HEADING 4','Please document the nature of this detail type (field)) ...','separator','Headings serve to break the data entry form up into sections', '','','open','3', 'HEADING 4','1060','99', '0','','', '','0','1','viewable','1'),
+('132','Title - alternate','','freetext','Title - alternate', '','','open','3', 'Title - alternate','1009','109', '0','','', '','0','1','viewable','0'),
+('133','Place type','Please document the nature of this detail type (field)) ...','enum','The type or category of place', '','','open','3', 'Place type','1068','109', '0','5039','', '','0','1','viewable','0'),
+('134','Location (place)','Please document the nature of this detail type (field)) ...','resource','Place where the oprganisation is located (singular, or head office/main location)', '','','open','', '','','1', '0','','', '12','','1','viewable','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RECORD STRUCTURE
 
 -- `rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`, `rst_DisplayName`, `rst_DisplayHelpText`, `rst_DisplayExtendedDescription`, `rst_DisplayOrder`, `rst_DisplayWidth`, `rst_DefaultValue`, `rst_RecordMatchOrder`, `rst_CalcFunctionID`, `rst_RequirementType`, `rst_NonOwnerVisibility`, `rst_Status`, `rst_MayModify`, `rst_OriginatingDBID`, `rst_IDInOriginatingDB`, `rst_MaxValues`, `rst_MinValues`, `rst_DisplayDetailTypeGroupID`, `rst_FilteredJsonTermIDTree`, `rst_PtrFilteredIDs`, `rst_OrderForThumbnailGeneration`, `rst_TermIDTreeNonSelectableIDs`, `rst_LocallyModified`
 
->>StartData>> ('1','1', '7','Source record','Primary resource', '','000','60', '','0','', 'required','viewable','approved','open', '2','1', '1','1','1', '','', '','','1'),
-('2','1', '6','Relationship type','RelationType', '','001','60', '','0','', 'required','viewable','approved','open', '2','2', '1','1','1', '','', '','','0'),
-('3','1', '5','Target record','The target record in Heurist to which the relationship points', '','002','60', '','1','', 'required','viewable','approved','open', '2','3', '1','1','0', '','', '','','0'),
+>>StartData>> ('1','1', '7','Source record','Primary resource', '','000','60', '','0','', 'required','viewable','reserved','open', '2','1', '1','1','1', '','', '','','1'),
+('2','1', '6','Relationship type','RelationType', '','001','60', '','0','', 'required','viewable','reserved','open', '2','2', '1','1','1', '','', '','','1'),
+('3','1', '5','Target record','The target record in Heurist to which the relationship points', '','002','60', '','1','', 'required','viewable','reserved','open', '2','3', '1','1','0', '','', '','','1'),
 ('4','1', '1','Title for relationship','A succinct descriptive title for the relationship', '','005','60', '','0','', 'optional','viewable','approved','open', '2','4', '1','0','0', '','', '','','1'),
 ('5','1', '3','Description','Short summary, typically used in annotated lsitings, information popups and so forth. Aim for 100 - 200 words.', '','006','60', '','0','', 'optional','viewable','approved','open', '2','5', '1','0','1', '','', '','','0'),
 ('6','1', '10','Start date/time','Dates only required if relationship is to be timestamped ', '','003','10', '','0','', 'recommended','viewable','approved','open', '2','6', '1','0','0', '','', '','','1'),
@@ -686,11 +709,10 @@
 ('24','4', '3','Short description','Short description of the organisation, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','003','80', '','0','', 'recommended','viewable','approved','open', '2','24', '1','0','1', '','', '','','1'),
 ('25','4', '10','Start date','Date the organisation was founded', '','008','10', '','0','', 'optional','viewable','approved','open', '2','25', '1','0','1', '','', '','','1'),
 ('26','4', '11','End date','Date the organisation was wound up/ closed / ceased to exist', '','009','10', '','0','', 'optional','viewable','approved','open', '2','26', '1','0','1', '','', '','','1'),
-('27','4', '27','Location name(s)','Name of place(s) - city, town, locality - where organisation is located', '','012','30', '','0','', 'optional','viewable','approved','open', '2','27', '','0','', '','', '','','1'),
-('28','4', '26','Country','The country(ies) in which the organisation was based/operated', '','011','60', '','0','', 'optional','viewable','approved','open', '2','28', '','0','1', '','', '','','1'),
-('29','4', '28','Location (mappable)','A geospatial object or objects providing a mappable location for the organisation', '','013','60', '','0','', 'optional','viewable','approved','open', '2','29', '1','0','1', '','', '','','1'),
+('28','4', '26','Country','The main country in which the organisation is/was based/operated', '','013','60', '','0','', 'recommended','viewable','approved','open', '2','28', '1','0','1', '','', '','','1'),
+('29','4', '28','Location (mappable)','A geospatial object or objects providing a mappable location for the organisation', '','011','60', '','0','', 'recommended','viewable','approved','open', '2','29', '1','0','1', '','', '','','1'),
 ('30','4', '39','Thumbnail or Logo','An image of approx. 200 pixels wide used to represent the record in search results and other compact listings', '','004','60', '','0','', 'recommended','viewable','approved','open', '2','30', '1','0','1', '','', '','','1'),
-('31','4', '38','Related files','Documents adn otehr information related to this organisation, either uploaded or as a reference to a URI', '','015','60', '','0','', 'optional','viewable','approved','open', '2','31', '','0','1', '','', '','','1'),
+('31','4', '38','Related files','Documents adn otehr information related to this organisation, either uploaded or as a reference to a URI', '','016','60', '','0','', 'optional','viewable','approved','open', '2','31', '','0','1', '','', '','','1'),
 ('32','5', '1','Media item title','A succinct descriptive title of the media item, generally the title given by the author', '','000','80', '','1','', 'required','viewable','reserved','open', '2','32', '1','1','0', '','', '','','1'),
 ('33','5', '38','Media file','Browse to media file and upload - recommended max size 5 MBytes', '','001','60', '','2','', 'required','viewable','reserved','open', '2','33', '1','1','0', '','', '','','1'),
 ('34','5', '3','Short description','Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '','003','80', '','0','', 'recommended','viewable','approved','open', '2','34', '1','0','1', '','', '','','1'),
@@ -701,19 +723,19 @@
 ('39','5', '35','Copyright information','Copyright information for this media item (copyright statement or URL)', '','007','80', '','0','', 'recommended','viewable','approved','open', '2','39', '1','0','1', '','', '','','1'),
 ('45','7', '1','Title of post','A title for the blog entry, date will be added automatically', '','000','80', '','1','', 'required','viewable','reserved','open', '2','45', '1','1','0', '','', '','','1'),
 ('46','7', '39','Thumbnail image','Thumbnail image, recommended 200 pixels maximum dimension', '','001','30', '','0','', 'recommended','viewable','reserved','open', '2','46', '1','0','0', '','', '','','1'),
-('47','7', '28','Location (mappable)','Location or extent of this blog entry, can be rendered on the map', '','002','30', '','0','', 'recommended','viewable','approved','open', '2','47', '','0','0', '','', '','','1'),
+('47','7', '28','Location (mappable)','Location or extent of this blog entry, can be rendered on the map', '','005','30', '','0','', 'recommended','viewable','approved','open', '2','47', '','0','0', '','', '','','1'),
 ('48','8', '1','Summary title','A title for this interpretation, excluding author, date', '','000','50', '','1','', 'required','viewable','reserved','open', '2','48', '1','1','0', '','', '','','1'),
-('49','8', '10','Validity date','Date of validity of this interpretation', '','001','10', 'today','0','', 'required','viewable','approved','open', '2','49', '1','1','0', '','', '','','1'),
-('50','8', '3','Text of annotation','Short sumamry of the interpretation, use the WYSIWYG text in the TEXT or PERSONAL tabs for longer description', '','004','100', '','0','', 'required','viewable','approved','open', '2','50', '1','1','0', '','', '','','1'),
-('51','8', '15','Author(s)','Person(s) making this interpretation (original author, use transcriber if further interpreted)', '','002','30', '','1','', 'recommended','viewable','approved','open', '2','51', '','0','0', '','', '','','1'),
+('49','8', '10','Validity date','Date of validity of this interpretation', '','001','10', 'today','0','', 'required','viewable','reserved','open', '2','49', '1','1','0', '','', '','','1'),
+('50','8', '3','Text of annotation','Short sumamry of the interpretation, use the WYSIWYG text in the TEXT or PERSONAL tabs for longer description', '','004','100', '','0','', 'required','viewable','reserved','open', '2','50', '1','1','0', '','', '','','1'),
+('51','8', '15','Author(s)','Person(s) making this interpretation (original author, use transcriber if further interpreted)', '','002','30', '','1','', 'recommended','viewable','reserved','open', '2','51', '','0','0', '','', '','','1'),
 ('52','8', '14','Transcriber(s)','Person(s) transcribing/further interpreting the original interpretation', '','003','30', '','0','', 'optional','viewable','approved','open', '2','52', '','0','0', '','', '','','1'),
-('53','8', '13','References','Bibliographic or other records in Heurist which support or relate to this interpretation', '','005','80', '','0','', 'recommended','viewable','approved','open', '2','53', '','0','0', '','', '','','0'),
-('54','9', '23','Email of sender','Email address from which this email forwarded or ccd', 'Address of owner (forwarder or sender)','000','50', '','2','', 'required','viewable','approved','open', '2','54', '1','0','0', '','', '','','0'),
-('55','9', '1','Subject','Subject/title of the email', 'Subject line of email','001','30', 'No subject line provided','1','', 'required','viewable','approved','open', '2','55', '1','0','0', '','', '','','0'),
-('56','9', '9','Date originally sent','Date of the original email (date of sending of a ccd email or original date of a forwarded email)', 'Date of original sending','002','30', '','0','', 'required','viewable','approved','open', '2','56', '1','0','0', '','', '','','0'),
-('57','9', '24','Email of originator','Address of original sender (if applicable, that is for forwarded emails)', 'Address of original sender (where different)','003','50', '','0','', 'optional','viewable','approved','open', '2','57', '1','0','0', '','', '','','0'),
-('58','9', '25','Email of recipients','Email addresses of all recipients of the email', 'Emails of all recipients of the email ','004','30', '','0','', 'optional','viewable','approved','open', '2','58', '','0','0', '','', '','','0'),
-('59','9', '3','Email Body','Content of the body/text of the email', '','005','60', '','0','', 'optional','viewable','approved','open', '2','59', '1','0','1', '','', '','','0'),
+('53','8', '13','References','Bibliographic or other records in Heurist which support or relate to this interpretation', '','005','80', '','0','', 'recommended','viewable','approved','open', '2','53', '','0','0', '','', '','','1'),
+('54','9', '23','Email of sender','Email address from which this email forwarded or ccd', 'Address of owner (forwarder or sender)','000','50', '','2','', 'required','viewable','reserved','open', '2','54', '1','1','0', '','', '','','1'),
+('55','9', '1','Subject','Subject/title of the email', 'Subject line of email','001','30', 'No subject line provided','1','', 'required','viewable','reserved','open', '2','55', '1','1','0', '','', '','','1'),
+('56','9', '9','Date originally sent','Date of the original email (date of sending of a ccd email or original date of a forwarded email)', 'Date of original sending','002','30', '','0','', 'required','viewable','reserved','open', '2','56', '1','1','0', '','', '','','1'),
+('57','9', '24','Email of originator','Address of original sender (if applicable, that is for forwarded emails)', 'Address of original sender (where different)','003','50', '','0','', 'optional','viewable','approved','open', '2','57', '1','0','0', '','', '','','1'),
+('58','9', '25','Email of recipients','Email addresses of all recipients of the email', 'Emails of all recipients of the email ','004','30', '','0','', 'optional','viewable','approved','open', '2','58', '','0','0', '','', '','','1'),
+('59','9', '3','Email Body','Content of the body/text of the email', '','005','60', '','0','', 'recommended','viewable','reserved','open', '2','59', '1','0','1', '','', '','','1'),
 ('60','9', '38','Attachments','Files attached to the email', 'Attached files','006','50', '','0','', 'optional','viewable','approved','open', '2','60', '','0','0', '','', '','','0'),
 ('61','10', '1','Family name','Family name of person', '','001','40', '','1','', 'required','viewable','reserved','open', '2','61', '1','1','1', '','', '','','1'),
 ('62','10', '18','Given name(s)','The given name or names of the person placed in their normal order', '','002','40', '','1','', 'recommended','viewable','reserved','open', '2','62', '1','0','0', '','', '','','1'),
@@ -728,25 +750,25 @@
 ('71','10', '11','Date of death','Date of death (year, or year-month or year-month-day)', 'Please provide an extended description for display on rollover ...','013','10', '','0','', 'optional','viewable','approved','open', '2','71', '1','0','1', '','', '','','1'),
 ('1375','6', '1','Aggregation Name','The main name or title for the object. Title of a work, family name of person, name of organisation etc.', 'Please provide an extended description for display on rollover ...','000','40', '','1','', 'required','viewable','reserved','open', '2','1375', '1','1','1', '','', '','','1'),
 ('1376','6', '39','Thumbnail image','An image of approx. 200 pixels wide used to represent the record in search results and other compact listings', 'Please provide an extended description for display on rollover ...','008','60', '','0','', 'optional','viewable','open','open', '2','1376', '1','0','1', '','', '','','1'),
-('1377','6', '3','Short summary','Notes about the aggregation, normally 100 - 200 words max. so usable in lists', 'Please provide an extended description for display on rollover ...','007','80', '','0','', 'optional','viewable','open','open', '2','1377', '1','0','1', '','', '','','1'),
+('1377','6', '3','Short summary','Notes about the aggregation, normally 100 - 200 words max. so usable in lists', 'Please provide an extended description for display on rollover ...','001','80', '','0','', 'optional','viewable','reserved','open', '2','1377', '1','0','1', '','', '','','1'),
 ('1379','6', '15','Creator - author, artist etc.','The person(s) or organisation(s) who created this record', 'May include authors, artists, organisations that sponsored a resource etc.','009','60', '','0','', 'optional','viewable','open','open', '2','1379', '','0','1', '','', '','','1'),
 ('1380','6', '35','Copyright information','Copyright information, either a URL to a copyrigth statement or text describing the copyright', 'Please provide an extended description for display on rollover ...','010','100', '','0','', 'optional','viewable','open','open', '2','1380', '1','0','1', '','', '','','1'),
 ('1391','3', '4','Extended note','An extended version of the note and/or further detail', '','003','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1392','10', '57','Life','Another separator field', '','008','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1393','10', '58','Contact info','Another separator field', '','014','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1394','2', '4','Extended description','A more extensive description, often derived from text on the web page itself', '','010','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1395','7', '3','Short summary','Short summary, typically used in annotated lsitings, information popups and so forth. Aim for 100 - 200 words.', '','004','60', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1397','7', '15','Creator','The person or organisation who created the record/resource', 'May include authors, artists, organisations that sponsored a resource etc.','005','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1398','7', '27','Place name(s0','The name of a place/location(s) associated with the blog post', '','006','40', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1399','7', '57','Optional information','Another separator field', '','003','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1400','6', '13','Record pointer','One or more record pointers to records which are to be included in this aggregation', 'A highly generic detail utility','002','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
-('1401','6', '12','Heurist Query String','A string representing a valid Heurist query (a query that you might enter in the search box on the home page)', 'Please provide an extended description for display on rollover ...','003','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1402','6', '40','Heurist Filter String','A string representing a valid Heurist filter (rtfilter={\"level\":[\"rtID1\",\"rtID2\"]}', 'Allows the saving of rules that work on a result set. Rather than just saying \"give me all the related records of record x\" one could say \"give me all the related people of record x\" and save this in a detail for reuse.','005','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1403','6', '48','Heurist Layout String','A formatted string that can be interpretted by the Heurist Interface as specific layout.', 'Used to pre-configure the Heurist environment. Usually accompanying a query and/or a filter. The combination of these details enables the full current Heurist environment to be stored and/or sent to other users','004','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1404','6', '57','Aggregation fields','A heading for contact information', '','001','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1405','6', '58','Descriptive fields','A heading for the life history section of a person record', '','006','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1395','7', '3','Short summary','Short summary, typically used in annotated lsitings, information popups and so forth. Aim for 100 - 200 words.', '','003','80', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
+('1397','7', '15','Creator(s)','The person or organisation who created the record/resource', 'May include authors, artists, organisations that sponsored a resource etc.','004','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1398','7', '27','Place name(s)','The name of a place/location(s) associated with the blog post', '','006','40', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
+('1399','7', '57','Optional information','Another separator field', '','002','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1400','6', '13','Record pointer','One or more record pointers to records which are to be included in this aggregation', 'A highly generic detail utility','003','0', '','0','', 'optional','viewable','reserved','open', '','', '','0','1', '','', '','','0'),
+('1401','6', '12','Heurist Query String','A string representing a valid Heurist query (a query that you might enter in the search box on the home page)', 'Please provide an extended description for display on rollover ...','004','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1402','6', '40','Heurist Filter String','A string representing a valid Heurist filter (rtfilter={\"level\":[\"rtID1\",\"rtID2\"]}', 'Allows the saving of rules that work on a result set. Rather than just saying \"give me all the related records of record x\" one could say \"give me all the related people of record x\" and save this in a detail for reuse.','006','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1403','6', '48','Heurist Layout String','A formatted string that can be interpretted by the Heurist Interface as specific layout.', 'Used to pre-configure the Heurist environment. Usually accompanying a query and/or a filter. The combination of these details enables the full current Heurist environment to be stored and/or sent to other users','005','100', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1404','6', '57','Aggregation fields','A heading for contact information', '','002','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1405','6', '58','Descriptive fields','A heading for the life history section of a person record', '','007','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1406','10', '39','Thumbnail picture','An image used to represent the person. Typically ~ 200 pixels wide for display in search results and other compact listings', '','007','0', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
-('1407','4', '57','Other information','A heading for contact information', '','014','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1407','4', '57','Other information','A heading for contact information', '','015','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1408','4', '58','Description','A heading for the life history section of a person record', '','005','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1409','4', '4','Extended description','An extended description of the organisation. However more detailed information can be attached as PDF or other documents', '','007','100', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
 ('1410','4', '17','Contact details or URL(s)','Contact details, either as text or a URL to eg. a phonebook record or search', '','006','80', '','0','', 'optional','viewable','approved','open', '','', '','0','1', '','', '','','0'),
@@ -759,7 +781,7 @@
 ('1417','3', '61','Multimedia >','Multimedia records - use this in preference to a file field if you want to record additional metadata about the media file or use it in multiple records ', '','008','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
 ('1418','3', '15','Additional author(s) >','The person or organisation who created the note (where different from the person who created the record)', 'May include authors, artists, organisations that sponsored a resource etc.','005','0', '','0','', 'optional','viewable','open','open', '','', '','0','1', '','', '','','0'),
 ('1419','3', '57','Additional information','A heading for contact information', '','004','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
-('1420','4', '61','Multimedia >','Points to a multimedia record - use this in preference to a file field (below) if you want to record additional metadata about the media file or use it in multiple records ', '','016','0', '','0','', 'optional','viewable','approved','open', '','', '','0','1', '','', '','','0'),
+('1420','4', '61','Multimedia >','Points to a multimedia record - use this in preference to a file field (below) if you want to record additional metadata about the media file or use it in multiple records ', '','017','0', '','0','', 'optional','viewable','approved','open', '','', '','0','1', '','', '','','0'),
 ('1421','5', '41','File Type','The type of media file, may be used to determine presentation and playback methods', '','014','0', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
 ('1422','5', '62','File name','The original name of the file, excluding path, including extension', '','012','40', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
 ('1423','5', '63','File path','The full path to the file, created automatically for files imported with the in situ file importer', '','011','80', '','0','', 'optional','viewable','approved','open', '','', '1','0','1', '','', '','','0'),
@@ -785,11 +807,26 @@
 ('1722','11', '20','Gender','Gender of the person', '','005','30', '','0','', 'optional','viewable','approved','open', '2','66', '1','0','0', '','', '','','1'),
 ('1733','11', '69','Additional information','Please rename to an appropriate heading within each record structure', '','004','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
 ('1734','11', '70','Common information','Please rename to an appropriate heading within each record structure', '','000','0', '','0','', 'optional','viewable','open','open', '','', '1','0','1', '','', '','','0'),
+('1746','12', '1','Name of place','Full name of the place - do not abbreviate, do not use hierarchichal naming (put that under country, state etc.)', '','000','60', '','0','0', 'required','viewable','reserved','open', '3','2274', '1','1','1', '','', '0','','1'),
+('1747','12', '2','Name - short','Name - short', '','011','20', '','0','0', 'optional','viewable','open','open', '3','2282', '1','0','1', '','', '0','','1'),
+('1748','12', '3','Description','Short summary, typically used in annotated lsitings, information popups and so forth. Aim for 100 - 200 words. and so forth. Aim for 100 - 200 words.', '','002','80', '','0','0', 'optional','viewable','approved','open', '3','2280', '1','0','1', '','', '0','','1'),
+('1749','12', '4','Extended description','Extended description', '','009','100', '','0','0', 'optional','viewable','open','open', '3','2281', '1','0','1', '','', '0','','1'),
+('1750','12', '10','Start date','Start Date', '','006','15', '','0','0', 'optional','viewable','approved','open', '3','2275', '1','0','1', '','', '0','','1'),
+('1751','12', '11','End date','End Date', '','007','15', '','0','0', 'optional','viewable','approved','open', '3','2276', '1','0','1', '','', '0','','1'),
+('1752','12', '26','Country','Country', '','004','60', '','0','0', 'recommended','viewable','approved','open', '3','2285', '1','0','1', '','', '0','','1'),
+('1753','12', '28','Location (mappable)','A geospatial object providing a mappable location for the record', '','005','60', '','0','0', 'recommended','viewable','approved','open', '3','2279', '1','0','1', '','', '0','','1'),
+('1754','12', '38','Related file(s)','An uploaded file or a reference to a file through a URI ', '','013','60', '','0','0', 'optional','viewable','open','open', '3','2277', '0','0','1', '','', '0','','1'),
+('1755','12', '39','Thumbnail image','An image of approx. 200 pixels wide used to represent the record in search results and other compact listings', '','010','60', '','0','0', 'optional','viewable','open','open', '3','2278', '1','0','1', '','', '0','','1'),
+('1756','12', '132','Name - alternate','Name - alternate', '','012','60', '','0','0', 'optional','viewable','open','open', '3','2284', '0','0','1', '','', '0','','1'),
+('1757','12', '76','Additional','Headings serve to break the data entry form up into sections', '','008','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
+('1758','12', '80','Location/time','Headings serve to break the data entry form up into sections', '','003','0', '','0','0', 'optional','viewable','open','open', '0','0', '1','0','1', '','', '0','','0'),
+('1759','12', '133','Place type','The type or category of place', '','001','0', '5043','0','0', 'recommended','viewable','reserved','open', '0','0', '1','0','1', '','', '0','','0'),
+('1760','4', '134','Location (places)','Place(s) where the oprganisation is located', '','012','0', '','0','', 'recommended','viewable','approved','open', '','', '','0','1', '','', '','','0'),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- RELATIONSHIP CONSTRAINTS
 
@@ -797,9 +834,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- FILE EXTENSIONS TO MIME TYPES
 
@@ -990,9 +1027,9 @@
 ('zip','application/zip', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- Definitions translations
 
@@ -1000,9 +1037,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CALC FUNCTIONS
 
@@ -1010,9 +1047,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF CROSSWALK
 
@@ -1020,9 +1057,9 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF LANGUAGE
 
@@ -1066,9 +1103,9 @@
 ('','YI','Yiddish',''),
 >>EndData>>
 
- 
 
- 
+
+
 
 -- DEF URL PREFIXES
 
@@ -1076,6 +1113,5 @@
 
 >>StartData>> >>EndData>>
 
- 
 
- 
+
