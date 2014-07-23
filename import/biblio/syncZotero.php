@@ -16,7 +16,7 @@
 
 /**
 *   Sync h3 database with zotero group or user items
-*   zotero API key and mapping are specified in zoteroMap.xml
+*   zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC and mapping are specified in zoteroMap.xml
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2013 University of Sydney
@@ -66,6 +66,59 @@
     $mapping_rt_errors = array();
     $rep_errors_only = true;
 
+    
+    
+    if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
+        die("Sorry, library key for Zotero sync is not defined. To set it up go to Admin/Database/Advanced Properties");
+    }
+    
+    //parse lib keys
+    //Artem,1958388,268611,YjUxZzcgq1fhCc9YyxgzzVNX|Ian,1836383,274864,DuFHBTyVYVhuIhttUotyqbsjb
+    
+    $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
+
+    if(!$step){
+        if(count($lib_keys)>1){ //select key)
+?>
+        <form action="syncZotero.php" style="padding:20px;">
+        
+            <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>" />
+            <input type="hidden" name="step" value="1" />
+            Please select library:
+            <select name="lib_key">
+<?php            
+            foreach($lib_keys as $idx=>$key){
+                $vals = explode(",",$key);
+                print '<option value="'.$idx.'">'.$vals[0].'</option>';
+            }
+?>                
+            </select>
+            <input type="submit" value="Start" />
+        </form>
+        </body>
+        </html>
+<?php        
+            exit();
+        }else{
+            $lib_key_idx = 0;            
+        }
+    }else{
+        $lib_key_idx = @$_REQUEST['lib_key'];
+    }
+    
+    $key = $lib_keys[];
+    $vals = explode(",",$key);
+    
+    $user_ID = @$vals[1];
+    $group_ID = @$vals[2];
+    $api_Key  = @$vals[3];
+    
+    if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
+        print "<div style='color:red'><br />Connection parameters are not defined properly (".$key."). Please go to Admin/Database/Advanced Properties and correct it</div></body></html>";
+        exit;
+    }
+    
+    
     if(!file_exists($mapping_file) || !is_readable($mapping_file)){
         die("Sorry, could not find/read mapping/configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation");
     }
@@ -79,9 +132,11 @@
         if($f_gen->getName()=="settings"){
 
             $arr = $f_gen->attributes();
+            /* NOW IT IS DEFINED IN DATABASE
             $user_ID = @$arr['userId'];
             $group_ID = @$arr['groupId'];
             $api_Key = @$arr['key'];
+            */
 
         }else if($f_gen->getName()=="zTypes"){
 
@@ -140,14 +195,10 @@
 
     $zotero = null;
     
-if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-   print "<div style='color:red'><br />Connection parameters are not defined in configuration file .../import/biblio/zoteroMap.xml</div></body></html>";
-   exit;
-}
 
    $zotero = new phpZotero($api_Key);
     
-if(!$step ){  //first step
+if($step=="1"){  //first step - info about current status
 
     // 1) verify connection to zotero (get total count of top-level items in zotero)
     if($group_ID){
@@ -164,9 +215,9 @@ if(!$step ){  //first step
     }else if($code>399){
         $msg = "<div style='color:red'><br />Error. Can not connect to Zotero API. It returns response code: $code.<br /><br />";
         if($code==401 || $code==403){
-            $msg = $msg."Verify API key in configuration file .../import/biblio/zoteroMap.xml";
+            $msg = $msg."Verify API key in Admin/Database/Advanced Properties";
         }else if($code==404 ){
-            $msg = $msg."Verify User and Group ID in configuration file .../import/biblio/zoteroMap.xml";
+            $msg = $msg."Verify User and Group ID in Admin/Database/Advanced Properties";
         }else if($code==407 ){
             $msg = $msg."Proxy Authentication Required";
         }
@@ -181,8 +232,14 @@ if(!$step ){  //first step
 
         print "<div>Count items in Zotero: $totalitems</div>";
         if($totalitems>0){
-            print "<div><br /><br /><a href='syncZotero.php?step=1&cnt=".$totalitems."&db=".HEURIST_DBNAME."'><button>Start</button></a></div>";
+            print "<div><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME."&lib_key=".$lib_key_idx."'><button>Start</button></a></div>";
         }
+        
+            
+    
+
+        
+        
         // 2) show mapping issues report
         if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
             print "<div style='color:red'><br />Warning. There are problem in the mapping file (import/biblio/zoteroMap.xml)<br />";
@@ -196,7 +253,7 @@ if(!$step ){  //first step
         }
     
     }
-}else if ($step=='1'){ //second step
+}else if ($step=='2'){ //second step - sync
 
     $alldettypes = getAllDetailTypeStructures();
     $allterms = getTerms();

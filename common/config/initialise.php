@@ -337,6 +337,7 @@
     define('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
     define('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);
     define('HEURIST_DBVERSION', "" . $sysValues['sys_dbVersion'] . "." . $sysValues['sys_dbSubVersion'] . "." . $sysValues['sys_dbSubSubVersion']);
+    define('HEURIST_ZOTEROSYNC', $sysValues['sys_SyncDefsWithDB']);
 
     if (!defined('SKIP_VERSIONCHECK') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
 
