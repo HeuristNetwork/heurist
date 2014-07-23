@@ -2298,7 +2298,7 @@ function recreateRecTypesPreview(type, value) {
 			txt = "unconstrained";
 		}
 
-		if (txt.length > 40){
+		if (txt && txt.length > 40){
 			divRecType.title = txt;
 			txt = txt.substr(0,40) + "&#8230";
 		}else{
@@ -2355,8 +2355,8 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){
-						recreateRecTypesPreview(dty_ID, rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs], null);
+						recreateRecTypesPreview(dty_ID, 
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]); //rst_type, null);
 					}
 
 					/*detect what group

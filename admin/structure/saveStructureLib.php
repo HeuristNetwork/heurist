@@ -171,7 +171,7 @@
     // helper function
     //
     function addParam($parameters, $type, $val){
-        $parameters[0] = $parameters[0].$type;
+        $parameters[0] = $parameters[0].$type;  //concat
         if($type=="s" && $val!=null){
             $val = trim($val);
         }
@@ -1136,12 +1136,14 @@
 				$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)";
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
+error_log("AAAA:".$query);                
+                
 				$rows = execSQL($mysqli, $query, $parameters, true);
 				if($rows == "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
 				}else if ($rows==0 || is_string($rows) ) {
 //error_log($query);error_log($rows);
-					$ret = "AAA SQL error updating field type $dtyID in updateDetailType: ".htmlspecialchars($query)."  ".$parameters[1]."  ".@$parameters[2];//.$mysqli->error;
+					$ret = "AAA SQL error updating field type $dtyID in updateDetailType: ".htmlspecialchars($query)."  type=".$parameters[0]." values=".@$parameters[1];//.$mysqli->error;
 				} else {
 					$ret = $dtyID;
 				}
