@@ -126,29 +126,28 @@ sudo chmod -R 755  /var/www/html/HEURIST/HEURIST_FILESTORE
 
 # ------------- Create H3Sandpit database --------------------------------------------------
 
-echo -e "\n\n\n"
-echo "You will be asked for your mysql root password to allow creation of the default database"
+# 23 July 2014: H3Sandpit now created automatically by Heurist at first access attempt
+# Directoreis are, however, created by this script
 
-# Added database creation to buildExampleDB script 24/2/14 so password doesn't need to be entered twice
-# echo "CREATE DATABASE hdb_H3Sandpit" | mysql -uroot -p
-
-echo "Please enter the MySQL root password, previously entered, to allow creation of the default database"
-mysql -uroot -p  < /var/www/html/HEURIST/h3/admin/setup/dbcreate/buildExampleDB.sql
+# ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist installed in /var/www/html/HEURIST/h3 -------------------------------------------"
 echo
-echo "Heurist can be accessed through the URL for /var/www/html/h3 or /var/www/html/heurist"
+echo "Simlinks in /var/www and /var/www/html allow Heurist to be accessed as h3 or heurist in the web root"
 echo
-echo "CONFIGURATION:"
-echo "Edit /var/www/html/HEURIST/h3/configIni.php to set your MySQL root user + password - twice, clearly documented in file"
-echo "You can do this by: sudo nano /var/www/html/HEURIST/h3/configIni.php"
+echo "NOTE:"
 echo
-echo "Note:"
 echo "There is normally limited space on /var/www, so you may wish to move HEURIST_FILESTORE from"
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
-echo "of space allocated, such as /srv or /data, and add a simlink in /var/www/html/HEURIST "
+echo "of space allocated, such as /srv or /data, and add a simlink to this location in /var/www/html/HEURIST "
 echo
-echo "---- Installation complete -------------------------------------------------------------------"
+echo "CONFIGURATION:"
+echo
+echo "Edit /var/www/html/HEURIST/h3/configIni.php to set your MySQL root user password - twice, clearly documented in file"
+echo
+echo "You can do this by pasting the following at the command line (may need to change nano to pico on some systems):"
+echo
+echo "           sudo nano /var/www/html/HEURIST/h3/configIni.php"
 echo

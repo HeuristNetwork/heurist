@@ -39,7 +39,10 @@ echo
 echo "Later you will be asked to supply a root password for MySQL, which sets the root password for your MySQL installation"
 echo
 echo "******* WARNING ********* Do not let your session time out or you will need to start over"
-
+echo
+echo
+echo "Please do not be concerned by warnings such as:  sudo: unable to resolve host Your-Server-Name"
+echo "If you get these warnings, you will get dozens, but it has no effect on the results of the script"
 
 
 # -------------PRE-REQUISITES---------------------------------------------------------------------------------------------
@@ -107,12 +110,10 @@ sudo pear config-set php_ini /etc/php5/apache2/php.ini
 
 # ----- Apache restart ----------------------------------------------------
 
-
 sudo apache2ctl graceful
 
 echo
 echo "Apache restarted"
-
 
 echo -e "\n\n\n\n"
 
@@ -120,10 +121,11 @@ echo ----- Heurist Prerequisites installed -------------------------------------
 echo
 echo Please check for any errors above
 echo
-echo "WARNING: Bug in creation of php.ini at 21/7/14 - please check whether /etc/php5/apache2/php.ini is blank"
-echo "         If so, copy a valid php.ini file into this location, otherwise the search interface fails to "
-echo "         load completely and a memcached error shows up in the Database Summary popup"
+echo "WARNING: Bug in creation of php.ini - please check whether /etc/php5/apache2/php.ini is blank"
+echo "         We think this bug is fixed, but please check anyway if the search interface fails to "
+echo "         load completely and a memcached error shows up in the Database Summary popup."
+echo "         If so, copy a valid php.ini file into this location - consult your system administrator, or email us"
 echo
 echo
-echo Please now run install_heurist.sh
+echo Please now run install_heurist.sh (step 2 on the Heurist installation instructions)
 echo

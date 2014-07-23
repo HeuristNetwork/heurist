@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 if [ -z $1 ]
-   then echo "Usage:   sudo ./copy_distribution_files.sh. heurist-3.x.x.xxxx   - insert appropriate sub-versions and alpha or beta in x.x-xxxx"
+   then echo "Usage:   sudo ./copy_distribution_files.sh. h3.x.x.xxxx   - insert appropriate sub-versions and alpha or beta in x.x-xxxx"
    exit
    fi
 
@@ -31,7 +31,7 @@ if [ -z $1 ]
 # RUN THIS FILE FROM AN h3-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
 
 # Expects h3-build directory in same parent directory as h3-xx directory (ie. /var/www/html/HEURIST)
-# Modified 9th dec 2013 to run on new virtual server, minor updates 9/6/14 and 16-20/7/14
+# Modified 9th dec 2013 to run on new virtual server, minor updates 9/6/14 and 16-23/7/14
 
 
 echo -e "\n\n\n\n"
@@ -72,17 +72,20 @@ cp -r ../h3/external ../h3-build/$1
 cp -r ../h3/help ../h3-build/$1
 cp -r ../h3/exemplars ../h3-build/$1
 
+# copy the installation functions to DISTRIBUTION
+cp install_* ../DISTRIBUTION
+
 # remove any superfluous files - add others as appropriate
-rm ../h3-build/$1/copy_distribution_files.sh
-rm ../h3-build/$1/install_heurist_*.sh
-rm ../h3-build/$1/install_prerequisites_*.sh
+rm -f ../h3-build/$1/copy_distribution_files.sh
+rm -f ../h3-build/$1/install_heurist_*.sh
+rm -f ../h3-build/$1/install_prerequisites_*.sh
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
+
 echo
-echo creating tarball $1.tar.bz2
+echo creating tarball ../h3-build/$1.tar.bz2
 rm -f ../h3-build/$1.tar.bz2
 tar -cjf ../h3-build/$1.tar.bz2 -C ../h3-build/ $1/
-echo
 
 # show what we have got in the directory
 ls -alt ../h3-build
@@ -93,5 +96,7 @@ echo
 echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
 echo and the installation is dependant on the filename parameter to find this folder
 echo
-echo Use:  cd ../h3-build  then  rm ../DISTRIBUTION/$1.tar.bz2  THEN  mv $1 ../h3-DISTRIBUTION
+echo Use:  cd ../h3-build  then  sudo rm ../DISTRIBUTION/$1.tar.bz2  THEN  sudo mv $1 ../DISTRIBUTION
+echo
+echo You may also wish to run    sudo ./copy_support_files.sh   to create new tarballs of support materials
 echo
