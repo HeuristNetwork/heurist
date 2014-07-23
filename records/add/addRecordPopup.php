@@ -191,6 +191,8 @@
                 var tags = $("#add-link-tags").val();
                 extra_parms = '&rec_owner=' + wg_id;
                 extra_parms += '&rec_visibility=' + vis;
+                var sError2 = '',
+                    sError1 = '';
                 if (true || cbShowAccessRights.checked) {
                     if (wg_id>=0) {
 
@@ -198,21 +200,26 @@
                             extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
                         }
                     }else {
-                        alert('Please select a group to which this record shall be restricted');
-                        cbShowAccessRights.checked = true;
-                        showHideAccessSettings(cbShowAccessRights);
-                        document.getElementById('rec_OwnerUGrpID').focus();
-                        return;
+                        sError1 = 'record owner';
                     }
                 }
                 if(vis=="-1"){
-                        alert('Please visibility type for users outside of owner group');
-                        cbShowAccessRights.checked = true;
-                        showHideAccessSettings(cbShowAccessRights);
-                        document.getElementById('rec_NonOwnerVisibility').focus();
-                        return;
+                       sError2 ='visibility outside of owner group';
                 }
 
+                if(sError1!='' || sError2!=''){
+                        if(sError1!='' && sError2!=''){
+                            sError2 = ' and '+sError2;
+                        }
+                        alert('Please select '+sError1+sError2);
+                        cbShowAccessRights.checked = true;
+                        showHideAccessSettings(cbShowAccessRights);
+                        //document.getElementById('rec_OwnerUGrpID').focus();
+                        //document.getElementById('rec_NonOwnerVisibility').focus();
+                        return;
+                }
+                
+                
                 rt = parseInt(document.getElementById('rectype_elt').value);
                 //Since 2012-12-13 Ian asked to disable it again! if (! rt) rt = <?=RT_NOTE?> ;
                 //added ian 19/9/08 to re-enable notes as default
