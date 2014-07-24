@@ -28,7 +28,13 @@
 
 \W -- warnings to standard out, OK for command line but not for phpMyAdmin
 
--- --------------------------------------------------------
+-- ADDED 24/4/14 to obviate need to enter password twice dutring inital install
+-- can remove b/c Heurist now detects H3Sandpit missing
+
+create database if not exists hdb_H3Sandpit;
+use hdb_H3Sandpit;
+
+-- ---------------------------------------------------------------------------------------------
 
 -- The rest of this file is a MySQLDump dump of a basic H3CoreDefinitions database
 -- which is used as a starting point for new users. Login and email addresss needs to be set as part of
@@ -38,11 +44,12 @@
 
 --  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
 
--- ADDED 24/4/14 to obviate need to enter password twice dutring inital install
+--  IMPORTANT: MAKE SURE THE DATABASE IS CONFIGURED TO ALLOW REGISTRATION IN sysIdentification
 
--- can remove b/c Heurist now detects H3Sandpit missing
-create database if not exists hdb_H3Sandpit;
-use hdb_H3Sandpit;
+-- ---------------------------------------------------------------------------------------------
+
+-- INSERT BELOW FROM MySQLDump ...
+
 
 -- MySQL dump 10.13  Distrib 5.1.73, for redhat-linux-gnu (x86_64)
 --
@@ -1591,7 +1598,7 @@ CREATE TABLE `sysIdentification` (
 
 LOCK TABLES `sysIdentification` WRITE;
 /*!40000 ALTER TABLE `sysIdentification` DISABLE KEYS */;
-INSERT INTO `sysIdentification` VALUES (1,2,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'Please enter a database name here ...','2','Please define ownership and rights here ...','Based on Heurist core definitions (required and very common record types)',NULL,'0',0,0,NULL,NULL,NULL,0,'viewable',0,'locktypetotype',0,NULL,'jpg,png,gif,tif,tiff,wmv,,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff,');
+INSERT INTO `sysIdentification` VALUES (1,2,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,'Please enter a database name here ...','2','Please define ownership and rights here ...','Based on Heurist core definitions (required and very common record types)',NULL,'0',0,0,NULL,NULL,NULL,0,'viewable',0,'locktypetotype',1,NULL,'jpg,png,gif,tif,tiff,wmv,,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff,');
 /*!40000 ALTER TABLE `sysIdentification` ENABLE KEYS */;
 UNLOCK TABLES;
 
