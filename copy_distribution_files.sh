@@ -96,7 +96,7 @@ echo
 echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
 echo and the installation is dependant on the filename parameter to find this folder
 echo
-echo Use:  cd ../h3-build  then  sudo rm ../DISTRIBUTION/$1.tar.bz2  THEN  sudo mv $1 ../DISTRIBUTION
+echo Use:  cd ../h3-build  then  sudo rm ../DISTRIBUTION/$1.tar.bz2  THEN  sudo mv $1.tar.bz2 ../DISTRIBUTION
 echo
 echo You may also wish to run    sudo ./copy_support_files.sh   to create new tarballs of support materials
 echo

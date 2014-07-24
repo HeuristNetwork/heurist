@@ -127,5 +127,5 @@ echo "         load completely and a memcached error shows up in the Database Su
 echo "         If so, copy a valid php.ini file into this location - consult your system administrator, or email us"
 echo
 echo
-echo Please now run install_heurist.sh (step 2 on the Heurist installation instructions)
+echo Please now run install_heurist.sh - step 2 on the Heurist installation instructions
 echo

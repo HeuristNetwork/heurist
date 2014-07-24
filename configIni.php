@@ -101,7 +101,8 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // PHP must have permissions to be able to create subdirectories of this directory for each Heurist database and write files within them.
 // For instance, if you set $defaultRootFileUploadPath = "/srv/HeuristUploadDir/"; then, when running Heurist with db=xyz, uploaded files
 // will be loaded into /srv/HeuristUploadDir/xyz/, and new databases will be created with a subdirectory in /srv/HeuristUploadDir
-$defaultRootFileUploadPath = ""; // recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
+$defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
+// recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
 
 // [email]
 
