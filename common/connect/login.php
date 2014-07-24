@@ -84,7 +84,8 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		} else if ($_REQUEST['session_type'] == 'shared') {
 			$time = time() + 24*60*60;
 		} else if ($_REQUEST['session_type'] == 'remember') {
-			$time = time() + 365*24*60*60;    //remember for one year
+            //Besides make sure thah php.ini session.gc_maxlifetime set to the similar value
+			$time = time() +  90*24*60*60; //remember for 90 days
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
 		}
 		setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);

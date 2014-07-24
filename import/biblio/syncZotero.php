@@ -129,16 +129,17 @@
 
     // 2) verify heurist codes in mapping and create mapping array
     foreach ($fh_data->children() as $f_gen){
+         /* NOW IT IS DEFINED IN DATABASE
         if($f_gen->getName()=="settings"){
 
             $arr = $f_gen->attributes();
-            /* NOW IT IS DEFINED IN DATABASE
             $user_ID = @$arr['userId'];
             $group_ID = @$arr['groupId'];
             $api_Key = @$arr['key'];
-            */
 
-        }else if($f_gen->getName()=="zTypes"){
+        }else 
+        */
+        if($f_gen->getName()=="zTypes"){
 
             foreach ($f_gen->children() as $f_type){
 

@@ -217,7 +217,25 @@
         if (defined("NO_DB_ALLOWED")) { //for createNewDB.php and selectDatabase.php
             return;
         } else {
-            returnErrorMsgPage(2, "Unable to open database : $dbName, MySQL error: " . mysql_error());
+            if($dbFullName=="hdb_H3Sandpit"){
+                //recreate this database - since this is failure of installation
+                if(defined('RECREATE_EXAMPLE_DB')){
+                    $res2 = buildExampleDB($dbFullName);
+                    if ($res2 != 0 ) {
+                        //error
+                        returnErrorMsgPage(2, "Unable to open/recreate example database ".HEURIST_DBNAME." Error:".$res2);
+                    }else{
+                        $redirect = @$_REQUEST['url'];
+                        header("Location: " . $redirect);        
+                        exit();
+                    }
+                    
+                }else{
+                    returnErrorMsgPage(4, null); //exit
+                }
+            }else{
+                returnErrorMsgPage(2, "Unable to open database : $dbName, MySQL error: " . mysql_error());
+            }
         }
     }
 
@@ -687,7 +705,7 @@
 
         } else if ($critical == 2) { //database not defined or cannot connect to it
             $redirect = HEURIST_BASE_URL . "common/connect/selectDatabase.php";
-            error_log("redirectURL = " . print_r($redirect, true));
+//DEBUG error_log("redirectURL = " . print_r($redirect, true));
             if ($msg) {
                 $redirect.= "?msg=" . rawurlencode($msg);
             }
@@ -696,6 +714,22 @@
 
             $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
 
+        } else if ($critical == 4) { // recreate example DB
+        
+                if (defined('ISSERVICE')) { //redirect to main page
+                    $url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME;
+                }else{
+                    $url = HEURIST_CURRENT_URL;
+                }
+            
+                $msg2 = "<p>&nbsp;Cannot open example database. Most probably this is installation failure<p><br><br>".
+                "<p><br><br><button onclick='{location.replace(\"".HEURIST_BASE_URL."admin/setup/dbcreate/buildExampleDB.php?db="
+                                .HEURIST_DBNAME."&url=".rawurlencode($url)."\")}'>Press this button to recreate example database</button></p>";
+                                
+                $msg2 = rawurlencode($msg2);
+                $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
+            
+            
         } else {
             // gets to here if database not specified properly. This is an error if the system is set up properly, but not at
             // first initialisaiton of the system, so test for existence of databases, if none then Heurist has not been set up yet.

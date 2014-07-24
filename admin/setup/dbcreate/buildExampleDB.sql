@@ -39,8 +39,8 @@
 --  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
 
 -- ADDED 24/4/14 to obviate need to enter password twice dutring inital install
--- can remove b/c Heurist now detects H3Sandpit missing
 
+-- can remove b/c Heurist now detects H3Sandpit missing
 create database if not exists hdb_H3Sandpit;
 use hdb_H3Sandpit;
 

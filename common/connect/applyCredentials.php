@@ -46,9 +46,9 @@ if (_is_logged_in()) {
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'] = $_SERVER['REQUEST_URI'];
 		}
 	}
-	// update cookie expiry time
+	// update cookie expiry time. Besides make sure thah php.ini session.gc_maxlifetime set to the similar value
 	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive']) {
-		$rv = setcookie('heurist-sessionid', session_id(), time() + 365*24*60*60, '/', HEURIST_SERVER_NAME);
+		$rv = setcookie('heurist-sessionid', session_id(), time() + 90*24*60*60, '/', HEURIST_SERVER_NAME);
 	}
 //	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
 //		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
@@ -212,7 +212,7 @@ function reloadUserGroups($user_id){
 */
 function startMySession(){
 
-//DEBUG error_log("SESSION ID: ".@$_COOKIE['heurist-sessionid']);
+//DEBUG  error_log("SESSION ID: ".@$_COOKIE['heurist-sessionid']);
     
 	if (@$_COOKIE['heurist-sessionid']) {
 		session_id($_COOKIE['heurist-sessionid']);
@@ -221,7 +221,7 @@ function startMySession(){
 		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_SERVER_NAME);
 	}
 
-	//session_cache_limiter('none');
+	session_cache_limiter('none');
 	session_start();
     
 /*error_log("USER NAME ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']);    
