@@ -151,7 +151,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 
             }else{
             
-                $tarfile = $folder . "/" . $upload["name"];
+                $tarfile_orig = $upload["name"];
                 $tarfile = $folder . "/project.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
 
 /*debug print "<br>temp :".$tmp_name;
@@ -180,7 +180,7 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
                 $res1 = 0;
                 $output1 = exec($cmdline, $output, $res1);
                 if ($res1 != 0 ) {
-                            echo "<p class='err_message'>Error code $res1: Unable to extract database from archive $tarfile<br><br>";
+                            echo "<p class='err_message'>Error code $res1: Unable to extract database from archive $tarfile_orig<br><br>";
                             //echo print_r($output1, true)."<br>out=";
                             //echo print_r($output, true);
                             echo "</p>";
