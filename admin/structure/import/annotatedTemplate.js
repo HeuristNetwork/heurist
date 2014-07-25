@@ -48,7 +48,6 @@ function receiveMessage(event)
                 if(event.data.indexOf('heurist:add:RecTypeSource=')===0){
                     
                     var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
-                    
                     var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
                     var url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
                     
@@ -63,6 +62,27 @@ function receiveMessage(event)
                             }
                         }
                     });
+                }else if(event.data.indexOf('heurist:check:RecTypeSource=')===0){
+                   /* 
+                    var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+                    var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+                    var _url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
+                    
+                    $.ajax({
+                        url: _url,
+                        data: null,
+                        success: function(data) {
+                            if(data['error']){
+                                //alert(data['error']);
+                            }else{
+                                win.postMessage("heuristexists", "*");    
+                            }
+                            
+                        },
+                        dataType: 'json'
+                    });                    
+                   */ 
+                    // alert(event.data);
                 }
             }
             //alert(message);
@@ -97,7 +117,9 @@ function receiveMessage(event)
    }
 */   
 
-/* insert this code into wordpress  template/js/heurist_messages.js
+/* 
+
+!!!!!!!!!!!!!!!!!!!!!!   1. insert this code into wordpress  wp-content/themes/[name]/js/heurist_messages.js
 
 if (!window['postMessage'])
     alert("postMessage is not supported");
@@ -157,7 +179,7 @@ function sendMessage(rectypeid){
 
 }
 
-insert this code into wordpress  wp-content/themes/[name]/functions.php
+!!!!!!!!!!!!!!!!!!! 2. insert this code into wordpress  wp-content/themes/[name]/functions.php
 
 
 function my_custom_js() {

@@ -29,7 +29,7 @@
 //heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/importRectype.php?&db=artem_delete1&id=1126-15
 //heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/importRectype.php?&db=artem_delete1&id=1126-12
 
-$outputFormat = null; //@$_REQUEST["output"]; //html (default) or json
+$outputFormat = @$_REQUEST["output"]; //html (default) or json
 if($outputFormat=="json"){
     define('ISSERVICE',1);
 }
@@ -48,6 +48,11 @@ $excludeDuplication = (@$_REQUEST["dup"]!="1"); //by defaul exclude
 
 //combination of db and rectype id
 $code = @$_REQUEST["id"]; 
+
+if(!$code){
+    $code = @$_REQUEST["checkid"];     
+}
+
 if(!$code){
     error_exit("Rectype code not defined");
 }
@@ -91,7 +96,6 @@ if(!$remote_url_params || !$remote_url){
 }
 
 $reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
-
 
 //print $reg_url."<br>";
 
@@ -613,15 +617,18 @@ function error_exit($msg){
     <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
 </head>
 <body>
-<div class="error" style="text-align:center;padding:40px;">ERROR: <?=$msg?></div>
+<div class="error" style="text-align:left;padding:40px;">ERROR: <?=$msg?></div>
 </body></html>
 <?php        
     }
     
     if(isset($mysqli)){
-        if($outputFormat!="json") print "ROLLBACK";
         $mysqli->rollback();
         $mysqli->close();
+        if($outputFormat!="json") {
+            //ROLLBACK
+            print '<div style="text-align:left;padding:40px;">No record types, fields or terms have been imported</div>';
+        }
     }
     
     exit;
@@ -1042,15 +1049,26 @@ function renderPreviewForm(){
     global $imp_recordtypes_tree, $imp_recordtypes, $rectypes_correspondence, $defs;
         //if(count($imp_recordtypes)>1 || count($rectypes_correspondence)>0){
     $end_s = count($imp_recordtypes)>1?'s':'';
+    if(count($imp_recordtypes)>0){
+
+        $rectype_id = $imp_recordtypes[0];
+        $def_rts = $defs['rectypes']['typedefs'];
+        $idx_ccode = $def_rts['commonNamesToIndex']['rty_ConceptID'];
+        
+        $title = @$defs['rectypes']['names'][$rectype_id]."(".@$def_rts[$rectype_id]['commonFields'][$idx_ccode].")";
+    }else{
+        $title = "";
+    }
+    
 ?>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+    <title>Importing <?=$title?></title>
 </head>
-<body>
-          
-<h4>REVIEW WHAT TO BE IMPORTED</h4>
-<hr /><br/>
+<body class="popup">
+
+<br/>
 <form action="importRectype.php" method="POST">
 <input type="hidden" name='correspondence' value='<?=json_encode($rectypes_correspondence)?>' />
 <input type="hidden" name='db' value='<?=HEURIST_DBNAME?>' />
@@ -1059,24 +1077,24 @@ function renderPreviewForm(){
 if(count($imp_recordtypes)>1){
     print "<div>The requested record type <b>"
         .$defs['rectypes']['names'][$imp_recordtypes[0]]
-        ."</b> has related record types (they get pulled in through pointer fields and relationship markers). They will be imported as well.</div><br/>";
+        ."</b> has related record types (they are referenced by pointer fields and relationship markers). They will be imported as well.</div><br/>";
 }
 
 if(count($rectypes_correspondence)>0){    
 ?>
-<table border="0">
-<tr><th>The requested<br>Record type<?=$end_s?></th><th>Already represented<br> in your database as: 
-</th><th>Mark to import<br>as new record type</th></tr>
+<table border="0" width="100%">
+<tr style='text-align:left'><th>The requested<br>Record type<?=$end_s?></th><th>Concept ID</th><th>Already represented<br> in your database as: 
+</th><th>Check to import<br>as new record type</th></tr>
 <?php
-    renderePreviewFormRelated($imp_recordtypes_tree, 0);
+    renderPreviewFormRelated($imp_recordtypes_tree, 0);
 ?>
 </table>
 <br/>
-<div>Rectypes that are already represented in your database may have a different structure from the template you are importing, and you may therefore wish to continue with this import to create a new record type. Mark checkboxes in this case</div>
+<div>Record types that are already represented in your database may have a different structure from the template you are importing, and you may therefore wish to continue with this import to create a new record type. Mark checkboxes in this case</div>
 <?php
 }else{
     print "<table>";
-    renderePreviewFormRelated($imp_recordtypes_tree, 0); 
+    renderPreviewFormRelated($imp_recordtypes_tree, 0); 
     print "</table>";
 }
 ?>
@@ -1091,7 +1109,7 @@ if(count($rectypes_correspondence)>0){
 //
 //
 //
-function renderePreviewFormRelated($dep_rectypes, $level) {
+function renderPreviewFormRelated($dep_rectypes, $level) {
     global $defs, $trg_rectypes, $rectypes_correspondence, $remote_url, $remote_url_params;
     
     $remote_link = $remote_url."admin/adminMenu.php?".$remote_url_params;
@@ -1102,7 +1120,9 @@ function renderePreviewFormRelated($dep_rectypes, $level) {
     foreach($dep_rectypes as $rectype_id=>$info){
 print "<tr><td style='padding-left:".($level*10)."px'>"
         ."<a href='".$remote_link."&mode=rectype&rtID=".$rectype_id."' target='_blank'>"
-        .$defs['rectypes']['names'][$rectype_id]."</a> (concept ID ".$def_rts[$rectype_id]['commonFields'][$idx_ccode].")</td>";
+        .$defs['rectypes']['names'][$rectype_id]."</a></td>";
+        
+print "<td>".$def_rts[$rectype_id]['commonFields'][$idx_ccode]."</td>"; //concept code
         
         if(count($rectypes_correspondence)>0){        
 print "<td>";
@@ -1123,7 +1143,7 @@ print "</td>";
 print "</tr>";
 
        //list of dependent    
-      renderePreviewFormRelated($info['dependence'], $level+1);
+      renderPreviewFormRelated($info['dependence'], $level+1);
     }
 
 }
