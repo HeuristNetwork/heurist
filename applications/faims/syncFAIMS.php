@@ -85,16 +85,17 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         function showFinalMessage(smessage, iserror){
              var ele = document.getElementById("topmessage");
              ele.style.display = 'block';
+             ele.innerHTML = smessage;
              if(iserror){
                  ele.style.color = 'red';
              }
-             ele.innerHTML = smessage;
+             alert(smessage);
         }
     </script>
 
     <div class="banner"><h2>FAIMS sync</h2></div>
     <div id="page-inner" style="margin:0px 5px; padding: 0.5em;">
-    <div id="topmessage" style="display:none"></div>
+    <div id="topmessage"></div>
 <?php
 
     $step = @$_REQUEST['step'];
@@ -248,32 +249,38 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
         exit();
     }
 
-
-
-# loading SpatiaLite as an extension
-$dbfaims->loadExtension('libspatialite.so');
-
-# enabling Spatial Metadata
-# using v.2.4.0 this automatically initializes SPATIAL_REF_SYS
-# and GEOMETRY_COLUMNS
-$dbfaims->exec("SELECT InitSpatialMetadata()");
-
-# reporting some version info
-$rs = $dbfaims->query('SELECT sqlite_version()');
-while ($row = $rs->fetchArray())
-{
-  print "<h3>Server running: SQLite version: $row[0]</h3>&nbsp;";
-}
-$rs = $dbfaims->query('SELECT spatialite_version()');
-if($rs){
+    # reporting some version info
+    $rs = $dbfaims->query('SELECT sqlite_version()');
     while ($row = $rs->fetchArray())
     {
-        print "<h3>Server running: SpatiaLite version: $row[0]</h3>";
+      print "<h3>Server running: SQLite version: $row[0]</h3>&nbsp;";
     }
-}else{
-        print "<div style='color:red; font-weight:bold;padding:10px'>Cannot detect SQLite SpatiaLite version. Please verify installation</div>";
-        exit();
-}
+        
+        
+    $use_Spatialite = false;    
+        
+    if($use_Spatialite){              //TEMP
+
+    # loading SpatiaLite as an extension
+    $dbfaims->loadExtension('libspatialite.so');
+
+    # enabling Spatial Metadata
+    # using v.2.4.0 this automatically initializes SPATIAL_REF_SYS
+    # and GEOMETRY_COLUMNS
+    $dbfaims->exec("SELECT InitSpatialMetadata()");
+
+    $rs = $dbfaims->query('SELECT spatialite_version()');
+    if($rs){
+        while ($row = $rs->fetchArray())
+        {
+            print "<h3>Server running: SpatiaLite version: $row[0]</h3>";
+        }
+    }else{
+            print "<div style='color:red; font-weight:bold;padding:10px'>Cannot detect SQLite SpatiaLite version. Please verify installation</div>";
+            exit();
+    }
+
+    }  //use spatialite
 
      print "<br>";
 /* THIS IS ORIGINAL BRIAN QUERY TO RETRIEVE SPATIAL DATA
@@ -313,14 +320,19 @@ exit();
             echo $row[0]."<br>";
     }*/
 
-    if(@$_REQUEST['showstr']){
+    if(@$_REQUEST['showstr']){   //show strucuture only
+        
+        print "<h3>STRUCTURE</h3><br>";
+        
         // AttributeKey -> defDetailTypes
         print "<h3>AttributeKey (fields)</h3><br><table>";
         $query =  "SELECT AttributeID, AttributeType, AttributeName, AttributeDescription FROM AttributeKey";
         $rs = $dbfaims->query($query);
+        $fields = array();
         while ($row = $rs->fetchArray(SQLITE3_NUM))
         {
-                echo "<tr><td>".$row[0]."</td><td>".$row[1]."</td><td>".trunc50($row[2])."</td></tr>";
+                echo "<tr><td width='150px'>".$row[0]."</td><td>".$row[1]."</td><td>".trunc50($row[2])."</td></tr>";
+                $fields[$row[0]] = $row[2];
         }
         print "</table>";
 
@@ -331,13 +343,20 @@ exit();
         while ($row = $rs->fetchArray(SQLITE3_NUM))
         {
             
-                echo "<tr style='font-weight:bold'><td>".$row[0]."</td><td>".$row[1]."</td><td>".trunc50($row[3])."</td></tr>";
+                echo "<tr style='font-weight:bold'><td width='150px'>".$row[0]."</td><td width='150px'>".$row[1]."</td><td>".trunc50($row[3])."</td></tr>";
 
                 $query2 =  "SELECT AEntTypeID, AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".$row[0];
                 $rs2 = $dbfaims->query($query2);
                 while ($row2 = $rs2->fetchArray(SQLITE3_NUM))
                 {
-                      echo "<tr><td>&nbsp;</td><td>".$row2[1]."</td><td>".trunc50($row2[2])."</td></tr>";
+                    
+                      if(trim($row2[2])==""){
+                          $sdesc = $fields[$row2[1]];
+                      }else{
+                          $sdesc = $row2[2];
+                      }
+                    
+                      echo "<tr><td>&nbsp;</td><td>".$row2[1]."</td><td>".trunc50($sdesc)."</td></tr>";
                 }
         }
         print "</table>"; 
@@ -347,14 +366,20 @@ exit();
         $rs = $dbfaims->query($query);
         while ($row = $rs->fetchArray(SQLITE3_NUM))
         {
-                echo "<tr style='font-weight:bold'><td>".$row[0]."</td><td>".$row[1]."</td><td>".trunc50($row[3])."</td></tr>";
+                echo "<tr style='font-weight:bold'><td width='150px'>".$row[0]."</td><td width='150px'>".$row[1]."</td><td>".trunc50($row[3])."</td></tr>";
 
                 $query2 =  'SELECT "RelnTypeID", "AttributeID", "RelnDescription", "IsIdentifier", "MinCardinality", "MaxCardinality" FROM "IdealReln"
  where RelnTypeID='.$row[0];
                 $rs2 = $dbfaims->query($query2);
                 while ($row2 = $rs2->fetchArray(SQLITE3_NUM))
                 {
-                      echo "<tr><td>&nbsp;</td><td>".$row2[1]."</td><td>".trunc50($row2[2])."</td></tr>";
+                      if(trim($row2[2])==""){
+                          $sdesc = $fields[$row2[1]];
+                      }else{
+                          $sdesc = $row2[2];
+                      }
+                    
+                      echo "<tr><td>&nbsp;</td><td>".$row2[1]."</td><td>".trunc50($sdesc)."</td></tr>";
                 }
         }
         print "</table>"; 
@@ -366,8 +391,8 @@ exit();
         $rs = $dbfaims->query($query);
         while ($row = $rs->fetchArray(SQLITE3_NUM))
         {
-                echo $row[0]."  ".$row[2]."<br>";
-                echo "<tr><td>".$row[0]."</td><td>".$row[2]."</td></tr>";
+                //echo $row[0]."  ".$row[2]."<br>";
+                echo "<tr><td width='150px'>".$row[0]."</td><td>".$row[2]."</td></tr>";
         }
         print "</table>"; 
 
@@ -378,7 +403,7 @@ exit();
         $rs = $dbfaims->query($query);
         while ($row = $rs->fetchArray(SQLITE3_NUM))
         {
-                echo "<tr><td>".$row[0]."</td><td>".$row[1]."</td><td>".$row[2]."</td><td>".$row[3]."</td><td>".$row[4]."</td></tr>";
+                echo "<tr><td width='150px'>".$row[0]."</td><td>".$row[1]."</td><td>".$row[2]."</td><td>".$row[3]."</td><td>".$row[4]."</td></tr>";
         }
         print "</table>"; 
 
@@ -407,7 +432,7 @@ exit();
             $row = mysqli__select_array($mysqli, "select dty_ID, dty_Name, dty_JsonTermIDTree, dty_Type from defDetailTypes where dty_NameInOriginatingDB='FAIMS.".$attrID."'");
             if($row){
 
-print  "Field ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."<br/>";
+print  "<div style='color:gray'>Field ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."</div>";
 
                 $dtyId = $row[0];                                                                        
                 $dtyName = $row[1];
@@ -418,25 +443,31 @@ print  "Field ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]
                 $dtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
                 
                 //rename existing to deprecated
-                $row = mysqli__select_array($mysqli, "select dty_ID from defDetailTypes where dty_Name='".mysql_real_escape_string($dtyName)."'");
-                
-                
-                //add new detail type into HEURIST
-                $query = "INSERT INTO defDetailTypes (dty_Name, dty_HelpText, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?,?)";
-                $stmt = $mysqli->prepare($query);
-                if(!$stmt){
-                    print "<script>showErrorMessage('ERROR ".$mysqli->error."')</script>";
-                    exit();
-                }
+                renameExisitingDt($dtyName, 0, 1);
+
                 $fid = 'FAIMS.'.$attrID;
                 $ftype = faimsToH3_dt_mapping($row1[2]);
 //print ">>>>".$fid." ".$row1[1];
                 $dtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
                 $dtyDescr = trim($row1[3]." FAIMS ID ".$attrID);
 
+                
+                //add new detail type into HEURIST
+                $query = "INSERT INTO defDetailTypes (dty_Name, dty_HelpText, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?,?)";
+                $stmt = $mysqli->prepare($query);
+                if(!$stmt){
+                    print "<script>showErrorMessage('".addslashes("ERROR: Field type not inserted for:  FAIMS"
+                        .$attrID." | ".$row1[1]." | ".trunc50($row1[3])." <br> "
+                        ."SQL message:".$mysqli->error)."')</script></body></html>";
+                    exit();
+                }
+                
                 $stmt->bind_param('sssss', $dtyName, $dtyDescr, $dtyDescr, $ftype, $fid);
                 if(!$stmt->execute()){
-                    print "<script>showErrorMessage('ERROR! Field type not inserted ".$mysqli->error."( based on ".$attrID." ".$row1[1]." ".$row1[3].")')</script>";
+                    print "<script>showErrorMessage('".addslashes("ERROR: Field type not inserted for:  FAIMS"
+                        .$attrID." | ".$row1[1]." | ".trunc50($row1[3])." <br> "
+                        ."SQL message:".$mysqli->error)."')</script></body></html>";
+
                     exit();
                 }
 
@@ -448,7 +479,7 @@ print  "Field ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]
 
                 $detailMap[$attrID] = array($dtyId, $ftype);
 
-print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".trunc50($row1[3])."<br/>";
+print  "<div>Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".trunc50($row1[3])."</div>";
             }
 
 
@@ -468,6 +499,7 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
                     $vocabID = $stmt->insert_id;
                     $stmt->close();
 
+                    //set vocabulary ID in field type
                     $query = "UPDATE defDetailTypes set dty_Type='enum', dty_JsonTermIDTree=$vocabID where dty_ID=$dtyId";
                     $stmt = $mysqli->prepare($query);
                     $stmt->execute();
@@ -478,7 +510,7 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
                 $row = mysqli__select_array($mysqli, "select trm_ID, trm_Label from defTerms where trm_NameInOriginatingDB='FAIMS.".$row_vocab[0]."'");
                 if($row){
 
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term ".$row[0]." already exists. Based on FAIMS ".$row_vocab[0]." | ".$row[1]."<br/>";  
+        print  "<div style='color:gray;padding-left:100px;'>Term ".$row[0]." already exists. Based on FAIMS ".$row_vocab[0]." | ".$row[1]."</div>";  
 
                         $termsMap[$row_vocab[0]] = $row[0];
                 }else{
@@ -497,7 +529,7 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
 
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Added term ".$trm_ID." based on FAIMS ".$row_vocab[0]." | ".$row_vocab[1]."<br/>";  
+        print  "<div style='padding-left:100px;'>Added term ".$trm_ID." based on FAIMS ".$row_vocab[0]." | ".$row_vocab[1]."</div>";  
                 }//add terms
 
             }
@@ -553,10 +585,13 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
                                 $trm_ID = $row[0];
                             }
                             $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$trm_ID);   // hierarchy - contains two heurist id - parent and child
-                            print  "&nbsp;&nbsp;Relationship type hierarchy tagID:".$parent."=".$row_vocab[3]." and tagID:" .$trm_ID."=".$row_vocab[4]."  =>".$row_vocab[0]."<br/>";
+                            print  "<div style='color:gray;padding-left:50px;'>Relationship type hierarchy already exists based on FAIMS:".$row_vocab[0]
+                                        ." | Parent term ID:"
+                                        .$parent." (FAIMS:".$row_vocab[3].") and child term ID:" .$trm_ID." (FAIMS:".$row_vocab[4].")</div>";
                             
                         }else{
-                            print  "&nbsp;&nbsp;Relationship type ".$row[0]."  ".$row[1]."  =>".$row_vocab[0]."<br/>";
+                            print  "<div style='color:gray;padding-left:50px;'>Relationship type already exists based on FAIMS:".$row_vocab[0]
+                                            ." | ".$row[0]." | ".$row[1]."</div>";
                             $reltypeMap[$row_vocab[0]] = $row[0];
                         }
                         
@@ -583,11 +618,12 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
                                 $trm_ID = addChildRelType($parentTermID, $parent, $row_vocab[0], $row_vocab[4]);
                                 
                                 $reltypeMap[$row_vocab[0]] = array($row_vocab[3]=>$parent, $row_vocab[4]=>$trm_ID);
-                                print  "&nbsp;&nbsp;Added Relationship type. Hierarchy ".$parent."=".$row_vocab[3]." and " .$trm_ID."=".$row_vocab[4].". Based on FAIMS ".$row_vocab[0]."<br/>";
+                                print  "<div style='padding-left:50px;'>Added Relationship type Hierarchy based on FAIMS: ".$row_vocab[0]
+                                    .". Parent term ID:".$parent." (FAIMS:".$row_vocab[3].") and child term ID:" .$trm_ID." (FAIMS:".$row_vocab[4].")<br/>";
 
                         }else{
                             $reltypeMap[$row_vocab[0]] = $trm_ID;
-                            print  "&nbsp;&nbsp;Added Relationship type ".$trm_ID."  based on FAIMS ".$row_vocab[0]." | ".$row_vocab[1]."<br/>";
+                            print  "<div style='padding-left:50px;'>Added Relationship type ".$trm_ID."  based on FAIMS ".$row_vocab[0]." | ".$row_vocab[1]."</div>";
                         }
 
         
@@ -616,7 +652,7 @@ print  "Added field ".$dtyId."  based on FAIMS ".$attrID." | ".$row1[1]." | ".tr
             $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name, rty_TitleMask from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
             if($row){ //already exists
 
-print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."<br/>";
+print  "<div style='color:gray'>Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."</div>";
 
                 $rtyId = $row[0];
                 $rtyName = $row[1];
@@ -624,6 +660,10 @@ print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$
 
                 $rectypeMap[$attrID] = $row[0];
             }else{
+                
+                //rename existing to deprecated
+                renameExisitingRt($rtyName, 0, 1);
+                
                 //add new record type into HEURIST
                 $query = "INSERT INTO defRecTypes (rty_Name, rty_TitleMask, rty_Description, rty_NameInOriginatingDB) VALUES (?,'Record #[ID]',?,?)";
                 $stmt = $mysqli->prepare($query);
@@ -634,7 +674,10 @@ print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "<script>showErrorMessage('ERROR! record type not inserted ".$mysqli->error."')</script>";
+                    print "<script>showErrorMessage('".addslashes("ERROR: Reord type not inserted for:  FAIMS"
+                        .$attrID." | ".$row1[1]." | ".trunc50($row1[2])." <br> "
+                        ."SQL message:".$mysqli->error)."')</script></body></html>";
+                    
                     exit();
                 }
 
@@ -645,7 +688,7 @@ print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$
                 
                 $rectypeMap[$attrID] = $rtyId;
 
-print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." | ".substr($row1[2],0,50)."<br/>";
+print  "<div>Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." | ".trunc50($rtyDescr)."</div>";
             }
 
             //if AEntType has strucute described in IdealAEnt
@@ -667,7 +710,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
                     if($row){  //such detal in structure already exists
 
                             $dt_Id = $row[2];
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Field ".$row[0]." is already in structure. Based on FAIMS ".$row_recstr[0]." | ".$row[1]."<br/>";
+        print  "<div style='color:gray;padding-left:100px'>Field ".$row[0]." is already in structure. Based on FAIMS ".$row_recstr[0]." | ".$row[1]."</div>";
 
                     }else{
 
@@ -683,9 +726,9 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
 
                                 $dt_Id = $row3[0];
 
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."<br/>";
+        print "<div style='color:gray;padding-left:100px'>Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."</div>";
                         }else{
-                            print  "&nbsp;&nbsp;&nbsp;DETAIL NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
+                            print  "<div style='color:red;padding-left:100px'>DETAIL NOT ADDED TO STRUCTURE. IT IS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
                         }
                     }
                     
@@ -697,7 +740,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
             
             //update title mask
             if($currTitleMask!=$titleMask){
-print "titlemask=".$titleMask."<br>";                
+        print "<div>Titlemask is updated: ".$titleMask."</div>";                
                 $query = "UPDATE defRecTypes set rty_TitleMask =? where rty_ID=".$rtyId;
                 $stmt = $mysqli->prepare($query);
                 $stmt->bind_param('s', $titleMask);
@@ -706,14 +749,14 @@ print "titlemask=".$titleMask."<br>";
             }
 
             //verify spatial data for this record type
-            if(isset($dt_Geo) && $dt_Geo>0)
+            if($use_Spatialite && isset($dt_Geo) && $dt_Geo>0)
             {
                 $row = mysqli__select_array($mysqli,
                             "select rst_DetailTypeID, rst_DisplayName from defRecStructure r ".
                             "where r.rst_RecTypeID=$rtyId and r.rst_DetailTypeID".$dt_Geo."'");
 
                 if($row){  //such detal in structure already exists
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Field ".$row[0]." is already in structure | ".$row[1]."<br/>";
+        print "<div style='color:gray;padding-left:100px'>Spatial field ".$row[0]." is already in structure | ".$row[1]."</div>";
                 }else{
 
                     $query3 = "SELECT count(*) FROM archentity ae where ae.AEntTypeID="
@@ -721,7 +764,7 @@ print "titlemask=".$titleMask."<br>";
                     $hasgeo = $dbfaims->query($query3);
                     $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
 
-        print "HAS GEO : ".$hasgeo[0]." entries<br>";
+        print "<div>HAS GEO : ".$hasgeo[0]." entries</div>";
 
                     if($hasgeo[0]>0){
                         $row3 = mysqli__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_ID=".$dt_Geo);
@@ -731,7 +774,7 @@ print "titlemask=".$titleMask."<br>";
                                         $stmt->bind_param('iis', $rtyId, $row3[0], $row3[1] );
                                         $stmt->execute();
                                         $stmt->close();
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Added field ".$row3[0]." to structure | ".$row3[1]."<br/>";
+        print "<div style='padding-left:100px'>Added spatial field ".$row3[0]." to structure | ".$row3[1]."</div>";
                         }
                     }
                 }
@@ -739,6 +782,7 @@ print "titlemask=".$titleMask."<br>";
 
     }//for AEntTypes
 
+    
 //exit();
 
 //----------------------------------------------------------------------------------------
@@ -757,13 +801,17 @@ print "titlemask=".$titleMask."<br>";
             $row = mysqli__select_array($mysqli, "select rty_ID, rty_Name from defRecTypes where rty_NameInOriginatingDB='FAIMS.".$attrID."'");
             if($row){ //already exists
 
-print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."<br/>";
+print  "<div style='color:gray'>Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$row[1]."</div>";
 
                 $rtyId = $row[0];
                 $rtyName = $row[1];
 
                 $rectypeMap[$attrID] = $row[0];
             }else{
+                
+                //rename existing to deprecated
+                renameExisitingRt($rtyName, 0, 1);
+                
                 //add new record type into HEURIST
                 $query = "INSERT INTO defRecTypes (rty_Name, rty_TitleMask, rty_Description, rty_NameInOriginatingDB) VALUES (?,?,?,?)";
                 $stmt = $mysqli->prepare($query);
@@ -776,7 +824,10 @@ print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$
 
                 $rtyId = $stmt->insert_id;
                 if($rtyId<1){
-                    print "<script>showErrorMessage('ERROR! Record type not inserted ".$mysqli->error."')</script>";
+                    print "<script>showErrorMessage('".addslashes("ERROR: Reord type not inserted for:  FAIMS"
+                        .$attrID." | ".$row1[1]." | ".trunc50($row1[2])." <br> "
+                        ."SQL message:".$mysqli->error)."')</script></body></html>";
+                    
                     exit();
                 }
 
@@ -784,7 +835,7 @@ print  "Record type ".$row[0]." already exists. Based on FAIMS ".$attrID." | ".$
 
                 $rectypeMap[$attrID] = $rtyId;
 
-print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." | ".substr($row1[2],0,50)."<br/>";
+print  "<div>Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." | ".substr($row1[2],0,50)."</div>";
             }
 
             //if AEntType has strucute described in IdealReln
@@ -801,7 +852,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
 
                     if($row){  //such detal in structure already exists
 
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Field ".$row[0]." is already in structure | ".$row[1]."<br/>";
+        print  "<div style='color:gray;padding-left:100px'>Field ".$row[0]." is already in structure. Based on FAIMS ".$row_recstr[0]." | ".$row[1]."</div>";
 
                     }else{
 
@@ -815,24 +866,26 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
 
                                 $stmt->close();
 
-
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."<br/>";
+        print "<div style='color:gray;padding-left:100px'>Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."</div>";
                         }else{
-                            print  "&nbsp;&nbsp;&nbsp;FIELD NOT FOUND FAIMS.".$row_recstr[0]." !<br>";
+                            print  "<div style='color:red;padding-left:100px'>DETAIL NOT ADDED TO STRUCTURE. IT IS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
                         }
                     }
 
             }//for add details for structure
 
+            
+    
+            
             //verify spatial data for this record type
-            if(isset($dt_Geo) && $dt_Geo>0)
+            if($use_Spatialite && isset($dt_Geo) && $dt_Geo>0)
             {
                 $row = mysqli__select_array($mysqli,
                             "select rst_DetailTypeID, rst_DisplayName from defRecStructure r ".
                             "where r.rst_RecTypeID=$rtyId and r.rst_DetailTypeID".$dt_Geo."'");
 
                 if($row){  //such detal in structure already exists
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Field ".$row[0]." is already in structure | ".$row[1]."<br/>";
+        print "<div style='color:gray;padding-left:100px'>Spatial field ".$row[0]." is already in structure | ".$row[1]."</div>";
                 }else{
 
                     $query3 = "SELECT count(*) FROM Relationship ae where ae.RelnTypeID="
@@ -840,7 +893,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
                     $hasgeo = $dbfaims->query($query3);
                     $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
 
-        print "HAS GEO : ".$hasgeo[0]." entries<br>";
+        print "<div>HAS GEO : ".$hasgeo[0]." entries</div>";
 
                     if($hasgeo[0]>0){
                         $row3 = mysqli__select_array($mysqli, "select dty_ID, dty_Name from defDetailTypes where dty_ID=".$dt_Geo);
@@ -850,7 +903,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
                                         $stmt->bind_param('iis', $rtyId, $row3[0], $row3[1] );
                                         $stmt->execute();
                                         $stmt->close();
-        print  "&nbsp;&nbsp;&nbsp;&nbsp;Added field ".$row3[0]." to structure | ".$row3[1]."<br/>";
+        print "<div style='padding-left:100px'>Added spatial field ".$row3[0]." to structure | ".$row3[1]."</div>";
                         }
                     }
                 }
@@ -888,6 +941,7 @@ print  "Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyName." |
     $cntUpdated = 0;
 
     $rs = $dbfaims->query($query);
+    if($rs)
     while ($row = $rs->fetchArray(SQLITE3_NUM))
     {
         if($faims_id!=$row[0]){
@@ -1054,6 +1108,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
     $containerRecords = array();
 
     $rs = $dbfaims->query($query);
+    if($rs)
     while ($row = $rs->fetchArray(SQLITE3_NUM))
     {
         if($faims_id!=$row[0]){
@@ -1208,6 +1263,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
     $cntUpdated = 0;
 
     $rs = $dbfaims->query($query);
+    if($rs)
     while ($row = $rs->fetchArray(SQLITE3_NUM))
     {                                           
         if($faims_id!=$row[0]){ 
@@ -1645,6 +1701,71 @@ function trunc50($str){
     }
     
 }
+
+//
+// rename the existing field type to deprecated
+//
+function renameExisitingDt($dtyName, $dty_ID, $cnt){
+    global $mysqli;
+
+    $query = "select dty_ID from defDetailTypes where dty_Name = '".mysql_real_escape_string($dtyName)."'";
+    
+    $row = mysqli__select_array($mysqli, $query);
+    
+    if($row && $row[0]){ //found
+     
+        if(strpos($dtyName,"_deprecated")>0){
+            $dtyName = $dtyName."_".$cnt;
+        }else{  
+            $dtyName = $dtyName."_deprecated";
+        }
+     
+        renameExisitingDt($dtyName, $dty_ID>0?$dty_ID:$row[0], $cnt+1);
+        
+    }else if($dty_ID>0){
+        
+            $query = "UPDATE defDetailTypes set dty_Name=? where dty_ID=".$dty_ID;
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('s', $dtyName);
+            if(!$stmt->execute()){
+                //sql error
+print  "<div style='color:red'>'Can not rename Field type $dty_ID. MySQL error: ".$mysqli->error."</div>";                
+            }else{
+print  "<div style='color:purple'>Existing Field type ".$dty_ID." is renamed to ".$dtyName."</div>";                
+            }
+    }
+}                
+
+//
+// rename the existing Record type to deprecated
+//
+function renameExisitingRt($rtyName, $rty_ID, $cnt){
+    global $mysqli;
+
+    $row = mysqli__select_array($mysqli, "select rty_ID from defDetailTypes where rty_Name = '".mysql_real_escape_string($rtyName)."'");
+    if($row && $row[0]){ //found
+        
+        if(strpos($rtyName,"_deprecated")>0){
+            $rtyName = $rtyName."_".$cnt;
+        }else{  
+            $rtyName = $rtyName."_deprecated";
+        }
+        renameExisitingRt($rtyName, $rty_ID>0?$rty_ID:$row[0], $cnt+1);
+        
+    }else if($rty_ID>0){
+            $query = "UPDATE defDetailTypes set rty_Name=? where rty_ID=".$rty_ID;
+            $stmt = $mysqli->prepare($query);
+            $stmt->bind_param('s', $rtyName);
+            if(!$stmt->execute()){
+                //sql error
+print  "<div style='color:red'>'Can not rename Record type $rty_ID. MySQL error: ".$mysqli->error."</div>";                
+            }else{
+print  "<div style='color:purple'>Existing Record type ".$row[0]." is renamed to ".$rtyName."</div>";                
+            }
+    }
+}                
+                
+
 ?>
   </div>
 </body>
