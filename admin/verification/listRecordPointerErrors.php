@@ -24,6 +24,7 @@
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 ?>
 
 <html>
@@ -71,7 +72,7 @@
                 left join defRecTypes on rty_ID = rec_RecTypeID
                 where dty_Type = "resource"
                 and dty_PtrTargetRectypeIDs > 0
-            and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
+            and (INSTR(concat(dty_PtrTargetRectypeIDs,','), concat(rec_RecTypeID,',')) = 0)');    // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
             $bibs = array();
             while ($row = mysql_fetch_assoc($res))
                 $bibs[$row['dtl_RecID']] = $row;
@@ -142,8 +143,11 @@
                     and a.rec_ID is not null
                 and b.rec_ID is null');
                 $bibs = array();
-                while ($row = mysql_fetch_assoc($res))
-                    $bibs[$row['dtl_RecID']] = $row;
+                $ids = array();
+                while ($row = mysql_fetch_assoc($res)) {
+                    array_push($bibs, $row);  
+                    $ids[$row['dtl_RecID']] = 1;  
+                }
 
                 if(count($bibs)==0){
                     print "<div><h3>All records have valid pointers</h3></div>";
@@ -157,7 +161,7 @@
                 <div>
                     <h3>Records with record pointers to non-existent records</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB');">(show selected as search)</a>
                     </span>
@@ -190,6 +194,144 @@
             ?>
             <br/><hr/>
 <?php
+//------------------------------------    Any records with term fields which contain values which are not in the list of terms specified for that field in the record type
+                $wasdeleted = 0;
+                if(@$_REQUEST['fixterms']=="1"){  //remove wrong term IDs
+
+                    $query = 'delete d from recDetails d
+                    left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
+                    left join defTerms b on b.trm_ID = d.dtl_Value
+                    where dt.dty_Type = "enum" or  dt.dty_Type = "relationtype"
+                    and b.trm_ID is null';
+                    $res = mysql_query( $query );
+                    if(! $res )
+                    {
+                        print "<div class='error'>Can not delete invalid term values from Records. SQL error: ".mysql_error()."</div>";
+                    }else{
+                        $wasdeleted = mysql_affected_rows();
+                    }            
+                }
+
+                //find non existing term values
+                $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, a.rec_Title
+                    from recDetails
+                    left join defDetailTypes on dty_ID = dtl_DetailTypeID
+                    left join Records a on a.rec_ID = dtl_RecID
+                    left join defTerms b on b.trm_ID = dtl_Value
+                    where (dty_Type = "enum" or dty_Type = "relationtype") and dtl_Value is not null
+                    and a.rec_ID is not null
+                    and b.trm_ID is null');
+                $bibs = array();
+                $ids  = array();
+                $dtl_ids = array();
+                while ($row = mysql_fetch_assoc($res)){
+                    array_push($bibs, $row);  
+                    $ids[$row['dtl_RecID']] = 1;
+                    array_push($dtl_ids, $row['dtl_ID']);
+                }
+
+                if(count($bibs)==0){
+                    print "<div><h3>All records have valid term values</h3></div>";
+                    if($wasdeleted>1){
+                        print "<div>$wasdeleted invalid term values were removed from database</div>";    
+                    }else if($wasdeleted>0){
+                        print "<div>$wasdeleted invalid term value was removed from database</div>";    
+                    }
+                }else{
+                ?>
+                <div>
+                    <h3>Records with non-existent term values</h3>
+                    <span>
+                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB1');">(show selected as search)</a>
+                    </span>
+                    <div>To fix the inconsistencies, please click here: 
+                        <button onclick="window.open('listRecordPointerErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
+                            Delete ALL faulty term values</button>
+                    </div>
+                </div>
+                <table>
+                    <?php
+                        foreach ($bibs as $row) {
+                        ?>
+                        <tr>
+                            <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><a target=_new 
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?>
+                                </a></td>
+                            <td><?= substr($row['rec_Title'],0,50) ?></td>
+                            <td><?= $row['dty_Name'] ?></td>
+                        </tr>
+                        <?php
+                        }
+                        print "</table>\n";
+                    ?>
+                </table>
+                [end of list]
+                <?php
+                }
+            ?>
+            <br/><hr/>
+<?php
+
+           $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title
+                from Records, recDetails, defDetailTypes
+                where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relationtype")
+                 and dtl_Value is not null
+                order by dtl_DetailTypeID');
+            /*
+           'select dtl_RecID, dty_Name, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, dtl_Value, dty_ID
+                from defDetailTypes
+                left join recDetails on dty_ID = dtl_DetailTypeID
+                left join Records on rec_ID = dtl_RecID
+                where dty_Type = "enum" or  dty_Type = "relationtype"
+                order by dtl_DetailTypeID'*/
+            $bibs = array();
+            $ids = array();
+            while ($row = mysql_fetch_assoc($res)){
+                //verify value
+                if(  !in_array($row['dtl_ID'], $dtl_ids) && 
+                      trim($row['dtl_Value'])!="" && 
+                      isInvalidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
+                {
+                    array_push($bibs, $row);  
+                    $ids[$row['dtl_RecID']] = 1;  
+                }
+            }
+                
+          //Check for invalid term values
+          //These checks look for invalid term values within the database.
+        ?>
+            <div>
+                <h3>Records with term values are not in the list of terms specified for that field in the record type</h3>
+                <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                    (show results as search)</a></span>
+            </div>
+            <table>
+                <tr><th>Record</th><th>&nbsp;</th><th>Field</th><th>Wrong Term</th></tr>
+                <?php
+                    foreach ($bibs as $row) {
+                    ?>
+                    <tr>
+                        <td><a target=_new 
+                                href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
+                            </a></td>
+                        <td><?= substr($row['rec_Title'], 0, 50) ?></td>
+                        <td><?= $row['dty_Name'] ?></td>
+                        <td><?= $row['dtl_Value'] ?></td>
+                    </tr>
+                    <?php
+                    }
+                ?>
+            </table>
+            [end of list]
+            <p />
+
+            <hr />
+<?php
+
 //------------------------------------    Any single value fields with mutliple values 
 
                 $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
@@ -380,4 +522,55 @@ where rst_ID is null
         </div>
     </body>
 </html>
+<?php
 
+$dtyIDDefs = array();
+
+function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
+    global $dtyIDDefs;
+    
+    if(!@$dtyIDDefs[$dtyID]){
+        $terms = getTermsFromFormat($defs);
+        if (($cntTrm = count($terms)) > 0) {
+            if ($cntTrm == 1) {  //vocabulary
+                $terms = getTermOffspringList($terms[0]);
+            }else{
+                $nonTerms = getTermsFromFormat($defs_nonsel);
+                if (count($nonTerms) > 0) {
+                    $terms = array_diff($terms,$nonTerms);
+                }
+            }
+            if (count($temp)<1) {
+                $dtyIDDefs[$dtyID] = "all";
+            }else{
+                $dtyIDDefs[$dtyID] = $terms;
+            }
+        }
+    }
+    
+    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
+}    
+//
+// siilar functions are in saveRecordDetail and importRectype
+//
+function getTermsFromFormat($formattedStringOfTermIDs){
+    
+        if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
+            return array();
+        }
+
+        if (strpos($formattedStringOfTermIDs,"{")!== false) {
+            /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
+            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+            if (strrpos($temp,":") == strlen($temp)-1) {
+                $temp = substr($temp,0, strlen($temp)-1);
+            }
+            $termIDs = explode(":",$temp);
+        } else {
+            /*****DEBUG****///echo ( "term array string = ". $formattedStringOfTermIDs);
+            $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
+            $termIDs = explode(",",$temp);
+        }
+        return $termIDs;
+}
+?>

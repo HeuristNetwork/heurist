@@ -111,6 +111,9 @@
     }
     /***** END OF OUTPUT *****/
 
+    /**
+    * get array of terms from Field type definition
+    */
     function getTermsFromFormat($formattedStringOfTermIDs) {
         global $TL;
         $validTermIDs = array();
@@ -163,7 +166,7 @@
                     //create term Id list and term list.
                     $terms = getTermsFromFormat($row[2]);
                     if (($cntTrm = count($terms)) > 0) {
-                        if ($cntTrm == 1) {
+                        if ($cntTrm == 1) {  //vocabulary
                             $terms = getTermOffspringList($terms[0]);
                         }else{
                             $nonTerms = getTermsFromFormat($row[3]);
