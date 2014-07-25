@@ -1,4 +1,5 @@
-{* This is a very simple Smarty report template which you can edit into something more sophisticated.
+{* This is a simple Smarty report template which you can edit into something more sophisticated.
+   It should give basic output for any database, as it uses the standard record types which are part of all databases.
    Enter html for web pages or other text format. Use tree on right to insert fields, loops and tests.
    Use this format to include comments in your file, use <!-- --> for output of html comments.
    Smarty help describes many functions you can apply, loop counting/summing, custom functions etc.*}
@@ -6,10 +7,9 @@
 <h2>Basic report as an example</h2> {* Text here appears at start of report *}
 
 <i><pre>
-     Please use this as an example from which to create your own reports.<br/>
-     Just open from the pulldown menu at top right, then Save As and edit the copy.<br/>
-     Use the tree view on the right (when editing) to insert data fields, tests and loops<br/>
-     As you edit, hit Test button repeatedly to see how your changes are working.<br/>
+     Please use this as an example from which to create your own reports, by copying this template.<br/>
+     To do this, choose <b>Edit Template</b> from the pulldown menu at top right, then click the <b>Save As</b> button.<br/>
+     As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br/>
      Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br/>
 </pre></i>
 
@@ -50,7 +50,7 @@
          {$r.f3}{*Summary*}<br/>
        {/if}
 
-     {/if}{* Digital media item *}
+     {else}
 
 
      {* --------------------------------------------------*}
@@ -82,7 +82,7 @@
        	 {wrap var=$r.f39_originalvalue dt="file" width="150" height="auto"}<br/> {* Thumbnail Image *}
        {/if}
 
-     {/if}{* Organisation *}
+     {else}{* Organisation *}
 
 
      {* --------------------------------------------------*}
@@ -118,7 +118,7 @@
          <br/>Birth place map below:<br/>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
        {/if}
 
-     {/if}{* Person - detailed *}
+     {else}{* Person - detailed *}
 
 
      {* --------------------------------------------------*}
@@ -134,7 +134,7 @@
      </i>
      </b> <br/>
 
-     {/if}{* Person - minimal *}
+     {else}{* Person - minimal *}
 
 
      {* --------------------------------------------------*}
@@ -152,7 +152,7 @@
          <br/><br/>{$r.f3}{*Summary*}
        {/if}
 
-     {/if}{* Web site / page *}
+     {else}{* Web site / page *}
 
 
      {* --------------------------------------------------*}
@@ -169,7 +169,7 @@
 
        <br/>{wrap var=$r.f28_originalvalue dt="geo"} {*Map*}
 
-     {/if}{* Place *}
+     {else}{* Place *}
 
 
      {* --------------------------------------------------*}
@@ -183,11 +183,31 @@
 
        <br/>{$r.f3}{*Short Note / Summary*}
 
-     {/if}{* Notes *}
+     {else}{* Notes *}
 
 
      {* --------------------------------------------------*}
 
+
+       Other: <b>{$r.recID}</b>  {* the unique record ID *}
+
+       <b>{$r.f1}</b><br/> {*Title*}
+
+			 <br/> Unsupported record type: please edit the template to add support for it
+ 
+     
+               
+{* Close all the IF statements *}
+  
+  {/if}	
+  {/if}	
+  {/if}	
+  {/if}	
+  {/if}	
+  {/if}	
+  {/if}	
+      
+      
 
 <br/> <hr> <br/> {* line breaks / horizontal rule between each record *}
 

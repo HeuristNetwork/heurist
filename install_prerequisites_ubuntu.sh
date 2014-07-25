@@ -41,9 +41,12 @@ echo
 echo "******* WARNING ********* Do not let your session time out or you will need to start over"
 echo
 echo
-echo "Please do not be concerned by warnings such as:  sudo: unable to resolve host Your-Server-Name"
-echo "If you get these warnings, you will get dozens, but it has no effect on the results of the script"
-
+echo "Please do not be concerned by warnings such as:"
+echo "        sudo: unable to resolve host Your-Server-Name"
+echo "If you get these warnings, you will get dozens, but"
+echo "they have no effect on the results of the script"
+echo
+echo
 
 # -------------PRE-REQUISITES---------------------------------------------------------------------------------------------
 

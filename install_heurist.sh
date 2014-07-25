@@ -129,11 +129,10 @@ sudo chmod -R 755  /var/www/html/HEURIST/HEURIST_FILESTORE
 # 23 July 2014: H3Sandpit now created automatically by Heurist at first access attempt
 # Directories are, however, created by this script
 
-echo
-echo Please enter the root password for MySQL at the following prompt
-echo
-
-sudo mysql -uroot -p < /var/www/html/HEURIST/h3/admin/setup/dbcreate/buildExampleDB.sql
+# echo
+# echo Please enter the root password for MySQL at the following prompt
+# echo
+# sudo mysql -uroot -p < /var/www/html/HEURIST/h3/admin/setup/dbcreate/buildExampleDB.sql
 
 # ------------------------------------------------------------------------------------------
 

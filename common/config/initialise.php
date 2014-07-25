@@ -80,14 +80,17 @@
     define('HEURIST_MIN_DBVERSION', "1.1.0");
     // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
     define('HEURIST_TOP_DIRS', "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers");
+
     if (!$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
+
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
     define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/html
     $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
     define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
     define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
+
     // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
     $installDir = preg_replace("/\/(" . HEURIST_TOP_DIRS . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -99,6 +102,7 @@
     } else {
         define('INSTALL_DIR', ''); //the default is the document root directory
     }
+
     define('HEURIST_SITE_PATH', INSTALL_DIR == '' ? '/' : INSTALL_DIR . '/'); // eg. /h3/
     define('HEURIST_BASE_URL', $serverBaseURL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
 
@@ -148,10 +152,10 @@
 
     //test db connect valid db
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword)
-    or returnErrorMsgPage(1, "Unable to connect to database server with readwrite account, please set login in configIni.php. MySQL error: " .
+    or returnErrorMsgPage(1, "Unable to connect to database server with readwrite account, please set passwords in configIni.php. MySQL error: " .
         mysql_error());
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword)
-    or returnErrorMsgPage(1, "Unable to connect to database server with readonly account, please set login in configIni.php. MySQL error: " .
+    or returnErrorMsgPage(1, "Unable to connect to database server with readonly account, please set passwords in configIni.php. MySQL error: " .
         mysql_error());
 
     if (@$httpProxy != '') {
@@ -216,26 +220,8 @@
     } else {
         if (defined("NO_DB_ALLOWED")) { //for createNewDB.php and selectDatabase.php
             return;
-        } else {
-            if($dbFullName=="hdb_H3Sandpit"){
-                //recreate this database - since this is failure of installation
-                if(defined('RECREATE_EXAMPLE_DB')){
-                    $res2 = buildExampleDB($dbFullName);
-                    if ($res2 != 0 ) {
-                        //error
-                        returnErrorMsgPage(2, "Unable to open/recreate example database ".HEURIST_DBNAME." Error:".$res2);
-                    }else{
-                        $redirect = @$_REQUEST['url'];
-                        header("Location: " . $redirect);        
-                        exit();
-                    }
-                    
-                }else{
-                    returnErrorMsgPage(4, null); //exit
-                }
-            }else{
-                returnErrorMsgPage(2, "Unable to open database : $dbName, MySQL error: " . mysql_error());
-            }
+        }  else {// unknown database, tranfers message to selectDatabase.php, MySQL err includes db name
+            returnErrorMsgPage(2, "Unable to open database: " . mysql_error());
         }
     }
 
@@ -705,7 +691,7 @@
 
         } else if ($critical == 2) { //database not defined or cannot connect to it
             $redirect = HEURIST_BASE_URL . "common/connect/selectDatabase.php";
-//DEBUG error_log("redirectURL = " . print_r($redirect, true));
+            //DEBUG error_log("redirectURL = " . print_r($redirect, true));
             if ($msg) {
                 $redirect.= "?msg=" . rawurlencode($msg);
             }
@@ -714,22 +700,22 @@
 
             $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
 
-        } else if ($critical == 4) { // recreate example DB
-        
-                if (defined('ISSERVICE')) { //redirect to main page
-                    $url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME;
-                }else{
-                    $url = HEURIST_CURRENT_URL;
-                }
-            
-                $msg2 = "<p>&nbsp;Cannot open example database. Most probably this is installation failure<p><br><br>".
-                "<p><br><br><button onclick='{location.replace(\"".HEURIST_BASE_URL."admin/setup/dbcreate/buildExampleDB.php?db="
-                                .HEURIST_DBNAME."&url=".rawurlencode($url)."\")}'>Press this button to recreate example database</button></p>";
-                                
-                $msg2 = rawurlencode($msg2);
-                $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
-            
-            
+        } else if ($critical == 4) { // recreate sandpit DB - this should ONLY be called if the requested database is H3Sandpit
+
+            if (defined('ISSERVICE')) { // ISSERVICE set by files (~27) which include initialise.php. 0 if returns html, otherwise 1.
+                $url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //redirect to main page
+            }else{
+                $url = HEURIST_CURRENT_URL;
+            }
+
+            $msg2 = "<p>&nbsp;Cannot open sandpit database. This should only occur for new installations.<p><br><br>".
+            "<p><br><br><button onclick='{location.replace(\"".HEURIST_BASE_URL."admin/setup/dbcreate/buildExampleDB.php?db="
+            .HEURIST_DBNAME."&url=".rawurlencode($url)."\")}'>Press this button to create the sandpit database</button></p>";
+
+            $msg2 = rawurlencode($msg2);
+            $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
+
+
         } else {
             // gets to here if database not specified properly. This is an error if the system is set up properly, but not at
             // first initialisaiton of the system, so test for existence of databases, if none then Heurist has not been set up yet.
@@ -746,7 +732,7 @@
 
         if ($redirect) {
 
-            if (defined('ISSERVICE')) {
+            if (defined('ISSERVICE')) { // ISSERVICE set by files (~27) which include initialise.php. 0 if returns html, otherwise 1
                 echo "/*DEBUG: it happens in " . $_SERVER['PHP_SELF'] . " */ location.replace(\"" . $redirect . "\");";
             } else {
                 header("Location: " . $redirect);

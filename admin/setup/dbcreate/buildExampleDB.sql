@@ -28,11 +28,6 @@
 
 \W -- warnings to standard out, OK for command line but not for phpMyAdmin
 
--- ADDED 24/4/14 to obviate need to enter password twice dutring inital install
--- can remove b/c Heurist now detects H3Sandpit missing
-
-create database if not exists hdb_H3Sandpit;
-use hdb_H3Sandpit;
 
 -- ---------------------------------------------------------------------------------------------
 
@@ -45,6 +40,8 @@ use hdb_H3Sandpit;
 --  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
 
 --  IMPORTANT: MAKE SURE THE DATABASE IS CONFIGURED TO ALLOW REGISTRATION IN sysIdentification
+--             Remove any unwanted users (sysUGrps) and unwanted user-group connections
+--             (sysUGrpLinks )- only (1,2,1,admin) is required
 
 -- ---------------------------------------------------------------------------------------------
 
@@ -1696,7 +1693,7 @@ CREATE TABLE `sysUGrps` (
 
 LOCK TABLES `sysUGrps` WRITE;
 /*!40000 ALTER TABLE `sysUGrps` DISABLE KEYS */;
-INSERT INTO `sysUGrps` VALUES (0,'workgroup','All users','All users','A dummy workgroup representing all users of the system. There are no user group - user links in the sysUsrGrpLinks table for this group, they are implied','Password not set for this group','none@junk.com','All','Users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(2,'user','johnson','',NULL,'7Nx6OFJ5OgyQk','ian.johnson@sydney.edu.au','Ian','Johnson','Archaeology','Archaeological Computing Laboratory, University of Sydney','','','','...','y','2014-07-23 23:26:00',3,74,0,NULL,NULL,NULL,0,'2014-07-23 13:26:00'),(3,'user','wilson',NULL,'','6n3KOeN9Wr7/U','andrew.wilson@sydney.edu.au','Andrew','Wilson','','Arts eResearch ','','','','archaeology','y','2013-03-18 14:50:13',3,5,0,'undefined',NULL,'',0,'2013-03-18 03:50:13'),(4,'user','stevewh',NULL,NULL,'f57SMJf2RDxTc','stephenawhite@hotmail.com','Stephen','White','','AeR','','','','3D modeling, remote sensing','y','2012-12-13 12:07:17',2,192,0,NULL,NULL,NULL,1,'2012-12-13 01:07:17');
+INSERT INTO `sysUGrps` VALUES (0,'workgroup','All users','All users','A dummy workgroup representing all users of the system. There are no user group - user links in the sysUsrGrpLinks table for this group, they are implied','Password not set for this group','none@junk.com','All','Users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(2,'user','not set','',NULL,'','not set','not set','not set','not set','not set','','','','...','y','2014-07-23 23:26:00',3,74,0,NULL,NULL,NULL,0,'2014-07-23 13:26:00');
 /*!40000 ALTER TABLE `sysUGrps` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1762,7 +1759,7 @@ CREATE TABLE `sysUsrGrpLinks` (
 
 LOCK TABLES `sysUsrGrpLinks` WRITE;
 /*!40000 ALTER TABLE `sysUsrGrpLinks` DISABLE KEYS */;
-INSERT INTO `sysUsrGrpLinks` VALUES (1,2,1,'admin'),(2,4,1,'admin');
+INSERT INTO `sysUsrGrpLinks` VALUES (1,2,1,'admin');
 /*!40000 ALTER TABLE `sysUsrGrpLinks` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
