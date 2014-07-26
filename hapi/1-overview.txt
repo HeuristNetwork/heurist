@@ -1,18 +1,19 @@
-Heurist academic data management system (http://HeuristScholar.org)
-Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
-License: http://www.gnu.org/licenses/gpl-3.0.txt
-Concept/direction: Ian Johnson
-Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
-Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
- 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+
 ---------------------------------------------------------------------
+
 
 Directory:	/hapi
 
-Overview:	Heurist Javascript API, provides structure-independent access 
+Overview:	Heurist Javascript API, provides structure-independent access
 		to the Heurist database as an agnostic data store
 
-Notes:	
+Notes:
 
 
 Updated: 	28 March 2010

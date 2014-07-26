@@ -1,17 +1,18 @@
-Heurist academic data management system (http://HeuristScholar.org)
-Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
-License: http://www.gnu.org/licenses/gpl-3.0.txt
-Concept/direction: Ian Johnson
-Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
-Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
- 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+
 ---------------------------------------------------------------------
 
-Directory:	<name of directory>
 
-Overview:	<short summary of the general function of the current directory, giving as much detail as is useful for a general understanding – more specific detail should be in the headers of individual files and functions>
+Directory:	records/edit/tabs
 
-Notes:	    <specific notes or comments for developers> 
+Overview:	defines each of the tabs which are displayed in the left sidebar and give access to the major functions of the record editing form
 
-Updated: 	<dd month yyyy>
+Notes:	    tabs are only shown in full mode, in simplified mode they are hidden and only the shared information tab is displayed
+
+Updated: 	26th July 2014
 
