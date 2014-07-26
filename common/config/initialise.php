@@ -700,22 +700,6 @@
 
             $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
 
-        } else if ($critical == 4) { // recreate sandpit DB - this should ONLY be called if the requested database is H3Sandpit
-
-            if (defined('ISSERVICE')) { // ISSERVICE set by files (~27) which include initialise.php. 0 if returns html, otherwise 1.
-                $url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //redirect to main page
-            }else{
-                $url = HEURIST_CURRENT_URL;
-            }
-
-            $msg2 = "<p>&nbsp;Cannot open sandpit database. This should only occur for new installations.<p><br><br>".
-            "<p><br><br><button onclick='{location.replace(\"".HEURIST_BASE_URL."admin/setup/dbcreate/buildExampleDB.php?db="
-            .HEURIST_DBNAME."&url=".rawurlencode($url)."\")}'>Press this button to create the sandpit database</button></p>";
-
-            $msg2 = rawurlencode($msg2);
-            $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
-
-
         } else {
             // gets to here if database not specified properly. This is an error if the system is set up properly, but not at
             // first initialisaiton of the system, so test for existence of databases, if none then Heurist has not been set up yet.
