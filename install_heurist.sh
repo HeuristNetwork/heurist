@@ -21,6 +21,7 @@
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
 echo Checking parameters and availability ...
 echo
+echo
 
 if [ -z $1 ]
    then
@@ -43,6 +44,7 @@ if [ $rc -ne 0 ]
         exit
      fi
 
+echo
 echo
 echo "----------------------- Installing Heurist Version 3 ---------------------------"
 echo
@@ -124,23 +126,11 @@ sudo mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 sudo chown -R www-data:www-data /var/www/html/HEURIST/HEURIST_FILESTORE
 sudo chmod -R 755  /var/www/html/HEURIST/HEURIST_FILESTORE
 
-# ------------- Create H3Sandpit database --------------------------------------------------
-
-# 23 July 2014: H3Sandpit now created automatically by Heurist at first access attempt
-# Directories are, however, created by this script
-
-# echo
-# echo Please enter the root password for MySQL at the following prompt
-# echo
-# sudo mysql -uroot -p < /var/www/html/HEURIST/h3/admin/setup/dbcreate/buildExampleDB.sql
-
 # ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist installed in /var/www/html/HEURIST/h3 -------------------------------------------"
-echo
-echo "Simlinks in /var/www and /var/www/html allow Heurist to be accessed as h3 or heurist in the web root"
 echo
 echo "NOTE:"
 echo
@@ -152,7 +142,14 @@ echo "CONFIGURATION:"
 echo
 echo "Edit /var/www/html/HEURIST/h3/configIni.php to set your MySQL root user password - twice, clearly documented in file"
 echo
-echo "You can do this by pasting the following at the command line (may need to change nano to pico on some systems):"
+echo "You can do this by pasting the following at the command line - you may need to change nano to pico on some systems:"
 echo
 echo "           sudo nano /var/www/html/HEURIST/h3/configIni.php"
+echo
+echo "Then run Heurist by navigating to h3 on your web site eg. myserver.com/h3"
+echo "You will be asked for a master login name, password and email address"
+echo
+echo "For general use, we advise copying parentDirectory_index.html in h3 as index.html in the parent directory "
+echo "of your Heurist installation, normally /var/www/html/HEURIST, and pointing users to server/path/HEURIST, "
+echo "which will display an introductory navigation page. They can later bookmark direct access to their databases."
 echo

@@ -106,9 +106,6 @@ sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini |
 sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
-# TODO: PROBLEM @ 2/10/13 - php.ini is ending up empty. Need to copy a valid php.ini into /etc/php5/apache2/php.ini
-# otherwise the search interface fails to load completely and a memcached error shows up in the database summary popup
-
 sudo pear config-set php_ini /etc/php5/apache2/php.ini
 
 # ----- Apache restart ----------------------------------------------------
@@ -122,13 +119,16 @@ echo -e "\n\n\n\n"
 
 echo ----- Heurist Prerequisites installed --------------------------------------------------------------------
 echo
-echo Please check for any errors above
+echo Please check for any errors above - please advise info@heuristscholar.org of any errors
 echo
-echo "WARNING: Bug in creation of php.ini - please check whether /etc/php5/apache2/php.ini is blank"
-echo "         We think this bug is fixed, but please check anyway if the search interface fails to "
-echo "         load completely and a memcached error shows up in the Database Summary popup."
-echo "         If so, copy a valid php.ini file into this location - consult your system administrator, or email us"
+echo "If you are getting lots of warnings along the lines of sudo: unable to resolve host Your-Server-Name"
+echo "we suggest editing /etc/hosts with    sudo nano /etc/hosts    and insert the following:"
 echo
+echo "    127.0.1.1 localhost"
+echo "    IPaddress ServerName"
 echo
-echo Please now run install_heurist.sh - step 2 on the Heurist installation instructions
+echo "Note: use hostname and hostname -i to find the required values"
+echo
+echo "Please now run step 2 - install_heurist.sh - on the Heurist installation instructions"
+echo "to install the Heurist software on your server"
 echo

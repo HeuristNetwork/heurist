@@ -73,6 +73,8 @@ cp -r ../h3/help ../h3-build/$1
 cp -r ../h3/exemplars ../h3-build/$1
 
 # copy the installation functions to DISTRIBUTION
+echo
+echo Copying installation scripts to DISTRIBUTION
 cp install_* ../DISTRIBUTION
 
 # remove any superfluous files - add others as appropriate
@@ -88,6 +90,7 @@ rm -f ../h3-build/$1.tar.bz2
 tar -cjf ../h3-build/$1.tar.bz2 -C ../h3-build/ $1/
 
 # show what we have got in the directory
+echo
 ls -alt ../h3-build
 
 echo
