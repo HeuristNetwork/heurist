@@ -98,6 +98,12 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     <div id="topmessage"></div>
 <?php
 
+    if ( !class_exists('SQLite3' ) ) {
+        print "<div style='color:red; font-weight:bold;padding:10px'>FAIMS synchronisation requires installation of the SQLite3 extension to PHP."
+        ." Please ask your system administrator to install this extension. See <put in appropriate URL to doco> for installation information.</div></body></html>";
+        exit();
+    }
+
     $step = @$_REQUEST['step'];
 
     $mode_dir = (@$_REQUEST['mode']=='0');
@@ -237,12 +243,6 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
         exit();
     }
 
-    if ( !class_exists('SQLite3' ) ) {
-        print "<div style='color:red; font-weight:bold;padding:10px'>FAIMS synchronisation requires installation of the SQLite3 extension to PHP."
-        ." Please ask your system administrator to install this extension. See <put in appropriate URL to doco> for installation information.</div>";
-        exit();
-    }
-
     $dbfaims = new SQLite3($dbname_faims); //':memory:');
     if ( !$dbfaims ) {
         print "<div style='color:red; font-weight:bold;padding:10px'>Cannot open the database</div>";
@@ -257,7 +257,7 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
     }
         
         
-    $use_Spatialite = false;    
+    $use_Spatialite = true;    
         
     if($use_Spatialite){              //TEMP
 
