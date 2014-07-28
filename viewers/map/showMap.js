@@ -393,15 +393,15 @@ function ShowMap() {
 	function _init() {
 
 
-		if(HRST.displayPreferences){
-			_sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+		if(HRST.displayPreferences && document.getElementById('rbMapUseSelectedRecords')){
+			_sQueryMode = HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 			document.getElementById('rbMapUseSelectedRecords').value = _sQueryMode;
 		}else{
 			_sQueryMode = "main";
 			//hide toolbar
 			_hidetoolbar = true;
 
-			top.HEURIST.currentQuery_main = location.search;
+			HRST.currentQuery_main = location.search;
 		}
 
 		if(YAHOO.widget.Menu){ //there is not menu for showMapS.html (publish map)
@@ -416,18 +416,18 @@ function ShowMap() {
 				if(dest=="code"){
 					Hul.popupURL(this,'../viewers/map/mapMenu.html',null);
 				}else{
-					var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+					var mode = HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 	 				var currentSearchQuery =
 	 					(mode=="selected")
-							?top.HEURIST.currentQuery_sel  //top.HEURIST.search.currentSearchQuery_sel
-							:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
+							?HRST.currentQuery_sel 
+							    :((mode=="all")?HRST.currentQuery_all:HRST.currentQuery_main);
 
 					if(currentSearchQuery)
 					{
 						if(dest=="earth"){
-							url = top.HEURIST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
+							url = HRST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
 						}else{
-							url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
+							url = HRST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
 						}
 						window.open(url, '_blank');
 					}
@@ -456,9 +456,9 @@ function ShowMap() {
 		/*var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
-			 squery_all = top.HEURIST.currentQuery_all;
-			 squery_sel = top.HEURIST.currentQuery_sel;
-			 squery_main = top.HEURIST.currentQuery_main;
+			 squery_all = HRST.currentQuery_all;
+			 squery_sel = HRST.currentQuery_sel;
+			 squery_main = HRST.currentQuery_main;
 		}else{
 			squery_all = _sQueryMode=="all"?s1:null;
 			squery_sel = _sQueryMode=="selected"?s1:null;
@@ -505,10 +505,13 @@ function ShowMap() {
 	*/
 	function _updateLayersList(context){
 
+        var elem = document.getElementById('cbLayers');
+       
+        if(elem){    //showMapS.html does not have such feature
+
 		var ind,
-			elem = document.getElementById('cbLayers'),
 			s = "<option value='-1'>none</option>",
-			keptLayer = top.HEURIST.util.getDisplayPreference("mapbackground"); //read record id
+			keptLayer = HRST.util.getDisplayPreference("mapbackground"); //read record id
 
 		systemAllLayers = context.layers;
 
@@ -559,7 +562,8 @@ function ShowMap() {
 			currentBackgroundLayer = keptLayer;
 			 _loadLayer(elem);
 		}
-
+        
+        }
 	}
 
 	/**
@@ -573,9 +577,9 @@ function ShowMap() {
 		if(isNaN(val) || val < 0){
 			RelBrowser.Mapping.addLayers([], 0);
 			if(!Hul.isempty(currentBackgroundLayer)){
-				if(top.HEURIST.currentQuery_all) top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
-				if(top.HEURIST.currentQuery_sel) top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
-				if(top.HEURIST.currentQuery_main) top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main.replace(","+currentBackgroundLayer,"");
+				if(HRST.currentQuery_all) HRST.currentQuery_all = HRST.currentQuery_all.replace(","+currentBackgroundLayer,"");
+				if(HRST.currentQuery_sel) HRST.currentQuery_sel = HRST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
+				if(HRST.currentQuery_main) HRST.currentQuery_main = HRST.currentQuery_main.replace(","+currentBackgroundLayer,"");
 			}
 			currentBackgroundLayer = '';
 		}else{
@@ -583,9 +587,9 @@ function ShowMap() {
 			//that's required that map panel will be visible in case there are no more other map objects
 			if(Hul.isempty(errors)){
 				currentBackgroundLayer = systemAllLayers[val].rec_ID;
-				if(top.HEURIST.currentQuery_all) top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
-				if(top.HEURIST.currentQuery_sel) top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
-				if(top.HEURIST.currentQuery_main) top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main + "," + currentBackgroundLayer;
+				if(HRST.currentQuery_all) HRS.currentQuery_all = HRST.currentQuery_all + "," + currentBackgroundLayer;
+				if(HRST.currentQuery_sel) HRST.currentQuery_sel = HRST.currentQuery_sel + "," + currentBackgroundLayer;
+				if(HRST.currentQuery_main) HRST.currentQuery_main = HRST.currentQuery_main + "," + currentBackgroundLayer;
 			}else{
 				currentBackgroundLayer = '';
 			}
@@ -593,7 +597,7 @@ function ShowMap() {
 		_showErrorSign(errors);
 
 		if(HRST.displayPreferences){
-			top.HEURIST.util.setDisplayPreference("mapbackground", currentBackgroundLayer); //save record id of background layer
+			HRST.util.setDisplayPreference("mapbackground", currentBackgroundLayer); //save record id of background layer
 		}
 	}
 
@@ -624,14 +628,14 @@ function ShowMap() {
 
 			if(mapobjects>0){
 
-				var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
+				var limit = parseInt(HRST.util.getDisplayPreference("report-output-limit"));
 				if (isNaN(limit)) limit = 1000; //def value for dispPreference
 
 
 
-				if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
-					(_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
-					(_sQueryMode=="main" && limit<top.HEURIST.search.results.totalQueryResultRecordCount))
+				if( (_sQueryMode=="all" && HRST.currentQuery_all_waslimited) ||
+					(_sQueryMode=="selected" && HRST.currentQuery_sel_waslimited) ||
+					(_sQueryMode=="main" && limit<HRST.search.results.totalQueryResultRecordCount))
 				{
 					msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
 				}
@@ -663,11 +667,11 @@ function ShowMap() {
 	//
 	function _getQuery(){
 		if(_sQueryMode=="all"){
-			return top.HEURIST.currentQuery_all;
+			return HRST.currentQuery_all;
 		}else if(_sQueryMode=="selected"){
-			return top.HEURIST.currentQuery_sel;
+			return HRST.currentQuery_sel;
 		}else {
-			return top.HEURIST.currentQuery_main;
+			return HRST.currentQuery_main;
 		}
 	}
 
@@ -721,7 +725,7 @@ function ShowMap() {
 			}
 
 			if(document.getElementById('rbMapUseSelectedRecords')){
-				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
+				HRST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
 				document.getElementById('rbMapUseSelectedRecords').value = _sQueryMode;
 			}
 		},
