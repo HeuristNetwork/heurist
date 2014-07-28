@@ -4157,7 +4157,7 @@ top.HEURIST.search = {
 		var scroll = document.getElementById("results").scrollTop;
 		var pwd = document.getElementById("password");
 		document.getElementById("reminder").innerHTML = elt.getAttribute("user_pwd");
-		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50 });
+		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50, 'no-close':false, 'no-titlebar':false });
 	},
 
 	getPushDownFilter: function(type){
