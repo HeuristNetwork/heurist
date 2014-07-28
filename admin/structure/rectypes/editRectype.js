@@ -80,9 +80,12 @@ function _upload_icon(mode) {
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
-            height: (mode==0?140:220),
-            width: 340,
-            callback: mode==0?icon_refresh:thumb_refresh
+            height: 500, //(mode==0?200:250),
+            width: 550,
+            callback:function(){
+                icon_refresh();
+                thumb_refresh();
+            } //mode==0?icon_refresh:thumb_refresh
     });
 
 }

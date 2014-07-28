@@ -1451,8 +1451,8 @@ function _upload_icon(rectypeID,mode) {
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
-            height: (mode==0?200:250),
-            width: 350,
+            height: 500, //(mode==0?200:250),
+            width: 550,
             callback: icon_refresh(rectypeID)
     });
 
