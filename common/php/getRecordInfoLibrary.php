@@ -1648,7 +1648,7 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     $query = "select relnID, src.dtl_Value as src, srcRec.rec_RecTypeID as srcRT, srcRec.rec_Title as srcTitle, srcRec.rec_URL as srcURL, trg.dtl_Value as trg," .
                     " if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role, trgRec.rec_RecTypeID as trgRT, trgRec.rec_Title as trgTitle," .
                     " trgRec.rec_URL as trgURL, trm.dtl_Value as trmID, term.trm_Label as term, inv.trm_ID as invTrmID," .
-                    " if(inv.trm_ID, inv.trm_Label, concat('inverse of ', term.trm_Label)) as invTrm, rlnTtl.dtl_Value as title," .
+                    " if(inv.trm_ID>0, inv.trm_Label, term.trm_Label) as invTrm, rlnTtl.dtl_Value as title," .    //concat('inverse of ', term.trm_Label)
                     " rlnNote.dtl_Value as note, strDate.dtl_Value as strDate, endDate.dtl_Value as endDate, intrpRec.rec_ID as intrp," .
                     " intrpRec.rec_RecTypeID as intrpRT, intrpRec.rec_Title as intrpTitle, intrpRec.rec_URL as intrpURL" .
               " from (select rrc_RecID as relnID from recRelationshipsCache) rels" .

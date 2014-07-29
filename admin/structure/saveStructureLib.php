@@ -1181,6 +1181,17 @@ error_log("AAAA:".$query);
 		if (count($colNames) && count($values))
 		{
 			$isInsert = ($trmID==null || (!is_numeric($trmID) && (strrpos($trmID, "-")>0)));
+            
+            $inverse_termid_old = null;
+            if(!$isInsert){//find inverse term id 
+                $res = $mysqli->query("select trm_InverseTermId from defTerms where trmID=".$trmID);
+                if($res){
+                    if ( $row = $res->fetch_row() ) {
+                        $inverse_termid_old = $row[0];
+                    }
+                }
+            }
+            
 
 			$query = "";
             $querycols = "";
@@ -1219,7 +1230,7 @@ error_log("AAAA:".$query);
                         $ch_label = $val;
                     }else if($colName=="trm_InverseTermId"){
                         if($val=="") $val=null;
-                        $inverse_termid = $val;
+                        $inverse_termid = $val;   //new value
                     }
 
                     $parameters = addParam($parameters, $trmColumnNames[$colName], $val);
@@ -1275,18 +1286,22 @@ error_log("AAAA:".$query);
 
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
-				if ($rows==0 || is_string($rows) ) {
+				if ($rows==0 || is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "$inverse_termid   SQL error $oper term $trmID in updateTerms: ".$rows;
+					$ret = "Inverse term id: $inverse_termid. SQL error $oper term $trmID in updateTerms: ".$rows; //htmlspecialchars($query);
 				} else {
 					if($isInsert){
-						$trmID = $ext_db->insert_id;
+						$trmID = $ext_db->insert_id;  // new id
 					}
 
                     if($inverse_termid!=null){
                         $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
                         execSQL($ext_db, $query, null, true);
+                    }else if ($inverse_termid_old!=null){
+                        $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old";
+                        execSQL($ext_db, $query, null, true);
                     }
+                    
 
 					$ret = $trmID;
 				}
