@@ -41,10 +41,11 @@
     $rt_id = intval($_REQUEST['rty_ID']);
     $mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
-    if (!$rt_id) { // no ID set, hopefully this should not occur
+    if ($mode!=3 && !$rt_id) { // no ID set, hopefully this should not occur
         error_log("uploadRectypeIcon.php called without a record type ID set");
         return;
     }
+    $rt_name = @$_REQUEST['rty_Name'];
 
     $dim = ($mode==0)?16:64; // appropriate sizes for icons and thumbnails
 
@@ -74,7 +75,7 @@
 <html>
     <head>
 
-        <title>Upload reference type icon</title>
+        <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
@@ -94,44 +95,59 @@
     <body class="popup">
         <script>
             function onLibIconSelect(name){
-                var ele = document.getElementById('libicon');
-                ele.value = name;
-                document.forms[0].submit();
+                <?php if ($mode==3) {
+                    print "window.close(name);";
+                } else { ?>
+                    var ele = document.getElementById('libicon');
+                    ele.value = name;
+                    document.forms[0].submit();
+                <?php } ?>    
             }
         </script>
     
-    
+<?php if($mode!=3){ ?>
         <div class="input-row">
             <div class="input-header-cell">Current <?=(($mode==0)?'icon':'thumbnail')?>:</div>
             <div class="input-cell"><img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; height:<?=$dim?>px;"></div>
-            
         </div>
+<?php } ?>        
         <div class="actionButtons" style="position:absolute; right:10px; top:4px">
                 <!-- input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px" -->
                 <input type="button" value="Close window" onClick="closewin()">
         </div>
 
-        <?php	if ($success_msg) { ?>
-            <div class="success"><?= $success_msg ?></div>
-            <?php	} else if ($failure_msg) { ?>
-            <div class="failure"><?= $failure_msg ?></div>
-            <?php	} else { ?>
-            <div style="padding:10px 0">Uploaded image will be scaled to <?=$dim?>x<?=$dim?></div>
-            <?php	} ?>
-
         <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
             <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
-            <input type="hidden" name="mode" value="<?= $mode ?>">
             <input type="hidden" name="uploading" value="1">
             <input type="hidden" name="libicon" id="libicon" value="" />
+<?php if($mode!=3){ ?>
 
+            <?php    if ($success_msg) { ?>
+            <div class="success"><?= $success_msg ?></div>
+            <?php    } else if ($failure_msg) { ?>
+            <div class="failure"><?= $failure_msg ?></div>
+            <?php    } else { ?>
+            <div style="padding:10px 0">Uploaded image will be scaled to 16x16 for icon or 64x64 for thumbnail</div>
+            <?php    } ?>
+
+            <div class="input-row">
+                <div class="input-header-cell">Select type</div>
+                <div class="input-cell">
+                    <input type="radio" name="mode" value="0" <?= $mode==0?"checked":"" ?>>&nbsp;Icon&nbsp;&nbsp;
+                    <input type="radio" name="mode" value="1" <?= $mode==1?"checked":"" ?>>&nbsp;Thumbnail
+                </div>
+            </div>
 
             <div class="input-row">
                 <div class="input-header-cell">Select new image</div>
                 <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
             </div>
-            
+<?php }else{
+            print '<input type="hidden" name="mode" value="3">';
+      } 
+?>            
             <div style="margin-bottom:30px;">
+                <span class="help"><?=($mode==3?"Select ":"or select ")?>a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons)</span><br />
 <?php            
 //get list of files
     $lib_path = 'setup/iconLibrary/'.($mode==0?'16px/':'64px/');    
@@ -178,18 +194,19 @@
     //
     //    
     function copy_from_library($rt_id, $filename) {
-        global $image_dir;
+        
+        if (! @$_REQUEST['uploading']) return;
 
         $lib_dir1 = dirname(__FILE__).'/../../setup/iconLibrary/16px/';
         $lib_dir2 = dirname(__FILE__).'/../../setup/iconLibrary/64px/';
         
-        if (copy($lib_dir1.$filename, $image_dir . $rt_id . '.png') && 
-            copy($lib_dir2.$filename, $image_dir . 'thumb/th_' .$rt_id.'.png')) { // actually save the file
+        if (copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png') && 
+            copy($lib_dir2.$filename, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png')) { // actually save the file
             
             return array('Icon and thumbnail have been set successfully', '');
         }
         return array('', "Library file: $filename couldn't be saved to upload path defined for db = "
-            .HEURIST_DBNAME." (".$image_dir."). Please ask your system administrator to correct the path and/or permissions for this directory");
+            .HEURIST_DBNAME." (".HEURIST_ICON_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory");
     }
 
     //

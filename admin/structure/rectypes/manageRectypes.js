@@ -1445,9 +1445,11 @@ function _upload_icon(rectypeID,mode) {
     if (!mode){
         mode = 0;
     }
+    
+    rt_name =  top.HEURIST.rectypes.names[rectypeID];
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID;
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
