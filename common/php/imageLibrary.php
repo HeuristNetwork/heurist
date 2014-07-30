@@ -72,6 +72,29 @@
 }
 
 /**
+* $rt_id - record type ID
+* $filename - from icon library
+* @param mixed $rt_id
+* @param mixed $filename
+*/
+function copy_IconAndThumb_FromLibrary($rt_id, $filename) {
+    
+    $lib_dir1 = dirname(__FILE__).'/../../admin/setup/iconLibrary/16px/';
+    $lib_dir2 = dirname(__FILE__).'/../../admin/setup/iconLibrary/64px/';
+    
+    if (copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png') && 
+        copy($lib_dir2.$filename, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png')) { // actually save the file
+        
+        return false;
+    }
+    return true;
+}
+
+
+
+
+
+/**
 * Creates the image with text
 *
 * @param mixed $desc - text (may be multiline)

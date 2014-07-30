@@ -65,7 +65,15 @@
     
     if(@$_REQUEST['libicon']){
         //take from  library
-        list($success_msg, $failure_msg) = copy_from_library($rt_id, $_REQUEST['libicon']);
+        if(copy_IconAndThumb_FromLibrary($rt_id, $_REQUEST['libicon'])){
+            //error
+            list($success_msg, $failure_msg) = array('', "Library file: $filename couldn't be saved to upload path defined for db = "
+            .HEURIST_DBNAME." (".HEURIST_ICON_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory");
+        }else{
+            list($success_msg, $failure_msg) = array('Icon and thumbnail have been set successfully', '');
+        }
+        
+        list($success_msg, $failure_msg) = copy_from_library();
     }else{
         //upload new one
         list($success_msg, $failure_msg) = upload_file($rt_id, $dim);
@@ -86,8 +94,8 @@
             .input-row div.input-header-cell {width:90px; vertical-align:baseline; min-width:90px;}
         </style>
         <script>
-            function closewin(){
-                window.close(null);
+            function closewin(context){
+                window.close(context);
             }
         </script>
     </head>
@@ -120,6 +128,8 @@
             <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
             <input type="hidden" name="uploading" value="1">
             <input type="hidden" name="libicon" id="libicon" value="" />
+            <input type="hidden" name="mode" value="<?=$mode?>">
+            
 <?php if($mode!=3){ ?>
 
             <?php    if ($success_msg) { ?>
@@ -129,7 +139,7 @@
             <?php    } else { ?>
             <div style="padding:10px 0">Uploaded image will be scaled to 16x16 for icon or 64x64 for thumbnail</div>
             <?php    } ?>
-
+<!--
             <div class="input-row">
                 <div class="input-header-cell">Select type</div>
                 <div class="input-cell">
@@ -137,20 +147,23 @@
                     <input type="radio" name="mode" value="1" <?= $mode==1?"checked":"" ?>>&nbsp;Thumbnail
                 </div>
             </div>
-
+-->
             <div class="input-row">
                 <div class="input-header-cell">Select new image</div>
                 <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
             </div>
-<?php }else{
-            print '<input type="hidden" name="mode" value="3">';
+<?php 
+            $select_tip = "or select a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons)";
+      }else{
+            $select_tip = "Select a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons) <br> You may choose your own custom icons later by editing the record type definition";
       } 
 ?>            
             <div style="margin-bottom:30px;">
-                <span class="help"><?=($mode==3?"Select ":"or select ")?>a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons)</span><br />
+                <span class="help"><?=$select_tip?></span><br />
 <?php            
 //get list of files
-    $lib_path = 'setup/iconLibrary/'.($mode==0?'16px/':'64px/');    
+    $dim = ($mode!=1) ?16 :64;
+    $lib_path = 'setup/iconLibrary/'.$dim.'px/';    
     $lib_dir = dirname(__FILE__).'/../../'.$lib_path;
 
     $files = scandir($lib_dir);
@@ -169,7 +182,7 @@
                 //$path_parts['filename'] )); - does not work for nonlatin names
                 $name = substr($filename, 0, -4);
                 print '<div style="display:inline-block;padding:4px;width:120px;">';
-                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img src="'.HEURIST_SITE_PATH.'admin/'.$lib_path.'/'.$filename.'"/>&nbsp;'.$name.'</a></div>';
+                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_SITE_PATH.'admin/'.$lib_path.$filename.'"/></a></div>';
                 //array_push($results, array( 'filename'=>$filename, 'name'=>$name));
             }
         }
@@ -181,7 +194,7 @@
 
         <?php    if ($success_msg) { ?>
             <script  type="text/javascript">
-                setTimeout(closewin, 1000);
+                setTimeout(function(){closewin('ok');}, 1000);
             </script>
             <?php    } ?>        
     </body>
@@ -189,26 +202,6 @@
 <?php
 
     /***** END OF OUTPUT *****/
-
-    //
-    //
-    //    
-    function copy_from_library($rt_id, $filename) {
-        
-        if (! @$_REQUEST['uploading']) return;
-
-        $lib_dir1 = dirname(__FILE__).'/../../setup/iconLibrary/16px/';
-        $lib_dir2 = dirname(__FILE__).'/../../setup/iconLibrary/64px/';
-        
-        if (copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png') && 
-            copy($lib_dir2.$filename, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png')) { // actually save the file
-            
-            return array('Icon and thumbnail have been set successfully', '');
-        }
-        return array('', "Library file: $filename couldn't be saved to upload path defined for db = "
-            .HEURIST_DBNAME." (".HEURIST_ICON_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory");
-    }
-
     //
     //
     //

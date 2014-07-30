@@ -14,7 +14,8 @@ var rectype,
     
     titleMaskIsOk = true,
     _keepTitleMask,
-    _keepStatus;
+    _keepStatus,
+    _rectype_icon = '';
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
@@ -77,6 +78,7 @@ function _upload_icon(mode) {
     }
     function thumb_refresh(context) {
         if(mode==3){
+               _rectype_icon = context;
                var img = document.getElementById('imgThumb2');
                img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
@@ -360,6 +362,10 @@ function updateRectypeOnServer_continue()
         alert("Title mask is invalid");
         return;
     }
+    if(!(rectypeID>0 || _rectype_icon!='')){
+        alert("Please select Icon for new record type");
+        return;
+    }
 
     var str = getUpdatedFields();
 
@@ -375,6 +381,11 @@ function updateRectypeOnServer_continue()
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
+        
+        if(!(rectypeID>0)){
+            params = params + '&icon='+ encodeURIComponent(_rectype_icon);
+        }
+        
         Hul.getJsonData(baseurl, callback, params);
 
     } else { //nothing changed

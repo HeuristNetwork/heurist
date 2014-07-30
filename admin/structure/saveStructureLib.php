@@ -238,9 +238,10 @@
     * @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
     * @param $dtFieldNames an array valid column names in the defRecStructure table
     * @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
+    * @param $icon_filename - filename from icon library - for new record type ONLY
     * @return $ret an array of return values for the various data elements created or errors if they occurred
     **/
-    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true) {
+    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null) {
         global $mysqli, $rtyColumnNames;
 
         $ret = null;
@@ -295,10 +296,16 @@
                 if($titleMask){
                     updateTitleMask($rtyID, $titleMask);
                 }
-
+                
+                $need_create_icon = true;
+                if($icon_filename){
+                      $need_create_icon = copy_IconAndThumb_FromLibrary($rtyID, $icon_filename);
+                }
                 //create icon and thumbnail
-                getRectypeIconURL($rtyID);
-                getRectypeThumbURL($rtyID);
+                if($need_create_icon){
+                    getRectypeIconURL($rtyID);
+                    getRectypeThumbURL($rtyID);
+                }
 
             }
 
@@ -309,7 +316,7 @@
 
         return $ret;
     }
-
+    
     /**
     * updateRectype - Function that updates rectypes in the defRecTypes table.and updates or inserts any
     * fields into the defRecStructure table for the given rtyID

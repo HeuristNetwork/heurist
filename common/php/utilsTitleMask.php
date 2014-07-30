@@ -592,7 +592,7 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                             $s1 = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');
                         }
                         
-error_log(  $s1. "." .$inner_field_name );         //AAAA              
+//DEBUG AAAA             error_log(  $s1. "." .$inner_field_name );         
                         return $s1. "." .$inner_field_name;     
                     }
 
