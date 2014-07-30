@@ -117,9 +117,8 @@ function receiveMessage(event)
    }
 */   
 
+//!!!!!!!!!!!!!!!!!!!!!!   1. insert this code into wordpress  wp-content/themes/[name]/js/heurist_messages.js
 /* 
-
-!!!!!!!!!!!!!!!!!!!!!!   1. insert this code into wordpress  wp-content/themes/[name]/js/heurist_messages.js
 
 if (!window['postMessage'])
     alert("postMessage is not supported");
@@ -178,10 +177,11 @@ function sendMessage(rectypeid){
             win.postMessage("heurist:"+rectypeid, "*"); // "http://heuristscholar.org");    
 
 }
+*/
 
-!!!!!!!!!!!!!!!!!!! 2. insert this code into wordpress  wp-content/themes/[name]/functions.php
+//!!!!!!!!!!!!!!!!!!! 2. insert this code into wordpress  wp-content/themes/[name]/functions.php
 
-
+/*
 function my_custom_js() {
     wp_enqueue_script( 'script-name', get_template_directory_uri() . '/js/heurist_messages.js', array(), '1.0.0', false );
 }

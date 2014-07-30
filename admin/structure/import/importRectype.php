@@ -96,6 +96,7 @@ if(!$remote_url_params || !$remote_url){
 }
 
 $reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
+//$reg_url = "http://heuristscholar.org/h3-ao/common/php/reloadCommonInfo.php?".$remote_url_params;
 
 //print $reg_url."<br>";
 
@@ -103,9 +104,10 @@ $defs = loadRemoteURLContent($reg_url);
 if (!$defs) {                            
     error_exit("Unable to contact source database, possibly due to timeout or proxy setting");    
 }
-//error_log(
-//print $defs['rectypes'];
+
 $defs = json_decode($defs, true);
+
+//DEBUG error_log(print_r($defs['rectypes'], true));
 
 if (!($defs['rectypes'] && $defs['detailTypes'] && $defs['terms'])) {                            
     error_exit("Defintions from source database are invalid");    
@@ -148,8 +150,15 @@ if(@$_REQUEST["import"] && count($_REQUEST["import"])>0){
     
     //rectypes that will be omited out of export
     $data = @$_REQUEST["correspondence"]; 
+    
+//DEBUG print "<div>IMPORT: ".print_r($imp_recordtypes,true)."</div>";
+    
+    
     if($data){ //
         $rectypes_correspondence = json_decode($data, true);
+        
+//DEBUG print "<div>OMIT: ".print_r($rectypes_correspondence,true)."</div>";
+
         foreach($imp_recordtypes as $rty_id){
             if(@$rectypes_correspondence[$rty_id]){
                  //$rectypes_correspondence[$rty_id] = null;
@@ -172,6 +181,8 @@ if(@$_REQUEST["import"] && count($_REQUEST["import"])>0){
     }
   
 }
+
+//DEBUG print "<div>rectyppes to be imported: ".print_r($imp_recordtypes,true)."</div>";
 
 //other target definitions
 $trg_fieldtypes = getAllDetailTypeStructures();
@@ -235,16 +246,19 @@ importVocabulary(null, "relation");
 $columnNames = array("rtg_Name","rtg_Order","rtg_Description");
 $idx_rt_grp = $def_rts['commonNamesToIndex']['rty_RecTypeGroupID'];
 
-//DEBUG print "<div>rectyppes: ".print_r($imp_recordtypes,true)."</div>";
+//print "<div>".print_r($def_rts[32], true)."</div>";
 
 foreach ($imp_recordtypes as $recId){
 
-//DEBUG print "<div>".$recId."  ".print_r($imp_recordtypes,true)."</div>";
 
     $grp_id = $def_rts[$recId]['commonFields'][$idx_rt_grp];
+    
+//DEBUG print "<div>".$recId."  grp_id=".$grp_id."   ".print_r($def_rts[$recId],true)."</div>";
+    
     if(@$group_rt_ids[$grp_id]){ //already found
         continue;
     }
+    //find group in source by ID
     foreach ($defs['rectypes']['groups'] as $idx=>$group){
        if(is_numeric($idx) && $group['id']==$grp_id){ 
            $src_group = $group;
@@ -252,7 +266,9 @@ foreach ($imp_recordtypes as $recId){
            break;
        }
     }
-    
+
+//DEBUG print "<div>".$recId."  group ".$grp_name."  #".$grp_id."   ".print_r($src_group, true)."</div>";
+
     //get name and try to find in target
     $isNotFound = true;
     foreach ($trg_rectypes['groups'] as $idx=>$group){
@@ -394,7 +410,7 @@ $idx_origin_dbid = $def_dts['fieldNamesToIndex']['dty_OriginatingDBID'];
 $idx_origin_id   = $def_dts['fieldNamesToIndex']['dty_IDInOriginatingDB'];
 $idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
 
-print "ADD FIELDTYPES<br>";
+//DEBUG print "ADD FIELDTYPES<br>";
 
 foreach ($imp_fieldtypes as $ftId){
 
@@ -672,6 +688,7 @@ function findDependentRecordTypes($rectype_id, $depth){
     $res = array('correspondence'=>$correspondence, 'dependence'=>array());
 
     $fields = $def_rts[$rectype_id]['dtFields'];
+    if(is_array($fields))
     //loop all fields and check constraint for pointers and relmarkers
     foreach ($fields as $ftId => $field){
         if($field[$idx_type] == "resource" || $field[$idx_type] == "relmarker"){
@@ -680,9 +697,13 @@ function findDependentRecordTypes($rectype_id, $depth){
 
            $rty_ids = explode(",", $constraints);
            foreach ($rty_ids as $rty_id){
-                 $dep = findDependentRecordTypes($rty_id, $depth+1);
-                 if($dep){
-                    $res['dependence'][$rty_id] = $dep;
+                 if(@$defs['rectypes']['names'][$rty_id]){
+               
+                     $dep = findDependentRecordTypes($rty_id, $depth+1);
+                     if($dep){
+                        $res['dependence'][$rty_id] = $dep;
+                     }
+                 
                  }
            }
         }
@@ -905,7 +926,7 @@ function doDisambiguate($newvalue, $entities){
         }
         
 if($name1=="Header"){
-print ">>>".$newvalue." found ".$found."<br>";    
+//DEBUG print ">>>".$newvalue." found ".$found."<br>";    
 }
         
         if($found>0){

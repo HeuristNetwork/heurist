@@ -1455,7 +1455,10 @@ function _upload_icon(rectypeID,mode) {
             "no-resize": false,
             height: 500, //(mode==0?200:250),
             width: 550,
-            callback: icon_refresh(rectypeID)
+            callback: function(context){
+                if(context)
+                icon_refresh(rectypeID)  
+            } 
     });
 
 }
@@ -1463,12 +1466,13 @@ function _upload_icon(rectypeID,mode) {
 function icon_refresh(rectypeID) {
     if(rectypeID){
         var d = new Date();
-        curtimestamp = d.getMilliseconds();
+        curtimestamp = d.getTime(); //getMilliseconds();
 
         var db = top.HEURIST.database.id;
         var imgIcon = "#icon" + rectypeID;
         var img = $(imgIcon);
         if(img){
+            //was img.src = top.HEURIST.iconBaseURL+rectypeID+".png" + '?' + (new Date()).getTime();
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+'")');
         }
 
@@ -1478,6 +1482,7 @@ function icon_refresh(rectypeID) {
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
+        
     }
 }
 

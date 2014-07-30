@@ -73,7 +73,6 @@
             list($success_msg, $failure_msg) = array('Icon and thumbnail have been set successfully', '');
         }
         
-        list($success_msg, $failure_msg) = copy_from_library();
     }else{
         //upload new one
         list($success_msg, $failure_msg) = upload_file($rt_id, $dim);
