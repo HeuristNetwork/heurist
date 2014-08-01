@@ -1454,9 +1454,8 @@ function _upload_icon(rectypeID,mode) {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
-            width: 550,
+            width: 700,
             callback: function(context){
-                if(context)
                 icon_refresh(rectypeID)  
             } 
     });

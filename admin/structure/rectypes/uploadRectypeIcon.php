@@ -47,10 +47,8 @@
     }
     $rt_name = @$_REQUEST['rty_Name'];
 
-    $dim = ($mode==0)?16:64; // appropriate sizes for icons and thumbnails
-
-    $image_dir = HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
-    $image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
+    $image_icon      = getRectypeIconURL($rt_id);
+    $image_thumbnail = getRectypeThumbURL($rt_id);
 
     /*****DEBUG****///error_log("image directory / image url: ".$image_dir."  /  ".$image_url);
 
@@ -61,7 +59,6 @@
     $res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
     $rt = mysql_fetch_assoc($res);
     */
-    
     
     if(@$_REQUEST['libicon']){
         //take from  library
@@ -75,7 +72,13 @@
         
     }else{
         //upload new one
-        list($success_msg, $failure_msg) = upload_file($rt_id, $dim);
+//error_log("thumb :".@$_FILES['new_thumb']['size']."  icon:".@$_FILES['new_icon']['size']);
+        
+        if( @$_FILES['new_thumb']['size']>0 ){
+            list($success_msg, $failure_msg) = upload_file($rt_id, 'new_thumb');
+        }else if( @$_FILES['new_icon']['size']>0 ){
+            list($success_msg, $failure_msg) = upload_file($rt_id, 'new_icon');
+        }
     }
 
 ?>
@@ -90,7 +93,7 @@
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }
             .failure { font-weight: bold; color: red; margin-left: 3px; }
-            .input-row div.input-header-cell {width:90px; vertical-align:baseline; min-width:90px;}
+            .input-row div.input-header-cell {width:110px; vertical-align:baseline; min-width:110px;}
         </style>
         <script>
             function closewin(context){
@@ -114,8 +117,10 @@
     
 <?php if($mode!=3){ ?>
         <div class="input-row">
-            <div class="input-header-cell">Current <?=(($mode==0)?'icon':'thumbnail')?>:</div>
-            <div class="input-cell"><img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; height:<?=$dim?>px;"></div>
+            <div class="input-header-cell">Current thumbnail:</div>
+            <div class="input-cell"><img src="<?=$image_thumbnail?>?<?= time() ?>" style="vertical-align: middle; height:64px;"></div>
+            <div class="input-header-cell">Current icon:</div>
+            <div class="input-cell"><img src="<?=$image_icon?>?<?= time() ?>" style="vertical-align: middle; height:16px;"></div>
         </div>
 <?php } ?>        
         <div class="actionButtons" style="position:absolute; right:10px; top:4px">
@@ -125,7 +130,6 @@
 
         <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
             <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
-            <input type="hidden" name="uploading" value="1">
             <input type="hidden" name="libicon" id="libicon" value="" />
             <input type="hidden" name="mode" value="<?=$mode?>">
             
@@ -148,7 +152,10 @@
             </div>
 -->
             <div class="input-row">
-                <div class="input-header-cell">Select new image</div>
+                <div class="input-header-cell">Select new thumbnail</div>
+                <div class="input-cell"><input type="file" name="new_thumb" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
+                
+                <div class="input-header-cell">Select new icon</div>
                 <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
             </div>
 <?php 
@@ -161,7 +168,7 @@
                 <span class="help"><?=$select_tip?></span><br />
 <?php            
 //get list of files
-    $dim = ($mode!=1) ?16 :64;
+    $dim = 16; //always show icons  ($mode!=1) ?16 :64;
     $lib_path = 'setup/iconLibrary/'.$dim.'px/';    
     $lib_dir = dirname(__FILE__).'/../../'.$lib_path;
 
@@ -180,7 +187,7 @@
             {
                 //$path_parts['filename'] )); - does not work for nonlatin names
                 $name = substr($filename, 0, -4);
-                print '<div style="display:inline-block;padding:4px;width:120px;">';
+                print '<div style="display:inline-block;padding:4px;width:40px;">';
                 print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_SITE_PATH.'admin/'.$lib_path.$filename.'"/></a></div>';
                 //array_push($results, array( 'filename'=>$filename, 'name'=>$name));
             }
@@ -193,7 +200,7 @@
 
         <?php    if ($success_msg) { ?>
             <script  type="text/javascript">
-                setTimeout(function(){closewin('ok');}, 1000);
+                //setTimeout(function(){closewin('ok');}, 1000);
             </script>
             <?php    } ?>        
     </body>
@@ -204,16 +211,16 @@
     //
     //
     //
-    function upload_file($rt_id, $dim) {
+    function upload_file($rt_id, $type) {
 
-        global $image_dir, $mode;
+        $image_dir = HEURIST_ICON_DIR.(($type=='new_icon')?'':'thumb/th_');
+        $dim = ($type=='new_icon')?16:64;
 
-        if (! @$_REQUEST['uploading']) return;
-        if (! $_FILES['new_icon']['size']) return array('', 'Error occurred during upload - file had zero size');
+        if ( !$_FILES[$type]['size'] ) return array('', 'Error occurred during upload - file had zero size '.$type.'  '.$_FILES[$type]['size']);
         /*****DEBUG****///error_log(" file info ".print_r($_FILES,true));
-        $mimeExt = $_FILES['new_icon']['type'];
-        $filename = $_FILES['new_icon']['tmp_name'];
-        $origfilename = $_FILES['new_icon']['name'];
+        $mimeExt = $_FILES[$type]['type'];
+        $filename = $_FILES[$type]['tmp_name'];
+        $origfilename = $_FILES[$type]['name'];
         $img = null;
 
         switch($mimeExt) {

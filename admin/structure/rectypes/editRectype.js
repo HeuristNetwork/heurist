@@ -66,10 +66,12 @@ function _upload_icon(mode) {
 
     function icon_refresh(context) {
         if(mode==3){
+            if(context){
                var img = document.getElementById('imgIcon2');
                img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/16px/" + context;
                img.width = 16;
                img.height = 16;
+            }
         }else{
                var img = document.getElementById('imgIcon');
                img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
@@ -78,11 +80,13 @@ function _upload_icon(mode) {
     }
     function thumb_refresh(context) {
         if(mode==3){
+            if(context){
                _rectype_icon = context;
                var img = document.getElementById('imgThumb2');
                img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
                img.height = 64;
+            }
         }else{
             var img = document.getElementById('imgThumb');
             img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
@@ -97,12 +101,10 @@ function _upload_icon(mode) {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
-            width: 550,
+            width: 700,
             callback:function(context){
-                if(context){
-                    icon_refresh(context);
-                    thumb_refresh(context);
-                }
+                icon_refresh(context);
+                thumb_refresh(context);
             } //mode==0?icon_refresh:thumb_refresh
     });
 
