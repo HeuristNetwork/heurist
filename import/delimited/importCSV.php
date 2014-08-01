@@ -46,6 +46,11 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
     
     clear_import_session($_REQUEST["clearsession"]);
     exit();
+    
+}else if( @$_REQUEST["getsession"] ){ //download session
+    
+    download_import_session($_REQUEST["getsession"]);
+    exit();
 }
 ?>
 <html>
@@ -268,6 +273,7 @@ function doReload(){
                 <input type="hidden" name="csv_linebreak" value="<?=$_REQUEST['csv_linebreak']?>">
                 <input type="hidden" name="csv_enclosure" value="<?=$_REQUEST['csv_enclosure']?>">
                 <input type="hidden" name="csv_dateformat" value="<?=$_REQUEST['csv_dateformat']?>">
+                <input type="hidden" name="csv_mvsep" value="<?=$_REQUEST['csv_mvsep']?>">
                 
 <?php
 $fields = @$imp_session['fields'];                  
@@ -500,6 +506,7 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
         <input type="hidden" id="multifield" name="multifield" value="">
         <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
         <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
+        <input type="hidden" id="csv_mvsep" name="csv_mvsep" value="<?=@$imp_session["csv_mvsep"]?>">
 
 <div id="main_mapping"<?=$mode_import_result?>>
 
@@ -508,6 +515,7 @@ echo "REUQEST: ".print_r($_REQUEST)."</div>";
         <div style="position:absolute;right:10px;top:10px;">
             <input type="button" value="New file" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"  style="margin-right: 5px;">
             <input type="button" value="Clear this file" onclick="doClearSession(<?=$_REQUEST["import_id"]?>)">
+            <input type="button" value="Download this file" onclick="window.open('importCSV.php?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')">
         </div>        
         <hr width="100%" />
         
@@ -983,6 +991,13 @@ function doSelectSession(){
                                     </select>                
                 </td></tr>
                 <tr><td align="right">Fields enclosed in:</td><td><select name="csv_enclosure"><option selected value='2'>"</option><option value="1">'</option></select></td></tr>
+                <tr><td align="right">Multivalue separator:</td><td><select name="csv_mvsep">
+                            <option value="|" selected>|</option>
+                            <option value=";">;</option>
+                            <option value=":">:</option>
+                            <option value="/">/</option>
+                            <!-- option value=",">,</option -->
+                    </select></td></tr>
                 <tr><td align="right">Date format:</td><td><select name="csv_dateformat"><option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select></td></tr>
                 </table>
         </form>    
@@ -1051,6 +1066,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     global $mysqli;
 
     //$val_separator = $_REQUEST["val_separator"];
+    $csv_mvsep     = $_REQUEST["csv_mvsep"];
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
     $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
@@ -1199,6 +1215,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
                      "memos"=>$preproc['memos'], 
                      "multivals"=>$preproc['multivals'],
                      "csv_enclosure"=>$_REQUEST['csv_enclosure'],
+                     "csv_mvsep"=>$_REQUEST['csv_mvsep'],
                      "uniqcnt"=>$uniqcnt,   //count of uniq values per column  
                      "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype  
                      "indexes"=>array() );  //names of columns in importtable that contains record_ID
@@ -1236,6 +1253,7 @@ function preprocess_uploaded_file($filename){
     if(!$datefields) $datefields = array();
     if(!$memofields) $memofields = array();
     
+    $csv_mvsep     = $_REQUEST["csv_mvsep"];
     $csv_delimiter = $_REQUEST["csv_delimiter"];
     $csv_linebreak = $_REQUEST["csv_linebreak"];
     $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';

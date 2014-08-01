@@ -684,7 +684,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             
             $ids = array();
             //split multivalue field
-            $values = getMultiValues($multivalue, $params['csv_enclosure']);
+            $values = getMultiValues($multivalue, $params['csv_enclosure'], $params['csv_mvsep']);
             foreach($values as $idx=>$value){
                 $row[$multivalue_field_name_idx] = $value;
                 //verify that not empty
@@ -697,7 +697,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                 $fc = $row;
                 array_walk($fc, 'trim_lower_accent2');
 
-                $keyvalue = implode("|", $fc);
+                $keyvalue = implode($params['csv_mvsep'], $fc);
                 
                 if(!@$pairs[$keyvalue]){  //was $value && $value!="" && 
 //search for ID 
@@ -750,7 +750,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
                     array_push($ids, $pairs[$keyvalue]);
                 }
             }//foreach multivalues
-            $records[$imp_id] = implode("|", $ids);   //IDS to be added to import table
+            $records[$imp_id] = implode($params['csv_mvsep'], $ids);   //IDS to be added to import table
         }//while import table
     }
     
@@ -775,7 +775,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
         while ($row = $res->fetch_row()){
 //split multivalue field
             $ids = array();
-            $values = getMultiValues($row[1], $params['csv_enclosure']);
+            $values = getMultiValues($row[1], $params['csv_enclosure'], $params['csv_mvsep']);
             foreach($values as $idx=>$value){
                 if($value && $value!="" && !@$pairs[$value]){
 //search for ID 
@@ -918,7 +918,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
         foreach($pairs as $value => $rec_ID){
             
             if($rec_ID<0){
-                $values = explode("|", $value);
+                $values = explode($params['csv_mvsep'], $value);
                 
                 $k=1;
                 foreach ($params as $key => $field_type) {
@@ -960,14 +960,14 @@ function assignMultivalues($mysqli, $imp_session, $params){
     foreach($records as $imp_id => $ids){
         
         if($is_create_records){
-            $ids = explode("|",$ids);
+            $ids = explode($params['csv_mvsep'], $ids);
             $newids = array();
             foreach($ids as $id){
                 if($id<0) $id = $newrecs[$id];
                 if($id)
                     array_push($newids,$id);
             }
-            $newids = implode('|',$newids);
+            $newids = implode($params['csv_mvsep'], $newids);
         }else{
             $newids = $ids;
         }
@@ -995,10 +995,10 @@ function assignMultivalues($mysqli, $imp_session, $params){
 * @param array $values
 * @param mixed $csv_enclosure
 */
-function getMultiValues($values, $csv_enclosure){
+function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
         $nv = array();
-        $values =  explode("|", $values);                          
+        $values =  explode($csv_mvsep, $values);                          
         if(count($values)==1){
            array_push($nv, trim($values[0])); 
         }else{
@@ -1296,6 +1296,9 @@ function validateImport($mysqli, $imp_session, $params){
  if(!@$imp_session['csv_enclosure']){
     $imp_session['csv_enclosure'] = $params['csv_enclosure'];
  }
+ if(!@$imp_session['csv_mvsep']){
+    $imp_session['csv_mvsep'] = $params['csv_mvsep'];
+ }
  
  
  $hwv = " have wrong values";
@@ -1455,7 +1458,7 @@ function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_
 
               $is_error = false;
               $newvalue = array();
-              $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure']);
+              $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
               foreach($values as $idx=>$r_value){
                   $r_value2 = trim_lower_accent($r_value); 
                   if($r_value2!=""){
@@ -1469,7 +1472,7 @@ function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_
               }
               
               if($is_error){
-                  $row[$field_idx] = implode("|", $newvalue);
+                  $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
                   array_push($wrong_records, $row);
               }
         }
@@ -1622,7 +1625,7 @@ function doImport($mysqli, $imp_session, $params){
             
             //split multivalue index field
             if($id_field){ //id field defined - detect insert or update
-                $id_field_values = explode("|",$row[$id_field_idx]);
+                $id_field_values = explode($params['csv_mvsep'],$row[$id_field_idx]);
             }else{
                 $id_field_values = array(null);
             }
@@ -1695,8 +1698,8 @@ function doImport($mysqli, $imp_session, $params){
                     
                     $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
                     
-                    if(strpos($row[$index],"|")!==false){
-                        $values = getMultiValues($row[$index], $params['csv_enclosure']);
+                    if(strpos($row[$index],$params['csv_mvsep'])!==false){
+                        $values = getMultiValues($row[$index], $params['csv_enclosure'], $params['csv_mvsep']);
                         
                         //  if this is multivalue index field we have to take only current value
                         if($is_mulivalue_index && @$imp_session['indexes_keyfields'][$id_field][$sel_query[$index]] && $idx2<count($values)){
@@ -1810,7 +1813,7 @@ function doImport($mysqli, $imp_session, $params){
         }//foreach multivalue index
         
             if($is_mulivalue_index){
-                    updateRecIds($import_table, end($row), $id_field, $new_record_ids);
+                    updateRecIds($import_table, end($row), $id_field, $new_record_ids, $params['csv_mvsep']);
                     $new_record_ids = array(); //to save in import table
             }
         
@@ -1835,10 +1838,10 @@ function doImport($mysqli, $imp_session, $params){
 //
 //
 //
-function updateRecIds($import_table, $imp_id, $id_field, $newids){
+function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
     global $mysqli;
 
-    $newids = "'".implode("|", $newids)."'";
+    $newids = "'".implode($csv_mvsep, $newids)."'";
     
     $updquery = "UPDATE ".$import_table
             ." SET ".$id_field."=".$newids
@@ -2037,6 +2040,65 @@ function get_import_value($rec_id, $import_table){
 }
 
 /**
+* download seesion data into file
+* 
+* @param mixed $mysqli
+* @param mixed $import_id
+* @return mixed
+*/
+function download_import_session($session_id){
+
+    global $mysqli;
+    
+    $ret = "";
+    $where = "";
+    if(is_numeric($session_id)){
+        $where = " where imp_id=".$session_id;
+    }else{
+        print "session id is not defined";
+        return;
+    }
+    
+    $res = mysql__select_array2($mysqli, 
+                "select imp_session from import_sessions".$where);
+
+     //get field names and original filename
+     $session = json_decode($res[0], true);
+      
+     $columns = $session['columns'];
+     $import_table = $session['import_table'];
+     $list = array();
+     $headers = array();
+
+     foreach ($columns as $idx=>$column) {
+         array_push($list, " field_".$idx);
+         array_push($headers, '"'.str_replace('"','\\"',$column).'"');
+     }
+     
+     
+     //export content of import table into tempfile 
+     $tmpFile = tempnam('/tmp', 'export');
+     $tmpFile = $tmpFile."1";
+    
+     $query = "SELECT ".implode(',',$headers)
+     ." UNION ALL "
+     ." SELECT ".implode(",",$list)." FROM ".$import_table
+     ." INTO OUTFILE '".$tmpFile."'"
+     ." FIELDS TERMINATED BY ','"
+     ." ENCLOSED BY '\"'"
+     ." LINES TERMINATED BY '\n' ";
+
+      $res = $mysqli->query($query);
+      if($res){
+            //read content of tempfile and send it to client
+            header('Content-type: text/csv');
+            readfile($tmpFile);
+      }else{
+            print "File can not be downloaded. SQL error: ".$mysqli->error;          
+      }
+}
+
+/**
 * Drop import table and empty session table
 * 
 * @param mixed $session_id
@@ -2172,7 +2234,7 @@ function renderDisambiguation($type, $imp_session){
     
     foreach($records as $keyvalue =>$disamb){
                     
-        $value = explode("|",$keyvalue);
+        $value = explode($imp_session['csv_mvsep'], $keyvalue);
         array_shift($value); //remove first element
         $value = implode(";&nbsp;&nbsp;",$value); //keyvalue
         
@@ -2261,13 +2323,19 @@ function renderRecords($type, $imp_session){
             
         if(count($records)>25)    
         print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
-        
-        print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
 
-        if($type=="update"){
-            print '<th>Record ID</th>';
-        }
-            print '<th>Line #</th>';
+
+            //all this code only for small asterics
+            //$recStruct = getAllRectypeStructures(true);
+            //$recStruct = $recStruct['typedefs'][]
+            $recordType = @$_REQUEST['sa_rectype'];
+            if($recordType){
+                $recStruc = getRectypeStructures(array($recordType));  
+                $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
+                $recStruc = $recStruc[$recordType]['dtFields'];
+            }else{
+                $recStruc = null;
+            }
             
             
             $detDefs = getAllDetailTypeStructures(true);
@@ -2275,24 +2343,48 @@ function renderRecords($type, $imp_session){
             $detDefs = $detDefs['typedefs'];
             $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
             
+
+            print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
+
+            if($type=="update"){
+                print '<th>Record ID</th>';
+            }
+            print '<th>Line #</th>';
+            
+            
+            //HEADER
             $m=1;
             $err_col = 0;
             foreach($mapped_fields as $field_name=>$dt_id) {
                 
                 $colname = @$imp_session['columns'][substr($field_name,6)];
+                
+                if(@$recStruc[$dt_id][$idx_reqtype] == "required"){
+                    $colname = $colname."*";
+                }
+                
                 if($field_name==$checked_field){
                     $colname = "<font color='red'>".$colname."</font>";
                     $err_col = $m;
+                    $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
                 }
                 
                 $colname = $colname.'<br><font style="font-size:10px;font-weight:normal">'
                     .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id)."</font>";
+                
+                if($err_col == $m){
+                    $colname = $colname.'<br><font color="red">ERROR</font>';
+                }
                 
                 $m++;
                 print "<th>".$colname."</th>";
             }
             
             print "</tr></thead>";
+            
+            //BODY
+            $distinct_value = array();
+            
             if($records && is_array($records))            
             foreach ($records as $row) {  
 
@@ -2306,6 +2398,10 @@ function renderRecords($type, $imp_session){
                                  $value = "&lt;missing&gt;";
                             }
                             $value = "<font color='red'>".$value."</font>";
+                            if($is_enum && !in_array($value, $distinct_value)){
+                                array_push($distinct_value, $value);
+                            }
+                            
                         }
                         print "<td class='truncate'>";
                         /*
@@ -2323,6 +2419,15 @@ function renderRecords($type, $imp_session){
                 print "</tr>";
             }
         print "</table></div>";
+        
+            if($is_enum && count($distinct_value)>0){
+                //print distinct term values
+                print '<br><div style="display:none;padding-bottom:10px;" id="distinct_terms">';
+                foreach ($distinct_value as $value) {  
+                   print '<div style="min-width:50px;display:inline-block;">'.$value.' </div>';
+                }
+                print '</div><a href="#" onclick="{$(\'#distinct_terms\').show()}">Show distinct list of wrong terms values</a>'; 
+            }
         
         }//tabs
     

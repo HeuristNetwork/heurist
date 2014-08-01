@@ -379,7 +379,7 @@ function onExistingIDfieldSelect(){
         
 
 //
-// switch modes
+// switch modes 
 //
 function showUpdMode(newval){
     
@@ -393,6 +393,10 @@ function showUpdMode(newval){
     }else{                            // matching
         $(".importing").hide();
         $(".matching").show();   
+        
+        //reset everything
+        $("#sa_rectype").val('').change();
+        
     }
     $(".analized").hide();
 }
@@ -600,12 +604,20 @@ function getValues(dest){
                                 $("#currrow_0").html(response[0]);      
                                 $("#currrow_1").html(response[0]);
                                 for(i=1; i<response.length;i++){
+                                    if(top.HEURIST.util.isnull(response[i])){
+                                        sval = "&nbsp;";
+                                    }else{
+                                    
                                     var isIdx = ($('option[class^="idfield2_"][value="field_'+(i-1)+'"]').size()>0);
                                     var sval = response[i].substr(0,100);
+                                    
                                     if(isIdx && response[i]<0){
                                         sval = "&lt;New Record&gt;";
                                     }else if(sval==""){
                                         sval = "&nbsp;";
+                                    }else if(response[i].length>100){
+                                        sval = sval + '&#8230;';
+                                    }
                                     }
                                     
                                     if($("#impval"+(i-1)).length>0)
