@@ -47,17 +47,17 @@ echo
 echo
 echo "----------------------- Installing Heurist Version 3 ---------------------------"
 echo
-echo "Progress and errors go to terminal, other messages to a file called heurist_install.log"
-echo "in the current directory"
 echo
-echo ----- Now fetching and installing updated Heurist code -----------------------------------
-
-echo -e "Fetching Heurist code from HeuristScholar.org"
+echo -e "Fetching Heurist code from HeuristScholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2"
+echo
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
 sudo tar -xjf $1.tar.bz2
 sudo rm $1.tar.bz2
 sudo cp -r $1/ /var/www/html/HEURIST/$1
 
+echo
+echo Obtaining updated support files (external, exemplars and help files)
+echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
@@ -74,6 +74,14 @@ sudo rm exemplars.tar.bz2
 
 echo "Heurist unpacked"
 
+sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.1.tar.gz
+sudo tar -zxvf elasticsearch-1.3.1.tar.gz
+cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.1
+./bin/elasticsearch -d
+
+
 # ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"
@@ -84,6 +92,9 @@ echo You will need to edit the configIni.php file in the /var/www/html/HEURIST/$
 echo unless you have a shared heuristConfigIni.php file in /var/www/html/HEURIST
 echo See /var/www/html/HEURIST/$1/parentDirectory_heuristConfigIni.php for instructions
 echo
-echo Please verify that Heurist runs correctly from the new location, then
-echo overwrite your /var/www/html/HEURIST/h3 directory with /var/www/html/HEURIST/$1
+echo Please visit Designer View - Utilities - Verify installation to check that required compnents are installed
+echo and then verify that Heurist runs correctly from the new location, then overwrite
+echo your /var/www/html/HEURIST/h3 directory with /var/www/html/HEURIST/$1
 echo
+echo
+

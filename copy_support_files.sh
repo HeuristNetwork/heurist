@@ -32,14 +32,6 @@ echo
 ls -alt ../DISTRIBUTION/HEURIST_SUPPORT/
 
 echo
-echo Check for errors, if none shown, tar.bz2 files have been created
-echo
-echo
-echo "Now copy  ../h3-build/$1.tar.bz2 to /var/www/html/HEURIST/DISTRIBUTION"
-echo
-echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
-echo and the installation is dependant on the filename parameter to find this folder
-echo
-echo Use:  cd ../h3-build  then  sudo rm ../DISTRIBUTION/$1.tar.bz2  THEN  sudo mv $1.tar.bz2 ../DISTRIBUTION
+echo Check for errors. If none shown, tar.bz2 files have been created
 echo
 

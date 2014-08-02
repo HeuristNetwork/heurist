@@ -45,6 +45,11 @@ sudo apt-get upgrade -y >> heurist_install.log
 
 echo "Adding sqlite3 and spatialite3 support from FAIMS Fedarch.org server"
 
+# sudo sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/lib/' /etc/php5/apache2/php.ini
+
+sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/local\/lib/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+sed 's/;extension=php_sqlite3.dll/extension=php_sqlite3.dll/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+
 sudo apt-get build-dep libspatialite-dev -y >> heurist_install.log
 
 wget http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "Spatialite downloads from Fedarch dot org failed." }

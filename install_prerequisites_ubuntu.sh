@@ -24,17 +24,18 @@
 
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
 
-echo "---- Installing Prerequisites for Heurist(for Linux/Ubuntu 14.04) ----"
+echo "---- Installing Prerequisites for Heurist for Linux/Ubuntu ----"
 echo
 echo
 echo "WARNING 1: BEWARE OF TIMEOUT ON THE MYSQL PASSWORD REQUEST"
 echo
 echo "This installation is fairly radical in upgrading all required software to latest versions."
 echo "We do not recommend using it on servers which depend on old versions of software for"
-echo "existing applications to work. It should be fine on new servers without much in the way of" echo "existing applications."
+echo "existing applications to work. It should be fine on new servers without much in the way of"
+echo "existing applications."
 echo
 echo "Progress and errors go to terminal, other messages to a file called heurist_install.log"
-echo "in the current directory. Typical install time on a virtual server is about 5 - 10 minutes, but could take longer"
+echo "in the current directory. Typical install time on a virtual server is about 5 minutes, but could take longer"
 echo
 echo "Later you will be asked to supply a root password for MySQL, which sets the root password for your MySQL installation"
 echo
@@ -52,11 +53,16 @@ echo
 
 # Note: using apt-get rather than aptitude - the latter fixes problems automatically but is not always installed
 
-sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
+# This does not seem to be populating /etc/hosts, removed 30/7/14
+# sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
+
+sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/w /tmp/hostNew' /etc/hosts
 
 echo "Upgrading package versions from repositories"
+
 # update package list from the repositories
 sudo apt-get update > heurist_install.log
+
 # install updated packages
 sudo apt-get upgrade -y >> heurist_install.log
 
@@ -67,37 +73,22 @@ echo "System packages upgraded to latest versions, about to install LAMP stack"
 
 sudo tasksel install lamp-server
 
+# ----- PHP extensions --------------------------------------------
+
 echo "Installing PHP 5 extensions"
 
-sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd php5-dev php-pear memcached php5-memcached sqlite3 pv php5-sqlite -y >> heurist_install.log
+sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd zip unzip -y >> heurist_install.log
 
-# used by FAIMS and export/archiving functions
-sudo apt-get install zip unzip
+# mbstring - multilingual character handling - appears to be installed by default on Ubuntu
+# pdo appears to be installed by php5-mysql, but may also require pdo_mysql
 
-# mbstring (multilingual character handling) appears to be installed by default on Ubuntu
-# pdo appears to be installed by php5-mysql, but may also require pdo-mysql
-# pdo and mbstring could not be located on Ubuntu install - transferred from Artems RHEL script
-# sudo apt-get install php5-pdo php5-mbstring
-sudo apt-get install pdo-mysql
+sudo apt-get install pdo_mysql
 sudo apt-get install php5-pdo
 sudo apt-get install php5-mbstring
 
 sudo ldconfig
 
-# this is only done because upload progress needs to compile. The lout. We should write it out of the system ...
-# sudo apt-get build-dep php5 -y >> heurist_install.log
-
-# Only needed for uploadprogress, which we are getting rid of, remove when no longer needed
-sudo pecl install uploadprogress >> heurist_install.log
-
-
 # ----- PHP Ini ----------------------------------------------------
-
-# sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/w /tmp/hostNew' /etc/hosts
-# sudo sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/lib/' /etc/php5/apache2/php.ini
-
-sed 's/;sqlite3.extension_dir =/sqlite3.extension_dir = \/usr\/local\/lib/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
-sed 's/;extension=php_sqlite3.dll/extension=php_sqlite3.dll/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
 # If errors are on, errors are output to the browser and stuff up Heurist interface
 sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
@@ -106,7 +97,8 @@ sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini |
 sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
 
-sudo pear config-set php_ini /etc/php5/apache2/php.ini
+# Why do we need this here? Removed Ian 30/7/14
+# sudo pear config-set php_ini /etc/php5/apache2/php.ini
 
 # ----- Apache restart ----------------------------------------------------
 
@@ -127,7 +119,9 @@ echo
 echo "    127.0.1.1 localhost"
 echo "    IPaddress ServerName"
 echo
-echo "Note: use hostname and hostname -i to find the required values"
+echo IPaddress and hostname are:
+hostname -i
+hostname
 echo
 echo "Please now run step 2 - install_heurist.sh - on the Heurist installation instructions"
 echo "to install the Heurist software on your server"
