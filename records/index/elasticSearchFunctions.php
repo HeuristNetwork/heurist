@@ -6,10 +6,10 @@
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0   
+    * @version     4.0
     */
 
     /*
@@ -21,8 +21,8 @@
     */
 
 
-    /* 
-    Elastic Search creates indexes automatically and updates the index record when new data is supplied for an existing key 
+    /*
+    Elastic Search creates indexes automatically and updates the index record when new data is supplied for an existing key
     However we do need to delete keys explicitely if 1. the record type changes or 2. we delete the record altogether
     Test for installation allows us to fall back to ordinary searching or render warning that feature is not supported
 
@@ -41,13 +41,13 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Test whether Elastic Search is installed/operational
     * @returns  Returns CURL result code, 0 if OK, >0 indicates error
     */
     function testElasticSearchOK () {
-        global $indexServerAddress, $indexServerPort; 
+        global $indexServerAddress, $indexServerPort;
         $url="$indexServerAddress:$indexServerPort"; // Set in configIni.php, address can be blank (not set), default port is 9200
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_GET, true);
@@ -65,7 +65,7 @@
 
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Remove uppercase letters from database name (Elastic Search rejects uppercase)
     * @param    $dbname - the database name to be converted to lower case
@@ -78,28 +78,28 @@
         } else {
             $dbname_new = $dbname_new."_nocaps"; // disambiguate eg. MyDB and mydb
             return($dbname_new);
-        }      
+        }
     } //testElasticSearchOK
 
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Add a new key or update an existing key - Elastic Search adds or updates as appropriate, no need to specify
     * By reading record from database we ensure that we are indexing only records which have been successfully written
     * @param $dbName        The name of the Heurist database, excluding prefix
     * @param $recTypeID     The record type ID of the record being indexed
     * @return               curl return code, 0 = success
-    */  
-    function updateRecordIndexEntry ($dbName, $recTypeID, $recID) { 
-        global $indexServerAddress, $indexServerPort; 
+    */
+    function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
+        global $indexServerAddress, $indexServerPort;
 
         $jsonData = "{";
 
         print "$recID ";
         error_log("updateRecordIndexEntry: about to index recID = $recID");
 
-        // Add the record level data: 
+        // Add the record level data:
         // DO NOT CHANGE ORDER unless changing JSON construction below
         $query="SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
         "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
@@ -142,38 +142,38 @@
                 // numeric detail ID is used as the key for the index, so no namespace conflict
                 // with textual keys from the Record itself
                 // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
-                // Curent code makes the simplistic assumption that only one of these three 
-                // fields is set or the cioncat is useful. TODO: Verify if this is the case                
+                // Curent code makes the simplistic assumption that only one of these three
+                // fields is set or the cioncat is useful. TODO: Verify if this is the case
             }
         }
 
         // Terminate the json data
-        $jsonData = $jsonData.'}'; 
+        $jsonData = $jsonData.'}';
 
         $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
 
 
-        //--------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------
 
         // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
 
-        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d'$jsonData'";    
+        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d'$jsonData'";
 
         // If the index and type do not exist, the index is created autiomatically according to
-        // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html   
+        // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html
         //
         // HOWEVER, IT COMES BACK WITH 404 AND INDEX ERROR UNSUPPOR5TED SERVICE
         // For example, if you pass json {user:"johnson"}  you get:
         // Rebuilding Lucene indices for all tables ... {"error":"IndexMissingException[[1] missing]","status":404}
         // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
         // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
-        // 
+        //
         // curl from comand line simply creates the index ...
         // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d'{Title:""}'
         // just to get the index started. This is a pain. Is it something wrong with the construction of the URL?
         // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
 
-        //--------------------------------------------------------------------------------------------------------------------------------------------------------------       
+        //----------------------------------------------------------------------------------------------------------------
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL); // have to reset before can set to PUT
@@ -193,27 +193,27 @@
 
 
 
-    // **************************************************************************************************************** 
-    // Note: Reported bug in PHP @ 18/11/13: must reset to NULL to obtain internal default. 
+    // ****************************************************************************************************************
+    // Note: Reported bug in PHP @ 18/11/13: must reset to NULL to obtain internal default.
     //       Resetting directly to eg. PUT or GET will not reset, it will remain set as DELETE
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Delete the index entry for a specified record - use when record type changed or record deleted
     * @param $dbName        The name of the Heurist databasem, excluding prefix
     * @param $recTypeID     The record type ID of the record being deleted from the index
-    * @param $recID         The record to be deleted from the index 
+    * @param $recID         The record to be deleted from the index
     * @return               curl return code, 0 = success
     */
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
-        global $indexServerAddress, $indexServerPort; 
+        global $indexServerAddress, $indexServerPort;
 
         print "deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName<br />";
         error_log("deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName");//DEBUG
 
-        $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";    
+        $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         $data = curl_exec($ch);
@@ -230,7 +230,7 @@
     } // deleteRecordIndex
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Delete the index for a specified record type
     * @param $dbName       The name of the Heurist databasem, excluding prefix
@@ -238,12 +238,12 @@
     */
     function deleteIndexForRectype ($dbName, $recTypeID) {
         // TODO: check that this is correct spec for deletion of the index for a record type
-        global $indexServerAddress, $indexServerPort; 
+        global $indexServerAddress, $indexServerPort;
 
         print "deleting index for record type $recTypeID for $dbName<br />";
         error_log("deleting index for record type $recTypeID for $dbName");//DEBUG
 
-        $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";    
+        $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         $data = curl_exec($ch);
@@ -256,23 +256,23 @@
         } else {
             curl_close(ch); // is this necessary?
             return(0);
-        } 
+        }
     } // deleteIndexForRectype
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Delete the index for a specified database
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     */
     function deleteIndexForDatabase ($dbName) {
         // TODO: check that this is correct spec for deletion of the index for a database
-        global $indexServerAddress, $indexServerPort; 
+        global $indexServerAddress, $indexServerPort;
 
         print "deleting all indexes for $dbName in $indexServerAddress:$indexServerPort<br />";
         error_log("deleting all indexes for $dbName in $indexServerAddress:$indexServerPort");//DEBUG
 
-        $url="$indexServerAddress:$indexServerPort/$dbname";    
+        $url="$indexServerAddress:$indexServerPort/$dbname";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         $data = curl_exec($ch);
@@ -289,15 +289,15 @@
     } // deleteIndexForDatabase
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Rebuild the index for a specified record type
     * @param $dbName       The name of the Heurist databasem, excluding prefix
-    * @param    
+    * @param
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
 
-        print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";      
+        print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
         error_log("buildIndexForRectype: indexing record type $recTypeID for $dbName");//DEBUG
 
         deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
@@ -308,31 +308,31 @@
             while (($row = mysql_fetch_array($res))) { // fetch records
                 updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
             }
-        }        
+        }
     } // buildIndexForRectype
 
 
-    // **************************************************************************************************************** 
+    // ****************************************************************************************************************
     /**
     * Rebuild the index for all record types
     * @param    $dbName  The name of the Heurist databasem, excluding prefix
     * @returns  0 = OK, 1 = error
     */
     function buildAllIndices ($dbName) {
-        print "<br />buildAllIndices: for $dbName<br />";      
+        print "<br />buildAllIndices: for $dbName<br />";
         error_log("buildAllIndices: for $dbName");//DEBUG
 
         $query="Select MAX(rec_RecTypeID) from Records where 1";
         $res = mysql_query($query);
         if ($res) {
             $row = mysql_fetch_array($res);
-            $maxRecTypeID = $row[0];                              
+            $maxRecTypeID = $row[0];
             print "<br />MaxRecTypeID = $maxRecTypeID<br />";
             for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
-                buildIndexForRectype ($dbName, $i);    
-            }                                       
-            return(0);            
-        }      
+                buildIndexForRectype ($dbName, $i);
+            }
+            return(0);
+        }
     } // buildAllIndices
 
 ?>

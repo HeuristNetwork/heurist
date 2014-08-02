@@ -2504,10 +2504,10 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenuBkmk){
 					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark",{zindex: 21});
 					top.HEURIST.search.recMenuBkmk.addItems([
-						{ text: "Delete" },
+                        // { text: "Tag" }, TODO: Tag and delete require record to be selected first
 						{ text: "Rate" },
-						{ text: "Un-bookmark" },
-						{ text: "Tag" }
+						{ text: "Un-bookmark" }
+                        // { text: "Delete" },
 					]);
 					top.HEURIST.search.recMenuBkmk.render(document.getElementById('page')); //document.body);
 					$("#menu_boomark").bind("mouseleave",function(){
@@ -2520,9 +2520,9 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenu){
 					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd",{zindex: 21});  //e.parentNode.id
 					top.HEURIST.search.recMenu.addItems([
-						{ text: "Delete" },
-						{ text: "Bookmark" },
-						{ text: "Tag" }
+                        // { text: "Tag" }, TODO: see above
+                        // { text: "Bookmark" },
+						{ text: "Delete" }
 					]);
 					top.HEURIST.search.recMenu.render(document.getElementById('page')); //document.body);//"rd"+recID);
 					$("#menu_recordrd").bind("mouseleave",function(){
