@@ -31,6 +31,7 @@
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
+
     require_once('importCSV_lib.php');
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
@@ -38,16 +39,15 @@
     if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
         exit();
-    }else if( @$_REQUEST["clearsession"] ){
-
-        clear_import_session($_REQUEST["clearsession"]);
-        exit();
-
-    }else if( @$_REQUEST["getsession"] ){ //download session
-
-        download_import_session($_REQUEST["getsession"]);
-        exit();
-    }
+    } else
+        if( @$_REQUEST["clearsession"] ){
+            clear_import_session($_REQUEST["clearsession"]);
+            exit();
+        } else
+            if( @$_REQUEST["getsession"] ){ //download session
+                download_import_session($_REQUEST["getsession"]);
+                exit();
+            }
 ?>
 
 <html>
@@ -206,9 +206,6 @@
                 $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
             }
 
-            //print "SESSION 0    :".print_r($imp_session, true);
-            //DEBUG print "STEP  :".$step;
-
             //first step - load file into import table
             if($step==1 && $imp_session==null){
                 echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
@@ -246,8 +243,8 @@
 
                     foreach($errors as $err){
                         print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
-                        print "</table>";
                     }
+                    print "</table>";
                 ?>
 
                 // TODO: This is horrible! You have numerous /body, /html and /table tags in one file, and they aren't matched b/c some are in print
@@ -290,9 +287,9 @@
                     $k=0;
                 ?>
 
-                <div>Please select input columns that contain dates which may contain human-friendly dates such as 1827, 14 sep 1827, 14th Sept 1827.
-                    These columns will be parsed to extract conistently formatted date fields.
-                    Date fields in standard format (dd-mm-yyyy, mm-dd-yyyy as selected, or ISO standard YYYY-MM-DD) will be handled automatically.
+                <div>Please select input columns that contain dates which may contain human-friendly dates such as 1827, 14 sep 1827, 14th Sept 1827.<br />
+                    These columns will be parsed to extract conistently formatted date fields.<br />
+                    Date fields in standard format (dd-mm-yyyy, mm-dd-yyyy as selected, or ISO standard YYYY-MM-DD) will be handled automatically.<br />
                     <br /><br />
                     <input type="button" value="Cancel" onClick="doReload();" style="margin-left: 70px; margin-right: 10px;">
                     <input type="button" value="Continue" style="font-weight: bold;" onclick="doUpload2()">
@@ -332,11 +329,12 @@
     if(is_array($imp_session)){
 
         //NOT USED ANYMORE
+        // ARTEM TODO: Remove this code
         if(false && @$_REQUEST["mvm"]){
             print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); });</script>';
             if($_REQUEST["mvm"]==1){
             ?>
-            <h4>INDEX KEYS GENERATED FROM MULTIVALUE FIELD</h4>
+            <h4>Index keys generated from multivalue field</h4>
             <hr width="100%" />
 
             <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
@@ -410,6 +408,8 @@
             exit();
         }
 
+        // ARTEM TODO: END OF DEPRECATED CODE TO BE REMOVED
+
     ?>
 
     <script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
@@ -433,6 +433,7 @@
             if($sa_mode==0){ //matching
 
                 if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
+                               // ARTEM TODO: REMOVE REDUNDANT CODE
 
                     echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
                     ob_flush();flush();
@@ -450,7 +451,7 @@
                     //NOT USED ANYMORE $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
 
                     if(is_array($res) && count(@$res['validation']['disambiguation'])>0){
-                        //There is disambiguation for your matching criteria. Please resolve it before proceed further
+                        //There is ambiguity with your matching criteria. Please resolve it before proceeding further
                     ?>
 
                     <script>
@@ -475,8 +476,6 @@
                     ob_flush();flush();
 
                     $res = validateImport($mysqli, $imp_session, $_REQUEST);
-
-                    //error_log(print_r($res, true));
 
                 }else if($step==3){  //create records - load to import data to database
                     $mode_import_result = ' style="display:none"';
@@ -522,7 +521,7 @@
 
     <div id="main_mapping"<?=$mode_import_result?>>
 
-        <h4>IMPORT DATA Step 2</h4>
+        <h4>Step 2: Matching and inserting/updating records</h4>
 
         <div style="position:absolute;right:25px;top:10px;">
 
@@ -530,7 +529,6 @@
                 HeuristNetwork.org/archive/importing-data</a> for a detailed explanation and examples of record import.
 
         </div>
-
 
         <hr width="100%" />
 
@@ -558,7 +556,7 @@
                 value="Download data to file"
                 onclick="window.open('importCSV.php?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')"
                 title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
-            <!-- TODO: DOWNLOAD SHOULD BE  MIME TYPE CSV, currently it is PHP -->
+            <!-- ARTEM TODO: DOWNLOAD SHOULD BE  MIME TYPE CSV, currently it is PHP -->
         </div>
 
         <?php
@@ -594,6 +592,7 @@
                 </div>
 
                 <!-- OLD VERSION - FULLY WORK
+                ARTEM TODO: REMOVE DEPRECATED CODE
                 <div id="div_idfield" style="padding-left:30px;display:none;">
 
                 <div id="div_idfield_new">
@@ -645,8 +644,12 @@
                     <br/>
 
                     <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
-                        <thead><tr>
-                            <th>Key<br/>field&nbsp;</th><th>Unique<br/>values</th><th>Column</th><th>Mapping</th>
+                        <thead><tr> <!-- Table headings -->
+                            <th style="width:40px;">Key<br/>field&nbsp;</th>
+                            <th style="width:50px;">Unique<br/>values</th>
+                            <th style="width:200px;">Column</th>
+                            <th style="width:310px;">Mapping</th>
+                            <!-- last column allows step through imported data records-->
                             <th width="300px" style="text-align: left;padding-left: 6px;">
                                 <a href="#" onclick="getValues(0);return false;"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
                                 <a href="#" onclick="getValues(-1);return false;"><img src="../../common/images/calendar-l-arrow.gif" /></a>
@@ -658,19 +661,24 @@
 
                         <?php
                             //
-                            // render matching table
+                            // render table allowing contextual selection of key fields for matching
                             //
                             for ($i = 0; $i < $len; $i++) {
+                                // Keyfield selection
                                 print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
-                                .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
-                                .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
-                                .'/></span></td>';
-                                print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
+                                    .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
+                                    .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
+                                    .'/></span></td>';
+                                // Unique values
+                                print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td>';
+                                // input column name
+                                print '<td style="padding-left:15px;" class="truncate">'.$imp_session['columns'][$i].'</td>';
+                                // Select mapping for imported column, initially hidden until keyfield checkbox selected
                                 print '<td style="width:306px;">&nbsp;<span style="display:none;">'
-                                .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px" onchange="{onFtSelect2('.$i.');}">'
-                                . '</select></span></td>';
+                                    .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px;" onchange="{onFtSelect2('.$i.');}">'
+                                    . '</select></span></td>';
+                                // Imported data value for column
                                 print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
-
                             }
                         ?>
                     </table>
@@ -750,8 +758,12 @@
 
 
                 <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
-                    <thead><tr>
-                        <th>Import&nbsp;<br/>value</th><th>Unique&nbsp;<br/>values</th><th style="max-width:100px;">Column</th><th width="310">Mapping</th>
+                    <thead><tr> <!-- Table headings -->
+                        <th style="width:40px;">Import&nbsp;<br/>value</th>
+                        <th style="width:50px;">Unique&nbsp;<br/>values</th>
+                        <th style="width:200px;">Column</th>
+                        <th style="width:310px;">Mapping</th>
+                        <!-- last column allows step through imported data records-->
                         <th width="300px" style="text-align: left;padding-left: 16px;">
                             <a href="#" onclick="getValues(0);return false;"><img src="../../common/images/calendar-ll-arrow.gif" /></a>
                             <a href="#" onclick="getValues(-1);return false;"><img src="../../common/images/calendar-l-arrow.gif" /></a>
@@ -772,10 +784,8 @@
                         $idx_dt_name = $recStruc['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
                         //$idx_rt_name = $recStruc['commonNamesToIndex']['rty_Name'];
 
-
-
-
-                        /*                                print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
+                        /*  ARTEM TODO: REMOVE DEPRECATED CODE
+                        print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
                         .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
                         .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
                         .'/></span></td>';
@@ -808,7 +818,7 @@
                             $s = $s.'<td align="center">'.$imp_session['uniqcnt'][$i];
 
                             // column names
-                            $s = $s.'</td><td class="truncate">'.$imp_session['columns'][$i].'</td>';
+                            $s = $s.'</td><td style="padding-left:15px; class="truncate">'.$imp_session['columns'][$i].'</td>';
 
                             // mapping
                             if($isProcessed){ // already selected
@@ -1047,19 +1057,20 @@
     </script>
 
 
-    <h4>UPLOAD DATAFILE OR SELECT SAVED SESSION Step 1</h4>
+    <h4>Step 1: Upload a new file or select a previously uploaded file</h4>
     <hr width="100%" />
 
-    <div class="help">This function loads a comma-separated or tab-separated text file, such as those generated
-        by many spreadsheets and databases, allowing matching of rows against existing data based on one or more
-        columns eg. name(s), dates, identifiers. Unmatched rows can be added as new records. The process can be repeated
-        on the file to extract multiple entities from different columns and replace them with record IDs which can be
+    <div class="help" style="margin-left: 150px; margin-top: 20px; margin-bottom: 30px;">
+        This function loads a comma-separated or tab-separated text file, such as those generated by many spreadsheets and databases, allowing<br />
+        matching of rows against existing data based on one or more columns eg. name(s), dates, identifiers. Unmatched rows can be added as new records.
+        <br /><br />
+        The process can be repeated on the file to extract multiple entities from different columns and replace them with record IDs which can be<br />
         used in a subsequent insertion or update of records.
         <br /><br />
-        Data rows must occupy a single line of data terminated with a CRLF (Windows) or an LF (Unix/Mac).
-        Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma.
-        Fields containing the field separator should be enclosed in quotes. Quotes may exist within unquoted fields,
-        but within quoted fields they should be preceded by a backslash ( \" ).
+        Data rows must occupy a single line of data terminated with a CRLF (Windows) or an LF (Unix/Mac).<br />
+        Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma.<br />
+        Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash ( \" ).<br />
+        Fields containing the field separator should be enclosed in quotes.
         <br/><br/>
         Editors such as <a href="http://notepad-plus-plus.org/" target="_blank">Notepad++</a>
         (free, Open Source, Windows) show tabs, CR and LF as symbols and can do global replacements on them.
@@ -1083,15 +1094,15 @@
             <tr><td></td><td></td></tr>
             <tr><td align="right"><label>Select previously uploaded file:</label></td><td>
                     <select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
-                    <input type="button" value="Clear All" style="font-weight: bold;"
-                        onclick="doClearSession('all')">
                 </td></tr>
 
             <tr><td>&nbsp;</td></tr>
             <tr>
                 <td></td>
                 <td align="left">
-                    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 10px;">
+                    <input type="button" value="Clear all files" style="margin-right: 10px;"
+                        onclick="doClearSession('all')">
+                    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 30px;">
                     <input type="button" value="Continue" style="font-weight: bold; margin-right: 100px;" onclick="doUpload()">
                 </td>
             </tr>
