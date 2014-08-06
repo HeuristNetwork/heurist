@@ -727,8 +727,8 @@
                     fclose($hunifile);
                 }
                 if($res){
-                    array_push($resout, $recID);
-                }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml")){
+                    $resout[$recID] = $recInfo['record']['rec_RecTypeID'];
+                }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$recID.".xml")){
                     unlink(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml");
                 }
             }
@@ -740,7 +740,6 @@
 
         return $resout;
     }
-
 
     //----------------------------------------------------------------------------//
     //  Output functions
@@ -785,7 +784,10 @@
         }       
 
 
-        openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'), 'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
+        openTag('record', array('depth' => $depth, 
+                                'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'), 
+                                'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
+                                
         if (array_key_exists('error', $record)) {
             makeTag('error', null, $record['error']);
             closeTag('record');
@@ -796,8 +798,11 @@
             closeTag('record');
             return true;
         }
+        $conceptID = getRecTypeConceptID($record['rec_RecTypeID']);
+        
         makeTag('id', null, $record['rec_ID']);
-        makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID' => getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
+        makeTag('type', array('id' => $record['rec_RecTypeID'], 
+                              'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
         makeTag('title', null, $record['rec_Title']);
         if ($record['rec_URL']) {
             makeTag('url', null, $record['rec_URL']);
@@ -932,6 +937,7 @@
                 makeTag('relationship', $attrs, $relRec_id);
             }
         }
+        
         closeTag('record');
 
         return true;    
@@ -1436,13 +1442,18 @@
             $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
             fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );    
             fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
-            foreach ($resout as $recID) {
+            foreach ($resout as $recID => $recTypeID) {
 
                 $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
                 if(file_exists($resfile)){
+                    
+                    $conceptID = getRecTypeConceptID($recTypeID);
+                    
                     fwrite( $huni_resources, "<record>\n");
                     fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
                     fwrite( $huni_resources, "<hash>".md5($resfile)."</hash>\n");
+                    //fwrite( $huni_resources, "<RecTypeID>".$recTypeID."</RecTypeID>\n");
+                    fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
                     fwrite( $huni_resources, "</record>\n");
                 }
             }

@@ -593,7 +593,11 @@ function getTerms($useCachedData = false) {
     $query = "select " . $fieldNamePrefix . "OriginatingDBID," . $fieldNamePrefix . "IDInOriginatingDB from $tableName where " . $fieldNamePrefix . "ID = $lclID";
     /*****DEBUG****///error_log("SQL=".$query);
     $res = mysql_query($query);
-    $ids = mysql_fetch_array($res);
+    if($res){
+        $ids = mysql_fetch_array($res);
+    }else{
+        $ids = null;
+    }
     /*****DEBUG****///error_log(print_r($ids, true));
     /*****DEBUG****///error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
     //return "".$ids[0]."-".$ids[1];
