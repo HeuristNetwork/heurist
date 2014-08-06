@@ -563,7 +563,7 @@
                 $disamb_resolv[$keyvalue] = $disamb_ids[$idx];
             }
 
-            print "<br>dis resolv ".print_r($disamb_resolv, true);
+//DEBUG print "<br>dis resolv ".print_r($disamb_resolv, true);
         }
 
         //get rectype to import
@@ -702,15 +702,22 @@
                     if(!@$pairs[$keyvalue]){  //was $value && $value!="" &&
                         //search for ID
 
+                        //assign parameters for search query
                         call_user_func_array(array($search_stmt, 'bind_param'), refValues($row));
                         $search_stmt->execute();
                         $disamb = array();
                         while ($search_stmt->fetch()) {
                             //keep pair ID => key value
                             $disamb[$rec_ID] = $rec_Title; //get value from binding
+                            
+                            /* instead of record title we show list of key fields separated by pipes
+                            $keyfields = $row;
+                            array_shift($keyfields);
+                            $disamb[$rec_ID] = implode("|", $keyfields);
+                            */
                         }
 
-                        if(count($disamb)==0){
+                        if(count($disamb)==0){ //nothing found - insert
                             $new_id = $ind;
                             $ind--;
                             $rec = $row;
@@ -718,7 +725,8 @@
                             $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
                             array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
                             //DEBUG print "<br>push :".print_r($imp_session['validation']['recs_insert'], true);
-                        }else if(count($disamb)==1 || @$disamb_resolv[addslashes($keyvalue)]){
+                            
+                        }else if(count($disamb)==1 || @$disamb_resolv[addslashes($keyvalue)]){  //eirther found exact or disamiguation is resolved 
 
                             if(count($disamb)>1){
                                 //DEBUG print "<br> ".$keyvalue."   ".@$disamb_resolv[addslashes($keyvalue)].".";
@@ -731,6 +739,7 @@
                             array_unshift($rec, $rec_ID);
                             $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']); //keep index in rec_update
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
+                            
                         }else{
                             $new_id= 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
@@ -2032,11 +2041,8 @@
 
         $query = "select * from $import_table where imp_id=".$rec_id;
         $res = mysql__select_array2($mysqli, $query);
-
+        return $res;
         //error_log(">>>".$query."  ".json_encode($res));
-
-        header('Content-type: text/javascript');
-        print json_encode($res);
     }
 
     /**
@@ -2245,7 +2251,10 @@
             foreach($disamb as $rec_ID =>$rec_Title){
                 print '<option value="'.$rec_ID.'">'.$rec_Title.'</option>';
             }
-            print '</select></td></tr>';
+
+            print '</select>&nbsp;';
+            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">edit ambiguities</a>';
+            print '</td></tr>';
         }
 
         print "</table><br />";
@@ -2259,6 +2268,11 @@
     // render the list of records as a table
     //
     function renderRecords($type, $imp_session){
+        
+        if($type=='error'){
+            renderRecordsError($imp_session);
+            return;
+        }
 
         ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
         ///DEBUG print print_r(@$validationRes['rec_error'],true);
@@ -2300,7 +2314,8 @@
             $records = $rec_tab['recs_'.$type];
             $mapped_fields = $imp_session['validation']['mapped_fields'];
 
-            //print print_r( @$imp_session['validation']['field_checked'], true);
+            //print print_r( @$imp_session['validation']['mapped_fields'], true);
+
             if($cnt>count($records)){
                 print "<div class='error'><b>Only the first ".count($records)." of ".$cnt." rows are shown</b></div>";
             }
@@ -2343,13 +2358,50 @@
             $detDefs = $detDefs['typedefs'];
             $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
 
-
+            //find distict terms values
+            if($type=="error" && !$is_missed){
+                $is_enum = false;
+                $err_col = 0;
+                $m = 0;
+                foreach($mapped_fields as $field_name=>$dt_id) {
+                    if($field_name==$checked_field){
+                        $err_col = $m;
+                        $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
+                        break;
+                    }            
+                    $m++;
+                }
+                
+                if($is_enum){
+                    $distinct_value = array();
+                    if($records && is_array($records)) {
+                        foreach ($records as $row) {
+                            $value = $row[$err_col];
+                            if(!in_array($value, $distinct_value)){
+                                 array_push($distinct_value, $value);
+                            }
+                        }
+                    }
+                
+                    if(count($distinct_value)>0){
+                        //print distinct term values
+                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms"><br>';
+                        foreach ($distinct_value as $value) {
+                            print '<div style="margin-left:30px;">'.$value.' </div>';
+                        }
+                        print '</div>';
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
+                        //  $(\'#distinct_terms\').show()
+                    }
+                }
+            }//end find distict terms values 
+            
             print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
 
             if($type=="update"){
-                print '<th>Record ID</th>';
+                print '<th width="30px">Record ID</th>';
             }
-            print '<th>Line #</th>';
+            print '<th width="20px">Line #</th>';
 
 
             //HEADER
@@ -2366,7 +2418,6 @@
                 if($field_name==$checked_field){
                     $colname = "<font color='red'>".$colname."</font>";
                     $err_col = $m;
-                    $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
                 }
 
                 $colname = $colname.'<br><font style="font-size:10px;font-weight:normal">'
@@ -2383,9 +2434,7 @@
             print "</tr></thead>";
 
             //BODY
-            $distinct_value = array();
-
-            if($records && is_array($records))
+            if($records && is_array($records)) {
                 foreach ($records as $row) {
 
                     print "<tr>";
@@ -2398,10 +2447,6 @@
                                     $value = "&lt;missing&gt;";
                                 }
                                 $value = "<font color='red'>".$value."</font>";
-                                if($is_enum && !in_array($value, $distinct_value)){
-                                    array_push($distinct_value, $value);
-                                }
-
                             }
                             print "<td class='truncate'>";
                             /*
@@ -2417,19 +2462,10 @@
                         }
                     }
                     print "</tr>";
-            }
-            print "</table></div>";
-
-            if($is_enum && count($distinct_value)>0){
-                //print distinct term values
-                print '<br><div style="display:none;padding-bottom:10px;" id="distinct_terms">';
-                foreach ($distinct_value as $value) {
-                    print '<div style="margin-left:20px;min-width:50px;display:inline-block;">'.$value.' </div>';
                 }
-                print '</div>';
-                print '<a href="#" onclick="{$(\'#distinct_terms\').show()}"><b>&nbsp;&nbsp;&nbsp;Show concise list of incorrect terms</b></a><br />';
             }
-
+            print "</table>";
+            print "</div>";
         }//tabs
 
         if(count($tabs)>1){
@@ -2440,6 +2476,193 @@
 
     }
 
+    //
+    // render the list of records as a table
+    //
+    function renderRecordsError($imp_session){
+
+        ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
+        ///DEBUG print print_r(@$validationRes['rec_error'],true);
+        $is_missed = false;
+
+        $tabs = $imp_session['validation']['error'];
+
+        if(count($tabs)>1){
+            $k = 0;
+
+            print '<div id="tabs_records"><ul>';
+            foreach($tabs as $rec_tab){
+                $colname = @$imp_session['columns'][substr($rec_tab['field_checked'],6)];
+
+                print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'<br><span style="font-size:0.7em">'.$rec_tab['short_message'].'</span></a></li>';
+                $k++;
+            }
+            print '</ul>';
+            $k++;
+        }
+
+        $mapped_fields = $imp_session['validation']['mapped_fields'];
+        
+        $k = 0;
+        //$clr = array('red','lime','blue','green','white');
+        foreach($tabs as $rec_tab)
+        {
+            print '<div id="rec__'.$k.'">'; //' style="background-color:'.$clr[$k].'">';
+            $k++;
+
+            $cnt = $rec_tab['count_error'];
+            $records = $rec_tab['recs_error'];
+
+            
+//print "AAAA".print_r($rec_tab, true)."<br>";            
+            
+            if($cnt>count($records)){
+                print "<div class='error'><b>Only the first ".count($records)." of ".$cnt." rows are shown</b></div>";
+            }
+
+            $checked_field  = $rec_tab['field_checked'];
+            if(in_array(intval(substr($checked_field ,6)), $imp_session['multivals'])){
+                $checked_field = null; //highlight errors individually
+            }
+
+            print "<div class='error'>Values in red are invalid<br/></div>";
+            print "<div>".$rec_tab['err_message']."<br/><br/></div>";
+
+            $is_missed = (strpos($rec_tab['err_message'], 'a value must be supplied')>0);
+
+            if(count($records)>25)
+                print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
+
+
+            //all this code only for small asterics
+            //$recStruct = getAllRectypeStructures(true);
+            //$recStruct = $recStruct['typedefs'][]
+            $recordType = @$_REQUEST['sa_rectype'];
+            if($recordType){
+                $recStruc = getRectypeStructures(array($recordType));
+                $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
+                $recStruc = $recStruc[$recordType]['dtFields'];
+            }else{
+                $recStruc = null;
+            }
+
+
+            $detDefs = getAllDetailTypeStructures(true);
+            $detLookup = $detDefs['lookups'];
+            $detDefs = $detDefs['typedefs'];
+            $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
+
+            //find distinct terms values
+            if(!$is_missed){
+                $is_enum = false;
+                $err_col = 0;
+                $m = 0;
+                foreach($mapped_fields as $field_name=>$dt_id) {
+                    if($field_name==$checked_field){
+                        $err_col = $m;
+                        $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
+                        break;
+                    }            
+                    $m++;
+                }
+                
+                if($is_enum){
+                    $distinct_value = array();
+                    if($records && is_array($records)) {
+                        foreach ($records as $row) {
+                            $value = $row[$err_col];
+                            if(!in_array($value, $distinct_value)){
+                                 array_push($distinct_value, $value);
+                            }
+                        }
+                    }
+                
+                    if(count($distinct_value)>0){
+                        //print distinct term values
+                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms"><br>';
+                        foreach ($distinct_value as $value) {
+                            print '<div style="margin-left:30px;">'.$value.' </div>';
+                        }
+                        print '</div>';
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
+                        //  $(\'#distinct_terms\').show()
+                    }
+                }
+                
+            }//end find distict terms values 
+            
+            print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
+
+            print '<th width="20px">Line #</th>';
+
+            //HEADER - only error field
+            $m=1;
+            $err_col = 0;
+            
+            foreach($mapped_fields as $field_name=>$dt_id) {
+
+                if($field_name==$checked_field){
+                    
+                    $colname = @$imp_session['columns'][substr($field_name,6)];
+
+                    if(@$recStruc[$dt_id][$idx_reqtype] == "required"){
+                        $colname = $colname."*";
+                    }
+                    $colname = "<font color='red'>".$colname."</font>"
+                            .'<br><font style="font-size:10px;font-weight:normal">'
+                            .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id)."</font>"
+                            .'<br><font color="red">ERROR</font>';                        
+                            
+                    print "<th style='min-width:90px'>".$colname."</th>";
+                    $err_col = $m;
+                    break;
+                }
+                $m++;
+            }
+            
+            //raw row
+            print '<th>Record content</th>';
+            print "</tr></thead>";
+
+            
+            $import_table = $imp_session['import_table'];
+            //BODY
+            if($records && is_array($records)) {
+                foreach ($records as $row) {
+
+                    print "<tr>";
+                    if(is_array($row)){
+                        print "<td class='truncate'>".$row[0]."</td>";
+                        if($is_missed){
+                            print "<td style='color:red'>&lt;missing&gt;</td>";
+                        } else {
+                            print "<td class='truncate' style='color:red'>".@$row[$err_col]."</td>";
+                        }
+                        // print raw content of import data
+                        $res = get_import_value($row[0], $import_table);
+                        if(is_array($res)){
+                            $s = htmlspecialchars(implode(", ", $res));
+                            print "<td title='".$s."'>".$s."</td>";
+                        }else{
+                            print "<td>&nbsp;</td>";  
+                        }
+                    }
+                    print "</tr>";
+                }
+            }
+            print "</table>";
+            print "</div>";
+        }//tabs
+
+        if(count($tabs)>1){
+            print '</div>';
+        }
+
+        print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+
+    }
+    
+    
     function stripAccents($stripAccents){
         return strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }

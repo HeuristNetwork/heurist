@@ -104,7 +104,7 @@ function init() {
 
             $("#idfield").val(top.HEURIST.rectypes.names[rectype]+' ID');
 
-            /* OLD VERSION - FULLY WORK
+            /* OLD VERSION - FULLY WORK 
             //ID field
             //uncheck id field radiogroup - matching
             $("#idfield").val('');
@@ -119,25 +119,26 @@ function init() {
             $("#new_idfield2").val(sval);
 
             if(sel_rt.length>0){
-            $("#rb_idfield1").attr("checked", true); //ART new
-            onExistingIDfieldSelect();
-            $("#idfield").val(sel_rt[0].value);
+                $("#rb_idfield1").attr("checked", true); //ART new
+                onExistingIDfieldSelect();
+                $("#idfield").val(sel_rt[0].value);
 
-            $('#div_idfield_exist').show();
-            $('#div_idfield_new').hide();
-            $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
-            if(sel_rt.length==1){
-            $("#span1").html('"'+sel_rt.html()+'"  as a field name');
-            $("#span3").html('this field name');
+                $('#div_idfield_exist').show();
+                $('#div_idfield_new').hide();
+                $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
+                if(sel_rt.length==1){
+                    $("#span1").html('"'+sel_rt.html()+'"  as a field name');
+                    $("#span3").html('this field name');
+                }else{
+                    $("#span1").html(sel_rt.length+' columns');
+                    $("#span3").html('one of existing columns');
+                }
             }else{
-            $("#span1").html(sel_rt.length+' columns');
-            $("#span3").html('one of existing columns');
-            }
-            }else{
-            $('#div_idfield_exist').hide();
-            $('#div_idfield_new').show();
-            }
-            */
+                $('#div_idfield_exist').hide();
+                $('#div_idfield_new').show();
+            }*/
+            //---------------------
+            
             //import -- id radiogroup
             $('option[class^="idfield_"]').hide(); //hide all
             sel_rt = $('option[class^="idfield_'+rectype+'"]');
@@ -176,6 +177,9 @@ function init() {
 
     //init values for mapping form
     if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
+        
+        //alert("reinit "+form_vals.sa_rectype);
+        
         select_rectype.val(form_vals.sa_rectype).change();
 
         //init import form
@@ -382,13 +386,11 @@ function onExistingIDfieldSelect(){
     }
 }
 
-
-
 //
 // switch modes
 //
 function showUpdMode(newval){
-
+    
     if(!top.HEURIST.util.isnull(newval)){
         $("#sa_mode").val(newval);
     }
@@ -401,7 +403,8 @@ function showUpdMode(newval){
         $(".matching").show();
 
         //reset everything
-        $("#sa_rectype").val('').change();
+        if(newval===0)
+            $("#sa_rectype").val('').change();
 
     }
     $(".analized").hide();

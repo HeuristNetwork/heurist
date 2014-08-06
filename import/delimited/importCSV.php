@@ -37,7 +37,9 @@
     $mysqli = mysqli_connection_overwrite(DATABASE);
 
     if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
-        get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
+        $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
+        header('Content-type: text/javascript');
+        print json_encode($res);
         exit();
     } else
         if( @$_REQUEST["clearsession"] ){
@@ -187,7 +189,6 @@
                 document.forms[0].submit();
             }
         </script>
-
         <?php
             //USER_ID:=get_user_id()
             $imp_session = null;
@@ -328,94 +329,9 @@
     //session is loaded - render second step page
     if(is_array($imp_session)){
 
-        //NOT USED ANYMORE
-        // ARTEM TODO: Remove this code
-        if(false && @$_REQUEST["mvm"]){
-            print '<script type="text/javascript">$( function(){ $("#div-progress").hide(); });</script>';
-            if($_REQUEST["mvm"]==1){
-            ?>
-            <h4>Index keys generated from multivalue field</h4>
-            <hr width="100%" />
-
-            <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
-                <input type="hidden" name="mvm" value="2">
-                <?php
-                    foreach ($_REQUEST as $name=>$value){
-                        if($name!='mvm')
-                            print '<input type="hidden" name="'.$name.'" value="'.$value.'">';
-                    }
-                ?>
-                <div class="actionButtons">
-                    <input type="button" value="Cancel" onClick="{window.close(null);}" style="margin-right: 5px;">
-                    <input type="button" value="Continuey" style="font-weight: bold;" onclick="doUpload2()">
-                </div>
-            </form>
-            <table width="100%">
-            <?php
-
-                $res = matchingMultivalues($mysqli, $imp_session, $_REQUEST);
-                //print results of matching
-                //$records = $res[1]; // imp_id => ids
-                $pairs = $res[0];   // values => ids
-
-                $sError = '';
-                $sInsert = '';
-                $sFound = '';
-
-                foreach($pairs as $value =>$id){
-
-                    $value = explode("|",$value);
-                    array_shift($value); //remove first element
-                    $value = implode(";&nbsp;&nbsp;",$value);
-
-                    if(!is_numeric($id)){
-                        //error
-                        $sError = $sError.'<tr><td>'.$value.'</td><td align="center">'.$id.'</td></tr>';
-                    }else if($id<0){
-                        //insert
-                        $sInsert = $sInsert.'<tr><td colspan="2">'.$value.'</td></tr>';
-                    }else{
-                        //found
-                        $sFound = $sFound.'<tr><td>'.$value.'</td><td align="center">'.$id.'</td></tr>';
-                    }
-                }
-
-                if($sError!=''){
-                    print '<tr><th align="left">Disambiguation</th><th>Instances</th></tr>'.$sError;
-                }
-                if($sInsert!=''){
-                    print '<tr><th colspan="2" align="left">New records to be inserted</th></tr>'.$sInsert;
-                }
-                if($sFound!=''){
-                    print '<tr><th colspan="2" align="left">Records found</th></tr><tr><th>Value</th><th>ID</th></tr>'.$sFound;
-                }
-                print '</table>';
-
-            }else if($_REQUEST["mvm"]==2){
-
-                $imp_session = assignMultivalues($mysqli, $imp_session, $_REQUEST);
-                if(is_array($imp_session)){
-                    print '<input type="button" value="Done! Close me" onClick="{window.close(111);}" style="margin-right: 5px;">';
-                }else{
-                    print "Error: ".$imp_session;
-                }
-            }
-        ?>
-
-        </body>
-        </html>
-        <?php
-            exit();
-        }
-
-        // ARTEM TODO: END OF DEPRECATED CODE TO BE REMOVED
-
     ?>
-
     <script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
     <script src="../../common/js/utilsUI.js"></script>
-    <script src="importCSV.js"></script>
-
     <script>
         var currentId = 1;
         var recCount = <?=$imp_session['reccount']?$imp_session['reccount']:0?>;
@@ -423,6 +339,7 @@
         var currentSessionName = "<?=$imp_session['import_name']?>";
         var form_vals = <?=($step>1)?json_encode($_REQUEST):"{}"?>;
     </script>
+    <script src="importCSV.js"></script>
 
     <?php
 
@@ -459,15 +376,14 @@
                         "Please click on \"Rows with ambiguous match\" to view and resolve these ambiguous matches.<br><br> "+
                         "If you have many such ambiguities you may need to select adidtional key fields or edit the incoming "+
                         "data file to add further matching information.";
-                    </script>;
-
+                    </script>
+                        
                     <?php
                     }else{
                         print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
                         //$sa_mode = 1; //ART switch to import  autimatically???
                     }
                 }
-
             }else{//importing
 
                 if($step==2){  //verification
@@ -509,7 +425,6 @@
         $len = count($imp_session['columns']);
 
     ?>
-
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
     <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
     <input type="hidden" name="step" id="input_step" value="2">
@@ -554,9 +469,8 @@
                 title="Clear the data for this uploaded file from the server">
             <input type="button"
                 value="Download data to file"
-                onclick="window.open('importCSV.php?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')"
+                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')"
                 title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
-            <!-- ARTEM TODO: DOWNLOAD SHOULD BE  MIME TYPE CSV, currently it is PHP -->
         </div>
 
         <?php
@@ -569,12 +483,108 @@
 
         <input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/>
 
+        <b>Records in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
+        <div class="help" style="float:right;width:240px;text-align:right;">
+                Unprocessed data is retained in buffer on exit
+        </div>
+        
+        <br />
+
+        <table style="vertical-align:middle;">
+            <tr>
+                <td>
+                    <span class="matching">
+                        <span id="btnStartMatch" style="display: none">
+                            <input type="button" value="Start search / match / Assign IDs"
+                                onclick="doMatching()" style="font-weight: bold;">
+
+                        </span>
+                    </span>
+                    <span class="importing">
+                        <input type="button" value="<< Previous" style="font-weight: bold;"
+                            title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
+                    </span>
+                </td>
+
+                <?php
+                    //
+                    // render validation result box
+                    //
+
+                    $validationRes = @$imp_session['validation'];
+                    if($validationRes){
+                        $cnt_error   = intval(@$validationRes['count_error']);
+                        $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
+
+                        $cnt_disamb   = count(@$validationRes['disambiguation']);
+                        $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
+
+                        $cnt_update  = intval(@$validationRes['count_update']);
+                        $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
+
+                        $cnt_insert  = intval(@$validationRes['count_insert']);
+                        $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
+
+                        $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
+
+                    ?>
+                    <td><div class="analized2">
+                            <table style="display: inline-block; border:none" border="0">
+                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
+                                <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
+                                <?php        if($sa_mode==0){ ?>
+                                    <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
+                                        <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
+                                    <?php        } else { ?>
+                                    <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
+                                    <?php        }        ?>
+                            </table>
+
+                            <div style="float:right;vertical-align:middle;padding-top:10px">
+                                <?php if($sa_mode==1){  ?>
+                                    <span class="importing">
+                                        <input type="button" value="Create records"
+                                            onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+                                    <?php }
+                                    if($cnt_disamb>0){
+                                    ?>
+                                    <span class="matching">
+                                    <input type="button" value="Resolve ambiguous matches"
+                                        onclick="showRecords('disamb')" style="font-weight: bold;">
+                                    <?php }else{ ?>
+                                    <span class="matching">
+                                        <input type="button" value="Next >>" title="Go to Import step"
+                                            onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
+                                    <?php
+                                    }
+                                ?>
+                            </div>
+                        </div>
+                    </td>
+
+                    <?php
+                    }else{
+                        print '<td></td>';
+                    }
+                ?>
+
+                <td>
+                    <span class="importing">
+                        <input  id="btnStartImport" type="submit"
+                            value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
+                    </span>
+
+                </td>
+            </tr>
+        </table>
+        
+        <br />
+        
         <div id="tabs_actions">
             <ul>
                 <li><a  style="background-color:F7F7F7;" href="#matching">Search / match</a></li>
                 <li><a  style="background-color:F7FFFF;" href="#import">Insert / update records</a></li>
             </ul>
-
 
             <!-- *** SEARCH/MATCH TAB ********************************************************************************* -->
 
@@ -590,54 +600,6 @@
                         represented by the key columns selected eg. author ID rather than person ID
                     </span>
                 </div>
-
-                <!-- OLD VERSION - FULLY WORK
-                ARTEM TODO: REMOVE DEPRECATED CODE
-                <div id="div_idfield" style="padding-left:30px;display:none;">
-
-                <div id="div_idfield_new">
-                <label for="new_idfield">New column to hold record identifiers</label>
-                <input id="new_idfield" name="new_idfield" type="text" size="20" /><br />
-                <span class="help">(you may wish to change this to identify a specific use of the entity represented by the key columns selected)</span>
-
-                </div>
-                <div id="div_idfield_exist" style="display: none;">
-                <span>You have already used <span id="span1">Person ID as a field name&nbsp;</span>
-                to hold the IDs of <span id="span2">Person</span> records (which may later be used as a Pointer Field in Update mode).<br /></span>
-                <input type="radio" id="rb_idfield0" name="idfield0" checked="checked"
-                onchange="{/*$('#rb_idfield1_div').hide();*/$('#rb_idfield0_div').show();$('#idfield').val('')}"/>
-                <label for="rb_idfield0">I wish to use a distinct field name</label>
-                <div id="rb_idfield0_div" style="padding-left: 30px;">
-                <label for="new_idfield2">Enter new field name</label>
-                <input id="new_idfield2" type="text" size="20" onchange="{$('#new_idfield').val(event.target.value)}"/>
-                </div>
-                <div>
-                <input type="radio" id="rb_idfield1" name="idfield0"
-                onchange="{onExistingIDfieldSelect()}" />
-                <label for="rb_idfield1">I wish to redo the matching, re-using <span id="span3">this field name</span></label>
-                <div id="rb_idfield1_div" style="display: none; padding-left: 30px;">
-                <label for="idfield">Select column</label>
-                <select id="idfield" name="idfield">
-                <option value="" disabled="disabled">select...</option>
-
-                <?php
-                    //list of all ID fields
-                    for ($i = 0; $i < $len; $i++) {
-                        $rectype = @$imp_session['indexes']["field_".$i];
-                        $isIndex = ($rectype!=null);
-                        if($isIndex){
-                            print '<option class="idfield2_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
-                        }
-                    }
-                ?>
-
-                </select>
-                </div>
-                </div>
-                </div>
-
-                </div>
-                -->
 
                 <!-- table showing input columns and controls for selection and matching -->
                 <div>
@@ -784,19 +746,6 @@
                         $idx_dt_name = $recStruc['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
                         //$idx_rt_name = $recStruc['commonNamesToIndex']['rty_Name'];
 
-                        /*  ARTEM TODO: REMOVE DEPRECATED CODE
-                        print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
-                        .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
-                        .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
-                        .'/></span></td>';
-                        print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td>
-                        <td class="truncate">'.$imp_session['columns'][$i].'</td>';
-                        print '<td style="width:306px;">&nbsp;<span style="display:none;">'
-                        .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px" onchange="{onFtSelect2('.$i.');}">'
-                        . '</select></span></td>';
-                        print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
-                        */
-
                         for ($i = 0; $i < $len; $i++) {
 
                             $isProcessed = @$imp_session["mapping"]["field_".$i];
@@ -862,101 +811,6 @@
             </div>
         </div>
 
-        <br />
-
-        <b>Records in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
-        <div class="help" style="float:right;width:240px;text-align:right;">Unprocessed data is retained in buffer on exit
-        </div>
-
-        <br />
-
-        <table style="vertical-align:middle;width:100%">
-            <tr>
-                <td width="30%">
-                    <span class="matching">
-                        <span id="btnStartMatch" style="display: none">
-                            <input type="button" value="Start search / match / Assign IDs"
-                                onclick="doMatching()" style="font-weight: bold;">
-
-                        </span>
-                    </span>
-                    <span class="importing">
-                        <input type="button" value="<< Previous" style="font-weight: bold;"
-                            title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
-                    </span>
-                </td>
-
-                <?php
-                    //
-                    // render validation result box
-                    //
-
-                    $validationRes = @$imp_session['validation'];
-                    if($validationRes){
-                        $cnt_error   = intval(@$validationRes['count_error']);
-                        $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
-
-                        $cnt_disamb   = count(@$validationRes['disambiguation']);
-                        $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
-
-                        $cnt_update  = intval(@$validationRes['count_update']);
-                        $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
-
-                        $cnt_insert  = intval(@$validationRes['count_insert']);
-                        $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
-
-                        $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
-
-                    ?>
-                    <td><div class="analized2">
-                            <table style="display: inline-block; border:none" border="0">
-                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
-                                <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
-                                <?php        if($sa_mode==0){ ?>
-                                    <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
-                                        <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
-                                    <?php        } else { ?>
-                                    <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
-                                    <?php        }        ?>
-                            </table>
-
-                            <div style="float:right;vertical-align:middle;padding-top:10px">
-                                <?php if($sa_mode==1){  ?>
-                                    <span class="importing">
-                                        <input type="button" value="Create records"
-                                            onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
-                                    <?php }
-                                    if($cnt_disamb>0){
-                                    ?>
-                                    <span class="matching">
-                                    <input type="button" value="Resolve ambiguous matches"
-                                        onclick="showRecords('disamb')" style="font-weight: bold;">
-                                    <?php }else{ ?>
-                                    <span class="matching">
-                                        <input type="button" value="Next >>" title="Go to Import step"
-                                            onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
-                                    <?php
-                                    }
-                                ?>
-                            </div>
-                        </div>
-                    </td>
-
-                    <?php
-                    }else{
-                        print '<td></td>';
-                    }
-                ?>
-
-                <td style="width:30%">
-                    <span class="importing">
-                        <input  id="btnStartImport" type="submit"
-                            value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
-                    </span>
-
-                </td>
-            </tr>
-        </table>
     </div>
 
     <?php
