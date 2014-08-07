@@ -884,3 +884,26 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
 
     return selObj;
 }
+
+//
+// add term list preview for error term field
+//
+function showTermListPreview(dty_ID){
+    
+        var td = top.HEURIST.detailTypes.typedefs[dty_ID];
+        if(td) {
+            var deftype = td.commonFields;
+            var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+            var _currentDomain = (deftype[fi["dty_Type"]]=="enum") ?"enum":"relation";
+            
+            var parentdiv = document.getElementById('termspreview'+dty_ID);
+            parentdiv.innerHTML = '';
+    
+            var el_sel = top.HEURIST.util.createTermSelect(deftype[fi.dty_JsonTermIDTree], deftype[fi.dty_TermIDTreeNonSelectableIDs], _currentDomain, null);
+            el_sel.style.backgroundColor = "#cccccc";
+            el_sel.width = 180;
+            el_sel.style.maxWidth = '180px';
+            el_sel.onchange =  function(event){ event.target.selectedIndex=0; };
+            parentdiv.appendChild(el_sel);
+        }
+}

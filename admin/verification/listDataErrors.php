@@ -25,7 +25,7 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
+    require_once('valueVerification.php');
 ?>
 
 <html>
@@ -335,6 +335,7 @@
                         array_push($bibs, $row);
                         $ids[$row['dtl_RecID']] = 1;
                     }
+
                 }
             ?>
 
@@ -616,56 +617,3 @@
         </div>
     </body>
 </html>
-
-<?php
-
-    $dtyIDDefs = array();
-
-    function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
-        global $dtyIDDefs;
-
-        if(!@$dtyIDDefs[$dtyID]){
-            $terms = getTermsFromFormat($defs);
-            if (($cntTrm = count($terms)) > 0) {
-                if ($cntTrm == 1) {  //vocabulary
-                    $terms = getTermOffspringList($terms[0]);
-                }else{
-                    $nonTerms = getTermsFromFormat($defs_nonsel);
-                    if (count($nonTerms) > 0) {
-                        $terms = array_diff($terms,$nonTerms);
-                    }
-                }
-                if (count($temp)<1) {
-                    $dtyIDDefs[$dtyID] = "all";
-                }else{
-                    $dtyIDDefs[$dtyID] = $terms;
-                }
-            }
-        }
-
-        return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
-    }
-
-
-    //
-    // similar functions are in saveRecordDetail and importRectype
-    //
-    function getTermsFromFormat($formattedStringOfTermIDs){
-
-        if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
-            return array();
-        }
-
-        if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
-            if (strrpos($temp,":") == strlen($temp)-1) {
-                $temp = substr($temp,0, strlen($temp)-1);
-            }
-            $termIDs = explode(":",$temp);
-        } else {
-            $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
-            $termIDs = explode(",",$temp);
-        }
-        return $termIDs;
-    }
-?>

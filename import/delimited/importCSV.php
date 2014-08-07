@@ -233,24 +233,42 @@
             </script>
 
             <?php
-                if(is_array($imp_session) && @$imp_session['errors']){ //preprocessing
+                if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
 
-                    $col_count = $imp_session['col_count'];
-                    $errors = $imp_session['errors'];
+                    if(count(@$imp_session['errors'])>0){
+                
+                        $col_count = $imp_session['col_count'];
+                        $errors = $imp_session['errors'];
+                        $fields = $imp_session['fields'];
 
-                    print "<h4>ERROR. Wrong field count in parsed data. Expected field count:".$col_count." </h4><hr width='100%' />";
+                        print "<h4>ERROR. Wrong field count in parsed data. Expected field count:&nbsp;&nbsp;".$col_count." </h4>";
+                        print "<div>Header: ".implode(", ", $fields)."</div>";
+                        print "<hr width='100%' />";
 
-                    print "<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>";
+                        print "<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>";
 
-                    foreach($errors as $err){
-                        print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
+                        foreach($errors as $err){
+                            print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
+                        }
+                        print "</table>";
+                    
                     }
-                    print "</table>";
-                ?>
+                    if(count(@$imp_session['err_encoding'])>0){
+                
+                        $errors = $imp_session['err_encoding'];
 
-                // TODO: This is horrible! You have numerous /body, /html and /table tags in one file, and they aren't matched b/c some are in print
-                // statements and some are in html. Put them all in print or put them all in html, and there should only be one /body and /html
-                // so that PHPEd can validate the file
+                        print "<h4>ERROR. Wrong encoding detected in import file. At least ".count($errors)." lines have such issue. Please save in UTF8.</h4>";
+                        print "<hr width='100%' />";
+
+                        print "<table><tr><th>Line#</th><th>Raw data</th></tr>";
+
+                        foreach($errors as $err){
+                            print "<tr><td>".$err['no']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
+                        }
+                        print "</table>";
+                    
+                    }
+            ?>
 
                 <div class="actionButtons" >
                     <input type="button" value="Cancel"
@@ -1118,14 +1136,19 @@
         }
 
         //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
+        
         $preproc = preprocess_uploaded_file($filename);
 
-        if(count($preproc['errors'])>0){
-            return array("errors"=>$preproc['errors']);
+        if(count($preproc['errors'])>0 || count($preproc['err_encoding'])>0){
+            return array("errors"=>$preproc['errors'], 
+                         "col_count"=>$preproc['col_count'],
+                         "fields"=>$preproc['fields'],
+                         "err_encoding"=>$preproc['err_encoding'] 
+                         );
         }
 
         $filename = $preproc['filename'];
-
+        
         $import_table = "import".date("YmdHis");
 
         //create temporary table import_datetime
@@ -1233,6 +1256,7 @@
     function preprocess_uploaded_file($filename){
 
         $errors = array();
+        $err_encoding = array();
         $memos = array();  //multiline fields
         $multivals = array();
         $datefields = @$_REQUEST["datefield"];
@@ -1282,14 +1306,22 @@
         while (!feof($handle)) {
 
             if($csv_linebreak=="auto" || $lb==null){
-                $line = fgets($handle, 1000000);
+                $line = fgets($handle, 1000000);      //read line and auto detect line break
             }else{
                 $line = stream_get_line($handle, 1000000, $lb);
             }
 
+            if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
+                array_push($err_encoding, array("no"=>$line_no, "line"=>substr($line,0,2000)));
+                //if(count($err_encoding)>100) break;
+            }
+
+print $line."<br>";            
 
             $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
 
+print print_r($fields, true)."<br>";            
+            
             if($len==0){
                 $header = $fields;
                 $len = count($fields);
@@ -1343,6 +1375,7 @@
                     }
 
                     $line = implode($csv_delimiter, $newfields)."\n";
+                    
                     if (fwrite($handle_wr, $line) === FALSE) {
                         return "Cannot write to file ($temp_name)";
                     }
@@ -1355,7 +1388,7 @@
 
         unlink($filename);
 
-        return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals );
+        return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "err_encoding"=>$err_encoding, "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );
     }
 
 ?>

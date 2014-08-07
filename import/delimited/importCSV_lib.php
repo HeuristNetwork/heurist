@@ -21,12 +21,12 @@
     */
 
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
+    require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php");
 
     // global variable for progress report
     $rep_processed = 0;
     $rep_added = 0;
     $rep_updated = 0;
-
 
     //a couple functions from h4/utils_db.php
     /**
@@ -1181,7 +1181,7 @@
         $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
         $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
 
-        $dt_types = array();
+        $dt_mapping = array(); //mapping to detail type ID
 
         $missed = array();
         $query_reqs = array(); //fieldnames from import table
@@ -1203,6 +1203,7 @@
         $query_date_nam = array();
         $query_date_where = array();
 
+        
         //loop for all fields in record type structure
         foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
 
@@ -1225,7 +1226,7 @@
 
             if($field_name){
 
-                $dt_types[$field_name] = $ft_vals[$idx_fieldtype];
+                $dt_mapping[$field_name] = $ft_id; //$ft_vals[$idx_fieldtype];
 
                 //$field_alias = $imp_session['columns'][substr($field_name,6)];
 
@@ -1314,14 +1315,14 @@
         $k=0;
         foreach ($query_enum as $field){
 
-            if(in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+            if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
                 $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table where ".$only_for_specified_id." 1";
 
                 $idx = array_search($field, $sel_query)+1;
 
-                $wrong_records = validateMultivalue($mysqli, $query, $imp_session, $field, $dt_types, $idx,
+                $wrong_records = validateMultivalue($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
                     "Term list values must match terms defined for the field", "Wrong Terms");
 
             }else{
@@ -1449,18 +1450,40 @@
         return null;
     }
 
-    function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_types, $field_idx, $message, $short_messsage){
+    /**
+    * put your comment there...
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    * @param mixed $imp_session
+    * @param mixed $fields_checked - name of field to be verified
+    * @param mixed $dt_id - mapped detail type ID
+    * @param mixed $field_idx - index of validation field in query result (to get value)
+    * @param mixed $recStruc - record type structure
+    * @param mixed $message - error message
+    * @param mixed $short_messsage
+    */
+    function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
 
-        $dt_type = $dt_types[$fields_checked];
+        
+        $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
+        
+        $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+        $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+        $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+        
+        $dt_type = $dt_def[$idx_fieldtype];
 
+        /*
         $terms = null;
         if($dt_type == "enum"){
             $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
         }else if($ft_vals[$idx_fieldtype] == "relationtype"){
             $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
-        }
+        }*/
 
         $res = $mysqli->query($query." LIMIT 5000");
+
         if($res){
             $wrong_records = array();
             while ($row = $res->fetch_row()){
@@ -1471,7 +1494,10 @@
                 foreach($values as $idx=>$r_value){
                     $r_value2 = trim_lower_accent($r_value);
                     if($r_value2!=""){
-                        if(!@$terms[$r_value2]){ //not found
+
+                        if (!isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id )) 
+                        {//not found
+                            // if(!@$terms[$r_value2]){ 
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
                         }else{
@@ -2083,7 +2109,7 @@
 
 
         //export content of import table into tempfile
-        $tmpFile = tempnam('/tmp', 'export');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'export');
         $tmpFile = $tmpFile."1";
 
         $query = "SELECT ".implode(',',$headers)
@@ -2556,7 +2582,7 @@
             if(!$is_missed){
                 $is_enum = false;
                 $err_col = 0;
-                $m = 0;
+                $m = 1;
                 foreach($mapped_fields as $field_name=>$dt_id) {
                     if($field_name==$checked_field){
                         $err_col = $m;
@@ -2608,10 +2634,20 @@
                     if(@$recStruc[$dt_id][$idx_reqtype] == "required"){
                         $colname = $colname."*";
                     }
+                    if($is_enum){
+                        $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show</a>';
+                    }else{
+                        $showlink = '';
+                    }
+                    
                     $colname = "<font color='red'>".$colname."</font>"
                             .'<br><font style="font-size:10px;font-weight:normal">'
-                            .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id)."</font>"
-                            .'<br><font color="red">ERROR</font>';                        
+                            .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id).$showlink."</font>"
+                            .'<br><font color="red">ERROR</font>';        
+                            
+                    if($is_enum){
+                        $colname = $colname."<div id='termspreview".$dt_id."'></div>"; //container for 
+                    }                
                             
                     print "<th style='min-width:90px'>".$colname."</th>";
                     $err_col = $m;

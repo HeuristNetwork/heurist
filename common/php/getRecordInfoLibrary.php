@@ -847,7 +847,7 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     $offspring = array();
     if ($termID) {
         $res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
-        if (mysql_num_rows($res)) { //child nodes exist
+        if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
                 array_push($offspring, $subTermID);
@@ -859,6 +859,19 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     }
     return $offspring;
 }
+function getTermLabels($termIDs) {
+    $labels = array();
+    if ($termIDs) {
+        $res = mysql_query("select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in (".implode(",", $termIDs).")");
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                $labels[$row[0]] = $row[1];
+            }
+        }
+    }
+    return $labels;
+}
+
 /**
  * return array of recType table column names
  */
