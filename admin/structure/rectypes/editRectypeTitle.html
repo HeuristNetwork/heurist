@@ -16,7 +16,7 @@
 
 /**
 * Allows editing of the title mask which constructs a one-line composite title for the record from fields within it
-* Title mask structure modified late 2013 (~ Vsn 3.1.5) to use only internal codes within the stored mask, which are 
+* Title mask structure modified late 2013 (~ Vsn 3.1.5) to use only internal codes within the stored mask, which are
 * translated to human-readable field names for editing, and vice versa
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -26,7 +26,7 @@
 * @version     3.1.6
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  
+* @subpackage
 */
 
 -->
@@ -96,13 +96,14 @@
                 <b>"Alice in Wonderland, pp. 37-39" </b><br>&nbsp;<br>
                 The element names in square brackets should match field names for this record type.<br>
                 The constructed value is used as the extended title displayed in search results and other lists.<br>
-                To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
+                To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).<br>
+                Trailing punctuation is removed, so ": [field]" will not render the : if field is blank.
                 <br/>&nbsp;<br/>
-                
+
             </div>
-            
+
             <hr/>
-            
+
             <div style="text-align:left; padding-top:20px;padding-bottom:1px;padding-left: 20px;" align="left">
                 <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button onclick="onInsert()" style="width:60px;">Insert fields</button>
                 &nbsp;&nbsp;<i>Select fields in tree and click button to insert in mask at cursor position</i>
@@ -119,7 +120,7 @@
                 <br>&nbsp;<br>&nbsp;<br>
             </div>
              -->
-            
+
 
             <hr/>
 
@@ -136,11 +137,11 @@
                 <b>Save mask</b> <br>
                 <br/><button style="width:60px;" onclick="onSave()">Save mask</button>&nbsp;&nbsp;
                 <button style="width:60px;" onclick="window.close(null)">Cancel</button>
-                
+
             </div>
-            
-            
-            
+
+
+
         </div>
 
 
@@ -163,9 +164,9 @@
             {
                 window.editRectypeTitle.doSave();
             }
-            
 
-            
+
+
 
             //
             //  starts initialization on load completion of this window
