@@ -24,12 +24,12 @@ echo "to tar.bz2 files in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT "
 echo
 echo creating tarballs for ../DISTRIBUTION/HEURIST_SUPPORT/external, exemplars and help
 tar -cjf ../DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
-tar -cjf ../DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
-tar -cjf ../DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ exemplars/
+tar -cjf ../DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ exemplars/
+tar -cjf ../DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
 echo done ...
 echo
-ls -alt ../DISTRIBUTION/HEURIST_SUPPORT/
+ls -alth ../DISTRIBUTION/HEURIST_SUPPORT/
 
 echo
 echo Check for errors. If none shown, tar.bz2 files have been created
