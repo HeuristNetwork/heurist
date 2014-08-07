@@ -179,7 +179,7 @@
 }
 
 .yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
-   background-color: #aaaaaa; 
+   background-color: #aaaaaa;
 }
 
 		</style>
@@ -224,14 +224,15 @@
             <input type="button" value="Done" onClick="editStructure.closeWin();"/>
             </span>
 		</div>
-        
+
         <div style="display: none;text-align:center; padding:5px; width:90%" id="dlgWrongTitleMask">
             The current title mask appears to be invalid, perhaps due to the removal of fields used in the mask. Would you like to fix this now?
             <div style="padding-top: 10px;">
-                <input type="button" value="Fix Now" 
+                <input style="margin-right: 10px;" type="button" value="Fix Now"
                     onClick="{top.HEURIST.util.popups.list[top.HEURIST.util.popups.list.length-1].opener.editStructure.doEditTitleMask();}"/>
-                <input type="button" value="Fix Later" onClick="top.HEURIST.util.closePopupAll();"/>
-                <input type="button" value="Cancel" 
+                <!-- Not a good idea to give them the option, will not get set
+                    <input type="button" value="Fix Later" onClick="top.HEURIST.util.closePopupAll();"/> -->
+                <input type="button" value="Cancel"
                     onClick="{top.HEURIST.util.popups.list[top.HEURIST.util.popups.list.length-1].opener.editStructure.closeWarningPopup();}"/>
             </div>
         </div>
@@ -241,7 +242,7 @@
 				//  starts initialization on load completion of this window
 				//
 				YAHOO.util.Event.addListener(window, "load", function(){  editStructure = new  EditRecStructure(); });
-                
+
 		</script>
 	</body>
 </html>
