@@ -96,7 +96,7 @@
     }
 
     $hunifile = null; //flag one-record-per-file mode for HuNI
-                      // why is this left to be set later as a success on file access??
+    // why is this left to be set later as a success on file access??
 
     if(!$intofile){
         if (@$_REQUEST['mode'] != '1') {
@@ -118,6 +118,16 @@
     $relTypDT = (defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
     $relSrcDT = (defined('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0);
     $relTrgDT = (defined('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0);
+
+
+    // Determine database registration ID
+    $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
+        "from sysIdentification where `sys_ID`='1'");
+    if ($res) {
+        $row = mysql_fetch_row($res); // Get system information for current database
+        $dbID = $row[0];
+    }
+
 
     //----------------------------------------------------------------------------//
     //  Tag construction helpers
@@ -351,7 +361,9 @@
         require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     }
 
-    $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
+    $ACCESSABLE_OWNER_IDS = mysql__select_array(
+        'sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID='
+        . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
 
     if (is_logged_in()) {
         array_push($ACCESSABLE_OWNER_IDS, get_user_id());
@@ -384,9 +396,21 @@
         // find all detail values for resource type details which exist for any record with an id in $rec_ids
         // and also is of a type in rtyIDs if rtyIDs is set to non null
         $nlrIDs = array(); // new linked record IDs
-        $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_Value as trgRecID, ' . 'dtl_DetailTypeID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' . //saw TODO check if we need to also check group ownership
-        'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' . 'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' . 'WHERE dtl_RecID in (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '') . 'AND dty_Type = "resource" AND ' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') . ((is_logged_in() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+        $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_Value as trgRecID, '
+        . 'dtl_DetailTypeID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .
+        //saw TODO check if we need to also check group ownership
+        'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' .
+        'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' .
+        'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' .
+        'WHERE dtl_RecID in (' . join(',', $qrec_ids) . ') ' .
+        ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
+        ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '')
+        . 'AND dty_Type = "resource" AND ' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+        ((is_logged_in() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+
         $res = mysql_query($query);
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             // if target is not in the result
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
@@ -454,10 +478,20 @@
         /*****DEBUG****/
         //error_log("in findReversePointers");
         $nlrIDs = array(); // new linked record IDs
-        $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' . 'FROM recDetails ' . 'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID ' . 'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_Value ' . 'WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') . (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-        /*****DEBUG****/
-        //error_log("find  d $depth rev pointer q = $query");
+        $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' .
+        'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .
+        'FROM recDetails ' . 'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID ' .
+        'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_Value ' .
+        'WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' .
+        join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
+            join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
+            join(',', $dtyIDs) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+        (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+
         $res = mysql_query($query);
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             // if target is not in the result
             $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
@@ -522,8 +556,30 @@
         global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $PUBONLY;
         $nlrIDs = array();
         $query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, ' . // from detail
-        'IF( f.dtl_Value IN (' . join(',', $qrec_ids) . '),1,0) as srcIsFrom, ' . 't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' . ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' . 'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . $relSrcDT . ' ' . 'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . $relTrgDT . ' ' . 'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . $relTypDT . ' ' . 'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' . 'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' . 'WHERE rel.rec_RecTypeID = ' . $relRT . ' ' . 'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') : '') . ')' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') . ((is_logged_in() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') . (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")') . ($relTermIDs && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' . join(',', $relTermIDs) . ') OR trm.trm_InverseTermID in (' . join(',', $relTermIDs) . ')) ' : '');
+        'IF( f.dtl_Value IN (' . join(',', $qrec_ids) . '),1,0) as srcIsFrom, ' .
+        't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' .
+        ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' .
+        'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . $relSrcDT . ' ' .
+        'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . $relTrgDT . ' ' .
+        'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . $relTypDT . ' ' .
+        'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' .
+        'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' .
+        'WHERE rel.rec_RecTypeID = ' . $relRT . ' ' . 'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
+        ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
+        ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') ' .
+            ($rtyIDs && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' .
+                join(',', $rtyIDs) . ') ' : '') : '') . ')' .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') .
+        ((is_logged_in() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (').
+        (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")').
+        ($relTermIDs && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
+            join(',', $relTermIDs) . ') OR trm.trm_InverseTermID in (' . join(',', $relTermIDs) . ')) ' : '');
+
         $res = mysql_query($query);
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
                 continue;
@@ -548,8 +604,8 @@
             }
 
             if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
-                $recSet['relatedSet'][$row['srcRecID']]['relLinks'] = array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
-
+                $recSet['relatedSet'][$row['srcRecID']]['relLinks'] =
+                array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
             }
 
             if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
@@ -569,7 +625,8 @@
             }
 
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
-                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] = array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
+                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] =
+                array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
             }
 
             $inverse = $row['invRelType'] ? $row['invRelType'] : "-" . $row['relType'];
@@ -605,14 +662,20 @@
         $depth = 0;
         $rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
         if ($rtfilter) {
-            $query = 'SELECT rec_ID from Records ' . 'WHERE rec_ID in (' . join(",", $rec_ids) . ') ' . 'AND rec_RecTypeID in (' . join(",", $rtfilter) . ')';
+            $query = 'SELECT rec_ID from Records ' .
+            'WHERE rec_ID in (' . join(",", $rec_ids) . ') ' .
+            'AND rec_RecTypeID in (' . join(",", $rtfilter) . ')';
             $filteredIDs = array();
+
             $res = mysql_query($query);
+
             while ($res && $row = mysql_fetch_row($res)) {
                 $filteredIDs[$row[0]] = 1;
             }
+
             $rec_ids = array_keys($filteredIDs);
         }
+
         if ($MAX_DEPTH == 0 && $OUTPUT_STUBS && count($rec_ids) > 0) {
             findPointers($rec_ids, $recSet, 1, null, null);
         } else {
@@ -674,7 +737,7 @@
                 $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
 
                 // close the file if using HuNI manifest + separate files output
-                // goddam! They opened the file in outputRecord but left it open!
+                // The file is opened in outputRecord but left open!
                 if($intofile && $hunifile){
                     fclose($hunifile);
                 }
@@ -697,7 +760,7 @@
 
     function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = null) {
         global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL,
-               $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile;
+        $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID;
 
         $hunifile = null;
         $record = $recordInfo['record'];
@@ -722,6 +785,7 @@
 
         // using separare files per record
         // TODO: no error checking on success so silent failure if directory non-writable
+        // beware: File is closed in outputRecords function
         if($intofile){
             $hunifile = fopen( HEURIST_HML_PUBPATH.$record['rec_ID'].".xml", 'w');
             output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
@@ -730,6 +794,12 @@
         openTag('record', array('depth' => $depth,
             'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'),
             'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
+
+        if (isset($dbID) && ($dbID != 0)) {
+                output( "<dbID>".$dbID."</dbID>\n");
+            } else {
+                output( "<dbID>0</dbID>\n"); // unregistered database
+            }
 
         if (array_key_exists('error', $record)) {
             makeTag('error', null, $record['error']);
@@ -955,6 +1025,7 @@
             if (preg_match("/\<\!DOCTYPE/", $content)) {
                 $content = preg_replace("/\<\!DOCTYPE[^\>]+\>/", "", $content, 1);
             }
+
             $parser = xml_parser_create();
             $ret = xml_parse_into_struct($parser, $content, $vals, $index);
             if ($ret == 0) {
@@ -962,6 +1033,7 @@
                 xml_parser_free($parser);
                 return;
             }
+
             if ($content) {
                 makeTag('content', array("type" => "xml"), $content, true, false);
             }
@@ -1307,6 +1379,15 @@
             $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
             fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
             fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
+
+            // dbID set at start of script
+            if (isset($dbID) && ($dbID != 0)) {
+                fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
+            }
+            else
+            {
+                fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
+            }
 
             // add each output file to the manifest
             foreach ($resout as $recID => $recTypeID) {
