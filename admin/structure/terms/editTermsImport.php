@@ -25,6 +25,7 @@
     // TODO: REMOVE define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
     if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX != "")) return;
@@ -174,7 +175,7 @@
 
         if($row==0) return array('error'=>'No appropriate line found to process in import file');
 
-        $db = mysqli_connection_overwrite(DATABASE);
+        $mysqli = mysqli_connection_overwrite(DATABASE);
 
         $colNames = array('trm_Code','trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_AddedByImport');
 
@@ -182,12 +183,12 @@
         $rv['result'] = array(); //result
 
         foreach ($parsed as $ind => $dt) {
-            $res = updateTerms($colNames, "1-1", $dt, $db);
+            $res = updateTerms($colNames, "1-1", $dt, $mysqli);
             array_push($rv['result'], $res);
         }
         $rv['terms'] = getTerms();
 
-        $db->close();
+        $mysqli->close();
 
         return $rv;
     }

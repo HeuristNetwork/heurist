@@ -1191,7 +1191,7 @@ error_log("AAAA:".$query);
             
             $inverse_termid_old = null;
             if(!$isInsert){//find inverse term id 
-                $res = $mysqli->query("select trm_InverseTermId from defTerms where trmID=".$trmID);
+                $res = $ext_db->query("select trm_InverseTermId from defTerms where trmID=".$trmID);
                 if($res){
                     if ( $row = $res->fetch_row() ) {
                         $inverse_termid_old = $row[0];
@@ -1269,9 +1269,9 @@ error_log("AAAA:".$query);
                 }
                 $dupquery .= ")";
 
-                $res = $mysqli->query($dupquery);
-                if ($mysqli->error) {
-                    $ret = "SQL error checking duplication values in terms: ".$mysqli->error."  Query:".$dupquery;
+                $res = $ext_db->query($dupquery);
+                if ($ext_db->error) {
+                    $ret = "SQL error checking duplication values in terms: ".$ext_db->error."  Query:".$dupquery;
                 } else {
                     $recCount = $res->num_rows;
                     if($recCount>0){

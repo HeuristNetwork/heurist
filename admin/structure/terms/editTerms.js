@@ -746,7 +746,7 @@ function EditTerms() {
             var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
-            top.HEURIST.util.getJsonData(baseurl, callback, params);
+            Hul.getJsonData(baseurl, callback, params);
         }
     }
 
@@ -803,7 +803,7 @@ function EditTerms() {
                 var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
-                top.HEURIST.util.getJsonData(baseurl, callback, params);
+                Hul.getJsonData(baseurl, callback, params);
             }else{
                 _currTreeView.popNode(_currentNode);
                 _currTreeView.render();
@@ -976,21 +976,25 @@ function EditTerms() {
                 for (ind in res)
                 {
                     if(!Hul.isnull(ind)){
-                        var termid = res[ind];
+                        var termid = Number(res[ind]);
 
-                        var arTerm = top.HEURIST.terms.termsByDomainLookup[_currentDomain][termid];
+                        if(!isNaN(termid))
+                        {
+                            var arTerm = top.HEURIST.terms.termsByDomainLookup[_currentDomain][termid];
+                            if(!Hul.isnull(alTerm)){
+                                var term = {}; //new Object();
+                                term.id = termid;
+                                term.label = arTerm[fi.trm_Label];
+                                term.conceptid = null;
+                                term.description = arTerm[fi.trm_Description];
+                                term.termcode = "";
+                                term.parent_id = context.parent; //_currentNode.data.id;
+                                term.domain = _currentDomain;
+                                term.inverseid = null;
 
-                        var term = {}; //new Object();
-                        term.id = termid;
-                        term.label = arTerm[fi.trm_Label];
-                        term.conceptid = null;
-                        term.description = arTerm[fi.trm_Description];
-                        term.termcode = "";
-                        term.parent_id = context.parent; //_currentNode.data.id;
-                        term.domain = _currentDomain;
-                        term.inverseid = null;
-
-                        var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
+                                var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
+                            }
+                        }
                     }
                 }//for
                 _currTreeView.render();
@@ -1207,7 +1211,7 @@ function EditTerms() {
                             var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                             var callback = _updateResult;
                             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
-                            top.HEURIST.util.getJsonData(baseurl, callback, params);
+                            Hul.getJsonData(baseurl, callback, params);
                         }
 
                     }
@@ -1236,7 +1240,7 @@ function EditTerms() {
         applyChanges: function(event){ //for window mode only
             if(_isWindowMode){
                 window.close(_isSomethingChanged);
-                //top.HEURIST.util.closePopup.apply(this, [_isSomethingChanged]);
+                //Hul.closePopup.apply(this, [_isSomethingChanged]);
             }
         },
 
