@@ -37,88 +37,88 @@
     
 function getInvalidFieldTypes($rectype_id){
       
-        global $TL, $RTN;
-    
-        mysql_connection_select(DATABASE);
-    
-            // lookup detail type enum values
-            $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_assoc($res)) {
-                $TL[$row['trm_ID']] = $row;
-            }
-            //record type name
-            $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_assoc($res)) {
-                $RTN[$row['rty_ID']] = $row['rty_Name'];
-            }
+    global $TL, $RTN;
 
-            //list of detail types to validate
-            $DTT = array();
-            $query = "SELECT dty_ID,".
-            "dty_Name,".
-            "dty_Type,".
-            "dty_JsonTermIDTree,".
-            "dty_TermIDTreeNonSelectableIDs,".
-            "dty_PtrTargetRectypeIDs".
-            " FROM defDetailTypes";
-            
-            if(null!=$rectype_id){ //detail types for given recordtype
-                $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
-                
-            }else{
-                $query = $query." WHERE ";
-            }
-            $query = $query.
-            "(dty_Type in ('enum','relationtype','relmarker','resource')".
-            " and (dty_JsonTermIDTree is not null or dty_TermIDTreeNonSelectableIDs is not null)) ".
-            "or (dty_Type in ('relmarker','resource') and dty_PtrTargetRectypeIDs is not null)";
-            
-            
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_assoc($res)) {
-                $DTT[$row['dty_ID']] = $row;
-            }
+    mysql_connection_select(DATABASE);
 
-            $dtysWithInvalidTerms = array();
-            $dtysWithInvalidNonSelectableTerms = array();
-            $dtysWithInvalidRectypeConstraint = array();
-            foreach ( $DTT as $dtyID => $dty) {
-                if ($dty['dty_JsonTermIDTree']){
-                    $res = getInvalidTerms($dty['dty_JsonTermIDTree'], true);
-                    $invalidTerms = $res[0];
-                    $validTermsString = $res[1];
-                    if (count($invalidTerms)){
-                        $dtysWithInvalidTerms[$dtyID] = $dty;
-                        $dtysWithInvalidTerms[$dtyID]['invalidTermIDs'] = $invalidTerms;
-                        $dtysWithInvalidTerms[$dtyID]['validTermsString'] = $validTermsString;
-                    }
-                }
-                if ($dty['dty_TermIDTreeNonSelectableIDs'])
-                {
-                    
-                    $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
-                    $invalidNonSelectableTerms = $res[0];
-                    $validNonSelTermsString = $res[1]; 
-                    if (count($invalidNonSelectableTerms)){
-                        $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
-                        $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
-                        $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
-                    }
-                }
-                /*****DEBUG****///error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
-                if ($dty['dty_PtrTargetRectypeIDs']){
-                    $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
-                    $invalidRectypes = $res[0];
-                    $validRectypes   = $res[1];
-                    if (count($invalidRectypes)){
-                        $dtysWithInvalidRectypeConstraint[$dtyID] = $dty;
-                        $dtysWithInvalidRectypeConstraint[$dtyID]['invalidRectypeConstraint'] = $invalidRectypes;
-                        $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
-                    }
-                }
-            }//for
+    // lookup detail type enum values
+    $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
+    $res = mysql_query($query);
+    while ($row = mysql_fetch_assoc($res)) {
+        $TL[$row['trm_ID']] = $row;
+    }
+    //record type name
+    $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
+    $res = mysql_query($query);
+    while ($row = mysql_fetch_assoc($res)) {
+        $RTN[$row['rty_ID']] = $row['rty_Name'];
+    }
+
+    //list of detail types to validate
+    $DTT = array();
+    $query = "SELECT dty_ID,".
+    "dty_Name,".
+    "dty_Type,".
+    "dty_JsonTermIDTree,".
+    "dty_TermIDTreeNonSelectableIDs,".
+    "dty_PtrTargetRectypeIDs".
+    " FROM defDetailTypes";
+    
+    if(null!=$rectype_id){ //detail types for given recordtype
+        $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
+        
+    }else{
+        $query = $query." WHERE ";
+    }
+    $query = $query.
+    "(dty_Type in ('enum','relationtype','relmarker','resource')".
+    " and (dty_JsonTermIDTree is not null or dty_TermIDTreeNonSelectableIDs is not null)) ".
+    "or (dty_Type in ('relmarker','resource') and dty_PtrTargetRectypeIDs is not null)";
+    
+    
+    $res = mysql_query($query);
+    while ($row = mysql_fetch_assoc($res)) {
+        $DTT[$row['dty_ID']] = $row;
+    }
+
+    $dtysWithInvalidTerms = array();
+    $dtysWithInvalidNonSelectableTerms = array();
+    $dtysWithInvalidRectypeConstraint = array();
+    foreach ( $DTT as $dtyID => $dty) {
+        if ($dty['dty_JsonTermIDTree']){
+            $res = getInvalidTerms($dty['dty_JsonTermIDTree'], true);
+            $invalidTerms = $res[0];
+            $validTermsString = $res[1];
+            if (count($invalidTerms)){
+                $dtysWithInvalidTerms[$dtyID] = $dty;
+                $dtysWithInvalidTerms[$dtyID]['invalidTermIDs'] = $invalidTerms;
+                $dtysWithInvalidTerms[$dtyID]['validTermsString'] = $validTermsString;
+            }
+        }
+        if ($dty['dty_TermIDTreeNonSelectableIDs'])
+        {
+            
+            $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
+            $invalidNonSelectableTerms = $res[0];
+            $validNonSelTermsString = $res[1]; 
+            if (count($invalidNonSelectableTerms)){
+                $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
+                $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
+                $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
+            }
+        }
+        /*****DEBUG****///error_log("selectable - ".print_r($dtysWithInvalidNonSelectableTerms,true));
+        if ($dty['dty_PtrTargetRectypeIDs']){
+            $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
+            $invalidRectypes = $res[0];
+            $validRectypes   = $res[1];
+            if (count($invalidRectypes)){
+                $dtysWithInvalidRectypeConstraint[$dtyID] = $dty;
+                $dtysWithInvalidRectypeConstraint[$dtyID]['invalidRectypeConstraint'] = $invalidRectypes;
+                $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
+            }
+        }
+    }//for
   
     return array("terms"=>$dtysWithInvalidTerms, "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, "rt_contraints"=>$dtysWithInvalidRectypeConstraint);
 }

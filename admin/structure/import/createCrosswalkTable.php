@@ -40,7 +40,6 @@
 ?>
 
 <html>
-
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Heurist - Database structure import</title>
@@ -121,7 +120,6 @@
                         // These rectypes are not in the importing database
                         $cnt_identical = mysql_num_rows($identicalMatches);
                     }
-
 
                     if(!$cnt_identical) {
                         $approxMatchesRes = mysql_query("select rty_Name, rty_Description from "
@@ -204,12 +202,12 @@
                             " AND dty_IDInOriginatingDB = ".$rtStruct['origDtyID']);
                         $dtyAlreadyImported = mysql_num_rows($dtyExistRes);
 
-                        $rtsShortRow = array($rtStruct["rst_DisplayName"],						//[0]
-                            mysql_escape_string($rtStruct["dty_Name"]),			//[1]
-                            $rtStruct["dty_Type"],								//[2]
-                            $rtStruct["dty_Status"],							//[3]
-                            mysql_escape_string($rtStruct["rty_Description"]),	//[4]
-                            $dtyAlreadyImported ? 1: 0);						//[5]
+                        $rtsShortRow = array($rtStruct["rst_DisplayName"],                                              //[0]
+                            mysql_escape_string($rtStruct["dty_Name"]),                 //[1]
+                            $rtStruct["dty_Type"],                                                              //[2]
+                            $rtStruct["dty_Status"],                                                    //[3]
+                            mysql_escape_string($rtStruct["rty_Description"]),  //[4]
+                            $dtyAlreadyImported ? 1: 0);                                                //[5]
 
                         if (!@$rectypeStructures[$rtStruct["rty_ID"]]){
                             $rectypeStructures[$rtStruct["rty_ID"]] = array($rtsShortRow);
@@ -546,8 +544,10 @@
             <b>Import succesful</b>
         </div>
 
-        <div class="banner"><h2>Import record types from <?= "\"".($source_db_id ?$source_db_id." : " : "").$source_db_name."\""?> </h2>
+        <div class="banner">
+            <h2>Import record types from <?= "\"".($source_db_id ?$source_db_id." : " : "").$source_db_name."\""?> </h2>
         </div>
+        
         <script src="../../../common/js/utilsLoad.js"></script>
         <script src="../../../common/js/utilsUI.js"></script>
 
@@ -559,18 +559,18 @@
             <?php ?>
             <!-- Smarty templates -->
             <div id="smarty" style="width:100%; margin:auto;">
-            <h3>Smarty report templates</h3>
-            <p>The following templates can be downloaded from this database. They will require more, or less, editing depending on the
-            degree to which your database shares original record type / field definitions with the source. If you also download missing
-            record types from the source database, the templates should work with little modification.</p>
+                <h3>Smarty report templates</h3>
+                <p>
+                    The following templates can be downloaded from this database. They will require more, or less, editing depending on the
+                    degree to which your database shares original record type / field definitions with the source. If you also download missing
+                    record types from the source database, the templates should work with little modification.
+                </p>
 
-
-            <!-- TODO:  functions are in templateOperations.php
-                 selection list of TPL files - use getList();
-                 call smartyLocalIDsToConceptIDs
-                 serve up to the calling database
-            -->
-
+                <!-- TODO:  functions are in templateOperations.php
+                     selection list of TPL files - use getList();
+                     call smartyLocalIDsToConceptIDs
+                     serve up to the calling database
+                -->
             </div>
 
             <!-- Record types/fields/terms -->
@@ -593,15 +593,19 @@
                         <label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
                     </div>
                 </div>
+                
                 <div id="topPagination"></div>
                 <div id="crosswalkTable"></div>
                 <div id="bottomPagination"></div>
             </div>
 
             <i>Note: If this function reports 'No records found' this normally means that there are no
-                definitions in the selected database which are not already in the current database.</i>
+               definitions in the selected database which are not already in the current database.</i>
 
-            <p><i>In version 3.0 this may also mean that the database is in a different format version which is not being read correctly</i></p>
+            <p>
+                <i>In version 3.0 this may also mean that the database is in a 
+                different format version which is not being read correctly</i>
+            </p>
 
             <!-- TODO: need a check on format version and report if there is a difference in format version -->
 
@@ -609,15 +613,18 @@
             <button id="finish2" onClick="dropTempDB(true)" class="button">Back to databases</button>
             <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
-            <div ><p>Logs give a more detailed history of the actions taken to import structure.
-                Click the links below to see the short version and long version respectively.</p></div>
+            <div >
+                <p>Logs give a more detailed history of the actions taken to import structure.
+                Click the links below to see the short version and long version respectively.</p>
+            </div>
+            
             <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
             <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
+            
             <div id="log"></div><br />
             <div id="log"></div>
 
             <script type="text/javascript">
-
                 var detailedImportLog = "";
                 var logHeader = ""
                 var shortImportLog = "";
@@ -731,8 +738,8 @@
                         "&strict="+(strictImport?"1":"0")+
                         "&noRecursion="+(noRecursion?"1":"0")+
                         "&importVocabs="+(importVocabs?"1":"0")+
-                        //						"&crwDefType="+crwDefType+
-                        //						"&crwLocalCode="+crwLocalCode+
+                        //                                              "&crwDefType="+crwDefType+
+                        //                                              "&crwLocalCode="+crwLocalCode+
                         "&replaceRecTypeName="+replaceRecTypeName+
                         "&importingTargetDBName="+importTargetDBFullName,
                         true);
@@ -788,7 +795,7 @@
                         replaceRecTypeName = newRecTypeName;
                         window.setTimeout(function() { processAction(rtyID, "import", newRecTypeName);},0);
                     } else {
-                        //		dropTempDB(true);
+                        //              dropTempDB(true);
                     }
                 }
 
@@ -816,8 +823,8 @@
                         });
 
 
-                        //		processAction(0, "drop");
-                        //		alert("Dropping temporal database");
+                        //  processAction(0, "drop");
+                        //  alert("Dropping temporal database");
                     }
                 }
             </script>

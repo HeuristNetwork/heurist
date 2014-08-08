@@ -386,7 +386,7 @@ print json_format($rv);
 exit();
 
 function error_exit($msg){
-        print json_format(array('error'=>$msg));
-        exit();
+    print json_format(array('error'=>$msg));
+    exit();
 }
 ?>

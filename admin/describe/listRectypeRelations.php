@@ -63,9 +63,7 @@
         $rt_cnt = 0;
 
         foreach ($rt['dtFields'] as $dt_id=>$dt) {
-
             $dt_type = $dt[$idx_dt_type];
-
 
             if (($showRelationships) && ($dt_type=="resource")) {  // pointer field
                 $constraints = $dt[$idx_dt_pointers]; //list of rectypes - constraints for pointer
@@ -217,7 +215,6 @@
 
 
         <?php  
-
             print '<div class="lvl0"><b>Record type schema / usage</b></p>This listing shows ';
 
             if ($showSimpleFields && $showRelationships) {
@@ -242,13 +239,11 @@
             print '</div>';
 
             foreach ($resrt  as $rt_id=>$rt){
-
                 // Record type, including total count
                 print '<div class="lvl0"><b>'.$rt['name']."</b>  (id ".$rt_id.", n=".$rt['count'].')</div>';
 
                 // Loop through record details (fields) in record structure
                 foreach ($rt['details']  as $details){
-
                     $dt_id = $details['dt_id'];
 
                     print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);

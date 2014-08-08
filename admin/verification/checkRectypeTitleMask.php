@@ -77,82 +77,84 @@
     </head>
 
     <body class="popup">
+        <div class="banner">
+            <h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> 
+        </div>
+        
+        <div id="page-inner">
 
-    <div class="banner">
-        <h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> 
-    </div>
-    <div id="page-inner">
+            Title masks are used to construct a composite title for a record based on data fields in the record.<br/>
+            For many record types, they will just render the title field, or the title with some additional contextual information.<br/>
+            For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
+            This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
+            If the title mask is invalid please edit the record type (see under Essentials in the menu on the left) and correct the title mask for the record type.<br/>
+            <?php
+               echo "<br/><hr>\n";
+                }//$mode!=3
+                $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_ID");
 
-    Title masks are used to construct a composite title for a record based on data fields in the record.<br/>
-    For many record types, they will just render the title field, or the title with some additional contextual information.<br/>
-    For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
-    This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
-    If the title mask is invalid please edit the record type (see under Essentials in the menu on the left) and correct the title mask for the record type.<br/>
-    <?php
+                if($mode==3){
+                    $rt_invalid_masks = array();
+                    foreach ($rtIDs as $rtID => $rtName) {
+                        $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
+                        $mask=$mask[0];
+                        $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                        if(is_array($res)){ //invalid mask
+                            array_push($rt_invalid_masks, $rtName);
+                        }
+                    }
+                    header('Content-type: text/javascript');
+                    print json_encode($rt_invalid_masks);
 
-        echo "<br/><hr>\n";
-    }//$mode!=3
-    $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_ID");
+                }else{
 
-    if($mode==3){
-        $rt_invalid_masks = array();
-        foreach ($rtIDs as $rtID => $rtName) {
-            $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
-            $mask=$mask[0];
-            $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
-            if(is_array($res)){ //invalid mask
-                array_push($rt_invalid_masks, $rtName);
-            }
-        }
-        header('Content-type: text/javascript');
-        print json_encode($rt_invalid_masks);
+                    if (!$rectypeID){
+                        //check all rectypes
+                        foreach ($rtIDs as $rtID => $rtName) {
+                            checkRectypeMask($rtID, $rtName, null, null, null, $mode);
+                        }
+                    }else{
+                        checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $mode);
+                    }
 
-    }else{
+                    echo "</body></html>";
+                }
 
-        if (!$rectypeID){
-            //check all rectypes
-            foreach ($rtIDs as $rtID => $rtName) {
-                checkRectypeMask($rtID, $rtName, null, null, null, $mode);
-            }
-        }else{
-            checkRectypeMask($rectypeID, $rtIDs[$rectypeID], $mask, $coMask, $recID, $mode);
-        }
+                function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $mode) {
+                    global $mode;
 
-        echo "</body></html>";
-    }
+                    if (!@$mask && @$rtID) {
+                        $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
+                        $mask=$mask[0];
+                    }
+                    /* deprecated
+                    if (!@$coMask && @$rtID) {
+                    $coMask= mysql__select_array("defRecTypes","rty_CanonicalTitleMask","rty_ID=$rtID");
+                    $coMask=$coMask[0];
+                    }*/
 
-    function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $mode) {
-        global $mode;
+                    //echo print_r($_REQUEST,true);
+                    if($mode > 0 || !$recID)
+                    {
+                        echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
 
-        if (!@$mask && @$rtID) {
-            $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
-            $mask=$mask[0];
-        }
-        /* deprecated
-        if (!@$coMask && @$rtID) {
-        $coMask= mysql__select_array("defRecTypes","rty_CanonicalTitleMask","rty_ID=$rtID");
-        $coMask=$coMask[0];
-        }*/
+                        $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                        echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
+                        echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
+                        if(is_array($res)){
+                            echo "<div class='errorCell'><b>< < < < < ".$res[0]."</b></div>";
+                        }else if(strcasecmp($res,$mask)!=0){
+                            echo "<div><br/>&nbsp;Decoded Mask: $res</div>";
+                        }
+                        echo "</div>";
 
-        //echo print_r($_REQUEST,true);
-        if($mode > 0 || !$recID)
-        {
-            echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
-
-            $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
-            echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
-            echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
-            if(is_array($res)){
-                echo "<div class='errorCell'><b>< < < < < ".$res[0]."</b></div>";
-            }else if(strcasecmp($res,$mask)!=0){
-                echo "<div><br/>&nbsp;Decoded Mask: $res</div>";
-            }
-            echo "</div>";
-
-            echo "\n";
-        }else{
-            echo "checking title mask $mask for record type $rtID and record $recID <br/>";
-            echo fill_title_mask($mask, $recID, $rtID);
-        }
-    }
-?>
+                        echo "\n";
+                    }else{
+                        echo "checking title mask $mask for record type $rtID and record $recID <br/>";
+                        echo fill_title_mask($mask, $recID, $rtID);
+                    }
+                }
+            ?>
+        </div>
+    </body>
+</html>

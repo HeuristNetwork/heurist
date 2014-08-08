@@ -81,8 +81,8 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
+    
     <body class="popup">
-
         <div class="banner"><h2>Rebuild Constructed Record Titles</h2></div>
         <div id="page-inner" style="overflow:auto;padding: 20px;">
 

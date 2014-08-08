@@ -98,7 +98,6 @@
     </head>
 
     <body class="popup">
-
         <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
         <script type="text/javascript" src="../../common/php/loadCommonInfo.php"></script>
 

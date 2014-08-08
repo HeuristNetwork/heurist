@@ -62,12 +62,11 @@
     </head>
 
     <body class="popup">
-
         <div class="banner">
             <h2>Verify Heurist installation</h2>
         </div>
+        
         <div id="page-inner">
-
             This function verifies the presence of required program components
             and the location and writability of folders required by the software.<br />
             It assumes that all instances of Heurist are located in subdirectories
@@ -78,8 +77,8 @@
 
             <h3>Please run this using the latest instance on your server eg. h3-alpha</h3><br />
             If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
-            <hr>
-            <br />
+            
+            <hr><br />
 
             Verification under development July 2014 <br /><br />
             <?php
@@ -99,11 +98,10 @@
 
                 print "<h3>All loaded extensions:</h3><br />";
                 print_r(get_loaded_extensions());
-
             ?>
-            <br />
-            <hr>
-            <br /> Verification complete. Please note any errors listed above.
+            
+            <br /><hr><br />
+            Verification complete. Please note any errors listed above.
         </div>
     </body>
 </html>

@@ -149,9 +149,7 @@
 
         // Terminate the json data
         $jsonData = $jsonData.'}';
-
         $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
-
 
         //-----------------------------------------------------------------------------------------------------------------
 
@@ -296,7 +294,6 @@
     * @param
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
-
         print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
         error_log("buildIndexForRectype: indexing record type $recTypeID for $dbName");//DEBUG
 

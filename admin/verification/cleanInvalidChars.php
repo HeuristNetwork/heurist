@@ -54,52 +54,54 @@ while ($row = mysql_fetch_assoc($res)) {
     	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 	</head>
-<body class="popup">
+    <body class="popup">
+        <div class="banner"><h2>Clean Invalid Characters</h2></div>
+        
+        <div id="page-inner" style="overflow:auto;padding-left: 20px;">
+            <div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
+            
+            <table>
+                <?php
 
-<div class="banner"><h2>Clean Invalid Characters</h2></div>
-<div id="page-inner" style="overflow:auto;padding-left: 20px;">
-<div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
-<table>
-<?php
+                mysql_connection_overwrite(DATABASE);
 
-mysql_connection_overwrite(DATABASE);
+                $prevInvalidRecId = 0;
+                foreach ($textDetails as $textDetail) {
+	                if (! check($textDetail['dtl_Value'])){
+		                if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
+			                print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/edit/editRecord.html?recID=".
+					                $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+			                $prevInvalidRecId = $textDetail['dtl_RecID'];
+			                mysql__update("Records", "rec_ID=".$textDetail['dtl_RecID'],array("rec_Modified" => $now));
+		                }
+		                print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</pre></td></tr>\n";
+		                $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
+		                mysql__update("recDetails", "dtl_ID=".$textDetail['dtl_ID'], array("dtl_Value" =>$newText));
+		                if (mysql_error()) {
+			                print "<tr><td><pre>" . "Error ". mysql_error()."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+		                }else {
+			                print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+		                }
+	                }
+                }
 
-$prevInvalidRecId = 0;
-foreach ($textDetails as $textDetail) {
-	if (! check($textDetail['dtl_Value'])){
-		if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-			print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/edit/editRecord.html?recID=".
-					$textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
-			$prevInvalidRecId = $textDetail['dtl_RecID'];
-			mysql__update("Records", "rec_ID=".$textDetail['dtl_RecID'],array("rec_Modified" => $now));
-		}
-		print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</pre></td></tr>\n";
-		$newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
-		mysql__update("recDetails", "dtl_ID=".$textDetail['dtl_ID'], array("dtl_Value" =>$newText));
-		if (mysql_error()) {
-			print "<tr><td><pre>" . "Error ". mysql_error()."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-		}else {
-			print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-		}
-	}
-}
+                function check($text) {
+	                global $invalidChars;
+	                foreach ($invalidChars as $charCode){
+		                if (strpos($text,$charCode)) {
+			                error_log("found invalid char " );
+			                return false;
+		                }
+	                }
+	                return true;
+                }
 
-function check($text) {
-	global $invalidChars;
-	foreach ($invalidChars as $charCode){
-		if (strpos($text,$charCode)) {
-			error_log("found invalid char " );
-			return false;
-		}
-	}
-	return true;
-}
-
-?>
-</table>
-<p>
-[end of check]
-</p>
-</div>
-</body>
+                ?>
+            </table>
+            
+            <p>
+            [end of check]
+            </p>
+        </div>
+    </body>
 </html>

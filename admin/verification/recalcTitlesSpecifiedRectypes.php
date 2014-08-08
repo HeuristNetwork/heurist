@@ -64,7 +64,6 @@
 ?>
 
 <html>
-
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Recalculation of composite record titles</title>
@@ -103,7 +102,9 @@
         <div><span id=total_count><?=count($recs)?></span> records in total</div>
         <div><span id=processed_count>0</span> processed</div>
         <div><span id=percent>0</span> %</div>
+        
         <br />
+        
         <div><span id=changed_count>0</span> to be updated</div>
         <div><span id=same_count>0</span> are unchanged</div>
         <div><span id=repair_count>0</span> marked for update</div>
@@ -132,7 +133,7 @@
                 $rec_title = trim($rec['rec_Title']);
                 if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
 
-                if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
+                if (! preg_match('/^\\s*$/', $new_title)) {     // if new title is blank, leave the existing title
                     $updates[$rec_id] = $new_title;
                 }else {
                     if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
@@ -210,7 +211,6 @@
             If the titles of other record types depend on these titles,
             you should run Designer View > Utilities > Rebuild Titles to rebuild all record titles in the database
         </div>
-
     </body>
 
 </html>

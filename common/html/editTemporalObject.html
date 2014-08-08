@@ -109,6 +109,7 @@
             .calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
         </style>
 	</head>
+    
 	<body class=" yui-skin-sam" style="background-color:rgb(240,240,240);" width=440 height=420 >
 
 		<script type="text/javascript" src="../../common/js/calendarViewer.js"></script>
@@ -122,13 +123,14 @@
 				<li><a href="#c"><em>C14 Date</em></a></li>
 
 			</ul>
+            
 			<div class="yui-content" style="background-color:rgb(240,240,240); border:0;">
 				<div id="s">
 					<div style="margin: 20px  0px 0px 50px">
 						<div>
 							<span title="Enter date in  y-m-d">
-							Date:&nbsp;<input type=text id="simpleDate" style="width:150px;" class="withCalendarsPicker" />
-							<!-- <input type=button class="date-button" id="calendar" onclick="calendarPopup(this);" /> -->
+							    Date:&nbsp;<input type=text id="simpleDate" style="width:150px;" class="withCalendarsPicker" />
+							    <!-- <input type=button class="date-button" id="calendar" onclick="calendarPopup(this);" /> -->
 							</span>
 						</div>
 						<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
@@ -136,31 +138,39 @@
 							<span >use minus(-) for BCE dates(eg. -375 for 375 BCE)</span>
 						</div>
 					</div>
+                    
 					<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
+                    
 					<div style="margin: 15px  0px 0px 50px">
 						<div>
 							<span title="Enter time in  h:m:s">
 								Time:&nbsp;<input type=text id="simpleTime" style="width:80px;" />
 								<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
 							</span>
+                            
 							<span title="Enter Time Zone offset starting with hours only enter minute for non-zero" style="margin:0px 30px">
 								Time Zone:&nbsp;<u>+</u>
 								<input type=text id="tzone" title="Time Zone Adjust hours (-12 to +12)" style="width:60px;" />
 								<span style="font-size:8pt; color:grey;">&nbsp;(optional)</span>
 							</span>
 						</div>
+                        
 						<div style="margin:5px 0px 15px 35px; font-size:8pt; color:grey;"  >
 							<span>hh or hh:mm or hh:mm:ss</span>
 							<span style="margin: 0px 120px;">+ for east (Europe,Africa,Asia)</span><br/>
 							<span style="margin: 0px 0px 0px 245px;">- for west (N &amp; S America)</span>
 						</div>
 					</div>
+                    
 					<div style="border-top:1px solid lightgrey; margin :0px 10px"></div>
+                    
 					<div id="deterDiv" style="float:left;margin:0px 0px 0px 57px;">
 						Type of Determination<br/>
+                        
 						<span style="font-size:8pt; color:grey;">
-						How were the dates arrived at?
+						    How were the dates arrived at?
 						</span>
+                        
 						<div style="margin:10px 25px;">
 							<input type="radio" name="sDET"  value="0" checked="checked" />Unknown<br/>
 							<input type="radio" name="sDET" value="1"/>Attested<br/>
@@ -172,31 +182,37 @@
 
 				<div id="p">
 					<div style="margin:20px 0px 10px 60px;">
-						<canvas id="dRangeCanvas" width="530" height="80">
-						</canvas>
+						<canvas id="dRangeCanvas" width="530" height="80"></canvas>
 					</div>
 					<div style="margin-left:30px;">
 						<div>
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
 								<input type=text id="TPQ" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
+                            
 							<span title="Press to set Probable begin equal to TPQ" style=" margin:0px 5px;">
 								<input type=button id="setPDB" value="set =>" onclick="setPDBtoTPQ();" style="font-size: 7pt; width:35px;" />
 							</span>
+                            
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
 								<input type=text id="PDB" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
+                            
 							<img style="width:30px; height:1px; border-top: 2px solid grey; margin:0px 5px;"/>
+                            
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
 								<input type=text id="PDE" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
+                            
 							<span title="Press to set Probable end equal to TAQ" style=" margin:0px 5px;">
 								<input type=button id="setPDE" value="<= set" onclick="setPDEtoTAQ();" style="font-size: 7pt; width:35px;"/>
 							</span>
+                            
 							<span title="Enter only the known values starting with year" style=" margin:0px 5px;">
 								<input type=text id="TAQ" style="width:95px;" class="withCalendarsPicker"/>
 							</span>
 						</div>
+                        
 						<div>
 							<span style="margin:5px 0px 15px 5px; font-size:8pt; color:grey;"> Terminus Post Quem </span>
 							<span style="margin:5px 0px 15px 75px; font-size:8pt; color:grey;"> Probable begin </span>
@@ -204,6 +220,7 @@
 							<span style="margin:5px 0px 15px 72px; font-size:8pt; color:grey;"> Terminus Ante Quem </span>
 						</div>
 					</div>
+                    
 					<div style="margin:20px 0px 20px 80px;">
 						<span id="pSProfDiv">
 							<label for="SPF" title="Select the profile">Start Profile:</label>
@@ -214,7 +231,9 @@
 								<option label="Slow Finish" value=3>Slow Finish</option>
 							</select>
 						</span>
+                        
 						<img style="height:1px; margin:0px 70px;"/>
+                        
 						<span id="pEProfDiv">
 							<label for="EPF" title="Select the profile">End Profile:</label>
 							<select id="EPF">
@@ -225,6 +244,7 @@
 							</select>
 						</span>
 					</div>
+                    
 					<div style="margin:10px 20px; ">
 						<div style="border: 1px solid grey; float:left; width:300px; padding:10px;" >
 							<b>Entering dates</b><br/>
@@ -235,6 +255,7 @@
 							between the terminus date and the probable date<br/>
 							(if in doubt, choose flat, that is any point is equally likely).</span><br/>
 						</div>
+                        
 						<div id="deterDiv" style="float:left;margin:0px 0px 0px 57px;">
 							Type of Determination<br/>
 							<span style="font-size:8pt; color:grey;">
@@ -255,13 +276,15 @@
 						<div style="float:left; width:430px;">
 							<div>
 								<span title="Enter date in  y-m-d">
-								Approximate date&nbsp;<input type=text id="fDAT" style="width:150px;" class="withCalendarsPicker"/>
+								    Approximate date&nbsp;<input type=text id="fDAT" style="width:150px;" class="withCalendarsPicker"/>
 								</span>
 							</div>
+                            
 							<div style="font-size:8pt; color:grey; margin:5px 0px 15px 105px;">
 								<span >Year(eg.1624) of calendar date (yyyy-mm or yyyy-mm-dd)</span><br/>
 								<span >use minus(-) for BCE dates(eg. -375 for 375 BCE)</span>
 							</div>
+                            
 							<div>
 								<div title="Enter duration in  PnYnMnDTnHnMnS format">
 									<span style="margin-right:50px">Range</span>
@@ -276,6 +299,7 @@
 									Actual date is assumed to lie withinthis range.
 								</div>
 							</div>
+                            
 							<div id="fProfDiv" >
 								<label for="fPRF" title="Select the profile">Probability curve &nbsp;</label>
 								<select id="fPRF">
@@ -289,11 +313,13 @@
 								</div>
 							</div>
 						</div>
+                        
 						<div id="fdeterDiv" style="float:left;margin:0px 0px 0px 57px;">
 							Source of the estimate<br/>
 							<span style="font-size:8pt; color:grey;">
-							How the dates arrived at?
+							    How the dates arrived at?
 							</span>
+                            
 							<div style="margin:10px 25px;">
 								<input type="radio" name="fDET"  value="0" checked="checked" />Unknown<br/>
 								<input type="radio" name="fDET" value="1"/>Attested<br/>
@@ -314,6 +340,7 @@
 						<span style="margin:5px 10px 15px 78px; font-size:8pt; color:grey;"> Years BCE </span>
 						<span style="margin:5px 0px 15px 55px; font-size:8pt; color:grey;"> Years BP </span>
 					</div>
+                    
 					<div style="margin:20px 0px 20px 50px;">
 						<span title="Enter duration in  PnYnMnDTnHnMnS format" style=" margin:0px 25px 0px 65px">±
 							<input type=text id="DEV" onclick="return c14DevClick('DEV');" tabindex="2" style="width:50px; margin:0px 25px 0px 1px" />or
@@ -328,6 +355,7 @@
 						<span style="margin:5px 10px 15px 70px; font-size:8pt; color:grey;">Pos dev </span>
 						<span style="margin:5px 0px 15px 20px; font-size:8pt; color:grey;">Neg dev</span>
 					</div>
+                    
 					<div style="margin:20px 0px 20px 50px;">
 						Lab Code:
 						<input type=text id="COD" tabindex="4" title="Enter Lab Code" style="width:100px; margin: 0px 5px 0px 14px" />
@@ -338,6 +366,7 @@
 				</div>
 			</div>
 		</div>
+        
 		<div>
 			<span style="margin:10px 270px">&nbsp;</span>
 			<span>
@@ -345,7 +374,9 @@
 				<input type="button" tabindex="12" value="Cancel" onclick="TemporalPopup.cancel();" />
 			</span>
 		</div>
+        
 		<div style="border-top:1px solid grey; margin :10px 10px"></div>
+        
 		<div style="margin: 10px 0px 0px 20px">
             <div title="Select calendar">
                 <div style="width:200px;float:left;text-align:right;">Use calendar:</div>
@@ -365,15 +396,18 @@
                     </select>
                     <span id="dateGregorian"></span>
             </div>
+            
 			<div title="Enter comment for this temporal or ">
 				<div style="width:200px;float:left;text-align:right;">Comment/original information:</div>
 				<input type=text id="COM" tabindex="10" style="width:300px;" />
 			</div>
-				<div style="margin:5px 0px 15px 175px; font-size:7pt; color:grey;"  >
-					<span >Temporal objects are converted to a standard format.</span><br/>
-					<span >This field is stored in the temporal to record the original values entered.</span>
-				</div>
+            
+			<div style="margin:5px 0px 15px 175px; font-size:7pt; color:grey;"  >
+				<span >Temporal objects are converted to a standard format.</span><br/>
+				<span >This field is stored in the temporal to record the original values entered.</span>
+			</div>
 		</div>
+        
 		<script type="text/javascript" src="../js/temporalObjectLibrary.js"></script>
         <script type="text/javascript" src="editTemporalObject.js"></script>
 	</body>
