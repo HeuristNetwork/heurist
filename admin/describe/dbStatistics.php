@@ -179,8 +179,6 @@
             ];
 
             var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
-
-
             var tt = new YAHOO.widget.Tooltip("myTooltip");
 
             dt.on('cellMouseoverEvent', function (oArgs) {

@@ -215,8 +215,10 @@
 
     <body style="padding:20px" class="popup" onLoad="if ('{section}' != ''  &&  (enddoc=document.getElementById('enddoc'))  &&  (elt=document.getElementById('{section}'))) { enddoc.focus(); elt.focus(); elt.blur(); }">
 
-        <div class="hide_on_bookmark_import"> <a name="tag_edit">
-	        </a> {TagMessage}
+        <div class="hide_on_bookmark_import"> 
+            <a name="tag_edit"> </a>
+            {TagMessage}
+            
 	        <div>
 		        <script type="text/javascript">
                     var kwd = new Object();
@@ -229,7 +231,10 @@
 			        <input type="hidden" name="tag_edit" value="{tag_edit}">
 			        {sortby_input}
                     {sortby_button}
-			        to change tag labels: edit labels below and click "Update tags" <br>to delete multiple tags, select with checkboxes and click "Delete selected tags"<br>
+			        to change tag labels: edit labels below and click "Update tags" <br>to delete multiple tags, 
+                    select with checkboxes and click "Delete selected tags"
+                    
+                    <br>
                     <br clear="all">
                     
                     <div id=tags-loading>Loading tag data ...</div>

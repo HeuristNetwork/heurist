@@ -89,10 +89,8 @@ function _issel($val){
 <html>
 
     <head>
-    <title>Configuration</title>
-
+        <title>Configuration</title>
 	    <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
-
 	    <style type="text/css">
 		    #ignored_hyperlinks {
 				    overflow: auto; background-color: #AAAAAA;
@@ -100,7 +98,6 @@ function _issel($val){
 				    height: 260px;
 		    }
 	    </style>
-
     </head>
 
     <body class="popup" width=600 height=450>
@@ -120,24 +117,24 @@ function _issel($val){
 	        <tr>
 	            <td width="260px" valign="top">
 		            <p>
-		            Heurist can import bookmarks from any html file, notably bookmarks.htm/html
-		            which is either used by (IE) or can be exported by (Firefox - Bookmarks
-		            - Organize Bookmarks ... File &gt; Export) most internet browsers. To
-		            avoid many unnecessary hyperlinks when importing search engine results,
-		            it can ignore commonly occurring hyperlink text and very short hyperlinks.
+		                Heurist can import bookmarks from any html file, notably bookmarks.htm/html
+		                which is either used by (IE) or can be exported by (Firefox - Bookmarks
+		                - Organize Bookmarks ... File &gt; Export) most internet browsers. To
+		                avoid many unnecessary hyperlinks when importing search engine results,
+		                it can ignore commonly occurring hyperlink text and very short hyperlinks.
 		            </p>
-		            <p>While importing bookmarks, <b>show only hyperlinks</b> with
-                    
-	                <select name="word_limit" onChange="form.submit();">
-		                <option value="0" <?=_issel(0)?>>any number of words</option>
-		                <option value="1" <?=_issel(1)?>>at least one word</option>
-		                <option value="2" <?=_issel(2)?>>at least two words</option>
-		                <option value="3" <?=_issel(3)?>>at least three words</option>
-		                <option value="4" <?=_issel(4)?>>at least four words</option>
-		                <option value="5" <?=_issel(5)?>>at least five words</option>
-	                </select>
-	                in the text of the link.
-		                </p>
+		            <p>
+                        While importing bookmarks, <b>show only hyperlinks</b> with
+	                    <select name="word_limit" onChange="form.submit();">
+		                    <option value="0" <?=_issel(0)?>>any number of words</option>
+		                    <option value="1" <?=_issel(1)?>>at least one word</option>
+		                    <option value="2" <?=_issel(2)?>>at least two words</option>
+		                    <option value="3" <?=_issel(3)?>>at least three words</option>
+		                    <option value="4" <?=_issel(4)?>>at least four words</option>
+		                    <option value="5" <?=_issel(5)?>>at least five words</option>
+	                    </select>
+	                    in the text of the link.
+		             </p>
 	            </td>
                     
 	            <td>
