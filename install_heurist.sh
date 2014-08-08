@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# install_heurist_ubuntu.sh: installation script for Heurist only on Ubuntu
+# install_heurist.sh: installation script for Heurist on ny flavour of Linux
 # Note: run install_prerequisities_ubuntu.sh first to install php packages, MySQL, SpatialLite etc.
 
 # @package     Heurist academic knowledge management system
@@ -62,9 +62,11 @@ echo "Changing to /var/www/html and creating HEURIST directory"
 # ensure html directory exists - if this is not apache web root, Heurist will be installed but
 # not accessible at hte web root address. Relatively easy for sysadmin to fix.
 cd /var/www
+# will do nothing if already exists
 sudo mkdir /var/www/html
 cd /var/www/html
 
+# mkdirs will do nothing if directory already exists
 sudo mkdir HEURIST
 sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 sudo chown -R www-data:www-data /var/www/html/HEURIST/
@@ -73,6 +75,7 @@ echo -e "Fetching Heurist code from HeuristScholar.org"
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
 sudo tar -xjf $1.tar.bz2
 sudo rm $1.tar.bz2
+# this will fail if h3 already exists, use update script in this case
 sudo mv $1/ /var/www/html/HEURIST/h3
 
 # Simlink Heurist as heurist and as h3 from the root web directory

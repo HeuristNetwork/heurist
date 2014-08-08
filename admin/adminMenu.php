@@ -340,7 +340,7 @@
                             menuEntry('','',''.HEURIST_DBNAME.'',
                                 '');
                             // DATA QUALITY
-                            menuEntry('---','Verify data consistency','verification/listRecordPointerErrors.php?db='.HEURIST_DBNAME,
+                            menuEntry('---','Verify data consistency','verification/listDataErrors.php?db='.HEURIST_DBNAME,
                                 'Find records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
 
                             menuEntry('','Verify field definitions','verification/listFieldTypeDefinitionErrors.php?db='.HEURIST_DBNAME,

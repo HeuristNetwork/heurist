@@ -195,7 +195,7 @@ imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $ori
 if ($standard_thumb  &&  @$file) {
 	$resized_file = $thumbnail_file;
 }else{
-	$resized_file = tempnam('/tmp', 'resized');
+	$resized_file = tempnam(sys_get_temp_dir(), 'resized');
 }
 
 imagepng($img_resized, $resized_file);

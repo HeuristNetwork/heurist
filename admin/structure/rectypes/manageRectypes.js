@@ -1445,15 +1445,19 @@ function _upload_icon(rectypeID,mode) {
     if (!mode){
         mode = 0;
     }
+    
+    rt_name =  top.HEURIST.rectypes.names[rectypeID];
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID;
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
-            height: (mode==0?200:250),
-            width: 350,
-            callback: icon_refresh(rectypeID)
+            height: 500, //(mode==0?200:250),
+            width: 700,
+            callback: function(context){
+                icon_refresh(rectypeID)  
+            } 
     });
 
 }
@@ -1461,12 +1465,13 @@ function _upload_icon(rectypeID,mode) {
 function icon_refresh(rectypeID) {
     if(rectypeID){
         var d = new Date();
-        curtimestamp = d.getMilliseconds();
+        curtimestamp = d.getTime(); //getMilliseconds();
 
         var db = top.HEURIST.database.id;
         var imgIcon = "#icon" + rectypeID;
         var img = $(imgIcon);
         if(img){
+            //was img.src = top.HEURIST.iconBaseURL+rectypeID+".png" + '?' + (new Date()).getTime();
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+'")');
         }
 
@@ -1476,6 +1481,7 @@ function icon_refresh(rectypeID) {
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
+        
     }
 }
 

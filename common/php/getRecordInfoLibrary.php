@@ -593,7 +593,11 @@ function getTerms($useCachedData = false) {
     $query = "select " . $fieldNamePrefix . "OriginatingDBID," . $fieldNamePrefix . "IDInOriginatingDB from $tableName where " . $fieldNamePrefix . "ID = $lclID";
     /*****DEBUG****///error_log("SQL=".$query);
     $res = mysql_query($query);
-    $ids = mysql_fetch_array($res);
+    if($res){
+        $ids = mysql_fetch_array($res);
+    }else{
+        $ids = null;
+    }
     /*****DEBUG****///error_log(print_r($ids, true));
     /*****DEBUG****///error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
     //return "".$ids[0]."-".$ids[1];
@@ -843,7 +847,7 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     $offspring = array();
     if ($termID) {
         $res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
-        if (mysql_num_rows($res)) { //child nodes exist
+        if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];
                 array_push($offspring, $subTermID);
@@ -855,6 +859,19 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     }
     return $offspring;
 }
+function getTermLabels($termIDs) {
+    $labels = array();
+    if ($termIDs) {
+        $res = mysql_query("select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in (".implode(",", $termIDs).")");
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                $labels[$row[0]] = $row[1];
+            }
+        }
+    }
+    return $labels;
+}
+
 /**
  * return array of recType table column names
  */
@@ -1648,7 +1665,7 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     $query = "select relnID, src.dtl_Value as src, srcRec.rec_RecTypeID as srcRT, srcRec.rec_Title as srcTitle, srcRec.rec_URL as srcURL, trg.dtl_Value as trg," .
                     " if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role, trgRec.rec_RecTypeID as trgRT, trgRec.rec_Title as trgTitle," .
                     " trgRec.rec_URL as trgURL, trm.dtl_Value as trmID, term.trm_Label as term, inv.trm_ID as invTrmID," .
-                    " if(inv.trm_ID, inv.trm_Label, concat('inverse of ', term.trm_Label)) as invTrm, rlnTtl.dtl_Value as title," .
+                    " if(inv.trm_ID>0, inv.trm_Label, term.trm_Label) as invTrm, rlnTtl.dtl_Value as title," .    //concat('inverse of ', term.trm_Label)
                     " rlnNote.dtl_Value as note, strDate.dtl_Value as strDate, endDate.dtl_Value as endDate, intrpRec.rec_ID as intrp," .
                     " intrpRec.rec_RecTypeID as intrpRT, intrpRec.rec_Title as intrpTitle, intrpRec.rec_URL as intrpURL" .
               " from (select rrc_RecID as relnID from recRelationshipsCache) rels" .

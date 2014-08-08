@@ -95,6 +95,7 @@ function getDetailTypes(){
 
     //add option for each detail type where the value=index into g_detailTypes and text=detail name (record type specific)
     var l = g_detailTypes.length;
+    g_recDetailSelect.size = l>15?15:l;
     for (var d = 0; d < l; ++d) {
         addOpt(g_recDetailSelect, d, HDetailManager.getDetailNameForRecordType(g_recType, g_detailTypes[d]));
     }

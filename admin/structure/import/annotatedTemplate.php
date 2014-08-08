@@ -1,42 +1,38 @@
 <?php
 
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
+    /**
+    * annotatedTemplate.php: Import record types via annotated templates  - load external descripton (from heuristnetwork.org) into frame
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     3.2
+    */
 
-/**
-* Import rectype via annotated templates  - load external descripton (from heuristnetwork.org) into frame
-* 
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  
-*/
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
 
-// User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
-if(isForAdminOnly("to modify database structure")){
-    return;
-}
+    // User must be system administrator or admin of the owners group for this database
+    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+
+    if(isForAdminOnly("to modify database structure")){
+        return;
+    }
 ?>
+
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Import rectypes via Annotated templates</title>
+        <title>Import record types from Annotated templates on HeuristNetwork.org</title>
 
         <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
@@ -50,17 +46,13 @@ if(isForAdminOnly("to modify database structure")){
     <body>
         <script type="text/javascript" src="annotatedTemplate.js"></script>
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-        
-        <div class="banner"><h2>Import rectypes via Annotated templates</h2></div>
+
+        <div class="banner">
+            <h2>Import record types from Annotated templates on HeuristNetwork.org</h2>
+        </div>
+
         <div>
-            <iframe id="templates" onload="onFrameLoad()" src="http://heuristnetwork.org/annotated-templates" width="100%" height="100%" />
-            <!--
-             <button onclick="onFrameLoad()">Send</button>
-                        <iframe id="templates" onload="onFrameLoad()" src="http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/browseRectypeTemplatesForImport.php?db=artem_delete1" width="100%" height="100%" />
-            -->
+            <iframe id="templates" onload="onFrameLoad()" src="http://heuristnetwork.org/annotated-templates" width="100%" height="100%"></iframe>
         </div>
     </body>
 </html>
-<?php
-  
-?>

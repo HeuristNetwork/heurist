@@ -253,6 +253,13 @@ body {
 		basePath: installDir,
 		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
 		external_publish: true,
+        
+        currentQuery_main: '',
+        currentQuery_sel: '',
+        currentQuery_all: '',
+        displayPreferences: [],
+        
+        
 		database: {
 			name: params['db']
 			},
@@ -260,7 +267,13 @@ body {
 			isnull: function(obj){
 				return ( (typeof obj==="undefined") || (obj===null));
 			},
-
+            isempty: function(obj){
+                return ( HRST.util.isnull(obj) || (obj==="") || (obj==="null") );
+            },
+            
+    setDisplayPreference: function(param, value){},
+    getDisplayPreference: function(param){ return null; },
+            
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if (! url.match(/^http:/)  &&  ! url.match(/^\//))

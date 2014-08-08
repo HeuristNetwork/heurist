@@ -796,7 +796,8 @@ div.right_margin_info div.mini-tools a {
 }
 #password div {
 	display: inline-block;
-	padding: 5px
+	padding: 5px;
+    padding-top: 30px;
 }
 #logged-in {
 	color: #444;

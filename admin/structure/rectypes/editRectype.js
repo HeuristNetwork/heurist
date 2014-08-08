@@ -14,7 +14,8 @@ var rectype,
     
     titleMaskIsOk = true,
     _keepTitleMask,
-    _keepStatus;
+    _keepStatus,
+    _rectype_icon = '';
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
@@ -64,25 +65,47 @@ function init() {
 function _upload_icon(mode) {
 
     function icon_refresh(context) {
-        var img = document.getElementById('imgIcon');
-        img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+        if(mode==3){
+            if(context){
+               var img = document.getElementById('imgIcon2');
+               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/16px/" + context;
+               img.width = 16;
+               img.height = 16;
+            }
+        }else{
+               var img = document.getElementById('imgIcon');
+               img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+        }
         _isIconWasUpdated = true;
     }
     function thumb_refresh(context) {
-        var img = document.getElementById('imgThumb');
-        img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+        if(mode==3){
+            if(context){
+               _rectype_icon = context;
+               var img = document.getElementById('imgThumb2');
+               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
+               img.width = 64;
+               img.height = 64;
+            }
+        }else{
+            var img = document.getElementById('imgThumb');
+            img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+        }
         _isIconWasUpdated = true;
     }
     
     
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
+    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
 
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
-            height: (mode==0?140:220),
-            width: 340,
-            callback: mode==0?icon_refresh:thumb_refresh
+            height: 500, //(mode==0?200:250),
+            width: 700,
+            callback:function(context){
+                icon_refresh(context);
+                thumb_refresh(context);
+            } //mode==0?icon_refresh:thumb_refresh
     });
 
 }
@@ -97,6 +120,8 @@ function initializeEmptyForm() {
     document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
     document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
     document.getElementById("divIconAndThumb").style.display = "none";
+    document.getElementById("divIconAndThumbNew").style.display = "block";
+    
 
     getGroups();
     // Set group from URL
@@ -124,7 +149,7 @@ function setRtyValues() {
             "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
             "<img id=\"imgThumb\" src=\""+
             top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp +
-            "\" width=\"75\" height=\"75\"></a>";
+            "\" width=\"64\" height=\"64\"></a>";
 
         } catch(e) {
             alert(e);
@@ -339,6 +364,10 @@ function updateRectypeOnServer_continue()
         alert("Title mask is invalid");
         return;
     }
+    if(!(rectypeID>0 || _rectype_icon!='')){
+        alert("Please select Icon for new record type");
+        return;
+    }
 
     var str = getUpdatedFields();
 
@@ -354,6 +383,11 @@ function updateRectypeOnServer_continue()
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
+        
+        if(!(rectypeID>0)){
+            params = params + '&icon='+ encodeURIComponent(_rectype_icon);
+        }
+        
         Hul.getJsonData(baseurl, callback, params);
 
     } else { //nothing changed

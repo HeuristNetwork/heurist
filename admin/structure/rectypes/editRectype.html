@@ -83,9 +83,18 @@
                     <div style="margin-left: 20px;display: inline-block;font-weight: bold;" id="div_rty_ConceptID"></div>
                 </div>
             </div>
-            
+            <div id="divIconAndThumbNew" style="display:none;">
+                <div style="min-width: 180px;display:inline-block;color:#6a7c99;text-align: right;padding-right: 10px; padding-top: 5px;"class="input-header-cell"><label>Thumbnail and icon</label></div>
+                <div class="input-cell" style="display:inline-block">
+                    <div id="rectypeThumb2" style="display:inline-block;" ><img id="imgThumb2" width="1" height="1"></div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div id="rectypeIcon2" style="display:inline-block;margin: 10px 0;vertical-align: middle;"><img id="imgIcon2" width="1" height="1"></div>
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="button" style="width:100px" onclick="editRectypeEditor.upload_icon(3);" value="Please select">
+                </div>
+            </div>
             <div class="input-row" id="divIconAndThumb">
-                <div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~75x75):</div>
+                <div class="input-header-cell" style="vertical-align: middle;">Thumbnail (~64x64):</div>
                 <div class="input-cell" style="vertical-align: middle;">
                     <div id="rectypeThumb" style="display:inline-block;" ></div>
                     <div class="input-header-cell" style="display:inline-block;vertical-align: middle;width:90px; min-width:90px;max-width:90px;">Icon (~16x16): </div>
@@ -93,7 +102,7 @@
                 </div>
             </div>
 
-            <div class="input-row required">
+            <div class="input-row  required">
                 <div class="input-header-cell"><label for="rty_Name">Record type name *</label></div>
                 <div class="input-cell">
                     <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" onKeyUp="editRectypeEditor.createPlural()" />
@@ -170,7 +179,7 @@
                                 <option>approved</option>
                                 <!-- option>reserved</option -->
                             </select>
-                            <div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;	'Open' for freely modifiable/personal record types</div>
+                            <div class="help prompt">'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress;  'Open' for freely modifiable/personal record types</div>
                         </div>
                     </div>
 

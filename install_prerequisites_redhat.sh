@@ -1,5 +1,7 @@
 #! /bin/sh
 
+# THIS SCRIPT IS NOT UP-TO-DATE
+
 # install.sh: installation script for RedHat
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
@@ -79,7 +81,7 @@ sed 's/^display_errors = .*/display_errors = Off/' < /etc/php.ini | sudo tee /et
 sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php.ini | sudo tee /etc/php.ini
 sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php.ini | sudo tee /etc/php.ini
 
-sudo pecl install uploadprogress
+# No longer used sudo pecl install uploadprogress
 
 echo "Start services"
 echo -e "\n"

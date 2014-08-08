@@ -111,8 +111,10 @@ else
                 foreach ($data['rectype']['defs'] as $rtyID => $rt) {
                     if ($rtyID == -1) {    // new rectypes
                         $definit = @$_REQUEST['definit'];  //create set of default fields for new rectype
-
-                        array_push($rv['result'], createRectypes($commonNames, $rt, ($definit=="1")));
+                        
+                        $ret = createRectypes($commonNames, $rt, ($definit=="1"), true, @$_REQUEST['icon']);
+                        array_push($rv['result'], $ret);
+                        
                     }else{
                         array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
                     }

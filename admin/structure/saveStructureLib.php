@@ -238,9 +238,10 @@
     * @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
     * @param $dtFieldNames an array valid column names in the defRecStructure table
     * @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
+    * @param $icon_filename - filename from icon library - for new record type ONLY
     * @return $ret an array of return values for the various data elements created or errors if they occurred
     **/
-    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true) {
+    function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null) {
         global $mysqli, $rtyColumnNames;
 
         $ret = null;
@@ -295,10 +296,16 @@
                 if($titleMask){
                     updateTitleMask($rtyID, $titleMask);
                 }
-
+                
+                $need_create_icon = true;
+                if($icon_filename){
+                      $need_create_icon = copy_IconAndThumb_FromLibrary($rtyID, $icon_filename);
+                }
                 //create icon and thumbnail
-                getRectypeIconURL($rtyID);
-                getRectypeThumbURL($rtyID);
+                if($need_create_icon){
+                    getRectypeIconURL($rtyID);
+                    getRectypeThumbURL($rtyID);
+                }
 
             }
 
@@ -309,7 +316,7 @@
 
         return $ret;
     }
-
+    
     /**
     * updateRectype - Function that updates rectypes in the defRecTypes table.and updates or inserts any
     * fields into the defRecStructure table for the given rtyID
@@ -1181,6 +1188,17 @@ error_log("AAAA:".$query);
 		if (count($colNames) && count($values))
 		{
 			$isInsert = ($trmID==null || (!is_numeric($trmID) && (strrpos($trmID, "-")>0)));
+            
+            $inverse_termid_old = null;
+            if(!$isInsert){//find inverse term id 
+                $res = $ext_db->query("select trm_InverseTermId from defTerms where trmID=".$trmID);
+                if($res){
+                    if ( $row = $res->fetch_row() ) {
+                        $inverse_termid_old = $row[0];
+                    }
+                }
+            }
+            
 
 			$query = "";
             $querycols = "";
@@ -1219,7 +1237,7 @@ error_log("AAAA:".$query);
                         $ch_label = $val;
                     }else if($colName=="trm_InverseTermId"){
                         if($val=="") $val=null;
-                        $inverse_termid = $val;
+                        $inverse_termid = $val;   //new value
                     }
 
                     $parameters = addParam($parameters, $trmColumnNames[$colName], $val);
@@ -1251,9 +1269,9 @@ error_log("AAAA:".$query);
                 }
                 $dupquery .= ")";
 
-                $res = $mysqli->query($dupquery);
-                if ($mysqli->error) {
-                    $ret = "SQL error checking duplication values in terms: ".$mysqli->error."  Query:".$dupquery;
+                $res = $ext_db->query($dupquery);
+                if ($ext_db->error) {
+                    $ret = "SQL error checking duplication values in terms: ".$ext_db->error."  Query:".$dupquery;
                 } else {
                     $recCount = $res->num_rows;
                     if($recCount>0){
@@ -1275,18 +1293,22 @@ error_log("AAAA:".$query);
 
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
-				if ($rows==0 || is_string($rows) ) {
+				if ($rows==0 || is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "$inverse_termid   SQL error $oper term $trmID in updateTerms: ".$rows;
+					$ret = "Inverse term id: $inverse_termid. SQL error $oper term $trmID in updateTerms: ".$rows; //htmlspecialchars($query);
 				} else {
 					if($isInsert){
-						$trmID = $ext_db->insert_id;
+						$trmID = $ext_db->insert_id;  // new id
 					}
 
                     if($inverse_termid!=null){
                         $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
                         execSQL($ext_db, $query, null, true);
+                    }else if ($inverse_termid_old!=null){
+                        $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old";
+                        execSQL($ext_db, $query, null, true);
                     }
+                    
 
 					$ret = $trmID;
 				}

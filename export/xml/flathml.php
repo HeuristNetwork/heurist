@@ -2,16 +2,17 @@
 
     /**
     * flathml.php:  flattened version of HML - records are not generated redundantly but are indicated by references within other records.
+    *               $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
     * @author      Kim Jackson
-    * @author      Stephen White    <stephen.white@sydney.edu.au>
+    * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -88,12 +89,14 @@
 
     }
 
-    if(@$_REQUEST['file']){
+    if(@$_REQUEST['file']){ // output manifest + files ??
         $intofile = true;
     }else{
         $intofile = false;
     }
-    $hunifile = null;
+
+    $hunifile = null; //flag one-record-per-file mode for HuNI
+    // why is this left to be set later as a success on file access??
 
     if(!$intofile){
         if (@$_REQUEST['mode'] != '1') {
@@ -108,11 +111,23 @@
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
     require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
     require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
+
     mysql_connection_select(DATABASE);
+
     $relRT = (defined('RT_RELATION') ? RT_RELATION : 0);
     $relTypDT = (defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
     $relSrcDT = (defined('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0);
     $relTrgDT = (defined('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0);
+
+
+    // Determine database registration ID
+    $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
+        "from sysIdentification where `sys_ID`='1'");
+    if ($res) {
+        $row = mysql_fetch_row($res); // Get system information for current database
+        $dbID = $row[0];
+    }
+
 
     //----------------------------------------------------------------------------//
     //  Tag construction helpers
@@ -126,23 +141,11 @@
                 fwrite($hunifile, $str);
             }
         }else{
-            echo $str;       
+            echo $str;
         }
 
     }
 
-
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
 
     function makeTag($name, $attributes = null, $textContent = null, $close = true, $encodeContent = true) {
         $tag = "<$name";
@@ -171,39 +174,14 @@
 
     /**
     * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
     * @param     mixed $name
     * @param     mixed $attributes
     * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
     */
-    /**
-    * put your comment there...
-    *
-    */
-
     function openTag($name, $attributes = null) {
         makeTag($name, $attributes, null, false);
     }
 
-
-
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
 
     function closeTag($name) {
         output( "</$name>\n" );
@@ -211,36 +189,10 @@
     }
 
 
-
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
-
     function openCDATA() {
         output( "<![CDATA[\n" );
     }
 
-
-
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
 
     function closeCDATA() {
         output( "]]>\n" );
@@ -260,6 +212,7 @@
     $UGN = array(); //User name
     $TL = array(); //term lookup
     $TLV = array(); //term lookup by value
+
     // record type labels
     $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
     $res = mysql_query($query);
@@ -295,11 +248,12 @@
     $UGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type ='user'");
     mysql_connection_select(DATABASE) or die(mysql_error());
     $GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point');
+
     // set parameter defaults
     $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true; //default to including reverse pointers
     $EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
     $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0; //default to not output text content
-    $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ? $_REQUEST['hinclude'] : 99; 
+    $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ? $_REQUEST['hinclude'] : 99;
     //default to not output xinclude format for related records until beyound 99 degrees of separation
     $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ? true : false; //default to not output xinclude format for related records
     $OUTPUT_STUBS = @$_REQUEST['stub'] == '1' ? true : false; //default to not output stubs
@@ -310,10 +264,12 @@
     //$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
     //			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
     $PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!is_logged_in() ? true : false));
+
     $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
     if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
         die(" error invalid json record type filters string");
     }
+
     $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
     if (!isset($RECTYPE_FILTERS)) {
         die(" error decoding json record type filters string");
@@ -323,6 +279,7 @@
     if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
         die(" error invalid json relation type filters string");
     }
+
     $RELTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
     if (!isset($RELTYPE_FILTERS)) {
         die(" error decoding json relation type filters string");
@@ -332,6 +289,7 @@
     if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
         die(" error invalid json pointer type filters string");
     }
+
     $PTRTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
     if (!isset($PTRTYPE_FILTERS)) {
         die(" error decoding json pointer type filters string");
@@ -341,6 +299,7 @@
     if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
         die(" error invalid json record type filters string");
     }
+
     $SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
     if (!isset($SELIDS_FILTERS)) {
         die(" error decoding json selected ids string");
@@ -402,7 +361,9 @@
         require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     }
 
-    $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
+    $ACCESSABLE_OWNER_IDS = mysql__select_array(
+        'sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID='
+        . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
 
     if (is_logged_in()) {
         array_push($ACCESSABLE_OWNER_IDS, get_user_id());
@@ -426,7 +387,6 @@
     * @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table used to filter the result
     * @param $dtyIDs an array of detailTypeIDs valid in the defDetailTypes table used to filter the results
     * @return $ret a comma separated list of recIDs
-    *
     */
     function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
         global $ACCESSABLE_OWNER_IDS, $PUBONLY;
@@ -436,18 +396,23 @@
         // find all detail values for resource type details which exist for any record with an id in $rec_ids
         // and also is of a type in rtyIDs if rtyIDs is set to non null
         $nlrIDs = array(); // new linked record IDs
-        $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_Value as trgRecID, ' . 'dtl_DetailTypeID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' . //saw TODO check if we need to also check group ownership
-        'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' . 'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' . 'WHERE dtl_RecID in (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '') . 'AND dty_Type = "resource" AND ' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') . ((is_logged_in() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-        /*****DEBUG****/
-        //error_log("find d $depth pointer q = $query");
-        //echo "\n $query\n";
+        $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_Value as trgRecID, '
+        . 'dtl_DetailTypeID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .
+        //saw TODO check if we need to also check group ownership
+        'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' .
+        'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' .
+        'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' .
+        'WHERE dtl_RecID in (' . join(',', $qrec_ids) . ') ' .
+        ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
+        ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '')
+        . 'AND dty_Type = "resource" AND ' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+        ((is_logged_in() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+
         $res = mysql_query($query);
-        /*****DEBUG****/
-        //error_log("mysql error = ".mysql_error($res));
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             // if target is not in the result
-            /*****DEBUG****/
-            //echo "\n".print_r($row);
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth);
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
@@ -456,29 +421,35 @@
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']) {
                 $recSet['relatedSet'][$row['trgRecID']]['revPtrLinks'] = array('byInvDtlType' => array(), 'byRecIDs' => array()); //create an entry
 
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
                 $recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
             } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']], $row['srcRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']]) {
                 $recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
             } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']], $row['ptrDetailTypeID']);
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']) {
                 $recSet['relatedSet'][$row['srcRecID']]['ptrLinks'] = array('byDtlType' => array(), 'byRecIDs' => array()); //create ptrLinks sub arrays
 
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
             } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']], $row['trgRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
             } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']])) {
@@ -487,7 +458,6 @@
         }
         return array_keys($nlrIDs);
         //	return $rv;
-
     }
 
 
@@ -501,7 +471,6 @@
     * @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table
     * @param $dtyIDs an array of detailTypeIDs valid in the defDetailTypes table used to filter the results
     * @return $ret a comma separated list of recIDs of pointed_to_by records
-    *
     */
     function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
         global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $PUBONLY;
@@ -509,10 +478,20 @@
         /*****DEBUG****/
         //error_log("in findReversePointers");
         $nlrIDs = array(); // new linked record IDs
-        $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' . 'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' . 'FROM recDetails ' . 'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID ' . 'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_Value ' . 'WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', $dtyIDs) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') . (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-        /*****DEBUG****/
-        //error_log("find  d $depth rev pointer q = $query");
+        $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' .
+        'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .
+        'FROM recDetails ' . 'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID ' .
+        'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID ' . 'LEFT JOIN Records src on src.rec_ID = dtl_Value ' .
+        'WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' .
+        join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
+            join(',', $rtyIDs) . ') ' : '') . ($dtyIDs && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
+            join(',', $dtyIDs) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? '(trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
+        (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+
         $res = mysql_query($query);
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             // if target is not in the result
             $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
@@ -528,25 +507,30 @@
                 $recSet['relatedSet'][$row['trgRecID']]['ptrLinks'] = array('byDtlType' => array(), 'byRecIDs' => array()); //create an entry
 
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
                 $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
             } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']], $row['srcRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']]) {
                 $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
             } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']], $row['ptrDetailTypeID']);
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']) {
                 $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks'] = array('byInvDtlType' => array(), 'byRecIDs' => array()); //create an entry
 
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
             } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']], $row['trgRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
             } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']])) {
@@ -567,19 +551,35 @@
     * @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table
     * @param $relTermIDs an array of termIDs valid in the defTerms table used to filter the results
     * @return $ret a comma separated list of recIDs of other record recIDs
-    *
     */
     function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
         global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $PUBONLY;
-        /*****DEBUG****/
-        //error_log("in findRelatedRecords");
         $nlrIDs = array();
         $query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, ' . // from detail
-        'IF( f.dtl_Value IN (' . join(',', $qrec_ids) . '),1,0) as srcIsFrom, ' . 't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' . ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' . 'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . $relSrcDT . ' ' . 'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . $relTrgDT . ' ' . 'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . $relTypDT . ' ' . 'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' . 'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' . 'WHERE rel.rec_RecTypeID = ' . $relRT . ' ' . 'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') . ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') ' . ($rtyIDs && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') : '') . ')' . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') . ((is_logged_in() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' . join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') . (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")') . ($relTermIDs && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' . join(',', $relTermIDs) . ') OR trm.trm_InverseTermID in (' . join(',', $relTermIDs) . ')) ' : '');
-        /*****DEBUG****/
-        //error_log("find  d $depth related q = $query");
-        //echo $query;
+        'IF( f.dtl_Value IN (' . join(',', $qrec_ids) . '),1,0) as srcIsFrom, ' .
+        't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' .
+        ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' .
+        'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . $relSrcDT . ' ' .
+        'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . $relTrgDT . ' ' .
+        'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = ' . $relTypDT . ' ' .
+        'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' .
+        'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' .
+        'WHERE rel.rec_RecTypeID = ' . $relRT . ' ' . 'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
+        ($rtyIDs && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', $rtyIDs) . ') ' : '') .
+        ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') ' .
+            ($rtyIDs && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' .
+                join(',', $rtyIDs) . ') ' : '') : '') . ')' .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (') .
+        ((is_logged_in() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
+        (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' .
+            join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : 'AND (').
+        (is_logged_in() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")').
+        ($relTermIDs && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
+            join(',', $relTermIDs) . ') OR trm.trm_InverseTermID in (' . join(',', $relTermIDs) . ')) ' : '');
+
         $res = mysql_query($query);
+
         while ($res && $row = mysql_fetch_assoc($res)) {
             if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
                 continue;
@@ -589,50 +589,59 @@
             if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth);
                 $nlrIDs[$row['srcRecID']] = 1; //save it for next level query
-
             }
+
             //if rel rec not in result
             if (!array_key_exists($row['relID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['relID']] = array('depth' => $recSet['relatedSet'][$row['srcRecID']]['depth'] . ".5");
             }
+
             // if target is not in the result
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth);
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
             }
-            if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
-                $recSet['relatedSet'][$row['srcRecID']]['relLinks'] = array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
 
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
+                $recSet['relatedSet'][$row['srcRecID']]['relLinks'] =
+                array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']] = array($row['trgRecID']);
             } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']])) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']], $row['trgRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']]) {
                 $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']] = array($row['relType']);
             } else if (!in_array($row['relType'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']])) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']], $row['relType']);
             }
+
             if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'])) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'], $row['relID']);
             }
-            if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
-                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] = array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
 
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
+                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] =
+                array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
             }
+
             $inverse = $row['invRelType'] ? $row['invRelType'] : "-" . $row['relType'];
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse]) {
                 $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse] = array($row['srcRecID']);
             } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse], $row['srcRecID']);
             }
+
             if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']]) {
                 $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']] = array($inverse);
             } else if (!in_array($inverse, $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']], $inverse);
             }
+
             if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'])) {
                 array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'], $row['relID']);
             }
@@ -647,23 +656,26 @@
     * @param $rec_ids an array of recIDs from the Records table for which to build the tree
     * @param $recSet an out array to store look up records by recordID
     * @param $relationships an out array of recIDs to store look up relationRecID by supplied target/source recIDs
-    *
     */
     function buildGraphStructure($rec_ids, &$recSet) {
         global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR, $OUTPUT_STUBS;
-        /*****DEBUG****/
-        //	error_log("max depth = ".print_r($MAX_DEPTH,true));
         $depth = 0;
         $rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
         if ($rtfilter) {
-            $query = 'SELECT rec_ID from Records ' . 'WHERE rec_ID in (' . join(",", $rec_ids) . ') ' . 'AND rec_RecTypeID in (' . join(",", $rtfilter) . ')';
+            $query = 'SELECT rec_ID from Records ' .
+            'WHERE rec_ID in (' . join(",", $rec_ids) . ') ' .
+            'AND rec_RecTypeID in (' . join(",", $rtfilter) . ')';
             $filteredIDs = array();
+
             $res = mysql_query($query);
+
             while ($res && $row = mysql_fetch_row($res)) {
                 $filteredIDs[$row[0]] = 1;
             }
+
             $rec_ids = array_keys($filteredIDs);
         }
+
         if ($MAX_DEPTH == 0 && $OUTPUT_STUBS && count($rec_ids) > 0) {
             findPointers($rec_ids, $recSet, 1, null, null);
         } else {
@@ -685,30 +697,29 @@
     //  Output functions
     //----------------------------------------------------------------------------//
 
-
     /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
+    * Outputs the set of records as an xml stream or separate files per record (if $intofile set)
+    *
+    * @param mixed $result
     */
     function outputRecords($result) {
+
         global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH, $intofile, $hunifile;
+
         $recSet = array('count' => 0, 'relatedSet' => array());
         $rec_ids = explode(",", $result['recIDs']);
+
         if (array_key_exists('expandColl', $_REQUEST)) {
             $rec_ids = expandCollections($rec_ids);
         }
+
         foreach ($rec_ids as $recID) {
             $recSet['relatedSet'][$recID] = array('depth' => 0);
         }
+
         buildGraphStructure($rec_ids, $recSet);
         $recSet['count'] = count($recSet['relatedSet']);
+
         foreach ($recSet['relatedSet'] as $recID => $recInfo) {
             $recSet['relatedSet'][$recID]['record'] = loadRecord($recID, $FRESH, true);
         }
@@ -721,14 +732,19 @@
 
         foreach ($recSet['relatedSet'] as $recID => $recInfo) {
             if (intval($recInfo['depth']) <= $MAX_DEPTH) {
+
+                // output one record
                 $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
 
+                // close the file if using HuNI manifest + separate files output
+                // The file is opened in outputRecord but left open!
                 if($intofile && $hunifile){
                     fclose($hunifile);
                 }
+
                 if($res){
-                    array_push($resout, $recID);
-                }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml")){
+                    $resout[$recID] = $recInfo['record']['rec_RecTypeID'];
+                }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$recID.".xml")){
                     unlink(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml");
                 }
             }
@@ -742,27 +758,15 @@
     }
 
 
-    //----------------------------------------------------------------------------//
-    //  Output functions
-    //----------------------------------------------------------------------------//
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = null) {
-        global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile;
+        global $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL,
+        $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID;
 
         $hunifile = null;
         $record = $recordInfo['record'];
         $depth = $recordInfo['depth'];
         $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
+
         if (isset($filter) && !in_array($record['rec_RecTypeID'], $filter)) {
             if ($record['rec_RecTypeID'] != $relRT) { //not a relationship rectype
                 if ($depth > 0) {
@@ -779,42 +783,64 @@
             }
         }
 
+        // using separare files per record
+        // TODO: no error checking on success so silent failure if directory non-writable
+        // beware: File is closed in outputRecords function
         if($intofile){
             $hunifile = fopen( HEURIST_HML_PUBPATH.$record['rec_ID'].".xml", 'w');
-            output( "<?xml version='1.0' encoding='UTF-8'?>\n" );    
-        }       
+            output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
+        }
 
+        openTag('record', array('depth' => $depth,
+            'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'),
+            'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
 
-        openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'), 'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
+        if (isset($dbID) && ($dbID != 0)) {
+                output( "<dbID>".$dbID."</dbID>\n");
+            } else {
+                output( "<dbID>0</dbID>\n"); // unregistered database
+            }
+
         if (array_key_exists('error', $record)) {
             makeTag('error', null, $record['error']);
             closeTag('record');
             return false;
         }
+
         if ($depth > $USEXINCLUDELEVEL) {
             outputXInclude($record);
             closeTag('record');
             return true;
         }
+
+        $conceptID = getRecTypeConceptID($record['rec_RecTypeID']);
+
         makeTag('id', null, $record['rec_ID']);
-        makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID' => getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
+        makeTag('type', array('id' => $record['rec_RecTypeID'],
+            'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
         makeTag('title', null, $record['rec_Title']);
+
         if ($record['rec_URL']) {
             makeTag('url', null, $record['rec_URL']);
         }
+
         if ($record['rec_ScratchPad']) {
             makeTag('notes', null, replaceIllegalChars($record['rec_ScratchPad']));
         }
+
         makeTag('added', null, $record['rec_Added']);
         makeTag('modified', null, $record['rec_Modified']);
+
         // saw FIXME  - need to output groups only
         if (array_key_exists($record['rec_OwnerUGrpID'], $WGN) || array_key_exists($record['rec_OwnerUGrpID'], $UGN)) {
             makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']), $record['rec_OwnerUGrpID'] > 0 ? (array_key_exists($record['rec_OwnerUGrpID'], $WGN) ? $WGN[$record['rec_OwnerUGrpID']] : (array_key_exists($record['rec_OwnerUGrpID'], $UGN) ? $UGN[$record['rec_OwnerUGrpID']] : 'Unknown')) : 'public');
         }
+
         foreach ($record['details'] as $dt => $details) {
             foreach ($details as $value) {
                 outputDetail($dt, $value, $record['rec_RecTypeID'], $recInfos, $depth, $outputStub, $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
             }
+
         }
         if ($WOOT) {
             $result = loadWoot(array('title' => 'record:' . $record['rec_ID']));
@@ -829,6 +855,7 @@
                 closeTag('woot');
             }
         }
+
         if (array_key_exists('revPtrLinks', $recordInfo) && $recordInfo['revPtrLinks']['byRecIDs']) {
             foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
                 foreach ($dtIDs as $dtID) {
@@ -841,6 +868,7 @@
                 }
             }
         }
+
         if (array_key_exists('revRelLinks', $recordInfo) && $recordInfo['revRelLinks']['relRecIDs']) {
             $recID = $record['rec_ID'];
             foreach ($recordInfo['revRelLinks']['relRecIDs'] as $relRec_id) {
@@ -863,6 +891,7 @@
                             }
                         }
                     }
+
                     if ($details[$relTypDT]) {
                         list($key, $value) = each($details[$relTypDT]);
                         preg_replace("/-/", "", $value);
@@ -888,6 +917,7 @@
                 makeTag('relationship', $attrs, $relRec_id);
             }
         }
+
         if (array_key_exists('relLinks', $recordInfo) && $recordInfo['relLinks']['relRecIDs']) {
             $recID = $record['rec_ID'];
             foreach ($recordInfo['relLinks']['relRecIDs'] as $relRec_id) {
@@ -910,6 +940,7 @@
                             }
                         }
                     }
+
                     if ($details[$relTypDT]) {
                         list($key, $value) = each($details[$relTypDT]);
                         preg_replace("/-/", "", $value);
@@ -932,23 +963,13 @@
                 makeTag('relationship', $attrs, $relRec_id);
             }
         }
+
         closeTag('record');
 
-        return true;    
+        return true;
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function outputXInclude($record) {
         global $RTN;
         $recID = $record['rec_ID'];
@@ -959,7 +980,6 @@
         $type = $record['rec_RecTypeID'];
         makeTag('type', array('id' => $type, 'conceptID' => getRecTypeConceptID($type)), $RTN[$type]);
         $title = $record['rec_Title'];
-        //	makeTag('title', null, $title);
         makeTag('title', null, "Record Not Available");
         makeTag('notavailable', null, null);
         closeTag('xi:fallback');
@@ -967,17 +987,6 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function outputRecordStub($recordStub) {
         global $RTN;
         openTag('record', array('isStub' => 1));
@@ -990,17 +999,6 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function makeFileContentNode($file) {
         $filename = $file['URL'];
         if ($file['mimeType'] === "application/xml") { // && file_exists($filename)) {
@@ -1018,13 +1016,16 @@
                     return;
                 }
             }
+
             //embedding so remove any xml element
             $content = preg_replace("/^\<\?xml[^\?]+\?\>/", "", $xml);
+
             //embedding so remove any DOCTYPE  TODO saw need to validate first then this is fine. also perhaps attribute with type and ID
             $content = preg_replace("/\<\!DOCTYPE[^\[]+\s*\[\s*(?:(?:\<--)?\s*\<[^\>]+\>\s*(?:--\>)?)*\s*\]\>/", "", $content, 1);
             if (preg_match("/\<\!DOCTYPE/", $content)) {
                 $content = preg_replace("/\<\!DOCTYPE[^\>]+\>/", "", $content, 1);
             }
+
             $parser = xml_parser_create();
             $ret = xml_parse_into_struct($parser, $content, $vals, $index);
             if ($ret == 0) {
@@ -1032,6 +1033,7 @@
                 xml_parser_free($parser);
                 return;
             }
+
             if ($content) {
                 makeTag('content', array("type" => "xml"), $content, true, false);
             }
@@ -1040,30 +1042,24 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $parentID) {
+
         global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT;
         $attrs = array('id' => $dt, 'conceptID' => getDetailTypeConceptID($dt));
+
         if (array_key_exists($dt, $DTN)) {
             $attrs['type'] = $DTN[$dt];
         }
+
         if (array_key_exists($rt, $RQS) && array_key_exists($dt, $RQS[$rt])) {
             $attrs['name'] = $RQS[$rt][$dt];
         }
+
         if ($dt === $relTypDT && array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) { //saw Enum change
             $attrs['inverse'] = $TL[$INV[$value]]['trm_Label'];
             $attrs['invTermConceptID'] = getTermConceptID($INV[$value]);
         }
+
         if (is_array($value)) {
             if (array_key_exists('id', $value)) {
                 // record pointer
@@ -1153,6 +1149,7 @@
             makeTag('detail', $attrs, replaceIllegalChars($value));
         }
     }
+
     $typeDict = array("s" => "Simple Date", "c" => "C14 Date", "f" => "Aproximate Date", "p" => "Date Range", "d" => "Duration");
     $fieldsDict = array("VER" => "Version Number", "TYP" => "Temporal Type Code", "PRF" => "Probability Profile", "SPF" => "Start Profile", "EPF" => "End Profile", "CAL" => "Calibrated", "COD" => "Laboratory Code", "DET" => "Determination Type", "COM" => "Comment", "EGP" => "Egyptian Date");
     $determinationCodes = array(0 => "Unknown", 1 => "Attested", 2 => "Conjecture", 3 => "Measurement");
@@ -1161,17 +1158,7 @@
     $tDurationDict = array("DUR" => "Simple Duration", "RNG" => "Range", "DEV" => "Standard Deviation", "DVP" => "Deviation Positive", "DVN" => "Deviation Negative", "ERR" => "Error Margin");
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
+
     function outputTemporalDetail($attrs, $value) {
         global $typeDict, $fieldsDict, $determinationCodes, $profileCodes, $tDateDict, $tDurationDict;
         $temporalStr = substr_replace($value, "", 0, 1); // remove first verticle bar
@@ -1214,17 +1201,6 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
     function outputDateDetail($attrs, $value) {
         makeTag('raw', null, $value);
         if (preg_match('/^\\s*-?(\\d+)\\s*$/', $value, $matches)) { // year only
@@ -1276,17 +1252,7 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
+
     function outputTDateDetail($attrs, $value) {
         makeTag('raw', null, $value);
         if (preg_match('/^([^T\s]*)(?:[T\s+](\S*))?$/', $value, $matches)) { // valid ISO Duration split into date and time
@@ -1312,17 +1278,7 @@
     }
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
+
     function outputDurationDetail($attrs, $value) {
         makeTag('raw', null, $value);
         if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
@@ -1350,36 +1306,17 @@
             }
         }
     }
+
     $invalidChars = array(chr(0), chr(1), chr(2), chr(3), chr(4), chr(5), chr(6), chr(7), chr(8), chr(11), chr(12), chr(14), chr(15), chr(16), chr(17), chr(18), chr(19), chr(20), chr(21), chr(22), chr(23), chr(24), chr(25), chr(26), chr(27), chr(28), chr(29), chr(30), chr(31)); // invalid chars that need to be stripped from the data.
     $replacements = array("[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", "[?]", " ", "[?]", "[?]", "[?]", "[?]", "[?]");
 
 
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
+
     function replaceIllegalChars($text) {
         global $invalidChars, $replacements;
         return str_replace($invalidChars, $replacements, $text);
     }
-    /**
-    * description
-    * @global    type description of global variable usage in a function
-    * @staticvar type [$varname] description of static variable usage in function
-    * @param     type [$varname] description
-    * @return    type description
-    * @link      URL
-    * @see       name of another element (function or object) used in this function
-    * @throws    list of exceptions thrown in this code
-    * @uses      code_element_name description of use
-    */
+
     function check($text) {
         global $invalidChars;
         foreach ($invalidChars as $charCode) {
@@ -1414,45 +1351,66 @@
 
     $result = loadSearch($_REQUEST, false, true, $PUBONLY);
     $hmlAttrs = array();
+
     if ($USEXINCLUDE) {
         $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
     }
+
     if (@$_REQUEST['filename']) {
         $hmlAttrs['filename'] = $_REQUEST['filename'];
     }
+
     if (@$_REQUEST['pathfilename']) {
         $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
     }
+
     $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
-    if($intofile){
+    if($intofile){ // flags HuNI manifest + separate files per record
 
         if (array_key_exists('error', $result)) {
-            print "Error: ".$result['error']; 
+            print "Error: ".$result['error'];
         }else{
 
+            // write out all records as separate files
             $resout = outputRecords($result);
 
+            // create HuNI manifest
             $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
-            fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );    
+            fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
             fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
-            foreach ($resout as $recID) {
+
+            // dbID set at start of script
+            if (isset($dbID) && ($dbID != 0)) {
+                fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
+            }
+            else
+            {
+                fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
+            }
+
+            // add each output file to the manifest
+            foreach ($resout as $recID => $recTypeID) {
 
                 $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
+
                 if(file_exists($resfile)){
+                    $conceptID = getRecTypeConceptID($recTypeID);
                     fwrite( $huni_resources, "<record>\n");
                     fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
-                    fwrite( $huni_resources, "<hash>".md5($resfile)."</hash>\n");
+                    fwrite( $huni_resources, "<hash>".md5_file($resfile)."</hash>\n");
+                    fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
                     fwrite( $huni_resources, "</record>\n");
                 }
             }
+
             fwrite( $huni_resources, "</resources>");
             fclose( $huni_resources );
 
-            print "<h3>Export completed</h3> <b>Harvestable file(s) are in ".HEURIST_HML_PUBPATH."</b>"; 
+            print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_PUBPATH."</b>";
         }
 
-    }else{
+    }else{ // single output stream
 
         openTag('hml', $hmlAttrs);
         /*
@@ -1473,6 +1431,7 @@
         } else {
             makeTag('resultCount', null, $result['resultCount'] ? $result['resultCount'] : " 0 ");
             makeTag('recordCount', null, $result['recordCount'] ? $result['recordCount'] : " 0 ");
+            // Output all the records as XML blocks
             if ($result['recordCount'] > 0) outputRecords($result);
         }
         closeTag('hml');

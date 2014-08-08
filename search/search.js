@@ -2504,10 +2504,10 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenuBkmk){
 					top.HEURIST.search.recMenuBkmk = new YAHOO.widget.Menu("menu_boomark",{zindex: 21});
 					top.HEURIST.search.recMenuBkmk.addItems([
-						{ text: "Delete" },
+                        // { text: "Tag" }, TODO: Tag and delete require record to be selected first
 						{ text: "Rate" },
-						{ text: "Un-bookmark" },
-						{ text: "Tag" }
+						{ text: "Un-bookmark" }
+                        // { text: "Delete" },
 					]);
 					top.HEURIST.search.recMenuBkmk.render(document.getElementById('page')); //document.body);
 					$("#menu_boomark").bind("mouseleave",function(){
@@ -2520,9 +2520,9 @@ top.HEURIST.search = {
 				if(!top.HEURIST.search.recMenu){
 					top.HEURIST.search.recMenu = new YAHOO.widget.Menu("menu_recordrd",{zindex: 21});  //e.parentNode.id
 					top.HEURIST.search.recMenu.addItems([
-						{ text: "Delete" },
-						{ text: "Bookmark" },
-						{ text: "Tag" }
+                        // { text: "Tag" }, TODO: see above
+                        // { text: "Bookmark" },
+						{ text: "Delete" }
 					]);
 					top.HEURIST.search.recMenu.render(document.getElementById('page')); //document.body);//"rd"+recID);
 					$("#menu_recordrd").bind("mouseleave",function(){
@@ -3295,6 +3295,8 @@ top.HEURIST.search = {
             options = {height:dim.h*0.95, width:dim.w*0.95};
         }else if (targ.className.match(/\bfixed\b/)){
             options = {height:dim.h*0.8, width:800};
+        }else if (targ.className.match(/\blandscape\b/)){
+            options = {height:dim.h*0.9, width:dim.w*0.8};
 		}
 		top.HEURIST.util.popupURL(top, targ.href, options);
 
@@ -4157,7 +4159,7 @@ top.HEURIST.search = {
 		var scroll = document.getElementById("results").scrollTop;
 		var pwd = document.getElementById("password");
 		document.getElementById("reminder").innerHTML = elt.getAttribute("user_pwd");
-		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50 });
+		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50, 'no-close':false, 'no-titlebar':false });
 	},
 
 	getPushDownFilter: function(type){

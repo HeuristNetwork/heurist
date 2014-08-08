@@ -118,8 +118,7 @@
     }
     if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
         returnErrorMsgPage(1, "Unconfigured or mis-configured Heurist instance. Please ask your system administrator to edit the MySQL passwords".
-            " in the configIni.php file. Note that the MySql passwords may not contain special characters (to avoid problems down the line they are".
-            " restricted to alphanumeric only).");
+            " in the configIni.php file.");
     }
 
     // refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/dbcreate/createNewDB.php
