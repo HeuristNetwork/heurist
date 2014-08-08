@@ -184,7 +184,7 @@
                     // create list of valid rectypes
                     $dtyIDDefs[$row[0]] = "all";
                     if ($row[4] != "") {
-                        $temp = explode(",",$row[4]);
+                        $temp = explode(",",$row[4]); //get allowed record types
                         if (count($temp)>0) {
                             $dtyIDDefs[$row[0]] = $temp;
                         }
