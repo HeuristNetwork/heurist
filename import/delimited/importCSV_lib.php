@@ -321,7 +321,6 @@
             return "SQL error: Can not execute query to calculate number of records to be inserted";
         }
 
-
         return $imp_session;
     }
 
@@ -332,6 +331,8 @@
     * @param mixed $mysqli
     * @param mixed $imp_session
     * @param mixed $params
+    * 
+    * Not used anymore!!!! Redirection to  assignMultivalues
     */
     function matchingAssign($mysqli, $imp_session, $params){
 
@@ -538,7 +539,7 @@
 
     //====================================================================
     /**
-    * special case - multivalue index field
+    * Perform matching 
     *
     * @param mixed $mysqli
     * @param mixed $imp_session
@@ -546,7 +547,6 @@
     */
     function matchingMultivalues($mysqli, $imp_session, $params){
 
-        //DEBUG print "SESSION:".print_r($imp_session, true);
         $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array(),
             "recs_insert"=>array(), "recs_update"=>array() );
 
@@ -562,8 +562,6 @@
             foreach($disamb_keys as $idx => $keyvalue){
                 $disamb_resolv[$keyvalue] = $disamb_ids[$idx];
             }
-
-//DEBUG print "<br>dis resolv ".print_r($disamb_resolv, true);
         }
 
         //get rectype to import
@@ -573,7 +571,7 @@
             return "record type not defined";
         }
 
-        //get search query
+        //create search query  - based on mapping (search for  sa_keyfield_ - checkboxes in UI)
         /*  OLD  WORK
         $select_query_update_from = array("Records");
         $select_query_update_where = array("rec_RecTypeID=".$recordType);
@@ -647,6 +645,7 @@
             }
         }
 
+        //keep mapping   field_XXX => dty_ID
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
 
 
@@ -670,7 +669,7 @@
         $tmp_idx_update = array(); //to keep indexes
 
 
-        //loop all records
+        //loop all records in import tabale and detect what is for insert and what for update
         $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
         $res = $mysqli->query($select_query);
         if($res){
@@ -679,7 +678,6 @@
                 $imp_id = $row[0];
                 $row[0] = $params_dt;
 
-                $multivalue = $row[$multivalue_field_name_idx];
                 $multivalue = $row[$multivalue_field_name_idx];
 
                 $ids = array();
@@ -811,19 +809,24 @@
         $search_stmt->close();
         */
 
-
+        
+        // result of work - counts of records to be inserted, updated
         $imp_session['validation']['count_update'] = count($imp_session['validation']['recs_update']);
         $imp_session['validation']['count_insert'] = count($imp_session['validation']['recs_insert']);
         $imp_session['validation']['disambiguation'] = $disambiguation;
         $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
+        
+        //MAIN RESULT - ids to be assigned to each record in import table
         $imp_session['validation']['records'] = $records; //imp_id(line#) => list of records ids
 
         return $imp_session;
     }
 
     /**
-    * Assign multivalues IDs
+    * Assign record ids to field in import table
     * (negative if not found)
+    * 
+    * since we do match and assign in ONE STEP - first we call matchingMultivalues
     *
     * @param mixed $mysqli
     * @param mixed $imp_session
@@ -912,6 +915,7 @@
         }
         */
         //NOT USED ANYMORE
+        /*
         if($is_create_records){
 
             $newrecs = array();
@@ -964,7 +968,7 @@
                 }
             }
         }
-
+        */
         //update values in import table - replace negative to new one
         foreach($records as $imp_id => $ids){
 
@@ -1322,7 +1326,7 @@
 
                 $idx = array_search($field, $sel_query)+1;
 
-                $wrong_records = validateMultivalue($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
+                $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
                     "Term list values must match terms defined for the field", "Wrong Terms");
 
             }else{
@@ -1350,13 +1354,26 @@
         $k=0;
         foreach ($query_res as $field){
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
-            ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
+            if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table where ".$only_for_specified_id." 1";
+
+                $idx = array_search($field, $sel_query)+1;
+
+                $wrong_records = validateResourcePointers($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType);
+
+            }else{
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
+                ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
+                $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+                    "Record pointer fields must reference an existing record in the database",
+                    "Wrong Pointers", $field);
+            }
+
             $k++;
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                "Record pointer fields must reference an existing record in the database",
-                "Wrong Pointers", $field);
+
             //"Fields mapped as resources(pointers)".$hwv,
             //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
@@ -1463,7 +1480,7 @@
     * @param mixed $message - error message
     * @param mixed $short_messsage
     */
-    function validateMultivalue($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
+    function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
 
         
         $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
@@ -1533,6 +1550,81 @@
         return null;
     }
 
+    /**
+    * put your comment there...
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    * @param mixed $imp_session
+    * @param mixed $fields_checked - name of field to be verified
+    * @param mixed $dt_id - mapped detail type ID
+    * @param mixed $field_idx - index of validation field in query result (to get value)
+    * @param mixed $recStruc - record type structure
+    * @param mixed $message - error message
+    * @param mixed $short_messsage
+    */
+    function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
+
+        
+        $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
+        
+        $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+        $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        
+        $dt_type = $dt_def[$idx_fieldtype];
+
+        $res = $mysqli->query($query." LIMIT 5000");
+
+        if($res){
+            $wrong_records = array();
+            while ($row = $res->fetch_row()){
+
+                $is_error = false;
+                $newvalue = array();
+                $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
+                foreach($values as $idx=>$r_value){
+                    $r_value2 = trim($r_value);
+                    if($r_value2!=""){
+
+                        if (!isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id )) 
+                        {//not found
+                            // if(!@$terms[$r_value2]){ 
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        }else{
+                            array_push($newvalue, $r_value);
+                        }
+                    }
+                }
+
+                if($is_error){
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                    array_push($wrong_records, $row);
+                }
+            }
+            $res->close();
+            $cnt_error = count($wrong_records);
+            if($cnt_error>0){
+                $error = array();
+                $error["count_error"] = $cnt_error;
+                $error["recs_error"] = array_slice($wrong_records,0,1000);
+                $error["field_checked"] = $fields_checked;
+                $error["err_message"] = "Record pointer fields must reference an existing record of valid type in the database";
+                $error["short_messsage"] = "Wrong Pointers";
+
+                $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
+                array_push($imp_session['validation']['error'], $error);
+
+                return $imp_session;
+            }
+
+        }else{
+            return "SQL error: Can not perform validation query: ".$query;
+        }
+        return null;
+    }
+    
+    
     /**
     * create or update records
     *
@@ -2239,8 +2331,20 @@
     //
     function renderWarnings($imp_session){
 
+        $columns = $imp_session['columns'];
+        
         $warnings = $imp_session['load_warnings'];
         foreach ($warnings as $line) {
+            
+            //replace field names in table to human column names from import file
+            while (strpos($line, "field_")>0) {
+                $k = strpos($line, "field_");
+                $field_name = substr($line, $k, strpos($line, "'", $k)-$k);
+                $idx = intval(substr($field_name, 6));
+                $column_name = $columns[$idx];
+                $line = str_replace($field_name, $column_name, $line);
+            }
+            
             print $line."<br />";
         }
         print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
