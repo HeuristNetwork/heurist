@@ -69,7 +69,6 @@
                 padding-right: 3px;
             }
         </style>
-
     </head>
 
     <body class="popup yui-skin-sam">

@@ -35,7 +35,6 @@ if(isForAdminOnly("to modify database structure")){
 ?>
 <html>
     <head>
-
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Import rectypes via Annotated templates</title>
 
@@ -46,7 +45,6 @@ if(isForAdminOnly("to modify database structure")){
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
-        
     </head>
 
     <body>
@@ -55,12 +53,11 @@ if(isForAdminOnly("to modify database structure")){
         
         <div class="banner"><h2>Import rectypes via Annotated templates</h2></div>
         <div>
-        
             <iframe id="templates" onload="onFrameLoad()" src="http://heuristnetwork.org/annotated-templates" width="100%" height="100%" />
-<!--
- <button onclick="onFrameLoad()">Send</button>
-            <iframe id="templates" onload="onFrameLoad()" src="http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/browseRectypeTemplatesForImport.php?db=artem_delete1" width="100%" height="100%" />
--->
+            <!--
+             <button onclick="onFrameLoad()">Send</button>
+                        <iframe id="templates" onload="onFrameLoad()" src="http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-ao/admin/structure/import/browseRectypeTemplatesForImport.php?db=artem_delete1" width="100%" height="100%" />
+            -->
         </div>
     </body>
 </html>

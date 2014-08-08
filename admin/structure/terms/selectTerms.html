@@ -43,9 +43,7 @@
             .termTree, .selectedTerms, .termTreeText, .selectedTermsText {width:49%}
             .previewListText {float:none;}
         </style>
-
     </head>
-
 
     <body class="popup">
 
@@ -94,19 +92,16 @@
                     title="Save current selection of terms for this field pulldown" >Save</button>
                 <button onClick="selectTerms.cancel();" style="margin-right:20px;"
                     title="Cancel changes to selection" >Cancel</button>
-
             </div>
         </div>
 
 
         <script type="text/javascript">
-
             //
             //  starts initialization on load completion of this window
             //
             YAHOO.util.Event.addListener(window, "load", function(){ selectTerms = new  SelectTerms(false, true); });
             //YAHOO.util.Event.onDOMReady( function(){ selectTerms = new  SelectTerms(); } );
-
         </script>
     </body>
 </html>

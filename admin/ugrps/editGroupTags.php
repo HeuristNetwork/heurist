@@ -46,99 +46,97 @@ mysql_connection_select(DATABASE);
 
 ?>
 <html>
-<head>
- <title>Workgroup Tags</title>
+    <head>
+         <title>Workgroup Tags</title>
 
-<link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-<link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-<link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
- <style type="text/css">
-.tbox { border: 1px solid black; margin: 1px; }
-.gr_div { padding: 4px 0px; }
-ul { margin: 2px; }
- </style>
+        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        
+        <style type="text/css">
+            .tbox { border: 1px solid black; margin: 1px; }
+            .gr_div { padding: 4px 0px; }
+            ul { margin: 2px; }
+         </style>
 
-<script type="text/javascript">
-function delete_tag(tag_ID) {
-	if (! confirm('Really delete this tag?')) return;
-	var kd = document.getElementById('kwd_delete');
-	kd.value = tag_ID + '';
-	kd.form.submit();
-}
-</script>
+        <script type="text/javascript">
+            function delete_tag(tag_ID) {
+	            if (! confirm('Really delete this tag?')) return;
+	            var kd = document.getElementById('kwd_delete');
+	            kd.value = tag_ID + '';
+	            kd.form.submit();
+            }
+        </script>
+    </head>
 
-</head>
+    <body class="popup" width="840" height="550" style="padding: 0; overflow:hidden;">
+        <?php if(@$_REQUEST['popup']!="yes") { ?>
+        <div class="banner"><h2>Workgroup Tags</h2></div>
+        <?php } ?>
+        
+        <div id="page-inner">
+            Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
+            workgroup tags are a controlled list of shared tags established by a workgroup administrator.
+            <br>The list below only shows workgroups of which you are an administrator. <br>
 
-<body class="popup" width="840" height="550" style="padding: 0; overflow:hidden;">
-<?php if(@$_REQUEST['popup']!="yes") { ?>
-<div class="banner"><h2>Workgroup Tags</h2></div>
-<?php } ?>
-<div id="page-inner">
-Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
-workgroup tags are a controlled list of shared tags established by a workgroup administrator.
-<br>The list below only shows workgroups of which you are an administrator. <br>
+            <?php
+	            if (array_key_exists('deleting', $_REQUEST) && $_REQUEST['deleting']) {
+		            delete_tag();
+	            } else if (array_key_exists('adding', $_REQUEST) && $_REQUEST['adding']) {
+		            add_tags();
+	            }
+            ?>
 
-<?php
-	if (array_key_exists('deleting', $_REQUEST) && $_REQUEST['deleting']) {
-		delete_tag();
-	} else if (array_key_exists('adding', $_REQUEST) && $_REQUEST['adding']) {
-		add_tags();
-	}
-?>
+            <form method="post">
+                <br>Note: Deleting a tag deletes all references to that tag.
+                <p>To add new tags, type a tag into the blank field at the end of a workgroup and hit [enter] or click this button:
 
-<form method="post">
+                <input type="submit" value="Add workgroup tag(s)">
+                <?php if(@$_REQUEST['popup']=="yes") { ?>
+                <input type="button" value="Close Form" onclick="{window.close('bla');}">
+                <?php } ?>
+                <input type="hidden" name="adding" value="1">
+                <input type="hidden" name="deleting" value="0" id="kwd_delete">
 
-<br>Note: Deleting a tag deletes all references to that tag.
-<p>To add new tags, type a tag into the blank field at the end of a workgroup and hit [enter] or click this button:
+                <?php
+	                $adminGroupList = array();
+	                // This retrieves all the user groups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
+	                // foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
+	                //	if ($access == "admin") array_push($adminGroupList,$grp_id);
+	                $q='select distinct ugl_GroupID from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_UserID='.get_user_id().' and ugl_Role="admin"';
+	                $gres = mysql_query($q);
+	                while ($grp = mysql_fetch_assoc($gres)) {
+		                array_push($adminGroupList,$grp['ugl_GroupID']);
+	                }
+	                if (count($adminGroupList) < 1){
+		                print '<html><body> <h2>No workgroups</h2>You must have administration rights to a work group in order to add workgroup tags to it. You are not an adminstrator of any workgroups in this database.</body></html>';
+		                return;
+	                }
+	                $adminGroupList = join(',', $adminGroupList);
+	                $gres = mysql_query('select grp.ugr_ID, grp.ugr_Name from '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID in ('.$adminGroupList.') order by grp.ugr_Name');
+	                while ($grp = mysql_fetch_assoc($gres)) {
+		                print '<div class="gr_div">';
+		                print '<b>' . htmlspecialchars($grp['ugr_Name']) . '</b>';
 
-
-<input type="submit" value="Add workgroup tag(s)">
-<?php if(@$_REQUEST['popup']=="yes") { ?>
-<input type="button" value="Close Form" onclick="{window.close('bla');}">
-<?php } ?>
-<input type="hidden" name="adding" value="1">
-<input type="hidden" name="deleting" value="0" id="kwd_delete">
-
-<?php
-	$adminGroupList = array();
-	// This retrieves all the user groups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
-	// foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
-	//	if ($access == "admin") array_push($adminGroupList,$grp_id);
-	$q='select distinct ugl_GroupID from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_UserID='.get_user_id().' and ugl_Role="admin"';
-	$gres = mysql_query($q);
-	while ($grp = mysql_fetch_assoc($gres)) {
-		array_push($adminGroupList,$grp['ugl_GroupID']);
-	}
-	if (count($adminGroupList) < 1){
-		print '<html><body> <h2>No workgroups</h2>You must have administration rights to a work group in order to add workgroup tags to it. You are not an adminstrator of any workgroups in this database.</body></html>';
-		return;
-	}
-	$adminGroupList = join(',', $adminGroupList);
-	$gres = mysql_query('select grp.ugr_ID, grp.ugr_Name from '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID in ('.$adminGroupList.') order by grp.ugr_Name');
-	while ($grp = mysql_fetch_assoc($gres)) {
-		print '<div class="gr_div">';
-		print '<b>' . htmlspecialchars($grp['ugr_Name']) . '</b>';
-
-		print '<ul>';
-		$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
-		while ($tag = mysql_fetch_assoc($res)) {
-			$searchlink = HEURIST_BASE_URL.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
-			if ($tag['tgi_count'] == 0) $used = '';
-			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
-?>
- <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onClick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
-<?php
-		}
-		// TODO: this is giving undefined index error for 'new' in the log  7/11/11
-		print ' <li>add: <input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . (  array_key_exists('new', $_REQUEST)?htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]):'') . '"></li>';
-		print '</ul>';
-		print '</div>';
-	}
-?>
-
-</form>
-</div>
-</body>
+		                print '<ul>';
+		                $res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
+		                while ($tag = mysql_fetch_assoc($res)) {
+			                $searchlink = HEURIST_BASE_URL.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
+			                if ($tag['tgi_count'] == 0) $used = '';
+			                else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
+                ?>
+                 <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onClick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
+                <?php
+		                }
+		                // TODO: this is giving undefined index error for 'new' in the log  7/11/11
+		                print ' <li>add: <input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . (  array_key_exists('new', $_REQUEST)?htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]):'') . '"></li>';
+		                print '</ul>';
+		                print '</div>';
+	                }
+                ?>
+            </form>
+        </div>
+    </body>
 </html>
 <?php
 /***** END OF OUTPUT *****/

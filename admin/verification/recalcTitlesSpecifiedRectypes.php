@@ -75,158 +75,156 @@ $processed_count = 0;
 
 ?>
 <html>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Recalculation of composite record titles</title>
-	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-</head>
-<body class="popup">
-<p>
-	Rebuilding record titles for <b><?=implode(',',$rt_names)?></b>
-</p>
-<p>This will take some time for large databases</p>
-<!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
+    <head>
+	    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	    <title>Recalculation of composite record titles</title>
+	    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    </head>
+
+    <body class="popup">
+    <p>
+	    Rebuilding record titles for <b><?=implode(',',$rt_names)?></b>
+    </p>
+    <p>This will take some time for large databases</p>
+    <!-- <p>The scanning step does not write to the database and can be cancelled safely at any time</p> -->
 
 
-<script type="text/javascript">
-function update_counts(processed, blank, repair, changed) {
-	if(changed==undefined) {
-		 changed = 0;
-	}
+    <script type="text/javascript">
+    function update_counts(processed, blank, repair, changed) {
+	    if(changed==undefined) {
+		     changed = 0;
+	    }
 
-	document.getElementById('processed_count').innerHTML = processed;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
+	    document.getElementById('processed_count').innerHTML = processed;
+	    document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
 
 
-	document.getElementById('changed_count').innerHTML = changed;
-	document.getElementById('same_count').innerHTML = processed - (changed + blank);
-	document.getElementById('repair_count').innerHTML = repair;
-	document.getElementById('blank_count').innerHTML = blank;
-}
-
-function update_counts2(processed, total) {
-	document.getElementById('updated_count').innerHTML = processed;
-	document.getElementById('percent2').innerHTML = Math.round(1000 * processed / total) / 10;
-}
-</script>
-
-<div><span id=total_count><?=count($recs)?></span> records in total</div>
-<div><span id=processed_count>0</span> processed</div>
-<div><span id=percent>0</span> %</div>
-<br />
-<div><span id=changed_count>0</span> to be updated</div>
-<div><span id=same_count>0</span> are unchanged</div>
-<div><span id=repair_count>0</span> marked for update</div>
-<div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>
-
-<?php
-
-    $step_uiupdate = 10;
-    if(count($recs)>1000){
-        $step_uiupdate = ceil( count($recs) / 100 );
+	    document.getElementById('changed_count').innerHTML = changed;
+	    document.getElementById('same_count').innerHTML = processed - (changed + blank);
+	    document.getElementById('repair_count').innerHTML = repair;
+	    document.getElementById('blank_count').innerHTML = blank;
     }
 
-
-$blanks = array();
-$reparables = array();
-foreach ($recs as $rec_id => $rec) {
-	if ($rec_id % $step_uiupdate == 0) {
-		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
-		ob_flush();
-		flush();
-	}
-
-	$mask = $masks[$rec['rec_RecTypeID']];
-	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
-	++$processed_count;
-	$rec_title = trim($rec['rec_Title']);
-	if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
-
-	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
-		$updates[$rec_id] = $new_title;
-	}else {
-		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
-			array_push($reparables, $rec_id);
-			++$repair_count;
-		}else{
-			array_push($blanks, $rec_id);
-			++$blank_count;
-		}
-	}
-	continue;
-
-
-	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
-		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
-	else
-		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
-
-	print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
-
-	if ($rec_id % $step_uiupdate == 0) {
-		ob_flush();
-		flush();
-	}
-}
-
-
-print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
-print '<hr>';
-
-$titleDT = (defined('DT_NAME')?DT_NAME:0);
-
-if (count($updates) > 0) {
-
-    $step_uiupdate = 10;
-    if(count($updates)>1000){
-        $step_uiupdate = ceil( count($updates) / 100 );
+    function update_counts2(processed, total) {
+	    document.getElementById('updated_count').innerHTML = processed;
+	    document.getElementById('percent2').innerHTML = Math.round(1000 * processed / total) / 10;
     }
+    </script>
+
+    <div><span id=total_count><?=count($recs)?></span> records in total</div>
+    <div><span id=processed_count>0</span> processed</div>
+    <div><span id=percent>0</span> %</div>
+    <br />
+    <div><span id=changed_count>0</span> to be updated</div>
+    <div><span id=same_count>0</span> are unchanged</div>
+    <div><span id=repair_count>0</span> marked for update</div>
+    <div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>
+
+    <?php
+
+        $step_uiupdate = 10;
+        if(count($recs)>1000){
+            $step_uiupdate = ceil( count($recs) / 100 );
+        }
+
+        $blanks = array();
+        $reparables = array();
+        foreach ($recs as $rec_id => $rec) {
+	        if ($rec_id % $step_uiupdate == 0) {
+		        print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
+		        ob_flush();
+		        flush();
+	        }
+
+	        $mask = $masks[$rec['rec_RecTypeID']];
+	        $new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
+	        ++$processed_count;
+	        $rec_title = trim($rec['rec_Title']);
+	        if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
+
+	        if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
+		        $updates[$rec_id] = $new_title;
+	        }else {
+		        if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
+			        array_push($reparables, $rec_id);
+			        ++$repair_count;
+		        }else{
+			        array_push($blanks, $rec_id);
+			        ++$blank_count;
+		        }
+	        }
+	        continue;
+
+	        if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
+		        print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
+	        else
+		        print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
+
+	        print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
+
+	        if ($rec_id % $step_uiupdate == 0) {
+		        ob_flush();
+		        flush();
+	        }
+        }
+
+        print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
+        print '<hr>';
+
+        $titleDT = (defined('DT_NAME')?DT_NAME:0);
+
+        if (count($updates) > 0) {
+
+            $step_uiupdate = 10;
+            if(count($updates)>1000){
+                $step_uiupdate = ceil( count($updates) / 100 );
+            }
+            
+	        print '<p>Updating records</p>';
+	        print '<div><span id=updated_count>0</span> of '.count($updates).' records updated (<span id=percent2>0</span>%)</div>';
+
+	        $i = 0;
+	        foreach ($updates as $rec_id => $new_title) {
+		        mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+		        ++$i;
+		        if ($rec_id % $step_uiupdate == 0) {
+			        print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
+			        ob_flush();
+			        flush();
+		        }
+	        }
+	        foreach ($reparables as $rec_id) {
+		        $rec = $recs[$rec_id];
+		        if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
+			        $has_detail_160 = (mysql_num_rows(mysql_query("select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id)) > 0);
+			        //touch the record so we can update it  (required by the heuristdb triggers)
+			        mysql_query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
+			        if ($has_detail_160) {
+				        mysql_query('update recDetails set dtl_Value="' .$rec['rec_Title'] . "\" where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id);
+			        }else{
+				        mysql_query('insert into recDetails (dtl_RecID, dtl_Value) VALUES(' .$rec_id . ','.$rec['rec_Title'] . ')');
+			        }
+		        }
+	        }
+	        print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
+
+	        print '<hr><br/>';
+
+	        print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.
+            '">Click to view updated records</a><br/>&nbsp;<br/>';
+        }
+        if(count($blanks)>0){
+	        print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
+             '">Click to view records for which the data would create a blank title</a>'.
+            '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)<br/>or faulty data in individual records. These titles have not been changed.';
+        }
+
+        ob_flush();
+        flush();
+    ?>
     
-	print '<p>Updating records</p>';
-	print '<div><span id=updated_count>0</span> of '.count($updates).' records updated (<span id=percent2>0</span>%)</div>';
-
-	$i = 0;
-	foreach ($updates as $rec_id => $new_title) {
-		mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
-		++$i;
-		if ($rec_id % $step_uiupdate == 0) {
-			print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
-			ob_flush();
-			flush();
-		}
-	}
-	foreach ($reparables as $rec_id) {
-		$rec = $recs[$rec_id];
-		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
-			$has_detail_160 = (mysql_num_rows(mysql_query("select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id)) > 0);
-			//touch the record so we can update it  (required by the heuristdb triggers)
-			mysql_query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
-			if ($has_detail_160) {
-				mysql_query('update recDetails set dtl_Value="' .$rec['rec_Title'] . "\" where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id);
-			}else{
-				mysql_query('insert into recDetails (dtl_RecID, dtl_Value) VALUES(' .$rec_id . ','.$rec['rec_Title'] . ')');
-			}
-		}
-	}
-	print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
-
-	print '<hr><br/>';
-
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.
-    '">Click to view updated records</a><br/>&nbsp;<br/>';
-}
-if(count($blanks)>0){
-	print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
-     '">Click to view records for which the data would create a blank title</a>'.
-    '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)<br/>or faulty data in individual records. These titles have not been changed.';
-}
-
-ob_flush();
-flush();
-
-?>
-<div style="color: green;padding-top:10px;">
-If the titles of other record types depend on these titles, you should run Designer View > Utilities > Rebuild Titles to rebuild all record titles in the database
-<div>
-</body>
+    <div style="color: green;padding-top:10px;">
+        If the titles of other record types depend on these titles, you should run Designer View > Utilities > Rebuild Titles to rebuild all record titles in the database
+    <div>
+    </body>
 </html>

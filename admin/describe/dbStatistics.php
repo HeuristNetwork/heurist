@@ -33,10 +33,8 @@
     }
     
     mysql_connection_select();
-    
     $dbs = mysql__getdatabases(true);
     
-
     function mysql__select_val($query) {
         $res = mysql_query($query);
         if (!$res) {
@@ -108,12 +106,10 @@
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-        
     </head>
 
     <body class="popup yui-skin-sam">
 
-    
     <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
     <div id="page-inner">
         <div id="tabContainer"></div>
@@ -182,46 +178,44 @@
         ];
    
         var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
+        var tt = new YAHOO.widget.Tooltip("myTooltip");
         
-        
-            var tt = new YAHOO.widget.Tooltip("myTooltip");
-            
-            dt.on('cellMouseoverEvent', function (oArgs) {
-                if (showTimer) {
-                    window.clearTimeout(showTimer);
-                    showTimer = 0;
-                }
+        dt.on('cellMouseoverEvent', function (oArgs) {
+            if (showTimer) {
+                window.clearTimeout(showTimer);
+                showTimer = 0;
+            }
 
-                var target = oArgs.target;
-                var column = this.getColumn(target);
-                if (column.key == 'dbname') {
-                    var record = this.getRecord(target);
-                    var description = record.getData('owner') || '';
-                    if(description!=''){
-                    var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
+            var target = oArgs.target;
+            var column = this.getColumn(target);
+            if (column.key == 'dbname') {
+                var record = this.getRecord(target);
+                var description = record.getData('owner') || '';
+                if(description!=''){
+                var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 
-                    showTimer = window.setTimeout(function() {
-                        tt.setBody(description);
-                        tt.cfg.setProperty('xy',xy);
-                        tt.show();
-                        hideTimer = window.setTimeout(function() {
-                            tt.hide();
-                        },5000);
-                    },500);
-                    }
+                showTimer = window.setTimeout(function() {
+                    tt.setBody(description);
+                    tt.cfg.setProperty('xy',xy);
+                    tt.show();
+                    hideTimer = window.setTimeout(function() {
+                        tt.hide();
+                    },5000);
+                },500);
                 }
-            });
-            dt.on('cellMouseoutEvent', function (oArgs) {
-                if (showTimer) {
-                    window.clearTimeout(showTimer);
-                    showTimer = 0;
-                }
-                if (hideTimer) {
-                    window.clearTimeout(hideTimer);
-                    hideTimer = 0;
-                }
-                tt.hide();
-            });        
+            }
+        });
+        dt.on('cellMouseoutEvent', function (oArgs) {
+            if (showTimer) {
+                window.clearTimeout(showTimer);
+                showTimer = 0;
+            }
+            if (hideTimer) {
+                window.clearTimeout(hideTimer);
+                hideTimer = 0;
+            }
+            tt.hide();
+        });        
     </script>
     
     </body>

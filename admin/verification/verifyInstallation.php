@@ -28,7 +28,6 @@
 ?>
 
 <html>
-
     <head>
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
@@ -62,7 +61,6 @@
     </head>
 
     <body class="popup">
-
         <div class="banner">
             <h2>Verify Heurist installation</h2> 
         </div>
@@ -80,8 +78,6 @@
 
         Verification under development July 2014 <br />
         <?php
-
-
 
         ?>
         <br />

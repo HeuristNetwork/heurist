@@ -64,66 +64,65 @@
 	}
 ?>
 <html>
- <head>
+    <head>
+        <title>Import list of terms</title>
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
 
-  <title>Import list of terms</title>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <style type="text/css">
+          .success { font-weight: bold; color: green; margin-left: 3px; }
+          .failure { font-weight: bold; color: red; margin-left: 3px; }
+          .input-row div.input-header-cell {width:90px; vertical-align:baseline}
+        </style>
 
-  <style type="text/css">
-.success { font-weight: bold; color: green; margin-left: 3px; }
-.failure { font-weight: bold; color: red; margin-left: 3px; }
-.input-row div.input-header-cell {width:90px; vertical-align:baseline}
-  </style>
+        <!-- script type="text/javascript">
+  	       function onload(){
+  		      var result = null
+	       }
+        </script -->
+     </head>
 
-  <!-- script type="text/javascript">
-  	function onload(){
-  		var result = null
-	}
-  </script -->
- </head>
+     <body class="popup">
 
- <body class="popup">
+        <script type="text/javascript">
+  		        var result = null;
+        <?php   if ($res_array) { ?>
+			        result = <?=$res_array?>;
+        <?php	}  ?>
+        </script>
 
-<script type="text/javascript">
-  		var result = null;
-<?php   if ($res_array) { ?>
-			result = <?=$res_array?>;
-<?php	}  ?>
-</script>
+        <?php   if ($success_msg) { ?>
+          <div class="success"><?= $success_msg ?></div>
+        <?php	} else if ($failure_msg) { ?>
+          <div class="failure"><?= $failure_msg ?></div>
+        <?php	} ?>
 
+          <form action="editTermsImport.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
+               <input type="hidden" name="parent" value="<?= $parent_id ?>">
+               <input type="hidden" name="domain" value="<?= $domain ?>">
+               <input type="hidden" name="uploading" value="1">
 
-<?php   if ($success_msg) { ?>
-  <div class="success"><?= $success_msg ?></div>
-<?php	} else if ($failure_msg) { ?>
-  <div class="failure"><?= $failure_msg ?></div>
-<?php	} ?>
-
-  <form action="editTermsImport.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
-   <input type="hidden" name="parent" value="<?= $parent_id ?>">
-   <input type="hidden" name="domain" value="<?= $domain ?>">
-   <input type="hidden" name="uploading" value="1">
-
-
-   <div class="input-row">
-    	<div class="input-header-cell">Select file to import <br>(text file with one term per line)</div>
-        <div class="input-cell"><input type="file" name="import_file" style="display:inline-block;"></div>
-   </div>
-   <div class="input-row">
-    	<div class="input-header-cell">Does the file contain</div>
-        <div class="input-cell">
-        		<input type="checkbox" name="has_codes" value="1" style="display:inline-block;">Codes?
-        		<input type="checkbox" name="has_descr" value="1" style="display:inline-block;">Description?
-        </div>
-   </div>
-   <div class="actionButtons" style="padding-right:80px">
-   		Terms are imported as children of the currently selected term<p>
-   		<input type="button" onclick="window.document.forms[0].submit();" value="Import" style="margin-right:10px">
-   		<input type="button" value="Done" onClick="window.close(result);"></div>
-   </div>
-  </form>
- </body>
+               <div class="input-row">
+    	            <div class="input-header-cell">Select file to import <br>(text file with one term per line)</div>
+                    <div class="input-cell"><input type="file" name="import_file" style="display:inline-block;"></div>
+               </div>
+               
+               <div class="input-row">
+    	            <div class="input-header-cell">Does the file contain</div>
+                    <div class="input-cell">
+        		            <input type="checkbox" name="has_codes" value="1" style="display:inline-block;">Codes?
+        		            <input type="checkbox" name="has_descr" value="1" style="display:inline-block;">Description?
+                    </div>
+               </div>
+               
+               <div class="actionButtons" style="padding-right:80px">
+   		            Terms are imported as children of the currently selected term<p>
+   		            <input type="button" onclick="window.document.forms[0].submit();" value="Import" style="margin-right:10px">
+   		            <input type="button" value="Done" onClick="window.close(result);">
+               </div>  
+          </form>
+     </body>
 </html>
 <?php
 

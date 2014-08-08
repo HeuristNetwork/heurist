@@ -72,6 +72,7 @@ if (@$_REQUEST['delete_kwd_id']) {
 		$tag_message .= '<div class="failure">Tag was not deleted</div>';
 	}
 }
+
 if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 	mysql_connection_overwrite(DATABASE);
 	$kwd_from = intval(@$_REQUEST['update_kwd_from']);
@@ -94,6 +95,7 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 		$tag_message .= '<div class="failure">Tag not changed</div>';
 	}
 }
+
 if (@$_REQUEST['change_names']) {
 	mysql_connection_overwrite(DATABASE);
 	$orig_kwd_label = mysql__select_assoc('usrTags', 'tag_ID', 'tag_Text', 'tag_UGrpID='.get_user_id());
@@ -113,11 +115,13 @@ if (@$_REQUEST['change_names']) {
 	else
 		$tag_message .= '<div class="failure">Error of some sort: ' . mysql_error() . '</div>';
 }
+
 if (@$_REQUEST['replace_kwd']) {
 	mysql_connection_overwrite(DATABASE);
 	mysql_query('update usrRecTagLinks set rtl_TagID = '.intval(@$_REQUEST['replace_with_kwd_id']).' where rtl_TagID = '.intval($_REQUEST['replace_kwd_id']));
 	$tag_message .= '<div class="success">Tag replaced</div>';
 }
+
 if (@$_REQUEST['delete_multiple_kwds']) {
 	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
 	if (count($kwd_ids)) {
@@ -202,7 +206,6 @@ else if (@$_REQUEST['bookmark_import'])
 $template = str_replace('{tag_edit}', @$_REQUEST['tag_edit'], $template);
 $template = str_replace('{bookmark_import}', @$_REQUEST['bookmark_import'], $template);
 $template = str_replace('{body_only}', (array_key_exists('body_only', $_REQUEST)? '<input type=hidden name=body_only>' : ''), $template);
-
 $template = str_replace('{section}', @$_REQUEST['section'], $template);
 
 mysql_connection_select(USERS_DATABASE);
@@ -240,19 +243,19 @@ if (@$_REQUEST['order_by_popularity']) {
 $foreach_kwd = $foreach_kwd_js = '';
 while ($row = mysql_fetch_row($res)) {
 	$foreach_kwd .=
-'<tr>
- <td nowrap>
-  <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-  <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
-  <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
- </td>
- <td nowrap>' . $row[2] . '</td>
- <td class="u-cell">
-  <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
- </td>
- <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
- <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
-</tr>';
+        '<tr>
+         <td nowrap>
+          <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
+          <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
+          <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
+         </td>
+         <td nowrap>' . $row[2] . '</td>
+         <td class="u-cell">
+          <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
+         </td>
+         <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
+         <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
+        </tr>';
 
 	$foreach_kwd_js .= "kwd['".htmlspecialchars(strtolower($row[1]))."'] = ".$row[0].";\n";
 }

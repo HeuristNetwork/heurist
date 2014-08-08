@@ -44,7 +44,8 @@ if (mysql_error()) {
 if (!is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
 	return;
-}
+}                
+
 ?>
 <html>
 	<head>

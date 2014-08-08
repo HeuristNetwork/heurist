@@ -28,7 +28,6 @@
 ?>
 
 <html>
-
     <head>
         <script type=text/javascript>
             function open_selected(sname) {

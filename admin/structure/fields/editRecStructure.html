@@ -131,85 +131,78 @@
 				min-height:300;
 			}
 
+            .depth0 {
+	            margin-left: 0px;
+            }
+            .depth1 {
+	            margin-left: 10px;
+            }
+            .depth2 {
+	            margin-left: 20px;
+            }
+            .depth3 {
+	            margin-left: 30px;
+            }
+            .depth4 {
+	            margin-left: 40px;
+            }
+            .depth5 {
+	            margin-left: 50px;
+            }
+            .depth6 {
+	            margin-left: 60px;
+            }
+            .depth7 {
+	            margin-left: 70px;
+            }
 
-.depth0 {
-	margin-left: 0px;
-}
-.depth1 {
-	margin-left: 10px;
-}
-.depth2 {
-	margin-left: 20px;
-}
-.depth3 {
-	margin-left: 30px;
-}
-.depth4 {
-	margin-left: 40px;
-}
-.depth5 {
-	margin-left: 50px;
-}
-.depth6 {
-	margin-left: 60px;
-}
-.depth7 {
-	margin-left: 70px;
-}
+            .termHeader {
+	            font-weight: bold;
+	            color: black;
+            }
+            .dtyName {
+	            text-align:left;
+	            padding-left: 10px;
+	            padding-bottom: 3px;
+	            padding-top: 3px;
+	            font-weight: 200;
+            }
 
-.termHeader {
-	font-weight: bold;
-	color: black;
-}
-.dtyName {
-	text-align:left;
-	padding-left: 10px;
-	padding-bottom: 3px;
-	padding-top: 3px;
-	font-weight: 200;
-}
+            /* grey rows in datatable */
+            .yui-skin-sam .yui-dt tr.gray,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-desc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
+            .yui-skin-sam .yui-dt tr.gray td.yui-dt-desc {
+	            color: #aaaaaa;
+            }
 
-/* grey rows in datatable */
-.yui-skin-sam .yui-dt tr.gray,
-.yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
-.yui-skin-sam .yui-dt tr.gray td.yui-dt-desc,
-.yui-skin-sam .yui-dt tr.gray td.yui-dt-asc,
-.yui-skin-sam .yui-dt tr.gray td.yui-dt-desc {
-	color: #aaaaaa;
-}
-
-.yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
-   background-color: #aaaaaa; 
-}
-
+            .yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
+               background-color: #aaaaaa; 
+            }
 		</style>
-
 	</head>
 
 	<body class="popup yui-skin-sam" style="overflow: auto;">
 		<h2 id="recordTitle" style="margin:10px 0"></h2>
         <div id="page-inner" style="top:50px; bottom:60px;">
-		<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-		<script src="../../../common/php/displayPreferences.php"></script>
-		<script src="../../../common/php/getMagicNumbers.php"></script>
-		<script src="../../../common/php/loadCommonInfo.php"></script>
+        
+		    <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
+		    <script src="../../../common/php/displayPreferences.php"></script>
+		    <script src="../../../common/php/getMagicNumbers.php"></script>
+		    <script src="../../../common/php/loadCommonInfo.php"></script>
+		    <!-- script type="text/javascript" src="../../records/edit/editRecord.js"></script -->
+		    <script type="text/javascript" src="../../../records/edit/relationshipsObjectLibrary.js"></script>
 
+		    <script type="text/javascript" src="editRecStructure.js"></script>
+		    <script type="text/javascript" src="../terms/selectTerms.js"></script>
+		    <script type="text/javascript" src="../rectypes/selectRectype.js"></script>
+		    <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 
-		<!-- script type="text/javascript" src="../../records/edit/editRecord.js"></script -->
-		<script type="text/javascript" src="../../../records/edit/relationshipsObjectLibrary.js"></script>
-
-
-		<script type="text/javascript" src="editRecStructure.js"></script>
-		<script type="text/javascript" src="../terms/selectTerms.js"></script>
-		<script type="text/javascript" src="../rectypes/selectRectype.js"></script>
-		<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-
-
-
-<!--  class="yui-navset yui-navset-top"  -->
-		<div id="modelTabs" style="margin:auto;text-align:left;">
+            <!--  class="yui-navset yui-navset-top"  -->
+		    <div id="modelTabs" style="margin:auto;text-align:left;"></div>
 		</div>
-		</div>
+        
 		<div style="bottom:10px;left:10px; right:10px;text-align:left; position:absolute;" id="recStrcuture_bottom">
         	<span style="float:left">
               <i>Click row to edit field specifications. Drag arrows at left to change the order in the form.</i>
@@ -241,7 +234,6 @@
 				//  starts initialization on load completion of this window
 				//
 				YAHOO.util.Event.addListener(window, "load", function(){  editStructure = new  EditRecStructure(); });
-                
 		</script>
 	</body>
 </html>

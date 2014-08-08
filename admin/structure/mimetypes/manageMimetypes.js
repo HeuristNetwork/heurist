@@ -44,58 +44,56 @@ var Dom = YAHOO.util.Dom,
 */
 function MimetypeManager() {
 
-		var _className = "MimetypeManager",
-			_myDataTable,
-			_myDataSource,
-			_db;
-		//
-		// filtering UI controls
-		//
-		var	filterTimeout,
-			filterByName;
-
+	var _className = "MimetypeManager",
+		_myDataTable,
+		_myDataSource,
+		_db;
+	//
+	// filtering UI controls
+	//
+	var	filterTimeout,
+		filterByName;
 
 	/**
 	* Updates REMOTE filter conditions and loads data from server side
 	*/
 	var _updateFilter = function () {
+		/**
+		* Result handler for search on server
+		*/
+		function __updateList(context) {
 
-					/**
-					* Result handler for search on server
-					*/
-					function __updateList(context) {
+			var arr = [],
+				ind, entity;
 
-						var arr = [],
-							ind, entity;
+			if(!Hul.isnull(context)){
 
-						if(!Hul.isnull(context)){
+				var _list = context;
 
-							var _list = context;
+				for (ind in _list) {
+					if(!Hul.isnull(ind))
+					{
 
-							for (ind in _list) {
-								if(!Hul.isnull(ind))
-								{
+						entity = _list[ind];
 
-									entity = _list[ind];
+						arr.push([
+								entity.fxm_Extension,
+								entity.fxm_MimeType,
+								entity.fxm_OpenNewWindow,
+								entity.fxm_FiletypeName,
+								entity.fxm_IconFileName,
+								entity.fxm_ImagePlaceholder,
+								]);
+								//["ext", "mimetype", "newwin", "description", "icon", "thumb"]
+					}
+				}
+			}
+			_initTable(arr);
+		};
 
-									arr.push([
-											entity.fxm_Extension,
-											entity.fxm_MimeType,
-											entity.fxm_OpenNewWindow,
-											entity.fxm_FiletypeName,
-											entity.fxm_IconFileName,
-											entity.fxm_ImagePlaceholder,
-											]);
-											//["ext", "mimetype", "newwin", "description", "icon", "thumb"]
-								}
-							}
-						}
-						_initTable(arr);
-					};
-
-					var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
-					var params = "method=search&db=" + _db;
-					top.HEURIST.util.getJsonData(baseurl, __updateList, params);
+		var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
+		var params = "method=search&db=" + _db;
+		top.HEURIST.util.getJsonData(baseurl, __updateList, params);
 	};
 
 
@@ -103,20 +101,19 @@ function MimetypeManager() {
 	* Updates filter conditions for datatable
 	*/
 	var _updateFilterLocal  = function () {
+		// Reset sort
+		var state = _myDataTable.getState();
+		state.sortedBy = {key:'ext', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
-							// Reset sort
-							var state = _myDataTable.getState();
-							state.sortedBy = {key:'ext', dir:YAHOO.widget.DataTable.CLASS_ASC};
+		var filter_name   = filterByName.value;
 
-							var filter_name   = filterByName.value;
-
-							// Get filtered data
-							_myDataSource.sendRequest(filter_name, {
-								success : _myDataTable.onDataReturnInitializeTable,
-								failure : _myDataTable.onDataReturnInitializeTable,
-								scope   : _myDataTable,
-								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
-							});
+		// Get filtered data
+		_myDataSource.sendRequest(filter_name, {
+			success : _myDataTable.onDataReturnInitializeTable,
+			failure : _myDataTable.onDataReturnInitializeTable,
+			scope   : _myDataTable,
+			argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+		});
 	};
 
 
@@ -125,16 +122,14 @@ function MimetypeManager() {
 	*/
 	function _init()
 	{
+		if (location.search.length > 1) {
+			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+		}
+		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-
-			if (location.search.length > 1) {
-								//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-								top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			}
-			_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-			//////////////////// create data table
-			_initTable([]);
+		//////////////////// create data table
+		_initTable([]);
 	}
 
 	/**
@@ -143,25 +138,24 @@ function MimetypeManager() {
 	function _initTable(arr)
 	{
 
-	//if datatable exists, only refill ==========================
-				if(!Hul.isnull(_myDataTable)){
+	    //if datatable exists, only refill ==========================
+		if(!Hul.isnull(_myDataTable)){
 
-					// all stuff is already inited, change livedata in datasource only
-					_myDataSource.liveData = arr;
+			// all stuff is already inited, change livedata in datasource only
+			_myDataSource.liveData = arr;
 
-					//refresh table
-					_myDataSource.sendRequest("", {
-								success : _myDataTable.onDataReturnInitializeTable,
-								failure : _myDataTable.onDataReturnInitializeTable,
-								scope   : _myDataTable,
-								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
-					});
+			//refresh table
+			_myDataSource.sendRequest("", {
+						success : _myDataTable.onDataReturnInitializeTable,
+						failure : _myDataTable.onDataReturnInitializeTable,
+						scope   : _myDataTable,
+						argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+			});
 
-					return;
-				}
+			return;
+	        }
 
-	//create new datatable ==========================
-
+	        //create new datatable ==========================
 			_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
@@ -190,53 +184,51 @@ function MimetypeManager() {
 			});
 
 			var myColumnDefs = [
+			    /*{ key: "icon", label: "Edit", sortable:false,  width:20,
+				    formatter: function(elLiner, oRecord, oColumn, oData) {
+					    var sicon = oRecord.getData("icon");
+					    elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/'+sicon+'" width="16" height="16" border="0" title="Edit" /></a>';
+			    }},*/
 
-			/*{ key: "icon", label: "Edit", sortable:false,  width:20,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-					var sicon = oRecord.getData("icon");
-					elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/'+sicon+'" width="16" height="16" border="0" title="Edit" /></a>';
-			}},*/
+			    { key: "ext", label: "Extension", sortable:true, resizeable:false},
 
-			{ key: "ext", label: "Extension", sortable:true, resizeable:false},
+			    { key: "mimetype", label: "<div align='left'>Mime type (general type/specific type)</div>", sortable:true},
+			    { key: "newwin", label: "Open in new window", sortable:true,
+				    formatter: function(elLiner, oRecord, oColumn, oData) {
+					    var str = oRecord.getData("newwin");
+					    elLiner.innerHTML =  (str=="1")?'yes':'';
+			    }},
+			    { key: "description", label: "Descriptive name for this file type", sortable:false},
+			    { key: null, label: "Edit", sortable:false,  width:20,
+				    formatter: function(elLiner, oRecord, oColumn, oData) {
+					    elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>';
+			    }},
+			    { key: null, label: "Del", className:'center', sortable:false,
+				    formatter: function(elLiner, oRecord, oColumn, oData) {
+					    elLiner.innerHTML = '<div align="center"><a href="#delete"><img src="../../../common/images/cross.png" border="0" title="Delete" /><\/a></div>';
+				    }
+			    }
+			];
 
-			{ key: "mimetype", label: "<div align='left'>Mime type (general type/specific type)</div>", sortable:true},
-			{ key: "newwin", label: "Open in new window", sortable:true,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-					var str = oRecord.getData("newwin");
-					elLiner.innerHTML =  (str=="1")?'yes':'';
-			}},
-			{ key: "description", label: "Descriptive name for this file type", sortable:false},
-			{ key: null, label: "Edit", sortable:false,  width:20,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit"><img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>';
-			}},
-			{ key: null, label: "Del", className:'center', sortable:false,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<div align="center"><a href="#delete"><img src="../../../common/images/cross.png" border="0" title="Delete" /><\/a></div>';
-				}
-			}
-								];
+		    var myConfigs = {
+				//selectionMode: "singlecell",
+				paginator : new YAHOO.widget.Paginator({
+					rowsPerPage: 50, // REQUIRED
+					totalRecords: arr.length, // OPTIONAL
+					containers: ['dt_pagination_top','dt_pagination_bottom'],
+					// use a custom layout for pagination controls
+					template: "{PageLinks}",  //" Show {RowsPerPageDropdown} per page",
+					// show all links
+					pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
+					// use these in the rows-per-page dropdown
+					//, rowsPerPageOptions: [100]
+				})
+		    };
 
+		    _myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);
 
-		var myConfigs = {
-					//selectionMode: "singlecell",
-					paginator : new YAHOO.widget.Paginator({
-						rowsPerPage: 50, // REQUIRED
-						totalRecords: arr.length, // OPTIONAL
-						containers: ['dt_pagination_top','dt_pagination_bottom'],
-						// use a custom layout for pagination controls
-						template: "{PageLinks}",  //" Show {RowsPerPageDropdown} per page",
-						// show all links
-						pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
-						// use these in the rows-per-page dropdown
-						//, rowsPerPageOptions: [100]
-					})
-		};
-
-		_myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);
-
-		//click on action images
-		_myDataTable.subscribe('linkClickEvent', function(oArgs){
+		    //click on action images
+		    _myDataTable.subscribe('linkClickEvent', function(oArgs){
 
 				var dt = this;
 				var elLink = oArgs.target;
@@ -250,40 +242,40 @@ function MimetypeManager() {
 
 				}else if(elLink.hash === "#delete"){
 
-						YAHOO.util.Event.stopEvent(oArgs.event);
+					YAHOO.util.Event.stopEvent(oArgs.event);
 
-						var value = confirm("Do you really want to delete mimetype for extension '"+recID+"'?");
-						if(value) {
+					var value = confirm("Do you really want to delete mimetype for extension '"+recID+"'?");
+					if(value) {
 
-							function _updateAfterDelete(context) {
+						function _updateAfterDelete(context) {
 
-								if(!Hul.isnull(context))
-								{
-									dt.deleteRow(oRecord.getId(), -1);
-									alert("Mime type for extension "+recID+" was deleted");
-									top.HEURIST.rectypes = context.rectypes;
-								}
+							if(!Hul.isnull(context))
+							{
+								dt.deleteRow(oRecord.getId(), -1);
+								alert("Mime type for extension "+recID+" was deleted");
+								top.HEURIST.rectypes = context.rectypes;
 							}
-
-							var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
-							var callback = _updateAfterDelete;
-							var params = "method=delete&db=" + _db + "&recID=" + recID;
-							top.HEURIST.util.getJsonData(baseurl, callback, params);
-
 						}
+
+						var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";
+						var callback = _updateAfterDelete;
+						var params = "method=delete&db=" + _db + "&recID=" + recID;
+						top.HEURIST.util.getJsonData(baseurl, callback, params);
+
+					}
 				}
 
-		});
+		    });
 
-		// Subscribe to events for row selection
-		_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
-		_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
+		    // Subscribe to events for row selection
+		    _myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
+		    _myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
 
-		//init listeners for filter controls
-		_initListeners();
+		    //init listeners for filter controls
+		    _initListeners();
 
-		_updateFilter(); //fill table after creation
-	}//end of initialization =====================
+		    _updateFilter(); //fill table after creation
+	    }//end of initialization =====================
 
 
 	/**
@@ -292,13 +284,13 @@ function MimetypeManager() {
 	*/
 	function _initListeners()
 	{
-				filterByName = Dom.get('inputFilterByName');
-				if(!Hul.isnull(filterByName)){
-							filterByName.onkeyup = function (e) {
-								clearTimeout(filterTimeout);
-								filterTimeout = setTimeout(_updateFilterLocal, 600);
-							};
-				}
+		filterByName = Dom.get('inputFilterByName');
+		if(!Hul.isnull(filterByName)){
+					filterByName.onkeyup = function (e) {
+						clearTimeout(filterTimeout);
+						filterTimeout = setTimeout(_updateFilterLocal, 600);
+					};
+		}
 
 	} //end init listener
 
@@ -334,17 +326,15 @@ function MimetypeManager() {
 	//public members
 	//
 	var that = {
+		editMimetype: function(id){ _editMimetype( id ); },
 
-				editMimetype: function(id){ _editMimetype( id ); },
+		getClass: function () {
+			return _className;
+		},
 
-				getClass: function () {
-					return _className;
-				},
-
-				isA: function (strClass) {
-					return (strClass === _className);
-				}
-
+		isA: function (strClass) {
+			return (strClass === _className);
+		}
 	};
 
 	_init();  // initialize before returning

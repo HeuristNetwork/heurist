@@ -55,9 +55,7 @@ You must specify a record  (?recIDs=12345) a records set (?recIDs=12345,23456,67
 
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
-
 mysql_connection_overwrite(DATABASE);
-
 
 $res = mysql_query("select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_ID in ($recids) order by rand()");
 $recs = array();

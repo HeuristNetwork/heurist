@@ -65,8 +65,8 @@ print mysql_error() . "\n";
 
 ?>
 <style>
-td { text-align: center; }
-td:first-child { text-align: right; }
+    td { text-align: center; }
+    td:first-child { text-align: right; }
 </style>
 <?php
 

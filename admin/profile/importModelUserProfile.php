@@ -56,195 +56,195 @@ $updated = 0;
 if (@$_REQUEST['submit']) $updated = update_my_settings();
 
 ?>
+
 <html>
-<head>
- <title>Update settings from model user</title>
- <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-<style type="text/css">
-<!--
-table.normal {margin:10px 0}
--->
-</style>
-</head>
+    <head>
+     <title>Update settings from model user</title>
+     <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+    <style type="text/css">
+    <!--
+    table.normal {margin:10px 0}
+    -->
+    </style>
+    </head>
 
-<body class="popup" width=600 height=500 style="font-size: 11px;">
+    <body class="popup" width=600 height=500 style="font-size: 11px;">
+        <table border="0" cellpadding="3" cellspacing="0" width="100%" class="normal">
+            <tr>
+                <td align="left"><h2>Update my settings</h2></td>
+                <td align="right">&nbsp;</td>
+            </tr>
 
-<table border="0" cellpadding="3" cellspacing="0" width="100%" class="normal">
-  <tr>
-   <td align="left"><h2>Update my settings</h2></td>
-   <td align="right">&nbsp;</td>
-  </tr>
+            <tr>
+                <td><p>Listed below are tags, URLs and saved searches which you may wish to add to your profile.<br></p></td>
+            </tr>
 
-  <tr><td>
-    <p>Listed below are tags, URLs and saved searches which you may wish to add to your profile.<br></p>
-  </td></tr>
+        <?php	if ($updated) { ?>
+            <tr>
+                <td colspan="2">
+                    <span class="normalgr"><b>Settings have been updated</b></span>
+                </td>
+            </tr>
+        <?php	} ?>
 
-<?php	if ($updated) { ?>
-  <tr>
-   <td colspan="2">
-    <span class="normalgr"><b>Settings have been updated</b></span>
-   </td>
-  </tr>
-<?php	} ?>
+          <tr>
+              <td>
+               <form method="get">
+                    Show new data for:
+                    <select name="model_user_id" onChange="form.submit();">
+                        <?php
+	                        $res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as realname from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_IsModelUser=1");
+	                        while ($row = mysql_fetch_assoc($res)) { ?>
+                          <option value="<?=$row['ugr_ID']?>"<?=($row['ugr_ID']==MODEL_USER_ID ? ' selected' : '')?>><?=$row['realname']?></option>
+                        <?php	} ?>
+                    </select>
+               </form>
+               </td>
+          </tr>
 
-  <tr>
-  <td>
-   <form method="get">
-    Show new data for:
-    <select name="model_user_id" onChange="form.submit();">
-<?php
-	$res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as realname from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_IsModelUser=1");
-	while ($row = mysql_fetch_assoc($res)) { ?>
-  <option value="<?=$row['ugr_ID']?>"<?=($row['ugr_ID']==MODEL_USER_ID ? ' selected' : '')?>><?=$row['realname']?></option>
-<?php	} ?>
-    </select>
-   </form>
-   </td>
-  </tr>
+          <tr>
+            <td colspan="2">
+        <form method="post">
+            <input type="hidden" name="submit" value="1">
 
-  <tr>
-   <td colspan="2">
-<form method="post">
-<input type="hidden" name="submit" value="1">
+            <div class="separator_row" style="margin-top:20px"></div>
 
-<div class="separator_row" style="margin-top:20px"></div>
+            <table border="0" class="normal" style="text-align: left;">
+                <?php
+	                $res = tag_query();
+	                if (mysql_num_rows($res)) {
+                ?>
+                <tr><td colspan="3" style="font-weight: bold;" id="tag_section">Tags</td></tr>
+                <?php
+	                } else {
+                ?>
+                <tr><td colspan="3" id="tag_section">(no new tags)</td></tr>
+                <style type="text/css">
+                    <!--
+                    .keyword_link { display: none; }
+                    -->
+                </style>
+                <?php
+	                }
+	                while ($row = mysql_fetch_assoc($res)) {
+                ?>
+                  <tr>
+                   <td style="width: 16px;">&nbsp;</td>
+                   <td style="width: 16px;"><input type="checkbox" name="tag[<?= $row['tag_ID'] ?>]" value="1" checked class="tag"></td>
+                   <td><?= htmlspecialchars($row['tag_Text']) ?></td>
+                  </tr>
+                <?php
+	                }
+	                if (mysql_num_rows($res)) {
+                ?>
+                  <tr><td colspan="3">
+                    <span class="small">
+                        <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=true;">
+                        <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=false;">
+	                </span>
+                  </td></tr>
+                <?php
+	                }
+                ?>
+            </table>
+            
+            <div class="separator_row"></div>
+            
+            <table border="0" class="normal" style="text-align: left;">
+                <?php
+	                $res = bkmk_query();
+	                if (mysql_num_rows($res)) {
+                ?>
+                <tr><td colspan="3" style="font-weight: bold;" id="urls_section">URLs</td></tr>
+                <?php
+	                } else {
+                ?>
+                <tr><td colspan="3" id="urls_section">(no new URLs)</td></tr>
+                <style type="text/css">
+                    <!--
+                    .urls_link { display: none; }
+                    -->
+                </style>
+                
+                <?php
+	                }
+	                while ($row = mysql_fetch_assoc($res)) {
+                ?>
+                  <tr>
+                   <td style="width: 16px;">&nbsp;</td>
+                   <td style="width: 16px;"><input type="checkbox" name="bkmk[<?= $row['bkm_ID'] ?>]" value="1" checked class="bkmk"></td>
+                   <td><a href="<?= $row['rec_URL'] ?>" target="_testwindow"><?= htmlspecialchars($row['rec_Title']) ?></a></td>
+                  </tr>
+                <?php
+	                }
+	                if (mysql_num_rows($res)) {
+                ?>
+                  <tr><td colspan="3">
+                    <span class="small">
+                    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='bkmk') form.elements[i].checked=true;">
+                    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='bkmk') form.elements[i].checked=false;">
+	                </span>
+                  </td></tr>
+                <?php
+	                }
+                ?>
+            </table>
 
-<table border="0" class="normal" style="text-align: left;">
-<?php
-	$res = tag_query();
-	if (mysql_num_rows($res)) {
-?>
-<tr><td colspan="3" style="font-weight: bold;" id="tag_section">Tags</td></tr>
-<?php
-	} else {
-?>
-<tr><td colspan="3" id="tag_section">(no new tags)</td></tr>
-<style type="text/css">
-<!--
-.keyword_link { display: none; }
--->
-</style>
-<?php
-	}
-	while ($row = mysql_fetch_assoc($res)) {
-?>
-  <tr>
-   <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="tag[<?= $row['tag_ID'] ?>]" value="1" checked class="tag"></td>
-   <td><?= htmlspecialchars($row['tag_Text']) ?></td>
-  </tr>
-<?php
-	}
-	if (mysql_num_rows($res)) {
-?>
-  <tr><td colspan="3">
-    <span class="small">
-    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=true;">
-    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=false;">
-	</span>
-  </td></tr>
-<?php
-	}
-?>
+            <div class="separator_row"></div>
 
-</table>
-<div class="separator_row"></div>
-<table border="0" class="normal" style="text-align: left;">
-<?php
+            <table border="0" class="normal" style="text-align: left;">
+                <?php
+	                $res = saved_search_query();
+	                if (mysql_num_rows($res)) {
+                ?>  
+                <tr><td colspan="3" style="font-weight: bold;" id="ssearch_section">Saved searches</td></tr>
+                
+                <?php
+	                } else {
+                ?>
+                <tr><td colspan="3" id="urls_section">(no new saved searches)</td></tr>
+                
+                <style type="text/css">
+                    <!--
+                    .ssearch_link { display: none; }
+                    -->
+                </style>
+                
+                <?php
+	                }
+	                while ($row = mysql_fetch_assoc($res)) {
+                ?>
+                
+                <tr>
+                    <td style="width: 16px;">&nbsp;</td>
+                    <td style="width: 16px;"><input type="checkbox" name="ssearch[<?= $row['svs_ID'] ?>]" value="1" checked class="ssearch"></td>
+                    <td><a href="<?= $row['ss_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['svs_Name']) ?></a></td>
+                </tr>
+                
+                <?php
+	                }
+	                if (mysql_num_rows($res)) {
+                ?>
+                    <tr><td colspan="3">
+                        <span class="small">
+                            <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='ssearch') form.elements[i].checked=true;">
+                            <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='ssearch') form.elements[i].checked=false;">
+	                    </span>
+                    </td></tr>
+                <?php
+	                }
+                ?>
+            </table>
+            
+            <div class="separator_row"></div>
 
-	$res = bkmk_query();
-	if (mysql_num_rows($res)) {
-?>
-<tr><td colspan="3" style="font-weight: bold;" id="urls_section">URLs</td></tr>
-<?php
-	} else {
-?>
-<tr><td colspan="3" id="urls_section">(no new URLs)</td></tr>
-<style type="text/css">
-<!--
-.urls_link { display: none; }
--->
-</style>
-<?php
-	}
-	while ($row = mysql_fetch_assoc($res)) {
-?>
-  <tr>
-   <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="bkmk[<?= $row['bkm_ID'] ?>]" value="1" checked class="bkmk"></td>
-   <td><a href="<?= $row['rec_URL'] ?>" target="_testwindow"><?= htmlspecialchars($row['rec_Title']) ?></a></td>
-  </tr>
-<?php
-	}
-	if (mysql_num_rows($res)) {
-?>
-  <tr><td colspan="3">
-    <span class="small">
-    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='bkmk') form.elements[i].checked=true;">
-    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='bkmk') form.elements[i].checked=false;">
-	</span>
-  </td></tr>
-<?php
-	}
-?>
-</table>
-
-<div class="separator_row"></div>
-
-<table border="0" class="normal" style="text-align: left;">
-<?php
-
-	$res = saved_search_query();
-	if (mysql_num_rows($res)) {
-?>
-<tr><td colspan="3" style="font-weight: bold;" id="ssearch_section">Saved searches</td></tr>
-<?php
-	} else {
-?>
-<tr><td colspan="3" id="urls_section">(no new saved searches)</td></tr>
-<style type="text/css">
-<!--
-.ssearch_link { display: none; }
--->
-</style>
-<?php
-	}
-	while ($row = mysql_fetch_assoc($res)) {
-?>
-  <tr>
-   <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="ssearch[<?= $row['svs_ID'] ?>]" value="1" checked class="ssearch"></td>
-   <td><a href="<?= $row['ss_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['svs_Name']) ?></a></td>
-  </tr>
-<?php
-	}
-	if (mysql_num_rows($res)) {
-?>
-  <tr><td colspan="3">
-    <span class="small">
-    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='ssearch') form.elements[i].checked=true;">
-    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='ssearch') form.elements[i].checked=false;">
-	</span>
-  </td></tr>
-<?php
-	}
-?>
-
-</table>
-<div class="separator_row"></div>
-  </td>
-  </tr>
-</table>
-
-<table border="0" cellpadding="3" cellspacing="0" width="100%">
-  <tr>
-    <td align="right"><span class="small"><input type="button" value="Add selected items" style="font-weight: bold;"></span>&nbsp;&nbsp;</td>
-  </tr>
-</table>
-
-</form>
-
-</body>
+            <table border="0" cellpadding="3" cellspacing="0" width="100%">
+                <tr>
+                    <td align="right"><span class="small"><input type="button" value="Add selected items" style="font-weight: bold;"></span>&nbsp;&nbsp;</td>
+                </tr>
+            </table>
+        </form>
+    </body>
 </html>
 <?php
 /* ----- END OF OUTPUT ----- */

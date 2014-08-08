@@ -53,73 +53,75 @@ while ($row = mysql_fetch_assoc($res)) {
     	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 	</head>
-<body class="popup">
+    
+    <body class="popup">
+        <div class="banner"><h2>Check Wysiwyg Texts</h2></div>
+        
+        <div id="page-inner" style="overflow:auto;padding-left: 20px;">
+            <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr /></div>
+        
+            <table class="wysiwygCheckTable">
+                <?php
 
-<div class="banner"><h2>Check Wysiwyg Texts</h2></div>
-<div id="page-inner" style="overflow:auto;padding-left: 20px;">
+                foreach ($woots as $woot) {
+	                $valid = true;
+	                $errs = array();
 
-<div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr /></div>
-<table class="wysiwygCheckTable">
-<?php
+	                //print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
 
-foreach ($woots as $woot) {
-	$valid = true;
-	$errs = array();
+	                $res = mysql_query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
+	                while ($row = mysql_fetch_assoc($res)) {
+		                $err = check($row["chunk_Text"]);
+		                if ($err) {
+			                $valid = false;
+			                array_push($errs, $err);
+		                }
+	                }
 
-	//print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
+	                if ($valid) {
+		                //print "ok\n";
+	                } else {
+                        print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
+		                print $woot["woot_Title"] . "'>";
+                        print $woot["woot_Title"];
+                        print "</a></td>\n";
 
-	$res = mysql_query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
-	while ($row = mysql_fetch_assoc($res)) {
-		$err = check($row["chunk_Text"]);
-		if ($err) {
-			$valid = false;
-			array_push($errs, $err);
-		}
-	}
+		                print "<td>" . htmlspecialchars(join("\n", $errs)) . "s</td></tr>\n";
+	                }
+                }
 
-	if ($valid) {
-		//print "ok\n";
-	} else {
-        print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
-		print $woot["woot_Title"] . "'>";
-        print $woot["woot_Title"];
-        print "</a></td>\n";
+                function check($html) {
+                //print "text: $html\n";
+	                $descriptorspec = array(
+		                0 => array("pipe", "r"),
+		                2 => array("pipe", "w"),
+	                );
+	                $proc = proc_open("xmllint -o /dev/null -", $descriptorspec, $pipes);
 
-		print "<td>" . htmlspecialchars(join("\n", $errs)) . "s</td></tr>\n";
-	}
-}
+	                fwrite($pipes[0], "<html>" . $html . "</html>");
+	                fclose($pipes[0]);
 
-function check($html) {
-//print "text: $html\n";
-	$descriptorspec = array(
-		0 => array("pipe", "r"),
-		2 => array("pipe", "w"),
-	);
-	$proc = proc_open("xmllint -o /dev/null -", $descriptorspec, $pipes);
+	                $out = stream_get_contents($pipes[2]);
+	                fclose($pipes[2]);
 
-	fwrite($pipes[0], "<html>" . $html . "</html>");
-	fclose($pipes[0]);
+	                $rv = proc_close($proc);
+                //print "rv: $rv\n";
+                //print "out: $out\n";
 
-	$out = stream_get_contents($pipes[2]);
-	fclose($pipes[2]);
+	                if ($rv != 0) {
+		                return $out;
+	                } else {
+		                return 0;
+	                }
+                }
 
-	$rv = proc_close($proc);
-//print "rv: $rv\n";
-//print "out: $out\n";
-
-	if ($rv != 0) {
-		return $out;
-	} else {
-		return 0;
-	}
-}
-
-?>
-</table>
-<p>&nbsp;</p>
-<p>
-[end of check]
-</p>
-</div>
-</body>
+                ?>
+            </table>
+            
+            <p>&nbsp;</p>
+            <p>
+            [end of check]
+            </p>
+        </div>
+    </body>
 </html>

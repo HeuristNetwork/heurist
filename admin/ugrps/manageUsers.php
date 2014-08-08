@@ -58,8 +58,6 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 ?>
 <html>
 	<head>
-
-
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Manage Users</title>
 
@@ -151,150 +149,149 @@ $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 	</head>
 
 	<body class="popup yui-skin-sam" style="overflow:auto;">
-    <div>
-<?php if(!$isPopup){ ?>
-    	<div class="banner" id="titleBanner"><h2>Manage Users</h2></div>
-<?php } ?>
-		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-		<script src="../../common/php/displayPreferences.php"></script>
+        <div>
+            <?php if(!$isPopup){ ?>
+    	        <div class="banner" id="titleBanner"><h2>Manage Users</h2></div>
+            <?php } ?>
+            
+		    <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+		    <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+		    <script src="../../common/php/displayPreferences.php"></script>
 
-		<!-- access to functions about current user -->
-		<script src="loadUserInfoShort.php"></script>
-		<script type="text/javascript" src="manageUsers.js"></script>
+		    <!-- access to functions about current user -->
+		    <script src="loadUserInfoShort.php"></script>
+		    <script type="text/javascript" src="manageUsers.js"></script>
 
-		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
+		    <div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-	<div id="page-inner">
+	        <div id="page-inner">
+			    <div id="currUserInfo"></div>
 
-			<div id="currUserInfo"></div>
+			    <!-- <h2 id="lblGroupTitleSelection" class="selection"></h2> -->
 
-			<!-- <h2 id="lblGroupTitleSelection" class="selection"></h2> -->
+			    <div  style="float: left;">
+				    <div id="pnlFilterByGroup">
+                            <label style="width:120px;display:inline-block;text-align:right" for="inputFilterByGroup">Filter by group:</label>
+                                <select id="inputFilterByGroup" size="1" style="width:138px">
+                                    <option value="all">all groups</option>
+                                </select>
+						    <!-- Too many bells and whistles, really confusing, will never have more than a few groups
+                            <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter pulldown:</label>
+						    <input type="text" id="inputFilterGroup"  style="width:40px;" value=""/> (3+ characters)
+                            -->
+				    </div>
 
-			<div  style="float: left;">
-				<div id="pnlFilterByGroup">
-                        <label style="width:120px;display:inline-block;text-align:right" for="inputFilterByGroup">Filter by group:</label>
-                            <select id="inputFilterByGroup" size="1" style="width:138px">
-                                <option value="all">all groups</option>
-                            </select>
-						<!-- Too many bells and whistles, really confusing, will never have more than a few groups
-                        <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter pulldown:</label>
-						<input type="text" id="inputFilterGroup"  style="width:40px;" value=""/> (3+ characters)
-                        -->
-				</div>
+				    <!--
+				    <div id="pnlGroupTitle" style="display:none;">
+					    <h2 id="lblGroupTitle"></h2>
+				    </div>
+				    -->
 
-				<!--
-				<div id="pnlGroupTitle" style="display:none;">
-					<h2 id="lblGroupTitle"></h2>
-				</div>
-				-->
+                    <div id="pnlFilterByRole" style="display:none;">
+					    <br>
+                        <label for="inputFilterByRole" style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
+					    <select id="inputFilterByRole" name="inputFilterByRole" size="1" style="width:75px">
+						    <option value="all">all roles</option>
+						    <option value="admin">admin</option>
+						    <option value="member">member</option>
+						    <!-- <option value="invited">invited</option>
+						    <option value="request">request</option> -->
+                	    </select>
+				    </div>
+			    </div>
 
-                <div id="pnlFilterByRole" style="display:none;">
-					<br>
-                    <label for="inputFilterByRole" style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
-					<select id="inputFilterByRole" name="inputFilterByRole" size="1" style="width:75px">
-						<option value="all">all roles</option>
-						<option value="admin">admin</option>
-						<option value="member">member</option>
-						<!-- <option value="invited">invited</option>
-						<option value="request">request</option> -->
-                	</select>
-				</div>
+			    <div id="dbOwnerInfo" style="display:none;float: right; width:40%">
+                    <i>User #2 - the first in this group - is the OWNER of this database (the only user who can register the database with the Heurist master index, who receives email to the owner and is permitted certain destructive actions)</i>
+			    </div>
 
-			</div>
+                <p></p>
 
-			<div id="dbOwnerInfo" style="display:none;float: right; width:40%"><i>User #2 - the first in this group - is the OWNER of this database (the only user who can register the database with the Heurist master index, who receives email to the owner and is permitted certain destructive actions)</i>
-			</div>
+			    <div id="toolbar2" style="clear: both;text-align: left;">
 
-            <p></p>
+				    <label style="width:120px;display:inline-block;text-align:right">Filter by name:</label>
+					    <input type="text" id="inputFilterByName" style="width:140px;" value=""/>
 
-			<div id="toolbar2" style="clear: both;text-align: left;">
+				    <div id="divFilterByEnable" class="listing">
+					    <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <input type="radio" id="inputFilterByEnable1" name="inputFilterByDisbale"
+                                value="all" checked="checked"/>&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="inputFilterByEnable2" name="inputFilterByDisbale"
+                                value="disbledonly"/> &nbsp;&nbsp;Inactive
+				    </div>
 
-				<label style="width:120px;display:inline-block;text-align:right">Filter by name:</label>
-					<input type="text" id="inputFilterByName" style="width:140px;" value=""/>
+				    <div id="divFilterBySelection" class="selection">
+					    <label>Show:</label>
+                        <input type="radio" id="inputFilterBySelection1"
+                                name="inputFilterBySelection" value="all" checked="checked"/>&nbsp;All&nbsp;
+                        <input type="radio" id="inputFilterBySelection2"
+                                name="inputFilterBySelection" value="selonly"/> Selected
 
-				<div id="divFilterByEnable" class="listing">
-					<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <input type="radio" id="inputFilterByEnable1" name="inputFilterByDisbale"
-                            value="all" checked="checked"/>&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
-                    <input type="radio" id="inputFilterByEnable2" name="inputFilterByDisbale"
-                            value="disbledonly"/> &nbsp;&nbsp;Inactive
-				</div>
+                    <!--&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/> -->
+				    </div>
 
-				<div id="divFilterBySelection" class="selection">
-					<label>Show:</label>
-                    <input type="radio" id="inputFilterBySelection1"
-                            name="inputFilterBySelection" value="all" checked="checked"/>&nbsp;All&nbsp;
-                    <input type="radio" id="inputFilterBySelection2"
-                            name="inputFilterBySelection" value="selonly"/> Selected
+			    </div>
 
-                <!--&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/> -->
-				</div>
+			    <div id="tb_top" style="height:30">
+				    <div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
+				    <!-- selection controls -->
+				    <div id="pnlCtrlSel1"  class="selection" style="float:right; text-align:right;padding-top:5px;">
+					    <label id="lblSelect1"></label>
+					    <input type="button" tabindex="12" value="Cancel" onClick="userManager.cancel();" />
+					    <input type="button" tabindex="11" id="btnApply1" value="Add Users to Group" onClick="userManager.returnSelection();" />
+				    </div>
+				    <!-- edit contols -->
+				    <div class="listing" style="float:right; text-align:right;padding-top:5px;">
+					    <?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
+						    <input type="button" tabindex="13" id="btnBack1" value="Back to Groups" onClick="{backToGroup()};" />
+					    <?php } ?>
+					    <div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px;padding-left:2px">
+						    <div id="pnlAdd1" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" /></div>
+						    <div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
+							    title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+					    </div>
+				    </div>
+			    </div>
 
-			</div>
+			    <div id="tabContainer">
+				    <script  type="text/javascript">
 
-			<div id="tb_top" style="height:30">
-				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
-				<!-- selection controls -->
-				<div id="pnlCtrlSel1"  class="selection" style="float:right; text-align:right;padding-top:5px;">
-					<label id="lblSelect1"></label>
-					<input type="button" tabindex="12" value="Cancel" onClick="userManager.cancel();" />
-					<input type="button" tabindex="11" id="btnApply1" value="Add Users to Group" onClick="userManager.returnSelection();" />
-				</div>
-				<!-- edit contols -->
-				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
-						<input type="button" tabindex="13" id="btnBack1" value="Back to Groups" onClick="{backToGroup()};" />
-					<?php } ?>
-					<div id="pnlCtrlEdit1" style="float:right; text-align:right;padding-right:2px;padding-left:2px">
-						<div id="pnlAdd1" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd1" value="Create New User" onClick="userManager.editUser(-1);" /></div>
-						<div id="btnSelectAdd1"><input type="button" tabindex="11" value="Find and Add User"
-							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
-					</div>
-				</div>
-			</div>
+				    function backToGroup(){
+					    window.location.href = top.HEURIST.baseURL + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
+					    //window.history.go(-1);
+				    }
 
-			<div id="tabContainer">
+				    //  starts initialization on load completion of this window
+				    function createManagerObj(){
+					    userManager = new  UserManager(false, false, true); //nonfilter, no selection, in window
+				    }
+				    YAHOO.util.Event.addListener(window, "load", createManagerObj);
 
-				<script  type="text/javascript">
-
-				function backToGroup(){
-					window.location.href = top.HEURIST.baseURL + "admin/ugrps/manageGroups.php?db=<?=$_REQUEST['db']?>&popup=<?=@$_REQUEST['popup']?>";
-					//window.history.go(-1);
-				}
-
-				//  starts initialization on load completion of this window
-				function createManagerObj(){
-					userManager = new  UserManager(false, false, true); //nonfilter, no selection, in window
-				}
-				YAHOO.util.Event.addListener(window, "load", createManagerObj);
-
-				</script>
-			</div>
+				    </script>
+			    </div>
 
 
-			<div id="tb_top" style="height:30">
-				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_bottom"></div></div>
+			    <div id="tb_top" style="height:30">
+				    <div style="display:inline-block; max-width:150;"><div id="dt_pagination_bottom"></div></div>
 
-				<!-- selection controls -->
-				<div id="pnlCtrlSel1"  class="selection" style="float:right; text-align:right;padding-top:5px;">
-					<label id="lblSelect1"></label>
-					<input type="button" tabindex="12" value="Cancel" onClick="userManager.cancel();" />
-					<input type="button" tabindex="11" id="btnApply2" value="Add Users to Group" onClick="userManager.returnSelection();" />
-				</div>
-				<!-- edit contols -->
-				<div class="listing" style="float:right; text-align:right;padding-top:5px;">
-					<?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
-						<input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
-					<?php } ?>
-					<div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">
-						<div id="pnlAdd2" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" /></div>
-						<div id="btnSelectAdd2"><input type="button" tabindex="11" value="Find and Add User"
-							title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
-					</div>
-				</div>
-			</div>
-	</div></div>
-
+				    <!-- selection controls -->
+				    <div id="pnlCtrlSel1"  class="selection" style="float:right; text-align:right;padding-top:5px;">
+					    <label id="lblSelect1"></label>
+					    <input type="button" tabindex="12" value="Cancel" onClick="userManager.cancel();" />
+					    <input type="button" tabindex="11" id="btnApply2" value="Add Users to Group" onClick="userManager.returnSelection();" />
+				    </div>
+				    <!-- edit contols -->
+				    <div class="listing" style="float:right; text-align:right;padding-top:5px;">
+					    <?php if(array_key_exists('grpID', $_REQUEST) && $isPopup){?>
+						    <input type="button" tabindex="13" id="btnBack2" value="Back to Groups" onClick="{backToGroup()};" />
+					    <?php } ?>
+					    <div id="pnlCtrlEdit2" style="float:right; text-align:right;padding-right:2px">
+						    <div id="pnlAdd2" style="display: inline-block;"><input type="button" tabindex="12" id="btnAdd2" value="Create New User" onClick="userManager.editUser(-1);" /></div>
+						    <div id="btnSelectAdd2"><input type="button" tabindex="11" value="Find and Add User"
+							    title="Find and add user to this group" onClick="userManager.findAndAddUser();" /></div>
+					    </div>
+				    </div>
+			    </div>
+            </div>
+	    </div>
 	</body>
 </html>

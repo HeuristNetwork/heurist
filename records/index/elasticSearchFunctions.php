@@ -107,9 +107,9 @@
         $res = mysql_query($query);
 
         if (($res) && ($row[3] != $recTypeID)) {// record type has changed
-
             // TODO: Delete index for old record type before updating index for new record type
-
+            deleteRecordIndexEntry($dbName, $recTypeID, $recID);
+            
         } // change of record type / delete existing index entry
 
         if ($res) { // add record level data to json
@@ -143,7 +143,8 @@
                 // with textual keys from the Record itself
                 // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
                 // Curent code makes the simplistic assumption that only one of these three 
-                // fields is set or the cioncat is useful. TODO: Verify if this is the case                
+                // fields is set or the cioncat is useful. TODO: Verify if this is the case         
+                
             }
         }
 

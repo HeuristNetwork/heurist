@@ -31,7 +31,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
 	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 
 	$legalMethods = array(
@@ -210,26 +209,23 @@ exit();
 
 				if (array_key_exists($colName, $defFileExtToMimetype))
 				{
-
 					if($query!="") $query = $query.",";
 
 					if($isInsert){
-							if($colName == "fxm_Extension"){
-								$recID = $val;
-								$parameters2[0] = $defFileExtToMimetype[$colName]; //take datatype from array
-								array_push($parameters2, $val);
-							}
-							$query = $query."?";
+						if($colName == "fxm_Extension"){
+							$recID = $val;
+							$parameters2[0] = $defFileExtToMimetype[$colName]; //take datatype from array
+							array_push($parameters2, $val);
+						}
+						$query = $query."?";
 					}else{
-							$query = $query."$colName = ?";
+						$query = $query."$colName = ?";
 					}
 
 					$parameters[0] = $parameters[0].$defFileExtToMimetype[$colName]; //take datatype from array
 					array_push($parameters, $val);
-
 				}
 			}//for columns
-
 
 					//check for duplication
 			/*if($isInsert){
@@ -265,8 +261,6 @@ exit();
 					}
 				}
 			}
-
-
 
 			$db->close();
 		}//if column names

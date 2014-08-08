@@ -57,7 +57,6 @@
                 cursor:pointer !important;
             }
         </style>
-
     </head>
 
     <body class="popup yui-skin-sam" style="overflow: auto;">
@@ -69,11 +68,16 @@
             The list below shows available databases registered with the HeuristScholar.org Index database 
             which have the same major/minor version as the current database<br />
             Use the filter to locate a specific term in the name or title. 
-            Click the database icon on the left to view available record types in that database.<br />
+            Click the database icon on the left to view available record types in that database.
+            <br />
             <b>Bolded</b> databases contain collections of schemas curated by the Heurist team or members of the Heurist community
-            <br />            <h4>Older (or newer) format registered databases may not be shown, 
-                as this list only shows databases with format version number <?=HEURIST_DBVERSION?>.</h4>
-
+            
+            <br />
+            
+            <h4>
+                Older (or newer) format registered databases may not be shown, 
+                as this list only shows databases with format version number <?=HEURIST_DBVERSION?>.
+            </h4>
 
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter:</label> <input type="text" id="filter" value="">
