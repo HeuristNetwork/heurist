@@ -37,49 +37,49 @@
 		<link rel=stylesheet href="../../../common/css/admin.css">
 
         <script>
-if (!window['postMessage'])
-    alert("postMessage is not supported");
-else {
-    if (window.addEventListener) {
-        //alert("standards-compliant");
-        // For standards-compliant web browsers (ie9+)
-        window.addEventListener("message", function(event){alert('!!!!')}, false);
-    }
-    else {
-        //alert("not standards-compliant (ie8)");
-        window.attachEvent("onmessage", receiveMessage);
-    }
-}
-function receiveMessage(event)
-{
-            var message;
-            if (event.origin !== "http://heuristscholar.org"){
-            //if (false) {
-                message = 'You ("' + event.origin + '") are not worthy';
-            } else {
-                message = 'I got "' + event.data + '" from "' + event.origin + '"';
-                document.getElementById('header-full').style.display = 'none';
-                document.getElementById('topbar').style.display = 'none';
-                document.getElementById('footer').style.display = 'none';
+            if (!window['postMessage'])
+                alert("postMessage is not supported");
+            else {
+                if (window.addEventListener) {
+                    //alert("standards-compliant");
+                    // For standards-compliant web browsers (ie9+)
+                    window.addEventListener("message", function(event){alert('!!!!')}, false);
+                }
+                else {
+                    //alert("not standards-compliant (ie8)");
+                    window.attachEvent("onmessage", receiveMessage);
+                }
             }
-            alert(message);
-}        
+            
+            function receiveMessage(event)
+            {
+                var message;
+                if (event.origin !== "http://heuristscholar.org"){
+                //if (false) {
+                    message = 'You ("' + event.origin + '") are not worthy';
+                } else {
+                    message = 'I got "' + event.data + '" from "' + event.origin + '"';
+                    document.getElementById('header-full').style.display = 'none';
+                    document.getElementById('topbar').style.display = 'none';
+                    document.getElementById('footer').style.display = 'none';
+                }
+                alert(message);
+            }        
         </script>
 	</head>
 
 	<body>
+        <!--
+         
+            TODO: Artem, at this point allow the user to browse the web pages starting at http://heuristnetwork.org/annotated-templates
+            If possible, strip out page furniture around the content
+            Add an [Import into database] link below or to the right of the page title (record type name)
+            Pick up database and record type ID to get structurer from recorded as 
+            hidden metadata embedded in page eg. <RecTypeSource>1234-567</RecTypeSource>
+        
+        -->
             
-            <!--
-             
-                TODO: Artem, at this point allow the user to browse the web pages starting at http://heuristnetwork.org/annotated-templates
-                If possible, strip out page furniture around the content
-                Add an [Import into database] link below or to the right of the page title (record type name)
-                Pick up database and record type ID to get structurer from recorded as 
-                hidden metadata embedded in page eg. <RecTypeSource>1234-567</RecTypeSource>
-            
-            -->
-                
-			<p>Function under development April 2014<br />
+		<p>Function under development April 2014<br />
 
 	</body>
 </html>

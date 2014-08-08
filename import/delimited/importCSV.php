@@ -494,7 +494,7 @@
         <?php
             if(@$imp_session['load_warnings']){
                 print "<div style='padding:20px;'><span style='color:red;font-size:14px; font-weight:bold'>"
-                ."Warning: there are errors in the data read</span>"
+                ."Warning: there are errors in the data read</span>&nbsp;"
                 .$imp_session['load_warnings'][0]."&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'><b>show errors &gt;</b></a></div>";
             }
         ?>
@@ -1099,6 +1099,10 @@
             else if (! is_readable($filename)) return 'file is not readable';
                 else return 'file could not be read';
         }
+        
+        //fgetcsv и str_getcsv depends on server locale
+        // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
+        setlocale(LC_ALL, 'en_US.utf8');
 
         // read header
         if($csv_linebreak=="auto"){
@@ -1254,7 +1258,7 @@
     multivalues
     */
     function preprocess_uploaded_file($filename){
-
+                            
         $errors = array();
         $err_encoding = array();
         $memos = array();  //multiline fields
@@ -1311,17 +1315,13 @@
                 $line = stream_get_line($handle, 1000000, $lb);
             }
 
-            if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
+            if(false && count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
                 array_push($err_encoding, array("no"=>$line_no, "line"=>substr($line,0,2000)));
                 //if(count($err_encoding)>100) break;
             }
 
-print $line."<br>";            
-
             $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
 
-print print_r($fields, true)."<br>";            
-            
             if($len==0){
                 $header = $fields;
                 $len = count($fields);

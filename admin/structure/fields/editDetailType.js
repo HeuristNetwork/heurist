@@ -40,12 +40,9 @@ function checkIfInteger(evt) {
     }
 }
 
-
-
 //aliases
 var Dom = YAHOO.util.Dom,
 Hul = top.HEURIST.util;
-
 
 var detailTypeEditor;
 /**

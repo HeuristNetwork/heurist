@@ -22,7 +22,7 @@
 
     define('SAVE_URI', 'disabled');
 
-    // TODO: REMOVE define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+    // TODO: REMOVE define('dirname(__FILE__)', dirname(__FILE__));     // this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
@@ -54,9 +54,7 @@
 ?>
 
 <html>
-
     <head>
-
         <title>Import list of terms into current branch</title>
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
@@ -67,9 +65,7 @@
             .failure { font-weight: bold; color: red; margin-left: 3px; }
             .input-row div.input-header-cell {width:90px; vertical-align:baseline}
         </style>
-
     </head>
-
 
     <body class="popup">
 
@@ -77,7 +73,7 @@
             var result = null;
             <?php   if ($res_array) { ?>
                 result = <?=$res_array?>;
-                <?php	}
+                <?php   }
             ?>
         </script>
 
@@ -85,10 +81,10 @@
         <?php   if ($success_msg) { ?>
             <div class="success"><?= $success_msg ?>
             </div>
-            <?php	} else if ($failure_msg) { ?>
+            <?php       } else if ($failure_msg) { ?>
             <div class="failure"><?= $failure_msg ?>
             </div>
-            <?php	}
+            <?php       }
         ?>
 
         <form action="editTermsImport.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" style="border: 0px;">

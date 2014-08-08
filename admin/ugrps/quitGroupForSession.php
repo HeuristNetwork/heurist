@@ -30,7 +30,6 @@
         return;
     }
 
-
     if ($_COOKIE['heurist-sessionid']) session_id($_COOKIE['heurist-sessionid']);
     session_start();
 
@@ -45,7 +44,6 @@
 
 ?>
 
-
 <html>
     <head>
         <title>Modify group/admin status for session</title>
@@ -53,6 +51,7 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
+    
     <body class="popup">
         <div class="banner"><h2>Modify group / admin status for session</h2></div>
         <div id="page-inner">

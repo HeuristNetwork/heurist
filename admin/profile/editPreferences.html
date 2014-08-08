@@ -42,14 +42,11 @@
                 text-align: right;
             }
         </style>
-
     </head>
 
     <body class="popup" onLoad="showPreferences()" width="640" height="660">
-
         <script src="../../common/js/utilsLoad.js"></script>
         <script>
-
             var mybkm, agg, navi, favsrch;
 
             // Note: "Preferences are defined in /common/php/displayPreferences
@@ -105,7 +102,6 @@
 
                 var edadv = top.HEURIST.util.getDisplayPreference("record-edit-advancedmode");
                 document.getElementById("record-edit-advancedmode").checked = (edadv!=='false');
-
             }
 
             function save() {
@@ -125,39 +121,12 @@
                 var showquery = (document.getElementById("showSearchQueryInBrowser").checked)?'true':'false';
                 var edadv = (document.getElementById("record-edit-advancedmode").checked)?'true':'false';
 
-
                 if (isNaN(rpp) || rpp < 1 || rpp > 500) {
                     alert("Results per page must be between 1 and 500");
                     return;
                 }
 
-                var mol = parseInt(document.getElementById("report-output-limit").value);
-                if (isNaN(mol) || mol<rpp){
-                    alert("'Limit for report output' must be equal or more than 'Results per page'");
-                    return;
-                }
-                if(mol>5000){
-                    if(! confirm("Large limit for report output may delay map rendereing and smarty processing. Do you confirm?") ){
-                        return;
-                    }
-                }
-
-                var new_val = (document.getElementById("showMyBookmarks").checked)?'true':'false';
-                if(mybkm != new_val){
-                    reload_nav = true;
-                    mybkm = new_val;
-                }
-                new_val = (document.getElementById("showAggregations").checked)?'true':'false';
-                if(agg != new_val){
-                    reload_nav = true;
-                    agg = new_val;
-                }
-                new_val = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
-                if(navi != new_val){
-                    reload_menu = true;
-                    navi = new_val;
-                }
-                new_val = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
+                var mol = parseInt(document.getElementById("report-output-limit").value
                 if(favsrch != new_val){
                     reload_nav = true;
                     favsrch = new_val;
@@ -197,31 +166,30 @@
         </script>
 
         <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
+            <script>
+                var hBase = (top.HEURIST && top.HEURIST.baseURL)? top.HEURIST.baseURL
+                : document.location.href.replace(/admin\/.*/,"");
+                var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
-                <script>
-                    var hBase = (top.HEURIST && top.HEURIST.baseURL)? top.HEURIST.baseURL
-                    : document.location.href.replace(/admin\/.*/,"");
-                    var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
+                var bookmarkletname = top.HEURIST.VERSION;
 
-                    var bookmarkletname = top.HEURIST.VERSION;
-
-                    var html =
-                    "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link,"
-                    +" choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet."+
-                    " Drag this link to your browser bookmarks toolbar, or right-click the link,"
-                    + " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
-                    + " href=\"javascript:(function(){h='" + hBase + "';"
-                    + "d=document;c=d.contentType;"
-                    + "if(c=='text/html'||!c){"
-                    + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-                    + "s=d.createElement('script');s.type='text/javascript';"
-                    + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
-                    + "d.getElementsByTagName('head')[0].appendChild(s);}"
-                    + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
-                    + "window.setTimeout('w.focus()',200);}"
-                    + "})();\"><b>>> "+database+" </b></a>";
-                    document.write(html);
-                </script>
+                var html =
+                "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link,"
+                +" choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet."+
+                " Drag this link to your browser bookmarks toolbar, or right-click the link,"
+                + " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+                + " href=\"javascript:(function(){h='" + hBase + "';"
+                + "d=document;c=d.contentType;"
+                + "if(c=='text/html'||!c){"
+                + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+                + "s=d.createElement('script');s.type='text/javascript';"
+                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
+                + "d.getElementsByTagName('head')[0].appendChild(s);}"
+                + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
+                + "window.setTimeout('w.focus()',200);}"
+                + "})();\"><b>>> "+database+" </b></a>";
+                document.write(html);
+            </script>
 
             </u></b><i>&nbsp;&nbsp;&nbsp; to your bookmarks bar to provide bookmarking of web pages</i>
 
@@ -334,7 +302,6 @@
             <input type="button" value="save" onClick="save();">
             <input type="button" value="cancel" onClick="window.close();">
         </div>
-
     </body>
 </html>
 

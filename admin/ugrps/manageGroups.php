@@ -37,8 +37,6 @@
 
 <html>
     <head>
-
-
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Manage Workgroups</title>
 
@@ -76,7 +74,6 @@
         </style>
     </head>
 
-
     <body width="650" height="450" class="popup yui-skin-sam" style="overflow:auto;">
         <div>
             <?php if (!$isPopup) { ?>
@@ -92,7 +89,6 @@
             <script type="text/javascript" src="manageGroups.js"></script>
 
             <div id="page-inner">
-
                 <p>To view users in a group or assign users to a group, click on the edit icon in the Edit Membership column</p>
 
                 <div id="currUserInfo"></div>
@@ -124,15 +120,12 @@
                 </div>
 
                 <div id="tabContainer">
-
                     <script  type="text/javascript">
-
                         //  starts initialization on load completion of this window
                         function createManagerObj(){
                             groupManager = new  GroupManager(false, false, true); //nonfilter, no selection, in window
                         }
                         YAHOO.util.Event.addListener(window, "load", createManagerObj);
-
                     </script>
                 </div>
 
@@ -143,7 +136,7 @@
                         <input type="button" tabindex="11" id="btnAdd2" value="Add New Group" onClick="groupManager.editGroup(-1);" />
                     </div>
                 </div>
-            </div></div>
-
+            </div>
+        </div>
     </body>
 </html>

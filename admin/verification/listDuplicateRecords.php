@@ -131,8 +131,8 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
+    
     <body class="popup">
-
         <script type="text/javascript">
             function setAsNonDuplication(){
                 var checkboxes = document.getElementsByName('dupeDiffHash[]');

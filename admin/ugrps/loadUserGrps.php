@@ -39,9 +39,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 header('Content-type: text/javascript');
 
-
 mysql_connection_select(DATABASE);
-
 
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
 /*****DEBUG****///error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
@@ -49,8 +47,6 @@ mysql_connection_select(DATABASE);
 	$metod = @$_REQUEST['method'];
 
 if (is_logged_in() || $metod=="getuser") {
-
-
 	if($metod=="searchuser"){
 		//search the list of users by specified parameters
 		$f_group = @$_REQUEST['grpID'];

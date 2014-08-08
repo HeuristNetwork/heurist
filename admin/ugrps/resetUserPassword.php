@@ -40,81 +40,81 @@ require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 
 ?>
 <html>
- <head>
-  <title>Heurist Password Reset</title>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
- </head>
- <body>
- <div style="padding: 10px;">
- <h3>Reset lost/forgotten password</h3>
-<?php
+    <head>
+        <title>Heurist Password Reset</title>
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+    </head>
+    
+    <body>
+         <div style="padding: 10px;">
+             <h3>Reset lost/forgotten password</h3>
+             
+            <?php
+                function generate_passwd ($length = 8) {
+	                $passwd = '';
+	                $possible = '023456789bcdfghjkmnpqrstvwxyz';
+	                while (strlen($passwd) < $length) {
+		                $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
+		                if (!strstr($passwd, $char)) $passwd .= $char;
+	                }
+	                return $passwd;
+                }
 
-function generate_passwd ($length = 8) {
-	$passwd = '';
-	$possible = '023456789bcdfghjkmnpqrstvwxyz';
-	while (strlen($passwd) < $length) {
-		$char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
-		if (!strstr($passwd, $char)) $passwd .= $char;
-	}
-	return $passwd;
-}
+                function hash_it ($passwd) {
+	                $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+	                $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+	                return crypt($passwd, $salt);
+                }
 
-function hash_it ($passwd) {
-	$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-	$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-	return crypt($passwd, $salt);
-}
+                if (@$_REQUEST['username']) {
+	                mysql_connection_overwrite(USERS_DATABASE);
 
-if (@$_REQUEST['username']) {
-	mysql_connection_overwrite(USERS_DATABASE);
+	                $username = mysql_real_escape_string($_REQUEST['username']);
 
-	$username = mysql_real_escape_string($_REQUEST['username']);
+	                $res = mysql_query('select ugr_ID,ugr_eMail,ugr_FirstName,ugr_Name from sysUGrps usr where usr.ugr_Name = "'.$username.'" or ugr_eMail = "'.$username.'"');
+	                $row = mysql_fetch_assoc($res);
+	                $username = $row['ugr_Name'];
+	                $user_id = $row['ugr_ID'];
+	                $email = $row['ugr_eMail'];
+	                $firstname = $row['ugr_FirstName'];
 
-	$res = mysql_query('select ugr_ID,ugr_eMail,ugr_FirstName,ugr_Name from sysUGrps usr where usr.ugr_Name = "'.$username.'" or ugr_eMail = "'.$username.'"');
-	$row = mysql_fetch_assoc($res);
-	$username = $row['ugr_Name'];
-	$user_id = $row['ugr_ID'];
-	$email = $row['ugr_eMail'];
-	$firstname = $row['ugr_FirstName'];
+	                if ($user_id) {
+		                $new_passwd = generate_passwd();
+		                mysql_query('update sysUGrps usr set ugr_Password = "'.hash_it($new_passwd).'" where ugr_ID = ' . $user_id);
 
-	if ($user_id) {
-		$new_passwd = generate_passwd();
-		mysql_query('update sysUGrps usr set ugr_Password = "'.hash_it($new_passwd).'" where ugr_ID = ' . $user_id);
+                        $email_title = 'Password reset';
+                        $email_text = "Dear ".$firstname.",\n\n".
+                                      "Your Heurist password has been reset.\n\n".
+                                      "Your username is: ".$username."\n".
+                                      "Your new password is: ".$new_passwd."\n\n".
+                                      "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+                        $email_header = 'From: '.HEURIST_MAIL_TO_INFO;
+                        
+                        $rv = sendEmail($email, $email_title, $email_text, $email_header);
+                        if($rv=="ok"){
+                            print '<p>Your password has been reset. You should receive an email shortly with your new password.</p>'."\n";    
+                        }else{
+                            print '<p style="color: red;">'.$rv.'</p>'."\n";
+                        }
 
-        $email_title = 'Password reset';
-        $email_text = "Dear ".$firstname.",\n\n".
-                      "Your Heurist password has been reset.\n\n".
-                      "Your username is: ".$username."\n".
-                      "Your new password is: ".$new_passwd."\n\n".
-                      "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
-        $email_header = 'From: '.HEURIST_MAIL_TO_INFO;
-        
-        $rv = sendEmail($email, $email_title, $email_text, $email_header);
-        if($rv=="ok"){
-            print '<p>Your password has been reset. You should receive an email shortly with your new password.</p>'."\n";    
-        }else{
-            print '<p style="color: red;">'.$rv.'</p>'."\n";
-        }
+	                } else {
+		                $error = '<p style="color: red;">Username does not exist</p>'."\n";
+	                }
+                }
 
-	} else {
-		$error = '<p style="color: red;">Username does not exist</p>'."\n";
-	}
-
-}
-
-if (!$_REQUEST['username']  ||  $error) {
-?>
-<p>Enter your username OR email address below and a new password will be emailed to you.</p>
-<?= $error ?>
-<form method="get">
- <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
- Enter username / email:
- <input type="text" name="username" size="20"> &nbsp;&nbsp;
- <input type="submit" value="reset password">
-</form>
-<?php
-}
-?>
- </div>
- </body>
+                if (!$_REQUEST['username']  ||  $error) {
+                    ?>
+                    <p>Enter your username OR email address below and a new password will be emailed to you.</p>
+                    <?= $error ?>
+                    <form method="get">
+                        <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
+                        Enter username / email:
+                        <input type="text" name="username" size="20"> &nbsp;&nbsp;
+                        <input type="submit" value="reset password">
+                    </form>
+                    <?php
+                    }
+                    ?>
+         </div>
+    </body>
 </html>

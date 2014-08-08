@@ -120,7 +120,6 @@
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
-
                 top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
                     "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
@@ -197,7 +196,6 @@
                             title="Add, edit and rearrange terms in the overall tree view of terms defined for this database"/>
                     </div>
                 </div>
-
             </form>
         </div>
     </body>

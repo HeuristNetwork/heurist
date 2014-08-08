@@ -73,9 +73,7 @@
 ?>
 
 <html>
-
     <head>
-
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Databases statistics</title>
 
@@ -103,12 +101,9 @@
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-
     </head>
 
     <body class="popup yui-skin-sam">
-
-
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
             <div id="tabContainer"></div>

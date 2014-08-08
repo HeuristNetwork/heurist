@@ -45,96 +45,93 @@
 
 -->
 <html>
- <head>
-  <title>Group members</title>
-  <link rel=stylesheet href="../../common/css/heurist.css">
+    <head>
+        <title>Group members</title>
+        <link rel=stylesheet href="../../common/css/heurist.css">
 
-  <style>
-#wg-title { font-size: 120% }
-#wg-name { font-weight: bold; }
-td { padding-right: 20px; }
-  </style>
+        <style>
+            #wg-title { font-size: 120% }
+            #wg-name { font-weight: bold; }
+            td { padding-right: 20px; }
+        </style>
+    </head>
 
- </head>
+     <body width=600 height=400>
+        <script src="utilsLoad.js"></script>
+        <script>
+            window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
- <body width=600 height=400>
+            function showMembers() {
+	            var wg = top.HEURIST.workgroups[window.HEURIST.parameters["wg_id"]];
+	            if (! wg) {
+		            // We only make it here if someone's screwing around ...
+		            // It does give a flash of popup window, but it's a bit hard to work around that.
+		            alert("Sorry - no group members visible");
+		            setTimeout(function() { window.close(); }, 0);
+		            return;
+	            }
 
-  <script src="utilsLoad.js"></script>
-  <script>
-window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+	            var dateString;
+	            if (top.HEURIST.is_wgAdmin(wg)) {
+		            var now = new Date();
+		            var y = now.getFullYear();
+		            var m = now.getMonth() + 1;
+		            var d = now.getDate();
+		            dateString = y + "-" +
+						            (m < 10 ? "0" : "") + m + "-" +
+						            (d < 10 ? "0" : "") + d;
+	            }
 
-function showMembers() {
-	var wg = top.HEURIST.workgroups[window.HEURIST.parameters["wg_id"]];
-	if (! wg) {
-		// We only make it here if someone's screwing around ...
-		// It does give a flash of popup window, but it's a bit hard to work around that.
-		alert("Sorry - no group members visible");
-		setTimeout(function() { window.close(); }, 0);
-		return;
-	}
+	            document.getElementById("wg-name").appendChild(document.createTextNode(wg.name));
 
-	var dateString;
-	if (top.HEURIST.is_wgAdmin(wg)) {
-		var now = new Date();
-		var y = now.getFullYear();
-		var m = now.getMonth() + 1;
-		var d = now.getDate();
-		dateString = y + "-" +
-						(m < 10 ? "0" : "") + m + "-" +
-						(d < 10 ? "0" : "") + d;
-	}
+	            var table = document.getElementById("members-table");
+	            var tbody =table.appendChild(document.createElement("tbody"));
+	            for (var i=0; i < wg.members.length; ++i) {
+		            var tr = tbody.appendChild(document.createElement("tr"));
 
-	document.getElementById("wg-name").appendChild(document.createTextNode(wg.name));
+		            var td = tr.appendChild(document.createElement("td"));
+		            td.appendChild(document.createTextNode(wg.members[i].name));
 
-	var table = document.getElementById("members-table");
-	var tbody =table.appendChild(document.createElement("tbody"));
-	for (var i=0; i < wg.members.length; ++i) {
-		var tr = tbody.appendChild(document.createElement("tr"));
+		            td = tr.appendChild(document.createElement("td"));
+		            var link = td.appendChild(document.createElement("a"));
+		            link.href = "mailto:"+wg.members[i].email;
+		            link.appendChild(document.createTextNode("email"));
 
-		var td = tr.appendChild(document.createElement("td"));
-		td.appendChild(document.createTextNode(wg.members[i].name));
+		            if (top.HEURIST.database.name == "") {
+			            td = tr.appendChild(document.createElement("td"));
+			            link = td.appendChild(document.createElement("a"));
+			            link.target = "_blank";
+			            link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;//saw TODO: instance awareness
+			            link.appendChild(document.createTextNode("blog"));
+		            }
 
-		td = tr.appendChild(document.createElement("td"));
-		var link = td.appendChild(document.createElement("a"));
-		link.href = "mailto:"+wg.members[i].email;
-		link.appendChild(document.createTextNode("email"));
+		            if (top.HEURIST.is_wgAdmin(wg)) {
+			            td = tr.appendChild(document.createElement("td"));
+			            var a = td.appendChild(document.createElement("a"));
+				            a.target = "_blank";
+				            a.href = "../../viewers/blog/reportForUGrpBlog.php?u=" + wg.members[i].id + "&d=" + dateString;//saw TODO: instance awareness
+				            a.appendChild(document.createTextNode("blog report"));
+		            }
+	            }
 
-		if (top.HEURIST.database.name == "") {
-			td = tr.appendChild(document.createElement("td"));
-			link = td.appendChild(document.createElement("a"));
-			link.target = "_blank";
-			link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;//saw TODO: instance awareness
-			link.appendChild(document.createTextNode("blog"));
-		}
+	            if (top.HEURIST.is_wgAdmin(wg)) {
+		            var div = document.createElement("div");
+			            div.style.cssFloat = div.style.styleFloat = "right";
+		            var a = div.appendChild(document.createElement("a"));
+			            a.target = "_blank";
+			            a.href = "../../viewers/blog/reportForUGrpBlog.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;//saw TODO: instance awareness
+			            a.appendChild(document.createTextNode("group blog report"));
+		            table.parentNode.insertBefore(div, table);
+	            }
+            }
 
-		if (top.HEURIST.is_wgAdmin(wg)) {
-			td = tr.appendChild(document.createElement("td"));
-			var a = td.appendChild(document.createElement("a"));
-				a.target = "_blank";
-				a.href = "../../viewers/blog/reportForUGrpBlog.php?u=" + wg.members[i].id + "&d=" + dateString;//saw TODO: instance awareness
-				a.appendChild(document.createTextNode("blog report"));
-		}
-	}
+            top.HEURIST.registerEvent(window, "load", function() {
+	            top.HEURIST.util.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
+            });
+          </script>
 
-	if (top.HEURIST.is_wgAdmin(wg)) {
-		var div = document.createElement("div");
-			div.style.cssFloat = div.style.styleFloat = "right";
-		var a = div.appendChild(document.createElement("a"));
-			a.target = "_blank";
-			a.href = "../../viewers/blog/reportForUGrpBlog.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;//saw TODO: instance awareness
-			a.appendChild(document.createTextNode("group blog report"));
-		table.parentNode.insertBefore(div, table);
-	}
-}
-
-top.HEURIST.registerEvent(window, "load", function() {
-	top.HEURIST.util.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
-});
-
-  </script>
-
-  <h2 id=wg-title>Members of workgroup <span id=wg-name></span></h2>
-  <table id=members-table></table>
- </body>
+          <h2 id=wg-title>Members of workgroup <span id=wg-name></span></h2>
+          <table id=members-table></table>
+     </body>
 </html>
 

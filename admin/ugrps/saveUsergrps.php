@@ -31,15 +31,11 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
     require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 	//require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
-
 
 	$legalMethods = array(
 		"saveUser",

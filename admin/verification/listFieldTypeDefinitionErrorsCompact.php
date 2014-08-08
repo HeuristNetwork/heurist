@@ -54,7 +54,6 @@
     $dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
 ?>    
 <html>
-
     <head>
         <title>Invalid Field Type Definition check</title>
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
@@ -169,7 +168,6 @@
                     }
                 }
             ?>
-
         </div>
     </body>
 </html>

@@ -87,8 +87,6 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
         <script type="text/javascript" src="manageRectypes.js"></script>
 
-
-
         <div>
             <div class="banner"><h2>Record Type and Field definitions</h2></div>
             <div id="page-inner">
@@ -117,6 +115,7 @@ if(isForAdminOnly("to modify database structure")){
                         }
                     </script>
                 </div>
-            </div></div>
+            </div>
+        </div>
     </body>
 </html>

@@ -70,378 +70,377 @@
 ?>
 
 <html>
-<head>
-	<style type="text/css">
-		* { font-size: 100%; font-family: verdana;}
-		body { font-size: 0.7em; }
-		td { vertical-align: top; }
-	</style>
-	<script type="text/javascript">
-		<!--
-		function keep_bib(rec_id) {
-			e = document.getElementById('tb');
-			if (!e) return;
-			for (var i = 0; i < e.childNodes.length; ++i) {
-				row = e.childNodes[i];
-				if (row.nodeName == "TR" && row.id){
-					id = row.id.replace(/row/,'');
-					d = document.getElementById('duplicate' + id);
-					if (id == rec_id){
-						row.style.backgroundColor = '#EEE';
-						if(d){
-							d.style.display = "none";
-							d.nextSibling.style.display = "none";
-						}
-					}else{
-						if (d) {
-							d.style.display = "block";
-							d.nextSibling.style.display = "block";
-						}
-						if (d && d.checked){
-							row.style.backgroundColor = '#EEE';
-						}else{
-							row.style.backgroundColor = '';
-						}
-					}
-				}
-			}
-			e = document.getElementById('keep'+rec_id);
-			if (e) e.checked = true;
-			e = document.getElementById('duplicate'+rec_id);
-			if (e) e.checked = false;
-		}
-		function delete_bib(rec_id) {
-			e = document.getElementById('row'+rec_id);
-			if (e) e.style.backgroundColor = '#EEE';
-		}
-		function undelete_bib(rec_id) {
-			e = document.getElementById('row'+rec_id);
-			if (e) e.style.backgroundColor = '';
-		}
-		-->
-	</script>
-	<link rel=stylesheet href="../../common/css/global.css" media="all">
-	<link rel=stylesheet href="../../common/css/admin.css" media="all">
-	<title>Merging records</title>
-</head>
-<body class="popup" width="600" height="400">
-<div style="max-width:600px;">
-	<form>
+    <head>
+	    <style type="text/css">
+		    * { font-size: 100%; font-family: verdana;}
+		    body { font-size: 0.7em; }
+		    td { vertical-align: top; }
+	    </style>
+        
+	    <script type="text/javascript">
+		    <!--
+		    function keep_bib(rec_id) {
+			    e = document.getElementById('tb');
+			    if (!e) return;
+			    for (var i = 0; i < e.childNodes.length; ++i) {
+				    row = e.childNodes[i];
+				    if (row.nodeName == "TR" && row.id){
+					    id = row.id.replace(/row/,'');
+					    d = document.getElementById('duplicate' + id);
+					    if (id == rec_id){
+						    row.style.backgroundColor = '#EEE';
+						    if(d){
+							    d.style.display = "none";
+							    d.nextSibling.style.display = "none";
+						    }
+					    }else{
+						    if (d) {
+							    d.style.display = "block";
+							    d.nextSibling.style.display = "block";
+						    }
+						    if (d && d.checked){
+							    row.style.backgroundColor = '#EEE';
+						    }else{
+							    row.style.backgroundColor = '';
+						    }
+					    }
+				    }
+			    }
+			    e = document.getElementById('keep'+rec_id);
+			    if (e) e.checked = true;
+			    e = document.getElementById('duplicate'+rec_id);
+			    if (e) e.checked = false;
+		    }
+		    function delete_bib(rec_id) {
+			    e = document.getElementById('row'+rec_id);
+			    if (e) e.style.backgroundColor = '#EEE';
+		    }
+		    function undelete_bib(rec_id) {
+			    e = document.getElementById('row'+rec_id);
+			    if (e) e.style.backgroundColor = '';
+		    }
+		    -->
+	    </script>
+	    <link rel=stylesheet href="../../common/css/global.css" media="all">
+	    <link rel=stylesheet href="../../common/css/admin.css" media="all">
+	    <title>Merging records</title>
+    </head>
 
-		<div>
-			<?php
-				if (! @$do_merge_details){
-					print 'This function combines duplicate records. One record MUST be selected as a master record'.
-					' and there must be at least one duplicate selected. Processing duplicates allows you to merge,'.
-					'data with the master record.<br/><br/>'.
-					'Bookmarks, Tags and Relationships from deleted records are added to the master record.'.
-					'None of these data are duplicated if they already exist in the master record.';
-				} else{
-					print 'Select the data items which should be retained, added or replaced in the master records.'.
-					' Repeatable (multi-valued)fields are indicated by checkboxes and single value fields are '.
-					' indicated by radio buttons. Pressing the "commit changes" button will start the process to'.
-					' save the changes to the master record. You will be able to view the master record to verify '.
-					'the changes.';
-				}
-			?>
-		</div><br/><hr/>
+    <body class="popup" width="600" height="400">
+        <div style="max-width:600px;">
+	        <form>
+		        <div>
+			        <?php
+				        if (! @$do_merge_details){
+					        print 'This function combines duplicate records. One record MUST be selected as a master record'.
+					        ' and there must be at least one duplicate selected. Processing duplicates allows you to merge,'.
+					        'data with the master record.<br/><br/>'.
+					        'Bookmarks, Tags and Relationships from deleted records are added to the master record.'.
+					        'None of these data are duplicated if they already exist in the master record.';
+				        } else{
+					        print 'Select the data items which should be retained, added or replaced in the master records.'.
+					        ' Repeatable (multi-valued)fields are indicated by checkboxes and single value fields are '.
+					        ' indicated by radio buttons. Pressing the "commit changes" button will start the process to'.
+					        ' save the changes to the master record. You will be able to view the master record to verify '.
+					        'the changes.';
+				        }
+			        ?>
+		        </div><br/><hr/>
 
-		<table><tbody id="tb">
+		        <table><tbody id="tb">
+				    <?php
+					    print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
-				<?php
+					    $rtyNameLookup = array();
+					    $res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
+					    //FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
+					    while ($row = mysql_fetch_assoc($res)) $rtyNameLookup[$row['rty_ID']]= $row['rty_Name'];
 
-					print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
+					    $temptypes = '';
+					    if (count($rtyNameLookup) > 0) {
+						    foreach ($rtyNameLookup as $rtyID => $rtyName){
+							    if (!$temptypes) {
+								    $temptypes = $rtyName;
+								    $firstRtyID = $rtyID;
+							    }else{
+								    $temptypes .= '/'.$rtyName;
+							    }
+						    }
+						    print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
+					    }
+					    //save rec type for merging code
+					    if (!@$_SESSION['rty_ID']) $_SESSION['rty_ID'] = @$firstRtyID;
+					    //get requirements for details
+					    $res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
+					    $rec_requirements =  array();
 
-					$rtyNameLookup = array();
-					$res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
-					//FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
-					while ($row = mysql_fetch_assoc($res)) $rtyNameLookup[$row['rty_ID']]= $row['rty_Name'];
+					    while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
+					    $res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
+					    $records = array();
+					    $counts = array();
+					    $rec_references = array();
+					    $invalid_rec_references = array();
+					    while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_ID']] = $rec;
+					    foreach($records as $index => $record){
+						    $rec_references = mysql__select_array('recDetails', 'dtl_RecID', 'dtl_Value='.$records[$index]['rec_ID'].' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
+						    if ($rec_references){
+							    // only store the references that are actually records
+							    $records[$index]["refs"] =  mysql__select_array('Records', 'rec_ID', 'rec_ID in ('.join(',', $rec_references).')');
+							    $records[$index]["ref_count"] = count($records[$index]["refs"]);
+							    $counts[$index] = $records[$index]["ref_count"];
+							    $invalid_rec_references += array_diff($rec_references,$records[$index]["refs"]);
+						    } else{
+							    array_push($counts,0);
+						    }
+						    $details = array();
+						    $res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo, trm_Label
+						    from recDetails  left join defTerms on trm_ID = dtl_Value
+						    where dtl_RecID = ' . $records[$index]['rec_ID'] . '
+						    order by dtl_DetailTypeID, dtl_ID');
+						    $records[$index]['details'] = array();
+						    while ($row = mysql_fetch_assoc($res)) {
 
-					$temptypes = '';
-					if (count($rtyNameLookup) > 0) {
-						foreach ($rtyNameLookup as $rtyID => $rtyName){
-							if (!$temptypes) {
-								$temptypes = $rtyName;
-								$firstRtyID = $rtyID;
-							}else{
-								$temptypes .= '/'.$rtyName;
-							}
-						}
-						print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
-					}
-					//save rec type for merging code
-					if (!@$_SESSION['rty_ID']) $_SESSION['rty_ID'] = @$firstRtyID;
-					//get requirements for details
-					$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
-					$rec_requirements =  array();
+							    $type = $row['dtl_DetailTypeID'];
 
-					while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
-					$res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
-					$records = array();
-					$counts = array();
-					$rec_references = array();
-					$invalid_rec_references = array();
-					while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_ID']] = $rec;
-					foreach($records as $index => $record){
-						$rec_references = mysql__select_array('recDetails', 'dtl_RecID', 'dtl_Value='.$records[$index]['rec_ID'].' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
-						if ($rec_references){
-							// only store the references that are actually records
-							$records[$index]["refs"] =  mysql__select_array('Records', 'rec_ID', 'rec_ID in ('.join(',', $rec_references).')');
-							$records[$index]["ref_count"] = count($records[$index]["refs"]);
-							$counts[$index] = $records[$index]["ref_count"];
-							$invalid_rec_references += array_diff($rec_references,$records[$index]["refs"]);
-						} else{
-							array_push($counts,0);
-						}
-						$details = array();
-						$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo, trm_Label
-						from recDetails  left join defTerms on trm_ID = dtl_Value
-						where dtl_RecID = ' . $records[$index]['rec_ID'] . '
-						order by dtl_DetailTypeID, dtl_ID');
-						$records[$index]['details'] = array();
-						while ($row = mysql_fetch_assoc($res)) {
+							    if (! array_key_exists($type, $records[$index]['details'])) {
+								    $records[$index]['details'][$type] = array();
+							    }
+							    array_push($records[$index]['details'][$type], $row);
+						    }
+					    }
+					    //FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
+					    $rec_keys = array_keys($records);
+					    if (! @$master_rec_id){
+						    array_multisort($counts,SORT_NUMERIC, SORT_DESC, $rec_keys );
+						    $master_rec_id = $rec_keys[0];
+					    }
+					    if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
+						    //    foreach($records as $index) {
+						    foreach($records as $record) {
+							    //  $record = $records[$index];
+							    $is_master = ($record['rec_ID']== $master_rec_id);
+							    print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$record['rec_ID'].'">';
+							    $checkKeep =  $is_master? "checked" : "";
+							    $disableDup = $is_master? "none" : "block";
+							    if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.
+							    ' value="'.$record['rec_ID'].
+							    '" title="Check to mark this as a duplicate record for deletion"'.
+							    '  id="duplicate'.$record['rec_ID'].'" style="display:'.$disableDup.
+							    '" onclick="if (this.checked) delete_bib('.$record['rec_ID'].'); else undelete_bib('.$record['rec_ID'].
+							    ');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
+							    print '<td style="width: 500px;">';
+							    if (!$finished_merge) print '<input type="radio" name="keep" '.$checkKeep.
+							    ' value="'.$record['rec_ID'].
+							    '" title="Click to select this record as the Master record"'.
+							    ' id="keep'.$record['rec_ID'].
+							    '" onclick="keep_bib('.$record['rec_ID'].');">';
+							    print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
+							    print '<table>';
+							    foreach ($record['details'] as $rd_type => $detail) {
+								    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
+								    $reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
+								    $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
+								    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
+								    print '<td style="padding-left:10px;">';
+								    foreach($detail as $i => $rg){
+									    if ($rg['dtl_Value']) {
+										    if ($rg['dtl_Geo']) {
+                                                $rd_temp = $rg['dtl_Geo'];   
+                                            }
+                                            else if ($rg['trm_Label']){
+                                                $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")";   
+                                            }
+										    else {
+                                                $rd_temp = $rg['dtl_Value'];   
+                                            }
+									    }elseif ($rg['dtl_UploadedFileID']) {
+										    $rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
+										    $rd_temp = $rd_temp[0];
+									    }
+									    if(! @$temp) $temp=$rd_temp;
+									    elseif(!is_array($temp)){
+										    $temp = array($temp,$rd_temp);
+									    }else array_push($temp,$rd_temp);
+								    }
+								    $detail = detail_str($rd_type, $temp);
+								    unset($temp);
+								    if (is_array($detail)) {
+									    $repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
+									    if ($repeatCount==0){
+										    foreach ($detail as $val) {
+											    print '<div>'. $val . '</div>';
+										    }
+									    } else{
+										    for ($i = 0; $i < $repeatCount; $i++) {
+											    print '<div>'. $detail[$i] . '</div>';
+										    }
+										    //FIXME  add code to remove the extra details that are not supposed to be there
+										    }
+								    } else{
+									    print '<div>'. $detail . '</div>';
+								    }
 
-							$type = $row['dtl_DetailTypeID'];
+								    print '</td>';
+							    }
 
-							if (! array_key_exists($type, $records[$index]['details'])) {
-								$records[$index]['details'][$type] = array();
-							}
-							array_push($records[$index]['details'][$type], $row);
-						}
-					}
-					//FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
-					$rec_keys = array_keys($records);
-					if (! @$master_rec_id){
-						array_multisort($counts,SORT_NUMERIC, SORT_DESC, $rec_keys );
-						$master_rec_id = $rec_keys[0];
-					}
-					if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
-						//    foreach($records as $index) {
-						foreach($records as $record) {
-							//  $record = $records[$index];
-							$is_master = ($record['rec_ID']== $master_rec_id);
-							print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$record['rec_ID'].'">';
-							$checkKeep =  $is_master? "checked" : "";
-							$disableDup = $is_master? "none" : "block";
-							if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.
-							' value="'.$record['rec_ID'].
-							'" title="Check to mark this as a duplicate record for deletion"'.
-							'  id="duplicate'.$record['rec_ID'].'" style="display:'.$disableDup.
-							'" onclick="if (this.checked) delete_bib('.$record['rec_ID'].'); else undelete_bib('.$record['rec_ID'].
-							');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
-							print '<td style="width: 500px;">';
-							if (!$finished_merge) print '<input type="radio" name="keep" '.$checkKeep.
-							' value="'.$record['rec_ID'].
-							'" title="Click to select this record as the Master record"'.
-							' id="keep'.$record['rec_ID'].
-							'" onclick="keep_bib('.$record['rec_ID'].');">';
-							print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
-							print '<table>';
-							foreach ($record['details'] as $rd_type => $detail) {
-								if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
-								$reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
-								$color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
-								print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
-								print '<td style="padding-left:10px;">';
-								foreach($detail as $i => $rg){
-									if ($rg['dtl_Value']) {
-										if ($rg['dtl_Geo']) {
-                                            $rd_temp = $rg['dtl_Geo'];   
-                                        }
-                                        else if ($rg['trm_Label']){
-                                            $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")";   
-                                        }
-										else {
-                                            $rd_temp = $rg['dtl_Value'];   
-                                        }
-									}elseif ($rg['dtl_UploadedFileID']) {
-										$rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
-										$rd_temp = $rd_temp[0];
-									}
-									if(! @$temp) $temp=$rd_temp;
-									elseif(!is_array($temp)){
-										$temp = array($temp,$rd_temp);
-									}else array_push($temp,$rd_temp);
-								}
-								$detail = detail_str($rd_type, $temp);
-								unset($temp);
-								if (is_array($detail)) {
-									$repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
-									if ($repeatCount==0){
-										foreach ($detail as $val) {
-											print '<div>'. $val . '</div>';
-										}
-									} else{
-										for ($i = 0; $i < $repeatCount; $i++) {
-											print '<div>'. $detail[$i] . '</div>';
-										}
-										//FIXME  add code to remove the extra details that are not supposed to be there
-										}
-								} else{
-									print '<div>'. $detail . '</div>';
-								}
+							    if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
 
-								print '</td>';
-							}
-
-							if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
-
-							if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.substr($record['rec_Added'], 0, 10).'</td></tr>';
-							if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
-
-
-							print '</table></td><td>';
-
-							print '<table>';
-
-							if (array_key_exists("refs",$record)) {
-								print '<tr><td>References</td><td>';
-								$i = 1;
-								foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
-									print '<a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
-								}
-								print '</td></tr>';
-							}
-
-							$bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
-							if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-							$kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
-							if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
-
-							$res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where ugr_Type = "User" and rem_RecID='.$record['rec_ID']);
-							$rems = Array();
-							while ($rem = mysql_fetch_assoc($res2))
-							$rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
-							if (count($rems))
-							print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
-
-							print '</table>';
-
-							print '</td></tr>';
-							print '<tr><td colspan=3><hr /></td></tr>';
-							print "</tr>\n\n";
-						}
-					}else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
-						$master_index = array_search($master_rec_id, $rec_keys);
-						if ($master_index === FALSE){  // no master selected we can't do a merge
-							return;
-						} elseif ($master_index > 0){  // rotate the keys so the master is first
-							$temp = array_slice($rec_keys, 0,$master_index);
-							$rec_keys = array_merge(array_slice($rec_keys,$master_index),$temp);
-							$master_rec_type = $records[$master_rec_id]['rec_RecTypeID'];
-						}
-						foreach($rec_keys as $index) {
-							$record = $records[$index];
-							$is_master = ($record['rec_ID']== $master_rec_id);
-							print '<tr id="row'.$record['rec_ID'].'">';
-							if ($is_master) print '<td><div><b>MASTER</b></div></td>';
-							else print '<td><div><b>Duplicate</b></div></td>';
-							print '<td style="width: 500px;">';
-							print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
-							print '<table>';
-							if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
-							foreach ($record['details'] as $rd_type => $detail) {
-								if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
-								// check to see if the master record already has the same detail with the identical value ignoring leading and trailing spaces
-								$removeIndices = array();
-								if (! $is_master && $_SESSION['master_details'][$rd_type]){
-									$master_details =  $_SESSION['master_details'][$rd_type];
-									foreach ($detail as $i => $d_detail){
-										foreach ($master_details as $m_detail){
-											if (($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])) ||
-											($m_detail['dtl_Geo'] && trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])) ||
-											($m_detail['dtl_UploadedFileID'] && trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID']))){
-												//mark this detail for removal
-												array_push($removeIndices,$i);
-											}
-										}
-									}
-								}
-								foreach ($removeIndices as $i){
-									unset($detail[$i]);
-								}
-								if (count($detail) == 0) continue;
-								$reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
-								$color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
-								print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
-								//FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
-								//keep_dt_### where ### is detail Type id and mark both "checked" for master record
-								print '<td style="padding-left:10px;">';
-								$repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
-								$detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
-								if (is_array($detail)) {
-									if ($repeatCount != 1){//repeatable
-										foreach ($detail as $val) {
-											print '<div>'. $val . '</div>';
-										}
-									} else{
-										print '<div>'. $detail[0] . '</div>';
-										//FIXME  add code to remove the extra details that are not supposed to be there
-										}
-								} else{
-									print '<div>'. $detail . '</div>';
-								}
-
-								print '</td>';
-							}
-
-							if ($record['rec_URL']) print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
-							' title="'.($is_master?"Click to keep URL with Master record":"Click to replace URL in Master record (overwrite)").
-							'" value="'.$record['rec_URL'].
-							'" id="URL'.$record['rec_ID'].
-							'"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
-
-							if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.substr($record['rec_Added'], 0, 10).'</td></tr>';
-							if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
+							    if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.substr($record['rec_Added'], 0, 10).'</td></tr>';
+							    if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
 
 
-							print '</table></td><td>';
+							    print '</table></td><td>';
 
-							print '<table>';
+							    print '<table>';
 
-							if (array_key_exists("refs",$record)) {
-								print '<tr><td>References</td><td>';
-								$i = 1;
-								foreach ($record["refs"] as $ref) {
-									print '<a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
-								}
-								print '</td></tr>';
-							}
+							    if (array_key_exists("refs",$record)) {
+								    print '<tr><td>References</td><td>';
+								    $i = 1;
+								    foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
+									    print '<a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
+								    }
+								    print '</td></tr>';
+							    }
 
-							$bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
-							if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-							$kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
-							if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
+							    $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
+							    if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
+							    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
+							    if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
-							$res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where rem_RecID='.$record['rec_ID']);
-							$rems = Array();
-							while ($rem = mysql_fetch_assoc($res2))
-							$rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
-							if (count($rems))
-							print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+							    $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where ugr_Type = "User" and rem_RecID='.$record['rec_ID']);
+							    $rems = Array();
+							    while ($rem = mysql_fetch_assoc($res2))
+							    $rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
+							    if (count($rems))
+							    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
 
-							print '</table>';
+							    print '</table>';
 
-							print '</td></tr>';
-							print '<tr><td colspan=3><hr /></td></tr>';
-							print "</tr>\n\n";
-						}
-					}
-				?>
+							    print '</td></tr>';
+							    print '<tr><td colspan=3><hr /></td></tr>';
+							    print "</tr>\n\n";
+						    }
+					    }else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
+						    $master_index = array_search($master_rec_id, $rec_keys);
+						    if ($master_index === FALSE){  // no master selected we can't do a merge
+							    return;
+						    } elseif ($master_index > 0){  // rotate the keys so the master is first
+							    $temp = array_slice($rec_keys, 0,$master_index);
+							    $rec_keys = array_merge(array_slice($rec_keys,$master_index),$temp);
+							    $master_rec_type = $records[$master_rec_id]['rec_RecTypeID'];
+						    }
+						    foreach($rec_keys as $index) {
+							    $record = $records[$index];
+							    $is_master = ($record['rec_ID']== $master_rec_id);
+							    print '<tr id="row'.$record['rec_ID'].'">';
+							    if ($is_master) print '<td><div><b>MASTER</b></div></td>';
+							    else print '<td><div><b>Duplicate</b></div></td>';
+							    print '<td style="width: 500px;">';
+							    print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
+							    print '<table>';
+							    if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
+							    foreach ($record['details'] as $rd_type => $detail) {
+								    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
+								    // check to see if the master record already has the same detail with the identical value ignoring leading and trailing spaces
+								    $removeIndices = array();
+								    if (! $is_master && $_SESSION['master_details'][$rd_type]){
+									    $master_details =  $_SESSION['master_details'][$rd_type];
+									    foreach ($detail as $i => $d_detail){
+										    foreach ($master_details as $m_detail){
+											    if (($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])) ||
+											    ($m_detail['dtl_Geo'] && trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])) ||
+											    ($m_detail['dtl_UploadedFileID'] && trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID']))){
+												    //mark this detail for removal
+												    array_push($removeIndices,$i);
+											    }
+										    }
+									    }
+								    }
+								    foreach ($removeIndices as $i){
+									    unset($detail[$i]);
+								    }
+								    if (count($detail) == 0) continue;
+								    $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
+								    $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
+								    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
+								    //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
+								    //keep_dt_### where ### is detail Type id and mark both "checked" for master record
+								    print '<td style="padding-left:10px;">';
+								    $repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
+								    $detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
+								    if (is_array($detail)) {
+									    if ($repeatCount != 1){//repeatable
+										    foreach ($detail as $val) {
+											    print '<div>'. $val . '</div>';
+										    }
+									    } else{
+										    print '<div>'. $detail[0] . '</div>';
+										    //FIXME  add code to remove the extra details that are not supposed to be there
+										    }
+								    } else{
+									    print '<div>'. $detail . '</div>';
+								    }
 
-		</tbody></table>
-		<?php
-			if (! $finished_merge) {
-				print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
-			} else{
-				print '<div> Changes were commited </div>';
-				print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
-			}
-		?>
-		<input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
-	</form>
-</div>    
-</body>
+								    print '</td>';
+							    }
+
+							    if ($record['rec_URL']) print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
+							    ' title="'.($is_master?"Click to keep URL with Master record":"Click to replace URL in Master record (overwrite)").
+							    '" value="'.$record['rec_URL'].
+							    '" id="URL'.$record['rec_ID'].
+							    '"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
+
+							    if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.substr($record['rec_Added'], 0, 10).'</td></tr>';
+							    if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
+
+
+							    print '</table></td><td>';
+
+							    print '<table>';
+
+							    if (array_key_exists("refs",$record)) {
+								    print '<tr><td>References</td><td>';
+								    $i = 1;
+								    foreach ($record["refs"] as $ref) {
+									    print '<a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$ref.'">'.$i++.'</a> ';
+								    }
+								    print '</td></tr>';
+							    }
+
+							    $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
+							    if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
+							    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
+							    if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
+
+							    $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where rem_RecID='.$record['rec_ID']);
+							    $rems = Array();
+							    while ($rem = mysql_fetch_assoc($res2))
+							    $rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
+							    if (count($rems))
+							    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+
+							    print '</table>';
+
+							    print '</td></tr>';
+							    print '<tr><td colspan=3><hr /></td></tr>';
+							    print "</tr>\n\n";
+						    }
+					    }
+				    ?>
+		        </tbody></table>
+                
+		        <?php
+			        if (! $finished_merge) {
+				        print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
+			        } else{
+				        print '<div> Changes were commited </div>';
+				        print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
+			        }
+		        ?>
+		        <input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
+	        </form>
+        </div>    
+    </body>        
 </html>
 
 <?php
