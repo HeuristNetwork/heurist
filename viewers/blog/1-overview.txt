@@ -1,0 +1,31 @@
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+
+---------------------------------------------------------------------
+
+Directory:	/blog
+
+Overview:	Blog view is a special view generated from search results.
+		It has flexibility to render any set of search results, but is
+		normally used to generate a conventional blog view by displaying
+		records of type Blog Entry for the last month, with navigation to
+		older subsets.
+
+Notes:		Users automatically have access to a blog of their own blog entry
+		records (which is defined as all entries bookmarked by them, including
+		blog entries created by other people, a fact which is indicated clearly
+		on the entry).
+
+		They also have access to a shared blog for each workgroup of which they
+		are a member. In this case, the entries in the blog are defined as all
+		those records owned by the workgroup (which largely means those created
+		in the workgroup blog).
+
+		Blog entries also have threaded discussions/cpmments attached, which are
+		user-specific, and can be mapped, related to one another and edited repeatedly.
+
+Updated: 	28 March 2010
