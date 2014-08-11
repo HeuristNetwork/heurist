@@ -1077,7 +1077,9 @@
         }
 
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
-
+        
+        // calculate the number of records to insert, update and insert with existing ids
+        // @todo - it has implemented for non-multivalue indexes only
         if(!$id_field){ //ID field not defined - all records will be inserted
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
@@ -1350,7 +1352,7 @@
                 return $wrong_records;
             }
         }
-        //4. In DB: Verify resource fields
+        //4. In DB: Verify resource fields ==================================================
         $k=0;
         foreach ($query_res as $field){
 
@@ -1387,13 +1389,26 @@
         $k=0;
         foreach ($query_num as $field){
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
+            if(in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table where ".$only_for_specified_id." 1";
+
+                $idx = array_search($field, $sel_query)+1;
+
+                $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx);
+            
+            }else{
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table "
+                ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
+                $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+                    "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
+                    "Wrong Numerics", $field);
+            }
+                
             $k++;
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
-                "Wrong Numerics", $field);
+                
             // "Fields mapped as numeric".$hwv,
             //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
@@ -1407,13 +1422,25 @@
         $k=0;
         foreach ($query_date as $field){
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
+            if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table where ".$only_for_specified_id." 1";
+
+                $idx = array_search($field, $sel_query)+1;
+                
+                $wrong_records = validateDateField($mysqli, $query, $imp_session, $field, $idx);
+            
+            }else{
+                $query = "select imp_id, ".implode(",",$sel_query)
+                ." from $import_table "
+                ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
+                $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
+                    "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
+                    "Wrong Dates", $field);
+            }
+
             $k++;
-            $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
-                "Wrong Dates", $field);
             //"Fields mapped as date".$hwv,
             //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
@@ -1560,18 +1587,12 @@
     * @param mixed $dt_id - mapped detail type ID
     * @param mixed $field_idx - index of validation field in query result (to get value)
     * @param mixed $recStruc - record type structure
-    * @param mixed $message - error message
-    * @param mixed $short_messsage
     */
     function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
 
         
         $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
-        
-        $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
         $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-        
-        $dt_type = $dt_def[$idx_fieldtype];
 
         $res = $mysqli->query($query." LIMIT 5000");
 
@@ -1624,6 +1645,128 @@
         return null;
     }
     
+
+    /**
+    * put your comment there...
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    * @param mixed $imp_session
+    * @param mixed $fields_checked - name of field to be verified
+    * @param mixed $field_idx - index of validation field in query result (to get value)
+    */
+    function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+
+        $res = $mysqli->query($query." LIMIT 5000");
+
+        if($res){
+            $wrong_records = array();
+            while ($row = $res->fetch_row()){
+                
+                $is_error = false;
+                $newvalue = array();
+                $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
+                foreach($values as $idx=>$r_value){
+                    if($r_value!=null && trim($r_value)!=""){
+                        
+                        if(!is_numeric($r_value)){
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        }else{
+                            array_push($newvalue, $r_value);
+                        }
+                    }
+                }
+
+                if($is_error){
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                    array_push($wrong_records, $row);
+                }
+            }
+            $res->close();
+            $cnt_error = count($wrong_records);
+            if($cnt_error>0){
+                $error = array();
+                $error["count_error"] = $cnt_error;
+                $error["recs_error"] = array_slice($wrong_records,0,1000);
+                $error["field_checked"] = $fields_checked;
+                $error["err_message"] = "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation";
+                $error["short_messsage"] = "Wrong Numerics";
+                $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
+                array_push($imp_session['validation']['error'], $error);
+
+                return $imp_session;
+            }
+
+        }else{
+            return "SQL error: Can not perform validation query: ".$query;
+        }
+        return null;
+    }
+
+    
+    /**
+    * put your comment there...
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    * @param mixed $imp_session
+    * @param mixed $fields_checked - name of field to be verified
+    * @param mixed $field_idx - index of validation field in query result (to get value)
+    */
+    function validateDateField($mysqli, $query, $imp_session, $fields_checked, $field_idx){
+
+        $res = $mysqli->query($query." LIMIT 5000");
+
+        if($res){
+            $wrong_records = array();
+            while ($row = $res->fetch_row()){
+                
+                $is_error = false;
+                $newvalue = array();
+                $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
+                foreach($values as $idx=>$r_value){
+                    if($r_value!=null && trim($r_value)!=""){
+                        
+                        $date = date_parse($r_value);
+                        if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
+                        {
+                            $value = strtotime($r_value);
+                            $value = date('Y-m-d H:i:s', $value);
+                            array_push($newvalue, $value);
+                        }else{
+                            $is_error = true;
+                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        }
+                    }
+                }
+
+                if($is_error){
+                    $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
+                    array_push($wrong_records, $row);
+                }
+            }
+            $res->close();
+            $cnt_error = count($wrong_records);
+            if($cnt_error>0){
+                $error = array();
+                $error["count_error"] = $cnt_error;
+                $error["recs_error"] = array_slice($wrong_records,0,1000);
+                $error["field_checked"] = $fields_checked;
+                $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
+                $error["short_messsage"] = "Wrong Dates";
+                $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
+                array_push($imp_session['validation']['error'], $error);
+
+                return $imp_session;
+            }
+
+        }else{
+            return "SQL error: Can not perform validation query: ".$query;
+        }
+        return null;
+    }
+    
     
     /**
     * create or update records
@@ -1652,7 +1795,7 @@
             $is_mulivalue_index = false;
         }
 
-        //DEBUG print "<br>IS MULTI ".$is_mulivalue_index."<<  ".print_r(@$imp_session['indexes_keyfields'][$id_field], true);
+//DEBUG print "<br>IS MULTI ".$is_mulivalue_index."<<  ".print_r(@$imp_session['indexes_keyfields'][$id_field], true);
 
         if(intval($recordType)<1){
             return "record type not defined";
@@ -1678,7 +1821,9 @@
         }
 
         //indexes
+error_log(">>3");
         $recStruc = getRectypeStructures(array($recordType));
+error_log(">>4");
         $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
         $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
 
@@ -1695,11 +1840,11 @@
 
 
 
-        if($id_field){  //add to list of columns
+        if($id_field){  //index field defined - add to list of columns
             $id_field_idx = count($field_types); //last one
             $select_query = $select_query." WHERE (NOT(".$id_field." is null OR ".$id_field."='')) ORDER BY ".$id_field;
         }else{
-            //create id field by default
+            //create id field by default - add to import table
 
             $id_fieldname = "ID field for Record type #".$recordType;
             $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
@@ -1738,7 +1883,7 @@
             else if($step<1) $step=1;
 
 
-                $previos_recordId = null;
+            $previos_recordId = null;
             $recordId = null;
             $details = array();
             $details2 = array(); //to keep original for sa_mode=2 (replace all existing value)
@@ -1746,7 +1891,7 @@
             $new_record_ids = array();
             $imp_id = null;
 
-            $pairs = array(); // for multivalue rec_id => new_rec_id
+            $pairs = array(); // for multivalue rec_id => new_rec_id  (keep new id if such id already used)
 
             while ($row = $res->fetch_row()){
 
@@ -1757,8 +1902,8 @@
                     $id_field_values = array(null);
                 }
 
+                //loop all id values - because on index field may have multivalue ID
                 foreach($id_field_values as $idx2 => $recordId_in_import){
-
 
                     if(@$pairs[$recordId_in_import]){
                         $recordId_in_import = $pairs[$recordId_in_import];
@@ -1788,9 +1933,12 @@
                                 if(count($details2)==0){
                                     //record not found - this is insert with predefined ID
                                     $recordId = -$recordId_in_import;
+//DEBUG print "record not found - this is insert with predefined ID ".$recordId."<br>";
+                                    
                                 }else{
                                     // record found - update detail according TO settings
                                     $recordId = $recordId_in_import;
+//DEBUG print "record found - update detail according TO settings ".$recordId."<br>";
                                 }
 
                                 //if(!($params['sa_upd']==2 && $params['sa_upd2']==1)){//Delete existing if no new data supplied for record
@@ -1808,6 +1956,8 @@
                         $details = array();
                     }
 
+                    //START FILL DETAILS ============================
+                    
                     if(@$details['imp_id']==null){
                         $details['imp_id'] = array();
                     }
@@ -1887,10 +2037,13 @@
                                 if($value  &&
                                     ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                                     //Add new data only if field is empty (new data ignored for non-empty fields)
-
-
-                                    $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
-                                    $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
+                                    $details_lc = array();
+                                    $details2_lc = array();
+                                    
+                                    if(is_array(@$details["t:".$field_type]))
+                                        $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
+                                    if(is_array(@$details2["t:".$field_type]))
+                                        $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
                                     //DEBUG print "<br>".$value."   >>".print_r($details2_lc, true)."   >>".print_r($details2["t:".$field_type], true);
 
                                     if ((!@$details["t:".$field_type] || array_search(trim_lower_accent($value), $details_lc, true)===false) //no duplications
@@ -1908,13 +2061,14 @@
                             }
                         }
                     }//for import data
+                    //END FILL DETAILS =============================
 
                     //add - update record for 2 cases: idfield not defined, idfield is multivalue
                     if(!$id_field && count($details)>0){ //id field not defined - insert for each line
 
                         $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def);
 
-                    }else if ($is_mulivalue_index){ //idfield is multivalue
+                    }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
 
                         $details = retainExisiting($details, $details2, $params);
                         $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
@@ -2093,7 +2247,30 @@
         );
 
         if (@$out['error']) {
-            print "<div style='color:red'>Line: ".implode(",",$details['imp_id']).". Error: ".implode("; ",$out["error"])."</div>";
+           
+            //special formatting 
+            foreach($out["error"] as $idx=>$value){
+                 $value = str_replace(". You may need to make fields optional. Missed data","",$value);
+                 $k = strpos($value, "Missing data for Required field(s) in");
+                 if($k!==false){
+                    $value = "<span style='color:red'>".substr($value,0,$k+37)."</span>".substr($value,$k+37);
+                 }else{
+                    $value  = "<span style='color:red'>".$value."</span>";
+                 }
+                 $out["error"][$idx] = $value;
+            }
+            foreach($details['imp_id'] as $imp_id){
+                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
+                $res = get_import_value($imp_id, $import_table);
+                if(is_array($res)){
+                    $s = htmlspecialchars(implode(", ", $res));
+                    print "<div style='padding-left:40px'>".$s."</div>";
+                }
+                print "</div>";
+            }                
+
+            //was one line - now dozen:  print "<div><span style='color:red'>Line: ".implode(",",$details['imp_id']).".</span> ".implode("; ",$out["error"])."</div>";
+            
             //return "can not insert record ".implode("; ",$out["error"]);
         }else{
             if($recordId!=$out["bibID"]){ //}==null){
@@ -2612,11 +2789,12 @@
     function renderRecordsError($imp_session){
 
         ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
-        ///DEBUG print print_r(@$validationRes['rec_error'],true);
+        ///DEBUG print print_r($imp_session['validation']['mapped_fields'],true)."<br> ";
+
         $is_missed = false;
 
         $tabs = $imp_session['validation']['error'];
-
+        
         if(count($tabs)>1){
             $k = 0;
 
@@ -2651,10 +2829,13 @@
             }
 
             $checked_field  = $rec_tab['field_checked'];
+            
+            
             if(in_array(intval(substr($checked_field ,6)), $imp_session['multivals'])){
-                $checked_field = null; //highlight errors individually
+                $ismultivalue = true;     //highlight errors individually
+            }else{
+                $ismultivalue = false;
             }
-
             print "<div class='error'>Values in red are invalid<br/></div>";
             print "<div>".$rec_tab['err_message']."<br/><br/></div>";
 
@@ -2775,6 +2956,8 @@
                         print "<td class='truncate'>".$row[0]."</td>";
                         if($is_missed){
                             print "<td style='color:red'>&lt;missing&gt;</td>";
+                        } else if($ismultivalue){
+                            print "<td class='truncate'>".@$row[$err_col]."</td>";
                         } else {
                             print "<td class='truncate' style='color:red'>".@$row[$err_col]."</td>";
                         }

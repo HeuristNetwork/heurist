@@ -35,7 +35,9 @@
     require_once('importCSV_lib.php');
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
+    mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
 
+    
     if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
         header('Content-type: text/javascript');
@@ -814,7 +816,7 @@
                         }//for
                         if($sIndexes){
                             print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="4"><br /><b>Record IDs</b></td>'
-                            .'<td class="subh"><br />-1 indicates new record to be created</td></tr>'.$sIndexes;
+                            .'<td class="subh"><br />Negative value indicates new record to be created</td></tr>'.$sIndexes;
                         }
                         if($sRemain){
                             print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="6"><br /><b>Remaining Data</b></td></tr>'.$sRemain;
@@ -1315,7 +1317,7 @@
                 $line = stream_get_line($handle, 1000000, $lb);
             }
 
-            if(false && count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
+            if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
                 array_push($err_encoding, array("no"=>$line_no, "line"=>substr($line,0,2000)));
                 //if(count($err_encoding)>100) break;
             }

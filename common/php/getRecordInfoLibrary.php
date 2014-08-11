@@ -903,13 +903,26 @@ function getColumnNameToIndex($columns) {
  * @uses      getRectypeColNames()
  */
 function getRectypeDef($rtID) {
+    global $dbID;
+    
     $rtDef = array();
     //
-    $res = mysql_query("select " . join(",", getRectypeColNames()) .
-                        " from defRecTypes".
+    $query = "select " . join(",", getRectypeColNames());
+                        
+    $query = preg_replace("/rty_ConceptID/", "", $query);
+    if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+        $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
+    } else {
+        $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), '') as rty_ConceptID";
+    }
+
+    $query = $query . " from defRecTypes".
                         " left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID".
                         " where rty_ID=$rtID".
-                        " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+                        " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
+
+                        
+    $res = mysql_query($query);                    
     if($res){
         $rtDef = mysql_fetch_row($res);
 
@@ -917,7 +930,7 @@ function getRectypeDef($rtID) {
         //it stores as cocept codes - need to convert it to human readable string
         $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
     }else{
-        error_log('getRectypeDef: record type not found '.$rtID);
+        error_log('getRectypeDef: record type not found '.$rtID.'  '.mysql_error());
     }
 
     return $rtDef;

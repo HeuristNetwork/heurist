@@ -357,10 +357,10 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     if(r && cnt_errors>0){
         r = confirm("There are errors in the data. It is better to fix these in the source file and then "+
             "process it again, as uploading faulty data generally leads to major fix-up work. "+
-            "Are you sure you want to proceed?\r\n"+
-            "Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n"+
-            "BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
-        );
+            "Are you sure you want to proceed?");
+            //"\r\n"+
+            //"Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n"+
+            //"BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
     }
     if(r){
         $("#input_step").val(3);

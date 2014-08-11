@@ -175,14 +175,13 @@
             //		$log .= "- testing missing detatils ";
             $missed = "";
             while ($row = mysql_fetch_row($res)) {
-                $conceptCode = getDetailTypeConceptID($row[1]);
-                $missed = $missed.$row[2]." (Code:".$conceptCode.") ";
+                //ij asked to remove$conceptCode = getDetailTypeConceptID($row[1]);
+                $missed = $missed.$row[2]; //ij asked to remove ." (Code:".$conceptCode.") ";
             }
             /*****DEBUG****///error_log("MISSED ".$missed);
             // at least one missing field
             if($missed){
-                $msg = "Missing data for Required field(s) in '$rectypeName'. You may need to make fields optional
-                    record is missing required field(s). Missed data: ".$missed;
+                $msg = "Missing data for Required field(s) in '$rectypeName'. You may need to make fields optional. Missed data: ".$missed;
                 if($modeImport==2){
                     warnSaveRec($msg);
                 }else{
