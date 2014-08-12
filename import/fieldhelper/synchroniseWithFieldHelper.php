@@ -653,7 +653,7 @@ XML;
                             }
                             $key = $fieldhelper_to_heurist_map['file_path'];
                             if($key>0){
-                                $details["t:".$key] = array("1"=>$flleinfo['dirname']);
+                                $details["t:".$key] = array("1"=>  getRelativePath(HEURIST_UPLOAD_DIR, $flleinfo['dirname']) );
                             }
                             $key = $fieldhelper_to_heurist_map['extension'];
                             if($key>0){

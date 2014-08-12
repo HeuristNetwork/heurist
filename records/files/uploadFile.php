@@ -108,7 +108,7 @@
             'ulf_MimeExt ' => $mimetypeExt,
             'ulf_FileSizeKB' => $file_size,
             'ulf_Description' => $description? $description : NULL,
-            'ulf_FilePath' => HEURIST_UPLOAD_DIR,
+            'ulf_FilePath' => '', //was HEURIST_UPLOAD_DIR
             'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
         );
 
@@ -193,11 +193,14 @@
         }else{
             $file_size = round($size / 1024);
         }
+        
+        // get relative path
+        $relative_path = getRelativePath(HEURIST_UPLOAD_DIR, $dirname);
 
         //check if such file is already registered
-        $res = mysql_query('select ulf_ID from recUploadedFiles '.
-            'where ulf_FilePath = "'.addslashes($dirname).
-            '" and ulf_FileName = "'.addslashes($filename).'"');
+        $res = mysql_query('select ulf_ID from recUploadedFiles '
+            .'where ulf_FileName = "'.addslashes($filename).'" and '
+            .' (ulf_FilePath = "'.addslashes(HEURIST_UPLOAD_DIR).'" or ulf_FilePath = "'.addslashes($relative_path).'")');
 
         if (mysql_num_rows($res) == 1) {
             $row = mysql_fetch_assoc($res);
@@ -211,7 +214,7 @@
                 'ulf_MimeExt ' => $mimetypeExt,
                 'ulf_FileSizeKB' => $file_size,
                 'ulf_Description' => $description?$description : NULL,
-                'ulf_FilePath' => $dirname,
+                'ulf_FilePath' => $relative_path,
                 'ulf_FileName' => $filename,
                 'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
 
@@ -703,15 +706,25 @@
             }else{
                 $res["URL"] = $downloadURL;
             }
+            
+            //add database media storage folder for relative paths
+            $path = @$res['fullpath'];
+            if( $path && !file_exists($path) ){
+                chdir(HEURIST_UPLOAD_DIR);
+                $path = realpath($path);
+                if(file_exists($path)){
+                    $res['fullpath'] = $path;
+                }
+            }
+            
 
             $params = parseParameters($res["parameters"]);
             $res["mediaType"] =	(array_key_exists('mediatype', $params))?$params['mediatype']:null;
             $res["remoteSource"] = (array_key_exists('source', $params))?$params['source']:null;
 
-
             $type_source = $res['remoteSource'];
             if (!($type_source==null || $type_source=='heurist')){ //verify that this is actually remote resource
-                if( $res['fullpath'] && file_exists($res['fullpath']) ){
+                if( @$res['fullpath'] && file_exists($res['fullpath']) ){
                     $res['remoteSource'] = 'heurist';
                 }
             }
@@ -851,5 +864,59 @@
             $filedata['mimeType'] == 'image/jpeg'  ||  $filedata['mimeType'] == 'image/gif'  ||  $filedata['mimeType'] == 'image/png');
 
     }
+    
+    /**
+     * Returns the target path as relative reference from the base path.
+     *
+     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+     * Both paths must be absolute and not contain relative parts.
+     * Relative URLs from one resource to another are useful when generating self-contained downloadable document archives.
+     * Furthermore, they can be used to reduce the link size in documents.
+     *
+     * Example target paths, given a base path of "/a/b/c/d":
+     * - "/a/b/c/d"     -> ""
+     * - "/a/b/c/"      -> "./"
+     * - "/a/b/"        -> "../"
+     * - "/a/b/c/other" -> "other"
+     * - "/a/x/y"       -> "../../x/y"
+     *
+     * @param string $basePath   The base path
+     * @param string $targetPath The target path
+     *
+     * @return string The relative target path
+     */
+    function getRelativePath($basePath, $targetPath)
+    {
+        if ($basePath === $targetPath) {
+            return '';
+        }
+        //else  if(strpos($basePath, $targetPath)===0){
+        //    $relative_path = $dirname;
+
+
+        $sourceDirs = explode('/', isset($basePath[0]) && '/' === $basePath[0] ? substr($basePath, 1) : $basePath);
+        $targetDirs = explode('/', isset($targetPath[0]) && '/' === $targetPath[0] ? substr($targetPath, 1) : $targetPath);
+        array_pop($sourceDirs);
+        $targetFile = array_pop($targetDirs);
+
+        foreach ($sourceDirs as $i => $dir) {
+            if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
+                unset($sourceDirs[$i], $targetDirs[$i]);
+            } else {
+                break;
+            }
+        }
+
+        $targetDirs[] = $targetFile;
+        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
+
+        // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
+        // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
+        // as the first segment of a relative-path reference, as it would be mistaken for a scheme name
+        // (see http://tools.ietf.org/html/rfc3986#section-4.2).
+        return '' === $path || '/' === $path[0]
+            || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
+            ? "./$path" : $path;
+    }    
 
 ?>

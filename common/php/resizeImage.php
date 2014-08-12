@@ -90,7 +90,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		echo $file['ulf_Thumbnail'];
 		return;
 	}
-/*****DEBUG****///error_log(">>>>>>>>>".$file['ulf_Parameters']);
+/*****DEBUG****///error_log(">>>>>>>>>".print_r($file, true));
 	$fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
 	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
 	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
@@ -104,14 +104,26 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		$filename = str_replace('/../', '/', $filename);
 	}
 
+    if(isset($filename)){        
+            //add database media storage folder for relative paths
+            $path = $filename;
+            if( $path && !file_exists($path) ){
+                chdir(HEURIST_UPLOAD_DIR);
+                $path = realpath($path);
+                if(file_exists($path)){
+                    $filename = $path;
+                }
+            }
+    }
+    
 	if (isset($filename) && file_exists($filename)){
 
-		if ($file['ulf_FileName']) {
+		/*if ($file['ulf_FileName']) {
 			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
 		} else {
 			$filename = HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 		}
-		$filename = str_replace('/../', '/', $filename);
+		$filename = str_replace('/../', '/', $filename);*/
 
 		$mimeExt = '';
 		if ($file['ulf_MimeExt']) {

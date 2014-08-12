@@ -110,7 +110,7 @@
     */
     function get_uploaded_file_info_internal($fileID)
     {
-        global $urlbase, $is_generation, $media_filepath;
+        global $urlbase, $is_generation, $media_filepath;  // these are from DoS generator
 
         $res = null;
 
