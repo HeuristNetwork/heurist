@@ -69,6 +69,8 @@
 		}
 
 		$fresh = !! @$args["f"];
+        
+        $noCache = (@$args["nocache"]==1);
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
 		/*****DEBUG****///error_log("QUERY:".$query);
@@ -96,7 +98,13 @@
 					error_log("2.queryError in getSearchResults -".mysql_error());
 				}
 
-				$record = loadRecord($row["rec_ID"], $fresh, $bare);
+                if($noCache){
+                    $record = loadRecord_NoCache($row["rec_ID"], $bare);    
+                }else{
+                    $record = loadRecord($row["rec_ID"], $fresh, $bare);    
+                }
+                
+                
 				if (array_key_exists("error", $record)) {
 					return array("error" => $record["error"]);
 				}
@@ -174,6 +182,23 @@
 		return $record;
 	}
 
+    //
+    // do not use memcache - use in export 
+    // otherwise it fails on export of entire database
+    //
+    function loadRecord_NoCache($id, $bare = false) {
+        
+        if (! $id) {
+            return array("error" => "must specify record id");
+        }
+        $record = loadBareRecordFromDB($id);
+        if ($record && ! $bare) {
+            loadUserDependentData($record);
+        }
+        return $record;
+    }
+    
+    
 	function updateCachedRecord($id) {
 		global $memcache;
 		$key = DATABASE . ":record:" . $id;

@@ -414,7 +414,7 @@
         while ($res && $row = mysql_fetch_assoc($res)) {
             // if target is not in the result
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth);
+                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
             } else if ($rtyIDs || $dtyIDs) { // TODO placed here for directed filtering which means we want repeats to be expanded
@@ -496,7 +496,7 @@
             // if target is not in the result
             $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth);
+                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
             } else if ($rtyIDs || $dtyIDs) { // TODO placed here for directed filtering which means we want repeats to be expanded
@@ -587,18 +587,18 @@
             //echo "row is ".print_r($row,true);
             // if source is not in the result
             if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
-                $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth);
+                $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth, 'recID' => $row['srcRecID']);
                 $nlrIDs[$row['srcRecID']] = 1; //save it for next level query
             }
 
             //if rel rec not in result
             if (!array_key_exists($row['relID'], $recSet['relatedSet'])) {
-                $recSet['relatedSet'][$row['relID']] = array('depth' => $recSet['relatedSet'][$row['srcRecID']]['depth'] . ".5");
+                $recSet['relatedSet'][$row['relID']] = array('depth' => $recSet['relatedSet'][$row['srcRecID']]['depth'] . ".5", 'recID' => $row['relID']);
             }
 
             // if target is not in the result
             if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth);
+                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
                 $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
             }
@@ -714,15 +714,17 @@
         }
 
         foreach ($rec_ids as $recID) {
-            $recSet['relatedSet'][$recID] = array('depth' => 0);
+            $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
         }
 
         buildGraphStructure($rec_ids, $recSet);
         $recSet['count'] = count($recSet['relatedSet']);
 
+        /* ARTEM: avoid memory overflow
         foreach ($recSet['relatedSet'] as $recID => $recInfo) {
-            $recSet['relatedSet'][$recID]['record'] = loadRecord($recID, $FRESH, true);
+            $recSet['relatedSet'][$recID]['record'] = loadRecord_NoCache($recID, true); //loadRecord($recID, $FRESH, true);
         }
+        */
 
         $resout = array();
 
@@ -733,7 +735,7 @@
         foreach ($recSet['relatedSet'] as $recID => $recInfo) {
             if (intval($recInfo['depth']) <= $MAX_DEPTH) {
 
-                // output one record
+                // output one record - returs rec_RecTypeID for given record
                 $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
 
                 // close the file if using HuNI manifest + separate files output
@@ -743,7 +745,7 @@
                 }
 
                 if($res){
-                    $resout[$recID] = $recInfo['record']['rec_RecTypeID'];
+                    $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
                 }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$recID.".xml")){
                     unlink(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml");
                 }
@@ -763,7 +765,10 @@
         $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID;
 
         $hunifile = null;
-        $record = $recordInfo['record'];
+        
+        //$record = $recordInfo['record'];
+        $record = loadRecord_NoCache($recordInfo['recID'], true); //loadRecord($recID, $FRESH, true);
+        
         $depth = $recordInfo['depth'];
         $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
@@ -810,7 +815,7 @@
         if ($depth > $USEXINCLUDELEVEL) {
             outputXInclude($record);
             closeTag('record');
-            return true;
+            return $record['rec_RecTypeID'];
         }
 
         $conceptID = getRecTypeConceptID($record['rec_RecTypeID']);
@@ -859,7 +864,7 @@
         if (array_key_exists('revPtrLinks', $recordInfo) && $recordInfo['revPtrLinks']['byRecIDs']) {
             foreach ($recordInfo['revPtrLinks']['byRecIDs'] as $rec_id => $dtIDs) {
                 foreach ($dtIDs as $dtID) {
-                    $linkedRec = $recInfos[$rec_id]['record'];
+                    $linkedRec = loadRecord_NoCache($rec_id, true); //$recInfos[$rec_id]['record'];
                     $attrs = array('id' => $dtID, 'conceptID' => getDetailTypeConceptID($dtID), 'type' => $DTN[$dtID]);
                     if (array_key_exists($dtID, $RQS[$linkedRec['rec_RecTypeID']])) {
                         $attrs['name'] = $RQS[$linkedRec['rec_RecTypeID']][$dtID];
@@ -872,7 +877,7 @@
         if (array_key_exists('revRelLinks', $recordInfo) && $recordInfo['revRelLinks']['relRecIDs']) {
             $recID = $record['rec_ID'];
             foreach ($recordInfo['revRelLinks']['relRecIDs'] as $relRec_id) {
-                $relRec = $recInfos[$relRec_id]['record'];
+                $relRec = loadRecord_NoCache($relRec_id, true); //$recInfos[$relRec_id]['record'];
                 $attrs = array();
                 if ($details = $relRec['details']) {
                     if ($details[$relTrgDT]) {
@@ -921,7 +926,7 @@
         if (array_key_exists('relLinks', $recordInfo) && $recordInfo['relLinks']['relRecIDs']) {
             $recID = $record['rec_ID'];
             foreach ($recordInfo['relLinks']['relRecIDs'] as $relRec_id) {
-                $relRec = $recInfos[$relRec_id]['record'];
+                $relRec = loadRecord_NoCache($relRec_id, true); //$recInfos[$relRec_id]['record'];
                 $attrs = array();
                 if ($details = $relRec['details']) {
                     if ($details[$relTrgDT]) {
@@ -966,8 +971,8 @@
 
         closeTag('record');
 
-        return true;
-    }
+        return $record['rec_RecTypeID']; //true;
+    } //outputRecord
 
 
     function outputXInclude($record) {
@@ -1066,7 +1071,9 @@
                 $attrs['isRecordPointer'] = "true";
                 if ($MAX_DEPTH == 0 && $outputStub) {
                     openTag('detail', $attrs);
-                    outputRecordStub($recInfos[$value['id']]['record']);
+                    
+                    $recinfo = loadRecord_NoCache($value['id'], true);
+                    outputRecordStub($recinfo); //$recInfos[$value['id']]['record']);
                     closeTag('detail');
                 } else {
                     makeTag('detail', $attrs, $value['id']);
@@ -1133,7 +1140,8 @@
             $attrs['isRecordPointer'] = "true";
             if ($MAX_DEPTH == 0 && $outputStub) {
                 openTag('detail', $attrs);
-                outputRecordStub($recInfos[$value['id']]['record']);
+                $recinfo = loadRecord_NoCache($value['id'], true);
+                outputRecordStub($recinfo); //$recInfos[$value['id']]['record']);
                 closeTag('detail');
             } else {
                 makeTag('detail', $attrs, $value['id']);
@@ -1344,12 +1352,11 @@
         }
         ob_implicit_flush(1);
     }
-
+    
     //----------------------------------------------------------------------------//
     //  Output
     //----------------------------------------------------------------------------//
 
-    $result = loadSearch($_REQUEST, false, true, $PUBONLY);
     $hmlAttrs = array();
 
     if ($USEXINCLUDE) {
@@ -1364,10 +1371,25 @@
         $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
     }
 
+    $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
     $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
-    if($intofile){ // flags HuNI manifest + separate files per record
+    /*if(@$_REQUEST['offset']){
+        $offset = intval($_REQUEST['offset']);
+    }else{
+        $offset = 0;
+    }
+    $last_limit = null;
+    if(@$_REQUEST['limit']){
+        $limit = intval($_REQUEST['limit']);
+        if($limit>1000){
+            $last_limit = $limit+$offset;
+            $limit = 1000;        
+        }
+    }*/
 
+    if($intofile){ // flags HuNI manifest + separate files per record
+    
         if (array_key_exists('error', $result)) {
             print "Error: ".$result['error'];
         }else{
@@ -1409,9 +1431,75 @@
 
             print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_PUBPATH."</b>";
         }
+/*    
+    
+        $_REQUEST['limit'] = 1000;
+        
+        $total_out_count = 0;
 
+        // create HuNI manifest
+        $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
+        fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
+
+        // dbID set at start of script
+        if (isset($dbID) && ($dbID != 0)) {
+            fwrite( $huni_resources, "<dbID>".$dbID."</dbID>\n");
+        }
+        else
+        {
+            fwrite( $huni_resources, "<dbID>0</dbID>\n"); // unregistered indicated by 0
+        }
+
+        
+        while ($last_limit==null || $offset<$last_limit){
+
+            $_REQUEST['offset'] = $offset;
+            $result = loadSearch($_REQUEST, false, true, $PUBONLY);
+
+            if (array_key_exists('error', $result)) {
+                print "Error: ".$result['error'];
+                break;
+            }else if($result['recordCount']>0){
+            
+                // write out all records as separate files
+                $resout = outputRecords($result);
+
+                // add each output file to the manifest
+                foreach ($resout as $recID => $recTypeID) {
+
+                    $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
+
+                    if(file_exists($resfile)){
+                        $conceptID = getRecTypeConceptID($recTypeID);
+                        fwrite( $huni_resources, "<record>\n");
+                        fwrite( $huni_resources, "<name>".$recID.".xml</name>\n");
+                        fwrite( $huni_resources, "<hash>".md5_file($resfile)."</hash>\n");
+                        fwrite( $huni_resources, "<RTConceptID>".$conceptID."</RTConceptID>\n");
+                        fwrite( $huni_resources, "</record>\n");
+                    }
+                }            
+            
+                $offset = $offset + 1000;
+                $total_out_count = $total_out_count + count($resout);
+                
+                if($result['recordCount']<100){
+                    break;
+                }
+            }
+        }
+        
+        fseek( $huni_resources, 1);   // move pointer to the file position where we saved above 
+        fwrite( $huni_resources, '<resources recordCount="'.count($total_out_count)."\">\n");      // !!!!!!
+        
+        fwrite($huni_resources, $newline);        
+
+        fwrite( $huni_resources, "</resources>");
+        fclose( $huni_resources );
+
+        print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_PUBPATH."</b>";
+*/
     }else{ // single output stream
-
+    
         openTag('hml', $hmlAttrs);
         /*
         openTag('hml', array(

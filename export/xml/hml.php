@@ -508,7 +508,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 				if ($SUPRESS_LOOPBACKS && $rec_id == $parentID){	//pointing back to the parent so skip
 					continue;
 				}
-				$child = loadRecord($rec_id);
+				$child = loadRecord_NoCache($rec_id);
 				openTag('reversePointer', array('id' => $dt, 'conceptID'=>getDetailTypeConceptID($dt), 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_RecTypeID']][$dt]));
 				outputRecord($child, $reverse_pointers, $relationships, $depth + 1, $outputStub,$record['rec_ID']);
 				closeTag('reversePointer');
@@ -517,7 +517,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 		if (array_key_exists($record['rec_ID'], $relationships)  &&  count($relationships[$record['rec_ID']]) > 0) {
 			openTag('relationships');
 			foreach ($relationships[$record['rec_ID']] as $rel_id) {
-				$rel = loadRecord($rel_id);
+				$rel = loadRecord_NoCache($rel_id);
 /*****DEBUG****///error_log(" relRec = ".print_r($rel,true));
 				foreach ( $rel['details'][$relSrcDT] as $dtID => $from){
 					$fromType = $from['type'];
@@ -623,11 +623,11 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 					}
 				}
 				openTag('detail', $attrs);
-				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
+				outputRecord(loadRecord_NoCache($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 				closeTag('detail');
 			}else if ($depth < $MAX_DEPTH) {
 				openTag('detail', $attrs);
-				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
+				outputRecord(loadRecord_NoCache($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 				closeTag('detail');
 			} else if ($outputStub) {
 				openTag('detail', $attrs);
@@ -673,7 +673,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'resource') {
 		openTag('detail', $attrs);
-		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
+		outputRecord(loadRecord_NoCache($value), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 		closeTag('detail');
 	} else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype' ) && array_key_exists($value,$TL)) {
 		$attrs['termConceptID'] = getTermConceptID($value);
@@ -911,7 +911,7 @@ if (! @$ARGV) {
 for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
 ob_implicit_flush(1);
 
-
+$_REQUEST['nocache'] = 1;
 //----------------------------------------------------------------------------//
 //  Output
 //----------------------------------------------------------------------------//
