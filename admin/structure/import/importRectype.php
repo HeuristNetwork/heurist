@@ -249,8 +249,23 @@
 
     foreach ($imp_recordtypes as $recId){
 
-        $grp_id = $def_rts[$recId]['commonFields'][$idx_rt_grp];
+        $rt_name = @$defs['rectypes']['names'][$recId];
+        if(!@$def_rts[$recId]){
+             if(!$rt_name){
+                error_exit("Can't find record type #'".$recId."'. in source database");    
+             }else{
+                error_exit("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");    
+             }
+        }
+        
+        $grp_id = @$def_rts[$recId]['commonFields'][$idx_rt_grp];
 
+        if(!$grp_id){
+            error_exit("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");    
+        }
+        
+        $src_group=null;
+        
         if(@$group_rt_ids[$grp_id]){ //already found
             continue;
         }
@@ -259,11 +274,18 @@
         foreach ($defs['rectypes']['groups'] as $idx=>$group){
             if(is_numeric($idx) && $group['id']==$grp_id){
                 $src_group = $group;
-                $grp_name = $src_group['name'];
+                $grp_name = @$src_group['name'];
                 break;
             }
         }
 
+        if($src_group==null){
+            error_exit("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");    
+        }
+        if(!$grp_name){
+            error_exit("Name of group is empty. Can't add group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");    
+        }
+        
         //get name and try to find in target
         $isNotFound = true;
         foreach ($trg_rectypes['groups'] as $idx=>$group){
@@ -550,7 +572,7 @@
             <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         </head>
 
-        <body>
+        <body class="popup">
 
             <h4>Record type and associated structures imported</h4>
 
@@ -931,18 +953,22 @@
         global $trg_terms;
 
         if(!$term_import || $term_import=="") return $term_import;
+        
+        if(is_array($lvl_src)){
 
-        $found = 0;
-        $name = removeLastNum($term_import);
+            $found = 0;
+            $name = removeLastNum($term_import);
 
-        foreach($lvl_src as $trmId=>$childs){
-            $name1 = removeLastNum($trg_terms['termsByDomainLookup'][$domain][$trmId][$idx]);
-            if($name == $name1){
-                $found++;
+            foreach($lvl_src as $trmId=>$childs){
+                $name1 = removeLastNum($trg_terms['termsByDomainLookup'][$domain][$trmId][$idx]);
+                if($name == $name1){
+                    $found++;
+                }
             }
-        }
-        if($found>0){
-            $term_import = $name." ".($found+1);
+            if($found>0){
+                $term_import = $name." ".($found+1);
+            }
+            
         }
 
         return $term_import;

@@ -184,8 +184,6 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
 
     if($mode==0){  //fill the mask with values
     
-//error_log("111>>> ".$rep_mode);
-    
         if($fields_blank==$len && $rec_id){ //If all the title mask fields are blank
             $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
         }

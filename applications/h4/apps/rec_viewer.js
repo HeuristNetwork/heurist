@@ -253,7 +253,7 @@ $.widget( "heurist.rec_viewer", {
                     for(tagID in tags) {
                         var tag = tags[tagID];
                         if(tag && tag[3]>0){ //usage
-                            tags_list = tags_list + "<a href='#' "+(top.HEURIST.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
+                            tags_list = tags_li st + "<a href='#' "+(top.HEURIST.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
                         }
                     }
 

@@ -121,7 +121,6 @@ function getCachedData($key) {
 
     // check the cached lastupdate value and return false on not equal meaning recreate data
     if ($lastModified > $memcache->get('lastUpdate:' . $key)) {
-	// error_log("returning null from cache for key = $key");
         return null;
     }
 
