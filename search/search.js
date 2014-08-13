@@ -179,21 +179,26 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.updateRssFeedLink();
+        
+        if(false) {
+           // from now it is always invisible
 
-        if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" || top.HEURIST.search.results.infoByDepth[0].count==0){
-            $("#related-toggle").hide();
-        }else{
-            $("#related-toggle").show();
+            if(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" || top.HEURIST.search.results.infoByDepth[0].count==0){
+                $("#related-toggle").hide();
+            }else {            
+                $("#related-toggle").show();
+            }
         }
 
 		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
-		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
-			(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" ||
-				top.HEURIST.parameters['rtfilters'] ||
-				top.HEURIST.parameters['prtfilters'] ||
-				top.HEURIST.parameters['relfilters'] )){
-				top.HEURIST.search.loadRelatedResults();
+        if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
+			    (top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" ||
+				    top.HEURIST.parameters['rtfilters'] ||
+				    top.HEURIST.parameters['prtfilters'] ||
+				    top.HEURIST.parameters['relfilters'] )){
+				    top.HEURIST.search.loadRelatedResults();
 		}
+        
 	},
 
 	loadSearchLocation: function(strLocation) {
@@ -995,7 +1000,7 @@ top.HEURIST.search = {
 
     getLink_toggleOff_loadRelatedRecords: function(level){
 
-        if(level==1){
+        if(false && level==1){
             return "<a onclick=\"top.HEURIST.util.setDisplayPreference('loadRelatedOnSearch','false');top.HEURIST.search.clearRelatesRows();$('#related-toggle').show();\" "+
                       " style='{background-image:none;}' href=\"#\" "+
                       "title=\"Turns off searches for records linked to the current search results by relationships or pointers. Improves performance where display or navigation to related records is not needed\">turn off</a>";
@@ -2788,6 +2793,20 @@ top.HEURIST.search = {
 			return innerHTML;
 		};
 
+        printSavedSearchAsOption = function(cmb) {
+            var sid = cmb[2];
+
+            var innerHTML = "";
+
+            try {
+                var facet_params = $.parseJSON(cmb[1]);
+            }
+            catch (err) {
+                innerHTML = '<option value="'+sid+'">'+ cmb[0] + "</option>";
+            }
+            return innerHTML;
+        };
+        
 
 		if (! top.HEURIST.user) return;
 
@@ -2829,14 +2848,16 @@ top.HEURIST.search = {
 				innerHTML_bm = "",
 				innerHTML_all_inmenu = "",
 				innerHTML_bm_inmenu = "",
-				innerHTML_filters = "";
+				innerHTML_filters = "",
+                innerHTML_filters_opts = "<option value=''>select...</option>";
 
 			for (var i = 0; i < savedSearches.length; ++i) {
 				cmb = savedSearches[i];
 
 				var isFilter = top.HEURIST.util.isempty(top.HEURIST.util.getUrlParameter("q", cmb[1]));
-				if(isFilter){
+				if(isFilter){ //query not defined
 					innerHTML_filters += printSavedSearchAsMenuItem(cmb);
+                    innerHTML_filters_opts += printSavedSearchAsOption(cmb);
 				}else{
 					if (cmb[4]){
 						innerHTML_all += printSavedSearch(cmb);
@@ -2858,7 +2879,10 @@ top.HEURIST.search = {
 			searchDiv.innerHTML = innerHTML_all_inmenu;
 			searchDiv = document.getElementById("menuSavedFiltersAndLayouts");
 			searchDiv.innerHTML = innerHTML_filters;
+            searchDiv = document.getElementById("selSavedFiltersAndLayouts");
+            searchDiv.innerHTML = innerHTML_filters_opts;
 
+            
 			document.getElementById("my-blog-link").onclick = function(event){
 					top.HEURIST.util.stopEvent(event);
 					window.open(top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() + _db,'_blank');
@@ -3186,10 +3210,12 @@ top.HEURIST.search = {
 	// Execute the saved search by ID
 	//
 	savedSearchExecute: function(ssid) {
-		var ss = top.HEURIST.search.savedSearchFind(ssid);
-		if(!top.HEURIST.util.isnull(ss)){
-			top.HEURIST.search.executeQuery(ss[1]+'&label='+ss[0]);
-		}
+        if(ssid){
+		    var ss = top.HEURIST.search.savedSearchFind(ssid);
+		    if(!top.HEURIST.util.isnull(ss)){
+			    top.HEURIST.search.executeQuery(ss[1]+'&label='+ss[0]);
+		    }
+        }
 		return false;
 	},
 
