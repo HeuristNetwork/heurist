@@ -114,20 +114,20 @@
 
         if ($res) { // add record level data to json
             $row = mysql_fetch_array($res); // fetch Record data
-            $jsonData = $jsonData.'URL:"'          .$row[0].'"';
-            $jsonData = $jsonData.',Added:"'       .$row[1].'"';
-            $jsonData = $jsonData.',Modified:"'    .$row[2].'"';
-            $jsonData = $jsonData.',Title:"'       .$row[3].'"';
-            $jsonData = $jsonData.',RecTypeID:"'   .$row[4].'"';
-            $jsonData = $jsonData.',AddedBy:"'     .$row[5].'"';
-            $jsonData = $jsonData.',Imported:"'    .$row[6].'"';
-            $jsonData = $jsonData.',Popularity:"'  .$row[7].'"';
-            $jsonData = $jsonData.',Temporary:"'   .$row[8].'"';
-            $jsonData = $jsonData.',OwnerUGrpID:"' .$row[9].'"';
-            $jsonData = $jsonData.',NonOwnerVis:"' .$row[10].'"';
-            $jsonData = $jsonData.',URLLastVerif:"'.$row[11].'"';
-            $jsonData = $jsonData.',URLErrMsg:"'   .$row[12].'"';
-            $jsonData = $jsonData.',URLExtMimeType:"'.$row[13].'"';
+            $jsonData .= '"URL":"'          .$row[0].'"';
+            $jsonData .= ',"Added":"'       .$row[1].'"';
+            $jsonData .= ',"Modified":"'    .$row[2].'"';
+            $jsonData .= ',"Title":"'       .$row[3].'"';
+            $jsonData .= ',"RecTypeID":"'   .$row[4].'"';
+            $jsonData .= ',"AddedBy":"'     .$row[5].'"';
+            $jsonData .= ',"Imported":"'    .$row[6].'"';
+            $jsonData .= ',"Popularity":"'  .$row[7].'"';
+            $jsonData .= ',"Temporary":"'   .$row[8].'"';
+            $jsonData .= ',"OwnerUGrpID":"' .$row[9].'"';
+            $jsonData .= ',"NonOwnerVis":"' .$row[10].'"';
+            $jsonData .= ',"URLLastVerif":"'.$row[11].'"';
+            $jsonData .= ',"URLErrMsg":"'   .$row[12].'"';
+            $jsonData .= ',"URLExtMimeType":"'.$row[13].'"';
         } else {
             // TODO: Should really check and warn and exit if bad query
             // Also exit if record marked as temporary
@@ -139,7 +139,7 @@
         $res = mysql_query($queryDtl);
         if ($res) {
             while (($row = mysql_fetch_array($res))) { // fetch detail data
-                $jsonData = $jsonData.','.$row[0].':"'.$row[1].$row[2].$row[3].'"';
+                $jsonData .= ',"' .$row[0]. '":"'.$row[1].$row[2].$row[3].'"';
                 // numeric detail ID is used as the key for the index, so no namespace conflict
                 // with textual keys from the Record itself
                 // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
