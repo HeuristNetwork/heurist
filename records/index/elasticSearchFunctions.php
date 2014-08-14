@@ -149,7 +149,7 @@
         }
 
         // Terminate the json data
-        $jsonData = $jsonData.'}';
+        $jsonData .= '}';
         $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
 
         //-----------------------------------------------------------------------------------------------------------------
