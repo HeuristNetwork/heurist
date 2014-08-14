@@ -155,9 +155,6 @@
         //-----------------------------------------------------------------------------------------------------------------
 
         // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
-
-        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d '$jsonData'";
-
         // If the index and type do not exist, the index is created autiomatically according to
         // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html
         //
@@ -173,19 +170,24 @@
         // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
 
         //----------------------------------------------------------------------------------------------------------------
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL); // have to reset before can set to PUT
-        curl_setopt($ch, CURLOPT_PUT, true);
+        
+        $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
-            print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url;
+            print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
             error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
         } else {
+            print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
             curl_close(ch); // is this necessary?
             return(0);
         }
@@ -215,7 +217,7 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
@@ -246,7 +248,7 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
@@ -276,7 +278,7 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
