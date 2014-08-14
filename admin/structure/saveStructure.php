@@ -368,8 +368,12 @@ else
                     $rv['error'] = "Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php";
                 }else{
                     $ret = deleteTerms($trmID);
-                    $rv['result'] = $ret;
-                    $rv['terms'] = getTerms();
+                    if(@$ret['error']){
+                        $rv = $ret;
+                    }else{
+                        $rv['result'] = $ret;
+                        $rv['terms'] = getTerms();
+                    }
                 }
                 break;
         }

@@ -1343,6 +1343,31 @@ error_log("AAAA:".$query);
 		}
 		return $ret;
 	}
+    
+    /**
+    * Returns all parents for given term
+    * 
+    * @param mixed $termId
+    */
+    function getTermParents($termId){
+        global $mysqli;
+                                                     
+        $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
+        $res = $mysqli->query($query);
+        $row = $res->fetch_row();
+        if($row){
+            $parentId = $row[0];
+            
+        }
+
+        $parentId = mysql_fetch_array(mysql_query($query));
+        if($parentId && @$parentId[0]){
+            return getTopMostParentTerm($parentId[0]);
+        }else{
+            return $termId;
+        }
+    }
+    
 
 	/**
 	* deletes the term with given ID and all its children
@@ -1362,28 +1387,59 @@ error_log("AAAA:".$query);
 
 		/*****DEBUG****///		error_log(">>>>>>>>>>>>>>>>>".join(",",$children));
 
-		//find possible entries in defDetailTypes dty_JsonTermIDTree
-		foreach ($children as $termID) {
-			$query = "select dty_ID from defDetailTypes where (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
-			$res = $mysqli->query($query);
-			if ($mysqli->error) {
-				$ret['error'] = "SQL error in deleteTerms retreiving feild types which use term $termID: ".$mysqli->error;
-				break;
-			}else{
-				$dtCount = $res->num_rows;
-				if ($dtCount>0) { // there are records existing of this rectype, need to return error and the recIDs
-					$ret['error'] = "You cannot delete term $trmID. ".(($trmID==$termID)?"It":"Its child term $termID")." is referenced in $dtCount field type(s)";
-					$ret['dtyIDs'] = array();
-					while ($row = $res->fetch_row()) {
-						array_push($ret['dtyIDs'], $row[0]);
-					}
-					break;
-				}
-			}
-			//need to check inverseid or it will error by foreign key constraint?
-
-
-		}//foreach
+        //find possible entries in defDetailTypes dty_JsonTermIDTree
+        foreach ($children as $termID) {
+            $query = "select dty_ID, dty_Name from defDetailTypes where (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
+            $res = $mysqli->query($query);
+            if ($mysqli->error) {
+                $ret['error'] = "SQL error in deleteTerms retreiving field types which use term $termID: ".$mysqli->error;
+                break;
+            }else{
+                $dtCount = $res->num_rows;
+                if ($dtCount>0) { // there are records existing of this rectype, need to return error and the recIDs
+                    $ret['error'] = "Error: You cannot delete term $trmID. "
+                                .(($trmID==$termID)?"It":"Its child term $termID")
+                                ." is referenced in $dtCount base field defintions "
+                                ."- please delete field definitions or remove terms from these fields to allow deletion of these terms.<div style='text-align:left'><ul>";
+                    $ret['dtyIDs'] = array();
+                    while ($row = $res->fetch_row()) {
+                        array_push($ret['dtyIDs'], $row[0]);
+                        $ret['error'] = $ret['error'].("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                    }
+                    $ret['error'] = $ret['error']."</ul></div>";
+                    break;
+                }
+            }
+            //TODO: need to check inverseid or it will error by foreign key constraint?
+        }//foreach
+        
+        //find usage in recDetails
+        if(!array_key_exists("error", $ret)){
+            
+            $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
+                    ."where (dty_ID = dtl_DetailTypeID ) and "
+                    ."(dty_Type='enum' or dty_Type='relationtype') and "
+                    ."(dtl_Value in (".implode(",",$children)."))";
+            
+                $res = $mysqli->query($query);
+                if ($mysqli->error) {
+                    $ret['error'] = "SQL error in deleteTerms retreiving records which use term $termID: ".$mysqli->error;
+                    break;
+                }else{
+                    $recCount = $res->num_rows;
+                    if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs
+                        $ret['error'] = "Error: You cannot delete term $trmID. It or its child terms are referenced in $recCount record(s)";
+                        $ret['recIDs'] = array();
+                        while ($row = $res->fetch_row()) {
+                            array_push($ret['recIDs'], $row[0]);
+                        }
+                        $ret['error'] = $ret['error']."<br><br>"
+                        ."<a href='#' onclick='window.open(\""
+                        .HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME."&q=ids:".implode(",",$ret['recIDs'])."\",\"_blank\")'>Click here</a> to retrieve these records";
+                    }
+                }
+        }
+        
 
 		//all is clear - delete the term
 		if(!array_key_exists("error", $ret)){
