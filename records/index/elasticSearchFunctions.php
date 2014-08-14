@@ -30,7 +30,7 @@
 
     Call updateRecordIndexEntry whenever a record is written (new or updated, from record edit or record import or record recode)
 
-    Run buildAllIndices as part of database upgrade 1.1.0 to 1.2.0
+    Call buildAllIndices as part of database upgrade 1.1.0 to 1.2.0
 
     Call deleteRecordIndexEntry whenever a record is saved with a different type (editRecord)
 
@@ -109,7 +109,7 @@
         if (($res) && ($row[3] != $recTypeID)) {// record type has changed
 
             // TODO: Delete index for old record type before updating index for new record type
-
+            print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
         } // change of record type / delete existing index entry
 
         if ($res) { // add record level data to json
@@ -131,6 +131,7 @@
         } else {
             // TODO: Should really check and warn and exit if bad query
             // Also exit if record marked as temporary
+            print "<br />Query $query has failed";
         }
 
         // Add the detail level data
@@ -155,7 +156,7 @@
 
         // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
 
-        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d'$jsonData'";
+        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d '$jsonData'";
 
         // If the index and type do not exist, the index is created autiomatically according to
         // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html
@@ -167,7 +168,7 @@
         // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
         //
         // curl from comand line simply creates the index ...
-        // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d'{Title:""}'
+        // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d '{Title:""}'
         // just to get the index started. This is a pain. Is it something wrong with the construction of the URL?
         // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
 
@@ -179,7 +180,8 @@
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
-            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+            print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url;
             error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -218,6 +220,7 @@
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
             error_log("deleteRecordIndexEntry: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -248,6 +251,7 @@
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForRectype: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -276,10 +280,11 @@
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
-            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+            print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForDatabase: $error ($code)" . " url = ". $url);
             curl_close($ch);
-            return $code;
+            return($code);
         } else {
             curl_close(ch); // is this necessary?
             return(0);
@@ -292,6 +297,7 @@
     * Rebuild the index for a specified record type
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     * @param
+    * @returns 0 = OK, any other = error
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
         print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
@@ -303,9 +309,15 @@
         $res = mysql_query($query);
         if ($res) {
             while (($row = mysql_fetch_array($res))) { // fetch records
-                updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
+                $code = updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
+                if($code != 0) {
+                    print "<br />ERROR while updating record index; code = $code, dbName = $dbname, rectypeID = $recTypeID, row = " + $row[0] + "<br />";
+                    return($code); // curl error code
+                }
             }
+            return(0);
         }
+        return(-1);
     } // buildIndexForRectype
 
 
@@ -326,10 +338,15 @@
             $maxRecTypeID = $row[0];
             print "<br />MaxRecTypeID = $maxRecTypeID<br />";
             for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
-                buildIndexForRectype ($dbName, $i);
+                $code = buildIndexForRectype ($dbName, $i);
+                if($code != 0) {
+                    print "<br />ERROR while building index for rectype; code = $code, dbName = $dbName, i = $i<br />";
+                    return($code);
+                }
             }
             return(0);
         }
+        return(-1);
     } // buildAllIndices
 
 ?>
