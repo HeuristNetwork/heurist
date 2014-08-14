@@ -143,9 +143,9 @@
     $imp_terms = array("enum"=>array(), "relation"=>array());
 
     //source id => target id
-    $fields_correspondence = array();
+    $fields_correspondence = array();  //import field id -> target id - IMPORTANT for proper titlemask conversion
     $fields_correspondence_existed = array();
-    $rectypes_correspondence = array();
+    $rectypes_correspondence = array(); //source rectypeID => new (target) rectype ID
     $terms_correspondence = array(); //"enum"=>array(), "relation"=>array());
     $terms_correspondence_existed = array();
     $group_ft_ids = array();
@@ -540,8 +540,9 @@
 
             $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
 
-            ///DEBUG print "<br>mask before: ".$mask."  rty=".$rectypes_correspondence[$rtyID];
-
+            // DEBUG  print "<br>mask before: ".$mask."  rty=".$rectypes_correspondence[$rtyID];
+           
+            // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code 
             $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
             if(!is_numeric($res)){
                 error_exit($res);

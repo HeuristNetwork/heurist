@@ -156,7 +156,7 @@
 		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
 		" -D$tempDBName < ../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
         
-error_log("TEMP DB:".$tempDBName);
+/*DEBUG*///error_log("TEMP DB:".$tempDBName);
         
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {
@@ -231,7 +231,7 @@ error_log("TEMP DB:".$tempDBName);
                     "<br /><a href=$source_url_new target=_blank>$source_url_new</a> <p>$msg");
             }
 		}
-
+        
 	} // getting data from source database for import of definitions to an existing database
 
 

@@ -786,16 +786,18 @@ function EditTerms() {
                 Dom.get('formEditor').style.display = "none";
 
                 function __updateAfterDelete(context) {
-
-                    if(!Hul.isnull(context)){
-
-                        top.HEURIST.terms = context.terms;
-
-                        _currTreeView.popNode(_currentNode);
-                        _currTreeView.render();
-                        _currentNode = null;
-                        _onNodeClick(null);
-                        _isSomethingChanged = true;
+                    
+                    if(!Hul.isnull(context) && !context['error']){
+                            
+                            top.HEURIST.terms = context.terms;
+                            //remove from tree
+                            _currTreeView.popNode(_currentNode);
+                            _currTreeView.render();
+                            _currentNode = null;
+                            _onNodeClick(null);
+                            _isSomethingChanged = true;
+                    }else{
+                        Dom.get('formEditor').style.display = "block";
                     }
                     Dom.get('deleteMessage').style.display = "none";
                 }

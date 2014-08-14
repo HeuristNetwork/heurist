@@ -138,7 +138,12 @@
                     {
                         echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
 
-                        $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                        if($mask==null || trim($mask)==""){
+                            $res = array();
+                            $res[0] = "Title mask is not defined";
+                        }else{
+                            $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                        }
                         echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
                         echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
                         if(is_array($res)){
