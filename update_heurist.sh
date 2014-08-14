@@ -76,9 +76,9 @@ echo "Heurist unpacked"
 
 sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.1.tar.gz
-sudo tar -zxvf elasticsearch-1.3.1.tar.gz
-cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.1
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+sudo tar -zxvf elasticsearch-1.3.2.tar.gz
+cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 ./bin/elasticsearch -d
 
 

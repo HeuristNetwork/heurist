@@ -30,7 +30,7 @@
 
     Call updateRecordIndexEntry whenever a record is written (new or updated, from record edit or record import or record recode)
 
-    Run buildAllIndices as part of database upgrade 1.1.0 to 1.2.0
+    Call buildAllIndices as part of database upgrade 1.1.0 to 1.2.0
 
     Call deleteRecordIndexEntry whenever a record is saved with a different type (editRecord)
 
@@ -109,28 +109,29 @@
         if (($res) && ($row[3] != $recTypeID)) {// record type has changed
 
             // TODO: Delete index for old record type before updating index for new record type
-
+            print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
         } // change of record type / delete existing index entry
 
         if ($res) { // add record level data to json
             $row = mysql_fetch_array($res); // fetch Record data
-            $jsonData = $jsonData.'URL:"'          .$row[0].'"';
-            $jsonData = $jsonData.',Added:"'       .$row[1].'"';
-            $jsonData = $jsonData.',Modified:"'    .$row[2].'"';
-            $jsonData = $jsonData.',Title:"'       .$row[3].'"';
-            $jsonData = $jsonData.',RecTypeID:"'   .$row[4].'"';
-            $jsonData = $jsonData.',AddedBy:"'     .$row[5].'"';
-            $jsonData = $jsonData.',Imported:"'    .$row[6].'"';
-            $jsonData = $jsonData.',Popularity:"'  .$row[7].'"';
-            $jsonData = $jsonData.',Temporary:"'   .$row[8].'"';
-            $jsonData = $jsonData.',OwnerUGrpID:"' .$row[9].'"';
-            $jsonData = $jsonData.',NonOwnerVis:"' .$row[10].'"';
-            $jsonData = $jsonData.',URLLastVerif:"'.$row[11].'"';
-            $jsonData = $jsonData.',URLErrMsg:"'   .$row[12].'"';
-            $jsonData = $jsonData.',URLExtMimeType:"'.$row[13].'"';
+            $jsonData .= '"URL":"'          .$row[0].'"';
+            $jsonData .= ',"Added":"'       .$row[1].'"';
+            $jsonData .= ',"Modified":"'    .$row[2].'"';
+            $jsonData .= ',"Title":"'       .$row[3].'"';
+            $jsonData .= ',"RecTypeID":"'   .$row[4].'"';
+            $jsonData .= ',"AddedBy":"'     .$row[5].'"';
+            $jsonData .= ',"Imported":"'    .$row[6].'"';
+            $jsonData .= ',"Popularity":"'  .$row[7].'"';
+            $jsonData .= ',"Temporary":"'   .$row[8].'"';
+            $jsonData .= ',"OwnerUGrpID":"' .$row[9].'"';
+            $jsonData .= ',"NonOwnerVis":"' .$row[10].'"';
+            $jsonData .= ',"URLLastVerif":"'.$row[11].'"';
+            $jsonData .= ',"URLErrMsg":"'   .$row[12].'"';
+            $jsonData .= ',"URLExtMimeType":"'.$row[13].'"';
         } else {
             // TODO: Should really check and warn and exit if bad query
             // Also exit if record marked as temporary
+            print "<br />Query $query has failed";
         }
 
         // Add the detail level data
@@ -138,7 +139,7 @@
         $res = mysql_query($queryDtl);
         if ($res) {
             while (($row = mysql_fetch_array($res))) { // fetch detail data
-                $jsonData = $jsonData.','.$row[0].':"'.$row[1].$row[2].$row[3].'"';
+                $jsonData .= ',"' .$row[0]. '":"'.$row[1].$row[2].$row[3].'"';
                 // numeric detail ID is used as the key for the index, so no namespace conflict
                 // with textual keys from the Record itself
                 // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
@@ -154,9 +155,6 @@
         //-----------------------------------------------------------------------------------------------------------------
 
         // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
-
-        $url="$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID -d'$jsonData'";
-
         // If the index and type do not exist, the index is created autiomatically according to
         // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html
         //
@@ -167,23 +165,29 @@
         // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
         //
         // curl from comand line simply creates the index ...
-        // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d'{Title:""}'
+        // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d '{Title:""}'
         // just to get the index started. This is a pain. Is it something wrong with the construction of the URL?
         // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
 
         //----------------------------------------------------------------------------------------------------------------
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL); // have to reset before can set to PUT
-        curl_setopt($ch, CURLOPT_PUT, true);
+        
+        $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
-            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+            print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
             error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
         } else {
+            print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
             curl_close(ch); // is this necessary?
             return(0);
         }
@@ -213,11 +217,12 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
             error_log("deleteRecordIndexEntry: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -243,11 +248,12 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForRectype: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -272,14 +278,15 @@
 
         $url="$indexServerAddress:$indexServerPort/$dbname";
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
-            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+            print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForDatabase: $error ($code)" . " url = ". $url);
             curl_close($ch);
-            return $code;
+            return($code);
         } else {
             curl_close(ch); // is this necessary?
             return(0);
@@ -292,6 +299,7 @@
     * Rebuild the index for a specified record type
     * @param $dbName       The name of the Heurist databasem, excluding prefix
     * @param
+    * @returns 0 = OK, any other = error
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
         print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
@@ -303,9 +311,15 @@
         $res = mysql_query($query);
         if ($res) {
             while (($row = mysql_fetch_array($res))) { // fetch records
-                updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
+                $code = updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
+                if($code != 0) {
+                    print "<br />ERROR while updating record index; code = $code, dbName = $dbname, rectypeID = $recTypeID, row = " + $row[0] + "<br />";
+                    return($code); // curl error code
+                }
             }
+            return(0);
         }
+        return(-1);
     } // buildIndexForRectype
 
 
@@ -326,10 +340,15 @@
             $maxRecTypeID = $row[0];
             print "<br />MaxRecTypeID = $maxRecTypeID<br />";
             for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
-                buildIndexForRectype ($dbName, $i);
+                $code = buildIndexForRectype ($dbName, $i);
+                if($code != 0) {
+                    print "<br />ERROR while building index for rectype; code = $code, dbName = $dbName, i = $i<br />";
+                    return($code);
+                }
             }
             return(0);
         }
+        return(-1);
     } // buildAllIndices
 
 ?>

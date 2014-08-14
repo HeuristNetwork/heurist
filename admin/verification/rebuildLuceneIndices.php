@@ -36,11 +36,12 @@
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
     Rebuilding Lucene indices for all tables ... ";
 
-    if (buildAllIndices(HEURIST_DBNAME)==0) {
+    $code = buildAllIndices(HEURIST_DBNAME);
+    if ($code ==0) {
         print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
         <h2> Database indices have been rebuilt, please check for errors above</h2>";
     } else {
-        die('<p>Failed to rebuild indices, please consult Heurist support team');
+        die('<p>Failed to rebuild indices, please consult Heurist support team (error code: ' + $code + ')</p>');
     }
 
     print "</body>";
