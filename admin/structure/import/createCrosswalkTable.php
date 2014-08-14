@@ -22,6 +22,7 @@
     */
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+
     // Requires admin user, access to definitions though get_definitions is open
     if (! is_admin()) {
         print "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head>"
@@ -33,7 +34,7 @@
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 
-    require_once(dirname(__FILE__).'/../../../viewers/smarty/templateOperations.php'); // for listing and converting smarty templates
+    //ART - It breaks everything! require_once(dirname(__FILE__).'/../../../viewers/smarty/templateOperations.php'); // for listing and converting smarty templates
 
     mysql_connection_insert($tempDBName); // Use temp database
 
@@ -557,7 +558,12 @@
             -->
 
             <?php ?>
-            <!-- Smarty templates -->
+            <!-- Smarty templates 
+                 TODO:  functions are in templateOperations.php
+                     selection list of TPL files - use getList();
+                     call smartyLocalIDsToConceptIDs
+                     serve up to the calling database
+                
             <div id="smarty" style="width:100%; margin:auto;">
                 <h3>Smarty report templates</h3>
                 <p>
@@ -566,12 +572,8 @@
                     record types from the source database, the templates should work with little modification.
                 </p>
 
-                <!-- TODO:  functions are in templateOperations.php
-                     selection list of TPL files - use getList();
-                     call smartyLocalIDsToConceptIDs
-                     serve up to the calling database
-                -->
             </div>
+            -->
 
             <!-- Record types/fields/terms -->
             <div id="crosswalk" style="width:100%;margin:auto;">

@@ -36,7 +36,7 @@
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-
+require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 if (! is_admin()) {
 	echo "Error: You do not have sufficient privileges for this action";
@@ -55,7 +55,12 @@ $currentDate = date("d-m");
 $error = false;
 $importLog = array();
 
+//import field id -> target id - IMPORTANT for proper titlemask conversion
+$fields_correspondence = array();
+
 mysql_connection_insert($targetDBName);
+
+$mysqli = mysqli_connection_overwrite($targetDBName); // mysqli for saveStructureLib
 
 
 switch($_GET["action"]) {
@@ -108,6 +113,7 @@ function import() {
 		}
 		// check if rectype already imported, if so return the local id.
 		if(!$error && $importRty) {
+            
 			$origRtyName = $importRty["rty_Name"];
 			$replacementName = @$_GET["replaceRecTypeName"];
 			if($replacementName && $replacementName != "") {
@@ -135,7 +141,18 @@ function import() {
 	}
 	// successful import
 	if(!$error) {
+        
 		if ($startedTransaction) mysql_query("commit");
+
+        $mask = $importRty["rty_TitleMask"];
+       
+        // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code 
+        $res = updateTitleMask($localRtyID, $mask);
+        if(!is_numeric($res)){
+            makeLogEntry("Error convertion title mask", $localRtyID, $res);
+        }
+        
+        
 		$statusMsg = "";
 		if(sizeof($importLog) > 0) {
 			foreach($importLog as $logLine) {
@@ -169,7 +186,7 @@ function import() {
 }
 
 function importDetailType($importDty) {
-	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID, $fields_correspondence;
 	static $importDtyGroupID;
 	$importDtyID = $importDty["dty_ID"];
 /*****DEBUG****///error_log(" in import dty $importDtyID");
@@ -246,6 +263,7 @@ function importDetailType($importDty) {
 			break;
 		} else {
 			$importedDtyID = mysql_insert_id();
+            $fields_correspondence[$importDtyID] =  $importedDtyID; //keep pair source=>target field id for proper titlemask conversion
 			makeLogEntry("Importing Field-type", $importDtyID, " '".$importDty["dty_Name"]."' as #$importedDtyID");
 			return $importedDtyID;
 		}
@@ -429,7 +447,8 @@ function importRectype($importRty) {
 		if(!$error) {	//import rectype
 /*****DEBUG****///error_log("import rty 3bb");
 			$recTypeSuffix = 2;
-			while(mysql_num_rows(mysql_query("select * from ".$targetDBName.".defRecTypes where rty_Name = '".$importRty["rty_Name"]."'")) != 0) {
+			while(mysql_num_rows(mysql_query("select * from ".$targetDBName.".defRecTypes where rty_Name = '".$importRty["rty_Name"]."'")) != 0)
+            {
 				$importRty["rty_Name"] = $importRty["rty_Name"] . $recTypeSuffix;
 				makeLogEntry("Record type",$importRtyID, "Record type name used in the source DB already exist in the target DB($targetDBName) but with different concept code. Added suffix: ".$recTypeSuffix);
 				$recTypeSuffix++;
@@ -549,7 +568,7 @@ function importRectype($importRty) {
 			}
 			if (!$error) {
 				return $importedRecTypeID;
-			}
+            }
 		}
 		return null;
 	}
