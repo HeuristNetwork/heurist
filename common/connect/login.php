@@ -101,7 +101,6 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 			header('Location: ' . $last_uri);
 		}
 
-
 	} else {
 		$LOGIN_ERROR = 'Incorrect Username / Password - try email address for user name';
 	}
@@ -116,6 +115,9 @@ if (@$_REQUEST['logout']) {
 	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access']);
 	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
 	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['sessionid']);
+    
+    unset($_SESSION[DATABASE]['ugr_ID']); //unset h4
+    
 	setcookie('favourites', '', time() - 3600);
 
 	header('Location: login.php?db='.HEURIST_DBNAME . ($last_uri ? '&last_uri=\'' . urlencode($last_uri).'\'' : ''));

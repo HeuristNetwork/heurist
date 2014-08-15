@@ -48,7 +48,7 @@ if (_is_logged_in()) {
 	}
 	// update cookie expiry time. Besides make sure thah php.ini session.gc_maxlifetime set to the similar value
 	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive']) {
-		$rv = setcookie('heurist-sessionid', session_id(), time() + 90*24*60*60, '/', HEURIST_SERVER_NAME);
+		$rv = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', HEURIST_SERVER_NAME);
 	}
 //	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
 //		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
@@ -73,6 +73,7 @@ function get_roles() {
 }
 
 function _is_logged_in() {
+    
 /*****DEBUG****///	error_log("in _is_logged_in instance prefix = ".HEURIST_SESSION_DB_PREFIX);
 /*****DEBUG****///	error_log("in _is_logged_in restrict = ".defined('HEURIST_RESTRICT_GROUP_ID'));
 	return (!!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']  &&

@@ -275,34 +275,51 @@
         private function start_my_session(){
 
             //DEBUG error_log($_SERVER['PHP_SELF']." Start session Cooook:".@$_COOKIE['heurist-sessionid']);
-
+            
             if (@$_COOKIE['heurist-sessionid']) {
                 session_id($_COOKIE['heurist-sessionid']);
                 session_cache_limiter('none');
                 session_start();
-            } else {
+            } else {   //session does not exist - create new one
                 //session_id(sha1(rand()));
                 session_start();
                 $session_id = session_id();
-                /*
-                $res = setcookie('heurist-sessionid', $session_id, time()+3600*24*30, '/', HEURIST_SERVER_NAME);
-                if(!$res){
-                error_log("Cooookie no SAVED");
-                }else{
-                error_log("Cooookie OK");
-                }
-                */
+                setcookie('heurist-sessionid', $session_id, 0, '/', HEURIST_SERVER_NAME);
             }
 
-            //session_cache_limiter('none');
-            //session_start();
+            /*
+            if (@$_COOKIE['heurist-sessionid']) {
+                session_id($_COOKIE['heurist-sessionid']);
+            } else {
+                session_id(sha1(rand()));
+                setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_SERVER_NAME);
+            }
+            session_cache_limiter('none');
+            session_start();
+            */
         }
 
         /**
         * Load user info from session
         */
         public function login_verify(){
+
+            
+            
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
+            
+            if(!$userID){
+                // h3 backward capability                        
+                $h3session = $this->dbname_full.'.heurist';    
+                $userID = @$_SESSION[$h3session]['user_id'];
+                if($userID){
+                    $_SESSION[$this->dbname_full]['ugr_ID']       = $_SESSION[$h3session]['user_id'];
+                    $_SESSION[$this->dbname_full]['ugr_Name']     = $_SESSION[$h3session]['user_name'];
+                    $_SESSION[$this->dbname_full]['ugr_FullName'] = $_SESSION[$h3session]['user_realname'];
+                    $_SESSION[$this->dbname_full]['keepalive']    = $_SESSION[$h3session]['keepalive'];
+                }
+            }
+            
             $islogged = ($userID != null);
             if($islogged){
 
@@ -323,8 +340,11 @@
 
                 if (@$_SESSION[$this->dbname_full]['keepalive']) {
                     //update cookie - to keep it alive
-                    //ARTEM                setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HEURIST_SERVER_NAME);
+                    setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', HEURIST_SERVER_NAME);
                 }
+                
+                
+                
             }
             return $islogged;
         }
@@ -363,7 +383,7 @@
                         $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                         //@todo $_SESSION[$this->dbname_full]['user_access'] = $groups;
                         //$_SESSION[$this->dbname_full]['cookie_version'] = COOKIE_VERSION;
-
+                        
                         $time = 0;
                         if($session_type == 'public'){
                             $time = 0;
@@ -373,7 +393,7 @@
                             $time = time() + 7*24*60*60;
                             $_SESSION[$this->dbname_full]['keepalive'] = true;
                         }
-                        $cres = setcookie('heurist-sessionid', session_id(), $time); //, '/', HEURIST_SERVER_NAME);
+                        $cres = setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
                         if(!$cres){
                             error_log("Cookie no SAVED");
                         }
@@ -397,6 +417,15 @@
 
                         //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
+                        //h3 backward capability                        
+                        $h3session = $this->dbname_full.'.heurist';
+                        $_SESSION[$h3session]['cookie_version'] = 1;
+                        $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
+                        $_SESSION[$h3session]['user_realname'] = $user['ugr_FullName'];
+                        $_SESSION[$h3session]['user_id']       = $user['ugr_ID'];
+                        $_SESSION[$h3session]['user_access']   = $user['ugr_Groups'];
+                        $_SESSION[$h3session]['keepalive']     = ($session_type == 'remember');
+                        
                         return true;
                     }else{
                         $this->addError(HEURIST_REQUEST_DENIED,  "Password is incorrect");
