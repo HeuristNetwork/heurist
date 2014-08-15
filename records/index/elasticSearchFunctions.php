@@ -51,6 +51,7 @@
         $url="$indexServerAddress:$indexServerPort"; // Set in configIni.php, address can be blank (not set), default port is 9200
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_GET, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
@@ -96,7 +97,7 @@
 
         $jsonData = "{";
 
-        print "$recID ";
+        //print "$recID ";
         error_log("updateRecordIndexEntry: about to index recID = $recID");
 
         // Add the record level data:
@@ -109,7 +110,7 @@
         if (($res) && ($row[3] != $recTypeID)) {// record type has changed
 
             // TODO: Delete index for old record type before updating index for new record type
-            print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
+            //print "<br />TODO: Delete index for old record type before updating index for new record type<br />";
         } // change of record type / delete existing index entry
 
         if ($res) { // add record level data to json
@@ -131,7 +132,7 @@
         } else {
             // TODO: Should really check and warn and exit if bad query
             // Also exit if record marked as temporary
-            print "<br />Query $query has failed";
+            //print "<br />Query $query has failed";
         }
 
         // Add the detail level data
@@ -152,28 +153,11 @@
         $jsonData .= '}';
         $dbnameLoc=sanitiseForES($dbName); // remove any capitalisation and append _nocaps if this is done to distinguish DB from db
 
-        //-----------------------------------------------------------------------------------------------------------------
-
-        // PROBLEM: THIS IS NOT BEING HANDLED CORRECTLY
-        // If the index and type do not exist, the index is created autiomatically according to
-        // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html
-        //
-        // HOWEVER, IT COMES BACK WITH 404 AND INDEX ERROR UNSUPPOR5TED SERVICE
-        // For example, if you pass json {user:"johnson"}  you get:
-        // Rebuilding Lucene indices for all tables ... {"error":"IndexMissingException[[1] missing]","status":404}
-        // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
-        // No handler found for uri [-d'{"user":"johnson"}'] and method [GET]
-        //
-        // curl from comand line simply creates the index ...
-        // curl -XPUT 'http://129.78.67.200:9200/dbname/5/1' -d '{Title:""}'
-        // just to get the index started. This is a pain. Is it something wrong with the construction of the URL?
-        // see also http://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
-
-        //----------------------------------------------------------------------------------------------------------------
-        
+        // PUT request to Elasticsearch
         $url = "$indexServerAddress:$indexServerPort/$dbnameLoc/$recTypeID/$recID";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
@@ -182,12 +166,12 @@
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
-            print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
+            //print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
             error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
         } else {
-            print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
+            //print "<br />SUCCESS: updateRecordIndexEntry indexed: $url with $jsonData";
             curl_close(ch); // is this necessary?
             return(0);
         }
@@ -212,17 +196,18 @@
     function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         global $indexServerAddress, $indexServerPort;
 
-        print "deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName<br />";
+        //print "deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName<br />";
         error_log("deleteRecordIndexEntry : deleting index entry for record $recID for type $recTypeID for $dbName");//DEBUG
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID/$recID";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-            print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
+            //print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
             error_log("deleteRecordIndexEntry: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -243,17 +228,18 @@
         // TODO: check that this is correct spec for deletion of the index for a record type
         global $indexServerAddress, $indexServerPort;
 
-        print "deleting index for record type $recTypeID for $dbName<br />";
+        //print "deleting index for record type $recTypeID for $dbName<br />";
         error_log("deleting index for record type $recTypeID for $dbName");//DEBUG
 
         $url="$indexServerAddress:$indexServerPort/$dbname/$recTypeID";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-            print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
+            //print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForRectype: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return $code;
@@ -272,18 +258,19 @@
     function deleteIndexForDatabase ($dbName) {
         // TODO: check that this is correct spec for deletion of the index for a database
         global $indexServerAddress, $indexServerPort;
-
-        print "deleting all indexes for $dbName in $indexServerAddress:$indexServerPort<br />";
-        error_log("deleting all indexes for $dbName in $indexServerAddress:$indexServerPort");//DEBUG
-
-        $url="$indexServerAddress:$indexServerPort/$dbname";
+  
+        $url="$indexServerAddress:$indexServerPort/$dbName";
+        print "Deleting all Elasticsearch indices for $dbName at $url<br />";
+        error_log("Deleting all Elasticsearch indexes for $dbName at $url");
+        
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         $error = curl_error($ch);
         if ($error) {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
-            print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
+            //print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
             error_log("deleteIndexForDatabase: $error ($code)" . " url = ". $url);
             curl_close($ch);
             return($code);
@@ -302,7 +289,7 @@
     * @returns 0 = OK, any other = error
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
-        print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
+        //print "buildIndexForRectype: indexing record type $recTypeID for $dbName<br />";
         error_log("buildIndexForRectype: indexing record type $recTypeID for $dbName");//DEBUG
 
         deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
@@ -313,7 +300,7 @@
             while (($row = mysql_fetch_array($res))) { // fetch records
                 $code = updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/);
                 if($code != 0) {
-                    print "<br />ERROR while updating record index; code = $code, dbName = $dbname, rectypeID = $recTypeID, row = " + $row[0] + "<br />";
+                    //print "<br />ERROR while updating record index; code = $code, dbName = $dbname, rectypeID = $recTypeID, row = " + $row[0] + "<br />";
                     return($code); // curl error code
                 }
             }
@@ -330,19 +317,19 @@
     * @returns  0 = OK, 1 = error
     */
     function buildAllIndices ($dbName) {
-        print "<br />buildAllIndices: for $dbName<br />";
-        error_log("buildAllIndices: for $dbName");//DEBUG
+        print "Building all Elasticsearch indices for: $dbName<br />";
+        error_log("Building all Elasticsearch indices for: $dbName");//DEBUG
 
         $query="Select MAX(rec_RecTypeID) from Records where 1";
         $res = mysql_query($query);
         if ($res) {
             $row = mysql_fetch_array($res);
             $maxRecTypeID = $row[0];
-            print "<br />MaxRecTypeID = $maxRecTypeID<br />";
+            //print "<br />MaxRecTypeID = $maxRecTypeID<br />";
             for ($i = 1; $i <= $maxRecTypeID; $i++) { // call index function for each record type
                 $code = buildIndexForRectype ($dbName, $i);
                 if($code != 0) {
-                    print "<br />ERROR while building index for rectype; code = $code, dbName = $dbName, i = $i<br />";
+                    //print "<br />ERROR while building index for rectype; code = $code, dbName = $dbName, i = $i<br />";
                     return($code);
                 }
             }

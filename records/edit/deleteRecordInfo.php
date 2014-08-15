@@ -32,6 +32,7 @@
 
 
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
 //
 // important: transaction/rollback must performed in caller of this function
@@ -39,13 +40,12 @@ require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 function deleteRecord($id, $needDeleteFile=true) {
 	$id = intval($id);
 
-
-	if (!is_admin()) {
-
-		$res = mysql_query("SELECT rec_AddedByUGrpID, rec_OwnerUGrpID FROM Records WHERE rec_ID = " . $id);
-		$row = mysql_fetch_assoc($res);
-		$owner = $row["rec_OwnerUGrpID"];
-
+	$res = mysql_query("SELECT rec_AddedByUGrpID, rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = " . $id);
+	$row = mysql_fetch_assoc($res);
+    $recTypeID = $row["rec_RecTypeID"];
+	$owner = $row["rec_OwnerUGrpID"];
+        
+    if (!is_admin()) {
 		if (!($owner == get_user_id() || is_admin('group', $owner))){
 			return  array("error" => "user not authorised to delete record");
 		}
@@ -64,7 +64,6 @@ function deleteRecord($id, $needDeleteFile=true) {
 			return  array("error" => "record cannot be deleted - there are existing references to it");
 		}
 	}
-
 
 	$bkmk_count = 0;
 	$rels_count = 0;
@@ -107,7 +106,8 @@ function deleteRecord($id, $needDeleteFile=true) {
 			mysql_query('delete from Records where rec_ID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
 			$deleted = mysql_affected_rows();
-
+            deleteRecordIndexEntry(DATABASE, $recTypeID, $id);
+            
 			mysql_query('delete from usrReminders where rem_RecID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
 

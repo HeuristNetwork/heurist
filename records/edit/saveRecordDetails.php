@@ -42,6 +42,7 @@
     require_once(dirname(__FILE__)."/../disambig/findFuzzyRecordMatches.php");
     require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
     require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+    require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
     if (! is_logged_in()) return;
 
@@ -99,8 +100,7 @@
     /*****DEBUG****///error_log(" Save dtl Post  ".print_r($_POST,true));
 
     if ($updated) {
-
-        updateRecTypeUsageCount(); //getRecordInfoLibrary
+        updateRecTypeUsageCount(); //getRecordInfoLibrary                  
 
         // Update bib record data
         // Update recDetails, rec_ScratchPad and rec_Title in (parent.parent).HEURIST.record
@@ -424,6 +424,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         /*****DEBUG****///error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
+        
         if (mysql_error()) error_log("error rec update".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
@@ -478,9 +479,10 @@ which is one step too many and has been removed from design by Ian in approx 201
                 where rec_ID = $recID");
 
             mysql_query("commit");
-
+            
             // Update memcached's copy of record (if it is cached)
             updateCachedRecord($recID);
+            updateRecordIndexEntry(DATABASE, $record["rec_RecTypeID"], $recID);
 
             return true;
         } else {

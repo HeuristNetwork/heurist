@@ -21,7 +21,8 @@
     */
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
+    require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+    
     if(isForAdminOnly("to clear a database")){
         return;
     }
@@ -177,7 +178,6 @@
                 }
 
                 // Now delete the main data tables
-
                 if ($res2==0) {
                     $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
                     $fulldbname." -e'DELETE FROM recDetails' ";
@@ -212,7 +212,6 @@
                 }
 
                 // Reset the record counter to zero
-
                 if ($res2==0) {
                     $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
                     $fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
@@ -224,6 +223,11 @@
                         echo($output2);
                     }
                 }
+                
+                // Remove from Elasticsearch
+                print "Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br />";
+                deleteIndexForDatabase($dbname);
+                
                 if ($res2 != 0 ) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a>";

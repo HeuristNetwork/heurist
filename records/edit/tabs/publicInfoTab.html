@@ -134,6 +134,7 @@ function unchanged() {
 		parent.HEURIST.edit.unchanged("public");
 }
 function handleSaved(json) {
+    console.log(json);
 	var vals = eval(json.responseText);
 	if (! vals) {
 		window.location.reload();	// no changes to save ... make with the flishy-flashy

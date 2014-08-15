@@ -23,6 +23,7 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
 
     if(isForAdminOnly("to clone a database")){
         return;
@@ -225,9 +226,11 @@
         die ("Unable to process cleanup command ($cleanup_command)");
         }
         */
-
+        
+        // Index new database for Elasticsearch
+        buildAllIndices($targetdbname);
+        
         // Copy the images and the icons directories
-
         $copy_file_directory = "cp -R " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME . " " . HEURIST_UPLOAD_ROOT."$targetdbname"; // no prefix
         print "<br>Copying upload files: $copy_file_directory";
         exec("$copy_file_directory" . ' 2>&1', $output, $res1);
@@ -246,10 +249,8 @@
                 "<br>Please consult the system administrator</p>";
         }
 
-
-
+        // Success!
         echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
-
         print "<p>Please go to the <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname.
             "' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
 

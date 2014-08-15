@@ -21,6 +21,7 @@
 
 
     require_once(dirname(__FILE__).'../../../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
 
     if(isForAdminOnly("to delete a database")){
         return;
@@ -77,6 +78,11 @@
                 $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
                 $output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
             }
+            
+           // Remove from Elasticsearch
+            print "Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br />";
+            deleteIndexForDatabase($dbname);
+            
             if ($res2 != 0 ) {
                 echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                 echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br>");

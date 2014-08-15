@@ -34,7 +34,7 @@
     require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
     require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
     require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
-
+    require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
     $msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
 
@@ -150,6 +150,8 @@
                     "rec_FlagTemporary" => 0,
                     "rec_Modified" => $now
                 ));
+            updateRecordIndexEntry(DATABASE, $rectype, $recordID);
+            
             if (mysql_error()) {
                 errSaveRec("Database record update error - " . mysql_error());
                 return $msgInfoSaveRec;
@@ -206,7 +208,8 @@
 
         // Update memcache: we can do this here since it's only the public data that we cache.
         updateCachedRecord($recordID);
-
+        updateRecordIndexEntry(USERS_DATABASE, $rectype, $recordID);
+        
         // private data
         $bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and bkm_recID=" . $recordID));
         $bkm_ID = @$bkmk[0];
