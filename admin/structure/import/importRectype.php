@@ -42,12 +42,15 @@
     // TODO: Artem, is this meant to be the concept ID for the record type? or si the record type referenced by local ID?
     $code = @$_REQUEST["id"];
 
-    if(!$code){ // TODO: Artem, why do we have this alternate parameter?
+    if(!$code){
         $code = @$_REQUEST["checkid"];
+        $is_checkonly = true;
+    }else{
+        $is_checkonly = false;
     }
 
     if(!$code){
-        error_exit("Record type code not defined in call to importRectype.php - shoudl be two numbers separated by a dash(program glitch)");
+        error_exit("Record type code not defined in call to importRectype.php - should be two numbers separated by a dash(program glitch)");
     }
 
     $code = explode("-",$code);
@@ -131,7 +134,14 @@
     if(!@$def_rts[$rectype_id]){
         error_exit("Sorry, record type $rectype_id was not found in source database # $database_id. Please advise Heurist development team");
     }
-
+    
+    if($is_checkonly){
+            header("Content-type: text/javascript");
+            print json_format(array("ok"=>"Record type ".$rectype_id." is found"));
+            exit();    
+    }
+    
+    
     $sourceIconURL = $defs['icon_url'];
 
     //target(local) definitions

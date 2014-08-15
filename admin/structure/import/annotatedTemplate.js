@@ -44,18 +44,20 @@ else {
 // (script in iframe replace div to button and send "check" request
 //
 function onFrameLoad(){
+    //send message to frame
+    sendMessage("heurist");
+}
 
+function sendMessage(message){
     //send message to frame
     var win = document.getElementById("templates").contentWindow;
 
     // Specify origin. Should be a domain or a wildcard "*"
-    if (win == null || !window['postMessage'])
+    if (win === null || !window['postMessage'])
         alert("postMessage is not supported");
     else
-        win.postMessage("heurist", "*"); // "http://heuristscholar.org");
-
+        win.postMessage(message, "*"); // "http://heuristscholar.org");
 }
-
 
 //
 // we can recieve 2 kind of messages
@@ -88,25 +90,26 @@ function receiveMessage(event)
                     }
             });
         }else if(event.data.indexOf('heurist:check:RecTypeSource=')===0){
-            /*
+            
+            
             var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             var _url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
 
             $.ajax({
-            url: _url,
-            data: null,
-            success: function(data) {
-            if(data['error']){
-            //alert(data['error']);
-            }else{
-            win.postMessage("heuristexists", "*");
-            }
+                url: _url,
+                data: null,
+                success: function(data) {
+                    if(data['error']){
+                        alert(data['error']);
+                    }else{
+                        sendMessage("heuristexists");
+                    }
 
-            },
-            dataType: 'json'
+                },
+                dataType: 'json'
             });
-            */
+
             // alert(event.data);
         }
     }
@@ -189,8 +192,8 @@ if(rectypeid!==""){
 dv.html(jQuery("<button>Import this Record type to my Heurist Database!</button>").click(function(){sendMessage("add:"+rectypeid);} )).show();
 sendMessage("check:"+rectypeid);
 }
-}else if(event.data=="heuristexists"){
-dv.append(jQuery("<br /><label><i>This record type is already in your database - a new record type will be created</i></label>"));
+}else if(event.data=="heuristexists"){  //
+dv.append(jQuery("<br /><label><i>This record type already exists in your database (it may use a different name)</i></label>"));
 }
 
 }
