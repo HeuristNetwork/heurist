@@ -184,13 +184,12 @@ function init() {
 
         //init import form
         for (var key in form_vals){
-            if((key.indexOf('sa_dt_')==0 && form_vals[key]!='') ||
-                (key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''))
+            if((key.indexOf('sa_dt_')==0 && form_vals[key]!='') 
+                || (key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''))
             {
                 var fieldname = form_vals[key];
                 if(key.indexOf('sa_keyfield_')==0){
                     key = 'sa_dt_'+key.substr(12);
-                    //alert(key+'  '+form_vals[key]);
                 }
 
                 ($('#'+key).parent()).show();
@@ -205,7 +204,9 @@ function init() {
             }
         }
         onFtSelect(-1);
-
+        
+        if(form_vals.auto_switch_to_import!=1){
+        
         //init matching form
         for (var key in form_vals){
             if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
@@ -221,6 +222,9 @@ function init() {
             }
         }
         onFtSelect2(-1);
+        
+        }
+
 
         //init id field radiogroup for matching
         if(form_vals["idfield"]){
@@ -280,6 +284,8 @@ function init() {
     if(form_vals['error_message']){
         alert(form_vals['error_message']);
     }
+    
+    //form_vals = null;
 
 } //end init function
 
@@ -335,7 +341,7 @@ function doMatching(){
         //warn if id field already exists
         var idfield = $("#idfield").val();
         if(form_vals["idfield"]!=idfield && $('input[id^="cbsa_keyfield_"][column="'+idfield+'"]').length>0){
-            r = confirm('The specified ID field <b>'+idfield+'</b> has already been created. Its values will be overwritten. Please confirm');
+            r = confirm('The specified ID field "'+idfield+'" has already been created. Its values will be overwritten. Please confirm');
         }
 
         if(r){

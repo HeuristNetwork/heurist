@@ -563,7 +563,7 @@
                             <div style="float:right;vertical-align:middle;padding-top:10px">
                                 <?php if($sa_mode==1){  ?>
                                     <span class="importing">
-                                        <input type="button" value="Create records"
+                                        <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
                                             onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
                                     <?php }
                                     if($cnt_disamb>0){
