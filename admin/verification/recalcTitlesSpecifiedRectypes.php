@@ -83,8 +83,10 @@
                 }
 
                 document.getElementById('processed_count').innerHTML = processed;
-                document.getElementById('percent').innerHTML = Math.round((100 * processed) / <?php count($recs) ?> );
-
+                var rec = parseInt("<?=count($recs)?>");
+                if(rec>0){
+                    document.getElementById('percent').innerHTML = Math.round((100 * processed) / rec);
+                }
 
                 document.getElementById('changed_count').innerHTML = changed;
                 document.getElementById('same_count').innerHTML = processed - (changed + blank);

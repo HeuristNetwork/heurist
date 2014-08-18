@@ -97,7 +97,11 @@ function update_counts(processed, blank, repair, changed) {
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
 	document.getElementById('repair_count').innerHTML = repair;
 	document.getElementById('blank_count').innerHTML = blank;
-	//document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
+    
+    var rec = parseInt("<?=count($recs)?>");
+    if(rec>0){
+        document.getElementById('percent').innerHTML = Math.round((100 * processed) / rec)/10;
+    }
 }
 
 function update_counts2(processed, total) {
