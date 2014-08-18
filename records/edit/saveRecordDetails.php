@@ -482,7 +482,7 @@ which is one step too many and has been removed from design by Ian in approx 201
             
             // Update memcached's copy of record (if it is cached)
             updateCachedRecord($recID);
-            updateRecordIndexEntry(DATABASE, $record["rec_RecTypeID"], $recID);
+            updateRecordIndexEntry(DATABASE, $record["rec_RecTypeID"], $recID);  // TODO: Doesn't properly update Elasticsearch 
 
             return true;
         } else {

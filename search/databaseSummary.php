@@ -58,63 +58,116 @@
 		<title>Database Summary</title>
 
 		<link rel="stylesheet" type="text/css" href="../common/css/global.css">
-
-		<script type="text/javascript">
-				function onrowclick(rt_ID, innewtab){
-                    var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
-                    if(innewtab){
-					    window.open("search.html?"+query, "_blank");
-                        return false;
-                    }else{
-                        top.HEURIST.search.executeQuery(query);
-                        window.close();
-                    }
-				}
-		</script>
 		<style>
-			.row {
-				cursor:pointer;
-			}
-			.row:hover {
-				background-color: #CCCCCC;
-			}
-
+            /** Heurist */
 			table.tbcount{
 				border-width: 0 0 1px 1px;
 				border-spacing: 0;
 				border-collapse: collapse;
 				border-style: solid;
+                position: fixed;
+                top: 10px;
 			}
+
 			.tbcount td, .tbcount th{
 				margin: 0;
 				padding: 4px;
 				border-width: 1px 1px 0 0;
 				border-style: solid;
-			}
+			}    
+            
+            .row:hover {
+                background-color: #CCCCCC;
+            } 
+
+            a:hover, input:hover {
+                text-decoration: none;
+                cursor: pointer;
+            }
+            
+            /** D3 */
+            svg {
+                width: 100%;
+                height: 100%;
+            }
+            
+            g.table {
+                cursor: move;
+            }
+
+            rect.empty {
+                fill: #ccc;
+            }
+
+            text.center {
+                text-anchor: middle;
+            }
 		</style>
+        
+        <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../external/d3/d3.js"></script> 
+        <script>
+            function onrowclick(rt_ID, innewtab){
+                var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                if(innewtab){
+                    window.open("search.html?"+query, "_blank");
+                    return false;
+                }else{
+                    top.HEURIST.search.executeQuery(query);
+                    window.close();
+                }
+            }
+        </script>
 	</head>
+    
 	<body class="popup">
-		<table class="tbcount" cellpadding="4" cellspacing="1" width="100%">
+        <!-- D3 visualisation -->
+        <svg></svg> 
+        
+        <!-- Record count table -->
+		<table class="tbcount" cellpadding="4" cellspacing="1">
 		 	<tr>
-				<th>ID</th><th>&nbsp;</th><th align='left' style="padding-left: 10px;">Record type</th><th width="20" align="center"></th><th>Count</th>
+				<th>ID</th>
+                <th>Icon</th>
+                <th>Record type</th>
+                <th>Open</th>
+                <th>Count</th>
+                <th>Show</th>
 			</tr>
-<?php
-	/*****DEBUG****///print("QUERY:".$query);
-
-	$res = mysql_query($query);
-
-	while ($row = mysql_fetch_row($res)) {
-
-		$rt_ID = $row[0];
-		$rectypeTitle = $rtStructs['names'][$rt_ID];
-		$rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
-
-		$img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
-
-		echo "<tr class='row' onclick='{onrowclick($rt_ID, false)}'><td align='center'>$rt_ID</td><td align='center'>$img</td><td>".htmlspecialchars($rectypeTitle)."</td><td><a href='#' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a></td><td align='center'>".$row[1]."</td></tr>";
-
-	}//end while
-?>
+            
+            <?php
+                // Put record types & counts in the table
+	            $res = mysql_query($query);
+	            while ($row = mysql_fetch_row($res)) {
+                    // ID
+                    $rt_ID = $row[0];
+                    echo "<tr class='row'>";
+                    echo "<td align='center'>$rt_ID</td>";
+                    
+                    // Image
+                    $rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
+                    $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                    echo "<td align='center'>$img</td>";
+                    
+                    // Type
+                    $rectypeTitle = $rtStructs['names'][$rt_ID];
+                    echo "<td>".htmlspecialchars($rectypeTitle)."</td>";
+                    
+                    // Links
+                    $links =  "<a href='#' title='Open in current page' onclick='onrowclick($rt_ID, false)' class='internal-link'>&nbsp;</a>";
+                    $links .= "<a href='#' title='Open in new page' onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a>";
+                    echo "<td>$links</td>";
+                    
+                    // Count
+                    echo "<td align='center'>" .$row[1]. "</td>";
+                    
+                    // Show
+                    echo "<td align='center'><input type='checkbox' name='show' checked></td></tr>";
+                    
+	            }//end while
+            ?>
 		</table>
+
+        <script type="text/javascript" src="databaseSummary.js"></script>
 	</body>
 </html>

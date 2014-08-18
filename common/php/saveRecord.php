@@ -150,7 +150,7 @@
                     "rec_FlagTemporary" => 0,
                     "rec_Modified" => $now
                 ));
-            updateRecordIndexEntry(DATABASE, $rectype, $recordID);
+            updateRecordIndexEntry(DATABASE, $rectype, $recordID);   // TODO: Doesn't properly update Elasticsearch 
             
             if (mysql_error()) {
                 errSaveRec("Database record update error - " . mysql_error());
