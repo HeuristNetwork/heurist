@@ -56,14 +56,14 @@ $.widget( "heurist.search_links", {
         */
 
         this.mode_selector = $( "<div>" )
-        .css({"font-size":"0.7em","height":"2.4em","text-align":"center"})
+        .css({"font-size":"0.7em","height":"2.4em","text-align":"center" })
         .html('<input type="radio" id="ssradio1" name="ssradio" checked="checked" value="saved"/>'
             +'<label for="ssradio1">'+top.HR('Saved')+'</label>'
             +'<input type="radio" id="ssradio2" name="ssradio" value="faceted"/>'
             +'<label for="ssradio2">'+top.HR('Faceted')+'</label>'
             +'<input type="radio" id="ssradio3" name="ssradio" value="tags"/>'
             +'<label for="ssradio3">'+top.HR('Tags')+'</label>')
-        .buttonset()   
+        .buttonset()
         .click(function( event ) {
             that.currentMode = $("input[name='ssradio']:checked").val(); //event.target.value;
             that._refresh();

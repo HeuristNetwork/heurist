@@ -90,8 +90,8 @@ body {
 }
 
 #layout_panes{
-    /*position:relative;
-    background-color: gray;*/
+    /*position:relative; 
+    background-color: red;*/
     height: 100%;
     width: 100%;
 }

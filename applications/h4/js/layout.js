@@ -130,7 +130,7 @@ function appInitAll(layoutid, containerid){
 
     // 3) add tabs/apps to panes
 
-    function __layoutInitPane(pos){
+    function __layoutInitPane(pos, bg_color){
         if(layout[pos]){
 
             var lpane = layout[pos];
@@ -140,7 +140,9 @@ function appInitAll(layoutid, containerid){
             $pane.empty();
 
             var $pane_content = $(document.createElement('div'));
-            $pane_content.attr('id','content_'+pos).addClass('ui-layout-content').appendTo($pane);
+            $pane_content.attr('id','content_'+pos).addClass('ui-layout-content')
+                .css('background-color', bg_color)
+                .appendTo($pane);
 
             if(lpane.dropable){
                 $pane_content.addClass('pane_dropable');
@@ -174,11 +176,14 @@ function appInitAll(layoutid, containerid){
     } //end __layoutInitPane
 
 
-    __layoutInitPane('north');
-    __layoutInitPane('west');
-    __layoutInitPane('east');
-    __layoutInitPane('south');
-    __layoutInitPane('center');
+    var bg_color = $('.ui-widget-content:first').css('background-color');
+    $('body').css('background-color', bg_color);
+    
+    __layoutInitPane('north', bg_color);
+    __layoutInitPane('west', bg_color);
+    __layoutInitPane('east', bg_color);
+    __layoutInitPane('south', bg_color);
+    __layoutInitPane('center', bg_color);
 
 
     // listener for drag-n-droop    
