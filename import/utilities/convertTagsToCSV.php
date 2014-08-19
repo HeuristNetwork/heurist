@@ -64,11 +64,16 @@
 
             if ($step != '2'){ // step 1 = get filename
 
-                print "Note: This function simply operates on a text file; it is independent of any database.<br />
+                print "Note: This function simply operates on a text file; it is independent of any database.<br /><br />
                     The first line should contain a list of comma-separated tags, starting with the tag which will be
                     encountered at the start of each record (normally the Record ID tag). This tag marks the end of the previous record.<br />
                     Subsequent lines start with tags separated from a value by one or more space(s) or Tab.
                     Output is CSV format to the screen - copy and paste to a file.<br />
+                    <br />
+                    If marking up a file of free-format text in order to import as a set of fields, you may wish to prepare files in a format such as<br />
+                    <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RecordID xxxxx  F1=xxxx F2=xxxx F3=xxxx <br /><br />
+                    where F1, F2 and F3 are field/column names in no particular order, then use your editor to globally<br />
+                    change F1= to <newline> F1<space> etc. to create a set of tag-value lines suitable for input to this function.<br /><br />
                     <hr><br />";
                 print "<form id='setupform' name='setupform' action='convertTagsToCSV.php' method='get'>";
                 print "<input name='step' value='2' type='hidden'>"; // trigger step 2 when submitted and called again
@@ -103,7 +108,7 @@
 
                 $handle = fopen($myFile, 'r');
                 if ($handle == FALSE) {
-                    echo 'Unable to open '.$myFile;
+                    echo 'Unable to open "' .$myFile. '" - please check that it is readable by PHP';
                     die;
                 }
 

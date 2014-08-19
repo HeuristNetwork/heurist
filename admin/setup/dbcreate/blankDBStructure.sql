@@ -751,7 +751,7 @@ CREATE TABLE usrRecentRecords (
   rre_Time timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of use of records, notably those searched for with pointer field',
   UNIQUE KEY rre_composite (rre_UGrpID,rre_RecID),
   KEY rre_RecID (rre_RecID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache of recently used record IDs, identified to user, for speeding access and showing recently-used lists to a user';
 
 -- --------------------------------------------------------
 
