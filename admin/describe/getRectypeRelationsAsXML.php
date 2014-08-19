@@ -46,6 +46,7 @@
     $rtTerms = getTerms(true);
     $rtTerms = $rtTerms['termsByDomainLookup']['relation'];
 
+    $image_base_url = HEURIST_SERVER_URL . "/HEURIST_FILESTORE/" . HEURIST_DBNAME . "/rectype-icons/";
     $idx_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_dt_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
     $idx_dt_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
@@ -169,19 +170,22 @@
     print "\n\n<RecordTypes>";
     foreach ($resrt  as $rt_id=>$rt){
         // Record overview
-        print "\n\n<Record>";
+        print "\n\n<Record xmlns='rootrecord'>";
         print "\n<rec_Name>" .$rt['name']. "</rec_Name>";
         print "\n<rec_ID>" .$rt_id. "</rec_ID>";
         print "\n<rec_Count>" .$rt['count']. "</rec_Count>";
+        print "\n<rec_Image>" .$image_base_url.$rt_id. ".png</rec_Image>";
         
         // Loop through record details (fields) in record structure
         print "\n<rec_Relations>";
         foreach ($rt['details']  as $details){
             // Record overview
-            print "\n<Record>";
+            $dt_id = $details['dt_id'];
+            print "\n<Record xmlns='relationrecord'>";
             print "\n<rec_Name>" .$details['dt_name']. "</rec_Name>";
-            print "\n<rec_ID>" .$details['dt_id']. "</rec_ID>";
+            print "\n<rec_ID>" .$dt_id. "</rec_ID>";
             print "\n<rec_Count>" .$details['count']. "</rec_Count>";
+            print "\n<rec_Image>" .$image_base_url.$dt_id. ".png</rec_Image>";
 
             // Relation types
             print "\n<RelationTypes>";
@@ -225,7 +229,7 @@
             // Usage count for each pointed-to record type
             print "\n<Usages>";
             foreach ($details['rels']  as $pt_rt_id=>$data){
-                print "\n<Record>";
+                print "\n<Record xmlns='usagerecord'>";
                 if(!@$rtStructs['names'][$pt_rt_id]){
                     print "<Error>Pointer to incorrect record type; id= " .$pt_rt_idl;
                 }else{
@@ -233,6 +237,7 @@
                     print "\n<rec_Name>" .$rtStructs['names'][$pt_rt_id]. "</rec_Name>";
                     print "\n<rec_ID>" .$pt_rt_id. "</rec_ID>";
                     print "\n<rec_Count>" .$data[1]. "</rec_Count>"; 
+                    print "\n<rec_Image>" .$image_base_url.$pt_rt_id. ".png</rec_Image>";
 
                     // Terms
                     if(@$data[2]){ //terms

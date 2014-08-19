@@ -92,6 +92,20 @@
                 height: 100%;
             }
             
+            g.record:hover {
+                cursor: move;
+            }
+    
+            circle.around {
+                fill: none;
+                stroke-width: 3;
+                stroke: #000;               
+            }
+         
+            text.header {
+                font-weight: bold;
+            }
+            
             g.table {
                 cursor: move;
             }

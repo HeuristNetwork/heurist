@@ -25,7 +25,7 @@
 */
 
 /** D3 */
-var data = [
+/*var data = [
     {
         name: 'City',
         columns: [
@@ -59,7 +59,7 @@ var data = [
 console.log(data);                    
 
 /** SVG details */
-var fieldHeight = 30;
+/*var fieldHeight = 30;
 var fieldWidth = 150;
 var offset = 300;
 var svg = d3.select("svg");
@@ -67,7 +67,7 @@ var svg = d3.select("svg");
 /**
 * Attaches drag detection to an element
 */
-var drag = d3.behavior.drag()
+/*var drag = d3.behavior.drag()
              .origin(function() { 
                 var t = d3.select(this);
                 return {x: t.attr("x"), y: t.attr("y")};
@@ -77,7 +77,7 @@ var drag = d3.behavior.drag()
 /**
 * Called when an element has been dragged
 */
-function dragMove(d) {
+/*function dragMove(d) {
     console.log(d3.event);
     var x = d3.event.x;
     var y = d3.event.y;
@@ -91,7 +91,7 @@ function dragMove(d) {
 /**
 * Creates a 'g' element for each table
 */
-var tables = svg.selectAll("g")
+/*var tables = svg.selectAll("g")
                 .data(data)
                 .enter()
                 .append("g")
@@ -110,7 +110,7 @@ var tables = svg.selectAll("g")
 /**
 * Creates a 'g' element for each cell inside the table
 */
-var cells = tables.selectAll("g")
+/*var cells = tables.selectAll("g")
                   .data(function(d) {
                         return d3.values(d.columns);
                     })
@@ -123,7 +123,7 @@ var cells = tables.selectAll("g")
 /**
 * Creates a 'rect' element inside a cell
 */
-cells.append("rect")
+/*cells.append("rect")
      .attr("class", "empty")
      .attr("width", fieldWidth-1)
      .attr("height", fieldHeight-1);
@@ -131,13 +131,105 @@ cells.append("rect")
 /**
 * Creates a 'text' element inside a cell
 */
-cells.append("text")
+/*cells.append("text")
      .text(String)
      .attr("class", "center")
      .attr("x", fieldWidth/2)
      .attr("y", fieldHeight/2);
 
+/** Retrieving XML relationship data */
+var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
+console.log("Loading XML from: " + url);
+d3.xml(url, "application/xml", function(error, xml) {
+    if(error) {
+        return alert("Unable to load data, error message: \"" + error.statusText +"\"");
+    }
+    
+    // Now visualize it.
+     console.log(xml);
+    visualizeData(xml);
+});
 
+/** Visualizes the data */ 
+function visualizeData(xml) {
+    var offsetX = 300;
+    var offsetY = 50;
+    var imageSize = 16;
+    var items = 8;
+    var svg = d3.select("svg");
+    
+    /** Called to give an element drag abilities */
+    var drag = d3.behavior.drag()
+                 .origin(function() { 
+                    var t = d3.select(this);
+                    return {x: t.attr("x"), y: t.attr("y")};
+                 })
+                 .on("drag", dragMove);
 
-
-console.log("Done");
+    /** Helper method to use when an element has been dragged */
+    function dragMove(d) {
+        console.log(d3.event);
+        var x = d3.event.x;
+        var y = d3.event.y;
+        
+        d3.select(this)
+          .attr("x", x)
+          .attr("y", y)
+          .attr("transform", "translate(" +x+ ", " +y+ ")");
+    }
+    
+    /** Group creation for all records */                                         
+     var baseRecords = svg.selectAll("g")
+                         //.data(xml.documentElement.getElementsByTagNameNS("rootrecord", "Record"))
+                         .data(xml.documentElement.getElementsByTagName("Record"))
+                         .enter()
+                         .append("g")
+                         .attr("class", "record")
+                         .attr("id", function(d, i) {
+                             console.log("ROOT RECORDS");
+                             console.log(d);
+                             console.log("Name space: " + d.namespaceURI);
+                             return "rootrecord" + d.getElementsByTagName("rec_ID")[0].textContent; // Use Records internal ID.
+                         }) 
+                         .attr("x", function(d, i) {
+                             return offsetX + i % items * 100;
+                         })
+                         .attr("y", function(d, i) {
+                             return offsetY + Math.floor(i / items) * 50;
+                         })        
+                         .attr("transform", function(d, i) {
+                             var x = offsetX + i % items * 100;    
+                             var y = offsetY + Math.floor(i / items) * 50; 
+                             return "translate(" +x+ "," +y+ ")"; // Calculate location
+                         })
+                         .call(drag); 
+                         
+    /** Circle background for the records */              
+    var circles = baseRecords.append("circle")      
+                           .attr("class", "around")
+                           .attr("cx", imageSize/2)
+                           .attr("cy", imageSize/2)
+                           .attr("r", imageSize);
+                           
+    /** Icons for the records */              
+    var icons = baseRecords.append("svg:image") 
+                           .attr("xlink:href", function(d) {
+                                return d.getElementsByTagName("rec_Image")[0].textContent; // Grab Record image
+                           })
+                           .attr("height", imageSize)
+                           .attr("width", imageSize);
+                           
+    /** Names for the records */
+    var names = baseRecords.append("text")      
+                           .attr("class", "header")
+                           .attr("x", imageSize/2)    
+                           .attr("y", imageSize*-0.75)
+                           .attr("text-anchor", "middle")
+                           .text(function(d, i) {
+                               return d.getElementsByTagName("rec_Name")[0].textContent; // Grab Record name
+                           });
+                           
+    
+    
+    
+}
