@@ -66,6 +66,7 @@
 
 	$bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 	$reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
+    $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_Type="relationtype") OR (dty_Type="enum")');
 
 ?>
 
@@ -465,7 +466,7 @@
 			'" '.($is_master?"checked=checked":"").
 			' value="'.($is_type_repeatable?  $detail_id :($is_master? "master":$detail_id)).
 			'" id="'.($is_type_repeatable? ($is_master?"keep_detail_id":"add_detail_id"):"update").$detail_id.
-			'">'.detail_str($detail_type,$detail_val).'';
+			'">'.detail_str($detail_type, $detail_val).'';
 			$rv[]= $input;
 		}
 		return $rv;
@@ -482,9 +483,9 @@
 	"<input type=\"radio\" name=\"update159\"checked=checkedvalue=\"250494\" id=\"update159\">1996"
 
 	*/
-
+                             //ART
 	function detail_str($rd_type, $rd_val) {
-		global $reference_bdts;
+		global $reference_bdts, $enum_bdts;
 		if (in_array($rd_type, array_keys($reference_bdts))) {
 			if (is_array($rd_val)) {
 				foreach ($rd_val as $val){
@@ -510,7 +511,10 @@
 		}
 		}
 		*/
-		else
+        else if (in_array($rd_type, array_keys($enum_bdts))) {
+                $title = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID ='.$rd_val));
+                return $title['trm_Label'];
+		} else
 		return $rd_val;
 	}
 

@@ -30,6 +30,7 @@ $.widget( "heurist.about", {
         var that = this;
 
         this.element
+        //.css('background-color','blue')
         // prevent double click to select text
         .disableSelection();
 

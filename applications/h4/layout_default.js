@@ -85,12 +85,12 @@ var layouts = [
     {id:'l01', name:'h3 classic', theme:'smoothness',
         north:{size:88, resizable:false,
             apps:[
-                {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none'} },    //about
-                {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'50%', border:'none'} },   //profile
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none'}, options:{has_paginator:false} },   //search
-                {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none'} }  //pagination
+                {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about
+                {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'50%', border:'none', 'background':'none'} },   //profile
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
+                {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none'} }]},  //saved searches
+        west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:true, apps:[{appid:'ha21', dockable:true, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:true,
             tabs:[{dockable:true, dragable:true, resizable:true,

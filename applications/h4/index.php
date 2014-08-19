@@ -205,8 +205,8 @@
         </script>
 
     </head>
-    <body>
-        <div id="layout_panes">
+    <body style="background-color:#c9c9c9">
+        <div id="layout_panes" height="100%">
         </div>
 
         <div id="heurist-about" title="About">

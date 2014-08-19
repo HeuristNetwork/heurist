@@ -213,7 +213,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(needArray){
 
         }else{
-            selObj = createSelector(selObj, topOptions);
+            selObj = top.HEURIST.util.createSelector(selObj, topOptions);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
@@ -410,7 +410,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     }
                 }
             }        
-        }else if(!top.HEURIST.util.isempty(topOptions)){
+        }else if(!top.HEURIST.util.isempty(topOptions) && topOptions!==false){
+            if(topOptions===true) topOptions ='';
             top.HEURIST.util.addoption(selObj, '', topOptions); 
         }
 
