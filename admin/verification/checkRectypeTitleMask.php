@@ -9,7 +9,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -78,16 +78,17 @@
 
     <body class="popup">
         <div class="banner">
-            <h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2> 
+            <h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2>
         </div>
-        
+
         <div id="page-inner">
 
             Title masks are used to construct a composite title for a record based on data fields in the record.<br/>
             For many record types, they will just render the title field, or the title with some additional contextual information.<br/>
             For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
             This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
-            If the title mask is invalid please edit the record type (see under Essentials in the menu on the left) and correct the title mask for the record type.<br/>
+            If the title mask is invalid please edit the record type (see under Essentials in the menu on the left)
+            and correct the title mask for the record type.<br/>
             <?php
                echo "<br/><hr>\n";
                 }//$mode!=3
@@ -127,13 +128,7 @@
                         $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
                         $mask=$mask[0];
                     }
-                    /* deprecated
-                    if (!@$coMask && @$rtID) {
-                    $coMask= mysql__select_array("defRecTypes","rty_CanonicalTitleMask","rty_ID=$rtID");
-                    $coMask=$coMask[0];
-                    }*/
 
-                    //echo print_r($_REQUEST,true);
                     if($mode > 0 || !$recID)
                     {
                         echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
@@ -148,6 +143,8 @@
                         echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
                         if(is_array($res)){
                             echo "<div class='errorCell'><b>< < < < < ".$res[0]."</b></div>";
+                        }else if ($mask == "") {
+                            echo "<div class='errorCell'><b>< < < < < EMPTY TITLE MASK</b></div>";
                         }else if(strcasecmp($res,$mask)!=0){
                             echo "<div><br/>&nbsp;Decoded Mask: $res</div>";
                         }

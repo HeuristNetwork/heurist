@@ -1,8 +1,9 @@
 <?php
 
 /**
-* valueVerification.php - library of functions to verify values - pointers and terms to conform to the constrains in detail and record type definitions
-* it used in listRecordPointerErrors.php, importCSV_lib.php
+* valueVerification.php - library of functions to verify values - pointers and terms to conform to
+* the constraints in detail and record type definitions
+* Used in listDataErrors.php, importCSV_lib.php
 * @todo saveRecordDetail and importRectype
 *
 * @package     Heurist academic knowledge management system
@@ -27,22 +28,22 @@ $dtyID_term_label = array();
 
 /**
 * put your comment there...
-* 
+*
 * @param mixed $defs
 * @param mixed $defs_nonsel
 * @param mixed $dtyID
 */
 function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     global $dtyIDDefs;
-    
+
     $allowed_terms = null;
-    
+
     if($dtyID==null || !@$dtyIDDefs[$dtyID]){
         $terms = getTermsFromFormat($defs);
         if (($cntTrm = count($terms)) > 0) {
             if ($cntTrm == 1) {  //vocabulary
                 $terms = getTermOffspringList($terms[0]);
-                
+
             }else{
                 $nonTerms = getTermsFromFormat($defs_nonsel);
                 if (count($nonTerms) > 0) {
@@ -54,7 +55,7 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
             }else{
                 $allowed_terms = $terms;
             }
-            
+
             if($dtyID!=null){ //keep for future use
                 $dtyIDDefs[$dtyID] = $allowed_terms;
             }
@@ -62,27 +63,27 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     }else{
         $allowed_terms = $dtyIDDefs[$dtyID];
     }
-    return $allowed_terms;    
+    return $allowed_terms;
 }
 
 /**
 * Verifies that term ID value is valid for given detail id
-* 
+*
 * @param mixed $defs    - json or list of allowed terms (or vocabulary term id)
 * @param mixed $defs_nonsel - list of terms that are not selectable
 * @param mixed $id - term id
 * @param mixed $dtyID - detail type id
 */
 function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
-    
+
     $allowed_terms = getAllowedTerms($defs, $defs_nonsel, $dtyID);
-    
+
     return $allowed_terms && ($allowed_terms === "all" || in_array($id, $allowed_terms));
-}    
+}
 
 /**
 * put your comment there...
-* 
+*
 * @param mixed $defs
 * @param mixed $defs_nonsel
 * @param mixed $label
@@ -90,40 +91,40 @@ function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 */
 function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     global $dtyID_term_label;
-    
+
     $allowed_terms = null;
-    
+
     if($dtyID==null || !@$dtyID_term_label[$dtyID]){
-        
+
         //ids
         $allowed_terms = getAllowedTerms($defs, $defs_nonsel, $dtyID);
-        
+
         //get labels
         if(is_array($allowed_terms)){
             $allowed_terms = getTermLabels($allowed_terms);
         }
-        
+
         //keep for fitire use
         if($dtyID!=null){
             $dtyID_term_label[$dtyID] = $allowed_terms;
         }
-        
+
     }else{
-        $allowed_terms = $dtyID_term_label[$dtyID];    
+        $allowed_terms = $dtyID_term_label[$dtyID];
     }
-    
+
     $label = mb_strtolower($label);
-    
+
     return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
-}    
+}
 
 
 //
-// siilar functions are in saveRecordDetail and importRectype
+// similar functions are in saveRecordDetail and importRectype
 // @todo - use this library!
 //
 function getTermsFromFormat($formattedStringOfTermIDs){
-    
+
         if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
             return array();
         }
@@ -156,7 +157,7 @@ function isValidPointer($constraints, $rec_id, $dtyID ){
         } else {
              return false;
         }
-        
+
         $allowed_types = "all";
         if ($constraints!=null && $constraints != "") {
                 $temp = explode(",",$constraints); //get allowed record types
@@ -164,9 +165,9 @@ function isValidPointer($constraints, $rec_id, $dtyID ){
                        $allowed_types = $temp;
                 }
         }
-        
+
         return ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
-        
+
     }else{
         //record not found
         return false;

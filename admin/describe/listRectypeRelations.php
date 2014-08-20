@@ -1,38 +1,32 @@
 <?php
-    /*
-    * Copyright (C) 2005-2014 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
 
     /**
     * listRectypeRelations.php  Lists all fields, either together or as separate relationships and simple fields listings
-    * action=simple gives text, numeric, term lsits and dates
+    * action=simple gives text, numeric, term lists, geos, dates and file fields etc.
     * action=relations gives pointers and relationship markers
     * action=all gives both
-    *  
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.1.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     3.2
     */
 
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
 
     require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 
+    //TODO: why do we need to be logged in?
     if (!is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
         return;
@@ -65,7 +59,7 @@
         foreach ($rt['dtFields'] as $dt_id=>$dt) {
             $dt_type = $dt[$idx_dt_type];
 
-            if (($showRelationships) && ($dt_type=="resource")) {  // pointer field
+            if (($showRelationships) && ($dt_type=="resource")) {  // record pointer field
                 $constraints = $dt[$idx_dt_pointers]; //list of rectypes - constraints for pointer
                 $constraints = explode(",", $constraints);
                 $rels = array();
@@ -76,7 +70,8 @@
                 }
                 $isconstrainded = count($rels);
 
-                $query = "select r2.rec_RecTypeID, count(recDetails.dtl_ID) from Records r1, recDetails, Records r2 where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and "
+                $query = "select r2.rec_RecTypeID, count(recDetails.dtl_ID) from Records r1, recDetails, "
+                ."Records r2 where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and "
                 ."dtl_DetailTypeID=$dt_id and dtl_Value=r2.rec_ID group by r2.rec_RecTypeID";
                 $cnt = 0;
                 if(count($details)==0){
@@ -93,12 +88,12 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
-                    'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req],
+                    'max'=>$dt[$idx_dt_max], 'type'=>$dt_type, 'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
 
-            } // pointer 
-            
-            else if (($showRelationships) && ($dt_type=="relmarker")) {
+            } // record pointer
+
+            else if (($showRelationships) && ($dt_type=="relmarker")) { //relationship marker
 
                 $constraints = $dt[$idx_dt_pointers];
                 $constraints = explode(",", $constraints);
@@ -110,13 +105,15 @@
                 }
                 $isconstrainded = count($rels);
 
+                // TODO: explain these hard-coded detail type IDs
                 $query = "SELECT rec3.rec_RecTypeID, rd2.dtl_Value as reltype, count(rec1.rec_ID) FROM Records rec1
-                , recDetails rd2  
-                , recDetails rd3  
-                , recDetails rd1, Records rec3  
-                where rec1.rec_RecTypeID=1 
-                and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7 and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=$rt_id)
-                and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6 
+                , recDetails rd2
+                , recDetails rd3
+                , recDetails rd1, Records rec3
+                where rec1.rec_RecTypeID=1
+                and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7
+                and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=$rt_id)
+                and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6
                 and rec1.rec_ID = rd3.dtl_RecID and rd3.dtl_DetailTypeID=5 and rec3.rec_ID=rd3.dtl_Value
                 group by rec3.rec_RecTypeID, rd2.dtl_Value order by rec3.rec_RecTypeID";
                 $cnt = 0;
@@ -141,27 +138,28 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
-                    'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req],
+                    'max'=>$dt[$idx_dt_max], 'type'=>$dt_type, 'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
             } // relmarker
 
-            else if ($showSimpleFields) { //}&& (($dt_type=="freetext") || ($dt_type=="memo") || ($dt_type=="date") || ($dt_type=="geo") || ($dt_type=="terms") || ($dt_type=="file"))) {
+            else if ($showSimpleFields) { // everything esle: freetext, memo, date, geo, terms, file
 
                 // output simple fields listing
-                $query = "select count(recDetails.dtl_ID) from Records r1, recDetails where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and dtl_DetailTypeID=$dt_id";
+                $query = "select count(recDetails.dtl_ID) from Records r1, recDetails "
+                ."where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and dtl_DetailTypeID=$dt_id";
                 $res = mysql_query($query);
                 $cnt = 0;
                 if ($res) {
-                        while (($row = mysql_fetch_array($res))) {
-                            $cnt = $row[0];
-                        }
+                    while (($row = mysql_fetch_array($res))) {
+                        $cnt = $row[0];
+                    }
                 }
                 if(count($details)==0){
                     $rt_cnt = get_rt_usage($rt_id);
                 }
-                
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>intval($dt[$idx_dt_max]), 'type'=>$dt_type,
-                    'isconstrained'=>1, 'count'=>$cnt, 'rels'=>array()));
+
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req],
+                    'max'=>intval($dt[$idx_dt_max]), 'type'=>$dt_type, 'isconstrained'=>1, 'count'=>$cnt, 'rels'=>array()));
             } // simplefields
         }
 
@@ -176,8 +174,11 @@
     }
 
 ?>
+
 <html>
+
     <head>
+
         <title>Heurist record type schema (simple fields, pointers and relationship markers)</title>
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
@@ -198,10 +199,10 @@
             }
             .lvl1{
                 padding-left: 20px;
-            }      
+            }
             .lvl2{
                 padding-left: 160px;
-            } 
+            }
             .lvl3{
                 padding-left: 200px;
             }
@@ -209,88 +210,101 @@
                 color: red;
             }
         </style>
+
     </head>
+
     <body>
+
+
         <div style="padding: 10px;">
 
 
-        <?php  
-            print '<div class="lvl0"><b>Record type schema / usage</b></p>This listing shows ';
+            <?php
+                print '<div class="lvl0"><b>Record type schema / usage</b></p>This listing shows ';
 
-            if ($showSimpleFields && $showRelationships) {
-                print 'simple field types (text, numeric, terms, dates, geospatial and files), pointer fields and relationship marker fields <br/>'.
-                'for each record type, along with internal codes and occurrence in the database.<br/>';
-            }  else if ($showRelationships) {
-                print 'record pointers and relationship markers for each record type, along with internal codes and occurrence in the database.<br/>';
-            }  else if ($showSimpleFields) {
-                print 'simple field types (text, numeric, terms,dates, geospatial and files) for each record type, along with internal codes and occurrence in the database.<br/>';
-            }
+                if ($showSimpleFields && $showRelationships) {
+                    print 'simple field types (text, numeric, terms, dates, geospatial and files), pointer fields and '.
+                    'relationship marker fields <br/> for each record type, along with internal codes and occurrence in the database.<br/>';
+                }  else if ($showRelationships) {
+                    print 'record pointers and relationship markers for each record type, along with internal codes '.
+                    'and occurrence in the database.<br/>';
+                }  else if ($showSimpleFields) {
+                    print 'simple field types (text, numeric, terms,dates, geospatial and files) for each record type, '.
+                    'along with internal codes and occurrence in the database.<br/>';
+                }
 
-            if ($showRelationships) {
-                print 'Pointer fields are indicated by <i>[pointer]</i>, relationship marker fields by <i>[relationship]</i>. Pointed-to record types are separated by ||<br/>'.
-                'For constrained pointers, all defined target record types are listed. For unconstrained pointers, target record types present are listed.<br/>'.
-                'Relationships not defined by a relationship marker are not included in the counts.';
-            }
-            
-            if ($showSimpleFields) {
-                print '';
-            }
+                if ($showRelationships) {
+                    print 'Pointer fields are indicated by <i>[pointer]</i>, relationship marker fields by <i>[relationship]</i>. '.
+                    'Pointed-to record types are separated by ||<br/>'.
+                    'For constrained pointers, all defined target record types are listed. For unconstrained pointers, '.
+                    'target record types present are listed.<br/>'.
+                    'Relationships not defined by a relationship marker are not included in the counts.';
+                }
 
-            print '</div>';
+                if ($showSimpleFields) {
+                    print '';
+                }
 
-            foreach ($resrt  as $rt_id=>$rt){
-                // Record type, including total count
-                print '<div class="lvl0"><b>'.$rt['name']."</b>  (id ".$rt_id.", n=".$rt['count'].')</div>';
+                print '</div>';
 
-                // Loop through record details (fields) in record structure
-                foreach ($rt['details']  as $details){
-                    $dt_id = $details['dt_id'];
+                foreach ($resrt  as $rt_id=>$rt){
+                    // Record type, including total count
+                    print '<div class="lvl0"><b>'.$rt['name']."</b>  (id ".$rt_id.", n=".$rt['count'].')</div>';
 
-                    print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.(($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);
-                    if(@$details[req]){
-                        print ", ".substr($details[req],0,3)." ";
-                    }
-                    $mv = intval(@$details['max']);
-                    print ", ".($mv==1?"sng":($mv>1?"lim":"rpt"))." ";
+                    // Loop through record details (fields) in record structure
+                    foreach ($rt['details']  as $details){
+                        $dt_id = $details['dt_id'];
 
-                    print "]</i> ";
+                        print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.
+                        (($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);
+                        if(@$details[req]){
+                            print ", ".substr($details[req],0,3)." ";
+                        }
+                        $mv = intval(@$details['max']);
+                        print ", ".($mv==1?"sng":($mv>1?"lim":"rpt"))." ";
 
-                    $uncontrained = ($details['isconstrained']<1);
+                        print "]</i> ";
 
-                    if($uncontrained){
-                        print " unconstrained ";
-                    }
-                    print " (id ".$dt_id.", n=".$details['count'].') ';
+                        $uncontrained = ($details['isconstrained']<1);
 
-                    // Usage count for each pointed-to record type
-                    foreach ($details['rels']  as $pt_rt_id=>$data){
-                        if(!@$rtStructs['names'][$pt_rt_id]){
-                            print '<div class="lvl1  cerror"> Encountered pointer to incorrect record type id =  '.$pt_rt_id." (please run Utilities > Check Invalid Pointers to fix)</div>";
-                        }else{
-                            print '&nbsp; || &nbsp;'; // separator between record types poitned to by pointer field
-                            print '<b>'.$rtStructs['names'][$pt_rt_id]."</b> (id ".$pt_rt_id.", n=".$data[1].") ";
+                        if($uncontrained){
+                            print " unconstrained ";
+                        }
+                        print " (id ".$dt_id.", n=".$details['count'].') ';
 
-                            if(@$data[2]){ //terms
-                                $notfirst = false;
-                                print ' [ ';
-                                foreach ($data[2]  as $term_id=>$cnt){
+                        // Usage count for each pointed-to record type
+                        foreach ($details['rels']  as $pt_rt_id=>$data){
+                            if(!@$rtStructs['names'][$pt_rt_id]){
+                                print '<div class="lvl1  cerror"> Encountered pointer to incorrect record type id =  '.$pt_rt_id.
+                                " (please run Utilities > Verify Data Consistency to fix)</div>";
+                            }else{
+                                print '&nbsp; || &nbsp;'; // separator between record types poitned to by pointer field
+                                print '<b>'.$rtStructs['names'][$pt_rt_id]."</b> (id ".$pt_rt_id.", n=".$data[1].") ";
 
-                                    if($notfirst) print ", ";
-                                    $notfirst = true;
+                                if(@$data[2]){ //terms
+                                    $notfirst = false;
+                                    print ' [ ';
+                                    foreach ($data[2]  as $term_id=>$cnt){
 
-                                    print $rtTerms[$term_id][0]." (n=".$cnt.")";
+                                        if($notfirst) print ", ";
+                                        $notfirst = true;
+
+                                        print $rtTerms[$term_id][0]." (n=".$cnt.")";
+                                    }
+                                    print ' ]';
                                 }
-                                print ' ]';
                             }
                         }
-                    }         
-                    print '</div>';
+                        print '</div>';
 
-                } // end record details (fields) loop
+                    } // end record details (fields) loop
 
-                print "<br />";
-            }
-        ?>  
+                    print "<br />";
+                }
+            ?>
 
-    </body> 
+        </div>
+
+    </body>
+
 </html>

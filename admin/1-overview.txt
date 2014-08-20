@@ -1,0 +1,19 @@
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+
+---------------------------------------------------------------------
+
+
+Directory:	admin
+
+Overview:
+
+Administrative functions for managing database definitions, users, data verification and recovery, bulk changes etc.
+
+Notes: In version 3.2 (July 2014) and beyond, commonly used admin functions (open databaase, edit record structure etc. and personal user group management) are increasingly being also made available into menus on the main user view (search) interface.
+
+Updated: 	26th July 2014
