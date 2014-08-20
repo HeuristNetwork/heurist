@@ -1,46 +1,41 @@
 <?php
-    /*
-    * Copyright (C) 2005-2014 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
 
     /**
-    * getRectypeRelationsAsXML.php
-    * Lists the relations between records as XML
-    *  
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.1.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * getRectypeRelationsAsXML.php: Lists the relations between records as XML. Non-vidual version of listRecTypeRelations.php
+    *                               For use in visualisation of entities and relationships
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     3.2
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
     */
 
     require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 
     if (!is_logged_in()) {
-        print "Not logged in";                                                                     
+        print "Not logged in";
         return;
     }
-    
+
     // We are going to represent XML. Must be on top.
     header("Content-Type: application/xml");
     print '<?xml version="1.0" encoding="UTF-8"?>';
-    
-    // Code below is to grab data; copied from listRectypeRelations.php and removed unneccessary parts.
+
+    // Code below is to grab data; copied from listRectypeRelations.php
+    // and removed unneccessary parts to just generate XML for entities and relationships
     mysql_connection_select(DATABASE);
     $rtStructs = getAllRectypeStructures(true);
     $rtTerms = getTerms(true);
@@ -76,7 +71,8 @@
                 }
                 $isconstrainded = count($rels);
 
-                $query = "select r2.rec_RecTypeID, count(recDetails.dtl_ID) from Records r1, recDetails, Records r2 where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and "
+                $query = "select r2.rec_RecTypeID, count(recDetails.dtl_ID) from Records r1, recDetails, "
+                ."Records r2 where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and "
                 ."dtl_DetailTypeID=$dt_id and dtl_Value=r2.rec_ID group by r2.rec_RecTypeID";
                 $cnt = 0;
                 if(count($details)==0){
@@ -93,11 +89,11 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
-                    'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req],
+                    'max'=>$dt[$idx_dt_max], 'type'=>$dt_type, 'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
 
-            } // pointer 
-            
+            } // pointer
+
             else if ($dt_type=="relmarker") {
 
                 $constraints = $dt[$idx_dt_pointers];
@@ -111,12 +107,13 @@
                 $isconstrainded = count($rels);
 
                 $query = "SELECT rec3.rec_RecTypeID, rd2.dtl_Value as reltype, count(rec1.rec_ID) FROM Records rec1
-                , recDetails rd2  
-                , recDetails rd3  
-                , recDetails rd1, Records rec3  
-                where rec1.rec_RecTypeID=1 
-                and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7 and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=$rt_id)
-                and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6 
+                , recDetails rd2
+                , recDetails rd3
+                , recDetails rd1, Records rec3
+                where rec1.rec_RecTypeID=1
+                and rec1.rec_ID = rd1.dtl_RecID and rd1.dtl_DetailTypeID=7
+                and rd1.dtl_Value in (select rec2.rec_ID from Records rec2 where rec2.rec_RecTypeID=$rt_id)
+                and rec1.rec_ID = rd2.dtl_RecID and rd2.dtl_DetailTypeID=6
                 and rec1.rec_ID = rd3.dtl_RecID and rd3.dtl_DetailTypeID=5 and rec3.rec_ID=rd3.dtl_Value
                 group by rec3.rec_RecTypeID, rd2.dtl_Value order by rec3.rec_RecTypeID";
                 $cnt = 0;
@@ -141,8 +138,8 @@
                     }
                 }
 
-                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req], 'max'=>$dt[$idx_dt_max], 'type'=>$dt_type,
-                    'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
+                array_push($details, array('dt_id'=>$dt_id, 'dt_name'=>$dt[$idx_dt_name], 'req'=>$dt[$idx_dt_req],
+                    'max'=>$dt[$idx_dt_max], 'type'=>$dt_type, 'isconstrained'=>$isconstrainded, 'count'=>$cnt, 'rels'=>$rels));
             } // relmarker
         }
 
@@ -155,17 +152,14 @@
         $res = mysql__select_array("Records","count(*)","rec_RecTypeID=".$rt_id);
         return $res[0];
     }
-?>
-
-<?
-    // File headers to explain what the listing represents and for version checking 
-    print "\n<Relationships>"; 
+    // File headers to explain what the listing represents and for version checking
+    print "\n<Relationships>";
     print "\n\n<!--Heurist Definitions Exchange File, generated: ".date("d M Y @ H:i")."-->";
     print "\n<HeuristBaseURL>" . HEURIST_BASE_URL. "</HeuristBaseURL>";
     print "\n<HeuristDBName>" . HEURIST_DBNAME . "</HeuristDBName>";
     print "\n<HeuristProgVersion>".HEURIST_VERSION."</HeuristProgVersion>";
     print "\n<HeuristDBVersion>".HEURIST_DBVERSION."</HeuristDBVersion>";
-    
+
     // Retrieve relations
     print "\n\n<RecordTypes>";
     foreach ($resrt  as $rt_id=>$rt){
@@ -175,7 +169,7 @@
         print "\n<rec_ID>" .$rt_id. "</rec_ID>";
         print "\n<rec_Count>" .$rt['count']. "</rec_Count>";
         print "\n<rec_Image>" .$image_base_url.$rt_id. ".png</rec_Image>";
-        
+
         // Loop through record details (fields) in record structure
         print "\n<rec_Relations>";
         foreach ($rt['details']  as $details){
@@ -189,30 +183,30 @@
 
             // Relation types
             print "\n<RelationTypes>";
-            
+
             // Type check
             print "\n<rel_Name>";
             if($details['type']=="resource") {
                 print "pointer";
             }else{
-                print $details['type']; 
+                print $details['type'];
             }
             print "</rel_Name>";
 
             // Req check
             if(@$details[req]){
-                print "\n<rel_Name>" .substr($details[req],0,3). "</rel_Name>"; 
+                print "\n<rel_Name>" .substr($details[req],0,3). "</rel_Name>";
             }
-            
+
             // Max check
             print "\n<rel_Name>";
-            $mv = intval(@$details['max']);                    
+            $mv = intval(@$details['max']);
             if($mv == 1) {
                 print "sng";
             }else if($mv > 1) {
                 print "lim";
             }else{
-                print "rpt";   
+                print "rpt";
             }
             print "</rel_Name>";
             print "\n</RelationTypes>";
@@ -220,12 +214,12 @@
             // Unconstrained check
             print "\n<rel_Unconstrained>";
             if($details['isconstrained'] < 1) {
-                print "true";    
+                print "true";
             }else{
                 print "false";
             }
             print "</rel_Unconstrained>";
-  
+
             // Usage count for each pointed-to record type
             print "\n<Usages>";
             foreach ($details['rels']  as $pt_rt_id=>$data){
@@ -236,7 +230,7 @@
                     // Record overview
                     print "\n<rec_Name>" .$rtStructs['names'][$pt_rt_id]. "</rec_Name>";
                     print "\n<rec_ID>" .$pt_rt_id. "</rec_ID>";
-                    print "\n<rec_Count>" .$data[1]. "</rec_Count>"; 
+                    print "\n<rec_Count>" .$data[1]. "</rec_Count>";
                     print "\n<rec_Image>" .$image_base_url.$pt_rt_id. ".png</rec_Image>";
 
                     // Terms
@@ -251,14 +245,14 @@
                 }
                 print "\n</Record>";
             }
-            print "\n</Usages>";         
+            print "\n</Usages>";
             print "\n</Record>";
         } // end record details (fields) loop
-        
-        print "\n</rec_Relations>";    
+
+        print "\n</rec_Relations>";
         print "\n</Record>";
     }
-    
-    print "\n\n</RecordTypes>";    
-    print "\n</Relationships>";  
-?>  
+
+    print "\n\n</RecordTypes>";
+    print "\n</Relationships>";
+?>
