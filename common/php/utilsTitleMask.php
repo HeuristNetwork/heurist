@@ -129,6 +129,7 @@ function titlemask_make($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN
         return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?_titlemask__get_forempty($rec_id, $rt):"");
     }
 
+    //find inside brackets
     if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
         return $mask;    // nothing to do -- no substitutions
 

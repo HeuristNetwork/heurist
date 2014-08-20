@@ -471,6 +471,38 @@ function ShowReps() {
 			_generateTemplate(template_file, null, false);
 	}
 
+    /**
+    * Convert template to global
+    */
+    function _doExportTemplate(template_file, istest) {
+        
+            if(Number(top.HEURIST.database.id)>0){
+
+                var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+
+                var squery = 'db='+_db+'&mode=serve&dir=0&template='+template_file;
+
+                if(istest){
+                    Hul.sendRequest(baseurl, function(xhr) {
+                        var obj = Hul.evalJson(xhr.responseText);
+                        if (obj  &&  obj.error) {
+                            alert(obj.error);
+                        }else{
+                            _updateReps('<xmp>'+xhr.responseText+'</xmp>');    
+                        }
+                        }, squery);
+                }else{
+
+                    //template.gpl
+                    window.open(baseurl+'?'+squery, '_blank');
+                }
+
+            }else{
+                alert('Database must be registered to allow translation of local template to global template');
+            }
+    }
+    
+    
 	/**
 	* Close editor
 	* @param mode 0 - just close, 1 - save as (not close),  2 - save, close and execute, 3 - delete and close
@@ -1547,6 +1579,10 @@ function ShowReps() {
 				_doExecuteFromEditor();
 			},
 
+            doExportTemplate: function(template_file){
+                _doExportTemplate(template_file, false);
+            },
+            
 			onPublish:function (template_file){
 				_onPublish(template_file);
 			},

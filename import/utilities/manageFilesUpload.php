@@ -51,7 +51,7 @@
     }
 
     if (! is_admin()) { // TO DO: Change this to members of database managers
-        print "<p>Only members of the Database Managers group may upload files</p></body></html>";
+        print "<html><body><p>Only members of the Database Managers group may upload files</p></body></html>";
         return;
     }
 
@@ -143,9 +143,6 @@
                 print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
                 "Click here to set media/upload folders</a></p>";
 
-                print "<h3> This function is under development (April 2014)</h3>";
-
-
                 //exit;
             } // Visit #1
 
@@ -229,7 +226,7 @@
                 </td>
                 <td>
                     <p class="size">Processing...</p>
-                    <div class="progress"></div>
+                    <!-- div class="progress"></div -->
                 </td>
                 <td>
                     {% if (!i && !o.options.autoUpload) { %}

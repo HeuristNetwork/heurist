@@ -269,6 +269,9 @@ function insertVar(isloop, isif){
 		<!--		<button onClick="doEditor(3)">Delete</button>
 -->
 		<button onClick="doEditor(0)">Close Editor</button>
+        &nbsp;&nbsp;&nbsp;
+        <button onClick="onExportTemplate()" title="Test your template">Export</button>
+        <button onClick="{/*onImportTemplate()*/}" title="Test your template">Import</button>
 	</div>
 
 	<!--
@@ -390,6 +393,13 @@ if(isInited){
 		}
 	}
 
+    function onExportTemplate()
+    {
+        var sel = document.getElementById('selTemplates');
+        if(sel.selectedIndex>=0){
+            window.showReps.doExportTemplate(sel.options[sel.selectedIndex].value);
+        }
+    }
 
 	//
 	//
