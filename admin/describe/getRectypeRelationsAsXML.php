@@ -186,6 +186,15 @@
             print "\n<rec_ID>" .$dt_id. "</rec_ID>";
             print "\n<rec_Count>" .$details['count']. "</rec_Count>";
             print "\n<rec_Image>" .$image_base_url.$dt_id. ".png</rec_Image>";
+            
+            // Unconstrained check
+            print "\n<rel_Unconstrained>";
+            if($details['isconstrained'] < 1) {
+                print "true";    
+            }else{
+                print "false";
+            }
+            print "</rel_Unconstrained>";
 
             // Relation types
             print "\n<RelationTypes>";
@@ -216,16 +225,7 @@
             }
             print "</rel_Name>";
             print "\n</RelationTypes>";
-
-            // Unconstrained check
-            print "\n<rel_Unconstrained>";
-            if($details['isconstrained'] < 1) {
-                print "true";    
-            }else{
-                print "false";
-            }
-            print "</rel_Unconstrained>";
-  
+ 
             // Usage count for each pointed-to record type
             print "\n<Usages>";
             foreach ($details['rels']  as $pt_rt_id=>$data){
