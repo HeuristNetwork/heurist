@@ -1562,15 +1562,16 @@ function ShowReps() {
 				if(_needSelection){
 					alert('Please select some records to allow generation of the template');
 				}else{
-				_needListRefresh = true;
+				    _needListRefresh = true;
 					_generateTemplate(name, true);
 				}
 			},
 
-			showEditor:  function (template_file){
+			showEditor:  function (template_file, needRefresh){
 				if(_needSelection){
 					alert('Please select some records in the search results before editing the template');
 				}else{
+                    _needListRefresh = (needRefresh===true);
 					_showEditor(template_file);
 				}
 			},

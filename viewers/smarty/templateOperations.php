@@ -220,7 +220,7 @@
             $exp = $matches[1][$i];
             if(!trim($exp)) continue; //empty{}
             if(substr($exp,0,1)=="*" && substr($exp,-1)=="*") continue; //this is comment
-        
+
         //3. find words within this text
             if (! preg_match_all('/(\\$([a-zA-Z_0-9.])+)/', $exp, $matches2) ){
                 continue;
@@ -229,21 +229,38 @@
             $replacements = array();
         
             foreach ($matches2[1] as $var) {
+                
         //4. split by "."
                     $parts = explode(".", $var);
                     $parts2 = array();
                     foreach ($parts as $part) {
         //5. find starting with "f"
                         if(strpos($part, "f")===0){
+                            $prefix = "f";
+                        }else if(strpos($part, "\$f")===0){
+                            $prefix = "\$f";
+                        }else{
+                            $prefix = null;
+                        }
+        
+                        if($prefix){
         //6. get local DT ID - find Concept Code
+                            $code = substr($part, strlen($prefix));
+                            if(substr($part, -1)=="s"){
+                                    $suffix = "s";
+                                    $code = substr($code,0,strlen($code)-1);
+                            }else{
+                                    $suffix = "";
+                            }
+                            
                             if($mode==0){
-                                $localID = substr($part,1);
+                                $localID = $code;
                                 if(strpos($localID,"_")===false){
                                     $conceptCode = getDetailTypeConceptID($localID);
-                                    $part = "f".str_replace("-","_",$conceptCode);
+                                    $part = $prefix.str_replace("-","_",$conceptCode).$suffix;
                                 }
                             }else{
-                                $conceptCode = substr($part,1) ;
+                                $conceptCode = $code;
                                 
                                 if(strpos($conceptCode,"_")!==false){
                                     $conceptCode = str_replace("_","-",$conceptCode);
@@ -252,9 +269,9 @@
                                     if($localID==null){
                                         //local code not found - it means that this detail is not in this database
                                         array_push($not_found_details, $conceptCode);
-                                        $part = "f[[".$conceptCode."]]";
+                                        $part = $prefix."[[".$conceptCode."]]".$suffix;
                                     }else{
-                                        $part = "f".$localID;
+                                        $part = $prefix.$localID.$suffix;
                                     }
                                 }
                             }

@@ -284,7 +284,7 @@ function insertVar(isloop, isif){
         <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
         
         <span class="fileinput-button" style="visibility: hidden;">
-            <input id="fileupload" type="file" name="import_template">
+            <input id="fileupload" type="file" name="import_template" accept=".gpl">
         </span>
 
 	</div>
@@ -542,7 +542,7 @@ $(function () {
                     if (obj  &&  obj.error) {
                         alert(obj.error);
                     }else if(obj.ok) {
-                        window.showReps.showEditor(obj.ok);
+                        window.showReps.showEditor(obj.ok, true);
                         if(obj.details_not_found){
                             alert('Conversion of template file to internal codes. '+
                                 'Unable to convert '+obj.details_not_found.length+
