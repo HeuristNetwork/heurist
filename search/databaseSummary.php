@@ -32,34 +32,34 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-	require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
-	require_once(dirname(__FILE__).'/parseQueryToSQL.php');
-	require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
+    require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/parseQueryToSQL.php');
+    require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
 
-	mysql_connection_select(DATABASE);
+    mysql_connection_select(DATABASE);
 
-	$searchType = BOTH;
-	$args = array();
-	$publicOnly = false;
+    $searchType = BOTH;
+    $args = array();
+    $publicOnly = false;
 
-	$query = REQUEST_to_query("select rec_RecTypeID, count(*) ", $searchType, $args, null, $publicOnly);
+    $query = REQUEST_to_query("select rec_RecTypeID, count(*) ", $searchType, $args, null, $publicOnly);
 
-	$query = substr($query,0, strpos($query,"order by"));
+    $query = substr($query,0, strpos($query,"order by"));
 
-	$query .= " group by rec_RecTypeID";
+    $query .= " group by rec_RecTypeID";
 
-	// style="width:640px;height:480px;"
-	$rtStructs = getAllRectypeStructures();
+    // style="width:640px;height:480px;"
+    $rtStructs = getAllRectypeStructures();
 ?>
 <html>
-	<head>
+    <head>
 
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Database Summary</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Database Summary</title>
 
-		<link rel="stylesheet" type="text/css" href="../common/css/global.css">
-		<style>
+        <link rel="stylesheet" type="text/css" href="../common/css/global.css">
+        <style>
             /** Heurist */
             #container {
                 width: 100%;
@@ -103,9 +103,7 @@
                 height: 100%;   
             }
             
-            
-
-            /** Force directed diagram */
+            /** Move records around */
             g:hover {
                 cursor: move;
             }
@@ -114,7 +112,7 @@
             path.link {
               fill: none;
               stroke: #666;
-              stroke-width: 1.5px;
+              stroke-width: 1px;
               pointer-events: all;
             }
             
@@ -130,13 +128,19 @@
             }
             
             /** Text above circle */
-            text.header {
+            text {
                 font-weight: bold;
                 text-anchor: middle;
                 fill: #a00;
-                font: 10px sans-serif;  
+                font: 10px sans-serif;
             }
-		</style>
+            
+            text.shadow {
+                 stroke: #fff;
+                 stroke-width: 3px;
+                 stroke-opacity: .8;
+            }
+        </style>
         
         <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../external/d3/d3.js"></script> 
@@ -152,9 +156,9 @@
                 }
             }
         </script>
-	</head>
+    </head>
     
-	<body class="popup">
+    <body class="popup">
         <!-- Holds the record count table left (as small as possible), and the SVG visualisation on the right (as big as possible) -->
         <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
@@ -207,7 +211,19 @@
 
                 <!-- D3 visualisation -->
                 <td class="svg-cell">
-                    <svg></svg>
+                    <svg>
+                        <defs>
+                            <marker id="endMarker" markerWidth="8" markerHeight="8" refx="10" refy="0"
+                                    viewBox="0 -5 10 10" orient="auto">
+                                <path d="M0,-5L10,0L0,5"></path>
+                            </marker> 
+      
+                            <marker id="startMarker" markerWidth="8" markerHeight="8" refx="0" refy="0"
+                                    viewBox="0 -5 10 10" orient="auto">
+                                <path d="M10,-5L0,0L10,5"></path>
+                            </marker> 
+                        </defs>
+                    </svg>
                 </td>
             </tr>
         </table>

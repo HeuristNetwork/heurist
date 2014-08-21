@@ -124,16 +124,7 @@ function visualizeData() {
         // Check if we should filter this record
         var index = $.inArray(rootInfo.name, filter);
         console.log("INDEX of " + rootInfo.name + ":" + index); 
-        if(index == -1) {
-             // Root record check in node list 
-            var rootLink = {};
-            if(!(rootInfo.name in nodes)) {
-                nodes[rootInfo.name] = rootInfo;
-                rootLink["target"] = rootInfo;
-            }else{
-                rootLink["target"] = nodes[rootInfo.name];
-            }
-         
+        if(index == -1 && rootInfo.count > 0) {
             // Get through all linked relation Records with namespace 'relationrecord'
             var relations = root.getElementsByTagNameNS("relationrecord", "Record");
             console.log("RELATION");
@@ -147,20 +138,6 @@ function visualizeData() {
                     var relationInfo = getInfo(relation);
                     console.log(relationInfo);
          
-                    // Relation information for this relation record
-                    /*
-                    var relationLink = {};
-                    if(!(relationInfo.name in nodes)) { // Check if a node with this name has been added already
-                         nodes[relationInfo.name] = relationInfo; // It has not; add it to the list of nodes
-                         rootLink["target"] = relationInfo;       // Set the target of the root link to this reoord
-                         relationLink["source"] = relationInfo;   // Set the source of the relation link to this record
-                    }else{ // Node with this name exists already, use that record 
-                        rootLink["target"] = nodes[relationInfo.name];     // Set the target of the root link to the existing record
-                        relationLink["source"] = nodes[relationInfo.name]; // Set the source of the relation link to the existing record
-                    }
-                    links.push(rootLink); // Add the root link to the list of links
-                    */
-                    
                     // Unconstrained check
                     var constrained = isUnconstrained(relation);
                     console.log(constrained);
@@ -191,24 +168,26 @@ function visualizeData() {
                             // Check if we should filter this record
                             var index = $.inArray(usageInfo.name, filter);
                             console.log("INDEX of " + usageInfo.name + ":" + index); 
-                            if(index == -1) {
-                                 // Check if we need to add this record to list of nodes
-                                /*
-                                if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
-                                     nodes[usageInfo.name] = usageInfo;  // It has not; add it to the list of nodes
-                                     relationLink["target"] = usageInfo; // Set the target of the relation link to this reoord
-                                }else{ // Node with this name exists already, use that record 
-                                    relationLink["target"] = nodes[usageInfo.name]; 
+                            if(index == -1 && usageInfo.count > 0) {
+                                // Construct a link; add root record info
+                                var link = {};
+                                if(!(rootInfo.name in nodes)) {
+                                    nodes[rootInfo.name] = rootInfo;
+                                    link["target"] = rootInfo;
+                                }else{
+                                    link["target"] = nodes[rootInfo.name];
                                 }
-                                links.push(relationLink); // Add the relation link to the list of links
-                                */
+                                
+                                // Link construction; add usage record info
                                 if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
                                     nodes[usageInfo.name] = usageInfo; // It has not; add it to the list of nodes
-                                    rootLink["source"] = usageInfo;    // Set the target of the root link to this reoord
+                                    link["source"] = usageInfo;    // Set the target of the root link to this reoord
                                 }else{ // Node with this name exists already, use that record 
-                                    rootLink["source"] = nodes[usageInfo.name]; 
+                                    link["source"] = nodes[usageInfo.name]; 
                                 }
-                                links.push(rootLink); // Add the root link to the list of links
+                                
+                                // Add link to array
+                                links.push(link);
                             }
                         }
                     }
@@ -224,7 +203,7 @@ function visualizeData() {
     // svg details
     var width = $("svg").width();     // Determine the SVG width
     var height = $("svg").height();   // Determine the SVG height
-    $("svg").empty();                 // Remove all child elements
+    $("svg").find("g").remove();      // Remove all old elements
     var svg = d3.select("svg");       // Select the SVG with D3                 
     var iconSize = 16;                // The icon size 
     var offset = 10;                  // Line offsets
@@ -234,33 +213,19 @@ function visualizeData() {
                          .nodes(d3.values(nodes))
                          .links(links)
                          .size([width, height])
-                         .linkDistance(125)
+                         .linkDistance(250)
                          .charge(-700)
                          .on("tick", tick)
                          .start();
-
-    // build the arrow.
-    svg.append("svg:defs").selectAll("marker")
-                          .data(["end"])
-                          .enter().append("svg:marker")
-                          .attr("id", String)
-                          .attr("viewBox", "0 -5 10 10")
-                          .attr("refX", 10)
-                          .attr("refY", 0)
-                          .attr("markerWidth", 6)
-                          .attr("markerHeight", 6)
-                          .attr("orient", "auto")
-                          .append("svg:path")
-                          .attr("d", "M0,-5L10,0L0,5");
-
+                         
     // add the links and the arrows
     var path = svg.append("svg:g").selectAll("path")
                                   .data(force.links())
                                   .enter().append("svg:path")
                                   .attr("class", "link")
-                                  .attr("marker-end", "url(#end)")
-                                  .attr("pointer", function (d, i) {
-                                        return "TestName";
+                                  .attr("marker-end", "url(#endMarker)") 
+                                  .attr("pointer", function(d, i) {
+                                        return d.pointer;
                                   })
                                   .attr("onmouseover", function(d, i) {
                                         console.log("ON MOUSE OVER");
@@ -297,7 +262,16 @@ function visualizeData() {
         .attr("height", iconSize)
         .attr("width", iconSize);
 
-    // add the text 
+    // add the header shadow text 
+    node.append("text")
+        .attr("x", 0)
+        .attr("y", iconSize*-1)
+        .attr("class", "shadow")
+        .text(function(d) { 
+            return d.name; 
+        })
+        
+    // add the header main text 
     node.append("text")
         .attr("x", 0)
         .attr("y", iconSize*-1)
@@ -364,6 +338,9 @@ function visualizeData() {
             return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
+
+    
+       
     
     console.log("NODES AFTER");
     console.log(nodes);
