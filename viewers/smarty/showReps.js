@@ -438,19 +438,23 @@ function ShowReps() {
 			},2000);
 		}
 	}
-
+    
+    function _initEditorMode(template_file, template_body){
+        
+            Dom.get("edTemplateName").innerHTML = template_file;
+            _initEditor(template_body);
+            //Dom.get("edTemplateBody").value = template_body;
+            _keepTemplateValue = template_body; //Dom.get("edTemplateBody").value;
+            _setLayout(true, true);
+    }
+    
 	/**
 	* Creates new template from the given query
 	*/
 	function _showEditor(template_file) {
 
 		function _onGetTemplate(context){
-
-			Dom.get("edTemplateName").innerHTML = template_file;
-			_initEditor(context);
-			//Dom.get("edTemplateBody").value = context;
-			_keepTemplateValue = context; //Dom.get("edTemplateBody").value;
-			_setLayout(true, true);
+              _initEditorMode(template_file, context);
 		}
 
 			var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
@@ -1570,6 +1574,10 @@ function ShowReps() {
 					_showEditor(template_file);
 				}
 			},
+            
+            initEditorMode: function(template_file, template_body){
+                _initEditorMode(template_file, template_body);
+            },
 
 			operationEditor:  function (action){
 				_operationEditor(action);
@@ -1664,4 +1672,3 @@ $(function(){
     });
 });
 */
-

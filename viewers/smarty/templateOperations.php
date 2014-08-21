@@ -60,24 +60,10 @@
                     //get template body from request (for execution from editor)
                     $template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
                     //add extension and save in default template directory
+                    
+                    $res = saveTemplate($template_body, $template_file);
 
-                    $template_file = $dir.$template_file;
-                    $path_parts = pathinfo($template_file);
-                    $ext = (array_key_exists('extension',$path_parts))?strtolower($path_parts['extension']):"";
-                    if($ext!="tpl"){
-                        $template_file = $template_file.".tpl";
-                    }
-
-                    $file = fopen ($template_file, "w");
-                    if(!$file){
-                        print json_format(array("error"=>"Can't write file. Check permission for smarty template directory"));
-                        exit();
-                    }
-                    fwrite($file, $template_body);
-                    fclose ($file);
-
-                    print json_format(array("ok"=>$mode));
-
+                    print json_format($res);
                     break;
 
                 case 'delete':
@@ -94,6 +80,11 @@
 
                     break;
 
+                case 'import':
+                
+                    importTemplate();
+                
+                    break;
                 case 'serve':
                 // TODO: convert template file to global concept IDs and serve up to caller
 
@@ -170,6 +161,29 @@
         }
     }
 
+    function  saveTemplate($template_body, $template_file){
+        global $dir;
+
+        $path_parts = pathinfo($template_file);
+        $template_file = $path_parts['filename'];
+        $template_file = $template_file.".tpl";
+        $template_file_fullpath = $dir.$template_file;
+        
+        /*$ext = (array_key_exists('extension',$path_parts))?strtolower($path_parts['extension']):"";
+        if($ext!="tpl"){
+            $template_file = $template_file.".tpl";
+        }*/
+
+        $file = fopen ($template_file_fullpath, "w");
+        if(!$file){
+            return array("error"=>"Can't write file. Check permission for smarty template directory");
+        }
+        fwrite($file, $template_body);
+        fclose ($file);
+        return array("ok"=>$template_file);
+    }
+
+    
 
     /**
     * Returns the content of template file as text with local IDs replaced by concept IDs or viseverse
@@ -177,8 +191,7 @@
     * @param mixed $filename - name of template file
     * @param mixed $mode - 0 - to concept code, 1 - to local code
     */
-    function convertTemplate($filename, $mode){
-        global $dir;
+    function convertTemplate($template, $mode){
         
         //1. get template content
         //2. find all texts within {}
@@ -189,10 +202,8 @@
         //7. replace
 
         //1. get template content
-        if($filename && file_exists($dir.$filename)){
-            $template = file_get_contents($dir.$filename);
-        }else{
-            return array("error"=>"File $filename not found");
+        if($template==null || $template==''){
+            return array("error"=>"Template is empty");    
         }
         
         //2. find all texts within {} - expressions
@@ -227,17 +238,21 @@
         //6. get local DT ID - find Concept Code
                             if($mode==0){
                                 $localID = substr($part,1);
-                                if(strpos($localID,"-")===false){
+                                if(strpos($localID,"_")===false){
                                     $conceptCode = getDetailTypeConceptID($localID);
-                                    $part = "f".$conceptCode;
+                                    $part = "f".str_replace("-","_",$conceptCode);
                                 }
                             }else{
                                 $conceptCode = substr($part,1) ;
-                                if(strpos($conceptCode,"-")!==false){
+                                
+                                if(strpos($conceptCode,"_")!==false){
+                                    $conceptCode = str_replace("_","-",$conceptCode);
+                                    
                                     $localID = getDetailTypeLocalID($conceptCode);
-                                    if($localID==0){
+                                    if($localID==null){
                                         //local code not found - it means that this detail is not in this database
                                         array_push($not_found_details, $conceptCode);
+                                        $part = "f[[".$conceptCode."]]";
                                     }else{
                                         $part = "f".$localID;
                                     }
@@ -261,23 +276,17 @@
             }
         }//for expressions
         
-        if(count($not_found_details)>0){
-            
-            return array("error"=>count($not_found_details)." of concept codes cannot be translated to local codes", "details"=>$not_found_details); 
-            
-        }else{
         
-            if(count($replacements_exp)>0){
-                $template = array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
-            }
-            
-            if($mode==0){
-                    header('Content-type: html/text');
-                    header('Content-disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
-            }
-            
-            print $template; //"<hr><br><br><xmp>".$template."</xmp>";
+        if(count($replacements_exp)>0){
+             $template = array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
+
+        if($mode==1){
+            return array("template"=>$template, "details_not_found"=>$not_found_details); 
+        }else{
+            return $template;
+        }
+        
     }
 
     /**
@@ -286,13 +295,27 @@
     * @param mixed $filename - name of template file
     */
     function smartyLocalIDsToConceptIDs($filename){
-        global $dbID;
+        global $dir, $dbID;
         
         if(!$dbID){
             return array("error"=>"Database must be registered to allow translation of local template to global template");    
         }
+
+        if($filename && file_exists($dir.$filename)){
+            $template = file_get_contents($dir.$filename);
+            $res = convertTemplate($template, 0);
+        }else{
+            $res = array("error"=>"File $filename not found");
+        }
         
-        return convertTemplate($filename, 0);
+        if(is_array($res)){
+            header("Content-type: text/javascript");
+            print json_format($res);
+        }else{
+            header('Content-type: html/text');
+            header('Content-disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
+            print $res; //"<hr><br><br><xmp>".$template."</xmp>";
+        }
     }
 
     /**
@@ -300,8 +323,36 @@
     *
     * @param mixed $instream - source data with global concept IDs
     */
-    function smartyConceptIDsToLocalIDs($instream){
-        return convertTemplate($filename, 1);
+    function importTemplate(){
+        global $dir;
+        
+        if ( !$_FILES['import_template']['size'] ) {
+            $res = array("error"=>'Error occurred during upload - file had zero size');
+            
+        }else{
+            $filename = $_FILES['import_template']['tmp_name'];
+            $origfilename = $_FILES['import_template']['name'];
+        
+            //read tempfile
+            $template = file_get_contents($filename);
+        
+            $res = convertTemplate($template, 1);
+            
+            if(!is_array($res)){
+                $res = array('template'=>$res);
+            }
+            
+            if(!@$res['error']){
+                  $res2 = saveTemplate($res['template'], $origfilename);
+                  if(count(@$res['details_not_found'])>0){
+                      $res2['details_not_found'] = $res['details_not_found'];
+                  }
+                  $res = $res2;
+            }
+        }
+        
+        header("Content-type: text/javascript");
+        print json_format($res);
     }
 
     if (! function_exists('array_str_replace')) {

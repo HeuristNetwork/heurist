@@ -126,7 +126,7 @@
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded
                 // Unlike indexing, we add the user-defined set to the default set
-                $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,"+
+                $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff, ".
                     "mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar";
                     // default set to allow
                 $mediaExts = $mediaExts.$row1[1];
@@ -140,8 +140,8 @@
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
 
-                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'
-                    .title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
+                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1' "
+                    ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
                     ."Click here to set media/upload folders</a></p>";
 
             } // Visit #1
