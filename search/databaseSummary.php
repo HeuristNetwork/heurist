@@ -103,51 +103,38 @@
                 height: 100%;   
             }
             
-            g.record:hover {
-                cursor: move;
-            }
-    
-            circle.around {
-                fill: none;
-                stroke-width: 3;
-                stroke: #000;               
-            }
-         
-            text.header {
-                font-weight: bold;
-                text-anchor: middle;
-            }
+            
 
             /** Force directed diagram */
+            g:hover {
+                cursor: move;
+            }
+            
+            /** Lines between records */
             path.link {
               fill: none;
               stroke: #666;
               stroke-width: 1.5px;
-              pointer-events:all;
+              pointer-events: all;
+            }
+            
+            path.link:hover {
+                cursor: s-resize;
             }
 
-            circle {
-              fill: #ccc;
-              stroke: #fff;
-              stroke-width: 1.5px;
-            }
-
-            text {
-              fill: #000;
-              font: 10px sans-serif;
-              pointer-events: none;
+            /** Circle around icon */
+            circle.around {
+                fill: none;
+                stroke-width: 2px;
+                stroke: #000;               
             }
             
-            .rootrecord {
-                fill: #f00;
-            }
-            
-            .relationrecord {
-                fill: #0f0;
-            }
-            
-            .usagerecord {
-                fill: #00f;
+            /** Text above circle */
+            text.header {
+                font-weight: bold;
+                text-anchor: middle;
+                fill: #a00;
+                font: 10px sans-serif;  
             }
 		</style>
         
@@ -197,9 +184,10 @@
                                 $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
                                 
-                                // Type
+                                // Title
                                 $rectypeTitle = $rtStructs['names'][$rt_ID];
-                                echo "<td>".htmlspecialchars($rectypeTitle)."</td>";
+                                $title = htmlspecialchars($rectypeTitle);
+                                echo "<td>".$title."</td>";
                                 
                                 // Links
                                 $links =  "<a href='#' title='Open in current page' onclick='onrowclick($rt_ID, false)' class='internal-link'>&nbsp;</a>";
@@ -210,7 +198,7 @@
                                 echo "<td align='center'>" .$row[1]. "</td>";
                                 
                                 // Show
-                                echo "<td align='center'><input type='checkbox' name='show' checked></td></tr>";
+                                echo "<td align='center'><input type='checkbox' name='" .$title. "' checked></td></tr>";
                                 
                             }//end while
                         ?>
