@@ -70,7 +70,10 @@
 <!-- END TREEVIEW DEFS-->
 <!-- for yui simply dialog -->
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
 <!--
 <script type="text/javascript" src="../../external/tinymce3.4.4/jscripts/tiny_mce/tiny_mce.js"></script>
 <script src="../../external/js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -87,6 +90,8 @@
 <script src="../../external/js/codemirror-3.20/mode/htmlmixed/htmlmixed.js"></script>
 <script src="../../external/js/codemirror-3.20/mode/smarty/smarty.js"></script>
 <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
+
+<!-- link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload.css" -->
 
 <!--
 <link rel="stylesheet" href="../../external/js/codemirror-2.35/lib/codemirror.css">
@@ -146,6 +151,10 @@ function insertVar(isloop, isif){
 <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
+
+<script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
+
 
 <iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
 
@@ -270,8 +279,14 @@ function insertVar(isloop, isif){
 -->
 		<button onClick="doEditor(0)">Close Editor</button>
         &nbsp;&nbsp;&nbsp;
-        <button onClick="onExportTemplate()" title="Test your template">Export</button>
-        <button onClick="{/*onImportTemplate()*/}" title="Test your template">Import</button>
+        <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
+
+        <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
+        
+        <span class="fileinput-button" style="visibility: hidden;">
+            <input id="fileupload" type="file" name="import_template" accept=".gpl">
+        </span>
+
 	</div>
 
 	<!--
@@ -399,6 +414,7 @@ if(isInited){
         if(sel.selectedIndex>=0){
             window.showReps.doExportTemplate(sel.options[sel.selectedIndex].value);
         }
+        return false;
     }
 
 	//
@@ -498,6 +514,10 @@ if(isInited){
 			} else {
                 s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
             }
+            
+            s = s + '<li><a href="#" onClick="onExportTemplate()">Export</a></li>' + 
+                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
+            
 		}
 
 		var elem = document.getElementById('toolMenuItems');
@@ -506,6 +526,40 @@ if(isInited){
 
 	YAHOO.util.Event.addListener(window, "load", loadHandler );
 
+    
+$(function () {
+    'use strict';
+   
+    var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+                
+    $('#fileupload').fileupload({
+        url: 'templateOperations.php',
+        formData: [{name:'db', value: _db}, {name:'mode', value:'import'}],
+        dataType: 'json',
+        done: function (e, data) {
+            
+                    var obj = data.jqXHR.responseJSON; //Hul.evalJson(data.jqXHR.responseJSON);
+                    if (obj  &&  obj.error) {
+                        alert(obj.error);
+                    }else if(obj.ok) {
+                        window.showReps.showEditor(obj.ok, true);
+                        if(obj.details_not_found){
+                            alert('Conversion of template file to internal codes. '+
+                                'Unable to convert '+obj.details_not_found.length+
+                                '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
+                                'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
+                                'which failed to convert are enclosed in [[ ]] in the template file eg. f[[2-27]]'
+                            );
+                        }
+                    }
+            
+            /*$.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo('#files');
+            });*/
+        },
+    });
+});
+    
 </script>
 </body>
 </html>
