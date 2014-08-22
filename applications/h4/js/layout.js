@@ -325,6 +325,9 @@ function appAddContent($container, app, options){
         if(app.widgetname=='rec_viewer'){
             //DEBUG
             $content.rec_viewer();
+        }else if(app.widgetname=='rec_list'){
+            //DEBUG
+            $content.rec_list();
         }else
             if(app.widgetname=='svs_manager'){
                 //DEBUG

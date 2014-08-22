@@ -362,6 +362,21 @@ function hRecordSet(initdata) {
             return null;
 
         },
+        
+        /**
+        * returns all record ids from recordset
+        * 
+        * @returns {Array}
+        */
+        getIds: function(){
+            var aitems = [];
+            var recID;
+            for(recID in records)
+            if(recID){
+                aitems.push(recID);
+            }
+            return aitems;
+        },
 
         /**
         * Returns recordSet with the same field and structure definitions

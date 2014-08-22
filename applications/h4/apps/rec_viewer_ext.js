@@ -43,7 +43,7 @@ $.widget( "heurist.rec_viewer_ext", {
         this.lbl_message = $( "<label>" )
         .appendTo( this.element ).hide();
 
-        //-----------------------
+        //-----------------------   listener for global event
         $(this.document).on(top.HAPI.Event.ON_REC_SELECT,
             function(e, data) {
 

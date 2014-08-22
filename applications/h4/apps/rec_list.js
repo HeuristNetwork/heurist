@@ -1,5 +1,10 @@
 /**
-* Query result listing. Requires apps/tag_manager.js
+* Query result listing. 
+* 
+* Requires apps/rec_actions.js (must be preloaded)
+* 
+* @todo - remove action buttons and use rec_action widget
+* 
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -40,6 +45,8 @@ $.widget( "heurist.rec_list", {
     _create: function() {
 
         var that = this;
+        
+        //this.uniqueId();
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
         this.div_content = $( "<div>" )
@@ -47,132 +54,11 @@ $.widget( "heurist.rec_list", {
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
-
-        this.btn_add = $( "<button>", {
-            text: top.HR("add"),
-            title: top.HR("add new record")
-        })
-        .addClass('logged-in-only')
-        .appendTo( this.div_toolbar )
-        .button({icons: {
-            primary: "ui-icon-circle-plus"
-        }});
-
-        //-----------------------
-        this.btn_tags = $( "<button>", {text: top.HR("tags")} )
-        .addClass('logged-in-only')
-        .appendTo( this.div_toolbar )
-        .button({icons: {
-            primary: "ui-icon-tag",
-            secondary: "ui-icon-triangle-1-s"
-            },text:false});
-
-        this.menu_tags = null;
-
-        this._on( this.btn_tags, {
-            click: function() {
-                $('.menu-or-popup').hide(); //hide other
-                if(this.menu_tags){
-
-                    var popup = $( this.menu_tags )
-                    .tag_manager( 'option', 'record_ids', null )
-                    .show()
-                    .position({my: "left top", at: "left bottom", of: this.btn_tags });
-
-                    function _hidethispopup(event) {
-                        if($(event.target).closest(popup).length==0){
-                            popup.hide();
-                        }else{
-                            $( document ).one( "click", _hidethispopup);
-                            return false;
-                        }
-                    }
-
-                    $( document ).one( "click", _hidethispopup); //hide itself on click outside
-
-
-                }else{
-
-                    if($.isFunction($('body').tag_manager)){
-                        this._initTagMenu();
-                    }else{
-                        $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ that._initTagMenu(); } );
-                    }
-
-                }
-                return false;
-            }
-        });
-
-        //-----------------------
-        this.btn_share = $( "<button>", {text: "share"} )
-        .addClass('logged-in-only')
-        .appendTo( this.div_toolbar )
-        .button({icons: {
-            secondary: "ui-icon-triangle-1-s"
-            },text:true});
-
-        this.menu_share = $('<ul>'+
-            '<li id="menu-share-access"><a href="#">Access</a></li>'+
-            '<li id="menu-share-notify"><a href="#">Notify</a></li>'+
-            '<li id="menu-share-embed"><a href="#">Embed / link</a></li>'+
-            '<li id="menu-share-export"><a href="#">Export</a></li>'+
-            '</ul>')
-        .addClass('menu-or-popup')
-        .css('position','absolute')
-        .appendTo( this.document.find('body') )
-        .menu({
-            select: function( event, ui ) {
-                //ui.item.attr('id');
-        }})
-        .hide();
-
-        this._on( this.btn_share, {
-            click: function() {
-                $('.menu-or-popup').hide(); //hide other
-                var menu = $( this.menu_share )
-                .show()
-                .position({my: "left top", at: "left bottom", of: this.btn_share });
-                $( document ).one( "click", function() { menu.hide(); });
-                return false;
-            }
-        });
-
-        //-----------------------
-        this.btn_more = $( "<button>", {text: "more"} )
-        .addClass('logged-in-only')
-        .appendTo( this.div_toolbar )
-        .button({icons: {
-            secondary: "ui-icon-triangle-1-s"
-            },text:true});
-
-
-        this.menu_more = $('<ul>'+
-            '<li id="menu-more-relate"><a href="#">Relate to</a></li>'+
-            '<li id="menu-more-rate"><a href="#">Rate</a></li>'+
-            '<li id="menu-more-merge"><a href="#">Merge</a></li>'+
-            '<li id="menu-more-delete"><a href="#">Delete</a></li>'+
-            '</ul>')
-        .addClass('menu-or-popup')
-        .css('position','absolute')
-        .appendTo( this.document.find('body') )
-        .menu({
-            select: function( event, ui ) {
-                //ui.item.attr('id');
-        }})
-        .hide();
-
-        this._on( this.btn_more, {
-            click: function() {
-                $('.menu-or-popup').hide(); //hide other
-                var menu = $( this.menu_more )
-                //.css('width', this.btn_more.width())
-                .show()
-                .position({my: "right top", at: "right bottom", of: this.btn_more });
-                $( document ).one( "click", function() { menu.hide(); });
-                return false;
-            }
-        });
+        
+        this.action_buttons = $('<div>')
+        .css('display','inline-block')
+        .rec_actions({actionbuttons: this.options.actionbuttons})
+        .appendTo(this.div_toolbar);
 
         //-----------------------
         this.span_info = $("<label>").appendTo(
@@ -225,7 +111,7 @@ $.widget( "heurist.rec_list", {
         //-----------------------     listener of global events
         var sevents = top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT;
         if(this.options.isapplication){
-            sevents = sevents + ' ' + top.HAPI.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI.Event.ON_REC_SEARCHSTART;
+            sevents = sevents + ' ' + top.HAPI.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI.Event.ON_REC_SELECT;
         }
 
         $(this.document).on(sevents, function(e, data) {
@@ -254,7 +140,21 @@ $.widget( "heurist.rec_list", {
                 that._query_request = data;  //keep current query request 
                 that.option("recordset", null);
                 that.loadanimation(true);
-
+                
+            }else if(e.type == top.HAPI.Event.ON_REC_SELECT){
+                
+                   //update rec_actions
+                   if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                        if(data.length()>0){
+                            that.action_buttons.rec_actions('option','record_ids', data.getIds());
+                            //that.option("recdata", _recdata);
+                        }
+                        if(that.element.attr('id') != arguments[2]){ 
+                            //@todo - assign set of selected     
+                            //setSelected();
+                        }
+                   }
+                    
             }
             //that._refresh();
         });
@@ -267,6 +167,10 @@ $.widget( "heurist.rec_list", {
         }
         */
 
+        
+
+        
+        
         this._refresh();
 
     }, //end _create
@@ -589,7 +493,7 @@ $.widget( "heurist.rec_list", {
 
         if(selected.length()>0){
             if(this.options.isapplication){
-                $(this.document).trigger(top.HAPI.Event.ON_REC_SELECT, [ selected ]);
+                $(this.document).trigger(top.HAPI.Event.ON_REC_SELECT, [ selected, this.element.attr('id') ]);
             }
             this._trigger( "onselect", event, selected );
         }
@@ -610,6 +514,20 @@ $.widget( "heurist.rec_list", {
         return that.options.recordset.getSubSet(selected);
     },
 
+    setSelected: function(record_ids){
+/* to implent
+        var selected = [];
+        var that = this;
+        this.div_content.find('.selected').each(function(ids, rdiv){
+            var record = that.options.recordset.getById($(rdiv).attr('recid'));
+            selected.push(record);
+        });
+
+        return that.options.recordset.getSubSet(selected);
+*/        
+    },
+    
+    
     loadanimation: function(show){
         if(show){
             this.div_content.css('background','url('+top.HAPI.basePath+'assets/loading-animation-white.gif) no-repeat center center');

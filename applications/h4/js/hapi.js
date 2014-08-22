@@ -329,6 +329,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   tag_get
     *   tag_set
     *   tag_replace
+    *   tag_rating
     * 
     *   file_save
     *   file_delete
@@ -487,6 +488,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('record_tags', request, callback);
             }
 
+            // asign rating for given set of bookmarked records
+            // request  a: rating
+            //          ids - list of tag ids to be replaced and deleted
+            //          new_id - new tag id
+            ,tag_rating: function(request, callback){
+                if(request) request.a = 'rating';
+                _callserver('record_tags', request, callback);
+            }
+            
+            
 
             // add/save file
             // request  a: save

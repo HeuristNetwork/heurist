@@ -257,6 +257,7 @@ optgroup {
 
 .bookmarked {
     background-image: url(assets/star-red.png);
+    height:14px;
 }
 .unbookmarked {
     background-image: url(assets/star-white.png);

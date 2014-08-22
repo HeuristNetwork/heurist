@@ -1,6 +1,8 @@
 /**
 * View data for one record: loads data progressively in order shared, private, relationships, links
 * 
+* Requires apps/rec_actions.js (must be preloaded)
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
@@ -67,7 +69,7 @@ $.widget( "heurist.rec_viewer", {
         .html(top.HR('select record'))
         .appendTo( this.element ).hide();
 
-        //-----------------------
+        //----------------------- listener for global event
         $(this.document).on(top.HAPI.Event.ON_REC_SELECT,
             function(e, data) {
 

@@ -3966,7 +3966,7 @@ top.HEURIST.search = {
 	selectBookmarkMessage: function(operation) {
 		alert("Select at least one bookmark " + operation
 			+ (top.HEURIST.parameters["w"]=="all"
-				? "\n(operation can only be carried out on bookmarked records, shown by a yellow star )"
+				? "\n(operation can only be carried out on bookmarked records, shown by a red star )"
 				: ""));
 	},
 

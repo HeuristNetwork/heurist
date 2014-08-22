@@ -59,7 +59,7 @@
 
             } else if ($action=="search" && @$_REQUEST['UGrpID'] ) {
 
-                $res = tagGetByRecords($system, @$_REQUEST['info']!="short", @$_REQUEST['recIDs'], $_REQUEST['UGrpID']);
+                $res = tagGetByRecords($system, @$_REQUEST['info']!="short", @$_REQUEST['recIDs'], @$_REQUEST['UGrpID']);
                 if ( is_array($res) ) {
                     $res['recIDs'] = @$_REQUEST['recIDs'];
                 }
@@ -71,6 +71,10 @@
 
                 $res = tagReplace($system, $_REQUEST['ids'], $_REQUEST['new_id'], @$_REQUEST['UGrpID']);
 
+            } else if ($action=="rating" ) {
+                
+                $res = bookmarkRating($system, @$_REQUEST['recIDs'], @$_REQUEST['rating'], @$_REQUEST['UGrpID']);
+                
             } else if ($action=="set") {  // assign/remove tags to records
 
                 if(@$_REQUEST['assign']){

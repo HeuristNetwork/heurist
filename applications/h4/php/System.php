@@ -242,7 +242,7 @@
 
             switch ($contx) {
                 case 'group':
-                    if ($ug == 0 || $ug == $this->get_user_id()) return true;
+                    if ($ug == 0 || $ug == $this->get_user_id()) return true; //itself
                     if ($ug > 0){
                         return ( "admin" == @$this->current_User['ugr_Groups'][$ug] );
                     }

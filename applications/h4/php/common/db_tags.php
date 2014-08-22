@@ -128,7 +128,7 @@
             $system->addError(HEURIST_REQUEST_DENIED, 'No user or group defined');
             return false;
         }
-
+        
         $mysqli = $system->get_mysqli();
 
         $supinfo = $isfull?", tag_Text, tag_Description, tag_Modified ":"";
@@ -325,7 +325,7 @@
 
         }
     }
-
+    
     //
     function tagReplace_OLD_TODELETE($system, $tag_id_old, $tag_id_new, $ugrID=null){
         $ugrID = $system->is_admin2($ugrID);
@@ -422,7 +422,7 @@
 
                 //$stmt = $mysqli->query($query);
 
-                $rs = $mysqli->prepare($query);
+                $res = $mysqli->prepare($query);
 
                 if(!$res){
                     $system->addError(HEURIST_DB_ERROR,"Can not add bookmarks", $mysqli->error);
@@ -530,13 +530,13 @@
     function bookmarkRating($system, $record_ids, $rating, $ugrID=null)
     {
 
-        $ugrID = $system->is_admin2($ugrID);
+        $ugrID = $system->is_admin2($ugrID); //get current user
         if (!$ugrID) {
             $system->addError(HEURIST_REQUEST_DENIED);
             return false;
         }else{
 
-            if(!is_array($record_ids) || count($record_ids)<0 || !is_numeric($rating) ){
+            if( !is_array($record_ids) || count($record_ids)<0 || !is_numeric($rating) ){
                 $system->addError(HEURIST_INVALID_REQUEST);
                 return false;
             }
@@ -547,7 +547,7 @@
                 .$rating
                 .' where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not remove bookmarks", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Can not set rating", $mysqli->error );
                 return false;
             }
             $bookmarks_updated = $mysqli->affected_rows;
@@ -555,5 +555,4 @@
 
         }
     }
-
 ?>

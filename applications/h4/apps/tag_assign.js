@@ -1,4 +1,6 @@
 /**
+* NOT USED
+* 
 * Assign/remove tags to/from currently selected records. Requires utils.js
 * 
 * @package     Heurist academic knowledge management system

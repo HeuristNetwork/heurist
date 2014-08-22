@@ -1,5 +1,8 @@
 /**
-* Actions to be applied to current record selection. Requires apps/tag_manager.js
+* Actions to be applied to current record selection. 
+* 
+* Requires apps/tag_manager.js
+* Requires apps/tag_rating.js
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -24,7 +27,7 @@ $.widget( "heurist.rec_actions", {
     options: {
         actionbuttons: "add,tags,share,more", //list of visible buttons add, tag, share, more
 
-        record_ids: null //array of record ids the action will be applied for
+        record_ids: null //array of record ids the action will be applied for - owner of this widget MUST assign it (usually on ON_REC_SELECT event)
     },
 
     _allbuttons: ["add","tags","share","more"],
@@ -53,8 +56,9 @@ $.widget( "heurist.rec_actions", {
             secondary: "ui-icon-triangle-1-s"
             },text:false});
 
-        this.menu_tags = null;
+        this.menu_tags = null;   //reference to tag_manager popup
 
+        //open tag_manager popup on tag button click
         this._on( this.btn_tags, {
             click: function() {
                 $('.menu-or-popup').hide(); //hide other
@@ -101,10 +105,10 @@ $.widget( "heurist.rec_actions", {
             },text:true});
 
         this.menu_share = $('<ul>'+
-            '<li id="menu-share-access"><a href="#">Access</a></li>'+
-            '<li id="menu-share-notify"><a href="#">Notify</a></li>'+
-            '<li id="menu-share-embed"><a href="#">Embed / link</a></li>'+
-            '<li id="menu-share-export"><a href="#">Export</a></li>'+
+            '<li id="menu-share-access"><a href="#">'+top.HR('Access')+'</a></li>'+
+            '<li id="menu-share-notify"><a href="#">'+top.HR('Notify')+'</a></li>'+
+            '<li id="menu-share-embed"><a href="#">'+top.HR('Embed / link')+'</a></li>'+
+            '<li id="menu-share-export"><a href="#">'+top.HR('Export')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
@@ -136,17 +140,33 @@ $.widget( "heurist.rec_actions", {
 
 
         this.menu_more = $('<ul>'+
-            '<li id="menu-more-relate"><a href="#">Relate to</a></li>'+
-            '<li id="menu-more-rate"><a href="#">Rate</a></li>'+
-            '<li id="menu-more-merge"><a href="#">Merge</a></li>'+
-            '<li id="menu-more-delete"><a href="#">Delete</a></li>'+
+            '<li id="menu-more-relate"><a href="#">'+top.HR('Relate to')+'</a></li>'+
+            '<li id="menu-more-rate"><a href="#">'+top.HR('Rate')+'</a></li>'+
+            '<li id="menu-more-merge"><a href="#">'+top.HR('Merge')+'</a></li>'+
+            '<li id="menu-more-delete"><a href="#">'+top.HR('Delete')+'</a></li>'+
             '</ul>')
         .addClass('menu-or-popup')
         .css('position','absolute')
         .appendTo( this.document.find('body') )
         .menu({
             select: function( event, ui ) {
-                //ui.item.attr('id');
+                var action = ui.item.attr('id');
+                if(action == "menu-more-relate"){
+                    
+                }else if(action == "menu-more-rate"){
+                    
+                    if($.isFunction($('body').tag_rating)){ //already loaded
+                        showRatingTags();
+                    }else{
+                        $.getScript(top.HAPI.basePath+'apps/tag_rating.js', function(){ showRatingTags(); } );
+                    }
+
+                }else if(action == "menu-more-merge"){
+
+
+                }else if(action == "menu-more-delete"){
+                    
+                }
         }})
         .hide();
 

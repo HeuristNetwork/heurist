@@ -1,6 +1,8 @@
 /**
 * Manage user's tags, showing usage and allowing deletion and merging of tags
 * 
+* This widget is dynamically loaded and used in rec_actions and profile
+* 
 * TODO: "Requires utils.js" - does it?
 * 
 * @package     Heurist academic knowledge management system
@@ -725,6 +727,7 @@ $.widget( "heurist.tag_manager", {
 
 });
 
+// Show as dialog
 function showManageTags(){
 
     var manage_dlg = $('#heurist-tags-dialog');

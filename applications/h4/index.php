@@ -80,6 +80,7 @@
         <script type="text/javascript" src="apps/profile_edit.js"></script>
         <script type="text/javascript" src="apps/pagination.js"></script>
         -->
+        <script type="text/javascript" src="apps/rec_list.js"></script>
         <!-- DEBUG
         -->
 
