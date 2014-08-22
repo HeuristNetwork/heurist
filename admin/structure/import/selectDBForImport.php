@@ -133,7 +133,7 @@
                 if($data) {
 
                     // If data has been successfully received, write it to a javascript array, leave out own DB if found
-                    $res = mysql_query("select sys_dbRegisteredID from sysIdentification where `sys_ID`='1'");
+                    $res = mysql_query("select sys_dbRegisteredID from sysIdentification where 1");
                     if($res) {
                         $row = mysql_fetch_row($res);
                         $ownDBID = $row[0];

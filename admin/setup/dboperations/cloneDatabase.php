@@ -212,7 +212,7 @@
         }
 
         // RESET register db ID
-        $query1 = "update $newname.sysIdentification set sys_dbRegisteredID=0 where sys_ID=1";
+        $query1 = "update $newname.sysIdentification set sys_dbRegisteredID=0 where 1";
         $res1 = mysql_query($query1);
         if (mysql_error())  { //(mysql_num_rows($res1) == 0)
             print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().

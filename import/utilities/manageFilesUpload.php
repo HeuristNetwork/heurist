@@ -107,7 +107,7 @@
 
                 // Find out which folders are allowable - the default scratch space plus any
                 // specified for FieldHelper indexing in Advanced Properties
-                $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where sys_ID=1";
+                $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
                 $res1 = mysql_query($query1);
                 if (!$res1 || mysql_num_rows($res1) == 0) {
                     die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".

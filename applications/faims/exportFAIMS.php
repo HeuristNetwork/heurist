@@ -113,7 +113,7 @@ error_log(print_r($maprec_toexport, true));
         }
     }else{
         
-                $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
+                $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where 1");
                 if (!$res) { // Problem reading current registration ID
                     print "<div class='err_message'>Unable to read database identification record, this database might be incorrectly set up. \n" .
                     "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice.</div>";

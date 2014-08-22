@@ -89,7 +89,7 @@
 
                         if($src_min>$keep_minver){ //update database
                             mysql_connection_overwrite(DATABASE);
-                            mysql__update("sysIdentification", "sys_ID=1", array("sys_dbSubVersion"=>$src_min, "sys_dbSubSubVersion"=>"0"));
+                            mysql__update("sysIdentification", "1", array("sys_dbSubVersion"=>$src_min, "sys_dbSubSubVersion"=>"0"));
                             print "<br>";
                         }
 

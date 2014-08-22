@@ -766,7 +766,7 @@ which is one step too many and has been removed from design by Ian in approx 201
             //SAW  TODO: need to validate that the term is valid for given dtyID also need to accept concept ids
             /*  query for concept id  to local id lookup
             select trm_Label, concat(convert(if(trm_OriginatingDBID is null,
-            (SELECT sys_dbRegisteredID FROM sysIdentificationlimit 1),
+            (SELECT sys_dbRegisteredID FROM sysIdentification limit 1),
             trm_OriginatingDBID),
             char),
             "-",

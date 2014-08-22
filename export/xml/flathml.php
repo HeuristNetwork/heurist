@@ -122,7 +122,7 @@
 
     // Determine database registration ID
     $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
-        "from sysIdentification where `sys_ID`='1'");
+        "from sysIdentification where 1");
     if ($res) {
         $row = mysql_fetch_row($res); // Get system information for current database
         $dbID = $row[0];
