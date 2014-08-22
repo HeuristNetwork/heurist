@@ -43,13 +43,11 @@
     $args = array();
     $publicOnly = false;
 
-    $query = REQUEST_to_query("select rec_RecTypeID, count(*) ", $searchType, $args, null, $publicOnly);
+    // Building query
+    $query = REQUEST_to_query("select rec_RecTypeID, count(*) as count ", $searchType, $args, null, $publicOnly);
+    $query = substr($query, 0, strpos($query, "order by"));
+    $query .= " group by rec_RecTypeID order by count DESC";
 
-    $query = substr($query,0, strpos($query,"order by"));
-
-    $query .= " group by rec_RecTypeID";
-
-    // style="width:640px;height:480px;"
     $rtStructs = getAllRectypeStructures();
 ?>
 <html>
@@ -60,18 +58,20 @@
 
         <link rel="stylesheet" type="text/css" href="../common/css/global.css">
         <style>
-            /** Heurist */
+            /** Heurist table */
             #container {
                 width: 100%;
                 height: 100%;
+                overflow: scroll;
             }
             
-            table.tbcount {
+            table.tbcount {    
+                table-layout: auto;
+ 
                 border-width: 0 0 1px 1px;
                 border-spacing: 0;
                 border-collapse: collapse;
                 border-style: solid;
-                overflow: scroll;
             }
             
             td, th {
@@ -84,10 +84,7 @@
                 border-width: 1px 1px 0px 0px; 
                 border-style: solid;  
             }
-            
-            .svg-cell {
-                border-left: 1px dotted black;
-            }
+
             .row:hover {
                 background-color: #CCCCCC;
             } 
@@ -98,9 +95,13 @@
             }
 
             /** D3 */
+            .svg-cell {
+                border-left: 1px dotted black;
+            }
+            
             svg {
                 width: 100%;
-                height: 100%;   
+                height: 90%;   
             }
             
             /** Move records around */
@@ -109,20 +110,20 @@
             }
             
             /** Lines between records */
-            path.link {
+            .link {
               fill: none;
-              stroke: #666;
-              stroke-width: 1px;
+              stroke: #999;   
+              stroke-opacity: .6; 
               pointer-events: all;
             }
             
-            path.link:hover {
-                cursor: s-resize;
+            .link:hover {
+                cursor: help;
             }
 
             /** Circle around icon */
             circle.around {
-                fill: none;
+                fill: #fff;
                 stroke-width: 2px;
                 stroke: #000;               
             }
@@ -139,6 +140,14 @@
                  stroke: #fff;
                  stroke-width: 3px;
                  stroke-opacity: .8;
+            }
+            
+            /** Settings */
+            #settings {
+                width: 100%;
+                height: 10%;
+                border-top: 1px dotted black;
+                padding: 3px;
             }
         </style>
         
@@ -162,21 +171,22 @@
         <!-- Holds the record count table left (as small as possible), and the SVG visualisation on the right (as big as possible) -->
         <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
-                <td width="1" nowrap>
+                <td width="25%">
                     <!-- Record count table -->
                     <table class="tbcount" cellpadding="4" cellspacing="1">
                          <tr>
                             <th>ID</th>
                             <th>Icon</th>
-                            <th>Record type</th>
+                            <th style="max-width: 100px">Record type</th>
                             <th>Link</th>
                             <th>Count</th>
-                            <th>Show</th>
+                            <th>Show <input type='checkbox' id="show-all"></th>
                         </tr>
                         
                         <?php
                             // Put record types & counts in the table
                             $res = mysql_query($query);
+                            $count = 0;
                             while ($row = mysql_fetch_row($res)) {
                                 // ID
                                 $rt_ID = $row[0];
@@ -202,7 +212,12 @@
                                 echo "<td align='center'>" .$row[1]. "</td>";
                                 
                                 // Show
-                                echo "<td align='center'><input type='checkbox' name='" .$title. "' checked></td></tr>";
+                                if($count < 10) {
+                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "' checked></td></tr>";
+                                }else{
+                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td></tr>";
+                                }
+                                $count++;
                                 
                             }//end while
                         ?>
@@ -211,19 +226,30 @@
 
                 <!-- D3 visualisation -->
                 <td class="svg-cell">
-                    <svg>
+                    <svg>    
                         <defs>
-                            <marker id="endMarker" markerWidth="8" markerHeight="8" refx="10" refy="0"
-                                    viewBox="0 -5 10 10" orient="auto">
+                            <marker id="marker" markerWidth="8" markerHeight="8" refx="10" refy="0"
+                                    viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto">
                                 <path d="M0,-5L10,0L0,5"></path>
                             </marker> 
-      
-                            <marker id="startMarker" markerWidth="8" markerHeight="8" refx="0" refy="0"
-                                    viewBox="0 -5 10 10" orient="auto">
-                                <path d="M10,-5L0,0L10,5"></path>
-                            </marker> 
-                        </defs>
+                        </defs>    
                     </svg>
+                    
+                    <div id="settings">
+                        <b>Settings</b>
+                        
+                        <!-- Line type -->
+                        <div class="setting">
+                            <i>Line type:</i>
+                            <select id="linetype">
+                                <option value="straight">straight</option>
+                                <option value="curved">curved</option>
+                            </select>
+                        </div>
+                        
+                        
+
+                    </div>
                 </td>
             </tr>
         </table>

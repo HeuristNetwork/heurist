@@ -24,21 +24,6 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-/** Retrieving XML relationship data */
-var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
-console.log("Loading XML from: " + url);
-var data;
-d3.xml(url, "application/xml", function(error, xml) {
-    if(error) {
-        return alert("Unable to load data, error message: \"" + error.statusText +"\"");
-    }
-    
-    // Now visualize it.
-    console.log(xml);
-    data = xml;
-    visualizeData();
-});
-
 /** Attempts to grab the first value after searching for a tag*/
 function getValue(element, query) {
     var results = element.getElementsByTagName(query);
@@ -90,84 +75,66 @@ function isUnconstrained(record) {
         return true;
     }
     return false;
-}
+}    
 
-/** Called when the path has been hovered */
-function pathHovered(path) {
-    //alert("Path hovered!");
-    console.log(path);
-    var pointer = path.getAttribute("pointer");
-    console.log("Pointer: " + pointer);
-}
-
-/** Visualizes the data */ 
-function visualizeData() {
-    // Holds our nodes
+/** Converts the raw XML data to D3 usable nodes and links */
+function convertData() {
+    // Holds a list of unique nodes
+    // Has attributes 'id', 'name', 'count', 'image' and 'type'
     var nodes = {};
-    // Holds the node relations
+    
+    // Relationships between the nodes. 
+    // Has attributes 'source' and 'target'
     var links = [];
-    // Records to filter
+    
+    // A string array containing names of nodes to filter.
     var filter = getFilter();
     
     // Going through all Records with namespace 'rootrecord'
-    var roots = data.documentElement.getElementsByTagNameNS("rootrecord", "Record");
-    console.log(roots);
+    var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
     for(var i = 0; i < roots.length; i++) {
+        // Retrieve info about this record
         var root = roots[i];
-        console.log("ROOT");
-        console.log(root);
-        
-        // Get record info
         var rootInfo = getInfo(root);
-        console.log(rootInfo);
+        //console.log(rootInfo);
         
         // Check if we should filter this record
         var index = $.inArray(rootInfo.name, filter);
-        console.log("INDEX of " + rootInfo.name + ":" + index); 
         if(index == -1 && rootInfo.count > 0) {
-            // Get through all linked relation Records with namespace 'relationrecord'
+            // Going through all linked relation Records with namespace 'relationrecord'
             var relations = root.getElementsByTagNameNS("relationrecord", "Record");
-            console.log("RELATION");
-            console.log(relations);
             if(relations && relations.length > 0) {
                 for(var j = 0; j < relations.length; j++ ){
-                    var relation = relations[j];
-                    console.log(relation);
-                   
                     // Get record info 
+                    var relation = relations[j];
                     var relationInfo = getInfo(relation);
-                    console.log(relationInfo);
+                    //console.log(relationInfo);
          
                     // Unconstrained check
                     var constrained = isUnconstrained(relation);
-                    console.log(constrained);
+                    //console.log(constrained);
                     
                     // Check types
                     var types = relation.getElementsByTagName("rel_Name");
-                    console.log(types);
+                    //console.log(types);
                     if(types && types.length > 0) {
                         for(var k = 0; k < types.length; k++) {
                             var type = types[k].textContent;
-                            console.log(type);
+                            //console.log(type);
                         }
                     }
                     
                     // Going through all linked usage Records with namespace 'usagerecord'
                     var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
-                    console.log("USAGE"); 
-                    console.log(usages);
                     if(usages && usages.length > 0) {
                         for(var k = 0; k < usages.length; k++) {
-                            var usage = usages[k];
-                            console.log(usage);
-                            
                             // Get record info 
+                            var usage = usages[k];
                             var usageInfo = getInfo(usage);
-                            console.log(usageInfo);
+                            //console.log(usageInfo);
                             
                             // Check if we should filter this record
                             var index = $.inArray(usageInfo.name, filter);
-                            console.log("INDEX of " + usageInfo.name + ":" + index); 
                             if(index == -1 && usageInfo.count > 0) {
                                 // Construct a link; add root record info
                                 var link = {};
@@ -187,6 +154,7 @@ function visualizeData() {
                                 }
                                 
                                 // Add link to array
+                                link["pointer"] = relationInfo.name;
                                 links.push(link);
                             }
                         }
@@ -195,64 +163,112 @@ function visualizeData() {
              }
         } 
     }
-    console.log("NODES BEFORE");
-    console.log(nodes);
-    console.log("LINKS BEFORE");
-    console.log(links);
     
-    // svg details
+    // Construct a data object and return it.
+    var data = {"nodes": nodes, "links": links};
+    console.log("Data has been transformed to D3 format:");
+    console.log(data);
+    return data;
+}
+
+
+
+
+
+
+
+
+/** Visualizes the data */ 
+function visualizeData() {
+    // Variables
     var width = $("svg").width();     // Determine the SVG width
     var height = $("svg").height();   // Determine the SVG height
     $("svg").find("g").remove();      // Remove all old elements
     var svg = d3.select("svg");       // Select the SVG with D3                 
     var iconSize = 16;                // The icon size 
     var offset = 10;                  // Line offsets
+    var data = convertData();         // Convert XML to usable D3 data
     
-    // create force.
-    var force = d3.layout.force()
-                         .nodes(d3.values(nodes))
-                         .links(links)
-                         .size([width, height])
-                         .linkDistance(250)
-                         .charge(-700)
-                         .on("tick", tick)
-                         .start();
-                         
-    // add the links and the arrows
-    var path = svg.append("svg:g").selectAll("path")
-                                  .data(force.links())
-                                  .enter().append("svg:path")
-                                  .attr("class", "link")
-                                  .attr("marker-end", "url(#endMarker)") 
-                                  .attr("pointer", function(d, i) {
-                                        return d.pointer;
-                                  })
-                                  .attr("onmouseover", function(d, i) {
-                                        console.log("ON MOUSE OVER");
-                                        console.log(d);
-                                        return "pathHovered(this)";
-                                  });
+    // Settings
+    var linetype = localStorage.getItem("linetype");
 
-    // define the nodes
+    // Creating D3 force
+    var force = d3.layout.force()
+                         .nodes(d3.values(data.nodes))
+                         .links(data.links)
+                         .charge(-700) 
+                         .linkDistance(200) 
+                         .on("tick", function(d, i) {
+                             if(linetype == "curved") {
+                                 return curvedTick();
+                             }else{
+                                 return straightTick();
+                             }
+                         })
+                         .size([width, height])
+                         .start();
+
+    // Add the chosen lines
+    var lines;
+    if(linetype == "curved") {
+        // Add curved lines
+         lines = svg.append("svg:g").selectAll("path")
+                                    .data(force.links())
+                                    .enter().append("svg:path")
+                                    .attr("class", "link")
+                                    .attr("marker-mid", "url(#marker)") 
+                                    .style("stroke-width", function(d) { 
+                                      var width = Math.log(d.source.count);
+                                      if(width > 1) {
+                                          width = Math.sqrt(width);
+                                      }
+                                      return 0.5 + width;
+                                   })    
+                                    .attr("pointer", function(d, i) {
+                                        return d.pointer;
+                                    })
+                                    .attr("onmouseover", function(d, i) {
+                                        return "pathHovered(this)";
+                                    });
+    }else{
+        // Add straight lines
+        lines = svg.append("svg:g").selectAll("line.link")
+                                   .data(force.links())
+                                   .enter()
+                                   .append("svg:line")
+                                   .attr("class", "link")
+                                   .attr("pointer", function(d, i) {
+                                        return d.pointer;
+                                    })
+                                   .style("stroke-width", function(d) { 
+                                      var width = Math.log(d.source.count);
+                                      if(width > 1) {
+                                          width = Math.sqrt(width);
+                                      }
+                                      return 0.5 + width;
+                                   })
+                                   .attr("x1", function(d) { return d.source.x; })
+                                   .attr("y1", function(d) { return d.source.y; })
+                                   .attr("x2", function(d) { return d.target.x; })
+                                   .attr("y2", function(d) { return d.target.y; });
+    }
+                       
+    // Defining the nodes
     var node = svg.selectAll(".node")
                   .data(force.nodes())
                   .enter().append("g")
                   .attr("class", function(d, i) {
                       return "node " + d.type;
-                  })
+                  }) 
+                  .attr("transform", "translate(100, 100)") 
                   .call(force.drag);
 
-    // add the nodes
+    // Adding circles to the nodes
     node.append("circle")
         .attr("r", iconSize*0.75)
-        .attr("class", function(d, i) {
-            console.log("CLASS ATTRIBUTE");
-            console.log(d);
-            //return d.type;
-            return "around";
-        });
+        .attr("class", "around");
    
-    // add icons  
+    // Adding icons to the nodes 
     node.append("svg:image") 
         .attr("xlink:href", function(d) {
             return d.image;
@@ -262,110 +278,143 @@ function visualizeData() {
         .attr("height", iconSize)
         .attr("width", iconSize);
 
-    // add the header shadow text 
+    // Adding shadow text to the nodes 
     node.append("text")
         .attr("x", 0)
-        .attr("y", iconSize*-1)
+        .attr("y", -iconSize)
         .attr("class", "shadow")
         .text(function(d) { 
             return d.name; 
         })
         
-    // add the header main text 
+    // Adding normal text to the nodes 
     node.append("text")
         .attr("x", 0)
-        .attr("y", iconSize*-1)
+        .attr("y", -iconSize)
         .attr("class", "header")
         .text(function(d) { 
             return d.name; 
-        })
-
-    // add the curvy lines
-    function tick() {
-        path.attr("d", function(d) {
-            // Calculating curve
+        });
+        
+    
+     /** Tick handler for curved lines */
+    function curvedTick() {
+        // Calculate the segments
+        lines.attr("d", function(d) {
             var dx = d.target.x - d.source.x,
                 dy = d.target.y - d.source.y,
-                dr = Math.sqrt(dx * dx + dy * dy);
+                dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+                mx = d.source.x + dx,
+                my = d.source.y + dy;
                 
-            // Line locations   
-            var startX = d.source.x,
-                startY = d.source.y,
-                endX = d.target.x,
-                endY = d.target.y;
-            
-            // Calculcate line offets based on direction; 
-            // This is needed because to make sure the lines stay out of the circles
-            if(endX >= startX) { // EAST
-                if(endY >= startY) { // SOUTH
-                    // SOUTH EAST
-                    startX += offset;
-                    startY += offset/2;
-                    endX -= offset/2;
-                    endY -= offset;
-                }else{ // NORTH
-                    // NORTH EAST
-                    startX += offset;
-                    startY -= offset/2;
-                    endX -= offset/2;
-                    endY += offset; 
-                }
-            }else{ // EAST
-                if(endY >= startY) { // SOUTH
-                    // SOUTH WEST;
-                    startX -= offset;
-                    startY += offset/2;
-                    endX += offset/2;
-                    endY -= offset;
-                }else{ // NORTH
-                    // NORTH WEST
-                    startX -= offset;
-                    startY -= offset/2;
-                    endX += offset/2;
-                    endY += offset;
-                }
-            }
-                
-            return "M" + 
-                startX + "," + 
-                startY + "A" + 
-                dr + "," + dr + " 0 0,1 " + 
-                endX + "," + 
-                endY;
+            return [
+              "M",d.source.x,d.source.y,
+              "A",dr,dr,0,0,1,mx,my,
+              "A",dr,dr,0,0,1,d.target.x,d.target.y
+            ].join(" ");
         });
 
+        // Update node location
         node.attr("transform", function(d) { 
             return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
-
     
-       
+    /** Tick handler for straight lines */                           
+    function straightTick() {
+        lines.attr("x1", function(d) { return d.source.x; })
+             .attr("y1", function(d) { return d.source.y; })
+             .attr("x2", function(d) { return d.target.x; })
+             .attr("y2", function(d) { return d.target.y; });
+ 
+         node.attr("transform", function(d) { 
+            return "translate(" + d.x + "," + d.y + ")"; 
+        });
+    }
     
-    console.log("NODES AFTER");
-    console.log(nodes);
-    console.log("LINKS AFTER");
-    console.log(links);
-
 }
+
+
+/** Called when the path has been hovered */
+function pathHovered(path) {
+    //alert("Path hovered!");
+    console.log(path);
+    var pointer = path.getAttribute("pointer");
+    //console.log("Pointer: " + pointer);
+}
+
+
+
+
+
+
+
 
 /** Returns a String array containing names of records to filter */
 function getFilter() {
-    var names = [];
-    $("input[type='checkbox']").each(function() {
+    var names = [];   
+    $(".show-record").each(function() {
         var checked = $(this).is(':checked'); 
-        console.log("CHECKED: " + checked);
         if(!checked) {
             var name = $(this).attr("name");
             names.push(name);
         }
     });
-    console.log("FILTER NAMES");
-    console.log(names);
     return names;
 }
 
-/** Listen to checkbox changes */  
-$("input[type='checkbox']").change(function(e) {
+/** Listen to 'show-record' checkbox changes */  
+$(".show-record").change(function(e) {
     visualizeData();  
+});
+
+/** Listen to the 'show-all' checkbox */
+$("#show-all").change(function(e) {
+    var checked= $(this).is(':checked');
+    console.log("CHECKED: " + checked);
+    $(".show-record").prop("checked", checked);
+    visualizeData();
+});
+
+
+
+
+
+/** Returns the line type setting */
+function getLineType() {
+    return $("#linetype").val();
+}
+
+/** Listens to linetype selection changes */
+$("#linetype").change(function(e) {
+    localStorage.setItem("linetype", getLineType());
+    visualizeData();
+});
+
+
+
+
+/** Body is done with loading */
+var xml;
+$(document).ready(function() {
+    /** Updating settings in UI */
+    // Line type setting
+    var linetype = localStorage.getItem("linetype");
+    $("#linetype option[value='" +linetype+ "']").attr("selected", true);
+    
+    /** Retrieving XML relationship data */
+    var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
+        d3.xml(url, "application/xml", function(error, xmlData) {
+        // If there is an error, show it to the user
+        if(error) {
+            return alert("Unable to load data, error message: \"" + error.statusText +"\"");
+        }
+        
+        // Now visualize it.
+        console.log("XML succesfully loaded from server:");
+        console.log(xmlData);
+        xml = xmlData;
+        visualizeData();
+    });
+
 });
