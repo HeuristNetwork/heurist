@@ -88,7 +88,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         this._initTagMenu();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ that._initTagMenu(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/tag_manager.js', function(){ that._initTagMenu(); } );
                     }
 
                 }
@@ -158,7 +158,7 @@ $.widget( "heurist.rec_actions", {
                     if($.isFunction($('body').tag_rating)){ //already loaded
                         showRatingTags();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/tag_rating.js', function(){ showRatingTags(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/tag_rating.js', function(){ showRatingTags(); } );
                     }
 
                 }else if(action == "menu-more-merge"){
@@ -183,7 +183,7 @@ $.widget( "heurist.rec_actions", {
         });
 
         //-----------------------
-        var sevents = top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT;
+        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
 
         $(this.document).on(sevents, function(e, data) {
             that._refresh();
@@ -202,7 +202,7 @@ $.widget( "heurist.rec_actions", {
     /* private function */
     _refresh: function(){
 
-        if(top.HAPI.currentUser.ugr_ID>0){
+        if(top.HAPI4.currentUser.ugr_ID>0){
             $(this.element).find('.logged-in-only').css('visibility','visible');
         }else{
             $(this.element).find('.logged-in-only').css('visibility','hidden');
@@ -225,7 +225,7 @@ $.widget( "heurist.rec_actions", {
     // revert other modifications here
     _destroy: function() {
 
-        $(this.document).off(top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT);
+        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
 
         var that = this;
         $.each(this._allbuttons, function(index, value){

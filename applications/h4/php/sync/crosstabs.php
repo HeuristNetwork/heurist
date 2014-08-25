@@ -47,8 +47,8 @@
         <script type="text/javascript">
             <?php
                 //@ todo - load this stuff in hEditing
-                print "top.HEURIST.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
-                print "top.HEURIST.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
+                print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
+                print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
             var recordtype;
 
@@ -59,11 +59,11 @@
 
             $(document).ready(function() {
 
-                if(!top.HAPI){
-                    top.HAPI = new hAPI('<?=$_REQUEST['db']?>');
+                if(!top.HAPI4){
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');
                 }
 
-                top.HEURIST.util.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
+                top.HEURIST4.util.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
 
                 $('.showintervals')
                 .button({icons: {primary: "ui-icon-triangle-1-s"}, text: false })
@@ -81,9 +81,9 @@
 
                 var allowedlist = ["enum", "integer", "float", "date", "freetext"]; //"resource",
 
-                top.HEURIST.util.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
-                top.HEURIST.util.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
-                top.HEURIST.util.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
+                top.HEURIST4.util.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
+                top.HEURIST4.util.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
+                top.HEURIST4.util.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
 
                 clearIntervals('column');
                 clearIntervals('row');
@@ -156,16 +156,16 @@
                 $container.empty();
                 fields3[name] = {field:0, type:'', values:[], intervals:[]};
 
-                if (!(top.HEURIST.rectypes.typedefs[recordtype] &&
-                    top.HEURIST.rectypes.typedefs[recordtype].dtFields[detailid]))
+                if (!(top.HEURIST4.rectypes.typedefs[recordtype] &&
+                    top.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid]))
                 {
                     $container.hide();
                     return;
                 }
 
                 //get detail type
-                var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
-                var details = top.HEURIST.rectypes.typedefs[recordtype].dtFields[detailid];
+                var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                var details = top.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid];
                 var detailtype = details[fi['dty_Type']];
 
                 if(detailtype=="enum") //false &&
@@ -174,7 +174,7 @@
 
                     var allTerms = details[fi['rst_FilteredJsonTermIDTree']];
                     var headerTerms = details[fi['dty_TermIDTreeNonSelectableIDs']];
-                    var termlist = top.HEURIST.util.getPlainTermsList(detailtype, allTerms, headerTerms);
+                    var termlist = top.HEURIST4.util.getPlainTermsList(detailtype, allTerms, headerTerms);
 
                     fields3[name] = {field:detailid, type:detailtype, values:termlist, intervals:[]}
 
@@ -188,9 +188,9 @@
 
                     fields3[name] = {field:detailid, type:detailtype, values:[], intervals:[]}
 
-                    top.HAPI.RecordMgr.minmax({ rt:recordtype , dt:detailid },
+                    top.HAPI4.RecordMgr.minmax({ rt:recordtype , dt:detailid },
                         function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 var val0 = parseFloat(response.data.min);
                                 var valmax = parseFloat(response.data.max);

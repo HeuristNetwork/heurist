@@ -125,7 +125,7 @@
                     return;
                 }
 
-                var mol = parseInt(document.getElementById("report-output-limit").value
+                var mol = parseInt(document.getElementById("report-output-limit").value);
                 if(favsrch != new_val){
                     reload_nav = true;
                     favsrch = new_val;
@@ -187,7 +187,17 @@
                     }
 
                 }
-                window.close();
+                
+                closeThis();
+                
+            }
+            
+            function closeThis(){
+                if (typeof parent.closePopupFromH3 === 'undefined') {
+                    window.close();
+                }else{
+                    parent.closePopupFromH3();
+                }
             }
         </script>
 
@@ -326,7 +336,7 @@
 
         <div id="buttons" class="actionButtons">
             <input type="button" value="save" onClick="save();">
-            <input type="button" value="cancel" onClick="window.close();">
+            <input type="button" value="cancel" onClick="closeThis();">
         </div>
     </body>
 </html>

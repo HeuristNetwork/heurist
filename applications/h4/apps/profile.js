@@ -47,7 +47,7 @@ $.widget( "heurist.profile", {
 
         this._on( this.btn_help, {
             click: function() {
-                window.open(top.HAPI.sysinfo.help, '_blank');
+                window.open(top.HAPI4.sysinfo.help, '_blank');
                 return false;
             }
         });
@@ -76,7 +76,7 @@ $.widget( "heurist.profile", {
             '<li id="menu-options-import-faims"><a href="#">FAIMS</a></li>'+
             '</ul>'+
             '</li>'+
-            (top.HAPI.sys_registration_allowed?'<li id="menu-options-register" class="logged-out-only"><a href="#">'+top.HR('Register')+'</a></li>':'')+
+            (top.HAPI4.sys_registration_allowed?'<li id="menu-options-register" class="logged-out-only"><a href="#">'+top.HR('Register')+'</a></li>':'')+
             '<li id="menu-options-help"><a href="#">'+top.HR('Help')+'</a></li>'+
             '<li id="menu-options-bug" class="logged-in-only"><a href="#">'+top.HR('Report bug')+'</a></li>'+
             '<li id="menu-options-about"><a href="#">'+top.HR('About')+'</a></li>'+
@@ -92,7 +92,7 @@ $.widget( "heurist.profile", {
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/databases.php .db-list", function(){
+                    $dlg.load("php/databases.php .db-list", function(){  //load db-list only
                         $dlg.dialog({
                             autoOpen: true,
                             height: 420,
@@ -108,22 +108,22 @@ $.widget( "heurist.profile", {
                 }else if(action == "menu-options-about"){
                     $( "#heurist-about" ).dialog("open");
                 }else if(action == "menu-options-help"){
-                    window.open(top.HAPI.sysinfo.help, '_blank');                        
+                    window.open(top.HAPI4.sysinfo.help, '_blank');                        
                 }else if(action == "menu-options-db-design"){
-                    window.open(top.HAPI.basePathOld+'admin/adminMenu.php?db='+top.HAPI.database, '_blank');                        
+                    window.open(top.HAPI4.basePathOld+'admin/adminMenu.php?db='+top.HAPI4.database, '_blank');                        
                 }else if(action == "menu-options-db-summary"){
 
                     if($.isFunction($('body').rectype_manager)){ //already loaded
                         showManageRecordTypes();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/rectype_manager.js', function(){ showManageRecordTypes(); } );
                     }
 
                 }else if(action == "menu-options-import-faims"){
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/sync/faims.php?db="+top.HAPI.database+" .utility-content", function(){
+                    $dlg.load("php/sync/faims.php?db="+top.HAPI4.database+" .utility-content", function(){
                         $dlg.dialog({
                             autoOpen: true,
                             height: 480,
@@ -155,7 +155,7 @@ $.widget( "heurist.profile", {
         });
 
         //---------------------  LOGIN BUTTON
-        if(top.HAPI.sysinfo.registration_allowed==1){
+        if(top.HAPI4.sysinfo.registration_allowed==1){
             this.btn_register = $( "<button>", {
                 text: top.HR('Register')
             })
@@ -175,10 +175,10 @@ $.widget( "heurist.profile", {
             primary: "ui-icon-key"
         }});
 
-        if(!top.HAPI.is_ui_normal()){            
+        if(!top.HAPI4.is_ui_normal()){            
             //'color':'red','background-color':'white',
             this.login_welcome = $("<div>")
-            .html(top.HR((top.HAPI.sysinfo.registration_allowed==1)?"Please log in":"Please contact to register"))
+            .html(top.HR((top.HAPI4.sysinfo.registration_allowed==1)?"Please log in":"Please contact to register"))
             .css({'font-size':'1.2em', 'padding-right':'4px',
                 'float':'right','width':'50%','text-align':'right', 'margin-right':'4px'})
             .addClass('logged-out-only2 ui-state-error ui-corner-all').appendTo( this.element );
@@ -230,25 +230,25 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         showManageTags();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
                     }
                 }else if(action == "menu-user-faceted"){
                     if($.isFunction($('body').search_faceted_wiz)){ //already loaded
                         showSearchFacetedWizard();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
                     }
                 }else if(action == "menu-user-svs"){
                     if($.isFunction($('body').svs_manager)){ //already loaded
                         showManageSavedSearches();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/svs_manager.js', function(){ showManageSavedSearches(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/svs_manager.js', function(){ showManageSavedSearches(); } );
                     }
                 }else if(action == "menu-user-files"){
                     if($.isFunction($('body').file_manager)){ //already loaded
                         showManageFiles();
                     }else{
-                        $.getScript(top.HAPI.basePath+'apps/file_manager.js', function(){ showManageFiles(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/file_manager.js', function(){ showManageFiles(); } );
                     }
                 }
 
@@ -290,7 +290,7 @@ $.widget( "heurist.profile", {
         this.select_rectype.position({my: "right top", at: "right bottom", of: that.btn_record })
         .hide();
 
-        top.HEURIST.util.createRectypeSelect(this.select_rectype.get(0), null, false);
+        top.HEURIST4.util.createRectypeSelect(this.select_rectype.get(0), null, false);
 
 
 
@@ -301,7 +301,7 @@ $.widget( "heurist.profile", {
                 .position({my: "right top", at: "right bottom", of: that.btn_record });
                 $( document ).one( "click", function() { that.select_rectype.hide(); });
                 return false;
-                //window.open(top.HAPI.basePath + "php/recedit.php?db="+top.HAPI.database, "_blank");
+                //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database, "_blank");
             }
         });
         this._on( this.select_rectype, {
@@ -309,14 +309,14 @@ $.widget( "heurist.profile", {
 
                 var recordtype = event.target.value;
 
-                if(!top.HEURIST.editing){ //create new object
-                    top.HEURIST.editing = new hEditing();
+                if(!top.HEURIST4.editing){ //create new object
+                    top.HEURIST4.editing = new hEditing();
                 }
                 // add new record
-                top.HEURIST.editing.add(recordtype);
+                top.HEURIST4.editing.add(recordtype);
 
                 /* open in new window
-                window.open(top.HAPI.basePath + "php/recedit.php?db="+top.HAPI.database+"&rt="+recordtype, "_blank");
+                window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
                 */
             }
         });
@@ -359,7 +359,7 @@ $.widget( "heurist.profile", {
     */
     _refresh: function(){
 
-        if(top.HAPI.currentUser.ugr_ID>0){ 
+        if(top.HAPI4.currentUser.ugr_ID>0){ 
             if(this.blink_interval){ 
                 clearInterval(this.blink_interval);
                 this.blink_interval = null;
@@ -367,7 +367,7 @@ $.widget( "heurist.profile", {
             $(this.element).find('.logged-in-only').show(); //.css('visibility','visible');
             $(this.element).find('.logged-out-only').hide(); //.css('visibility','hidden');
             $(this.element).find('.logged-out-only2').hide(); //.css('visibility','hidden');
-            this.btn_user.button( "option", "label", top.HAPI.currentUser.ugr_FullName);
+            this.btn_user.button( "option", "label", top.HAPI4.currentUser.ugr_FullName);
             $('#menu-options li.logged-in-only').css('display','block');
             $('#menu-options li.logged-out-only').css('display','none');
         }else{
@@ -385,12 +385,12 @@ $.widget( "heurist.profile", {
 
     var that = this;
 
-    top.HAPI.SystemMgr.is_logged(
+    top.HAPI4.SystemMgr.is_logged(
     function(response){
-    if(response.status == top.HAPI.ResponseStatus.OK){
+    if(response.status == top.HAPI4.ResponseStatus.OK){
     alert(response.data);
     }else{
-    top.HEURIST.util.showMsgErr(response.message);
+    top.HEURIST4.util.showMsgErr(response.message);
     }
     }
     );
@@ -402,14 +402,14 @@ $.widget( "heurist.profile", {
 
         var that = this;
 
-        top.HAPI.SystemMgr.logout(
+        top.HAPI4.SystemMgr.logout(
             function(response){
-                if(response.status == top.HAPI.ResponseStatus.OK){
-                    top.HAPI.setCurrentUser(null);
-                    $(that.document).trigger(top.HAPI.Event.LOGOUT);
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    top.HAPI4.setCurrentUser(null);
+                    $(that.document).trigger(top.HAPI4.Event.LOGOUT);
                     that._refresh();
                 }else{
-                    top.HEURIST.util.showMsgErr(response);
+                    top.HEURIST4.util.showMsgErr(response);
                 }
             }
         );
@@ -441,14 +441,14 @@ $.widget( "heurist.profile", {
 
                     if(isreset){
                         var rusername = $dlg.find('#reset_username');
-                        if(top.HEURIST.util.checkLength( rusername, "username", message, 1, 0 ))
+                        if(top.HEURIST4.util.checkLength( rusername, "username", message, 1, 0 ))
                         {
-                            top.HAPI.SystemMgr.reset_password({username: rusername.val()}, function(response){
-                                if(response.status == top.HAPI.ResponseStatus.OK){
+                            top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
                                     $dlg.dialog( "close" );
-                                    top.HEURIST.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
+                                    top.HEURIST4.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
                                 }else{
-                                    top.HEURIST.util.showMsgErr(response);
+                                    top.HEURIST4.util.showMsgErr(response);
                                 }
                             });
                         }
@@ -458,20 +458,20 @@ $.widget( "heurist.profile", {
                         var password = $dlg.find('#password');
                         var session_type = $dlg.find('input[name="session_type"]');
 
-                        var bValid = top.HEURIST.util.checkLength( username, "username", message, 3, 16 )
-                        && top.HEURIST.util.checkLength( password, "password", message, 3, 16 );
+                        var bValid = top.HEURIST4.util.checkLength( username, "username", message, 3, 16 )
+                        && top.HEURIST4.util.checkLength( password, "password", message, 3, 16 );
 
                         if ( bValid ) {
 
                             //get hapi and perform login
-                            top.HAPI.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
+                            top.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
                                 function(response){
-                                    if(response.status == top.HAPI.ResponseStatus.OK){
+                                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                                        top.HAPI.setCurrentUser(response.data.currentUser);
-                                        top.HAPI.sysinfo = response.data.sysinfo;
+                                        top.HAPI4.setCurrentUser(response.data.currentUser);
+                                        top.HAPI4.sysinfo = response.data.sysinfo;
 
-                                        $(that.document).trigger(top.HAPI.Event.LOGIN, [top.HAPI.currentUser]);
+                                        $(that.document).trigger(top.HAPI4.Event.LOGIN, [top.HAPI4.currentUser]);
 
                                         $dlg.dialog( "close" );
                                         that._refresh();
@@ -548,15 +548,15 @@ $.widget( "heurist.profile", {
             if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
                 this.div_profile_edit = $('<div>').appendTo( this.element );
             }
-            this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI.currentUser.ugr_ID});
+            this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
 
         }else{
             var that = this;
-            $.getScript(top.HAPI.basePath+'apps/profile_edit.js', function() {
+            $.getScript(top.HAPI4.basePath+'apps/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     that.editProfile();
                 }else{
-                    top.HEURIST.util.showMsgErr('Widget profile edit not loaded!');
+                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
                 }        
             });          
         }
@@ -581,8 +581,8 @@ $.widget( "heurist.profile", {
 
             populateLanguages();
 
-            //assign values to form fields from top.HAPI.currentUser['ugr_Preferences']
-            var prefs = top.HAPI.currentUser['ugr_Preferences'];
+            //assign values to form fields from top.HAPI4.currentUser['ugr_Preferences']
+            var prefs = top.HAPI4.currentUser['ugr_Preferences'];
             var allFields = $dlg.find('input,select');
 
             var currentTheme = prefs['layout_theme'];
@@ -618,23 +618,23 @@ $.widget( "heurist.profile", {
 
 
                 //save preferences in session
-                top.HAPI.SystemMgr.save_prefs(request,
+                top.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
-                        if(response.status == top.HAPI.ResponseStatus.OK){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                            var prefs = top.HAPI.currentUser['ugr_Preferences'];
+                            var prefs = top.HAPI4.currentUser['ugr_Preferences'];
                             var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
                                 prefs['layout_theme'] != request['layout_theme']);
 
-                            top.HAPI.currentUser['ugr_Preferences'] = request;
+                            top.HAPI4.currentUser['ugr_Preferences'] = request;
                             /*allFields.each(function(){
-                            top.HAPI.currentUser['ugr_Preferences'][this.id] = $(this).val();
+                            top.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/
 
                             $dlg.dialog( "close" );
 
                             if(ask_reload){
-                                top.HEURIST.util.showMsgDlg('Reload page to apply new settings?',
+                                top.HEURIST4.util.showMsgDlg('Reload page to apply new settings?',
                                     function(){
                                         window.location.reload();
                                     }, 'Confirmation');

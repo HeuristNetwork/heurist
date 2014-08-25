@@ -134,12 +134,12 @@ $.widget( "heurist.tag_rating", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
+            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
             });
 

@@ -50,7 +50,7 @@ function MapViewer() {
         }
         var d = new Date().getTime()
 
-        var surl = top.HEURIST.basePath+"viewers/map/showMapUrl.php?width=300&height=300&db="+top.HEURIST.database.name+"&t="+d;
+        var surl = top.HEURIST4.basePath+"viewers/map/showMapUrl.php?width=300&height=300&db="+top.HEURIST4.database.name+"&t="+d;
 
         if(value){
             surl = surl + "&value="+encodeURIComponent(value);

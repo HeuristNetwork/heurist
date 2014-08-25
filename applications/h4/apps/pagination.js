@@ -68,7 +68,7 @@ $.widget( "heurist.pagination", {
             },text:false})
         .on("click", function(){ that._doSearch3(that.current_page+1); } );
 
-        this.limit = top.HAPI.get_prefs('search_limit');               
+        this.limit = top.HAPI4.get_prefs('search_limit');               
 
         this.btn_search_limit = $( "<button>", {
             text: this.limit,
@@ -92,13 +92,13 @@ $.widget( "heurist.pagination", {
                 var newlimit = Number(ui.item.attr('id').substring(13));
                 if(newlimit!=that.limit){
 
-                    top.HAPI.currentUser['ugr_Preferences']['search_limit'] = newlimit;
-                    if(top.HAPI.is_logged()){
+                    top.HAPI4.currentUser['ugr_Preferences']['search_limit'] = newlimit;
+                    if(top.HAPI4.is_logged()){
                         //save preference in session
-                        top.HAPI.SystemMgr.save_prefs({'search_limit': newlimit},
+                        top.HAPI4.SystemMgr.save_prefs({'search_limit': newlimit},
                             function(response){
-                                if(response.status != top.HAPI.ResponseStatus.OK){
-                                    top.HEURIST.util.showMsgErr(response.message);
+                                if(response.status != top.HAPI4.ResponseStatus.OK){
+                                    top.HEURIST4.util.showMsgErr(response.message);
                                 }
                             }
                         );
@@ -123,11 +123,11 @@ $.widget( "heurist.pagination", {
 
 
         //-----------------------     listener of global events
-        var sevents = top.HAPI.Event.LOGIN+' '+top.HAPI.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI.Event.ON_REC_SEARCHSTART;
+        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
 
         $(this.document).on(sevents, function(e, data) {
 
-            if(e.type == top.HAPI.Event.ON_REC_SEARCHRESULT){
+            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
 
                 if(data){
                     that.count_total = data.count_total();
@@ -135,7 +135,7 @@ $.widget( "heurist.pagination", {
                     that.count_total = 0;
                 }
                 that._refresh();
-            }else if(e.type == top.HAPI.Event.ON_REC_SEARCHSTART){
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 //hide all on start search   
                 that.count_total = 0; //hRecordSet
@@ -144,7 +144,7 @@ $.widget( "heurist.pagination", {
                     that.current_page = 0; //reset
                 }
 
-            }else if(e.type == top.HAPI.Event.ON_REC_SEARCHRESULT){
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
                 that._refresh();    
             }
 
@@ -157,7 +157,7 @@ $.widget( "heurist.pagination", {
     /* private function */
     _refresh: function(){
 
-        this.limit = top.HAPI.get_prefs('search_limit');
+        this.limit = top.HAPI4.get_prefs('search_limit');
         this.btn_search_limit.button( "option", "label", this.limit);
 
         if(this.count_total>0){
@@ -269,7 +269,7 @@ $.widget( "heurist.pagination", {
 
     _doSearch3: function(page){
 
-        if(top.HEURIST.util.isNumber(page)){
+        if(top.HEURIST4.util.isNumber(page)){
             this.current_page = page;
         }
         if(this.current_page>this.max_page-1){
@@ -291,7 +291,7 @@ $.widget( "heurist.pagination", {
             this.query_request.o = this.current_page * limit;
             this.query_request.orig = "paginator";
 
-            top.HAPI.RecordMgr.search(this.query_request, $(this.document));
+            top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
 
         }
 

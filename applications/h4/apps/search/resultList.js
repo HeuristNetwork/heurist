@@ -2,6 +2,7 @@
 * Query result listing. 
 * 
 * Requires apps/rec_actions.js (must be preloaded)
+* Requires apps/search/resultListMenu.js (must be preloaded)
 * 
 * @todo - remove action buttons and use rec_action widget
 * 
@@ -23,7 +24,7 @@
 */
 
 
-$.widget( "heurist.rec_list", {
+$.widget( "heurist.resultList", {
 
     // default options
     options: {
@@ -33,12 +34,10 @@ $.widget( "heurist.rec_list", {
         showcounter: true,
 
         recordset: null,
-        actionbuttons: "tags,share,more,sort,view", //list of visible buttons add, tag, share, more, sort, view
         // callbacks
         onselect: null
     },
 
-    _allbuttons: ["add","tags","share","more","sort","view"],
     _query_request: null, //keep curtent query result
 
     // the constructor
@@ -46,7 +45,10 @@ $.widget( "heurist.rec_list", {
 
         var that = this;
         
-        //this.uniqueId();
+        this.div_actions = $('<div>')
+            .css('width','100%')
+            .resultListMenu()
+            .appendTo(this.element);
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
         this.div_content = $( "<div>" )
@@ -54,11 +56,12 @@ $.widget( "heurist.rec_list", {
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
-        
+        /*
         this.action_buttons = $('<div>')
         .css('display','inline-block')
         .rec_actions({actionbuttons: this.options.actionbuttons})
         .appendTo(this.div_toolbar);
+        */
 
         //-----------------------
         this.span_info = $("<label>").appendTo(
@@ -144,6 +147,7 @@ $.widget( "heurist.rec_list", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
                    //update rec_actions
+                   /* @todo
                    if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
                         if(data.length()>0){
                             that.action_buttons.rec_actions('option','record_ids', data.getIds());
@@ -154,7 +158,7 @@ $.widget( "heurist.rec_list", {
                             //setSelected();
                         }
                    }
-                    
+                   */
             }
             //that._refresh();
         });
@@ -202,6 +206,7 @@ $.widget( "heurist.rec_list", {
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 
+        /*
         var abtns = (this.options.actionbuttons?this.options.actionbuttons:"tags,share,more,sort,view").split(',');
         var that = this;
         $.each(this._allbuttons, function(index, value){
@@ -211,6 +216,7 @@ $.widget( "heurist.rec_list", {
                 btn.css('display',($.inArray(value, abtns)<0?'none':'inline-block'));
             }
         });
+        */
 
 
         // show current records range and total count
@@ -237,12 +243,13 @@ $.widget( "heurist.rec_list", {
         $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT);
 
         var that = this;
-        $.each(this._allbuttons, function(index, value){
+        /*$.each(this._allbuttons, function(index, value){
             var btn = that['btn_'+value];
             if(btn) btn.remove();
-        });
+        });*/
 
         // remove generated elements
+        this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
 

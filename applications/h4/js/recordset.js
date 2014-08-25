@@ -259,7 +259,7 @@ function hRecordSet(initdata) {
                         recid: recID,
                         rectype: recTypeID,
                         //thumb: record.thumb_url,
-                        icon: top.HAPI.iconBaseURL + recTypeID + '.png',
+                        icon: top.HAPI4.iconBaseURL + recTypeID + '.png',
                         start: (startDate || ''),
                         end: (endDate && endDate!=startDate)?endDate:''
                         //,infoHTML: (infoHTML || ''),

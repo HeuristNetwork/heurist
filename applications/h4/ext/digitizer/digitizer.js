@@ -6,8 +6,8 @@
 
 function gob(e){if(typeof(e)=='object')return(e);if(document.getElementById)return(document.getElementById(e));return(eval(e))}
 
-if(top.HAPI){
-  top.HAPI.importSymbols(top, this);
+if(top.HAPI4){
+  top.HAPI4.importSymbols(top, this);
 }
 
 RelBrowser = {
@@ -267,7 +267,7 @@ function activateMarker() {
 }
 function initmap(map_div_id, geovalue){
 
-  var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
+  var defaultViewString = top.HEURIST4.util.getDisplayPreference("gigitiser-view");
   var viewBits;
   if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+):(\S+):(.*)?/))) {  //[mkh] (.*)
     if(viewBits[5]){
@@ -2340,7 +2340,7 @@ function closeWithValue() {
     }
   }
 
-  if(top.HAPI){
+  if(top.HAPI4){
     window.close(type, value);
   }else{
     alert(type+" "+value);
@@ -2352,10 +2352,10 @@ function closeWithValue() {
  */
 function _load_layers(mode) {
 
-  var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
+  var baseurl = top.HEURIST4.basePath + "viewers/map/showMap.php";
   var callback = _updateLayersList;
-  var params =  "ver=1&layers="+mode+"&db="+top.HEURIST.database.name;
-  top.HEURIST.util.getJsonData(baseurl, callback, params);
+  var params =  "ver=1&layers="+mode+"&db="+top.HEURIST4.database.name;
+  top.HEURIST4.util.getJsonData(baseurl, callback, params);
 }
 
 /**
@@ -2363,7 +2363,7 @@ function _load_layers(mode) {
  */
 function _updateLayersList(context){
 
-  if(!top.HEURIST.util.isnull(context)) {
+  if(!top.HEURIST4.util.isnull(context)) {
 
 
     var ind,
@@ -2375,13 +2375,13 @@ function _updateLayersList(context){
 
 
     for (ind in context.geoObjects) {
-      if(!top.HEURIST.util.isnull(ind))
+      if(!top.HEURIST4.util.isnull(ind))
         {
         geoobj = context.geoObjects[ind];
         if(geoobj.type === "kmlfile"){
 
-          var url = top.HEURIST.baseURL;
-          url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
+          var url = top.HEURIST4.baseURL;
+          url += "records/files/downloadFile.php?db=" + top.HEURIST4.database.name + "&ulf_ID="+geoobj.fileid;
           geoobj.url = url;
 
           systemAllLayers.push(geoobj);
@@ -2391,22 +2391,22 @@ function _updateLayersList(context){
 
 
     for (ind in systemAllLayers) {
-      if(!top.HEURIST.util.isnull(ind))
+      if(!top.HEURIST4.util.isnull(ind))
         {
-        if(top.HEURIST.util.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
+        if(top.HEURIST4.util.isnull(systemAllLayers[ind].isbackground) || systemAllLayers[ind].isbackground)
           {
 
           var sTitle = systemAllLayers[ind].title;
-          if(top.HEURIST.util.isempty(sTitle)){
+          if(top.HEURIST4.util.isempty(sTitle)){
             sTitle = context.records[systemAllLayers[ind].rec_ID].title;
           }
-          if(top.HEURIST.util.isempty(sTitle)){
+          if(top.HEURIST4.util.isempty(sTitle)){
             sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
           }
 
           s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
 
-          if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
+          if( (!top.HEURIST4.util.isnull(currentBackgroundLayer)) &&
             systemAllLayers[ind].rec_ID === currentBackgroundLayer){
             selIndex = ind;
           }
@@ -2452,7 +2452,7 @@ function keepExtent() {
   var currentMap = map.getMapTypeId(); //getCurrentMapType().getUrlArg();
   var viewString = currentLatLng.lat() + "," + currentLatLng.lng() + "@" + currentZoom + ":" + currentMap+":"+currentBackgroundLayer;
 
-  top.HEURIST.util.setDisplayPreference("gigitiser-view", viewString);
+  top.HEURIST4.util.setDisplayPreference("gigitiser-view", viewString);
 
   var button = document.getElementById("btnSaveExtent");
   button.value = "View saved";

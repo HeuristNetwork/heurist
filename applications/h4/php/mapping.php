@@ -94,20 +94,20 @@
 
                 var mapdata = [];
 
-                if(!top.HAPI){
-                    top.HAPI = new hAPI('<?=$_REQUEST['db']?>');//, <?=json_encode($system->getCurrentUser())?> );
+                if(!top.HAPI4){
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');//, <?=json_encode($system->getCurrentUser())?> );
                 }
 
-                mapping = new hMapping("map", "timeline", top.HAPI.basePath);
+                mapping = new hMapping("map", "timeline", top.HAPI4.basePath);
 
                 var q = '<?=@$_REQUEST['q']?>';
 
                 //t:26 f:85:3313  f:1:building
                 if( q )
                 {
-                    top.HAPI.RecordMgr.search({q: q, w: "all", f:"map", l:200},
+                    top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:200},
                         function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 var recset = new hRecordSet(response.data);
                                 mapping.load(recset.toTimemap());

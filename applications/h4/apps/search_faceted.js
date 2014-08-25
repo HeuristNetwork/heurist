@@ -129,7 +129,7 @@ $.widget( "heurist.search_faceted", {
 
         var facets = this.options.params.facets;
 
-        if(top.HEURIST.util.isArrayNotEmpty(facets)){
+        if(top.HEURIST4.util.isArrayNotEmpty(facets)){
             var facet_index, len = facets.length;
 
             for (facet_index=0;facet_index<len;facet_index++){
@@ -160,7 +160,7 @@ $.widget( "heurist.search_faceted", {
             var currentvalue = facets[facet_index][0].currentvalue;
             var type = facets[facet_index][0].type;
 
-            if(!top.HEURIST.util.isnull(currentvalue)){
+            if(!top.HEURIST4.util.isnull(currentvalue)){
 
                 var cv = currentvalue.query;
 
@@ -184,7 +184,7 @@ $.widget( "heurist.search_faceted", {
         }
 
         if(this.options.params.rectypes.length==1 || 
-            (this.options.params.rectype_as_facets && top.HEURIST.util.isnull(facets[0][0].currentvalue))) {
+            (this.options.params.rectype_as_facets && top.HEURIST4.util.isnull(facets[0][0].currentvalue))) {
             //if(full_query=='' && len>0){
             full_query = "t:"+this.options.params.rectypes.join(",")+' '+full_query; //facets[0][facets[0].length-1].query.split(' ')[0];
         }
@@ -200,9 +200,9 @@ $.widget( "heurist.search_faceted", {
 
         var facets = this.options.params.facets;
 
-        if(top.HEURIST.util.isArrayNotEmpty(facets)){
+        if(top.HEURIST4.util.isArrayNotEmpty(facets)){
 
-            var detailtypes = top.HEURIST.detailtypes.typedefs;
+            var detailtypes = top.HEURIST4.detailtypes.typedefs;
             var facet_index, i, len2 = facets.length;
             var current_query = this.getQuery();
             var facet_requests = [];
@@ -251,7 +251,7 @@ $.widget( "heurist.search_faceted", {
                 var $facet_values = $("<div>", {"id":"fv-"+facet_index})
                 .addClass('ui-widget-content ui-corner-bottom')
                 .css({"padding":"0.5em 0.5em 0.5em 0.7em","min-height":"20px"})
-                .css('background','url('+top.HAPI.basePath+'assets/loading-animation-white20.gif) no-repeat center center')
+                .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white20.gif) no-repeat center center')
                 .appendTo($facetdiv);
                 $facet_header.html( title );
 
@@ -260,7 +260,7 @@ $.widget( "heurist.search_faceted", {
                     //find first level of terms
 
 
-                    //top.HEURIST.detailtypes
+                    //top.HEURIST4.detailtypes
                     var dtID = fieldid.substring(2);
 
                     if(Number(dtID)>0 && detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']]=='enum'){
@@ -268,9 +268,9 @@ $.widget( "heurist.search_faceted", {
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                        var term = top.HEURIST.util.getChildrenTerms(type, allTerms, disabledTerms, currentvalue?currentvalue.termid:null );
+                        var term = top.HEURIST4.util.getChildrenTerms(type, allTerms, disabledTerms, currentvalue?currentvalue.termid:null );
 
-                        if(!top.HEURIST.util.isnull(term.id)){ //not first level
+                        if(!top.HEURIST4.util.isnull(term.id)){ //not first level
 
                             var that = this;
                             function __renderParent(cterm, $before){
@@ -296,7 +296,7 @@ $.widget( "heurist.search_faceted", {
                         }
 
 
-                        /*if(!top.HEURIST.util.isnull(term.id)){ //not first level
+                        /*if(!top.HEURIST4.util.isnull(term.id)){ //not first level
                         var termssearch = term.termssearch;
                         title = title + " <br>search:"+term.termssearch.join(",");
                         }*/
@@ -325,7 +325,7 @@ $.widget( "heurist.search_faceted", {
 
                     //$facet_values.html(type);
                     /*
-                    if(top.HEURIST.util.isnull(currentvalue)){
+                    if(top.HEURIST4.util.isnull(currentvalue)){
 
                     var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index};
                     var len = facets[facet_index].length;
@@ -347,7 +347,7 @@ $.widget( "heurist.search_faceted", {
                     var steps = 0;
                     var k, len = facets[facet_index][0].history.length;    
 
-                    if(!top.HEURIST.util.isnull(currentvalue)){
+                    if(!top.HEURIST4.util.isnull(currentvalue)){
                         $facet_values.css('background','none');
 
                         /*  WORKING!!!
@@ -395,7 +395,7 @@ $.widget( "heurist.search_faceted", {
                         //$("<span>",{'title':currentvalue.query }).css({'display':'inline-block'}).append(currentvalue.text).appendTo($facet_values);
                     }
 
-                    if( (type=="rectype" && len==0) || len<3 ){ // top.HEURIST.util.isnull(currentvalue)){
+                    if( (type=="rectype" && len==0) || len<3 ){ // top.HEURIST4.util.isnull(currentvalue)){
                         var prms = { q:current_query, w:this.options.params.domain, type:type, facet_index:facet_index, step:len-1};
                         var len = facets[facet_index].length;
                         prms.level0 = facets[facet_index][len-1].fieldid; //top level fieldid  f:XXX
@@ -428,7 +428,7 @@ $.widget( "heurist.search_faceted", {
     // workaround: jQuery ajax does not properly in the loop - success callback does not work often   
     //
     ,_getFacets: function(requests){
-        if(top.HEURIST.util.isArrayNotEmpty(requests)) {
+        if(top.HEURIST4.util.isArrayNotEmpty(requests)) {
 
             var request = requests.shift();  
 
@@ -438,7 +438,7 @@ $.widget( "heurist.search_faceted", {
 
             function __onResponse(response){
 
-                if(response.status == top.HAPI.ResponseStatus.OK){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     that.cached_counts.push(response);
 
@@ -483,7 +483,7 @@ $.widget( "heurist.search_faceted", {
                             if(facet_index>=0){
                                 var rtID = cterm[0];
                                 var f_link = that._createFacetLink(facet_index, 
-                                    {text:top.HEURIST.rectypes.names[rtID], query:rtID, count:cterm[1]});
+                                    {text:top.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
                                 $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
                             }
                         }
@@ -521,7 +521,7 @@ $.widget( "heurist.search_faceted", {
                     that._getFacets(requests);
 
                 }else{
-                    top.HEURIST.util.showMsgErr(response.message);
+                    top.HEURIST4.util.showMsgErr(response.message);
                 }
             };            
 
@@ -557,7 +557,7 @@ $.widget( "heurist.search_faceted", {
                 var value = link.attr('facet_value');
                 var label = link.attr('facet_label');                  
                 var termid = link.attr('termid');                  
-                if(top.HEURIST.util.isempty(value)){
+                if(top.HEURIST4.util.isempty(value)){
                     this.options.params.facets[facet_index][0].currentvalue = null;
                 } else {
                     this.options.params.facets[facet_index][0].currentvalue = {termid:termid, text:label, query:value}; 
@@ -594,7 +594,7 @@ $.widget( "heurist.search_faceted", {
                 var value = link.attr('facet_value');                  
                 var label = link.attr('facet_label');                  
                 var step = link.attr('step');
-                if(top.HEURIST.util.isempty(value)){
+                if(top.HEURIST4.util.isempty(value)){
                     this.options.params.facets[facet_index][0].currentvalue = null;
                     this.options.params.facets[facet_index][0].history = [];
                 }else{
@@ -631,7 +631,7 @@ $.widget( "heurist.search_faceted", {
             //this.options.searchdetails
             var request = {q: qsearch, w: domain, f: "map", orig:'saved', qname:qname};
             //get hapi and perform search
-            top.HAPI.RecordMgr.search(request, $(this.document));
+            top.HAPI4.RecordMgr.search(request, $(this.document));
 
         }
 

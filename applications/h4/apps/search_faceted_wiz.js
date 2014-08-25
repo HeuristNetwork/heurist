@@ -81,7 +81,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }},
                 {text:top.HR('Close'), click: function() {
                     var that_dlg = this;
-                    top.HEURIST.util.showMsgDlg(top.HR("Cancel? Please confirm"),
+                    top.HEURIST4.util.showMsgDlg(top.HR("Cancel? Please confirm"),
                         function(){ $( that_dlg ).dialog( "close" ); });
                 }}
             ]
@@ -232,8 +232,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     rectypeIds = [this.step0.find("#opt_rectypes").val()];
                 }
                 //mandatory
-                if(!top.HEURIST.util.isArrayNotEmpty(rectypeIds)){
-                    top.HEURIST.util.showMsgDlg(top.HR("Select record type"));
+                if(!top.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
+                    top.HEURIST4.util.showMsgDlg(top.HR("Select record type"));
 
                     this.step = (this.options.params.isadvanced)?1:0;
                     return;
@@ -313,7 +313,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST.util.createRectypeSelect( opt_rectypes, null, null);
+                top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
 
                 this._on( opt_mode, {
                     click: function(e){
@@ -335,13 +335,13 @@ $.widget( "heurist.search_faceted_wiz", {
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
-                var svs = top.HAPI.currentUser.usr_SavedSearch[svsID];
+                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 this.options.params = $.parseJSON(svs[1]);
                 this.options.domain = this.options.params.domain;
 
-                svs_ugrid.val(svs[2]==top.HAPI.currentUser.ugr_ID ?this.options.domain:svs[2]);
+                svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
                 svs_ugrid.parent().hide();
 
                 var ft = this.options.params.fieldtypes;
@@ -361,10 +361,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 //fill with list of user groups in case non bookmark search
                 var selObj = svs_ugrid.get(0); //select element
-                top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
+                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
                     function(){
-                        svs_ugrid.val(top.HAPI.currentUser.ugr_ID);
+                        svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
                 });
                 svs_ugrid.val(this.options.domain);
                 svs_ugrid.parent().show();
@@ -382,7 +382,7 @@ $.widget( "heurist.search_faceted_wiz", {
     // 2d step - init fieldtreeview
     , _initStep2_FieldTreeView: function(rectypeIds){
 
-        if(top.HEURIST.util.isArrayNotEmpty(rectypeIds)){
+        if(top.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
             /*if(!this.options.params.rectypes || 
             !($(rectypeIds).not(this.options.params.rectypes).length == 0 && 
             $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
@@ -392,7 +392,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 var treediv = $(this.step2).find('#field_treeview');
 
                 window.HAPI.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         //@todo - mark selected
                         if(!treediv.is(':empty')){
@@ -449,7 +449,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         //},1000);
 
                     }else{
-                        top.HEURIST.util.redirectToError(response.message);
+                        top.HEURIST4.util.redirectToError(response.message);
                     }
                 });
 
@@ -471,7 +471,7 @@ $.widget( "heurist.search_faceted_wiz", {
             facets.push([{ title:top.HR('Record types'), type:"rectype", query:"t" }]);
             /*for (k=0;k<len;k++){
             var rtID = this.options.params.rectypes[k];
-            facets.push([{ title:top.HEURIST.rectypes.names[rtID], type:"rectype", query:"t:"+rtID, fieldid:rtID }]);
+            facets.push([{ title:top.HEURIST4.rectypes.names[rtID], type:"rectype", query:"t:"+rtID, fieldid:rtID }]);
             }*/
         }
 
@@ -555,7 +555,7 @@ $.widget( "heurist.search_faceted_wiz", {
             for (k=0;k<len;k++){
                 var node =  fieldIds[k];      //FancytreeNode
                 //name, type, query,  ranges
-                if(!top.HEURIST.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
+                if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
                     var facet = __get_queries(node);
                     facets.push( facet ); // { id:node.key, title:node.title, query: squery, fieldid } );
                 }
@@ -630,13 +630,13 @@ $.widget( "heurist.search_faceted_wiz", {
         var allFields = $dlg.find('input');
         allFields.removeClass( "ui-state-error" );
 
-        var bValid = top.HEURIST.util.checkLength( svs_name, "Name", message, 3, 25 );
+        var bValid = top.HEURIST4.util.checkLength( svs_name, "Name", message, 3, 25 );
         if(!bValid){
             this._showStep(0);
             return false;
         }
 
-        var bValid = top.HEURIST.util.isArrayNotEmpty(this.options.params.facets);
+        var bValid = top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets);
         if(!bValid){
             this._showStep(2);
             return false;
@@ -647,7 +647,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.domain = 'all';    
         }else{
             this.options.params.domain = svs_ugrid;    
-            svs_ugrid = top.HAPI.currentUser.ugr_ID;
+            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
         }
 
         var request = {svs_Name: svs_name.val(),
@@ -663,17 +663,17 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
         //
-        top.HAPI.SystemMgr.ssearch_save(request,
+        top.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
-                if(response.status == top.HAPI.ResponseStatus.OK){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     var svsID = response.data;
 
-                    if(!top.HAPI.currentUser.usr_SavedSearch){
-                        top.HAPI.currentUser.usr_SavedSearch = {};
+                    if(!top.HAPI4.currentUser.usr_SavedSearch){
+                        top.HAPI4.currentUser.usr_SavedSearch = {};
                     }
 
-                    top.HAPI.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+                    top.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
 
                     request.new_svs_ID = svsID;
 
@@ -682,7 +682,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     that.element.dialog("close");
 
                 }else{
-                    top.HEURIST.util.redirectToError(response.message);
+                    top.HEURIST4.util.redirectToError(response.message);
                 }
             }
 
@@ -696,10 +696,10 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){
-        $.getScript(top.HAPI.basePath+'apps/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(top.HAPI4.basePath+'apps/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(top.HAPI.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
 
     }else{
 

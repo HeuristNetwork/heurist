@@ -52,10 +52,10 @@ $.widget( "heurist.rec_viewer", {
 
         this._on( this.btn_edit, {
             click: function() {
-                if(!top.HEURIST.editing){
-                    top.HEURIST.editing = new hEditing();
+                if(!top.HEURIST4.editing){
+                    top.HEURIST4.editing = new hEditing();
                 }
-                top.HEURIST.editing.edit(this.options.recdata);
+                top.HEURIST4.editing.edit(this.options.recdata);
             }
         });
 
@@ -70,7 +70,7 @@ $.widget( "heurist.rec_viewer", {
         .appendTo( this.element ).hide();
 
         //----------------------- listener for global event
-        $(this.document).on(top.HAPI.Event.ON_REC_SELECT,
+        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT,
             function(e, data) {
 
                 var _recID;
@@ -144,14 +144,14 @@ $.widget( "heurist.rec_viewer", {
                     // call for tags - on response - draw tags
                     that.options.user_Tags = {}; //reset
                     //load all tags for current user and this groups with usagecount for current record
-                    top.HAPI.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
+                    top.HAPI4.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                         function(response) {
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 if(that.options.recID == response.data['recIDs']){ //not outdated
 
                                     for(uGrpID in response.data) {
-                                        if(uGrpID && top.HEURIST.util.isNumber(uGrpID)){
+                                        if(uGrpID && top.HEURIST4.util.isNumber(uGrpID)){
                                             that.options.user_Tags[uGrpID] = response.data[uGrpID];  
                                         }
                                     }
@@ -159,7 +159,7 @@ $.widget( "heurist.rec_viewer", {
                                 }
 
                             }else{
-                                top.HEURIST.util.showMsgErr(response);
+                                top.HEURIST4.util.showMsgErr(response);
                             }
                     });
 
@@ -167,9 +167,9 @@ $.widget( "heurist.rec_viewer", {
                     // call for files - on response - draw thumbnails and apply yox viewer
                     that.options.rec_Files = {}; //reset
 
-                    top.HAPI.RecordMgr.file_get({recIDs:this.recIDloaded},
+                    top.HAPI4.RecordMgr.file_get({recIDs:this.recIDloaded},
                     function(response) {
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     if(that.options.recID == response.data['recIDs']){ //not outdated
 
@@ -184,7 +184,7 @@ $.widget( "heurist.rec_viewer", {
                     }
 
                     }else{
-                    top.HEURIST.util.showMsgErr(response);
+                    top.HEURIST4.util.showMsgErr(response);
                     }
                     });
                     */
@@ -195,10 +195,10 @@ $.widget( "heurist.rec_viewer", {
                     if($.isFunction($('body').editing_input)){
                     this._renderHeader();
                     }else{
-                    $.getScript(top.HAPI.basePath+'js/editing_input.js', function(){ 
-                    $.getScript(top.HAPI.basePath+'apps/rec_search.js',
+                    $.getScript(top.HAPI4.basePath+'js/editing_input.js', function(){ 
+                    $.getScript(top.HAPI4.basePath+'apps/rec_search.js',
                     function(){ 
-                    $.getScript(top.HAPI.basePath+'apps/rec_relation.js',
+                    $.getScript(top.HAPI4.basePath+'apps/rec_relation.js',
                     function(){ 
                     that._renderHeader(); 
                     });
@@ -217,7 +217,7 @@ $.widget( "heurist.rec_viewer", {
     // revert other modifications here
     _destroy: function() {
         this.element.off("myOnShowEvent");
-        $(this.document).off(top.HAPI.Event.ON_REC_SELECT);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
 
         this.lbl_message.remove();
 
@@ -233,14 +233,14 @@ $.widget( "heurist.rec_viewer", {
 
         var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
 
-        //if(top.HAPI.currentUser.usr_Tags)
+        //if(top.HAPI4.currentUser.usr_Tags)
         if(this.options.user_Tags)
         {
 
-            var groups = top.HAPI.currentUser.usr_GroupsList
+            var groups = top.HAPI4.currentUser.usr_GroupsList
 
             //groups.unshift(34);
-            groups[top.HAPI.currentUser.ugr_ID] = [ "admin", top.HR('Personal Tags')];
+            groups[top.HAPI4.currentUser.ugr_ID] = [ "admin", top.HR('Personal Tags')];
 
             for (var idx in groups)
             {
@@ -248,14 +248,14 @@ $.widget( "heurist.rec_viewer", {
                     var groupID = idx;
                     var groupName = groups[idx][1];
 
-                    var tags = this.options.user_Tags[groupID]; //top.HAPI.currentUser.usr_Tags[groupID];
+                    var tags = this.options.user_Tags[groupID]; //top.HAPI4.currentUser.usr_Tags[groupID];
                     var tags_list = "";
 
                     var tagID;
                     for(tagID in tags) {
                         var tag = tags[tagID];
                         if(tag && tag[3]>0){ //usage
-                            tags_list = tags_list + "<a href='#' "+(top.HEURIST.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
+                            tags_list = tags_list + "<a href='#' "+(top.HEURIST4.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
                         }
                     }
 
@@ -301,9 +301,9 @@ $.widget( "heurist.rec_viewer", {
                     // <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
                     // <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
 
-                    var $alink = $("<a>",{href: top.HAPI.basePath+'file.php?db=' + top.HAPI.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
+                    var $alink = $("<a>",{href: top.HAPI4.basePath+'file.php?db=' + top.HAPI4.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
                     .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
-                    $("<img>", {src: top.HAPI.basePath+'file.php?db=' + top.HAPI.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
+                    $("<img>", {src: top.HAPI4.basePath+'file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
 
 
                 }
@@ -331,7 +331,7 @@ $.widget( "heurist.rec_viewer", {
 
         var rectypeID = recdata.fld(record, 'rec_RecTypeID');
         if(!rectypes || rectypes.length==0){
-            rectypes = top.HEURIST.rectypes;
+            rectypes = top.HEURIST4.rectypes;
         }
 
         var rfrs = rectypes.typedefs[rectypeID].dtFields;
@@ -350,10 +350,10 @@ $.widget( "heurist.rec_viewer", {
 
         $('<div>')
         .append( $('<img>',{
-            src:  top.HAPI.basePath+'assets/16x16.gif',
+            src:  top.HAPI4.basePath+'assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
-            .css({'background-image':'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
+            .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
         .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>') 
         .appendTo($header);          
 
@@ -375,7 +375,7 @@ $.widget( "heurist.rec_viewer", {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (top.HAPI.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    (top.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner 
                 {
                     continue;
@@ -388,13 +388,13 @@ $.widget( "heurist.rec_viewer", {
 
                 var isempty = true;
                 $.each(values, function(idx,value){ 
-                    if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; } 
+                    if(!top.HEURIST4.util.isempty(value)){ isempty=false; return false; } 
                 } );
                 if(isempty) continue;
 
                 if(rfrs[dtID][fi['dty_Type']] == 'file'){   
                     $.each(values, function(idx,value){ 
-                        if(!top.HEURIST.util.isempty(value)){
+                        if(!top.HEURIST4.util.isempty(value)){
                             that.options.rec_Files.push(value)
                         }
                     } );

@@ -21,7 +21,7 @@
 */
 
 
-var Hul = top.HEURIST.util;
+var Hul = top.HEURIST4.util;
 
 var grid_min_size = 200;
 var grid_step_size = 100;
@@ -325,9 +325,12 @@ function appAddContent($container, app, options){
         if(app.widgetname=='rec_viewer'){
             //DEBUG
             $content.rec_viewer();
-        }else if(app.widgetname=='rec_list'){
+        }else if(app.widgetname=='mainMenu'){
             //DEBUG
-            $content.rec_list();
+            $content.mainMenu();
+        }else if(app.widgetname=='resultList'){
+            //DEBUG
+            $content.resultList();
         }else
             if(app.widgetname=='svs_manager'){
                 //DEBUG
@@ -345,7 +348,7 @@ function appAddContent($container, app, options){
                         if($.isFunction($content[app.widgetname])){
                             $content[app.widgetname]( options );
                         }else{
-                            top.HEURIST.util.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
+                            top.HEURIST4.util.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                         }
                     });
                 }

@@ -49,8 +49,8 @@ $.widget( "heurist.about", {
         //'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'
         this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'text-align':'center' }).appendTo(this.element);
 
-        $("<div>").css({'font-size':'1.6em', 'font-style':'italic'}).text(top.HAPI.database).appendTo( this.div_dbname );
-        $("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI.sysinfo.version).appendTo( this.div_dbname );
+        $("<div>").css({'font-size':'1.6em', 'font-style':'italic'}).text(top.HAPI4.database).appendTo( this.div_dbname );
+        $("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_dbname );
 
         this._refresh();
 

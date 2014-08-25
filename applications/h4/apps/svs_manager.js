@@ -25,7 +25,7 @@ $.widget( "heurist.svs_manager", {
         isdialog: false, //show in dialog or embedded
 
         current_UGrpID: null,
-        // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 0  // order by name
     },
 
@@ -118,14 +118,14 @@ $.widget( "heurist.svs_manager", {
             this._on( this.btn_add, { click: "_editSavedSearch" } );
         }
 
-        if(!top.HAPI.currentUser.usr_GroupsList){
+        if(!top.HAPI4.currentUser.usr_GroupsList){
 
             var that = this;
             //get details about user groups (names etc)
-            top.HAPI.SystemMgr.mygroups(
+            top.HAPI4.SystemMgr.mygroups(
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
-                        top.HAPI.currentUser.usr_GroupsList = response.data;
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        top.HAPI4.currentUser.usr_GroupsList = response.data;
                         that._updateGroups();
                     }
             });
@@ -138,14 +138,14 @@ $.widget( "heurist.svs_manager", {
     /* private function */
     _refresh: function(){
 
-        if(!top.HAPI.currentUser.usr_SavedSearch){
+        if(!top.HAPI4.currentUser.usr_SavedSearch){
 
             var that = this;
 
-            top.HAPI.SystemMgr.ssearch_get(
+            top.HAPI4.SystemMgr.ssearch_get(
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
-                        top.HAPI.currentUser.usr_SavedSearch = response.data;
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        top.HAPI4.currentUser.usr_SavedSearch = response.data;
                         that._renderItems();
                     }
             });
@@ -181,10 +181,10 @@ $.widget( "heurist.svs_manager", {
         var that = this;  
         // list of groups for current user
         var selObj = this.select_grp.get(0);
-        top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
-            [{key:"bookmark"+top.HAPI.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI.currentUser.ugr_ID, title:top.HR('All Records')}], 
+        top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+            [{key:"bookmark"+top.HAPI4.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('All Records')}], 
             function(){
-                that.select_grp.val(top.HAPI.currentUser.ugr_ID);
+                that.select_grp.val(top.HAPI4.currentUser.ugr_ID);
                 that.select_grp.change();
         });
     },
@@ -199,22 +199,22 @@ $.widget( "heurist.svs_manager", {
         }
 
         var that = this;
-        var ssearches = top.HAPI.currentUser.usr_SavedSearch;
+        var ssearches = top.HAPI4.currentUser.usr_SavedSearch;
 
         for (var svsID in ssearches)
         {
             if(svsID && (ssearches[svsID][2]== this.options.current_GrpID || "bookmark"+ssearches[svsID][2]== this.options.current_GrpID)){
 
                 var name = ssearches[svsID][0];
-                var prms = top.HEURIST.util.getUrlQueryAndDomain(ssearches[svsID][1]);
+                var prms = top.HEURIST4.util.getUrlQueryAndDomain(ssearches[svsID][1]);
                 var qsearch = prms[0];
                 var domain2  = prms[1];
 
-                if(this.options.current_GrpID==top.HAPI.currentUser.ugr_ID){
+                if(this.options.current_GrpID==top.HAPI4.currentUser.ugr_ID){
                     if(domain2=="bookmark"){
                         continue;
                     }
-                }else if(this.options.current_GrpID == "bookmark"+top.HAPI.currentUser.ugr_ID){
+                }else if(this.options.current_GrpID == "bookmark"+top.HAPI4.currentUser.ugr_ID){
                     if(domain2=="all"){
                         continue;
                     }
@@ -263,22 +263,22 @@ $.widget( "heurist.svs_manager", {
     */
     _deleteSavedSearch: function(svsID){
 
-        var svs = top.HAPI.currentUser.usr_SavedSearch[svsID];
+        var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
         if(!svs) return;
         var that = this;
 
-        top.HEURIST.util.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
-            top.HAPI.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
+        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
+            top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         //remove from UI
                         that.find('#svs-list-'+svsID).remove();
                         //remove from
-                        delete top.HAPI.currentUser.usr_SavedSearch[svsID];
+                        delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
                 }
 
@@ -303,16 +303,16 @@ $.widget( "heurist.svs_manager", {
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
-                var svs = top.HAPI.currentUser.usr_SavedSearch[svsID];
+                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
 
-                var prms = top.HEURIST.util.getUrlQueryAndDomain(svs[1]);
+                var prms = top.HEURIST4.util.getUrlQueryAndDomain(svs[1]);
                 var qsearch = prms[0];
                 var domain  = prms[1];
 
                 svs_query.val( qsearch );
-                svs_ugrid.val(svs[2]==top.HAPI.currentUser.ugr_ID ?domain:svs[2]);
+                svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?domain:svs[2]);
                 svs_ugrid.parent().hide();
 
             }else{ //add new saved search
@@ -326,10 +326,10 @@ $.widget( "heurist.svs_manager", {
 
                 //fill with list of user groups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
-                top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
+                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
                     function(){
-                        svs_ugrid.val(top.HAPI.currentUser.ugr_ID);
+                        svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
                 });
                 svs_ugrid.parent().show();
             }

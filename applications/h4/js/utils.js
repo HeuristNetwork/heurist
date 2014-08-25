@@ -21,10 +21,10 @@
 */
 
 
-if (!top.HEURIST){
-    top.HEURIST = {};
+if (!top.HEURIST4){
+    top.HEURIST4 = {};
 }
-if (! top.HEURIST.util) top.HEURIST.util = {
+if (! top.HEURIST4.util) top.HEURIST4.util = {
 
 
     isnull: function(obj){
@@ -32,9 +32,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     },
 
     isempty: function(obj){
-        if (top.HEURIST.util.isnull(obj)){
+        if (top.HEURIST4.util.isnull(obj)){
             return true;
-        }else if(top.HEURIST.util.isArray(obj)){
+        }else if(top.HEURIST4.util.isArray(obj)){
             return obj.length<1;
         }else{
             return (obj==="") || (obj==="null");    
@@ -51,8 +51,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     {
         var domain = null;
         if(qsearch && qsearch.indexOf('?')==0){
-            domain = top.HEURIST.util.getUrlParameter('w', qsearch);
-            qsearch = top.HEURIST.util.getUrlParameter('q', qsearch);
+            domain = top.HEURIST4.util.getUrlParameter('w', qsearch);
+            qsearch = top.HEURIST4.util.getUrlParameter('q', qsearch);
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
         return [qsearch, domain];
@@ -76,7 +76,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     },
 
     isArrayNotEmpty: function (a){
-        return (top.HEURIST.util.isArray(a) && a.length>0);
+        return (top.HEURIST4.util.isArray(a) && a.length>0);
     },
 
     isArray: function (a)
@@ -111,8 +111,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     getTermValue: function(datatype, termID, withcode){
 
-        var terms = top.HEURIST.terms;
-        if(!terms || top.HEURIST.util.isempty(termID)) return '';
+        var terms = top.HEURIST4.terms;
+        if(!terms || top.HEURIST4.util.isempty(termID)) return '';
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
@@ -128,7 +128,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(termLookup[termID]){
             termName = termLookup[termID][terms.fieldNamesToIndex['trm_Label']];
             termCode = termLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-            if(top.HEURIST.util.isempty(termCode)){
+            if(top.HEURIST4.util.isempty(termCode)){
                 termCode = '';
             }else{
                 termCode = " ("+termCode+")";
@@ -140,7 +140,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     // not used 
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        var selObj = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
+        var selObj = top.HEURIST4.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
         var reslist = [];
 
@@ -157,7 +157,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     //return term and its children as well as comma-separated list of non-disabled ancestors
     getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
 
-        var termtree = top.HEURIST.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
+        var termtree = top.HEURIST4.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, null, null, true);
         /*
         function __setParents(parent, terms){
 
@@ -194,14 +194,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //__setParents(root, termtree);
 
-        return top.HEURIST.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
+        return top.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
     },
 
     /**
     * create/fill SELECT for terms
     *
     * datatype enum|relation
-    * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST.terms.treesByDomain
+    * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST4.terms.treesByDomain
     * headerTermIDsList - json string or array
     * defaultTermID - term to be selected
     * sFirstEmptyItem - text for first empty value item
@@ -213,14 +213,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(needArray){
 
         }else{
-            selObj = top.HEURIST.util.createSelector(selObj, topOptions);
+            selObj = top.HEURIST4.util.createSelector(selObj, topOptions);
         }
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
         }
 
-        var terms = top.HEURIST.terms;
+        var terms = top.HEURIST4.terms;
         if(!(datatype=="enum" || datatype=="relation") || !terms ){
             return needArray ?[] :selObj;
         }
@@ -229,9 +229,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //prepare header
         //
-        var temp = ( top.HEURIST.util.isArray(headerTermIDsList)   //instanceof(Array)
+        var temp = ( top.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
             ? headerTermIDsList
-            : (( typeof(headerTermIDsList) === "string" && !top.HEURIST.util.isempty(headerTermIDsList) )
+            : (( typeof(headerTermIDsList) === "string" && !top.HEURIST4.util.isempty(headerTermIDsList) )
                 ? $.parseJSON(headerTermIDsList)  //headerTermIDsList.split(",")
                 : [] ));
 
@@ -242,7 +242,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         //prepare tree
         //
-        if(top.HEURIST.util.isNumber(termIDTree)){
+        if(top.HEURIST4.util.isNumber(termIDTree)){
             //this is vocabulary id - show list of all terms for this vocab
             var tree = terms.treesByDomain[datatype];
             termIDTree = tree[termIDTree];
@@ -271,14 +271,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(localLookup[termID]){
                     termName = localLookup[termID][terms.fieldNamesToIndex['trm_Label']];
                     termCode = localLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-                    if(top.HEURIST.util.isempty(termCode)){
+                    if(top.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
                         termCode = " ("+termCode+")";
                     }
                 }
 
-                if(top.HEURIST.util.isempty(termName)) continue;
+                if(top.HEURIST4.util.isempty(termName)) continue;
 
                 arrterm.push([termID, termName, termCode]);
             }
@@ -388,7 +388,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             $(selObj).empty();
         }
 
-        if(top.HEURIST.util.isArray(topOptions)){
+        if(top.HEURIST4.util.isArray(topOptions)){
             var idx;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
@@ -396,23 +396,23 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     if(idx){
                         var key = topOptions[idx].key;
                         var title = topOptions[idx].title;
-                        if(!top.HEURIST.util.isnull(title))
+                        if(!top.HEURIST4.util.isnull(title))
                         {
-                            if(!top.HEURIST.util.isnull(topOptions[idx].optgroup)){
+                            if(!top.HEURIST4.util.isnull(topOptions[idx].optgroup)){
                                 var grp = document.createElement("optgroup");
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                top.HEURIST.util.addoption(selObj, key, title);    
+                                top.HEURIST4.util.addoption(selObj, key, title);    
                             }
 
                         }
                     }
                 }
             }        
-        }else if(!top.HEURIST.util.isempty(topOptions) && topOptions!==false){
+        }else if(!top.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions ='';
-            top.HEURIST.util.addoption(selObj, '', topOptions); 
+            top.HEURIST4.util.addoption(selObj, '', topOptions); 
         }
 
 
@@ -424,9 +424,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     ,createRectypeGroupSelect: function(selObj, topOptions) {
 
-        top.HEURIST.util.createSelector(selObj, topOptions);
+        top.HEURIST4.util.createSelector(selObj, topOptions);
 
-        var rectypes = top.HEURIST.rectypes,
+        var rectypes = top.HEURIST4.rectypes,
         index;
 
         if(!rectypes) return selObj;
@@ -439,8 +439,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             }
 
             var name = rectypes.groups[index].name;
-            if(!top.HEURIST.util.isnull(name)){
-                top.HEURIST.util.addoption(selObj, rectypes.groups[index].id, name);
+            if(!top.HEURIST4.util.isnull(name)){
+                top.HEURIST4.util.addoption(selObj, rectypes.groups[index].id, name);
             }
         }
 
@@ -455,9 +455,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     , createRectypeSelect: function(selObj, rectypeList, topOptions) {
 
-        top.HEURIST.util.createSelector(selObj, topOptions);
+        top.HEURIST4.util.createSelector(selObj, topOptions);
 
-        var rectypes = top.HEURIST.rectypes,
+        var rectypes = top.HEURIST4.rectypes,
         index;
 
         if(!rectypes) return selObj;
@@ -465,7 +465,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         if(rectypeList){
 
-            if(!top.HEURIST.util.isArray(rectypeList)){
+            if(!top.HEURIST4.util.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
 
@@ -474,9 +474,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(idx){
                     var rectypeID = rectypeList[idx];
                     var name = rectypes.names[rectypeID];
-                    if(!top.HEURIST.util.isnull(name))
+                    if(!top.HEURIST4.util.isnull(name))
                     {
-                        top.HEURIST.util.addoption(selObj, rectypeID, name);
+                        top.HEURIST4.util.addoption(selObj, rectypeID, name);
                     }
                 }
             }
@@ -495,8 +495,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
                     var name = rectypes.names[rectypeID];
 
-                    if(!top.HEURIST.util.isnull(name)){
-                        var opt = top.HEURIST.util.addoption(selObj, rectypeID, name);
+                    if(!top.HEURIST4.util.isnull(name)){
+                        var opt = top.HEURIST4.util.addoption(selObj, rectypeID, name);
                     }
                 }
             }
@@ -512,20 +512,20 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     */
     createRectypeDetailSelect: function(selObj, rectype, allowedlist, topOptions, needEmpty) {
 
-        top.HEURIST.util.createSelector(selObj, topOptions);
+        top.HEURIST4.util.createSelector(selObj, topOptions);
 
         var dtyID, details;
 
         if(Number(rectype)>0){
             //structure not defined 
-            if(!(top.HEURIST.rectypes && top.HEURIST.rectypes.typedefs)) return selObj;
-            var rectypes = top.HEURIST.rectypes.typedefs[rectype];
+            if(!(top.HEURIST4.rectypes && top.HEURIST4.rectypes.typedefs)) return selObj;
+            var rectypes = top.HEURIST4.rectypes.typedefs[rectype];
 
             if(!rectypes) return selObj;
             details = rectypes.dtFields;
 
-            var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
+            var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
+            fit = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'];
 
             var arrterm = [];
 
@@ -536,7 +536,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     {
                         var name = details[dtyID][fi];
 
-                        if(!top.HEURIST.util.isnull(name)){
+                        if(!top.HEURIST4.util.isnull(name)){
                             arrterm.push([dtyID, name]);
                         }
                     }
@@ -548,14 +548,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
             }
 
         }else{ //show all detail types
 
-            if(!top.HEURIST.detailtypes) return selObj;
+            if(!top.HEURIST4.detailtypes) return selObj;
 
-            var detailtypes = top.HEURIST.detailtypes;
+            var detailtypes = top.HEURIST4.detailtypes;
             var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
 
 
@@ -574,7 +574,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     {
                         var name = detailtypes.names[detailID];
 
-                        if(!top.HEURIST.util.isnull(name)){
+                        if(!top.HEURIST4.util.isnull(name)){
                             arrterm.push([detailID, name]);
                         }
                     }
@@ -589,7 +589,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                     //add to select
                     var i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
-                        top.HEURIST.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                        top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
                     }
                 }
 
@@ -609,14 +609,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         $(selObj).empty();
 
         if(!groups){ //use groups of current user
-            groups = top.HAPI.currentUser.usr_GroupsList;
+            groups = top.HAPI4.currentUser.usr_GroupsList;
             if(!groups){        
                 //looad detailed info about user groups
-                top.HAPI.SystemMgr.mygroups(
+                top.HAPI4.SystemMgr.mygroups(
                     function(response){
-                        if(response.status == top.HAPI.ResponseStatus.OK){
-                            groups = top.HAPI.currentUser.usr_GroupsList = response.data;
-                            top.HEURIST.util.createUserGroupsSelect(selObj, groups, topOptions, callback);
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            groups = top.HAPI4.currentUser.usr_GroupsList = response.data;
+                            top.HEURIST4.util.createUserGroupsSelect(selObj, groups, topOptions, callback);
                         }
                 });
                 return;    
@@ -631,9 +631,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(idx){
                     var key = topOptions[idx].key;
                     var title = topOptions[idx].title;
-                    if(!top.HEURIST.util.isnull(title))
+                    if(!top.HEURIST4.util.isnull(title))
                     {
-                        top.HEURIST.util.addoption(selObj, key, title);
+                        top.HEURIST4.util.addoption(selObj, key, title);
                         addedontop.push(key);
                     }
                 }
@@ -646,9 +646,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(idx && addedontop.indexOf(idx)<0){
                     var groupID = idx;
                     var name = groups[idx][1];
-                    if(!top.HEURIST.util.isnull(name))
+                    if(!top.HEURIST4.util.isnull(name))
                     {
-                        top.HEURIST.util.addoption(selObj, groupID, name);
+                        top.HEURIST4.util.addoption(selObj, groupID, name);
                     }
                 }
             }
@@ -680,7 +680,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             }
         }
 
-        top.HEURIST.util.showMsgDlg(msg, null, "Error");
+        top.HEURIST4.util.showMsgDlg(msg, null, "Error");
     },
 
     getMsgDlg: function(){
@@ -694,9 +694,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
-            $dlg = top.HEURIST.util.getMsgDlg();
+            $dlg = top.HEURIST4.util.getMsgDlg();
             $dlg.load(url, function(){
-                top.HEURIST.util.showMsgDlg(null, buttons, title);    
+                top.HEURIST4.util.showMsgDlg(null, buttons, title);    
             });
         }
     },
@@ -708,7 +708,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             return;
         }
 
-        $dlg = top.HEURIST.util.getMsgDlg();
+        $dlg = top.HEURIST4.util.getMsgDlg();
 
         if(message!=null){
             $dlg.empty();
@@ -753,11 +753,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
     //@todo - redirect to error page
     redirectToError: function(message){
-        top.HEURIST.util.showMsgDlg(message, null, 'Error');
+        top.HEURIST4.util.showMsgDlg(message, null, 'Error');
     },
 
     checkLength: function( input, title, message, min, max ) {
-        var message_text = top.HEURIST.util.checkLength2( input, title, min, max );
+        var message_text = top.HEURIST4.util.checkLength2( input, title, min, max );
         if(message_text!=''){
 
             if(message){

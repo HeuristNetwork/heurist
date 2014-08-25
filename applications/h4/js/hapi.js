@@ -47,7 +47,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(_db){
             _database = _db;
         }else{
-            _database = top.HEURIST.util.getUrlParameter('db');
+            _database = top.HEURIST4.util.getUrlParameter('db');
         }
 
         // 
@@ -77,12 +77,12 @@ function hAPI(_db, _oninit) { //, _currentUser
         // Get current user if logged in, and global database settings
         that.SystemMgr.sys_info(
             function(response){
-                var  success = (response.status == top.HAPI.ResponseStatus.OK);
+                var  success = (response.status == top.HAPI4.ResponseStatus.OK);
                 if(success){
                     that.setCurrentUser(response.data.currentUser);
                     that.sysinfo = response.data.sysinfo;
                 }else{
-                    top.HEURIST.util.showMsgErr(response.message);
+                    top.HEURIST4.util.showMsgErr(response.message);
                 }
                 if(_oninit){
                     _oninit(success);
@@ -109,7 +109,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         var url = that.basePath+"php/api/"+action+".php"; //+(new Date().getTime());
 
-        //top.HEURIST.ajax.getJsonData(url, callback, request);
+        //top.HEURIST4.ajax.getJsonData(url, callback, request);
 
         //note jQuery ajax does not properly in the loop - success callback does not work often   
         $.ajax({
@@ -120,7 +120,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
-                    callback({status:top.HAPI.ResponseStatus.UNKNOWN_ERROR,
+                    callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
                         message: jqXHR.responseText });
                 }
                 //message:'Error connecting server '+textStatus});
@@ -396,25 +396,25 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if(!$.isFunction(callback)){
                     var document = callback;
-                    if(!top.HEURIST.util.isnull(document)){
-                        document.trigger(top.HAPI.Event.ON_REC_SEARCHSTART, [ request ]); //gloal app event  
+                    if(!top.HEURIST4.util.isnull(document)){
+                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //gloal app event  
                     } 
                     callback = function(response)
                     {
                         var resdata = null;
-                        if(response.status == top.HAPI.ResponseStatus.OK){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
-                            top.HEURIST.util.showMsgErr(response.message);
+                            top.HEURIST4.util.showMsgErr(response.message);
                         }
-                        if(!top.HEURIST.util.isnull(document)){
-                            document.trigger(top.HAPI.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                        if(!top.HEURIST4.util.isnull(document)){
+                            document.trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
                         }
                     }
                 }
 
-                if(top.HEURIST.util.isnull(request.l)){
-                    request.l = top.HAPI.get_prefs('search_limit');
+                if(top.HEURIST4.util.isnull(request.l)){
+                    request.l = top.HAPI4.get_prefs('search_limit');
                 }
 
                 _callserver('record_search', request, callback);
@@ -637,7 +637,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //preferences by default
                 that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'cupertino', layout_style:'johnson', 'search_limit':200};
             }
-            if(top.HEURIST.util.isempty(name)){
+            if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];    
             }else{
                 var res = that.currentUser['ugr_Preferences'][name]
@@ -648,7 +648,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         is_ui_normal: function(){
-            return (top.HAPI.get_prefs('layout_style')=='normal');
+            return (top.HAPI4.get_prefs('layout_style')=='normal');
         },
 
         currentUser: _guestUser,

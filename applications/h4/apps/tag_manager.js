@@ -29,7 +29,7 @@ $.widget( "heurist.tag_manager", {
         isdialog: false, //show in dialog or embedded
 
         current_GrpID: null,
-        // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
         record_ids: null, //array of record ids the tag selection will be applied for
 
@@ -39,7 +39,7 @@ $.widget( "heurist.tag_manager", {
     // the constructor
     _create: function() {
 
-        top.HAPI.currentUser.usr_Tags = {}; //clear all  
+        top.HAPI4.currentUser.usr_Tags = {}; //clear all  
 
         var that = this;
 
@@ -107,21 +107,21 @@ $.widget( "heurist.tag_manager", {
 
                 //var that = this;
 
-                if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[val]){  //already found
+                if(top.HAPI4.currentUser.usr_Tags && top.HAPI4.currentUser.usr_Tags[val]){  //already found
                     this.options.current_GrpID = val;
                     this._renderItems();
                 }else{
-                    top.HAPI.RecordMgr.tag_get({UGrpID:val, recIDs:this.options.record_ids},
+                    top.HAPI4.RecordMgr.tag_get({UGrpID:val, recIDs:this.options.record_ids},
                         function(response) {
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
                                 that.options.current_GrpID = val;
-                                if(!top.HAPI.currentUser.usr_Tags){
-                                    top.HAPI.currentUser.usr_Tags = {};
+                                if(!top.HAPI4.currentUser.usr_Tags){
+                                    top.HAPI4.currentUser.usr_Tags = {};
                                 }
-                                top.HAPI.currentUser.usr_Tags[val] = response.data[val];
+                                top.HAPI4.currentUser.usr_Tags[val] = response.data[val];
                                 that._renderItems();
                             }else{
-                                top.HEURIST.util.showMsgErr(response);
+                                top.HEURIST4.util.showMsgErr(response);
                             }
                     });
                 }
@@ -230,10 +230,10 @@ $.widget( "heurist.tag_manager", {
 
         // list of groups for current user
         var selObj = this.select_grp.get(0);
-        top.HEURIST.util.createUserGroupsSelect(selObj, top.HAPI.currentUser.usr_GroupsList,
-            [{key:top.HAPI.currentUser.ugr_ID, title:top.HR('Personal Tags')}], 
+        top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+            [{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('Personal Tags')}], 
             function(){
-                that.select_grp.val(top.HAPI.currentUser.ugr_ID);
+                that.select_grp.val(top.HAPI4.currentUser.ugr_ID);
                 that.select_grp.change();
         });
 
@@ -249,9 +249,9 @@ $.widget( "heurist.tag_manager", {
 
     _reloadTags: function(uGrpID){
         if(uGrpID){
-            top.HAPI.currentUser.usr_Tags[uGrpID] = null;
+            top.HAPI4.currentUser.usr_Tags[uGrpID] = null;
         }else{
-            top.HAPI.currentUser.usr_Tags = {}; //clear all  
+            top.HAPI4.currentUser.usr_Tags = {}; //clear all  
         }      
         this.options.current_GrpID = null;
         this.select_grp.change();
@@ -297,10 +297,10 @@ $.widget( "heurist.tag_manager", {
         btn.attr('disabled','disabled');       */
 
 
-        if(top.HAPI.currentUser.usr_Tags && top.HAPI.currentUser.usr_Tags[this.options.current_GrpID])
+        if(top.HAPI4.currentUser.usr_Tags && top.HAPI4.currentUser.usr_Tags[this.options.current_GrpID])
         {
             var that = this;
-            var tags2 = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID];
+            var tags2 = top.HAPI4.currentUser.usr_Tags[this.options.current_GrpID];
             var tagID;
             var tags = [];
             for(tagID in tags2) {
@@ -349,7 +349,7 @@ $.widget( "heurist.tag_manager", {
                 .css('margin','0.4em')
                 .click(function(event){
 
-                    top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][$(this).attr('tagID')][5] = event.target.checked;
+                    top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID][$(this).attr('tagID')][5] = event.target.checked;
                     //event.target.keepmark = event.target.checked; 
 
                     if(that.options.isdialog){  //tag management                               
@@ -442,7 +442,7 @@ $.widget( "heurist.tag_manager", {
 
         var tagIDs = [];
         if(tagID){     
-            var tag = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID][tagID];
+            var tag = top.HAPI4.currentUser.usr_Tags[this.options.current_GrpID][tagID];
             if(!tag) return;
             tagIDs.push(tagID);
         }else{
@@ -454,21 +454,21 @@ $.widget( "heurist.tag_manager", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
 
-        top.HEURIST.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
+        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
 
-            top.HAPI.RecordMgr.tag_delete(request,
+            top.HAPI4.RecordMgr.tag_delete(request,
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         $.each(tagIDs, function(i,e){
                             //remove from UI
                             $('#tag-'+e).remove();
                             //remove from
-                            delete top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][e];
+                            delete top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID][e];
                         });
 
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
                 }
 
@@ -507,7 +507,7 @@ $.widget( "heurist.tag_manager", {
             var isEdit = (parseInt(tagID)>0);
 
             if(isEdit){
-                var tag = top.HAPI.currentUser.usr_Tags[this.options.current_GrpID][tagID];
+                var tag = top.HAPI4.currentUser.usr_Tags[this.options.current_GrpID][tagID];
                 tag_id.val(tagID);
                 tag_name.val(tag[0]);
                 tag_desc.val(tag[1]);
@@ -528,8 +528,8 @@ $.widget( "heurist.tag_manager", {
     */
     _editTag: function(tagID, tagIDs){
 
-        var sTitle = top.HR(top.HEURIST.util.isnull(tagIDs)
-            ?(top.HEURIST.util.isempty(tagID)?"Add Tag":"Edit Tag")
+        var sTitle = top.HR(top.HEURIST4.util.isnull(tagIDs)
+            ?(top.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
             :"Define new tag that replaces old ones");
 
         if(  this.edit_dialog==null )
@@ -556,7 +556,7 @@ $.widget( "heurist.tag_manager", {
                     allFields.removeClass( "ui-state-error" );
 
                     var message = $dlg.find('.messages');
-                    var bValid = top.HEURIST.util.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
+                    var bValid = top.HEURIST4.util.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
 
                     if(bValid){
 
@@ -576,34 +576,34 @@ $.widget( "heurist.tag_manager", {
                         }
 
                         //get hapi and save tag
-                        top.HAPI.RecordMgr.tag_save(request,
+                        top.HAPI4.RecordMgr.tag_save(request,
                             function(response){
-                                if(response.status == top.HAPI.ResponseStatus.OK){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                     var tagID = response.data;
 
-                                    if(!top.HAPI.currentUser.usr_Tags){
-                                        top.HAPI.currentUser.usr_Tags = {};
+                                    if(!top.HAPI4.currentUser.usr_Tags){
+                                        top.HAPI4.currentUser.usr_Tags = {};
                                     }
-                                    if(!top.HAPI.currentUser.usr_Tags[that.options.current_GrpID]){
-                                        top.HAPI.currentUser.usr_Tags[that.options.current_GrpID] = {};
+                                    if(!top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID]){
+                                        top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID] = {};
                                     }
 
                                     if(isEdit){
-                                        var oldtag = top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID];
-                                        top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                        var oldtag = top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID][tagID];
+                                        top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
                                     }else{
-                                        top.HAPI.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                        top.HAPI4.currentUser.usr_Tags[that.options.current_GrpID][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                     }
 
-                                    if(!top.HEURIST.util.isnull(tag_ids)){ 
+                                    if(!top.HEURIST4.util.isnull(tag_ids)){ 
                                         //send request to replace selected tags with new one
                                         var request = {ids: tag_ids,
                                             new_id: tagID,
                                             UGrpID: that.options.current_GrpID};
 
-                                        top.HAPI.RecordMgr.tag_replace(request, function(response){
-                                            if(response.status == top.HAPI.ResponseStatus.OK){
+                                        top.HAPI4.RecordMgr.tag_replace(request, function(response){
+                                            if(response.status == top.HAPI4.ResponseStatus.OK){
                                                 $dlg.dialog( "close" );
 
                                                 that._reloadTags(that.options.current_GrpID);
@@ -703,12 +703,12 @@ $.widget( "heurist.tag_manager", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
+            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_GrpID, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
             });
 

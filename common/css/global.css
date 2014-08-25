@@ -33,7 +33,7 @@
 /******* global font ********/
 * {
 	font-family: Helvetica, Arial, Verdana !important;
-	font-size: 11px;
+	font-size: 11px !important;
 	line-height: 2ex;
 }
 
@@ -429,7 +429,6 @@ body.advanced tr.advanced {
 	box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
 	border: 3px solid #FFF !important;
 	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
-}
 }
 #stype_options_child {
 	padding: 3px;

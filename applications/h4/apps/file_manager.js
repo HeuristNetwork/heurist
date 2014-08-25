@@ -26,7 +26,7 @@ $.widget( "heurist.file_manager", {
         isdialog: false, //show in dialog or embedded
 
         current_mediatype: null,
-        // we take tags from top.HAPI.currentUser.usr_Files - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from top.HAPI4.currentUser.usr_Files - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
 
         record_ids: null, //array of record ids the file selection will be applied for
 
@@ -42,7 +42,7 @@ $.widget( "heurist.file_manager", {
     // the constructor
     _create: function() {
 
-        top.HAPI.currentUser.usr_Files = {}; // {type:[]; type2:[]}
+        top.HAPI4.currentUser.usr_Files = {}; // {type:[]; type2:[]}
 
         var that = this;
 
@@ -115,19 +115,19 @@ $.widget( "heurist.file_manager", {
 
                 //var that = this;
 
-                if(top.HAPI.currentUser.usr_Files && top.HAPI.currentUser.usr_Files[val]){  //already found
+                if(top.HAPI4.currentUser.usr_Files && top.HAPI4.currentUser.usr_Files[val]){  //already found
                     this.options.current_mediatype = val;
                     this._renderItems();
                 }else{
-                    top.HAPI.RecordMgr.file_get({recIDs:this.options.record_ids, mediaType:val},
+                    top.HAPI4.RecordMgr.file_get({recIDs:this.options.record_ids, mediaType:val},
                         function(response) {
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
                                 that.options.current_mediatype = val;
-                                if(!top.HAPI.currentUser.usr_Files){
-                                    top.HAPI.currentUser.usr_Files = {};
+                                if(!top.HAPI4.currentUser.usr_Files){
+                                    top.HAPI4.currentUser.usr_Files = {};
                                 }
 
-                                //top.HAPI.currentUser.usr_Files[val] = response.data;
+                                //top.HAPI4.currentUser.usr_Files[val] = response.data;
 
                                 that.options.header = response.data[0];
                                 var files = [];
@@ -137,12 +137,12 @@ $.widget( "heurist.file_manager", {
                                         files.push(response.data[idx]);     
                                     }
                                 }
-                                top.HAPI.currentUser.usr_Files[val] = files;
+                                top.HAPI4.currentUser.usr_Files[val] = files;
 
 
                                 that._renderItems();
                             }else{
-                                top.HEURIST.util.showMsgErr(response);
+                                top.HEURIST4.util.showMsgErr(response);
                             }
                     });
                 }
@@ -293,9 +293,9 @@ $.widget( "heurist.file_manager", {
 
     _reloadFiles: function(mediaType){
         if(mediaType){
-            top.HAPI.currentUser.usr_Files[mediaType] = null;
+            top.HAPI4.currentUser.usr_Files[mediaType] = null;
         }else{
-            top.HAPI.currentUser.usr_Files = {}; //clear all  
+            top.HAPI4.currentUser.usr_Files = {}; //clear all  
         }      
         this.options.current_mediatype = null;
         this.select_mediatype.change();
@@ -343,11 +343,11 @@ $.widget( "heurist.file_manager", {
         btn.attr('disabled','disabled');       */
 
 
-        if(top.HAPI.currentUser.usr_Files && top.HAPI.currentUser.usr_Files[this.options.current_mediatype])
+        if(top.HAPI4.currentUser.usr_Files && top.HAPI4.currentUser.usr_Files[this.options.current_mediatype])
         {
             //convert from object to array 
             var that = this;
-            var recfiles = top.HAPI.currentUser.usr_Files[this.options.current_mediatype];
+            var recfiles = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype];
 
             recfiles.sort(function (a,b){
                 var val = that.options.current_order;
@@ -392,13 +392,13 @@ $.widget( "heurist.file_manager", {
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css({ 'background-image':'url('+ top.HAPI.basePath+'/file.php?db=' + top.HAPI.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
+                    .css({ 'background-image':'url('+ top.HAPI4.basePath+'/file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
                     .appendTo($recdiv);
                 }else{
                     //@todo - thumbnail and icons for all mediatype
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css('background-image', 'url('+ top.HAPI.basePath + 'assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)') 
+                    .css('background-image', 'url('+ top.HAPI4.basePath + 'assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)') 
                     .appendTo($recdiv);
                 }
 
@@ -412,7 +412,7 @@ $.widget( "heurist.file_manager", {
                 .css('margin','0.4em')
                 .click(function(event){
 
-                top.HAPI.currentUser.usr_Files[that.options.current_mediatype][$(this).attr('tagID')][5] = event.target.checked;
+                top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][$(this).attr('tagID')][5] = event.target.checked;
                 //event.target.keepmark = event.target.checked; 
 
                 if(that.options.isdialog){  //tag management                               
@@ -517,7 +517,7 @@ $.widget( "heurist.file_manager", {
 
         var tagIDs = [];
         if(fileID){     
-            var tag = top.HAPI.currentUser.usr_Files[this.options.current_mediatype][tagID];
+            var tag = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
             if(!tag) return;
             tagIDs.push(tagID);
         }else{
@@ -529,21 +529,21 @@ $.widget( "heurist.file_manager", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
 
-        top.HEURIST.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
+        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
 
-            top.HAPI.RecordMgr.tag_delete(request,
+            top.HAPI4.RecordMgr.tag_delete(request,
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         $.each(tagIDs, function(i,e){
                             //remove from UI
                             $('#tag-'+e).remove();
                             //remove from
-                            delete top.HAPI.currentUser.usr_Files[that.options.current_mediatype][e];
+                            delete top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][e];
                         });
 
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
                 }
 
@@ -568,7 +568,7 @@ $.widget( "heurist.file_manager", {
             var isEdit = (parseInt(tagID)>0);
 
             if(isEdit){
-                var tag = top.HAPI.currentUser.usr_Files[this.options.current_mediatype][tagID];
+                var tag = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
                 tag_id.val(tagID);
                 tag_name.val(tag[0]);
                 tag_desc.val(tag[1]);
@@ -589,8 +589,8 @@ $.widget( "heurist.file_manager", {
     */
     _editTag: function(tagID, tagIDs){
 
-        var sTitle = top.HR(top.HEURIST.util.isnull(tagIDs)
-            ?(top.HEURIST.util.isempty(tagID)?"Add Tag":"Edit Tag")
+        var sTitle = top.HR(top.HEURIST4.util.isnull(tagIDs)
+            ?(top.HEURIST4.util.isempty(tagID)?"Add Tag":"Edit Tag")
             :"Define new tag that replaces old ones");
 
         if(  this.edit_dialog==null )
@@ -617,7 +617,7 @@ $.widget( "heurist.file_manager", {
                     allFields.removeClass( "ui-state-error" );
 
                     var message = $dlg.find('.messages');
-                    var bValid = top.HEURIST.util.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
+                    var bValid = top.HEURIST4.util.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
 
                     if(bValid){
 
@@ -637,34 +637,34 @@ $.widget( "heurist.file_manager", {
                         }
 
                         //get hapi and save tag
-                        top.HAPI.RecordMgr.tag_save(request,
+                        top.HAPI4.RecordMgr.tag_save(request,
                             function(response){
-                                if(response.status == top.HAPI.ResponseStatus.OK){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                     var tagID = response.data;
 
-                                    if(!top.HAPI.currentUser.usr_Files){
-                                        top.HAPI.currentUser.usr_Files = {};
+                                    if(!top.HAPI4.currentUser.usr_Files){
+                                        top.HAPI4.currentUser.usr_Files = {};
                                     }
-                                    if(!top.HAPI.currentUser.usr_Files[that.options.current_mediatype]){
-                                        top.HAPI.currentUser.usr_Files[that.options.current_mediatype] = {};
+                                    if(!top.HAPI4.currentUser.usr_Files[that.options.current_mediatype]){
+                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype] = {};
                                     }
 
                                     if(isEdit){
-                                        var oldtag = top.HAPI.currentUser.usr_Files[that.options.current_mediatype][tagID];
-                                        top.HAPI.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
+                                        var oldtag = top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID];
+                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), oldtag[3], tagID, oldtag[5]];
                                     }else{
-                                        top.HAPI.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
+                                        top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                     }
 
-                                    if(!top.HEURIST.util.isnull(tag_ids)){ 
+                                    if(!top.HEURIST4.util.isnull(tag_ids)){ 
                                         //send request to replace selected tags with new one
                                         var request = {ids: tag_ids,
                                             new_id: tagID,
                                             UGrpID: that.options.current_mediatype};
 
-                                        top.HAPI.RecordMgr.tag_replace(request, function(response){
-                                            if(response.status == top.HAPI.ResponseStatus.OK){
+                                        top.HAPI4.RecordMgr.tag_replace(request, function(response){
+                                            if(response.status == top.HAPI4.ResponseStatus.OK){
                                                 $dlg.dialog( "close" );
 
                                                 that._reloadFiles(that.options.current_mediatype);
@@ -765,12 +765,12 @@ $.widget( "heurist.file_manager", {
             t_removed.each(function(i,e){ toremove.push($(e).attr('tagID')); });
             var that = this;
 
-            top.HAPI.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_mediatype, recIDs:this.options.record_ids},
+            top.HAPI4.RecordMgr.tag_set({assign: toassign, remove: toremove, UGrpID:this.options.current_mediatype, recIDs:this.options.record_ids},
                 function(response) {
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
             });
 

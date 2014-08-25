@@ -40,20 +40,20 @@ $.widget( "heurist.app_timemap", {
 
         this.mapframe = $( "<iframe>" )
         .attr('id', 'map-frame')
-        //.attr('src', 'php/mapping.php?db='+top.HAPI.database)
+        //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
         .appendTo( this.framecontent );
 
 
-        $(this.document).on(top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT+' '+top.HAPI.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
-            if(e.type == top.HAPI.Event.LOGOUT)
+            if(e.type == top.HAPI4.Event.LOGOUT)
             {
                 if(that.options.recordset != null){
                     that.recordset_changed = true;
                     that.option("recordset", null);
                 }
 
-            }else if(e.type == top.HAPI.Event.ON_REC_SEARCHRESULT)
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT)
             {
                 that.recordset_changed = true;
                 that.option("recordset", data); //hRecordSet
@@ -86,7 +86,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){
                 this._initmap()
             }else {
-                (this.mapframe).attr('src', 'php/mapping.php?db='+top.HAPI.database);
+                (this.mapframe).attr('src', 'php/mapping.php?db='+top.HAPI4.database);
             }
         }
 
@@ -115,7 +115,7 @@ $.widget( "heurist.app_timemap", {
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        $(this.document).off(top.HAPI.Event.LOGIN+' '+top.HAPI.Event.LOGOUT+' '+top.HAPI.Event.ON_REC_SEARCHRESULT);
+        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT);
 
         // remove generated elements
         this.mapframe.remove();

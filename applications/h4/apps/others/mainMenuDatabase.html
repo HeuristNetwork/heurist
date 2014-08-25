@@ -1,0 +1,65 @@
+<li>DATABASE</li>
+
+<li style="padding-left:5px;"><a href="../common/connect/getListOfDatabases.php?popup=1" name="auto-popup" class="portrait"
+    onClick="{return false;}"
+    title="Open and login to another Heurist database - current database remains open">
+    Open database</a>
+</li>
+
+<li style="padding-left:5px;"><a href="../admin/setup/dbcreate/createNewDB.php?popup=1" name="auto-popup" class="portrait"
+    onClick="{return false;}"
+    title="Create a new database on the current server - essential structure elements are populated automatically">
+    New database</a>
+</li>
+
+<li>STRUCTURE</li>
+
+<!-- database name is appended automatically by auto-popup -->
+<li style="padding-left:5px;">
+    <a href="../admin/structure/rectypes/manageRectypes.php?popup=1" name="auto-popup" class="verylarge"
+        onClick="{return false;}"
+        title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
+        Record types / fields</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="../admin/structure/import/annotatedTemplate.php?popup=1" name="auto-popup" class="verylarge"
+        onClick="{return false;}"
+        title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
+        Annotated templates (beta)</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="../admin/structure/import/selectDBForImport.php?popup=1" name="auto-popup" class="verylarge"
+        onClick="{return false;}"
+        title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
+        Import structure</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="../admin/structure/fields/manageDetailTypes.php?popup=1" name="auto-popup" class="verylarge"
+        onClick="{return false;}"
+        title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
+        Manage field types</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="../admin/structure/terms/editTerms.php?popup=1" name="auto-popup" class="verylarge"
+        onClick="{return false;}"
+        title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
+        Manage terms</a>
+</li>
+
+<li style="padding-left:5px;"><a href="javascript:void(0)"
+    onClick="{top.HEURIST4.util.reloadStrcuture();}"
+    title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
+    Refresh lists</a>
+</li>
+
+<li>ANALYSE</li>
+
+<li style="padding-left:5px;"><a href="#"
+    onClick="top.HEURIST4.search.popupLink(top.HEURIST4.baseURL +'viewers/crosstab/crosstabs.php?' + top.HEURIST4.currentQuery_main)"
+    title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
+    Crosstabs analysis</a>
+</li>

@@ -106,7 +106,7 @@ $.widget( "heurist.editing_input", {
         .appendTo( this.element );
 
 
-        if( !top.HEURIST.util.isArray(this.options.values) ){
+        if( !top.HEURIST4.util.isArray(this.options.values) ){
             //this.options.values.length==0
             this.options.values = [''];
         }
@@ -177,7 +177,7 @@ $.widget( "heurist.editing_input", {
         var inputid = 'input'+idx+'_'+this.options.dtID;
         value = value ?value:'';
 
-        //@todo      var defaultValue = (top.HEURIST.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
+        //@todo      var defaultValue = (top.HEURIST4.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
 
 
         var $inputdiv = $( "<div>" ).addClass('input-div').appendTo( this.input_cell );
@@ -348,7 +348,7 @@ $.widget( "heurist.editing_input", {
         var allTerms = this.f('rst_FilteredJsonTermIDTree');
         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
-        top.HEURIST.util.createTermSelectExt($input.get(0), detailType, allTerms, headerTerms, value, true);
+        top.HEURIST4.util.createTermSelectExt($input.get(0), detailType, allTerms, headerTerms, value, true);
 
     },
 
@@ -384,9 +384,9 @@ $.widget( "heurist.editing_input", {
 
         }else if(detailType=="enum" || detailType=="relationtype"){
 
-            disp_value = top.HEURIST.util.getTermValue(detailType, value, true);
+            disp_value = top.HEURIST4.util.getTermValue(detailType, value, true);
 
-            if(top.HEURIST.util.isempty(value)) {
+            if(top.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missed. id '+termID
             }
         } else if(detailType=="file"){

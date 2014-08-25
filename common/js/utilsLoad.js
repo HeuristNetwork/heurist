@@ -35,7 +35,7 @@ if (! document.body) {
 }
 
 if (! top.HEURIST) {
-    var installDir = top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+    var installDir = top.location.pathname.replace(/(((admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 
     /**
      * main Heurist Namespace

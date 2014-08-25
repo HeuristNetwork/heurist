@@ -74,16 +74,19 @@
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/search_links.js"></script>
+        <script type="text/javascript" src="apps/others/mainMenu.js"></script>
+        <script type="text/javascript" src="apps/search/resultList.js"></script>
         <!-- script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/profile.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         <script type="text/javascript" src="apps/profile_edit.js"></script>
         <script type="text/javascript" src="apps/pagination.js"></script>
-        -->
         <script type="text/javascript" src="apps/rec_list.js"></script>
+        -->
         <!-- DEBUG
         -->
 
+        <script type="text/javascript" src="apps/search/resultListMenu.js"></script>
         <script type="text/javascript" src="apps/rec_actions.js"></script>
         <script type="text/javascript" src="apps/rec_search.js"></script>
         <script type="text/javascript" src="apps/rec_relation.js"></script>
@@ -123,14 +126,14 @@
                 */
 
                 //Performs hAPI initialization for given database
-                window.HAPI = new hAPI('<?=$_REQUEST['db']?>',
+                window.HAPI4 = new hAPI('<?=$_REQUEST['db']?>',
                     function(success) //callback function of hAPI initialization
                     {
                         if(success)  //system is inited
                         {
-                            var prefs = window.HAPI.get_prefs();
+                            var prefs = window.HAPI4.get_prefs();
                             //loads localization
-                            window.HR = window.HAPI.setLocale(prefs['layout_language']); 
+                            window.HR = window.HAPI4.setLocale(prefs['layout_language']); 
 
                             //loads theme (style for layout)
                             if(prefs['layout_theme'] && prefs['layout_theme']!="base" ){
@@ -142,46 +145,47 @@
                             }
                             //add theme link to html header
                             $("head").append(cssLink);
-                            $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">')); //">')); //
+                            $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
+                            //$("head").append($('<link rel="stylesheet" type="text/css" href="../../common/css/global.css?t='+(new Date().getTime())+'">'));
 
 
                             //load database structure (record types, field types, terms) definitions
-                            window.HAPI.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                                if(response.status == top.HAPI.ResponseStatus.OK){
-                                    top.HEURIST.rectypes = response.data.rectypes;
-                                    top.HEURIST.terms = response.data.terms;
-                                    top.HEURIST.detailtypes = response.data.detailtypes;
+                            window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                    top.HEURIST4.rectypes = response.data.rectypes;
+                                    top.HEURIST4.terms = response.data.terms;
+                                    top.HEURIST4.detailtypes = response.data.detailtypes;
 
                                     //in layout.js
                                     appInitAll("l01", "#layout_panes");
                                     /*                        
                                     //get all terms and rectypes   terms:0,
-                                    window.HAPI.SystemMgr.get_defs({terms:'all'}, function(response){
-                                    if(response.status == top.HAPI.ResponseStatus.OK){
-                                    top.HEURIST.terms = response.data.terms;
+                                    window.HAPI4.SystemMgr.get_defs({terms:'all'}, function(response){
+                                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                                    top.HEURIST4.terms = response.data.terms;
 
                                     //in layout.js
                                     appInitAll("l01", "#layout_panes");
 
                                     }else{
-                                    top.HEURIST.util.redirectToError(response.message);
+                                    top.HEURIST4.util.redirectToError(response.message);
                                     }
                                     });
                                     */
                                 }else{
-                                    top.HEURIST.util.redirectToError(response.message);
+                                    top.HEURIST4.util.redirectToError(response.message);
                                 }
                             });
-                            /*window.HAPI.SystemMgr.get_defs({detailtypes:'all', mode:2}, function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
-                            top.HEURIST.detailtypes = response.data.detailtypes;
+                            /*window.HAPI4.SystemMgr.get_defs({detailtypes:'all', mode:2}, function(response){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                            top.HEURIST4.detailtypes = response.data.detailtypes;
                             }else{
 
                             }
                             });*/
 
                         }else{
-                            //top.HEURIST.util.redirectToError
+                            //top.HEURIST4.util.redirectToError
                             alert("Can not initialize system");
                         }
                 });
@@ -201,12 +205,32 @@
                         }
                     }
                 );
+                
+                
+                // OLD H3 stuff
+                top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+    
+                
             });
+            
+            
+            var closePopupFromH3 = function(){
+                   $( "#heurist-dialog" ).dialog('close');
+            }            
 
         </script>
 
     </head>
     <body style="background-color:#c9c9c9">
+    
+    
+        <!-- These are old H3 stuff - it needds for support old features in popups -->
+        <script src="../../common/php/loadHAPI.php"></script>
+        <script src="../../common/js/utilsLoad.js"></script> 
+        <script src="../../common/php/getMagicNumbers.php"></script>
+        <script src="../../common/php/displayPreferences.php"></script>
+        <!-- These are old H3 stuff - it needds for support old features in popups -->
+    
         <div id="layout_panes" height="100%">
         </div>
 

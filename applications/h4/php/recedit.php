@@ -63,16 +63,16 @@
         <script type="text/javascript">
             <?php
                 //@ todo - load this stuff in hEditing
-                print "top.HEURIST.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 0) ).";\n";
-                print "top.HEURIST.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
+                print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 0) ).";\n";
+                print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
 
             var editing;
 
             $(document).ready(function() {
 
-                if(!top.HAPI){
-                    top.HAPI = new hAPI('<?=$_REQUEST['db']?>');//, <?=json_encode($system->getCurrentUser())?> );
+                if(!top.HAPI4){
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');//, <?=json_encode($system->getCurrentUser())?> );
                 }
 
                 var $container = $("<div>").appendTo($("body"));
@@ -85,9 +85,9 @@
                 //t:26 f:85:3313  f:1:building
                 if( q )
                 {
-                    top.HAPI.RecordMgr.search({q: q, w: "all", f:"structure", l:1},
+                    top.HAPI4.RecordMgr.search({q: q, w: "all", f:"structure", l:1},
                         function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 var recset = new hRecordSet(response.data);
                                 editing.load(recset);
@@ -102,9 +102,9 @@
 
                     var rt = '<?=@$_REQUEST['rt']?>';
 
-                    top.HAPI.RecordMgr.add( {rt:rt}, //ro - owner,  rv - visibility
+                    top.HAPI4.RecordMgr.add( {rt:rt}, //ro - owner,  rv - visibility
                         function(response){
-                            if(response.status == top.HAPI.ResponseStatus.OK){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 var recset = new hRecordSet(response.data);
                                 editing.load(recset);

@@ -28,7 +28,7 @@ $.widget( "heurist.rectype_manager", {
         selection:[], 
 
         current_GrpID: null,
-        // we take tags from top.HAPI.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
+        // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 1  // order by name
     },
 
@@ -153,7 +153,7 @@ $.widget( "heurist.rectype_manager", {
 
     _setOptions: function( options ) {
         this._superApply( arguments );
-        if(top.HEURIST.util.isnull(this.options.selection)){
+        if(top.HEURIST4.util.isnull(this.options.selection)){
             this.options.selection = [];
         }
         this._refresh();
@@ -184,9 +184,9 @@ $.widget( "heurist.rectype_manager", {
     _updateGroups: function(){
 
         var selObj = this.select_grp.get(0);
-        top.HEURIST.util.createRectypeGroupSelect( selObj, top.HR('all groups') );
+        top.HEURIST4.util.createRectypeGroupSelect( selObj, top.HR('all groups') );
 
-        this.select_grp.val( top.HEURIST.rectypes.groups[0].id);
+        this.select_grp.val( top.HEURIST4.rectypes.groups[0].id);
         this.select_grp.change();
 
     },
@@ -202,14 +202,14 @@ $.widget( "heurist.rectype_manager", {
 
         var rectypes = [],
         rectypeID, name, usage, is_selected;
-        var idx_rty_grpid = top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+        var idx_rty_grpid = top.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
 
-        for (rectypeID in  top.HEURIST.rectypes.names)
+        for (rectypeID in  top.HEURIST4.rectypes.names)
         {
-            if( rectypeID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST.rectypes.typedefs[rectypeID].commonFields[idx_rty_grpid]) ){
+            if( rectypeID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST4.rectypes.typedefs[rectypeID].commonFields[idx_rty_grpid]) ){
 
-                name = top.HEURIST.rectypes.names[rectypeID];
-                usage = 0; //  top.HEURIST.rectypes.rtUsage[rectypeID];
+                name = top.HEURIST4.rectypes.names[rectypeID];
+                usage = 0; //  top.HEURIST4.rectypes.rtUsage[rectypeID];
                 is_selected =  this.options.selection.indexOf(rectypeID);
 
                 rectypes.push([rectypeID, name, usage, is_selected]);
@@ -273,9 +273,9 @@ $.widget( "heurist.rectype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  top.HAPI.basePath+'assets/16x16.gif'
+                src:  top.HAPI4.basePath+'assets/16x16.gif'
             })
-            .css('background-image', 'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)')
+            .css('background-image', 'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)')
             .appendTo($iconsdiv);
 
             $('<div>',{

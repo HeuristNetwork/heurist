@@ -44,7 +44,7 @@ $.widget( "heurist.rec_viewer_ext", {
         .appendTo( this.element ).hide();
 
         //-----------------------   listener for global event
-        $(this.document).on(top.HAPI.Event.ON_REC_SELECT,
+        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT,
             function(e, data) {
 
                 var _recID;
@@ -82,7 +82,7 @@ $.widget( "heurist.rec_viewer_ext", {
     /* private function */
     _refresh: function(){
 
-        if(this.options.databases && this.options.databases.indexOf(top.HAPI.database)<0){
+        if(this.options.databases && this.options.databases.indexOf(top.HAPI4.database)<0){
 
             this.framecontent.hide();
             this.lbl_message.show();
@@ -99,7 +99,7 @@ $.widget( "heurist.rec_viewer_ext", {
             }else{
                 this.lbl_message.hide();
                 this.framecontent.show();
-                var newurl = this.options.url.replace("[recID]",  this.options.recID).replace("[dbname]",  top.HAPI.database);
+                var newurl = this.options.url.replace("[recID]",  this.options.recID).replace("[dbname]",  top.HAPI4.database);
                 if(this.dosframe.attr('src')!==newurl){
                     this.dosframe.attr('src', newurl); //recID
                 }
@@ -113,7 +113,7 @@ $.widget( "heurist.rec_viewer_ext", {
     // revert other modifications here
     _destroy: function() {
         this.element.off("myOnShowEvent");
-        $(this.document).off(top.HAPI.Event.ON_REC_SELECT);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
 
         // remove generated elements
         this.dosframe.remove();

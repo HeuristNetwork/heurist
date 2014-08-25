@@ -75,15 +75,15 @@ function hEditing() {
         _isaddnewrecord = true;
         recdata = null;
 
-        top.HAPI.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
+        top.HAPI4.RecordMgr.add( {rt:_recordtype}, //ro - owner,  rv - visibility
             function(response){
-                if(response.status == top.HAPI.ResponseStatus.OK){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     recdata = new hRecordSet(response.data);
                     _load();
 
                 }else{
-                    top.HEURIST.util.showMsgErr(response);
+                    top.HEURIST4.util.showMsgErr(response);
                 }
             }
 
@@ -111,21 +111,21 @@ function hEditing() {
             }
         } else if( !isNaN(parseInt(_recdata)) ) {
 
-            top.HAPI.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
+            top.HAPI4.RecordMgr.search({q: 'ids:'+_recdata, w: "all", f:"structure", l:1},
                 function(response){
-                    if(response.status == top.HAPI.ResponseStatus.OK){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         recdata = new hRecordSet(response.data);
                         _load();
 
                     }else{
-                        top.HEURIST.util.showMsgErr(response);
+                        top.HEURIST4.util.showMsgErr(response);
                     }
                 }
             );
 
         }else{
-            top.HEURIST.util.showMsgErr('Wrong parameters for record edit');
+            top.HEURIST4.util.showMsgErr('Wrong parameters for record edit');
         }
     }
 
@@ -145,7 +145,7 @@ function hEditing() {
 
         rectypeID = recdata.fld(record, 'rec_RecTypeID');
         if(!rectypes || rectypes.length==0){
-            rectypes = top.HEURIST.rectypes;
+            rectypes = top.HEURIST4.rectypes;
         }
 
         recID = recdata.fld(record, 'rec_ID');
@@ -177,10 +177,10 @@ function hEditing() {
         $('<div>')
         .css('display','inline-block')
         .append( $('<img>',{
-            src:  top.HAPI.basePath+'assets/16x16.gif',
+            src:  top.HAPI4.basePath+'assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
-            .css({'background-image':'url('+ top.HAPI.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
+            .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
         .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>')
         .appendTo($header);
 
@@ -200,7 +200,7 @@ function hEditing() {
                 var dtID = order[i];
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
-                    (top.HAPI.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
+                    (top.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
                         rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;
@@ -212,7 +212,7 @@ function hEditing() {
                 if( (rfrs[dtID][fi['dty_Type']])=="separator" || !values) continue;
                 var isempty = true;
                 $.each(values, function(idx,value){
-                if(!top.HEURIST.util.isempty(value)){ isempty=false; return false; }
+                if(!top.HEURIST4.util.isempty(value)){ isempty=false; return false; }
                 } );
                 if(isempty) continue;
                 */
@@ -295,15 +295,15 @@ function hEditing() {
         var request = {ID: recID, RecTypeID: rectypeID, 'details': details};
 
 
-        top.HAPI.RecordMgr.save( request,
+        top.HAPI4.RecordMgr.save( request,
             function(response){
-                if(response.status == top.HAPI.ResponseStatus.OK){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     alert('Record saved');
 
                 }else{
 
-                    top.HEURIST.util.showMsgErr(response);
+                    top.HEURIST4.util.showMsgErr(response);
                 }
             }
 
