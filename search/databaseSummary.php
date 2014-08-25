@@ -57,53 +57,70 @@
         <title>Database Summary</title>
 
         <link rel="stylesheet" type="text/css" href="../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../external/d3/colpick.css">
         <style>
             /** Heurist table */
-            #container {
+            #container, settings, #visualisation, svg {
                 width: 100%;
-                height: 100%;
-                overflow: scroll;
+                height: 100%;                 
+            }
+
+            h3 {
+                padding: 3px;
+                margin: 0px;
             }
             
-            table.tbcount {    
+            /** Table */ 
+            #records {
+                 overflow: scroll;
+            }       
+            
+            table {
                 table-layout: auto;
- 
                 border-width: 0 0 1px 1px;
                 border-spacing: 0;
-                border-collapse: collapse;
-                border-style: solid;
-            }
+                border: none;
+            }     
             
+            caption {
+                float: left;
+            }
+
             td, th {
                 vertical-align: top;
                 margin: 0px; 
-                padding: 2px; 
+                padding: 1px;                    
             }
             
-            .tbcount td, .tbcount th {
-                border-width: 1px 1px 0px 0px; 
-                border-style: solid;  
-            }
-
             .row:hover {
                 background-color: #CCCCCC;
             } 
-
+            
             a:hover, input:hover {
                 text-decoration: none;
                 cursor: pointer;
             }
-
-            /** D3 */
-            .svg-cell {
-                border-left: 1px dotted black;
+            
+            /** Settings */
+            #visualisation {
+                border-left: 1px dashed black;
             }
             
             svg {
-                width: 100%;
-                height: 90%;   
+                border-top: 1px dashed black;
             }
             
+            #linecolor {
+                display: inline-block; 
+                width: 10px; 
+                height: 10px; 
+                border: 1px solid black; 
+                background-color: #999;
+            }
+            
+         
+
+            /** D3 */
             /** Move records around */
             g:hover {
                 cursor: move;
@@ -112,9 +129,9 @@
             /** Lines between records */
             .link {
               fill: none;
-              stroke: #999;   
               stroke-opacity: .6; 
               pointer-events: all;
+             
             }
             
             .link:hover {
@@ -142,17 +159,13 @@
                  stroke-opacity: .8;
             }
             
-            /** Settings */
-            #settings {
-                width: 100%;
-                height: 10%;
-                border-top: 1px dotted black;
-                padding: 3px;
-            }
+            
         </style>
         
         <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../external/d3/d3.js"></script> 
+        <script type="text/javascript" src="../external/d3/colpick.js"></script>
+        <script type="text/javascript" src="../external/d3/fisheye.js"></script> 
         <script>
             function onrowclick(rt_ID, innewtab){
                 var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
@@ -171,13 +184,14 @@
         <!-- Holds the record count table left (as small as possible), and the SVG visualisation on the right (as big as possible) -->
         <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
-                <td width="25%">
+                <td width="250px">
                     <!-- Record count table -->
-                    <table class="tbcount" cellpadding="4" cellspacing="1">
+                    <table id="records" cellpadding="4" cellspacing="1" border="1">
+                         <caption><h3>Records</h3></caption>
                          <tr>
                             <th>ID</th>
                             <th>Icon</th>
-                            <th style="max-width: 100px">Record type</th>
+                            <th>Record type</th>
                             <th>Link</th>
                             <th>Count</th>
                             <th>Show <input type='checkbox' id="show-all"></th>
@@ -225,31 +239,112 @@
                 </td>
 
                 <!-- D3 visualisation -->
-                <td class="svg-cell">
-                    <svg>    
-                        <defs>
-                            <marker id="marker" markerWidth="8" markerHeight="8" refx="10" refy="0"
-                                    viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto">
-                                <path d="M0,-5L10,0L0,5"></path>
-                            </marker> 
-                        </defs>    
-                    </svg>
-                    
-                    <div id="settings">
-                        <b>Settings</b>
-                        
-                        <!-- Line type -->
-                        <div class="setting">
-                            <i>Line type:</i>
-                            <select id="linetype">
-                                <option value="straight">straight</option>
-                                <option value="curved">curved</option>
-                            </select>
-                        </div>
-                        
-                        
-
-                    </div>
+                <td>
+                    <table id="visualisation" cellpadding="4" cellspacing="1">
+                         <tr>
+                            <td height="1">
+                                <!-- SETTINGS -->
+                                <table id="settings" cellpadding="4" cellspacing="1" height="1%">
+                                    <caption><h3>Settings</h3></caption>
+                                    
+                                    <!-- Line type -->
+                                    <td>
+                                        <i>Line type:</i>
+                                        <select id="linetype">
+                                            <option value="straight">straight</option>
+                                            <option value="curved">curved</option>
+                                        </select>
+                                    </td>    
+                                    
+                                    <!-- Line color -->
+                                    <td>
+                                        <i>Line color:</i>
+                                        <div id="linecolor"></div>
+                                    </td>  
+                                    
+                                    <!-- Line thickness -->
+                                    <td>
+                                        <i>Line thickness:</i>
+                                        <input id="linethickness" type="range" min="1" max="10" value="5"> 
+                                    </td> 
+                                </table>
+                            </td>   
+                         </tr>
+                         <tr>
+                            <td>
+                                <!-- SVG -->
+                                <svg>    
+                                    <defs>
+                                        <!-- Marker for line with a stroke-width of 0 -->
+                                        <marker id="marker0" markerWidth="4" markerHeight="4" refx="-1" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 1 -->
+                                        <marker id="marker1" markerWidth="5" markerHeight="5" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 2 -->
+                                        <marker id="marker2" markerWidth="6" markerHeight="6" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 3 -->
+                                        <marker id="marker3" markerWidth="7" markerHeight="7" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 4 -->
+                                        <marker id="marker4" markerWidth="8" markerHeight="8" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 5 -->
+                                        <marker id="marker5" markerWidth="9" markerHeight="9" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 6 -->
+                                        <marker id="marker6" markerWidth="10" markerHeight="10" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 7 -->
+                                        <marker id="marker7" markerWidth="11" markerHeight="11" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 8 -->
+                                        <marker id="marker8" markerWidth="12" markerHeight="12" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                   
+                                        <!-- Marker for line with a stroke-width of 9 -->
+                                        <marker id="marker9" markerWidth="13" markerHeight="13" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                        
+                                        <!-- Marker for line with a stroke-width of 10 -->
+                                        <marker id="marker10" markerWidth="13" markerHeight="13" refx="-2" refy="0"
+                                                viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
+                                            <path d="M0,-5L10,0L0,5"></path>
+                                        </marker> 
+                                    </defs>    
+                                </svg>
+                            </td>
+                         </tr>
+                    </table>
                 </td>
             </tr>
         </table>

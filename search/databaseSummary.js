@@ -77,6 +77,7 @@ function isUnconstrained(record) {
     return false;
 }    
 
+
 /** Converts the raw XML data to D3 usable nodes and links */
 function convertData() {
     // Holds a list of unique nodes
@@ -135,6 +136,7 @@ function convertData() {
                             
                             // Check if we should filter this record
                             var index = $.inArray(usageInfo.name, filter);
+                            console.log("Index: " + index);
                             if(index == -1 && usageInfo.count > 0) {
                                 // Construct a link; add root record info
                                 var link = {};
@@ -165,10 +167,10 @@ function convertData() {
     }
     
     // Construct a data object and return it.
-    var data = {"nodes": nodes, "links": links};
+    var obj = {"nodes": nodes, "links": links};
     console.log("Data has been transformed to D3 format:");
-    console.log(data);
-    return data;
+    console.log(obj);
+    return obj;
 }
 
 
@@ -178,7 +180,27 @@ function convertData() {
 
 
 
+/** Calculates the line width based on count */
+function getLineWidth(count) {
+    var width = Math.log(count);
+    if(width > 1) {
+        width = Math.sqrt(width);
+    }
+    return Math.round(width);
+}
+
+
+/** Called when the path has been hovered */
+function pathHovered(path) {
+    //alert("Path hovered!");
+    console.log(path);
+    var pointer = path.getAttribute("pointer");
+    //console.log("Pointer: " + pointer);
+}
+
+
 /** Visualizes the data */ 
+var lines;
 function visualizeData() {
     // Variables
     var width = $("svg").width();     // Determine the SVG width
@@ -209,50 +231,42 @@ function visualizeData() {
                          .start();
 
     // Add the chosen lines
-    var lines;
     if(linetype == "curved") {
         // Add curved lines
          lines = svg.append("svg:g").selectAll("path")
                                     .data(force.links())
-                                    .enter().append("svg:path")
-                                    .attr("class", "link")
-                                    .attr("marker-mid", "url(#marker)") 
-                                    .style("stroke-width", function(d) { 
-                                      var width = Math.log(d.source.count);
-                                      if(width > 1) {
-                                          width = Math.sqrt(width);
-                                      }
-                                      return 0.5 + width;
-                                   })    
-                                    .attr("pointer", function(d, i) {
-                                        return d.pointer;
-                                    })
-                                    .attr("onmouseover", function(d, i) {
-                                        return "pathHovered(this)";
-                                    });
+                                    .enter().append("svg:path");
     }else{
         // Add straight lines
-        lines = svg.append("svg:g").selectAll("line.link")
+        lines = svg.append("svg:g").selectAll("polyline.link")
                                    .data(force.links())
                                    .enter()
-                                   .append("svg:line")
-                                   .attr("class", "link")
-                                   .attr("pointer", function(d, i) {
-                                        return d.pointer;
-                                    })
-                                   .style("stroke-width", function(d) { 
-                                      var width = Math.log(d.source.count);
-                                      if(width > 1) {
-                                          width = Math.sqrt(width);
-                                      }
-                                      return 0.5 + width;
-                                   })
-                                   .attr("x1", function(d) { return d.source.x; })
-                                   .attr("y1", function(d) { return d.source.y; })
-                                   .attr("x2", function(d) { return d.target.x; })
-                                   .attr("y2", function(d) { return d.target.y; });
+                                   .append("svg:polyline");
     }
-                       
+    // Adding shared attributes
+    lines.attr("class", "link") 
+         .attr("stroke", function(d) {
+             var color = getLineColor();
+             if(color) {
+                 return color;
+             }else{
+                 return "#999";
+             }
+         })
+         .attr("pointer", function(d, i) {
+            return d.pointer;
+         })
+         .attr("marker-mid", function(d) {
+            return "url(#marker" + getLineWidth(d.source.count) + ")";
+         })
+         .style("stroke-width", function(d) { 
+            return 0.5 + getLineWidth(d.source.count)/2;
+         })
+         .attr("onmouseover", function(d, i) {
+            return "pathHovered(this)";
+         });
+    
+    
     // Defining the nodes
     var node = svg.selectAll(".node")
                   .data(force.nodes())
@@ -264,9 +278,9 @@ function visualizeData() {
                   .call(force.drag);
 
     // Adding circles to the nodes
-    node.append("circle")
-        .attr("r", iconSize*0.75)
-        .attr("class", "around");
+    var circle = node.append("circle")
+                     .attr("r", iconSize*0.75)
+                     .attr("class", "around");
    
     // Adding icons to the nodes 
     node.append("svg:image") 
@@ -295,7 +309,8 @@ function visualizeData() {
         .text(function(d) { 
             return d.name; 
         });
-        
+ 
+    
     
      /** Tick handler for curved lines */
     function curvedTick() {
@@ -322,12 +337,13 @@ function visualizeData() {
     
     /** Tick handler for straight lines */                           
     function straightTick() {
-        lines.attr("x1", function(d) { return d.source.x; })
-             .attr("y1", function(d) { return d.source.y; })
-             .attr("x2", function(d) { return d.target.x; })
-             .attr("y2", function(d) { return d.target.y; });
- 
-         node.attr("transform", function(d) { 
+        lines.attr("points", function(d) {
+           return d.source.x + "," + d.source.y + " " +
+                  (d.source.x +(d.target.x-d.source.x)/2) + "," + (d.source.y +(d.target.y-d.source.y)/2) + " " +  
+                  d.target.x + "," + d.target.y;
+       });
+
+        node.attr("transform", function(d) { 
             return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
@@ -335,13 +351,6 @@ function visualizeData() {
 }
 
 
-/** Called when the path has been hovered */
-function pathHovered(path) {
-    //alert("Path hovered!");
-    console.log(path);
-    var pointer = path.getAttribute("pointer");
-    //console.log("Pointer: " + pointer);
-}
 
 
 
@@ -363,51 +372,75 @@ function getFilter() {
     return names;
 }
 
-/** Listen to 'show-record' checkbox changes */  
-$(".show-record").change(function(e) {
-    visualizeData();  
-});
-
-/** Listen to the 'show-all' checkbox */
-$("#show-all").change(function(e) {
-    var checked= $(this).is(':checked');
-    console.log("CHECKED: " + checked);
-    $(".show-record").prop("checked", checked);
-    visualizeData();
-});
-
-
-
-
-
 /** Returns the line type setting */
 function getLineType() {
-    return $("#linetype").val();
+    return localStorage.getItem("linetype");
 }
 
-/** Listens to linetype selection changes */
-$("#linetype").change(function(e) {
-    localStorage.setItem("linetype", getLineType());
-    visualizeData();
-});
-
-
-
+/** Returns the line color setting */
+function getLineColor() {
+    return localStorage.getItem("linecolor");
+}
 
 /** Body is done with loading */
 var xml;
 $(document).ready(function() {
     /** Updating settings in UI */
-    // Line type setting
+    // Set line type setting
     var linetype = localStorage.getItem("linetype");
-    $("#linetype option[value='" +linetype+ "']").attr("selected", true);
+    if(linetype) {
+        $("#linetype option[value='" +linetype+ "']").attr("selected", true);
+    }
+    
+    // Listens to linetype selection changes
+    $("#linetype").change(function(e) {
+        localStorage.setItem("linetype", $("#linetype").val());
+        visualizeData();
+    });
+    
+    // Set line color setting
+    var linecolor = getLineColor(); 
+    if(linecolor) {
+        $("#linecolor").css("background-color", linecolor);
+    }
+    
+    // Listen to 'line color' selection changes
+    $('#linecolor').colpick({
+        layout: 'hex',
+        onSubmit: function(hsb, hex, rgb, el) {
+            var color = "#"+hex; 
+            
+            localStorage.setItem("linecolor", color);
+            lines.attr("stroke", color);
+            
+            $(el).css('background-color', color);
+            $(el).colpickHide();
+        }
+    });
+    
+    // Listen to 'show-record' checkbox changes  
+    $(".show-record").change(function(e) {
+        visualizeData();  
+    });
+
+    // Listen to the 'show-all' checkbox 
+    $("#show-all").change(function(e) {
+        var checked= $(this).is(':checked');
+        console.log("CHECKED: " + checked);
+        $(".show-record").prop("checked", checked);
+        visualizeData();
+    });
+    
+    
+    
     
     /** Retrieving XML relationship data */
     var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
-        d3.xml(url, "application/xml", function(error, xmlData) {
+    console.log("Loading XML data from: " + url);
+    d3.xml(url, "application/xml", function(error, xmlData) {
         // If there is an error, show it to the user
         if(error) {
-            return alert("Unable to load data, error message: \"" + error.statusText +"\"");
+            return alert("Unable to load data: \"" + error.statusText +"\"");
         }
         
         // Now visualize it.

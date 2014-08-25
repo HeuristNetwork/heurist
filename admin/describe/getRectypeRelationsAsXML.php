@@ -26,8 +26,8 @@
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 
     if (!is_logged_in()) {
-        print "Not logged in";
-        return;
+        header("HTTP/1.1 401 Unauthorized");
+        exit;
     }
 
     // We are going to represent XML. Must be on top.
