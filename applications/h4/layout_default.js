@@ -86,7 +86,7 @@ options - parameters to init application
 */ 
 var layouts = [
     {id:'l01', name:'h3 classic', theme:'smoothness',
-        north:{size:88, resizable:false,
+        north:{size:90, resizable:false,
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'100%', border:'none', 'background':'none'} },    //top panel
                 

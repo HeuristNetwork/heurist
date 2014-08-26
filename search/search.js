@@ -3314,7 +3314,7 @@ top.HEURIST.search = {
             options = {height:dim.h*0.8, width:800};
         }else if (targ.className.match(/\blandscape\b/)){
             options = {height:dim.h*0.9, width:dim.w*0.8};
-		}
+        }
 		top.HEURIST.util.popupURL(top, targ.href, options);
 
 		return false;

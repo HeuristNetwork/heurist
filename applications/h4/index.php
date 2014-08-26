@@ -67,7 +67,7 @@
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
 
-        <!-- this scripts are loaded expicitely - for debug purposes -->
+        <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/rec_viewer.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
@@ -135,8 +135,8 @@
                             //loads localization
                             window.HR = window.HAPI4.setLocale(prefs['layout_language']); 
 
-                            //loads theme (style for layout)
-                            if(prefs['layout_theme'] && prefs['layout_theme']!="base" ){
+                            //loads theme (style for layout) - SINCE WE BACK TO H3 - always use default theme
+                            if(false && prefs['layout_theme'] && prefs['layout_theme']!="base" ){
                                 cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
                                     prefs['layout_theme']+'/jquery-ui.css" />');
                             }else{
@@ -156,7 +156,7 @@
                                     top.HEURIST4.terms = response.data.terms;
                                     top.HEURIST4.detailtypes = response.data.detailtypes;
 
-                                    //in layout.js
+                                    //in layout.js - load layout #101
                                     appInitAll("l01", "#layout_panes");
                                     /*                        
                                     //get all terms and rectypes   terms:0,
@@ -214,7 +214,7 @@
             });
             
             
-            var closePopupFromH3 = function(){
+            var closePopupFromH3 = function(context){
                    $( "#heurist-dialog" ).dialog('close');
             }            
 
@@ -224,14 +224,16 @@
     <body style="background-color:#c9c9c9">
     
     
-        <!-- These are old H3 stuff - it needds for support old features in popups -->
-        <script src="../../common/php/loadHAPI.php"></script>
+        <!-- These are old H3 stuff - it needs for support old features in popups
+        <script src="../../common/php/loadHAPI.php"></script> -->
         <script src="../../common/js/utilsLoad.js"></script> 
-        <script src="../../common/php/getMagicNumbers.php"></script>
         <script src="../../common/php/displayPreferences.php"></script>
-        <!-- These are old H3 stuff - it needds for support old features in popups -->
+        <!-- 
+        <script src="../../common/php/getMagicNumbers.php"></script>
+        These are old H3 stuff - it needs for support old features in popups -->
     
-        <div id="layout_panes" height="100%">
+        <div id="layout_panes" style="height:100%">
+            &nbsp;
         </div>
 
         <div id="heurist-about" title="About">
@@ -258,6 +260,8 @@
         </div>
 
         <div id="heurist-dialog">
+        </div>
+        <div id="heurist-dialog2">
         </div>
     </body>
 </html>

@@ -1,22 +1,21 @@
-
 <li>HELP</li>
 
 <li class="admin-only" style="padding-left:5px;">
-    <a href="../help/index.html" target="_blank"
-        title="Comprehensive online help for the Heurist system">
-        Online help</a>
+    <a href="../../help/index.html" target="_blank"
+       title="Comprehensive online help for the Heurist system">
+       Online help</a>
 </li>
 
 <li class="admin-only" style="padding-left:5px;">
-    <a href="http://HeuristNetwork.org"  target="_blank"
-        title="Heurist Network website - a source for a wide range of information, services and contacts ">
-        Heurist Network</a>
+    <a href="http://HeuristNetwork.org" target="_blank"
+       title="Heurist Network website - a source for a wide range of information, services and contacts ">
+       Heurist Network</a>
 </li>
 
-<li class="admin-only"  style="padding-left:5px;" id="reportBug"><a href="#"
-    onClick="top.HEURIST4.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false,
-    height: 450,width: 740,callback: _bugReportCallback});return false;"
-    title="Click to send a bug report or feature request to the Heurist development team" >
+<li class="admin-only"  style="padding-left:5px;" id="reportBug">
+    <a href="../../export/email/formEmailRecordPopup.html?rectype=bugreport" name="auto-popup" 
+       onClick="{return false;}"
+       title="Click to send a bug report or feature request to the Heurist development team" >
     Bug report</a>
 </li>
 
@@ -29,7 +28,8 @@
 <li>-</li>
 
 <li class="admin-only" style="padding-left:5px;">
-    <a  href="#" onclick="{window.open('../applications/h4/?db='+database, '_blank')}"
+    <a  href="#"
+        onclick="{window.open('../../search/search.html?db='+window.HAPI4.database, '_blank'); return false;}"
         title="Old UI">
         Heurist 3</a>
 </li>

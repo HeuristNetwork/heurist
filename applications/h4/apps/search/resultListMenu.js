@@ -31,120 +31,18 @@ $.widget( "heurist.resultListMenu", {
         var that = this;
 
         this.element
-        .css('font-size', '0.8em')
+        .css('font-size', '0.9em')
         // prevent double click to select text
         .disableSelection();
-        
-        //show hide function
-        var _hide = function(ele) {
-                $( ele ).delay(500).hide();
-            },
-            _show = function(ele, parent) {
-                $('.menu-or-popup').hide(); //hide other
-                var menu = $( ele )
-                //.css('width', this.btn_user.width())
-                .show()
-                .position({my: "right top", at: "right bottom", of: parent });
-                $( document ).one( "click", function() { menu.hide(); });
-                return false;
-            };
-        
-        
-        this.btn_Search = $( "<button>",{
-            text: "Search"
-        }).appendTo( this.element ).button();
-        
-        this.menu_Search = $('<ul>')
-        .load('apps/search/resultListMenuSearch.html', function(){
-            that.menu_Search.addClass('menu-or-popup')
-            .css('position', 'absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "left bottom", of: this.btn_Search })
-        .hide();
 
-        this.btn_Selected = $( "<button>",{
-            text: "Selected"
-        }).appendTo( this.element ).button();
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
         
-        this.menu_Selected = $('<ul>')
-        .load('apps/search/resultListMenuSelected.html', function(){
-            that.menu_Selected.addClass('menu-or-popup')
-            .css('position', 'absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "left bottom", of: this.btn_Selected })
-        .hide();
+        this._initMenu('Search');
+        this._initMenu('Selected');
+        this._initMenu('Collected');
+        this._initMenu('Layout');
+        this.divMainMenuItems.menu();
 
-        this.btn_Collected = $( "<button>",{
-            text: "Collected"
-        }).appendTo( this.element ).button();
-        
-        this.menu_Collected = $('<ul>')
-        .load('apps/search/resultListMenuCollected.html', function(){
-            that.menu_Collected.addClass('menu-or-popup')
-            .css('position', 'absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "left bottom", of: this.btn_Collected })
-        .hide();
-
-        this.btn_Layout = $( "<button>",{
-            text: "Layout"
-        }).appendTo( this.element ).button();
-        
-        this.menu_Layout = $('<ul>')
-        .load('apps/search/resultListMenuLayout.html', function(){
-            that.menu_Layout.addClass('menu-or-popup')
-            .css('position', 'absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "left top", at: "left bottom", of: this.btn_Layout })
-        .hide();
-                
-        
-        //show/hide menu on button hover
-        this._on( this.btn_Search, {
-            mouseenter : function(){_show(this.menu_Search, this.btn_Search)},
-            mouseleave : function(){_hide(this.menu_Search)}
-        });
-        this._on( this.menu_Search, {
-            mouseenter : function(){_show(this.menu_Search, this.btn_Search)},
-            mouseleave : function(){_hide(this.menu_Search)}
-        });      
-        this._on( this.btn_Selected, {
-            mouseenter : function(){_show(this.menu_Selected, this.btn_Selected)},
-            mouseleave : function(){_hide(this.menu_Selected)}
-        });
-        this._on( this.menu_Selected, {
-            mouseenter : function(){_show(this.menu_Selected, this.btn_Selected)},
-            mouseleave : function(){_hide(this.menu_Selected)}
-        });
-        this._on( this.btn_Collected, {
-            mouseenter : function(){_show(this.menu_Collected, this.btn_Collected)},
-            mouseleave : function(){_hide(this.menu_Collected)}
-        });
-        this._on( this.menu_Collected, {
-            mouseenter : function(){_show(this.menu_Collected, this.btn_Collected)},
-            mouseleave : function(){_hide(this.menu_Collected)}
-        });
-        this._on( this.btn_Layout, {
-            mouseenter : function(){_show(this.menu_Layout, this.btn_Layout)},
-            mouseleave : function(){_hide(this.menu_Layout)}
-        });
-        this._on( this.menu_Layout, {
-            mouseenter : function(){_show(this.menu_Layout, this.btn_Layout)},
-            mouseleave : function(){_hide(this.menu_Layout)}
-        });
-
-        //init 
-        
-        
-        
         this._refresh();
 
     }, //end _create
@@ -179,7 +77,55 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Collected.remove();
         this.btn_Layout.remove();
         this.menu_Layout.remove();
+        this.divMainMenuItems.remove();
+    },
+    
+    _initMenu: function(name){
+        
+        var that = this;
 
+        //show hide function
+        var _hide = function(ele) {
+                $( ele ).delay(700).hide();
+            },
+            _show = function(ele, parent) {
+                $('.menu-or-popup').hide(); //hide other
+                var menu = $( ele )
+                //.css('width', this.btn_user.width())
+                .show()
+                .position({my: "left top", at: "left bottom", of: parent });
+                //$( document ).one( "click", function() { menu.hide(); });
+                return false;
+            };
+            
+        this['btn_'+name] = $('<a>',{
+            text: name, href:'#'
+        });
+        
+        $('<li>').append(this['btn_'+name])
+        .appendTo( this.divMainMenuItems );
+        //.button();
+        
+        this['menu_'+name] = $('<ul>')
+        .load('apps/search/resultListMenu'+name+'.html', function(){
+            that['menu_'+name].addClass('menu-or-popup')
+            .css('position','absolute')
+            .appendTo( that.document.find('body') )
+            .menu();
+        })
+        //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
+        .hide();
+        
+        this._on( this['btn_'+name], {
+            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+            mouseleave : function(){_hide(this['menu_'+name])}
+        });
+        this._on( this['menu_'+name], {
+            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+            mouseleave : function(){_hide(this['menu_'+name])}
+        });        
+        
+        
     },
     
     //init listeners for auto-popup links
@@ -219,6 +165,4 @@ $.widget( "heurist.resultListMenu", {
         });
     
     }
-    
-
 });

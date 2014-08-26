@@ -188,17 +188,10 @@
 
                 }
                 
-                closeThis();
+                top.HEURIST.closeThisWindow();
                 
             }
             
-            function closeThis(){
-                if (typeof parent.closePopupFromH3 === 'undefined') {
-                    window.close();
-                }else{
-                    parent.closePopupFromH3();
-                }
-            }
         </script>
 
         <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
@@ -336,7 +329,7 @@
 
         <div id="buttons" class="actionButtons">
             <input type="button" value="save" onClick="save();">
-            <input type="button" value="cancel" onClick="closeThis();">
+            <input type="button" value="cancel" onClick="top.HEURIST.closeThisWindow();">
         </div>
     </body>
 </html>

@@ -51,7 +51,7 @@
 
 <body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">
 
-<?=(@$_REQUEST['popup']?"":"<div class='banner'><h2>Open Database</h2></div>") ?>
+<?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Open Database</h2></div>") ?>
 <div id='page-inner'>
 <?php
 
@@ -84,7 +84,7 @@
 			$role = null;
 		}
 
-		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&role=\"+this.value;}'>";
+		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&popup=".@$_REQUEST['popup']."&role=\"+this.value;}'>";
 		print "<option ".
 					(($role==null)?'selected':'')." value='0'>All</option><option ".
 					(($role=='user')?'selected':'')." value='user'>User</option><option ".

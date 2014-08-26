@@ -322,7 +322,7 @@ function UserEditor() {
 					window.location.replace(top.HEURIST.baseURL + "admin/ugrps/msgRegistrationSuccess.html")
 				}else{
 					// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
-					window.close(context); //send back new HEURIST strcuture
+                    top.HEURIST.closeThisWindow(context); //send back new HEURIST strcuture
 				}
 			}
 		}
@@ -381,7 +381,7 @@ function UserEditor() {
 
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
-			window.close(null);
+			top.HEURIST.closeThisWindow(null);
 		}
 	}
 
@@ -425,10 +425,10 @@ function UserEditor() {
 				if(_updatedFields.length > 0) {
 					var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
 					if(areYouSure) {
-						window.close(null);
+						top.HEURIST.closeThisWindow(null);
 					}
 				}else{
-					window.close(null);
+					top.HEURIST.closeThisWindow(null);
 				}
 			},
 

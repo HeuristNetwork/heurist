@@ -552,3 +552,14 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.horizontalmenu {
+    border:none;
+    background:none;
+    padding:0;    
+}
+.horizontalmenu > .ui-menu-item {
+    display: inline-block;
+    float: left;
+    width: auto;
+}

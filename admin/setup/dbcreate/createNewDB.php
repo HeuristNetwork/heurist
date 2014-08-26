@@ -163,7 +163,7 @@
 
     <body class="popup" onload="hideProgress()">
 
-        <div class="banner"><h2>Create New Database</h2></div>
+        <?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
         <div id="page-inner" style="overflow:auto">
 
         <?php
@@ -210,7 +210,7 @@
             </div>
 
             <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
-                <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
+                <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>" method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
                     <?php if(!is_logged_in()) { ?>
                         <div id="detailTypeValues" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 

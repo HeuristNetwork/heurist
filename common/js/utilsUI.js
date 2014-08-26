@@ -148,6 +148,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * @type Object
 */
     popups: { list: [] },
+    
+    
 /**
 * Make a new Heurist-managed popup window.
 * parentWindow is the frame that the window should think opened it,
@@ -453,13 +455,42 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     * @see popupWindow()
     */
     popupURL: function(parentWindow, url, options) {
-        if (! options) {
-            options = { "url": url };
-        } else {
-            options["url"] = url;
-        }
+        
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+            
+            if (! options) {
+                options = { "url": url };
+            } else {
+                options["url"] = url;
+            }
 
-        return top.HEURIST.util.popupWindow(parentWindow, options);
+            return top.HEURIST.util.popupWindow(parentWindow, options);
+            
+        }else{
+            
+                        var $dlg = $("#heurist-dialog2");
+                        $dlg.empty();
+                        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                        
+                        var that = this;
+                        
+//    callback
+                        var opts = {
+                                autoOpen: true,
+                                width : (options.width>0?options.width+20:680),
+                                height: (options.height>0?options.height+20:690),
+                                modal: true,
+                                resizable: !options['no-resize'],
+                                //draggable: false,
+                                title: options["title"],
+                                resizeStop: function( event, ui ) {
+                                    that.dosframe.css('width','100%');
+                                }
+                        };
+                        this.dosframe.attr('src', url);
+                        $dlg.dialog(opts);
+            
+        }
     },
 
    /**

@@ -471,7 +471,16 @@ if (! top.HEURIST) {
                 var webkitTest = navigator.userAgent.match(/webkit\/(\S+)/i);
                 return (webkitTest  &&  parseInt(webkitTest[1]) < 400);
             }()
+        },
+        
+        closeThisWindow: function(context){
+                if (typeof parent.closePopupFromH3 === 'undefined') {
+                    window.close(context);
+                }else{
+                    parent.closePopupFromH3(context);
+                }
         }
+        
     };
 /**
 * Legacy code to setup fake console for debug output

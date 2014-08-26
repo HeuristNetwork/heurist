@@ -55,160 +55,17 @@ $.widget( "heurist.mainMenu", {
         // MAIN MENU-----------------------------------------------------
         
         this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'text-align':'right' }).appendTo(this.element);
-        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).appendTo(this.divMainMenu);
-        this.divMainMenuItems = $( "<div>").appendTo(this.divMainMenu);
         
+        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css('padding-bottom','4px').appendTo(this.divMainMenu);
         
-        //show hide function
-        var _hide = function(ele) {
-                $( ele ).delay(500).hide();
-            },
-            _show = function(ele, parent) {
-                $('.menu-or-popup').hide(); //hide other
-                var menu = $( ele )
-                //.css('width', this.btn_user.width())
-                .show()
-                .position({my: "right top", at: "right bottom", of: parent });
-                $( document ).one( "click", function() { menu.hide(); });
-                return false;
-            };
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.divMainMenu);
         
-        
-        this.btn_Help = $( "<button>",{
-            text: "Help"
-        })
-        .css('float','right')
-        .appendTo( this.divMainMenuItems )
-        .button();
-        
-        this.menu_Help = $('<ul>')
-        .load('apps/others/mainMenuHelp.html', function(){
-            that.menu_Help.addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "right bottom", of: this.btn_Help })
-        .hide();
-                
-        this.btn_Export = $( "<button>",{
-            text: "Export"
-        })
-        .css('float','right')
-        .addClass('logged-in-only')
-        .appendTo( this.divMainMenuItems )
-        .button();
-        
-        this.menu_Export = $('<ul>')
-        .load('apps/others/mainMenuExport.html', function(){
-            that.menu_Export.addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "right bottom", of: this.btn_Export })
-        .hide();
-
-        this.btn_Import = $( "<button>",{
-            text: "Import"
-        })
-        .css('float','right')
-        .addClass('logged-in-only')
-        .appendTo( this.divMainMenuItems )
-        .button();
-        
-        this.menu_Import = $('<ul>')
-        .load('apps/others/mainMenuImport.html', function(){
-            that.menu_Import.addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "right bottom", of: this.btn_Import })
-        .hide();
-  
-        this.btn_Database = $( "<button>",{
-            text: "Database"
-        })
-        .css('float','right')
-        .addClass('logged-in-only')
-        .appendTo( this.divMainMenuItems )
-        .button();
-        
-        this.menu_Database = $('<ul>')
-        .load('apps/others/mainMenuDatabase.html', function(){
-            that.menu_Database.addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-        })
-        .position({my: "right top", at: "right bottom", of: this.btn_Database })
-        .hide();
-        
-        this.btn_user = $( "<button>",{
-            text: "My Profile"
-        })
-        .addClass('logged-in-only')
-        .appendTo( this.divMainMenuItems )
-        .button();
-        //.css('line-height','0.2em');
-        
-        this.menu_user = $('<ul>')
-        .load('apps/others/mainMenuProfile.html', function(){
-            that.menu_user.addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            .menu();
-            that._initLinks(that.menu_user);
-        })
-        .position({my: "right top", at: "right bottom", of: this.btn_user })
-        .hide();
-        
-        //show/hide menu on button hover
-        this._on( this.btn_user, {
-            mouseenter : function(){_show(this.menu_user, this.btn_user)},
-            mouseleave : function(){_hide(this.menu_user)}
-        });
-        this._on( this.menu_user, {
-            mouseenter : function(){_show(this.menu_user, this.btn_user)},
-            mouseleave : function(){_hide(this.menu_user)}
-        });      
-        this._on( this.btn_Database, {
-            mouseenter : function(){_show(this.menu_Database, this.btn_Database)},
-            mouseleave : function(){_hide(this.menu_Database)}
-        });
-        this._on( this.menu_Database, {
-            mouseenter : function(){_show(this.menu_Database, this.btn_Database)},
-            mouseleave : function(){_hide(this.menu_Database)}
-        });
-        this._on( this.btn_Import, {
-            mouseenter : function(){_show(this.menu_Import, this.btn_Import)},
-            mouseleave : function(){_hide(this.menu_Import)}
-        });
-        this._on( this.menu_Import, {
-            mouseenter : function(){_show(this.menu_Import, this.btn_Import)},
-            mouseleave : function(){_hide(this.menu_Import)}
-        });
-        this._on( this.btn_Export, {
-            mouseenter : function(){_show(this.menu_Export, this.btn_Export)},
-            mouseleave : function(){_hide(this.menu_Export)}
-        });
-        this._on( this.menu_Export, {
-            mouseenter : function(){_show(this.menu_Export, this.btn_Export)},
-            mouseleave : function(){_hide(this.menu_Export)}
-        });
-        this._on( this.btn_Help, {
-            mouseenter : function(){_show(this.menu_Help, this.btn_Help)},
-            mouseleave : function(){_hide(this.menu_Help)}
-        });
-        this._on( this.menu_Help, {
-            mouseenter : function(){_show(this.menu_Help, this.btn_Help)},
-            mouseleave : function(){_hide(this.menu_Help)}
-        });        
-        
-        //init 
-        
-        
+        this._initMenu('Profile');
+        this._initMenu('Database');
+        this._initMenu('Import');
+        this._initMenu('Export');
+        this._initMenu('Help');
+        this.divMainMenuItems.menu();
         
         this._refresh();
 
@@ -249,8 +106,8 @@ $.widget( "heurist.mainMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        this.btn_user.remove();
-        this.menu_user.remove();
+        this.btn_Profile.remove();
+        this.menu_Profile.remove();
         this.btn_Database.remove();
         this.menu_Database.remove();
         this.btn_Import.remove();
@@ -260,6 +117,56 @@ $.widget( "heurist.mainMenu", {
         this.btn_Help.remove();
         this.menu_Help.remove();
 
+    },
+
+    _initMenu: function(name){
+        
+        var that = this;
+
+        //show hide function
+        var _hide = function(ele) {
+                $( ele ).delay(800).hide();
+            },
+            _show = function(ele, parent) {
+                $('.menu-or-popup').hide(); //hide other
+                var menu = $( ele )
+                //.css('width', this.btn_user.width())
+                .show()
+                .position({my: "left top", at: "left bottom", of: parent });
+                //$( document ).one( "click", function() { menu.hide(); });
+                return false;
+            };
+            
+        this['btn_'+name] = $('<a>',{
+            text: name, href:'#'
+        });
+        
+        $('<li>').append(this['btn_'+name])
+        .appendTo( this.divMainMenuItems );
+        //.button();
+        
+        this['menu_'+name] = $('<ul>')          
+        .load('apps/others/mainMenu'+name+'.html?t='+(new Date().getTime()), function(){
+            that['menu_'+name].addClass('menu-or-popup')
+            .css('position','absolute')
+            .appendTo( that.document.find('body') )
+            .menu();
+            
+            that._initLinks(that['menu_'+name]);
+        })
+        //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
+        .hide();
+        
+        this._on( this['btn_'+name], {
+            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+            mouseleave : function(){_hide(this['menu_'+name])}
+        });
+        this._on( this['menu_'+name], {
+            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+            mouseleave : function(){_hide(this['menu_'+name])}
+        });        
+        
+        
     },
     
     //init listeners for auto-popup links
@@ -271,25 +178,72 @@ $.widget( "heurist.mainMenu", {
             var ele = $(this);
             var href = ele.attr('href');
             if(!top.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&amp;':'?') + 'db=' + top.HAPI4.database;
+                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
                 ele.attr('href', href);
                 that._on(ele, {
                     click: function(event){ 
-                        
+                        /*
+                        var body = this.document.find('body');
+                        var dim = {h:body.innerHeight(), w:body.innerWidth()},
+                            link = $(event.target),
+                            options = {};
+                        if (link.hasClass('small')){
+                            options.height=dim.h*0.55; options.width=dim.w*0.5;
+                        }else if (link.hasClass('portrait')){
+                            options.height=dim.h*0.8; options.width=dim.w*0.5;
+                        }else if (link.hasClass('large')){
+                            options.height=dim.h*0.8; options.width=dim.w*0.8;
+                        }else if (link.hasClass('verylarge')){
+                            options.height = dim.h*0.95; 
+                            options.width  = dim.w*0.95;
+                        }else if (link.hasClass('fixed')){
+                            options.height=dim.h*0.8; options.width=800;
+                        }else if (link.hasClass('landscape')){
+                            options.height=dim.h*0.5;
+                            options.width=dim.w*0.8;
+                        }
+                        top.HEURIST.util.popupURL(top, link.attr('href'), options);
+                        */
+
                         var $dlg = $("#heurist-dialog");
                         $dlg.empty();
+                        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                         
-                        this.dosframe = $( "<iframe>" ).appendTo( $dlg );
-                        this.dosframe.attr('src',  $(event.target).attr('href'));
-                        $dlg.dialog({
+                        var body = this.document.find('body');
+                        var dim = {h:body.innerHeight(), w:body.innerWidth()},
+                            link = $(event.target),
+                            that = this;
+                        var options = {
                                 autoOpen: true,
-                                height: 420,
-                                width: 480,
+                                height: 690,
+                                width: 690,
                                 modal: true,
-                                //resizable: false,
+                                resizable: false,
                                 //draggable: false,
-                                title: 'KUKU' //this.html()
-                        });
+                                title: link.html(),
+                                resizeStop: function( event, ui ) {
+                                    that.dosframe.css('width','100%');
+                                }
+                        };
+                        
+                        if (link.hasClass('small')){
+                            options.height=dim.h*0.55; options.width=dim.w*0.5;
+                        }else if (link.hasClass('portrait')){
+                            options.height=dim.h*0.8; options.width=dim.w*0.5;
+                        }else if (link.hasClass('large')){
+                            options.height=dim.h*0.8; options.width=dim.w*0.8;
+                        }else if (link.hasClass('verylarge')){
+                            options.height = dim.h*0.95; 
+                            options.width  = dim.w*0.95;
+                        }else if (link.hasClass('fixed')){
+                            options.height=dim.h*0.8; options.width=800;
+                        }else if (link.hasClass('landscape')){
+                            options.height=dim.h*0.5;
+                            options.width=dim.w*0.8;
+                        }
+                        
+                        this.dosframe.attr('src', link.attr('href'));
+                        $dlg.dialog(options);
                         
                         event.preventDefault();
                         return false;
