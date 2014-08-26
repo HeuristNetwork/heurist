@@ -135,8 +135,7 @@ function convertData() {
                             //console.log(usageInfo);
                             
                             // Check if we should filter this record
-                            var index = $.inArray(usageInfo.name, filter);
-                            console.log("Index: " + index);
+                            var index = $.inArray(usageInfo.name, filter); 
                             if(index == -1 && usageInfo.count > 0) {
                                 // Construct a link; add root record info
                                 var link = {};
@@ -158,6 +157,11 @@ function convertData() {
                                 // Add link to array
                                 link["pointer"] = relationInfo.name;
                                 links.push(link);
+                            }else{
+                                // Display root node anyways
+                                if(!(rootInfo.name in nodes)) {
+                                    nodes[rootInfo.name] = rootInfo;
+                                }
                             }
                         }
                     }
@@ -200,28 +204,40 @@ function pathHovered(path) {
 
 
 /** Visualizes the data */ 
-var lines;
+var iconSize = 16; // The icon size 
+var offset = 10;   // Line offsets
 function visualizeData() {
-    // Variables
+    // SVG data    
     var width = $("svg").width();     // Determine the SVG width
-    var height = $("svg").height();   // Determine the SVG height
-    $("svg").find("g").remove();      // Remove all old elements
+    var height = $("svg").height();   // Determine the SVG height    
+    $("svg").empty();                 // Remove all old elements
     var svg = d3.select("svg");       // Select the SVG with D3                 
-    var iconSize = 16;                // The icon size 
-    var offset = 10;                  // Line offsets
     var data = convertData();         // Convert XML to usable D3 data
     
-    // Settings
-    var linetype = localStorage.getItem("linetype");
-
+    // Color settings
+    var linecolor = getLineColor();
+    var markercolor = getMarkerColor();
+    var countcolor = getCountColor();
+    var textcolor = getTextColor();
+    
+    // Line settings
+    var linetype = getLineType();
+    var linethickness = getLineThickness();
+    var linelength = getLineLength();
+   
+    // Gravity settings
+    var gravity = getGravity(); 
+    var attraction = getAttraction();
+ 
     // Creating D3 force
     var force = d3.layout.force()
                          .nodes(d3.values(data.nodes))
                          .links(data.links)
-                         .charge(-700) 
-                         .linkDistance(200) 
+                         .charge(attraction)        // Using the attraction setting
+                         .linkDistance(linelength)  // Using the linelength setting 
                          .on("tick", function(d, i) {
-                             if(linetype == "curved") {
+                             // Using the linetype setting to determine what function to call
+                             if(linetype == "curved") { 
                                  return curvedTick();
                              }else{
                                  return straightTick();
@@ -229,26 +245,59 @@ function visualizeData() {
                          })
                          .size([width, height])
                          .start();
+                   
+    // Adding marker definitions
+    svg.append("defs").selectAll("marker")
+                      .data(force.links())
+                      .enter()
+                      .append("svg:marker")    
+                      .attr("id", function(d) {
+                            console.log(d);
+                            return "marker" + d.source.id;
+                      })
+                      .attr("markerWidth", function(d) {
+                          return 4 + getLineWidth(d.source.count);
+                      })
+                      .attr("markerHeight", function(d) {
+                          return 4 + getLineWidth(d.source.count);
+                      })
+                      .attr("refX", -1)
+                      .attr("refY", 0)
+                      .attr("viewBox", "0 -5 10 10")
+                      .attr("markerUnits", "userSpaceOnUse")
+                      .attr("orient", "auto")
+                      .attr("fill", function(d) {
+                          // Using the markercolor setting to determine the color
+                          if(markercolor) {
+                              return markercolor;
+                          }
+                          return "#000";
+                      })
+                      .attr("opacity", "0.6")
+                      .append("path")
+                      .attr("d", "M0,-5L10,0L0,5");
 
-    // Add the chosen lines
+    // Add the chosen lines [using the linetype setting]  
+    var lines;
     if(linetype == "curved") {
         // Add curved lines
          lines = svg.append("svg:g").selectAll("path")
                                     .data(force.links())
-                                    .enter().append("svg:path");
+                                    .enter()
+                                    .append("svg:path");
     }else{
         // Add straight lines
         lines = svg.append("svg:g").selectAll("polyline.link")
                                    .data(force.links())
                                    .enter()
                                    .append("svg:polyline");
-    }
+    }     
     // Adding shared attributes
     lines.attr("class", "link") 
-         .attr("stroke", function(d) {
-             var color = getLineColor();
-             if(color) {
-                 return color;
+         .attr("stroke", function(d) { 
+             // Using the linecolor setting to determine the color   
+             if(linecolor) {
+                 return linecolor;
              }else{
                  return "#999";
              }
@@ -257,7 +306,8 @@ function visualizeData() {
             return d.pointer;
          })
          .attr("marker-mid", function(d) {
-            return "url(#marker" + getLineWidth(d.source.count) + ")";
+            return "url(#marker" + d.source.id + ")";
+            //return "url(#marker)";
          })
          .style("stroke-width", function(d) { 
             return 0.5 + getLineWidth(d.source.count)/2;
@@ -265,8 +315,7 @@ function visualizeData() {
          .attr("onmouseover", function(d, i) {
             return "pathHovered(this)";
          });
-    
-    
+         
     // Defining the nodes
     var node = svg.selectAll(".node")
                   .data(force.nodes())
@@ -276,11 +325,25 @@ function visualizeData() {
                   }) 
                   .attr("transform", "translate(100, 100)") 
                   .call(force.drag);
+                  
+    // Adding the background circles to the nodes
+    node.append("circle")
+        .attr("r", function(d) {
+            return iconSize*0.75 + getLineWidth(d.count)*3
+        })
+        .attr("class", "background")
+        .attr("fill", function(d) {
+            // Using the countcolor setting to determine the color
+            if(countcolor) {
+                 return countcolor;
+            }
+            return "gray";
+        });
 
-    // Adding circles to the nodes
-    var circle = node.append("circle")
-                     .attr("r", iconSize*0.75)
-                     .attr("class", "around");
+    // Adding the foreground circles to the nodes
+    node.append("circle")
+        .attr("r", iconSize*0.75)
+        .attr("class", "around foreground");
    
     // Adding icons to the nodes 
     node.append("svg:image") 
@@ -305,14 +368,27 @@ function visualizeData() {
     node.append("text")
         .attr("x", 0)
         .attr("y", -iconSize)
-        .attr("class", "header")
+        .attr("class", "namelabel")
+        .attr("fill", function(d) {
+            if(textcolor) {
+                return textcolor;
+            }
+            return "#a00";
+        })
         .text(function(d) { 
             return d.name; 
         });
+    
+    // Gravity check
+    console.log("GRAVITY");
+    console.log(gravity);    
+    if(gravity === "false") {
+        force.stop();
+    }
  
     
     
-     /** Tick handler for curved lines */
+    /** Tick handler for curved lines */
     function curvedTick() {
         // Calculate the segments
         lines.attr("d", function(d) {
@@ -372,33 +448,56 @@ function getFilter() {
     return names;
 }
 
-/** Returns the line type setting */
-function getLineType() {
-    return localStorage.getItem("linetype");
-}
-
 /** Returns the line color setting */
 function getLineColor() {
     return localStorage.getItem("linecolor");
 }
 
+/** Returns the marker color setting */
+function getMarkerColor() {
+    return localStorage.getItem("markercolor");
+}
+
+/** Returns the count color setting */
+function getCountColor() {
+    return localStorage.getItem("countcolor");
+}
+
+/** Returns the text color setting */
+function getTextColor() {
+    return localStorage.getItem("textcolor");
+}
+
+/** Returns the line type setting */
+function getLineType() {
+    return localStorage.getItem("linetype");
+}
+
+/** Returns the line thickness setting */
+function getLineThickness() {
+    return localStorage.getItem("linethickness");
+}
+
+/** Returns the line length setting */
+function getLineLength() {
+    return localStorage.getItem("linelength");
+}
+
+/** Returns the attraction strength setting */
+function getAttraction() {
+    return localStorage.getItem("attraction");
+}
+
+/** Returns the gravity setting */
+function getGravity() {
+    return localStorage.getItem("gravity");
+}
+
 /** Body is done with loading */
 var xml;
 $(document).ready(function() {
-    /** Updating settings in UI */
-    // Set line type setting
-    var linetype = localStorage.getItem("linetype");
-    if(linetype) {
-        $("#linetype option[value='" +linetype+ "']").attr("selected", true);
-    }
-    
-    // Listens to linetype selection changes
-    $("#linetype").change(function(e) {
-        localStorage.setItem("linetype", $("#linetype").val());
-        visualizeData();
-    });
-    
-    // Set line color setting
+    /** LINE COLOR SETTING */
+    // Set line color setting in UI
     var linecolor = getLineColor(); 
     if(linecolor) {
         $("#linecolor").css("background-color", linecolor);
@@ -411,22 +510,150 @@ $(document).ready(function() {
             var color = "#"+hex; 
             
             localStorage.setItem("linecolor", color);
-            lines.attr("stroke", color);
+            $(".link").attr("fill", color);
+    
+            $(el).css('background-color', color);
+            $(el).colpickHide();
+        }
+    });
+    
+    /** MARKER COLOR SETTING */
+    // Set marker color in UI
+    var markercolor = getMarkerColor();
+    if(markercolor) {
+        $("#markercolor").css("background-color", markercolor);
+    }
+    
+    // Listen to 'marker color' selection changes
+    $('#markercolor').colpick({
+        layout: 'hex',
+        onSubmit: function(hsb, hex, rgb, el) {
+            var color = "#"+hex; 
+            
+            localStorage.setItem("markercolor", color);
+            $("marker").attr("fill", color);
             
             $(el).css('background-color', color);
             $(el).colpickHide();
         }
     });
     
+    /** COUNT COLOR SETTING */
+    // Set count color in UI
+    var countcolor = getCountColor();
+    if(countcolor) {
+         $("#countcolor").css("background-color", countcolor);
+    }
+    
+    // Listen to 'count color' selection changes
+    $('#countcolor').colpick({
+        layout: 'hex',
+        onSubmit: function(hsb, hex, rgb, el) {
+            var color = "#"+hex; 
+            
+            localStorage.setItem("countcolor", color);
+            $(".background").attr("fill", color);
+            
+            $(el).css('background-color', color);
+            $(el).colpickHide();
+        }
+    });
+    
+    /** TEXT COLOR SETTING */
+    // Set text color in UI
+    var textcolor = getTextColor();
+    if(textcolor) {
+         $("#textcolor").css("background-color", textcolor);
+    }
+    
+    // Listen to 'count color' selection changes
+    $('#textcolor').colpick({
+        layout: 'hex',
+        onSubmit: function(hsb, hex, rgb, el) {
+            var color = "#"+hex; 
+            
+            localStorage.setItem("textcolor", color);
+            $(".namelabel").attr("fill", color);
+            
+            $(el).css('background-color', color);
+            $(el).colpickHide();
+        }
+    });
+    
+    /** LINE TYPE SETTING */
+    // Set line type setting in UI
+    var linetype = getLineType();
+    if(linetype) {
+        $("#linetype option[value='" +linetype+ "']").attr("selected", true);
+    }
+    
+    // Listens to linetype selection changes
+    $("#linetype").change(function(e) {
+        localStorage.setItem("linetype", $("#linetype").val());
+        visualizeData();
+    });
+    
+    /** LINE THICKNESS SETTING */
+    // Set line thickness setting in UI
+    var linethickness = getLineThickness();
+    if(linethickness) {
+        $("#linethickness option[value='" +linethickness+ "']").attr("selected", true);
+    }
+    
+    // Listen to linethickness selection changes
+    $("#linethickness").change(function(e) {
+        localStorage.setItem("linethickness", $(this).val());
+        visualizeData();
+    });
+    
+    /** LINE LENGTH SETTING */
+    // Set line length setting in UI
+    var linelength = getLineLength();
+    if(linelength) {
+        $("#linelength").val(linelength); 
+    }
+    
+    // Listen to linelength changes
+    $("#linelength").change(function() {
+        localStorage.setItem("linelength", $(this).val());
+        visualizeData();
+    });
+    
+    /** GRAVITY SETTING */
+    // Set gravity setting in UI
+    var gravity = getGravity();
+    if(gravity === "true") {                      
+        $("#gravity").prop("checked", true);
+    }
+
+    // Listen to gravity changes
+    $("#gravity").change(function() {
+        localStorage.setItem("gravity",  $(this).is(':checked'));
+        visualizeData();
+    });
+    
+    /** ATTRACTION SETTING */
+    // Set attraction setting in UI
+    var attraction = getAttraction();
+    if(attraction) {
+        $("#attraction").val(attraction);
+    }
+    
+    // Listen to attraction changes
+    $("#attraction").change(function() {
+        localStorage.setItem("attraction", $(this).val());
+        visualizeData();
+    });
+    
+    /** RECORD FILTERING */
     // Listen to 'show-record' checkbox changes  
     $(".show-record").change(function(e) {
         visualizeData();  
     });
 
     // Listen to the 'show-all' checkbox 
-    $("#show-all").change(function(e) {
-        var checked= $(this).is(':checked');
-        console.log("CHECKED: " + checked);
+    $("#show-all").change(function() {
+        var checked = $(this).is(':checked');  
         $(".show-record").prop("checked", checked);
         visualizeData();
     });
@@ -434,7 +661,7 @@ $(document).ready(function() {
     
     
     
-    /** Retrieving XML relationship data */
+    /** BUILDING THE VISUALISATION */
     var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
     console.log("Loading XML data from: " + url);
     d3.xml(url, "application/xml", function(error, xmlData) {

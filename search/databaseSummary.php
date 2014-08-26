@@ -95,7 +95,7 @@
                 cursor: pointer;
             }
 
-            /** Settings */
+            /** SVG */
             #visualisation {
                 border-left: 1px dashed black;
             }
@@ -103,15 +103,50 @@
             svg {
                 border-top: 1px dashed black;
             }
+            
+            /** Settings */
+            #settings td {
+               vertical-align: middle;
+            }
+            
+            td.label {
+                padding-right: 5px;
+                padding-left: 30px;
+            }
+            
+            td.setting {
+               padding-left: 10px;     
+            }
+            
+            .middle {
+               vertical-align: middle; 
+            }
+            
+            input.small {
+                cursor: pointer;
+                max-width: 45px;
+                text-align: center;
+            }
 
-            #linecolor {
+            div.color {
+                cursor: pointer;
                 display: inline-block;
                 width: 10px;
                 height: 10px;
-                border: 1px solid black;
+                border: 1px solid black; 
+            }
+            
+            #linecolor {
                 background-color: #999;
             }
 
+            #markercolor {
+                background-color: #000;
+            }
+            
+            #countcolor {
+                background-color: #22a;
+            }
 
 
             /** D3 */
@@ -143,7 +178,6 @@
             text {
                 font-weight: bold;
                 text-anchor: middle;
-                fill: #a00;
                 font: 10px sans-serif;
             }
 
@@ -152,8 +186,6 @@
                 stroke-width: 3px;
                 stroke-opacity: .8;
             }
-
-
         </style>
 
         <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -250,47 +282,95 @@
                             <td height="30">
                                 <!-- SETTINGS -->
                                 <table id="settings" cellpadding="4" cellspacing="4" >
-                                    <tr style="vertical-align:bottom">
+                                    <tr style="vertical-align: bottom">
+                                        <!-- Color label -->
+                                        <td style="padding-left: 5px">
+                                            <b>Colours:</b>
+                                        </td>
 
+                                        <!-- Line color -->
+                                        <td>
+                                            <i>Lines</i>
+                                        </td>
+                                        <td>
+                                            <div id="linecolor" class="color"></div>
+                                        </td>
+
+                                        <!-- Marker color -->
+                                        <td class="setting">
+                                            <i>Arrows</i>
+                                        </td>
+                                        <td>
+                                            <div id="markercolor" class="color"></div>
+                                        </td>
+                                        
+                                        <!-- Record count circle color -->
+                                        <td class="setting">
+                                            <i>Frequency</i>
+                                        </td>
+                                        <td>
+                                             <div id="countcolor" class="color"></div>
+                                        </td>
+                                        
+                                        <!-- Text color -->
+                                        <td class="setting">
+                                            <i>Text</i>
+                                        </td>
+                                        <td>
+                                            <div id="textcolor" class="color"></div>
+                                        </td>
+                                        
+                                        
+                                        <!-- Line label -->
+                                        <td class="label">
+                                            <b>Lines:</b>
+                                        </td>
+                                        
                                         <!-- Line type -->
-                                        <td style="padding-left: 10px; vertical-align:middle">
-                                            <i>Line type&nbsp;</i>
-                                            <select style="vertical-align:middle" id="linetype">
+                                        <td>
+                                            <select class="middle" id="linetype">
                                                 <option value="straight">straight</option>
                                                 <option value="curved">curved</option>
                                             </select>
                                         </td>
 
-                                        <td style="padding-left: 20px; vertical-align:middle">
-                                            Colours:
-                                        </td>
-
-                                        <!-- Line color -->
-                                        <td style="padding-left: 10px; vertical-align:middle">
-                                            <i>Lines</i>
-                                            <div id="linecolor"></div>
-                                        </td>
-
-                                        <!-- Marker color -->
-                                        <td style="padding-left: 10px; vertical-align:middle">
-                                            <i>Arrows&nbsp;</i>
-                                            <div id="markercolor"></div> <!-- TODO -->
-                                        </td>
-
-                                        <!-- Record count marker -->
-                                        <td style="padding-left: 10px; vertical-align:middle">
-                                            <i>Frequency&nbsp;</i>
-                                            <div id="recordcountcolor"></div> <!-- TODO -->
-                                        </td>
-
                                         <!-- Line thickness -->
-                                        <td style="padding-left: 10px; vertical-align:middle">
-                                            <i>Line thickness&nbsp;&nbsp;</i>
+                                        <td class="setting">
+                                            <i>Thickness</i>
                                         </td>
                                         <td>
-                                            <input style="padding-left: 5px; vertical-align:middle" id="linethickness" type="range" min="1" max="10" value="5">
+                                            <select class="middle" id="linethickness">
+                                                <option value="formula1">formula1</option>
+                                                <option value="formula2">formula2</option>
+                                            </select>
                                         </td>
-
+                                        
+                                        <!-- Line length -->
+                                        <td class="setting">
+                                            <i>Length</i>
+                                        </td>
+                                        <td>
+                                            <input id="linelength" class="small" type="number" min="1" value="200"/>
+                                        </td>
+                                        
+                                        
+                                        <!-- Gravity label -->
+                                        <td class="label">
+                                            <b>Gravity:</b>
+                                        </td>
+                                        
+                                        <!-- Gravity setting -->
+                                        <td>
+                                            <input id="gravity" type="checkbox" name="gravity"></input>
+                                        </td>
+                                        
+                                        <!-- Attraction strength -->
+                                        <td class="setting">
+                                            <i>Attraction</i>
+                                        </td>
+                                        <td>
+                                            <input id="attraction" class="small" type="number" value="-700"/>
+                                        </td>
                                     </tr>
                                 </table>
                             </td>
@@ -299,79 +379,7 @@
                         <tr>
                             <td>
                                 <!-- SVG -->
-                                <svg>
-                                    <defs>
-                                        <!-- Marker for line with a stroke-width of 0 -->
-                                        <!-- This is rather primitive. You need to be able to vary this.
-                                             Calculate the values using php even if you are getting them from a lookup table on constants -->
-                                        <marker id="marker0" markerWidth="4" markerHeight="4" refx="-1" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 1 -->
-                                        <marker id="marker1" markerWidth="5" markerHeight="5" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 2 -->
-                                        <marker id="marker2" markerWidth="6" markerHeight="6" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 3 -->
-                                        <marker id="marker3" markerWidth="7" markerHeight="7" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 4 -->
-                                        <marker id="marker4" markerWidth="8" markerHeight="8" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 5 -->
-                                        <marker id="marker5" markerWidth="9" markerHeight="9" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 6 -->
-                                        <marker id="marker6" markerWidth="10" markerHeight="10" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 7 -->
-                                        <marker id="marker7" markerWidth="11" markerHeight="11" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 8 -->
-                                        <marker id="marker8" markerWidth="12" markerHeight="12" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 9 -->
-                                        <marker id="marker9" markerWidth="13" markerHeight="13" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                        <!-- Marker for line with a stroke-width of 10 -->
-                                        <marker id="marker10" markerWidth="13" markerHeight="13" refx="-2" refy="0"
-                                            viewBox="0 -5 10 10" markerUnits="userSpaceOnUse" orient="auto" fill='#000' opacity="0.6">
-                                            <path d="M0,-5L10,0L0,5"></path>
-                                        </marker>
-
-                                    </defs>
-                                </svg>
-
+                                <svg></svg>
                             </td>
                         </tr>
                     </table>
