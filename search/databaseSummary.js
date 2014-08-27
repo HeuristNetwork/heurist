@@ -141,17 +141,17 @@ function convertData() {
                                 var link = {};
                                 if(!(rootInfo.name in nodes)) {
                                     nodes[rootInfo.name] = rootInfo;
-                                    link["target"] = rootInfo;
+                                    link["source"] = rootInfo;
                                 }else{
-                                    link["target"] = nodes[rootInfo.name];
+                                    link["source"] = nodes[rootInfo.name];
                                 }
                                 
                                 // Link construction; add usage record info
                                 if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
                                     nodes[usageInfo.name] = usageInfo; // It has not; add it to the list of nodes
-                                    link["source"] = usageInfo;    // Set the target of the root link to this reoord
+                                    link["target"] = usageInfo;    // Set the target of the root link to this reoord
                                 }else{ // Node with this name exists already, use that record 
-                                    link["source"] = nodes[usageInfo.name]; 
+                                    link["target"] = nodes[usageInfo.name]; 
                                 }
                                 
                                 // Add link to array
@@ -197,7 +197,7 @@ function getLineWidth(count) {
 /** Called when the path has been hovered */
 function pathHovered(path) {
     //alert("Path hovered!");
-    console.log(path);
+    //console.log(path);
     var pointer = path.getAttribute("pointer");
     //console.log("Pointer: " + pointer);
 }
@@ -236,7 +236,7 @@ function visualizeData() {
                          .charge(attraction)        // Using the attraction setting
                          .linkDistance(linelength)  // Using the linelength setting 
                          .on("tick", function(d, i) {
-                             // Using the linetype setting to determine what function to call
+                             // Determine what function to call on force.drag
                              if(linetype == "curved") { 
                                  return curvedTick();
                              }else{
@@ -244,7 +244,7 @@ function visualizeData() {
                              }
                          })
                          .size([width, height])
-                         .start();
+                         .start();   
                    
     // Adding marker definitions
     svg.append("defs").selectAll("marker")
@@ -252,7 +252,6 @@ function visualizeData() {
                       .enter()
                       .append("svg:marker")    
                       .attr("id", function(d) {
-                            console.log(d);
                             return "marker" + d.source.id;
                       })
                       .attr("markerWidth", function(d) {
@@ -307,7 +306,6 @@ function visualizeData() {
          })
          .attr("marker-mid", function(d) {
             return "url(#marker" + d.source.id + ")";
-            //return "url(#marker)";
          })
          .style("stroke-width", function(d) { 
             return 0.5 + getLineWidth(d.source.count)/2;
@@ -316,6 +314,57 @@ function visualizeData() {
             return "pathHovered(this)";
          });
          
+    // Check what methods to call on drag
+     var node_drag;
+     if(gravity === "on") {
+         // Default method
+         node_drag = force.drag;
+     }else{
+         // Custom methods
+         node_drag = d3.behavior.drag()
+                                .on("dragstart", dragstart)
+                                .on("drag", dragmove)
+                                .on("dragend", dragend);
+     }
+                               
+    /** Called when a dragging event starts */
+    function dragstart(d, i) {
+        force.stop() // Stop force from auto positioning
+    }
+
+    /** Caled when a dragging move event occurs */
+    function dragmove(d, i) {
+        // Update locations
+        d.px += d3.event.dx;
+        d.py += d3.event.dy;
+        d.x += d3.event.dx;
+        d.y += d3.event.dy;  
+        
+        // Update nodes & lines                                                           
+        if(linetype == "curved") { 
+             curvedTick();
+        }else{
+             straightTick();
+        }
+    }
+
+    /** Called when a dragging event ends */
+    function dragend(d, i) {
+         d.fixed = true; // Node may not be auto positioned
+         
+          // Update nodes & lines 
+         if(linetype == "curved") { 
+             curvedTick();
+         }else{
+            straightTick();
+         }
+         
+         // Check if force may resume
+         if(gravity !== "off") {
+            force.resume(); 
+         }
+    }
+         
     // Defining the nodes
     var node = svg.selectAll(".node")
                   .data(force.nodes())
@@ -323,9 +372,9 @@ function visualizeData() {
                   .attr("class", function(d, i) {
                       return "node " + d.type;
                   }) 
-                  .attr("transform", "translate(100, 100)") 
-                  .call(force.drag);
-                  
+                  .attr("transform", "translate(100, 100)")
+                  .call(node_drag);
+    
     // Adding the background circles to the nodes
     node.append("circle")
         .attr("r", function(d) {
@@ -379,18 +428,9 @@ function visualizeData() {
             return d.name; 
         });
     
-    // Gravity check
-    console.log("GRAVITY");
-    console.log(gravity);    
-    if(gravity === "false") {
-        force.stop();
-    }
- 
-    
-    
     /** Tick handler for curved lines */
     function curvedTick() {
-        // Calculate the segments
+        // Calculate the curved segments
         lines.attr("d", function(d) {
             var dx = d.target.x - d.source.x,
                 dy = d.target.y - d.source.y,
@@ -405,7 +445,7 @@ function visualizeData() {
             ].join(" ");
         });
 
-        // Update node location
+        // Update node locations
         node.attr("transform", function(d) { 
             return "translate(" + d.x + "," + d.y + ")"; 
         });
@@ -413,12 +453,14 @@ function visualizeData() {
     
     /** Tick handler for straight lines */                           
     function straightTick() {
+        // Calculate the straight points
         lines.attr("points", function(d) {
            return d.source.x + "," + d.source.y + " " +
                   (d.source.x +(d.target.x-d.source.x)/2) + "," + (d.source.y +(d.target.y-d.source.y)/2) + " " +  
                   d.target.x + "," + d.target.y;
-       });
+        });
 
+        // Update node locations
         node.attr("transform", function(d) { 
             return "translate(" + d.x + "," + d.y + ")"; 
         });
@@ -510,7 +552,7 @@ $(document).ready(function() {
             var color = "#"+hex; 
             
             localStorage.setItem("linecolor", color);
-            $(".link").attr("fill", color);
+            $(".link").attr("stroke", color);
     
             $(el).css('background-color', color);
             $(el).colpickHide();
@@ -622,13 +664,13 @@ $(document).ready(function() {
     /** GRAVITY SETTING */
     // Set gravity setting in UI
     var gravity = getGravity();
-    if(gravity === "true") {                      
-        $("#gravity").prop("checked", true);
+    if(gravity) {                      
+        $("#gravity option[value='" +gravity+ "']").attr("selected", true);
     }
 
     // Listen to gravity changes
     $("#gravity").change(function() {
-        localStorage.setItem("gravity",  $(this).is(':checked'));
+        localStorage.setItem("gravity",  $(this).val());
         visualizeData();
     });
     

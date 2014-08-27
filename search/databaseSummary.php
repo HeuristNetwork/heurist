@@ -95,45 +95,20 @@
                 cursor: pointer;
             }
 
-            /** SVG */
-            #visualisation {
-                border-left: 1px dashed black;
-            }
-
-            svg {
-                border-top: 1px dashed black;
-            }
-            
             /** Settings */
-            #settings td {
-               vertical-align: middle;
+            div.settings {
+                float: left;
+                padding-left: 5px;
+                padding-right: 5px;     
             }
             
-            td.label {
-                padding-right: 5px;
-                padding-left: 30px;
-            }
-            
-            td.setting {
-               padding-left: 10px;     
-            }
-            
-            .middle {
-               vertical-align: middle; 
-            }
-            
-            input.small {
-                cursor: pointer;
-                max-width: 45px;
-                text-align: center;
-            }
-
             div.color {
                 cursor: pointer;
                 display: inline-block;
                 width: 10px;
                 height: 10px;
                 border: 1px solid black; 
+                margin-top: 4px;
             }
             
             #linecolor {
@@ -148,8 +123,26 @@
                 background-color: #22a;
             }
 
+            .middle {
+               vertical-align: middle; 
+            }
+            
+            input.small {
+                cursor: pointer;
+                max-width: 45px;
+                text-align: center;
+            }
 
-            /** D3 */
+            
+            /** SVG related */
+            #visualisation {
+                border-left: 1px dashed black;
+            }
+            
+            svg {
+                border-top: 1px dashed black;
+            }
+            
             /** Move records around */
             g:hover {
                 cursor: move;
@@ -160,7 +153,6 @@
                 fill: none;
                 stroke-opacity: .6;
                 pointer-events: all;
-
             }
 
             .link:hover {
@@ -212,9 +204,7 @@
 
         <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
-
                 <td width="350">
-
                     <!-- Record count table -->
                     <!-- also provides navigation to search for a record type and on/off controls for record types in visualisation -->
                     <h3> Record types (entities)</h3><br />
@@ -279,101 +269,76 @@
                 <td>
                     <table id="visualisation" cellpadding="4" cellspacing="1">
                         <tr>
-                            <td height="30">
-                                <!-- SETTINGS -->
-                                <table id="settings" cellpadding="4" cellspacing="4" >
-                                    <tr style="vertical-align: bottom">
-                                        <!-- Color label -->
-                                        <td style="padding-left: 5px">
-                                            <b>Colours:</b>
-                                        </td>
-
-                                        <!-- Line color -->
-                                        <td>
-                                            <i>Lines</i>
-                                        </td>
-                                        <td>
-                                            <div id="linecolor" class="color"></div>
-                                        </td>
-
-                                        <!-- Marker color -->
-                                        <td class="setting">
-                                            <i>Arrows</i>
-                                        </td>
-                                        <td>
-                                            <div id="markercolor" class="color"></div>
-                                        </td>
+                            <!-- SETTINGS -->
+                            <td height="25px" style="vertical-align: middle;">
+                                <!-- COLOR SETTINGS -->
+                                <div class="settings">
+                                     <b>Colours:</b>
+                                     <!-- Line color -->
+                                     <span>
+                                        <i>Lines</i>
+                                        <div id="linecolor" class="color"></div>
+                                     </span>
+                                     
+                                     <!-- Arrow color -->
+                                     <span>
+                                        <i>Arrows</i>
+                                        <div id="markercolor" class="color"></div>
+                                     </span>
                                         
-                                        <!-- Record count circle color -->
-                                        <td class="setting">
-                                            <i>Frequency</i>
-                                        </td>
-                                        <td>
-                                             <div id="countcolor" class="color"></div>
-                                        </td>
+                                      <!-- Record count circle color -->
+                                      <span>
+                                        <i>Frequency</i>
+                                        <div id="countcolor" class="color"></div>
+                                      </span>
                                         
-                                        <!-- Text color -->
-                                        <td class="setting">
-                                            <i>Text</i>
-                                        </td>
-                                        <td>
-                                            <div id="textcolor" class="color"></div>
-                                        </td>
-                                        
-                                        
-                                        <!-- Line label -->
-                                        <td class="label">
-                                            <b>Lines:</b>
-                                        </td>
-                                        
-                                        <!-- Line type -->
-                                        <td>
-                                            <select class="middle" id="linetype">
-                                                <option value="straight">straight</option>
-                                                <option value="curved">curved</option>
-                                            </select>
-                                        </td>
-
-                                        <!-- Line thickness -->
-                                        <td class="setting">
-                                            <i>Thickness</i>
-                                        </td>
-                                        <td>
-                                            <select class="middle" id="linethickness">
-                                                <option value="formula1">formula1</option>
-                                                <option value="formula2">formula2</option>
-                                            </select>
-                                        </td>
-                                        
-                                        <!-- Line length -->
-                                        <td class="setting">
-                                            <i>Length</i>
-                                        </td>
-                                        <td>
-                                            <input id="linelength" class="small" type="number" min="1" value="200"/>
-                                        </td>
-                                        
-                                        
-                                        <!-- Gravity label -->
-                                        <td class="label">
-                                            <b>Gravity:</b>
-                                        </td>
-                                        
-                                        <!-- Gravity setting -->
-                                        <td>
-                                            <input id="gravity" type="checkbox" name="gravity"></input>
-                                        </td>
-                                        
-                                        <!-- Attraction strength -->
-                                        <td class="setting">
-                                            <i>Attraction</i>
-                                        </td>
-                                        <td>
-                                            <input id="attraction" class="small" type="number" value="-700"/>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
+                                      <!-- Text color -->
+                                      <span>
+                                        <i>Text</i>
+                                        <div id="textcolor" class="color"></div>
+                                      </span> 
+                                </div> 
+                                
+                                <!-- LINE SETINGS -->           
+                                <div class="settings">
+                                    <b>Lines:</b>
+                                    <!-- Line type -->
+                                    <select class="middle" id="linetype">
+                                        <option value="straight">straight</option>
+                                        <option value="curved">curved</option>
+                                    </select>
+                                    
+                                    <!-- Line thickness -->
+                                    <span>
+                                        <i>Thickness</i>
+                                        <select class="middle" id="linethickness">
+                                            <option value="formula1">formula1</option>
+                                            <option value="formula2">formula2</option>
+                                        </select>
+                                    </span>
+                                   
+                                   <!-- Line length --> 
+                                    <span>
+                                        <i>Length</i>
+                                        <input id="linelength" class="small" type="number" min="1" value="200"/>
+                                    </span>
+                                </div>
+                                
+                                <!-- GRAVITY SETTINGS -->
+                                <div class="settings">
+                                    <b>Gravity:</b>
+                                    <!-- Gravity setting -->
+                                    <select class="middle" id="gravity">
+                                        <option value="on">on</option>
+                                        <option value="touch">touch</option>
+                                        <option value="off">off</option>
+                                    </select>
+                                    
+                                     <!-- Attraction strength -->
+                                    <i>Attraction</i>
+                                    <input id="attraction" class="small" type="number" value="-700"/>
+                                </div>
+                             </td> 
                         </tr>
 
                         <tr>
