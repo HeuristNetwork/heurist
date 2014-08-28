@@ -24,6 +24,8 @@ $.widget( "heurist.resultListMenu", {
     options: {
         // callbacks
     },
+    
+    _query_request: null, //keep current query request
 
     // the widget's constructor
     _create: function() {
@@ -43,6 +45,32 @@ $.widget( "heurist.resultListMenu", {
         this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
+        
+        //-----------------------     listener of global events
+        var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART; 
+        /*top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
+        if(this.options.isapplication){
+            sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+        }*/
+
+        $(this.document).on(sevents, function(e, data) {
+
+            if(e.type == top.HAPI4.Event.LOGIN || e.type == top.HAPI4.Event.LOGOUT){
+
+                that._refresh();
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+                
+                that._query_request = data;  //keep current query request 
+                
+            }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+                
+                
+            }
+            //that._refresh();
+        });        
+        
         this._refresh();
 
     }, //end _create
@@ -64,6 +92,12 @@ $.widget( "heurist.resultListMenu", {
     */
     _refresh: function(){
 
+        if(top.HAPI4.currentUser.ugr_ID>0){
+            $(this.element).find('.logged-in-only').css('visibility','visible');
+        }else{
+            $(this.element).find('.logged-in-only').css('visibility','hidden');
+        }
+                
     },
     // 
     // custom, widget-specific, cleanup.
@@ -98,23 +132,25 @@ $.widget( "heurist.resultListMenu", {
                 return false;
             };
             
-        this['btn_'+name] = $('<a>',{
+        var link = $('<a>',{
             text: name, href:'#'
         });
         
-        $('<li>').append(this['btn_'+name])
+        this['btn_'+name] = $('<li>').append(link)
         .appendTo( this.divMainMenuItems );
-        //.button();
+            
         
         this['menu_'+name] = $('<ul>')
-        .load('apps/search/resultListMenu'+name+'.html', function(){
+        .load('apps/search/resultListMenu'+name+'.html?t='+(new Date().getTime()), function(){
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
-            .menu();
+            .menu({select: function(event, ui){ that._menuActionHandler(ui.item.attr('id')); }})
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();
+        
+        {select: that._menuActionHandler}
         
         this._on( this['btn_'+name], {
             mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
@@ -128,41 +164,39 @@ $.widget( "heurist.resultListMenu", {
         
     },
     
-    //init listeners for auto-popup links
-    _initLinks: function(menu){
+
+    _menuActionHandler: function(action){
+
+          var that = this;
         
-        var that = this;
+          //var action = ui.item.attr('id');
+          if(action == "menu-search-quick"){
+              
+                $('#btn_search_assistant').click();
+              
+          }else if(action == "menu-search-advanced"){
+              
+                //call H3 search builder
+                var q = "", 
+                    that = this;
+                if(!top.HEURIST4.util.isnull(this._query_request) && !top.HEURIST4.util.isempty(this._query_request.q)){
+                    q ="&q=" + encodeURIComponent(this._query_request.q);
+                }
+                var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+                
+                top.HEURIST4.util.showDialog(url, { callback: 
+                    function(q){
+                        if(!top.HEURIST4.util.isempty(q)) {
+                            that._query_request.q = q;
+                            //that._query_request.w = 'a';
+                            that._query_request.orig = 'rec_list';
+                            top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                        }
+                    }});
+              
+              
+          }
         
-        menu.find('[name="auto-popup"]').each(function(){
-            var ele = $(this);
-            var href = ele.attr('href');
-            if(!top.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&amp;':'?') + 'db=' + top.HAPI4.database;
-                ele.attr('href', href);
-                that._on(ele, {
-                    click: function(event){ 
-                        
-                        var $dlg = $("#heurist-dialog");
-                        $dlg.empty();
-                        
-                        this.dosframe = $( "<iframe>" ).appendTo( $dlg );
-                        this.dosframe.attr('src',  $(event.target).attr('href'));
-                        $dlg.dialog({
-                                autoOpen: true,
-                                height: 420,
-                                width: 480,
-                                modal: true,
-                                //resizable: false,
-                                //draggable: false,
-                                title: 'KUKU' //this.html()
-                        });
-                        
-                        event.preventDefault();
-                        return false;
-                    }
-                });
-            }
-        });
-    
     }
+    
 });

@@ -112,7 +112,7 @@ $.widget( "heurist.pagination", {
 
         this._on( this.btn_search_limit, {
             click: function() {
-                $('.ui-menu').hide(); //hide other
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
                 var menu = $( this.menu_search_limit )
                 .show()
                 .position({my: "right top", at: "right bottom", of: this.btn_search_limit });

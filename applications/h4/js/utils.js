@@ -804,6 +804,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
     showDialog: function(url, options){
     
+                if(!options) options = {};
+        
         
                 var opener = options['window']?options['window'] :window;
         
@@ -819,13 +821,12 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     if(closeCallback){
                         rval = closeCallback.apply(opener, arguments);
                     }
-                    if (rval){
-                        $dlg.dialog('close');
-                        //$dlg.remove();
-                        return true;
-                    }else{
+                    if ( !rval  &&  rval !== undefined){
                         return false;
                     }
+                    
+                    $dlg.dialog('close');
+                    return true;
                 };                
                 
                 $dosframe.on('load', function(){
@@ -843,10 +844,10 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
                         var opts = {
                                 autoOpen: true,
-                                width : (options.width>0?options.width+20:680),
+                                width : (options.width>0?options.width+20:690),
                                 height: (options.height>0?options.height+20:690),
                                 modal: true,
-                                resizable: !options['no-resize'],
+                                resizable: (options['no-resize']==true),
                                 //draggable: false,
                                 title: options["title"],
                                 resizeStop: function( event, ui ) {

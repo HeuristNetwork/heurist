@@ -38,7 +38,7 @@ $.widget( "heurist.resultList", {
         onselect: null
     },
 
-    _query_request: null, //keep curtent query result
+    _query_request: null, //keep current query request
 
     // the constructor
     _create: function() {

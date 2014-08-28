@@ -69,6 +69,7 @@ $.widget( "heurist.search", {
         .appendTo( this.element );
 
         this.btn_search_assistant = $( "<button>", {
+            id: 'btn_search_assistant', 
             text: top.HR("search assistant")
         })
         .appendTo( this.div_search_as_user )
@@ -118,7 +119,7 @@ $.widget( "heurist.search", {
 
         this._on( this.btn_search_domain, {
             click: function() {
-                $('.ui-menu').hide(); //hide other
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
                 var menu = $( this.menu_search_domain )
                 .css('width', this.div_search_as_user.width())
                 .show()
@@ -133,7 +134,7 @@ $.widget( "heurist.search", {
         //show quick search assistant
         this._on( this.btn_search_assistant, {
             click: function() {
-                $('.ui-menu').hide(); //hide other
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
                 $('.menu-or-popup').hide(); //hide other
 
                 if(this.search_assistant){ //inited already
@@ -284,8 +285,12 @@ $.widget( "heurist.search", {
         return lbl;
     },
 
-    doSearch: function(){
+    doSearch: function(search_query){
 
+        if(!top.HEURIST4.util.isempty(search_query)){
+            this.input_search.val(search_query);
+        }
+        
         var qsearch = this.input_search.val();
         if( this.select_rectype && this.select_rectype.val()){
             qsearch = qsearch + ' t:'+this.select_rectype.val();
@@ -437,12 +442,13 @@ $.widget( "heurist.search", {
 
     }
 
+    // recalculate search query value
     ,calcShowSimpleSearch: function (e) {
 
-        var q = $("#sa_rectype").val(); if(q) q = "t:"+q;
-        var fld = $("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
-        var ctn = $("#fld_enum").is(':visible') ?$("#sa_termvalue").val() 
-        :$("#sa_fieldvalue").val();    
+        var q = this.search_assistant.find("#sa_rectype").val(); if(q) q = "t:"+q;
+        var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
+        var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val() 
+        :this.search_assistant.find("#sa_fieldvalue").val();    
 
         var asc = ($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();

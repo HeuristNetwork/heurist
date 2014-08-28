@@ -143,7 +143,6 @@ $.widget( "heurist.mainMenu", {
         
         this['btn_'+name] = $('<li>').append(link)
         .appendTo( this.divMainMenuItems );
-        //.button();
         
         this['menu_'+name] = $('<ul>')          
         .load('apps/others/mainMenu'+name+'.html?t='+(new Date().getTime()), function(){
@@ -211,11 +210,7 @@ $.widget( "heurist.mainMenu", {
                             link = $(event.target),
                             that = this;
 
-                        var options = {
-                                title: link.html(),
-                                height: 690,
-                                width: 690,
-                                'no-resize': true};
+                        var options = { title: link.html() };
 
                         if (link.hasClass('small')){
                             options.height=dim.h*0.55; options.width=dim.w*0.5;
