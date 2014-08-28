@@ -35,7 +35,7 @@ function getValue(element, query) {
 
 /** Returns the ID value of a record */
 function getID(record) {
-    return getValue(record, "rec_ID").textContent;                
+    return parseInt(getValue(record, "rec_ID").textContent);               
 }
 
 /** Returns the name value of a record */
@@ -45,7 +45,7 @@ function getName(record) {
 
 /** Returns the count value of a record */
 function getCount(record) {
-    return getValue(record, "rec_Count").textContent;                
+    return parseInt(getValue(record, "rec_Count").textContent);                
 }
 
 /** Returns the image value of a record */
@@ -79,7 +79,10 @@ function isUnconstrained(record) {
 
 
 /** Converts the raw XML data to D3 usable nodes and links */
+var maxCount = 1;
 function convertData() {
+    maxCount = 1;
+    
     // Holds a list of unique nodes
     // Has attributes 'id', 'name', 'count', 'image' and 'type'
     var nodes = {};
@@ -142,18 +145,28 @@ function convertData() {
                                 if(!(rootInfo.name in nodes)) {
                                     nodes[rootInfo.name] = rootInfo;
                                     link["source"] = rootInfo;
+                                    
+                                     // Count check
+                                    if(rootInfo.count > maxCount) {
+                                        maxCount = rootInfo.count;                                                                     
+                                    }
                                 }else{
                                     link["source"] = nodes[rootInfo.name];
                                 }
-                                
+
                                 // Link construction; add usage record info
                                 if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
                                     nodes[usageInfo.name] = usageInfo; // It has not; add it to the list of nodes
                                     link["target"] = usageInfo;    // Set the target of the root link to this reoord
+                                    
+                                     // Count check
+                                    if(usageInfo.count > maxCount) {
+                                        maxCount = usageInfo.count;
+                                    }
                                 }else{ // Node with this name exists already, use that record 
                                     link["target"] = nodes[usageInfo.name]; 
                                 }
-                                
+
                                 // Add link to array
                                 link["pointer"] = relationInfo.name;
                                 links.push(link);
@@ -161,6 +174,11 @@ function convertData() {
                                 // Display root node anyways
                                 if(!(rootInfo.name in nodes)) {
                                     nodes[rootInfo.name] = rootInfo;
+                                    
+                                    // Count check
+                                    if(rootInfo.count > maxCount) {
+                                        maxCount = rootInfo.count;
+                                    }
                                 }
                             }
                         }
@@ -185,12 +203,24 @@ function convertData() {
 
 
 /** Calculates the line width based on count */
-function getLineWidth(count) {
-    var width = Math.log(count);
-    if(width > 1) {
-        width = Math.sqrt(width);
+var iconSize = 16; // The icon size
+var circleSize = iconSize * 0.75;
+var maxRadius = 10;
+function log10(val) {
+    return Math.log(val) / Math.LN10;
+}
+function getLineWidth(formula, count) {
+    var result = 1;
+    if(formula == "linear") {                                       
+        result = maxRadius * (count/maxCount); 
+    } 
+    else if(formula == "naturallog") {
+        result = Math.log(count) * (maxRadius / Math.log(maxCount));
     }
-    return Math.round(width);
+    else if(formula == "logbase10") {
+        result = log10(count) * (maxRadius / log10(maxCount));                                           
+    }                                                                                                    
+    return result;
 }
 
 
@@ -204,8 +234,6 @@ function pathHovered(path) {
 
 
 /** Visualizes the data */ 
-var iconSize = 16; // The icon size 
-var offset = 10;   // Line offsets
 function visualizeData() {
     // SVG data    
     var width = $("svg").width();     // Determine the SVG width
@@ -215,19 +243,19 @@ function visualizeData() {
     var data = convertData();         // Convert XML to usable D3 data
     
     // Color settings
-    var linecolor = getLineColor();
-    var markercolor = getMarkerColor();
-    var countcolor = getCountColor();
-    var textcolor = getTextColor();
+    var linecolor = getSetting(setting_linecolor);
+    var markercolor = getSetting(setting_markercolor);
+    var countcolor = getSetting(setting_countcolor);
+    var textcolor = getSetting(setting_textcolor);
     
     // Line settings
-    var linetype = getLineType();
-    var linethickness = getLineThickness();
-    var linelength = getLineLength();
+    var linetype = getSetting(setting_linetype);
+    var linethickness = getSetting(setting_linethickness);
+    var linelength = getSetting(setting_linelength);
    
     // Gravity settings
-    var gravity = getGravity(); 
-    var attraction = getAttraction();
+    var gravity = getSetting(setting_gravity);
+    var attraction = getSetting(setting_attraction);
  
     // Creating D3 force
     var force = d3.layout.force()
@@ -255,23 +283,17 @@ function visualizeData() {
                             return "marker" + d.source.id;
                       })
                       .attr("markerWidth", function(d) {
-                          return 4 + getLineWidth(d.source.count);
+                          return 4 + getLineWidth(linethickness, d.source.count);
                       })
                       .attr("markerHeight", function(d) {
-                          return 4 + getLineWidth(d.source.count);
+                          return 4 + getLineWidth(linethickness, d.source.count);
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
                       .attr("viewBox", "0 -5 10 10")
                       .attr("markerUnits", "userSpaceOnUse")
                       .attr("orient", "auto")
-                      .attr("fill", function(d) {
-                          // Using the markercolor setting to determine the color
-                          if(markercolor) {
-                              return markercolor;
-                          }
-                          return "#000";
-                      })
+                      .attr("fill", markercolor) // Using the markercolor setting
                       .attr("opacity", "0.6")
                       .append("path")
                       .attr("d", "M0,-5L10,0L0,5");
@@ -293,14 +315,7 @@ function visualizeData() {
     }     
     // Adding shared attributes
     lines.attr("class", "link") 
-         .attr("stroke", function(d) { 
-             // Using the linecolor setting to determine the color   
-             if(linecolor) {
-                 return linecolor;
-             }else{
-                 return "#999";
-             }
-         })
+         .attr("stroke", linecolor)
          .attr("pointer", function(d, i) {
             return d.pointer;
          })
@@ -308,7 +323,7 @@ function visualizeData() {
             return "url(#marker" + d.source.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(d.source.count)/2;
+            return 0.5 + getLineWidth(linethickness, d.source.count)/2;
          })
          .attr("onmouseover", function(d, i) {
             return "pathHovered(this)";
@@ -338,8 +353,25 @@ function visualizeData() {
         d.px += d3.event.dx;
         d.py += d3.event.dy;
         d.x += d3.event.dx;
-        d.y += d3.event.dy;  
+        d.y += d3.event.dy;
         
+        // Update the location in localstorage
+        var record = localStorage.getItem(d.name);
+        var obj;
+        if(record === null) {
+            obj = {}; 
+        }else{
+            obj = JSON.parse(record);
+        }  
+        
+        // Set attributes 'x' and 'y' and store object
+        obj.px = d.px;
+        obj.py = d.py;
+        obj.x = d.x;
+        obj.y = d.y;
+        console.log("NAME: " + d.name);
+        localStorage.setItem(d.name, JSON.stringify(obj));
+    
         // Update nodes & lines                                                           
         if(linetype == "curved") { 
              curvedTick();
@@ -352,14 +384,15 @@ function visualizeData() {
     function dragend(d, i) {
          d.fixed = true; // Node may not be auto positioned
          
-          // Update nodes & lines 
+         // Update nodes & lines 
          if(linetype == "curved") { 
              curvedTick();
          }else{
-            straightTick();
+             straightTick();
          }
          
          // Check if force may resume
+         console.log("Gravity: " + gravity);
          if(gravity !== "off") {
             force.resume(); 
          }
@@ -373,25 +406,77 @@ function visualizeData() {
                       return "node " + d.type;
                   }) 
                   .attr("transform", "translate(100, 100)")
+                  .attr("x", function(d) {
+                      // Setting 'x' based on localstorage
+                      var record = localStorage.getItem(d.name);
+                      if(record) {
+                          var obj = JSON.parse(record);
+                          if("x" in obj) {
+                              d.x = obj.x;
+                              return obj.x;
+                          }
+                      }
+                  })
+                  .attr("y", function(d) {
+                      // Setting 'y' based on localstorage
+                      var record = localStorage.getItem(d.name);
+                      if(record) {
+                          var obj = JSON.parse(record);
+                          if("y" in obj) {
+                              d.y = obj.y;
+                              return obj.y;
+                          }
+                      }
+                  })
+                  .attr("px", function(d) {
+                      // Setting 'px' based on localstorage
+                      var record = localStorage.getItem(d.name);
+                      if(record) {
+                         var obj = JSON.parse(record);
+                         if("px" in obj) {
+                             d.px = obj.px;
+                              return obj.px;
+                         }
+                      }
+                  })
+                  .attr("py", function(d) {
+                      // Setting 'py' based on localstorage
+                      var record = localStorage.getItem(d.name);
+                      if(record) {
+                          var obj = JSON.parse(record);
+                          if("py" in obj) {
+                              d.py = obj.py; 
+                              return obj.py;
+                          }
+                      }
+                  })
+                  .attr("fixed", function(d) {
+                      // Setting 'fixed' based on localstorage
+                      var record = localStorage.getItem(d.name);
+                      if(record) {
+                          if(gravity === "on") { // Using gravity setting
+                             d.fixed = false;
+                             return false;
+                          }else{
+                             d.fixed = true;
+                             return true;
+                          }
+                      }           
+                      return false;
+                  })        
                   .call(node_drag);
     
     // Adding the background circles to the nodes
     node.append("circle")
         .attr("r", function(d) {
-            return iconSize*0.75 + getLineWidth(d.count)*3
+            return circleSize + getLineWidth(linethickness, d.count);
         })
         .attr("class", "background")
-        .attr("fill", function(d) {
-            // Using the countcolor setting to determine the color
-            if(countcolor) {
-                 return countcolor;
-            }
-            return "gray";
-        });
+        .attr("fill", countcolor);
 
     // Adding the foreground circles to the nodes
     node.append("circle")
-        .attr("r", iconSize*0.75)
+        .attr("r", circleSize)
         .attr("class", "around foreground");
    
     // Adding icons to the nodes 
@@ -418,12 +503,7 @@ function visualizeData() {
         .attr("x", 0)
         .attr("y", -iconSize)
         .attr("class", "namelabel")
-        .attr("fill", function(d) {
-            if(textcolor) {
-                return textcolor;
-            }
-            return "#a00";
-        })
+        .attr("fill", textcolor)
         .text(function(d) { 
             return d.name; 
         });
@@ -477,6 +557,24 @@ function visualizeData() {
 
 
 
+
+
+/** SETTING NAMES */
+var setting_linecolor     = "setting_linecolor";
+var setting_markercolor   = "setting_markercolor";
+var setting_countcolor    = "setting_countcolor";
+var setting_textcolor     = "setting_textcolor";
+var setting_linetype      = "setting_linetype";
+var setting_linethickness = "setting_linethickness";
+var setting_linelength    = "setting_linelength";
+var setting_gravity       = "setting_gravity";
+var setting_attraction    = "setting_attraction";
+
+/** Returns a setting from local storage */
+function getSetting(setting) {
+    return localStorage.getItem(setting);
+}
+
 /** Returns a String array containing names of records to filter */
 function getFilter() {
     var names = [];   
@@ -490,68 +588,82 @@ function getFilter() {
     return names;
 }
 
-/** Returns the line color setting */
-function getLineColor() {
-    return localStorage.getItem("linecolor");
-}
-
-/** Returns the marker color setting */
-function getMarkerColor() {
-    return localStorage.getItem("markercolor");
-}
-
-/** Returns the count color setting */
-function getCountColor() {
-    return localStorage.getItem("countcolor");
-}
-
-/** Returns the text color setting */
-function getTextColor() {
-    return localStorage.getItem("textcolor");
-}
-
-/** Returns the line type setting */
-function getLineType() {
-    return localStorage.getItem("linetype");
-}
-
-/** Returns the line thickness setting */
-function getLineThickness() {
-    return localStorage.getItem("linethickness");
-}
-
-/** Returns the line length setting */
-function getLineLength() {
-    return localStorage.getItem("linelength");
-}
-
-/** Returns the attraction strength setting */
-function getAttraction() {
-    return localStorage.getItem("attraction");
-}
-
-/** Returns the gravity setting */
-function getGravity() {
-    return localStorage.getItem("gravity");
+/** Checks the local storage settings */
+function checkLocalStorage() {
+    // Load all settings
+    var linecolor     = getSetting(setting_linecolor); 
+    var markercolor   = getSetting(setting_markercolor);
+    var countcolor    = getSetting(setting_countcolor);
+    var textcolor     = getSetting(setting_textcolor);
+    var linetype      = getSetting(setting_linetype);
+    var linethickness = getSetting(setting_linethickness);
+    var linelength    = getSetting(setting_linelength);
+    var attraction    = getSetting(setting_attraction);
+    var gravity       = getSetting(setting_gravity);
+    
+    // Set linecolor default if needed
+    if(linecolor === null) {
+        localStorage.setItem(setting_linecolor, "#22a");
+    }
+    
+    // Set markercolor default if needed
+    if(markercolor === null) {
+        localStorage.setItem(setting_markercolor, "#000");
+    }
+    
+    // Set countcolor default if needed
+    if(countcolor === null) {
+        localStorage.setItem(setting_countcolor, "#262");
+    }
+    
+    // Set textcolor default if needed
+    if(textcolor === null) {
+        localStorage.setItem(setting_textcolor, "#b22");
+    }
+    
+    // Set linetype default if needed
+    if(linetype === null) {
+        localStorage.setItem(setting_linetype, "straight");
+    }
+    
+    // Set linethickness default if needed
+    if(linethickness === null) {
+        localStorage.setItem(setting_linethickness, "linear");
+    }
+    
+    // Set linelength default if needed
+    if(linelength === null) {
+        localStorage.setItem(setting_linelength, "300");
+    }
+    
+    // Set gravity default if needed
+    if(gravity === null) {
+        localStorage.setItem(setting_gravity, "touch");
+    }
+    
+    // Set attraction default if needed
+    if(attraction === null) {
+        localStorage.setItem(setting_attraction, "-700");
+    }
 }
 
 /** Body is done with loading */
 var xml;
 $(document).ready(function() {
+    // Check localstorage settings
+    checkLocalStorage();
+    
     /** LINE COLOR SETTING */
     // Set line color setting in UI
-    var linecolor = getLineColor(); 
-    if(linecolor) {
-        $("#linecolor").css("background-color", linecolor);
-    }
-    
+    $("#linecolor").css("background-color", getSetting(setting_linecolor));
+
     // Listen to 'line color' selection changes
     $('#linecolor').colpick({
         layout: 'hex',
         onSubmit: function(hsb, hex, rgb, el) {
             var color = "#"+hex; 
             
-            localStorage.setItem("linecolor", color);
+            localStorage.setItem(setting_linecolor, color);
             $(".link").attr("stroke", color);
     
             $(el).css('background-color', color);
@@ -561,10 +673,7 @@ $(document).ready(function() {
     
     /** MARKER COLOR SETTING */
     // Set marker color in UI
-    var markercolor = getMarkerColor();
-    if(markercolor) {
-        $("#markercolor").css("background-color", markercolor);
-    }
+    $("#markercolor").css("background-color", getSetting(setting_markercolor));
     
     // Listen to 'marker color' selection changes
     $('#markercolor').colpick({
@@ -572,7 +681,7 @@ $(document).ready(function() {
         onSubmit: function(hsb, hex, rgb, el) {
             var color = "#"+hex; 
             
-            localStorage.setItem("markercolor", color);
+            localStorage.setItem(setting_markercolor, color);
             $("marker").attr("fill", color);
             
             $(el).css('background-color', color);
@@ -582,18 +691,15 @@ $(document).ready(function() {
     
     /** COUNT COLOR SETTING */
     // Set count color in UI
-    var countcolor = getCountColor();
-    if(countcolor) {
-         $("#countcolor").css("background-color", countcolor);
-    }
-    
+    $("#countcolor").css("background-color", getSetting(setting_countcolor));
+
     // Listen to 'count color' selection changes
     $('#countcolor').colpick({
         layout: 'hex',
         onSubmit: function(hsb, hex, rgb, el) {
             var color = "#"+hex; 
             
-            localStorage.setItem("countcolor", color);
+            localStorage.setItem(setting_countcolor, color);
             $(".background").attr("fill", color);
             
             $(el).css('background-color', color);
@@ -603,18 +709,15 @@ $(document).ready(function() {
     
     /** TEXT COLOR SETTING */
     // Set text color in UI
-    var textcolor = getTextColor();
-    if(textcolor) {
-         $("#textcolor").css("background-color", textcolor);
-    }
-    
+    $("#textcolor").css("background-color", getSetting(setting_textcolor));
+
     // Listen to 'count color' selection changes
     $('#textcolor').colpick({
         layout: 'hex',
         onSubmit: function(hsb, hex, rgb, el) {
             var color = "#"+hex; 
             
-            localStorage.setItem("textcolor", color);
+            localStorage.setItem(setting_textcolor, color);
             $(".namelabel").attr("fill", color);
             
             $(el).css('background-color', color);
@@ -624,84 +727,94 @@ $(document).ready(function() {
     
     /** LINE TYPE SETTING */
     // Set line type setting in UI
-    var linetype = getLineType();
-    if(linetype) {
-        $("#linetype option[value='" +linetype+ "']").attr("selected", true);
-    }
+    $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
     
     // Listens to linetype selection changes
     $("#linetype").change(function(e) {
-        localStorage.setItem("linetype", $("#linetype").val());
+        localStorage.setItem(setting_linetype, $("#linetype").val());
         visualizeData();
     });
     
     /** LINE THICKNESS SETTING */
     // Set line thickness setting in UI
-    var linethickness = getLineThickness();
-    if(linethickness) {
-        $("#linethickness option[value='" +linethickness+ "']").attr("selected", true);
-    }
-    
+    $("#linethickness option[value='" +getSetting(setting_linethickness)+ "']").attr("selected", true);
+
     // Listen to linethickness selection changes
     $("#linethickness").change(function(e) {
-        localStorage.setItem("linethickness", $(this).val());
+        localStorage.setItem(setting_linethickness, $(this).val());
         visualizeData();
     });
     
     /** LINE LENGTH SETTING */
     // Set line length setting in UI
-    var linelength = getLineLength();
-    if(linelength) {
-        $("#linelength").val(linelength); 
-    }
-    
+    $("#linelength").val(getSetting(setting_linelength)); 
+
     // Listen to linelength changes
     $("#linelength").change(function() {
-        localStorage.setItem("linelength", $(this).val());
+        localStorage.setItem(setting_linelength, $(this).val());
         visualizeData();
     });
     
     /** GRAVITY SETTING */
     // Set gravity setting in UI
-    var gravity = getGravity();
-    if(gravity) {                      
-        $("#gravity option[value='" +gravity+ "']").attr("selected", true);
-    }
+    $("#gravity option[value='" +getSetting(setting_gravity)+ "']").attr("selected", true);
 
     // Listen to gravity changes
     $("#gravity").change(function() {
-        localStorage.setItem("gravity",  $(this).val());
+        localStorage.setItem(setting_gravity,  $(this).val());
         visualizeData();
     });
     
     /** ATTRACTION SETTING */
     // Set attraction setting in UI
-    var attraction = getAttraction();
-    if(attraction) {
-        $("#attraction").val(attraction);
-    }
+    $("#attraction").val(getSetting(setting_attraction));
     
     // Listen to attraction changes
     $("#attraction").change(function() {
-        localStorage.setItem("attraction", $(this).val());
+        localStorage.setItem(setting_attraction, $(this).val());
         visualizeData();
     });
     
     /** RECORD FILTERING */
+    // Set filtering settings in UI
+    $(".show-record").each(function() {
+        var name = $(this).attr("name");
+        var record = localStorage.getItem(name);
+        if(record) {
+            // Update checked attribute
+            var obj = JSON.parse(record);
+            if("checked" in obj) {
+                $(this).prop("checked", obj.checked);
+            }
+        }
+    });
+    
     // Listen to 'show-record' checkbox changes  
     $(".show-record").change(function(e) {
-        visualizeData();  
+        // Update record field 'checked' value in localstorage
+        var name = $(this).attr("name");
+        var record = localStorage.getItem(name);
+        var obj;
+        if(record === null) {
+            obj = {};  
+        }else{                                   
+            obj = JSON.parse(record);
+        }
+        
+        // Set 'checked' attribute and store it
+        obj.checked = $(this).is(':checked');
+        localStorage.setItem(name, JSON.stringify(obj));
+        
+        // Update visualisation
+        visualizeData();
     });
 
     // Listen to the 'show-all' checkbox 
     $("#show-all").change(function() {
         var checked = $(this).is(':checked');  
-        $(".show-record").prop("checked", checked);
+        $(".show-record").prop("checked", checked).trigger("change");
         visualizeData();
     });
-    
-    
-    
     
     /** BUILDING THE VISUALISATION */
     var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;

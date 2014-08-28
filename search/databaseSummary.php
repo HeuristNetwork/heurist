@@ -54,7 +54,7 @@
         <link rel="stylesheet" type="text/css" href="../external/d3/colpick.css">
         <style>
             /** Heurist table */
-            #container, settings, #visualisation, svg {
+            #container, #settings, #visualisation, svg {
                 width: 100%;
                 height: 100%;
             }
@@ -67,23 +67,23 @@
             /** Table */
             #records {
                 overflow: scroll;
+                border: none;
             }
 
             table {
                 table-layout: auto;
-                border-width: 0 0 1px 1px;
-                border-spacing: 0;
-                border: none;
+                border-color: black;   
+                border-collapse: collapse;       
             }
-
-            caption {
-                float: left;
-            }
-
+            
             td, th {
                 vertical-align: top;
                 margin: 0px;
-                padding: 1px;
+                padding: 1px;  
+            }
+            
+            #records td, #records th {
+                border: 1px solid black;
             }
 
             .row:hover {
@@ -96,10 +96,13 @@
             }
 
             /** Settings */
-            div.settings {
-                float: left;
+            .space {
                 padding-left: 5px;
                 padding-right: 5px;     
+            }
+            
+            div.settings {
+                float: left;
             }
             
             div.color {
@@ -208,15 +211,15 @@
                     <!-- Record count table -->
                     <!-- also provides navigation to search for a record type and on/off controls for record types in visualisation -->
                     <h3> Record types (entities)</h3><br />
-                    <table id="records" cellpadding="4" cellspacing="1" border="1">
+                    <table id="records" cellpadding="4" cellspacing="1">
 
                         <tr>
                             <th width="40">ID</th>
-                            <th style="padding-left: 5px; padding-right: 5px">Icon</th>
-                            <th width="200">Record&nbsp;type</th>
-                            <th style="padding-left: 5px; padding-right: 5px">Link</th>
-                            <th style="padding-left: 5px; padding-right: 5px">Count</th>
-                            <th style="padding-left: 5px; padding-right: 5px">Show <input type='checkbox' id="show-all"></th>
+                            <th class="space">Icon</th>
+                            <th class="space" width="200">Record&nbsp;type</th>
+                            <th class="space">Link</th>
+                            <th class="space">Count</th>
+                            <th class="space">Show <input type='checkbox' id="show-all"></th>
                         </tr>
 
                         <?php
@@ -272,35 +275,27 @@
                             <!-- SETTINGS -->
                             <td height="25px" style="vertical-align: middle;">
                                 <!-- COLOR SETTINGS -->
-                                <div class="settings">
+                                <div class="settings space">
                                      <b>Colours:</b>
                                      <!-- Line color -->
-                                     <span>
-                                        <i>Lines</i>
-                                        <div id="linecolor" class="color"></div>
-                                     </span>
+                                     <i>Lines</i>
+                                     <div id="linecolor" class="color"></div>
                                      
                                      <!-- Arrow color -->
-                                     <span>
-                                        <i>Arrows</i>
-                                        <div id="markercolor" class="color"></div>
-                                     </span>
-                                        
+                                     <i>Arrows</i>
+                                     <div id="markercolor" class="color"></div>
+              
                                       <!-- Record count circle color -->
-                                      <span>
-                                        <i>Frequency</i>
-                                        <div id="countcolor" class="color"></div>
-                                      </span>
+                                      <i>Frequency</i>
+                                      <div id="countcolor" class="color"></div>
                                         
                                       <!-- Text color -->
-                                      <span>
-                                        <i>Text</i>
-                                        <div id="textcolor" class="color"></div>
-                                      </span> 
+                                      <i>Text</i>
+                                      <div id="textcolor" class="color"></div>
                                 </div> 
                                 
                                 <!-- LINE SETINGS -->           
-                                <div class="settings">
+                                <div class="settings space">
                                     <b>Lines:</b>
                                     <!-- Line type -->
                                     <select class="middle" id="linetype">
@@ -309,23 +304,20 @@
                                     </select>
                                     
                                     <!-- Line thickness -->
-                                    <span>
-                                        <i>Thickness</i>
-                                        <select class="middle" id="linethickness">
-                                            <option value="formula1">formula1</option>
-                                            <option value="formula2">formula2</option>
-                                        </select>
-                                    </span>
-                                   
+                                    <i>Thickness</i>
+                                    <select class="middle" id="linethickness">
+                                        <option value="linear">linear</option>
+                                        <option value="naturallog">natural log</option>
+                                        <option value="logbase10">log base 10</option>
+                                    </select>
+
                                    <!-- Line length --> 
-                                    <span>
-                                        <i>Length</i>
-                                        <input id="linelength" class="small" type="number" min="1" value="200"/>
-                                    </span>
+                                    <i>Length</i>
+                                    <input id="linelength" class="small" type="number" min="1" value="200"/>
                                 </div>
                                 
                                 <!-- GRAVITY SETTINGS -->
-                                <div class="settings">
+                                <div class="settings space">
                                     <b>Gravity:</b>
                                     <!-- Gravity setting -->
                                     <select class="middle" id="gravity">
