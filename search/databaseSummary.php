@@ -153,7 +153,7 @@
 
             /** Lines between records */
             .link {
-                fill: none;
+                fill: none;    
                 stroke-opacity: .6;
                 pointer-events: all;
             }
@@ -170,7 +170,7 @@
             }
 
             /** Text above circle */
-            text {
+            text.center {
                 font-weight: bold;
                 text-anchor: middle;
                 font: 10px sans-serif;
@@ -180,6 +180,18 @@
                 stroke: #fff;
                 stroke-width: 3px;
                 stroke-opacity: .8;
+            }
+            
+            /** Overlay */
+            #overlay {
+                pointer-events: none;
+            }
+            .semi-transparant {
+                fill: #fff;
+                fill-opacity: 0.8;
+                stroke: #000;
+                stroke-width: 3;
+                stroke-opacity: 1.0;
             }
         </style>
 

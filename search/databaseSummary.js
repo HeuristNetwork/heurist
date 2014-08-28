@@ -223,15 +223,34 @@ function getLineWidth(formula, count) {
     return result;
 }
 
+/** Create an overlay based on mouse hover x & y and the name to display */
+function createOverlay(x, y, name) {
+     $("#overlay").remove();
+    
+    var svg = d3.select("svg");                 
+    var overlay = svg.append("g")
+                     .attr("id", "overlay")      
+                     .attr("transform", "translate(" +x+ "," +y+ ")");
+            
+    overlay.append("rect")
+           .attr("class", "semi-transparant")              
+           .attr("x", 0)
+           .attr("y", 0)
+           .attr("width", 100)
+           .attr("height", 100);
 
-/** Called when the path has been hovered */
-function pathHovered(path) {
-    //alert("Path hovered!");
-    //console.log(path);
-    var pointer = path.getAttribute("pointer");
-    //console.log("Pointer: " + pointer);
+    overlay.append("text")
+           .attr("x", 5)
+           .attr("y", 15)
+           .text(name);              
 }
 
+/** Slight delay, fades away and then removes itself. */
+function removeOverlay() {
+    $("#overlay").delay(500).fadeOut(500, function() {
+         $(this).remove();
+    });
+}
 
 /** Visualizes the data */ 
 function visualizeData() {
@@ -283,10 +302,10 @@ function visualizeData() {
                             return "marker" + d.source.id;
                       })
                       .attr("markerWidth", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count);
+                          return 4 + getLineWidth(linethickness, d.source.count)*3;
                       })
                       .attr("markerHeight", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count);
+                          return 4 + getLineWidth(linethickness, d.source.count)*3;
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
@@ -323,10 +342,13 @@ function visualizeData() {
             return "url(#marker" + d.source.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(linethickness, d.source.count)/2;
+            return 0.5 + getLineWidth(linethickness, d.source.count);
          })
-         .attr("onmouseover", function(d, i) {
-            return "pathHovered(this)";
+         .on("mouseover", function(d) {
+             createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
+         })
+         .on("mouseout", function(d) {
+             removeOverlay();                                 
          });
          
     // Check what methods to call on drag
@@ -464,12 +486,18 @@ function visualizeData() {
                       }           
                       return false;
                   })        
+                  .on("mouseover", function(d) {
+                     createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                  })
+                  .on("mouseout", function(d) {
+                     removeOverlay();                                 
+                  })
                   .call(node_drag);
     
     // Adding the background circles to the nodes
     node.append("circle")
         .attr("r", function(d) {
-            return circleSize + getLineWidth(linethickness, d.count);
+            return circleSize + getLineWidth(linethickness, d.count)*4;
         })
         .attr("class", "background")
         .attr("fill", countcolor);
@@ -493,7 +521,7 @@ function visualizeData() {
     node.append("text")
         .attr("x", 0)
         .attr("y", -iconSize)
-        .attr("class", "shadow")
+        .attr("class", "center shadow")
         .text(function(d) { 
             return d.name; 
         })
@@ -502,7 +530,7 @@ function visualizeData() {
     node.append("text")
         .attr("x", 0)
         .attr("y", -iconSize)
-        .attr("class", "namelabel")
+        .attr("class", "center namelabel")
         .attr("fill", textcolor)
         .text(function(d) { 
             return d.name; 
