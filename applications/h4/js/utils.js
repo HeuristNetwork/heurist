@@ -800,8 +800,65 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         } else {
             return true;
         }
-    }    
+    },
 
+    showDialog: function(url, options){
+    
+        
+                var opener = options['window']?options['window'] :window;
+        
+                //.appendTo( that.document.find('body') )
+                
+                //create new div for dialogue with $(this).uniqueId();                 
+                var $dlg = $('<div>').appendTo( $(opener.document).find('body') );
+                var $dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                
+                $dosframe[0].close = function() {
+                    var rval = true;
+                    var closeCallback = options['callback'];
+                    if(closeCallback){
+                        rval = closeCallback.apply(opener, arguments);
+                    }
+                    if (rval){
+                        $dlg.dialog('close');
+                        //$dlg.remove();
+                        return true;
+                    }else{
+                        return false;
+                    }
+                };                
+                
+                $dosframe.on('load', function(){
+                        var content = $dosframe[0].contentWindow;
+                        if(!options["title"]){
+                            $dlg.dialog( "option", "title", content.document.title );
+                        }
+                        content.close = $dosframe[0].close;    // make window.close() do what we expect
+                        //content.popupOpener = opener;                        
+                });
+
+
+                
+//    options['callback']
+
+                        var opts = {
+                                autoOpen: true,
+                                width : (options.width>0?options.width+20:680),
+                                height: (options.height>0?options.height+20:690),
+                                modal: true,
+                                resizable: !options['no-resize'],
+                                //draggable: false,
+                                title: options["title"],
+                                resizeStop: function( event, ui ) {
+                                    $dosframe.css('width','100%');
+                                },
+                                close: function(event, ui){
+                                    $dlg.remove();
+                                }
+                        };
+                        $dosframe.attr('src', url);
+                        $dlg.dialog(opts);
+    }                        
 
 
     }//end util

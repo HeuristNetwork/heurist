@@ -188,10 +188,13 @@
 
                 }
                 
-                top.HEURIST.closeThisWindow();
+                window.close();
                 
             }
             
+            function closeThis(){
+                window.close();    
+            }
         </script>
 
         <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
@@ -329,7 +332,7 @@
 
         <div id="buttons" class="actionButtons">
             <input type="button" value="save" onClick="save();">
-            <input type="button" value="cancel" onClick="top.HEURIST.closeThisWindow();">
+            <input type="button" value="cancel" onClick="closeThis()">
         </div>
     </body>
 </html>

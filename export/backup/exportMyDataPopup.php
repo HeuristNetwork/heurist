@@ -62,16 +62,6 @@
 
     <body class="popup" width: 300px; height: 300px;>
 
-
-        <script>    
-            function closeThis(){
-                if (typeof parent.closePopupFromH3 === 'undefined') {
-                    window.close();
-                }else{
-                    parent.closePopupFromH3();
-                }
-            }
-        </script>    
         <?php
             if(!$mode) {
             ?>
@@ -108,7 +98,7 @@
 
                 <div id="buttons" class="actionButtons">
                     <input type="submit" value="backup">
-                    <input type="button" value="cancel" onClick="closeThis();">
+                    <input type="button" value="cancel" onClick="window.close();">
                 </div>
             </form>
 
