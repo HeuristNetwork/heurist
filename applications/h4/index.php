@@ -213,11 +213,6 @@
                 
             });
             
-            
-            var closePopupFromH3 = function(context){
-                   $( "#heurist-dialog" ).dialog('close');
-            }            
-
         </script>
 
     </head>
@@ -260,8 +255,6 @@
         </div>
 
         <div id="heurist-dialog">
-        </div>
-        <div id="heurist-dialog2">
         </div>
     </body>
 </html>

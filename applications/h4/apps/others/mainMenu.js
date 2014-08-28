@@ -137,11 +137,11 @@ $.widget( "heurist.mainMenu", {
                 return false;
             };
             
-        this['btn_'+name] = $('<a>',{
+        var link = $('<a>',{
             text: name, href:'#'
         });
         
-        $('<li>').append(this['btn_'+name])
+        this['btn_'+name] = $('<li>').append(link)
         .appendTo( this.divMainMenuItems );
         //.button();
         
@@ -204,28 +204,19 @@ $.widget( "heurist.mainMenu", {
                         }
                         top.HEURIST.util.popupURL(top, link.attr('href'), options);
                         */
-
-                        var $dlg = $("#heurist-dialog");
-                        $dlg.empty();
-                        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                        
                         
                         var body = this.document.find('body');
                         var dim = {h:body.innerHeight(), w:body.innerWidth()},
                             link = $(event.target),
                             that = this;
+
                         var options = {
-                                autoOpen: true,
+                                title: link.html(),
                                 height: 690,
                                 width: 690,
-                                modal: true,
-                                resizable: false,
-                                //draggable: false,
-                                title: link.html(),
-                                resizeStop: function( event, ui ) {
-                                    that.dosframe.css('width','100%');
-                                }
-                        };
-                        
+                                'no-resize': true};
+
                         if (link.hasClass('small')){
                             options.height=dim.h*0.55; options.width=dim.w*0.5;
                         }else if (link.hasClass('portrait')){
@@ -242,9 +233,8 @@ $.widget( "heurist.mainMenu", {
                             options.width=dim.w*0.8;
                         }
                         
-                        this.dosframe.attr('src', link.attr('href'));
-                        $dlg.dialog(options);
-                        
+                        top.HEURIST4.util.showDialog(link.attr('href'), options);
+                      
                         event.preventDefault();
                         return false;
                     }
