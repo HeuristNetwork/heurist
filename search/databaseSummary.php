@@ -148,7 +148,7 @@
             
             /** Move records around */
             g:hover {
-                cursor: move;
+                cursor: pointer;
             }
 
             /** Lines between records */
@@ -157,9 +157,9 @@
                 stroke-opacity: .6;
                 pointer-events: all;
             }
-
+     
             .link:hover {
-                cursor: help;
+                cursor: pointer;
             }
 
             /** Circle around icon */
@@ -348,9 +348,9 @@
                                     <b>Gravity:</b>
                                     <!-- Gravity setting -->
                                     <select class="middle" id="gravity">
-                                        <option value="on">on</option>
-                                        <option value="touch">touch</option>
                                         <option value="off">off</option>
+                                        <option value="touch">touch</option>
+                                        <option value="aggressive">aggressive</option>
                                     </select>
                                     
                                      <!-- Attraction strength -->

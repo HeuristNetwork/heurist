@@ -195,6 +195,85 @@ function convertData() {
     return obj;
 }
 
+/** Constructs the overlay data for an element in the XML with the name "name"  */
+function getOverlayText(name) {
+    var array = [];
+    array.push(name);
+    
+    var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
+    for(var i = 0; i < roots.length; i++) {
+        // Retrieve info about this record
+        var root = roots[i];
+        var rootInfo = getInfo(root);
+        //console.log(rootInfo);
+        
+        if(rootInfo.name == name) {
+            console.log("FOUND!");
+            array.push(rootInfo.name + " (n=" + rootInfo.count +")");
+
+            // Going through all linked relation Records with namespace 'relationrecord'
+            var relations = root.getElementsByTagNameNS("relationrecord", "Record");
+            if(relations && relations.length > 0) {
+                for(var j = 0; j < relations.length; j++ ){
+                    // Get record info 
+                    var relation = relations[j];
+                    var relationInfo = getInfo(relation);
+                    //console.log(relationInfo);
+                    array.push("");
+                    array.push(relationInfo.name + " (n=" + relationInfo.count +")");
+                    
+         
+                    // Unconstrained check
+                    var constrained = isUnconstrained(relation);
+                    //console.log(constrained);
+                    
+                    // Check types
+                    var types = relation.getElementsByTagName("rel_Name");
+                    //console.log(types);
+                    if(types && types.length > 0) {
+                        for(var k = 0; k < types.length; k++) {
+                            var type = types[k].textContent;
+                            //console.log(type);
+                            if(type == "rpt") {
+                                 // Going through all linked usage Records with namespace 'usagerecord'
+                                var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
+                                if(usages && usages.length > 0) {
+                                    for(var l = 0; l < usages.length; l++) {
+                                        // Get record info 
+                                        var usage = usages[l];
+                                        var usageInfo = getInfo(usage);
+                                        //console.log(usageInfo);
+                                        array.push("  R > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                    } 
+                                }
+                            }else if(type == "sng") {
+                                // Going through all linked usage Records with namespace 'usagerecord'
+                                var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
+                                if(usages && usages.length > 0) {
+                                    for(var l = 0; l < usages.length; l++) {
+                                        // Get record info 
+                                        var usage = usages[l];
+                                        var usageInfo = getInfo(usage);
+                                        //console.log(usageInfo);
+                                        array.push("  S > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                    } 
+                                }
+                            }
+                            
+                            
+     
+                            
+                        }
+                    }
+                }
+            }
+            break;
+        } 
+    }
+    
+    return array;
+}
+
 
 
 
@@ -223,10 +302,8 @@ function executeFormula(count, maxSize) {
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
-    var maxWidth = getSetting(setting_linewidth);
-    var result = executeFormula(count, maxWidth);
-    console.log("Count: " + count + ", max count: " + maxCount + ", max width: " + maxWidth + " , result: " + result);
-    return 0.5 + result;
+    var maxWidth = getSetting(setting_linewidth);                                                                     
+    return 0.5 + executeFormula(count, maxWidth);
 }            
 
 /** Calculates the marker width that should be used */
@@ -244,31 +321,62 @@ function getEntityRadius(count) {
 
 /** Create an overlay based on mouse hover x & y and the name to display */
 function createOverlay(x, y, name) {
-     $("#overlay").remove();
+    $("#overlay").remove();
     
+    // Add overlay container
     var svg = d3.select("svg");                 
     var overlay = svg.append("g")
                      .attr("id", "overlay")      
-                     .attr("transform", "translate(" +x+ "," +y+ ")");
-            
-    overlay.append("rect")
-           .attr("class", "semi-transparant")              
-           .attr("x", 0)
-           .attr("y", 0)
-           .attr("width", 100)
-           .attr("height", 100);
+                     .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
+    
+    // Draw a semi transparant rectangle       
+    var rect = overlay.append("rect")
+                      .attr("class", "semi-transparant")              
+                      .attr("x", 0)
+                      .attr("y", 0);
 
-    overlay.append("text")
-           .attr("x", 5)
-           .attr("y", 15)
-           .text(name);              
+    // Adding text
+    var horizontalOffset = 5;
+    var verticalOffset = 15;
+    var array = getOverlayText(name);
+    var text = overlay.selectAll("text")
+                      .data(array)
+                      .enter()
+                      .append("text")
+                      .attr("x", horizontalOffset)
+                      .attr("y", verticalOffset)
+                      .attr("dy", function(d, i) {
+                          return i*verticalOffset;
+                      })
+                      .text(String);
+  
+    // Calculate rectangle size
+    var maxWidth = 1;
+    var height = 1;
+    for(var i = 0; i < text[0].length; i++) {
+        var bbox = text[0][i].getBBox();
+        // Width
+        var width = bbox.width;
+        if(width > maxWidth) {
+            maxWidth = width;
+        }
+        // Height
+        if(i == text[0].length-1) {
+            height += bbox.y;
+        }
+    }
+    rect.attr("width", maxWidth + 2*horizontalOffset)
+        .attr("height", height  + verticalOffset);
+    
 }
 
 /** Slight delay, fades away and then removes itself. */
 function removeOverlay() {
+    /*
     $("#overlay").delay(500).fadeOut(500, function() {
          $(this).remove();
     });
+    */
 }
 
 /** Visualizes the data */ 
@@ -362,7 +470,8 @@ function visualizeData() {
          .style("stroke-width", function(d) { 
             return 0.5 + getLineWidth(d.source.count);
          })
-         .on("mouseover", function(d) {
+         .on("click", function(d) {
+             console.log(d3.event.defaultPrevented);
              createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
          })
          .on("mouseout", function(d) {
@@ -371,7 +480,7 @@ function visualizeData() {
          
     // Check what methods to call on drag
      var node_drag;
-     if(gravity === "on") {
+     if(gravity === "aggressive") {
          // Default method
          node_drag = force.drag;
      }else{
@@ -493,7 +602,7 @@ function visualizeData() {
                       // Setting 'fixed' based on localstorage
                       var record = localStorage.getItem(d.name);
                       if(record) {
-                          if(gravity === "on") { // Using gravity setting
+                          if(gravity === "aggressive") { // Using gravity setting
                              d.fixed = false;
                              return false;
                           }else{
@@ -503,8 +612,11 @@ function visualizeData() {
                       }           
                       return false;
                   })        
-                  .on("mouseover", function(d) {
-                     createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                  .on("click", function(d) {
+                       // Check if it's not a click after dragging
+                       if(!d3.event.defaultPrevented) {
+                            createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                       }
                   })
                   .on("mouseout", function(d) {
                      removeOverlay();                                 
@@ -682,7 +794,7 @@ function checkLocalStorage() {
     // Set entity radius default if needed
     var entityradius = getSetting(setting_entityradius);
     if(entityradius === null) {
-        localStorage.setItem(entityradius, 50);
+        localStorage.setItem(setting_entityradius, 50);
     }
     
     // Set formula default if needed
