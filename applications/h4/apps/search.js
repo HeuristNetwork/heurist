@@ -132,35 +132,7 @@ $.widget( "heurist.search", {
         this.search_assistant = null;
 
         //show quick search assistant
-        this._on( this.btn_search_assistant, {
-            click: function() {
-                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                $('.menu-or-popup').hide(); //hide other
-
-                if(this.search_assistant){ //inited already
-
-                    var popup = $( this.search_assistant )
-                    .show()
-                    .position({my: "right top+3", at: "right bottom", of: this.input_search });
-                    //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
-
-                    function _hidethispopup(event) {
-                        if($(event.target).closest(popup).length==0){
-                            popup.hide();
-                        }else{
-                            $( document ).one( "click", _hidethispopup);
-                            //return false;
-                        }
-                    }
-
-                    $( document ).one( "click", _hidethispopup);  //hide itself on click outside
-                }else{ //not inited yet
-                    this._initSearchAssistant();
-                }
-
-                return false;
-            }
-        });
+        this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
 
 
         if(this.options.isrectype){
@@ -319,6 +291,39 @@ $.widget( "heurist.search", {
         }
 
     }
+    
+    /**
+    *  public method
+    * 
+    * @returns {Boolean}
+    */
+    , showSearchAssistant: function() {
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                $('.menu-or-popup').hide(); //hide other
+
+                if(this.search_assistant){ //inited already
+
+                    var popup = $( this.search_assistant )
+                    .show()
+                    .position({my: "right top+3", at: "right bottom", of: this.input_search });
+                    //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
+
+                    function _hidethispopup(event) {
+                        if($(event.target).closest(popup).length==0){
+                            popup.hide();
+                        }else{
+                            $( document ).one( "click", _hidethispopup);
+                            //return false;
+                        }
+                    }
+
+                    $( document ).one( "click", _hidethispopup);  //hide itself on click outside
+                }else{ //not inited yet
+                    this._initSearchAssistant();
+                }
+
+                return false;
+    }   
 
     ,_initSearchAssistant: function(){
 

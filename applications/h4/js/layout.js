@@ -58,6 +58,17 @@ function appGetWidgetById(id){
     return null;
 }
 
+function appGetWidgetByName(widgetname){
+
+    var i;
+    for(i=0; i<widgets.length; i++){
+        if(widgets[i].widgetname==widgetname){
+            return widgets[i];
+        }
+    }
+    return null;
+}
+
 /**
 * Main funtion that inits all stuff
 *  
@@ -320,38 +331,40 @@ function appAddContent($container, app, options){
         $content.append('<iframe id="'+app.id+'_'+app_counter+'" src="'+app.url+'"></iframe>');
     }else if (app.script && app.widgetname) {
 
+        app.widget = $content;
+
         //this is debug mode to init widgets 
         // app javascript are loaded in index.php header
         if(app.widgetname=='rec_viewer'){
             //DEBUG
-            $content.rec_viewer();
+            widget = $content.rec_viewer();
         }else if(app.widgetname=='mainMenu'){
             //DEBUG
-            $content.mainMenu();
+            widget = $content.mainMenu();
         }else if(app.widgetname=='resultList'){
             //DEBUG
-            $content.resultList();
-        }else
-            if(app.widgetname=='svs_manager'){
+            widget = $content.resultList();
+        }else if(app.widgetname=='svs_manager'){
                 //DEBUG
-                $content.svs_manager( options ); //options
-            }else
-                if(app.widgetname=='search_links'){
+                widget = $content.svs_manager( options ); //options
+        }else if(app.widgetname=='search'){
 
-                    $content.search_links( options );
-                }else    
+               widget = $content.search( options );
+        }else    
                 {
                     //this is normal way of widget initialization   
                     // script is loaded dynamically and init function is widget name
-
-                    $.getScript(app.script, function() {
+                    
+                    
+                    $.getScript(app.script, function() {  //+'?t='+(new Date().getTime())
                         if($.isFunction($content[app.widgetname])){
-                            $content[app.widgetname]( options );
+                            $content[app.widgetname]( options );   //call function
                         }else{
                             top.HEURIST4.util.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                         }
                     });
                 }
+                
 
     }else if (app.url2) {
         $content.load(app.url2);

@@ -41,8 +41,8 @@ var widgets = [
     {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
     {id:'ha10', name:'Search', widgetname:'search', script:'apps/search.js'},
-    {id:'ha11', name:'Quick Search', url:'apps/search_quick.php'},
-    {id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
+    //{id:'ha11', name:'Quick Search', url:'apps/search_quick.php'},
+    //{id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
     {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
     {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
     {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},

@@ -378,6 +378,17 @@ function hRecordSet(initdata) {
             return aitems;
         },
 
+        getBookmarkIds: function(){
+            var aitems = [];
+            var recID, bkmID;
+            for(recID in records)
+            if(recID){
+                bkmID = _getFieldValue(records[recid], '');
+                if(bkmID>0) aitems.push(bkmID);
+            }
+            return aitems;
+        },
+        
         /**
         * Returns recordSet with the same field and structure definitions
         * 

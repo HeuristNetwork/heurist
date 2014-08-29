@@ -26,6 +26,7 @@ $.widget( "heurist.resultListMenu", {
     },
     
     _query_request: null, //keep current query request
+    _selection: null,     //current set of selected records
 
     // the widget's constructor
     _create: function() {
@@ -47,7 +48,7 @@ $.widget( "heurist.resultListMenu", {
 
         
         //-----------------------     listener of global events
-        var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART; 
+        var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT; 
         /*top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
             sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
@@ -66,6 +67,11 @@ $.widget( "heurist.resultListMenu", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
+                   if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                       _selection = data;
+                   }else{
+                       _selection = null
+                   }
                 
             }
             //that._refresh();
@@ -169,12 +175,16 @@ $.widget( "heurist.resultListMenu", {
 
           var that = this;
         
-          //var action = ui.item.attr('id');
-          if(action == "menu-search-quick"){
+          //var action = ui.item.attr('id');     
+          if(action == "menu-search-quick"){  //H4
               
-                $('#btn_search_assistant').click();
+                //hack $('#btn_search_assistant').click();
+                var app = appGetWidgetByName('search');  //appGetWidgetById('ha10'); 
+                if(app && app.widget){
+                    $(app.widget).search('showSearchAssistant');
+                }
               
-          }else if(action == "menu-search-advanced"){
+          }else if(action == "menu-search-advanced"){ //H3
               
                 //call H3 search builder
                 var q = "", 
@@ -194,9 +204,74 @@ $.widget( "heurist.resultListMenu", {
                         }
                     }});
               
+          }else if(action == "menu-search-save"){  //H4
               
+                var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).search_links('editSavedSearch', null, 'all');
+                }
+              
+              
+          }else if(action == "menu-selected-tag"){                  
+              
+                // addRemoveTagsPopup(true);
           }
         
-    }
+    },
+    
+    /**
+    * nearly copy from H3
+    */
+    addRemoveTagsPopup: function(reload, recID, bkmkID) {
+
+        var    recIDs_list = [];
+        var bkmkIDs_list = [];
+
+        if(recID || bkmkID){
+            if(recID) recIDs_list = top.HEURIST4.util.isArray(recID)?recID:[recID];
+            if(bkmkID) bkmkIDs_list = top.HEURIST4.util.isArray(bkmkID)?bkmkID:[bkmkID];
+        }else if (_selection!=null) {
+            recIDs_list = _selection.getIds();
+            bkmkIDs_list = _selection.getBookmarkIds();
+        }
+        if(recIDs_list.length == 1){
+            recID = recIDs_list[0];
+        }
+
+
+        var hasRecordsNotBkmkd = false;
+        if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
+            //nothing selected
+            top.HEURIST4.util.showMsgDlg("Select at least one record to add tags", null, "Info");
+            return;
+        }else if (recIDs_list.length > bkmkIDs_list.length) {
+            // at least one unbookmarked record selected
+            hasRecordsNotBkmkd = true;
+        }
+        
+        var url = top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + top.HAPI4.database + (recID?"&recid="+recID:"");
+        
+        top.HEURIST4.util.showDialog(url, { callback:
+         
+                        function(add, tags) {//options
+                            if (! tags) { //no tags added
+                                if (reload) {
+                                    //@todo top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
+                                }
+                                return;
+                            }
+
+                            var saction = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
+
+                            var _data = {bkmk_ids:bkmkIDs_list, rec_ids: recIDs_list, tagString:tags, reload:(reload ? "1" : "")};
+
+                            top.HEURIST.search.executeAction(saction, _data);
+
+                        }
+            });
+            
+    },
+    
+    
     
 });

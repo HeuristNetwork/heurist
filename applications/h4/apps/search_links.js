@@ -238,7 +238,7 @@ $.widget( "heurist.search_links", {
             .button({icons: {primary: "ui-icon-circle-plus"}, text:false})
             .click(function( event ) {
                 event.preventDefault();
-                that._editSavedSearch(null, domain);
+                that.editSavedSearch(null, domain);
                 return false;
             })
             .appendTo($header);
@@ -410,7 +410,7 @@ $.widget( "heurist.search_links", {
                 .append( $('<div>', { title: top.HR('Edit '+this.currentMode+' search') })
                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
                     .click(function( event ) {
-                        that._editSavedSearch(qid);
+                        that.editSavedSearch(qid);
                 }) )
                 .append($('<div>',{title: top.HR('Delete '+this.currentMode+' search') })
                     .button({icons: {primary: "ui-icon-close"}, text:false})
@@ -620,12 +620,12 @@ $.widget( "heurist.search_links", {
     }
 
     /**
-    * put your comment there...
+    * Public method to add/edit saved search - it opens dialog and allows to edit/create saved search
     * 
     * @param svsID
     * @param domain - bookmark or usergroupID
     */
-    , _editSavedSearch: function(svsID, domain){
+    , editSavedSearch: function(svsID, domain){
 
         var that = this;
         if( this.currentMode == "faceted") {
