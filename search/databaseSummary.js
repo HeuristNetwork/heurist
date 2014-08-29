@@ -202,25 +202,44 @@ function convertData() {
 
 
 
-/** Calculates the line width based on count */
-var iconSize = 16; // The icon size
-var circleSize = iconSize * 0.75;
-var maxRadius = 10;
+
+/** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
 }
-function getLineWidth(formula, count) {
-    var result = 1;
-    if(formula == "linear") {                                       
-        result = maxRadius * (count/maxCount); 
-    } 
-    else if(formula == "naturallog") {
-        result = Math.log(count) * (maxRadius / Math.log(maxCount));
+
+/** Executes the chosen formula with a chosen count & max size */
+function executeFormula(count, maxSize) {
+    var formula = getSetting(setting_formula);
+    if(formula == "naturallog") {
+        return Math.log(count) * (maxSize / Math.log(maxCount));
     }
     else if(formula == "logbase10") {
-        result = log10(count) * (maxRadius / log10(maxCount));                                           
-    }                                                                                                    
-    return result;
+        return log10(count) * (maxSize / log10(maxCount));                                           
+    }else {
+        return maxSize * (count/maxCount); 
+    }       
+}
+
+/** Calculates the line width that should be used */
+function getLineWidth(count) {
+    var maxWidth = getSetting(setting_linewidth);
+    var result = executeFormula(count, maxWidth);
+    console.log("Count: " + count + ", max count: " + maxCount + ", max width: " + maxWidth + " , result: " + result);
+    return 0.5 + result;
+}            
+
+/** Calculates the marker width that should be used */
+function getMarkerWidth(count) {
+    return 4 + getLineWidth(count)*2;
+}
+
+/** Calculates the entity raadius that should be used */
+var iconSize = 16; // The icon size
+var circleSize = iconSize * 0.75; // Circle around icon size
+function getEntityRadius(count) {
+    var maxRadius = getSetting(setting_entityradius);
+    return circleSize + executeFormula(count, maxRadius);
 }
 
 /** Create an overlay based on mouse hover x & y and the name to display */
@@ -269,9 +288,8 @@ function visualizeData() {
     
     // Line settings
     var linetype = getSetting(setting_linetype);
-    var linethickness = getSetting(setting_linethickness);
     var linelength = getSetting(setting_linelength);
-   
+
     // Gravity settings
     var gravity = getSetting(setting_gravity);
     var attraction = getSetting(setting_attraction);
@@ -301,11 +319,11 @@ function visualizeData() {
                       .attr("id", function(d) {
                             return "marker" + d.source.id;
                       })
-                      .attr("markerWidth", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count)*3;
+                      .attr("markerWidth", function(d) {    
+                          return getMarkerWidth(d.source.count);             
                       })
                       .attr("markerHeight", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count)*3;
+                          return getMarkerWidth(d.source.count);
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
@@ -342,7 +360,7 @@ function visualizeData() {
             return "url(#marker" + d.source.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(linethickness, d.source.count);
+            return 0.5 + getLineWidth(d.source.count);
          })
          .on("mouseover", function(d) {
              createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
@@ -414,7 +432,6 @@ function visualizeData() {
          }
          
          // Check if force may resume
-         console.log("Gravity: " + gravity);
          if(gravity !== "off") {
             force.resume(); 
          }
@@ -497,7 +514,7 @@ function visualizeData() {
     // Adding the background circles to the nodes
     node.append("circle")
         .attr("r", function(d) {
-            return circleSize + getLineWidth(linethickness, d.count)*4;
+            return getEntityRadius(d.count);
         })
         .attr("class", "background")
         .attr("fill", countcolor);
@@ -593,8 +610,10 @@ var setting_markercolor   = "setting_markercolor";
 var setting_countcolor    = "setting_countcolor";
 var setting_textcolor     = "setting_textcolor";
 var setting_linetype      = "setting_linetype";
-var setting_linethickness = "setting_linethickness";
 var setting_linelength    = "setting_linelength";
+var setting_linewidth     = "setting_linewidth";
+var setting_entityradius  = "setting_entityradius";
+var setting_formula       = "setting_formula";
 var setting_gravity       = "setting_gravity";
 var setting_attraction    = "setting_attraction";
 
@@ -618,60 +637,70 @@ function getFilter() {
 
 /** Checks the local storage settings */
 function checkLocalStorage() {
-    // Load all settings
-    var linecolor     = getSetting(setting_linecolor); 
-    var markercolor   = getSetting(setting_markercolor);
-    var countcolor    = getSetting(setting_countcolor);
-    var textcolor     = getSetting(setting_textcolor);
-    var linetype      = getSetting(setting_linetype);
-    var linethickness = getSetting(setting_linethickness);
-    var linelength    = getSetting(setting_linelength);
-    var attraction    = getSetting(setting_attraction);
-    var gravity       = getSetting(setting_gravity);
-    
     // Set linecolor default if needed
+    var linecolor = getSetting(setting_linecolor); 
     if(linecolor === null) {
         localStorage.setItem(setting_linecolor, "#22a");
     }
     
     // Set markercolor default if needed
+    var markercolor = getSetting(setting_markercolor);
     if(markercolor === null) {
         localStorage.setItem(setting_markercolor, "#000");
     }
     
     // Set countcolor default if needed
+    var countcolor = getSetting(setting_countcolor);
     if(countcolor === null) {
         localStorage.setItem(setting_countcolor, "#262");
     }
     
     // Set textcolor default if needed
+    var textcolor = getSetting(setting_textcolor);
     if(textcolor === null) {
         localStorage.setItem(setting_textcolor, "#b22");
     }
     
     // Set linetype default if needed
+    var linetype = getSetting(setting_linetype);
     if(linetype === null) {
         localStorage.setItem(setting_linetype, "straight");
     }
     
-    // Set linethickness default if needed
-    if(linethickness === null) {
-        localStorage.setItem(setting_linethickness, "linear");
+    // Set linelength default if needed
+    var linelength = getSetting(setting_linelength);
+    if(linelength === null) {
+        localStorage.setItem(setting_linelength, 300);
+    }
+
+    // Set linewidth default if needed
+    var linewidth = getSetting(setting_linewidth);
+    if(linewidth === null) {
+        localStorage.setItem(setting_linewidth, 15);
     }
     
-    // Set linelength default if needed
-    if(linelength === null) {
-        localStorage.setItem(setting_linelength, "300");
+    // Set entity radius default if needed
+    var entityradius = getSetting(setting_entityradius);
+    if(entityradius === null) {
+        localStorage.setItem(entityradius, 50);
+    }
+    
+    // Set formula default if needed
+    var formula = getSetting(setting_formula);
+    if(formula === null) {
+        localStorage.setItem(setting_formula, "linear");
     }
     
     // Set gravity default if needed
+    var gravity = getSetting(setting_gravity);
     if(gravity === null) {
         localStorage.setItem(setting_gravity, "touch");
     }
     
     // Set attraction default if needed
+    var attraction = getSetting(setting_attraction);
     if(attraction === null) {
-        localStorage.setItem(setting_attraction, "-700");
+        localStorage.setItem(setting_attraction, -700);
     }
 }
 
@@ -763,23 +792,45 @@ $(document).ready(function() {
         visualizeData();
     });
     
-    /** LINE THICKNESS SETTING */
-    // Set line thickness setting in UI
-    $("#linethickness option[value='" +getSetting(setting_linethickness)+ "']").attr("selected", true);
-
-    // Listen to linethickness selection changes
-    $("#linethickness").change(function(e) {
-        localStorage.setItem(setting_linethickness, $(this).val());
+    /** LINE LENGTH SETTING */
+    // Set line length setting in UI
+    $("#linelength").val(getSetting(setting_linelength));
+    
+    // Listen to line length changes
+    $("#linelength").change(function() {
+        localStorage.setItem(setting_linelength, $(this).val());
         visualizeData();
     });
     
+    /** LINE WIDTH SETTING */
+    // Set line width setting in UI
+    $("#linewidth").val(getSetting(setting_linewidth));
+    
+    // Listen to line width changes
+    $("#linewidth").change(function() {
+        localStorage.setItem(setting_linewidth, $(this).val());
+        visualizeData();
+    });
+    
+    /**  MAX RADIUS SETTING */
+    // Set entity radius setting in UI
+    $("#entityradius").val(getSetting(setting_entityradius));
+    
+    // Listen to line width changes
+    $("#entityradius").change(function() {
+        localStorage.setItem(setting_entityradius, $(this).val());
+        visualizeData();
+    });
+    
+    
+    
     /** LINE LENGTH SETTING */
-    // Set line length setting in UI
-    $("#linelength").val(getSetting(setting_linelength)); 
+    // Set formula setting in UI
+    $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
 
-    // Listen to linelength changes
-    $("#linelength").change(function() {
-        localStorage.setItem(setting_linelength, $(this).val());
+    // Listen to formula changes
+    $("#formula").change(function() {
+        localStorage.setItem(setting_formula, $(this).val());
         visualizeData();
     });
     

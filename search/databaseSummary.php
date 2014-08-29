@@ -102,7 +102,7 @@
             }
             
             div.settings {
-                float: left;
+                display: inline-block;
             }
             
             div.color {
@@ -132,7 +132,7 @@
             
             input.small {
                 cursor: pointer;
-                max-width: 45px;
+                max-width: 40px;
                 text-align: center;
             }
 
@@ -314,18 +314,33 @@
                                         <option value="straight">straight</option>
                                         <option value="curved">curved</option>
                                     </select>
+  
+                                   <!-- Line length --> 
+                                    <i>Length</i>
+                                    <input id="linelength" class="small" type="number" min="1" value="200"/>
                                     
-                                    <!-- Line thickness -->
-                                    <i>Thickness</i>
-                                    <select class="middle" id="linethickness">
+                                    <i>Max width</i>
+                                    <input id="linewidth" class="small" type="number" min="1" value="10"/>
+                                </div>
+                                
+                                <!-- Entity settings -->
+                                <div class="settings space">
+                                    <b>Entitity:</b>
+                                    
+                                    <i>Max radius</i>
+                                    <input id="entityradius" class="small" type="number" min="1" value="100"/>
+                                </div>
+                                
+                                <!-- Transform settings -->
+                                <div class="settings space">
+                                    <b>Transform:</b>
+                                    
+                                    <!-- Formula -->
+                                    <select class="middle" id="formula">
                                         <option value="linear">linear</option>
                                         <option value="naturallog">natural log</option>
                                         <option value="logbase10">log base 10</option>
                                     </select>
-
-                                   <!-- Line length --> 
-                                    <i>Length</i>
-                                    <input id="linelength" class="small" type="number" min="1" value="200"/>
                                 </div>
                                 
                                 <!-- GRAVITY SETTINGS -->
