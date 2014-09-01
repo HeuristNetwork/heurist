@@ -190,7 +190,7 @@
                 fill: #fff;
                 fill-opacity: 0.8;
                 stroke: #000;
-                stroke-width: 3;
+                stroke-width: 1.5;
                 stroke-opacity: 1.0;
             }
         </style>
@@ -356,6 +356,11 @@
                                      <!-- Attraction strength -->
                                     <i>Attraction</i>
                                     <input id="attraction" class="small" type="number" value="-700"/>
+                                </div>
+  
+                                <!-- HELP INFO -->
+                                <div class="settings space">
+                                    <i style="color: #444; font-size: 8px">Click entities or links to get information, drag entities to reposition</i>
                                 </div>
                              </td> 
                         </tr>

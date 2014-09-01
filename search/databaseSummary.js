@@ -372,11 +372,9 @@ function createOverlay(x, y, name) {
 
 /** Slight delay, fades away and then removes itself. */
 function removeOverlay() {
-    /*
     $("#overlay").delay(500).fadeOut(500, function() {
          $(this).remove();
     });
-    */
 }
 
 /** Visualizes the data */ 
@@ -495,16 +493,10 @@ function visualizeData() {
     function dragstart(d, i) {
         force.stop() // Stop force from auto positioning
     }
-
-    /** Caled when a dragging move event occurs */
-    function dragmove(d, i) {
-        // Update locations
-        d.px += d3.event.dx;
-        d.py += d3.event.dy;
-        d.x += d3.event.dx;
-        d.y += d3.event.dy;
-        
-        // Update the location in localstorage
+    
+     /** Handles localstorage + redrawing after a drag event */
+    function handledrag(d, i) {
+        // Get old positions from localstorage
         var record = localStorage.getItem(d.name);
         var obj;
         if(record === null) {
@@ -513,33 +505,50 @@ function visualizeData() {
             obj = JSON.parse(record);
         }  
         
-        // Set attributes 'x' and 'y' and store object
-        obj.px = d.px;
-        obj.py = d.py;
-        obj.x = d.x;
-        obj.y = d.y;
-        console.log("NAME: " + d.name);
-        localStorage.setItem(d.name, JSON.stringify(obj));
+        // Update positions
+        obj.px += d3.event.dx;
+        obj.py += d3.event.dy;
+        obj.x += d3.event.dx;
+        obj.y += d3.event.dy;
+        
+        // Check if valid
+        if(obj.x > 5 && obj.x < width-5 && obj.y > 5 && obj.y < height-5) {
+            // Update node
+            d.px += d3.event.dx;
+            d.py += d3.event.dy;
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+            
+            // Store positions in localstorage
+            console.log(obj);
+            localStorage.setItem(d.name, JSON.stringify(obj));
     
-        // Update nodes & lines                                                           
-        if(linetype == "curved") { 
-             curvedTick();
-        }else{
-             straightTick();
+            // Update nodes & lines                                                           
+            if(linetype == "curved") { 
+                 curvedTick();
+            }else{
+                 straightTick();
+            }
+            return true;
         }
+        return false;
     }
 
+    /** Caled when a dragging move event occurs */
+    function dragmove(d, i) {
+        handledrag(d, i);
+    }
+    
     /** Called when a dragging event ends */
     function dragend(d, i) {
+         // Handle drag
+         if(handledrag(d, i)) {
+             
+         }
+         svg.selectAll(".node").attr("fixed", false);
          d.fixed = true; // Node may not be auto positioned
          
-         // Update nodes & lines 
-         if(linetype == "curved") { 
-             curvedTick();
-         }else{
-             straightTick();
-         }
-         
+
          // Check if force may resume
          if(gravity !== "off") {
             force.resume(); 
@@ -559,7 +568,7 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("x" in obj) {
+                          if("x" in obj) { // Check if attribute is valid
                               d.x = obj.x;
                               return obj.x;
                           }
@@ -570,9 +579,9 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("y" in obj) {
+                          if("y" in obj) { // Check if attribute is valid
                               d.y = obj.y;
-                              return obj.y;
+                              return obj.y;  
                           }
                       }
                   })
@@ -581,9 +590,9 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                          var obj = JSON.parse(record);
-                         if("px" in obj) {
+                         if("px" in obj) { // Check if attribute is valid
                              d.px = obj.px;
-                              return obj.px;
+                             return obj.px;
                          }
                       }
                   })
@@ -592,7 +601,7 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("py" in obj) {
+                          if("py" in obj) { // Check if attribute is valid
                               d.py = obj.py; 
                               return obj.py;
                           }
@@ -602,12 +611,12 @@ function visualizeData() {
                       // Setting 'fixed' based on localstorage
                       var record = localStorage.getItem(d.name);
                       if(record) {
-                          if(gravity === "aggressive") { // Using gravity setting
-                             d.fixed = false;
-                             return false;
+                          if(d.x > 5 && d.x < width-5 && d.y > 5 && d.y < height-5 && gravity !== "aggressive") {
+                                d.fixed = true;
+                                return true;
                           }else{
-                             d.fixed = true;
-                             return true;
+                                d.fixed = false;
+                                return false; 
                           }
                       }           
                       return false;
@@ -684,7 +693,9 @@ function visualizeData() {
 
         // Update node locations
         node.attr("transform", function(d) { 
-            return "translate(" + d.x + "," + d.y + ")"; 
+            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
+                return "translate(" + d.x + "," + d.y + ")"; 
+            }
         });
     }
     
@@ -699,7 +710,9 @@ function visualizeData() {
 
         // Update node locations
         node.attr("transform", function(d) { 
-            return "translate(" + d.x + "," + d.y + ")"; 
+            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
+                return "translate(" + d.x + "," + d.y + ")"; 
+            }
         });
     }
     
