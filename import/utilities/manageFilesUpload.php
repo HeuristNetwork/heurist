@@ -120,6 +120,26 @@
                 $row1 = $row = mysql_fetch_row($res1);
                 $mediaFolders = $row1[0];
                 $dirs = explode(';', $mediaFolders); // get an array of folders
+                $dirs2 = array();
+                foreach ($dirs as $dir){
+                    if( $dir ){
+                        if(substr($dir, -1) != '/'){
+                            $dir .= "/";
+                        }
+                    
+                        if(!file_exists($dir) ){ //probable this is relative
+                            $orig = $dir;
+                            chdir(HEURIST_UPLOAD_DIR);
+                            $dir = realpath($dir);
+                        }
+                        if(file_exists($dir)){
+                             array_push($dirs2, $dir);
+                        }
+                    }
+                }
+                $dirs = $dirs2;                
+                
+                
                 // add the scratch directory, which will be the default for upload of material for import
                 array_push($dirs, HEURIST_UPLOAD_ROOT.'scratch');
 

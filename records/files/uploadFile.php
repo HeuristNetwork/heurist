@@ -124,13 +124,13 @@
             '", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
         /* nonce is a random value used to download the file */
         /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
-        $pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);
-        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename) )
+        $pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);   
+        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename) )  //file is already in upload folder
         {
             unlink($tmp_name);
             return $file_id;
 
-        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename)) {
+        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename)) {  //move file into upload folder
 
             return $file_id;
         } else {
@@ -864,6 +864,18 @@
             $filedata['mimeType'] == 'image/jpeg'  ||  $filedata['mimeType'] == 'image/gif'  ||  $filedata['mimeType'] == 'image/png');
 
     }
+
+    /*function getRelativePath2( $targetPath ){
+        if (HEURIST_UPLOAD_DIR === $targetPath) {
+            return '';
+        }
+        if(strpos($targetPath, HEURIST_UPLOAD_DIR)===0){ //target is subfolder
+            return substr($targetPath, strlen(HEURIST_UPLOAD_DIR));
+        }else{ //return absolute path
+            return $targetPath;
+        }
+    }*/
+
     
     /**
      * Returns the target path as relative reference from the base path.
