@@ -195,6 +195,84 @@ function convertData() {
     return obj;
 }
 
+/** Constructs the overlay data for an element in the XML with the name "name"  */
+function getOverlayText(name) {
+    var array = [];
+    array.push(name);
+    
+    var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
+    for(var i = 0; i < roots.length; i++) {
+        // Retrieve info about this record
+        var root = roots[i];
+        var rootInfo = getInfo(root);
+        //console.log(rootInfo);
+        
+        if(rootInfo.name == name) {
+            console.log("FOUND!");
+            array.push(rootInfo.name + " (n=" + rootInfo.count +")");
+
+            // Going through all linked relation Records with namespace 'relationrecord'
+            var relations = root.getElementsByTagNameNS("relationrecord", "Record");
+            if(relations && relations.length > 0) {
+                for(var j = 0; j < relations.length; j++ ){
+                    // Get record info 
+                    var relation = relations[j];
+                    var relationInfo = getInfo(relation);
+                    //console.log(relationInfo);
+                    array.push("");
+                    array.push(relationInfo.name + " (n=" + relationInfo.count +")");
+                    
+         
+                    // Unconstrained check
+                    var constrained = isUnconstrained(relation);
+                    //console.log(constrained);
+                    
+                    // Check types
+                    var types = relation.getElementsByTagName("rel_Name");
+                    //console.log(types);
+                    if(types && types.length > 0) {
+                        for(var k = 0; k < types.length; k++) {
+                            var type = types[k].textContent;
+                            //console.log(type);
+                            if(type == "rpt") {
+                                 // Going through all linked usage Records with namespace 'usagerecord'
+                                var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
+                                if(usages && usages.length > 0) {
+                                    for(var l = 0; l < usages.length; l++) {
+                                        // Get record info 
+                                        var usage = usages[l];
+                                        var usageInfo = getInfo(usage);
+                                        //console.log(usageInfo);
+                                        array.push("  R > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                    } 
+                                }
+                            }else if(type == "sng") {
+                                // Going through all linked usage Records with namespace 'usagerecord'
+                                var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
+                                if(usages && usages.length > 0) {
+                                    for(var l = 0; l < usages.length; l++) {
+                                        // Get record info 
+                                        var usage = usages[l];
+                                        var usageInfo = getInfo(usage);
+                                        //console.log(usageInfo);
+                                        array.push("  S > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                    } 
+                                }
+                            }
+                            
+                            
+     
+                            
+                        }
+                    }
+                }
+            }
+            break;
+        } 
+    }
+    
+    return array;
+}
 
 
 
@@ -202,47 +280,94 @@ function convertData() {
 
 
 
-/** Calculates the line width based on count */
-var iconSize = 16; // The icon size
-var circleSize = iconSize * 0.75;
-var maxRadius = 10;
+
+
+/** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
 }
-function getLineWidth(formula, count) {
-    var result = 1;
-    if(formula == "linear") {                                       
-        result = maxRadius * (count/maxCount); 
-    } 
-    else if(formula == "naturallog") {
-        result = Math.log(count) * (maxRadius / Math.log(maxCount));
+
+/** Executes the chosen formula with a chosen count & max size */
+function executeFormula(count, maxSize) {
+    var formula = getSetting(setting_formula);
+    if(formula == "naturallog") {
+        return Math.log(count) * (maxSize / Math.log(maxCount));
     }
     else if(formula == "logbase10") {
-        result = log10(count) * (maxRadius / log10(maxCount));                                           
-    }                                                                                                    
-    return result;
+        return log10(count) * (maxSize / log10(maxCount));                                           
+    }else {
+        return maxSize * (count/maxCount); 
+    }       
+}
+
+/** Calculates the line width that should be used */
+function getLineWidth(count) {
+    var maxWidth = getSetting(setting_linewidth);                                                                     
+    return 0.5 + executeFormula(count, maxWidth);
+}            
+
+/** Calculates the marker width that should be used */
+function getMarkerWidth(count) {
+    return 4 + getLineWidth(count)*2;
+}
+
+/** Calculates the entity raadius that should be used */
+var iconSize = 16; // The icon size
+var circleSize = iconSize * 0.75; // Circle around icon size
+function getEntityRadius(count) {
+    var maxRadius = getSetting(setting_entityradius);
+    return circleSize + executeFormula(count, maxRadius);
 }
 
 /** Create an overlay based on mouse hover x & y and the name to display */
 function createOverlay(x, y, name) {
-     $("#overlay").remove();
+    $("#overlay").remove();
     
+    // Add overlay container
     var svg = d3.select("svg");                 
     var overlay = svg.append("g")
                      .attr("id", "overlay")      
-                     .attr("transform", "translate(" +x+ "," +y+ ")");
-            
-    overlay.append("rect")
-           .attr("class", "semi-transparant")              
-           .attr("x", 0)
-           .attr("y", 0)
-           .attr("width", 100)
-           .attr("height", 100);
+                     .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
+    
+    // Draw a semi transparant rectangle       
+    var rect = overlay.append("rect")
+                      .attr("class", "semi-transparant")              
+                      .attr("x", 0)
+                      .attr("y", 0);
 
-    overlay.append("text")
-           .attr("x", 5)
-           .attr("y", 15)
-           .text(name);              
+    // Adding text
+    var horizontalOffset = 5;
+    var verticalOffset = 15;
+    var array = getOverlayText(name);
+    var text = overlay.selectAll("text")
+                      .data(array)
+                      .enter()
+                      .append("text")
+                      .attr("x", horizontalOffset)
+                      .attr("y", verticalOffset)
+                      .attr("dy", function(d, i) {
+                          return i*verticalOffset;
+                      })
+                      .text(String);
+  
+    // Calculate rectangle size
+    var maxWidth = 1;
+    var height = 1;
+    for(var i = 0; i < text[0].length; i++) {
+        var bbox = text[0][i].getBBox();
+        // Width
+        var width = bbox.width;
+        if(width > maxWidth) {
+            maxWidth = width;
+        }
+        // Height
+        if(i == text[0].length-1) {
+            height += bbox.y;
+        }
+    }
+    rect.attr("width", maxWidth + 2*horizontalOffset)
+        .attr("height", height  + verticalOffset);
+    
 }
 
 /** Slight delay, fades away and then removes itself. */
@@ -269,9 +394,8 @@ function visualizeData() {
     
     // Line settings
     var linetype = getSetting(setting_linetype);
-    var linethickness = getSetting(setting_linethickness);
     var linelength = getSetting(setting_linelength);
-   
+
     // Gravity settings
     var gravity = getSetting(setting_gravity);
     var attraction = getSetting(setting_attraction);
@@ -301,11 +425,11 @@ function visualizeData() {
                       .attr("id", function(d) {
                             return "marker" + d.source.id;
                       })
-                      .attr("markerWidth", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count)*3;
+                      .attr("markerWidth", function(d) {    
+                          return getMarkerWidth(d.source.count);             
                       })
                       .attr("markerHeight", function(d) {
-                          return 4 + getLineWidth(linethickness, d.source.count)*3;
+                          return getMarkerWidth(d.source.count);
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
@@ -342,9 +466,10 @@ function visualizeData() {
             return "url(#marker" + d.source.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(linethickness, d.source.count);
+            return 0.5 + getLineWidth(d.source.count);
          })
-         .on("mouseover", function(d) {
+         .on("click", function(d) {
+             console.log(d3.event.defaultPrevented);
              createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
          })
          .on("mouseout", function(d) {
@@ -353,7 +478,7 @@ function visualizeData() {
          
     // Check what methods to call on drag
      var node_drag;
-     if(gravity === "on") {
+     if(gravity === "aggressive") {
          // Default method
          node_drag = force.drag;
      }else{
@@ -368,16 +493,10 @@ function visualizeData() {
     function dragstart(d, i) {
         force.stop() // Stop force from auto positioning
     }
-
-    /** Caled when a dragging move event occurs */
-    function dragmove(d, i) {
-        // Update locations
-        d.px += d3.event.dx;
-        d.py += d3.event.dy;
-        d.x += d3.event.dx;
-        d.y += d3.event.dy;
-        
-        // Update the location in localstorage
+    
+     /** Handles localstorage + redrawing after a drag event */
+    function handledrag(d, i) {
+        // Get old positions from localstorage
         var record = localStorage.getItem(d.name);
         var obj;
         if(record === null) {
@@ -386,35 +505,51 @@ function visualizeData() {
             obj = JSON.parse(record);
         }  
         
-        // Set attributes 'x' and 'y' and store object
-        obj.px = d.px;
-        obj.py = d.py;
-        obj.x = d.x;
-        obj.y = d.y;
-        console.log("NAME: " + d.name);
-        localStorage.setItem(d.name, JSON.stringify(obj));
+        // Update positions
+        obj.px += d3.event.dx;
+        obj.py += d3.event.dy;
+        obj.x += d3.event.dx;
+        obj.y += d3.event.dy;
+        
+        // Check if valid
+        if(obj.x > 5 && obj.x < width-5 && obj.y > 5 && obj.y < height-5) {
+            // Update node
+            d.px += d3.event.dx;
+            d.py += d3.event.dy;
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+            
+            // Store positions in localstorage
+            console.log(obj);
+            localStorage.setItem(d.name, JSON.stringify(obj));
     
-        // Update nodes & lines                                                           
-        if(linetype == "curved") { 
-             curvedTick();
-        }else{
-             straightTick();
+            // Update nodes & lines                                                           
+            if(linetype == "curved") { 
+                 curvedTick();
+            }else{
+                 straightTick();
+            }
+            return true;
         }
+        return false;
     }
 
+    /** Caled when a dragging move event occurs */
+    function dragmove(d, i) {
+        handledrag(d, i);
+    }
+    
     /** Called when a dragging event ends */
     function dragend(d, i) {
+         // Handle drag
+         if(handledrag(d, i)) {
+             
+         }
+         svg.selectAll(".node").attr("fixed", false);
          d.fixed = true; // Node may not be auto positioned
          
-         // Update nodes & lines 
-         if(linetype == "curved") { 
-             curvedTick();
-         }else{
-             straightTick();
-         }
-         
+
          // Check if force may resume
-         console.log("Gravity: " + gravity);
          if(gravity !== "off") {
             force.resume(); 
          }
@@ -433,7 +568,7 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("x" in obj) {
+                          if("x" in obj) { // Check if attribute is valid
                               d.x = obj.x;
                               return obj.x;
                           }
@@ -444,9 +579,9 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("y" in obj) {
+                          if("y" in obj) { // Check if attribute is valid
                               d.y = obj.y;
-                              return obj.y;
+                              return obj.y;  
                           }
                       }
                   })
@@ -455,9 +590,9 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                          var obj = JSON.parse(record);
-                         if("px" in obj) {
+                         if("px" in obj) { // Check if attribute is valid
                              d.px = obj.px;
-                              return obj.px;
+                             return obj.px;
                          }
                       }
                   })
@@ -466,7 +601,7 @@ function visualizeData() {
                       var record = localStorage.getItem(d.name);
                       if(record) {
                           var obj = JSON.parse(record);
-                          if("py" in obj) {
+                          if("py" in obj) { // Check if attribute is valid
                               d.py = obj.py; 
                               return obj.py;
                           }
@@ -476,18 +611,21 @@ function visualizeData() {
                       // Setting 'fixed' based on localstorage
                       var record = localStorage.getItem(d.name);
                       if(record) {
-                          if(gravity === "on") { // Using gravity setting
-                             d.fixed = false;
-                             return false;
+                          if(d.x > 5 && d.x < width-5 && d.y > 5 && d.y < height-5 && gravity !== "aggressive") {
+                                d.fixed = true;
+                                return true;
                           }else{
-                             d.fixed = true;
-                             return true;
+                                d.fixed = false;
+                                return false; 
                           }
                       }           
                       return false;
                   })        
-                  .on("mouseover", function(d) {
-                     createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                  .on("click", function(d) {
+                       // Check if it's not a click after dragging
+                       if(!d3.event.defaultPrevented) {
+                            createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                       }
                   })
                   .on("mouseout", function(d) {
                      removeOverlay();                                 
@@ -497,7 +635,7 @@ function visualizeData() {
     // Adding the background circles to the nodes
     node.append("circle")
         .attr("r", function(d) {
-            return circleSize + getLineWidth(linethickness, d.count)*4;
+            return getEntityRadius(d.count);
         })
         .attr("class", "background")
         .attr("fill", countcolor);
@@ -555,7 +693,9 @@ function visualizeData() {
 
         // Update node locations
         node.attr("transform", function(d) { 
-            return "translate(" + d.x + "," + d.y + ")"; 
+            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
+                return "translate(" + d.x + "," + d.y + ")"; 
+            }
         });
     }
     
@@ -570,7 +710,9 @@ function visualizeData() {
 
         // Update node locations
         node.attr("transform", function(d) { 
-            return "translate(" + d.x + "," + d.y + ")"; 
+            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
+                return "translate(" + d.x + "," + d.y + ")"; 
+            }
         });
     }
     
@@ -593,8 +735,10 @@ var setting_markercolor   = "setting_markercolor";
 var setting_countcolor    = "setting_countcolor";
 var setting_textcolor     = "setting_textcolor";
 var setting_linetype      = "setting_linetype";
-var setting_linethickness = "setting_linethickness";
 var setting_linelength    = "setting_linelength";
+var setting_linewidth     = "setting_linewidth";
+var setting_entityradius  = "setting_entityradius";
+var setting_formula       = "setting_formula";
 var setting_gravity       = "setting_gravity";
 var setting_attraction    = "setting_attraction";
 
@@ -618,60 +762,70 @@ function getFilter() {
 
 /** Checks the local storage settings */
 function checkLocalStorage() {
-    // Load all settings
-    var linecolor     = getSetting(setting_linecolor); 
-    var markercolor   = getSetting(setting_markercolor);
-    var countcolor    = getSetting(setting_countcolor);
-    var textcolor     = getSetting(setting_textcolor);
-    var linetype      = getSetting(setting_linetype);
-    var linethickness = getSetting(setting_linethickness);
-    var linelength    = getSetting(setting_linelength);
-    var attraction    = getSetting(setting_attraction);
-    var gravity       = getSetting(setting_gravity);
-    
     // Set linecolor default if needed
+    var linecolor = getSetting(setting_linecolor); 
     if(linecolor === null) {
         localStorage.setItem(setting_linecolor, "#22a");
     }
     
     // Set markercolor default if needed
+    var markercolor = getSetting(setting_markercolor);
     if(markercolor === null) {
         localStorage.setItem(setting_markercolor, "#000");
     }
     
     // Set countcolor default if needed
+    var countcolor = getSetting(setting_countcolor);
     if(countcolor === null) {
         localStorage.setItem(setting_countcolor, "#262");
     }
     
     // Set textcolor default if needed
+    var textcolor = getSetting(setting_textcolor);
     if(textcolor === null) {
         localStorage.setItem(setting_textcolor, "#b22");
     }
     
     // Set linetype default if needed
+    var linetype = getSetting(setting_linetype);
     if(linetype === null) {
         localStorage.setItem(setting_linetype, "straight");
     }
     
-    // Set linethickness default if needed
-    if(linethickness === null) {
-        localStorage.setItem(setting_linethickness, "linear");
+    // Set linelength default if needed
+    var linelength = getSetting(setting_linelength);
+    if(linelength === null) {
+        localStorage.setItem(setting_linelength, 300);
+    }
+
+    // Set linewidth default if needed
+    var linewidth = getSetting(setting_linewidth);
+    if(linewidth === null) {
+        localStorage.setItem(setting_linewidth, 15);
     }
     
-    // Set linelength default if needed
-    if(linelength === null) {
-        localStorage.setItem(setting_linelength, "300");
+    // Set entity radius default if needed
+    var entityradius = getSetting(setting_entityradius);
+    if(entityradius === null) {
+        localStorage.setItem(setting_entityradius, 50);
+    }
+    
+    // Set formula default if needed
+    var formula = getSetting(setting_formula);
+    if(formula === null) {
+        localStorage.setItem(setting_formula, "linear");
     }
     
     // Set gravity default if needed
+    var gravity = getSetting(setting_gravity);
     if(gravity === null) {
         localStorage.setItem(setting_gravity, "touch");
     }
     
     // Set attraction default if needed
+    var attraction = getSetting(setting_attraction);
     if(attraction === null) {
-        localStorage.setItem(setting_attraction, "-700");
+        localStorage.setItem(setting_attraction, -700);
     }
 }
 
@@ -763,23 +917,45 @@ $(document).ready(function() {
         visualizeData();
     });
     
-    /** LINE THICKNESS SETTING */
-    // Set line thickness setting in UI
-    $("#linethickness option[value='" +getSetting(setting_linethickness)+ "']").attr("selected", true);
-
-    // Listen to linethickness selection changes
-    $("#linethickness").change(function(e) {
-        localStorage.setItem(setting_linethickness, $(this).val());
+    /** LINE LENGTH SETTING */
+    // Set line length setting in UI
+    $("#linelength").val(getSetting(setting_linelength));
+    
+    // Listen to line length changes
+    $("#linelength").change(function() {
+        localStorage.setItem(setting_linelength, $(this).val());
         visualizeData();
     });
     
+    /** LINE WIDTH SETTING */
+    // Set line width setting in UI
+    $("#linewidth").val(getSetting(setting_linewidth));
+    
+    // Listen to line width changes
+    $("#linewidth").change(function() {
+        localStorage.setItem(setting_linewidth, $(this).val());
+        visualizeData();
+    });
+    
+    /**  MAX RADIUS SETTING */
+    // Set entity radius setting in UI
+    $("#entityradius").val(getSetting(setting_entityradius));
+    
+    // Listen to line width changes
+    $("#entityradius").change(function() {
+        localStorage.setItem(setting_entityradius, $(this).val());
+        visualizeData();
+    });
+    
+    
+    
     /** LINE LENGTH SETTING */
-    // Set line length setting in UI
-    $("#linelength").val(getSetting(setting_linelength)); 
+    // Set formula setting in UI
+    $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
 
-    // Listen to linelength changes
-    $("#linelength").change(function() {
-        localStorage.setItem(setting_linelength, $(this).val());
+    // Listen to formula changes
+    $("#formula").change(function() {
+        localStorage.setItem(setting_formula, $(this).val());
         visualizeData();
     });
     
