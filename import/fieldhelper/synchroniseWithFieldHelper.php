@@ -96,7 +96,16 @@
             $currfile = null;
             $mediaExts = null;
             $progress_divid = 0;
-
+            $system_folders = array(HEURIST_THUMB_DIR,
+                        HEURIST_UPLOAD_DIR."/generated-reports/",
+                        HEURIST_HML_PUBPATH,
+                        HEURIST_HTML_PUBPATH,
+                        HEURIST_ICON_DIR,
+                        HEURIST_UPLOAD_DIR."/scratch/",
+                        HEURIST_UPLOAD_DIR."/settings/",
+                        HEURIST_SMARTY_TEMPLATES_DIR,
+                        HEURIST_XSL_TEMPLATES_DIR);
+                        
             mysql_connection_overwrite(DATABASE);
             if(mysql_error()) {
                 die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
@@ -229,46 +238,38 @@
 
             function doHarvest($dirs) {
 
-                global $rep_counter, $rep_issues;
-                
-                $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_UPLOAD_DIR."/generated-reports/",
-                        HEURIST_HML_PUBPATH,
-                        HEURIST_HTML_PUBPATH,
-                        HEURIST_ICON_DIR,
-                        HEURIST_UPLOAD_DIR."/scratch/",
-                        HEURIST_UPLOAD_DIR."/settings/",
-                        HEURIST_SMARTY_TEMPLATES_DIR,
-                        HEURIST_XSL_TEMPLATES_DIR);
-
-                
+                global $rep_counter, $rep_issues, $system_folders;
 
                 foreach ($dirs as $dir){
 
-                    if(substr($dir, -1) != '/'){
-                        $dir .= "/";
-                    }
+                    if($dir=="*"){
+                        
+                        $dir = HEURIST_UPLOAD_DIR;
+                        
+                    }else{
                     
-                    if(!file_exists($dir) ){ //probable this is relative
-                        $orig = $dir;
-                        chdir(HEURIST_UPLOAD_DIR);
-                        $dir = realpath($dir);
-                        if(!file_exists($dir)){
-                            $dir = $orig; //restore
+                        if(substr($dir, -1) != '/'){
+                            $dir .= "/";
+                        }
+                        
+                        if(!file_exists($dir) ){ //probable this is relative
+                            $orig = $dir;
+                            chdir(HEURIST_UPLOAD_DIR);
+                            $dir = realpath($dir);
+                            if(!file_exists($dir)){
+                                $dir = $orig; //restore
+                            }
                         }
                     }
-                    
 
-                    if($dir == HEURIST_UPLOAD_DIR){
-
-                        print "<div style=\"color:red\">It is not possible to scan root upload folder $dir</div>";
-                        
-                    }else if(in_array($dir, $system_folders)){
+                    if(in_array($dir, $system_folders)){
                         
                         print "<div style=\"color:red\">It is not possible to scan system folder $dir</div>";
 
-                    }else if(file_exists($dir) && is_dir($dir))
+                    }else if($dir && file_exists($dir) && is_dir($dir))
                     {
+                        
+                        
                         $files = scandir($dir);
                         if($files && count($files)>0)
                         {
@@ -285,7 +286,11 @@
                                         array_push($subdirs, $dir.$filename."/");
                                     }else if($isfirst){ //if($filename == "fieldhelper.xml"){
                                         $isfirst = false;
-                                        $rep_counter = $rep_counter + doHarvestInDir($dir);
+                                        if($dir == HEURIST_UPLOAD_DIR){
+                                            print "<div style=\"color:red\">Files are not scanned in root upload folder $dir</div>";
+                                        }else{
+                                            $rep_counter = $rep_counter + doHarvestInDir($dir);
+                                        }
                                     }
                                 }
                             }
@@ -295,7 +300,7 @@
                                 flush();
                             }
                         }
-                    }else{
+                    }else if ($dir) {
                         print "<div style=\"color:red\">Folder is not found: $dir</div>";
                         //$rep_issues = $rep_issues."<br/>Directory $dir not found.";
                     }

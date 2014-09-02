@@ -78,7 +78,7 @@
     $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
 
     if(!$step){
-        if(count($lib_keys)>1){ //select key)
+        if(count($lib_keys)>1){ //select key
 ?>
         <form action="syncZotero.php" style="padding:20px;">
         
@@ -106,7 +106,7 @@
         $lib_key_idx = @$_REQUEST['lib_key'];
     }
     
-    $key = $lib_keys[];
+    $key = $lib_keys[$lib_key_idx];
     $vals = explode(",",$key);
     
     $user_ID = @$vals[1];

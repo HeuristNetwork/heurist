@@ -113,6 +113,16 @@
                     die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".
                         "Possibly wrong database format, please consult Heurist team</b></p>");
                 }
+                
+                $system_folders = array(HEURIST_THUMB_DIR,
+                        HEURIST_UPLOAD_DIR."/generated-reports/",
+                        HEURIST_HML_PUBPATH,
+                        HEURIST_HTML_PUBPATH,
+                        HEURIST_ICON_DIR,
+                        HEURIST_UPLOAD_DIR."/settings/",
+                        HEURIST_SMARTY_TEMPLATES_DIR,
+                        HEURIST_XSL_TEMPLATES_DIR);
+                
 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
@@ -122,7 +132,7 @@
                 $dirs = explode(';', $mediaFolders); // get an array of folders
                 $dirs2 = array();
                 foreach ($dirs as $dir){
-                    if( $dir ){
+                    if( $dir && $dir!="*") {
                         if(substr($dir, -1) != '/'){
                             $dir .= "/";
                         }
@@ -132,7 +142,7 @@
                             chdir(HEURIST_UPLOAD_DIR);
                             $dir = realpath($dir);
                         }
-                        if(file_exists($dir)){
+                        if(file_exists($dir) && is_dir($dir) && !in_array($dir, $system_folders)){
                              array_push($dirs2, $dir);
                         }
                     }
