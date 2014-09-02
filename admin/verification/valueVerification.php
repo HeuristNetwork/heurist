@@ -118,6 +118,30 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
 }
 
+function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){        
+    global $dtyIDDefs;        
+
+    if(!@$dtyIDDefs[$dtyID]){        
+        $terms = getTermsFromFormat($defs);        
+        if (($cntTrm = count($terms)) > 0) {        
+            if ($cntTrm == 1) {  //vocabulary        
+                $terms = getTermOffspringList($terms[0]);        
+            }else{        
+                $nonTerms = getTermsFromFormat($defs_nonsel);        
+                if (count($nonTerms) > 0) {        
+                    $terms = array_diff($terms,$nonTerms);        
+                }        
+            }        
+            if (count($temp)<1) {        
+                $dtyIDDefs[$dtyID] = "all";        
+            }else{        
+                $dtyIDDefs[$dtyID] = $terms;        
+            }        
+        }        
+    }        
+
+    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);        
+}        
 
 //
 // similar functions are in saveRecordDetail and importRectype
