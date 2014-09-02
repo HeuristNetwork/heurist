@@ -154,8 +154,7 @@
             /** Lines between records */
             .link {
                 fill: none;    
-                stroke-opacity: .6;
-                pointer-events: all;
+                stroke-opacity: .6;  
             }
      
             .link:hover {
@@ -172,13 +171,12 @@
             /** Text above circle */
             text.center {
                 font-weight: bold;
-                text-anchor: middle;
-                font: 10px sans-serif;
+                text-anchor: middle;   
             }
 
             text.shadow {
                 stroke: #fff;
-                stroke-width: 3px;
+                stroke-width: 2px;
                 stroke-opacity: .8;
             }
             
@@ -188,7 +186,7 @@
             }
             .semi-transparant {
                 fill: #fff;
-                fill-opacity: 0.8;
+                fill-opacity: 0.9;
                 stroke: #000;
                 stroke-width: 1.5;
                 stroke-opacity: 1.0;
@@ -356,6 +354,11 @@
                                      <!-- Attraction strength -->
                                     <i>Attraction</i>
                                     <input id="attraction" class="small" type="number" value="-700"/>
+                                </div>
+                                
+                                <div class="settings space">
+                                    <b>Fisheye:</b>
+                                    <input id="fisheye" type="checkbox" name="fisheye">
                                 </div>
   
                                 <!-- HELP INFO -->

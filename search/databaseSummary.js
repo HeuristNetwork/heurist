@@ -13,7 +13,8 @@
 */
 
 /**
-* Heurist Database Summary Helper 
+* Heurist Database Summary Visualisation Helper 
+* Needs jQuery, d3.js and fisheye.js to run
 *
 * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>    
 * @copyright   (C) 2005-2014 University of Sydney
@@ -24,6 +25,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+/*******************************START OF FUNCTIONS TO PARSE DATA**********************************/
 /** Attempts to grab the first value after searching for a tag*/
 function getValue(element, query) {
     var results = element.getElementsByTagName(query);
@@ -196,10 +198,9 @@ function convertData() {
 }
 
 /** Constructs the overlay data for an element in the XML with the name "name"  */
-function getOverlayText(name) {
+function getOverlayObjects(name) {
     var array = [];
-    array.push(name);
-    
+
     var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
     for(var i = 0; i < roots.length; i++) {
         // Retrieve info about this record
@@ -208,8 +209,7 @@ function getOverlayText(name) {
         //console.log(rootInfo);
         
         if(rootInfo.name == name) {
-            console.log("FOUND!");
-            array.push(rootInfo.name + " (n=" + rootInfo.count +")");
+            array.push({text: rootInfo.name + " (n=" + rootInfo.count +")", bold: true});
 
             // Going through all linked relation Records with namespace 'relationrecord'
             var relations = root.getElementsByTagNameNS("relationrecord", "Record");
@@ -219,8 +219,8 @@ function getOverlayText(name) {
                     var relation = relations[j];
                     var relationInfo = getInfo(relation);
                     //console.log(relationInfo);
-                    array.push("");
-                    array.push(relationInfo.name + " (n=" + relationInfo.count +")");
+                    array.push({text: " ", bold: false});
+                    array.push({text: relationInfo.name + " (n=" + relationInfo.count +")", bold: true});
                     
          
                     // Unconstrained check
@@ -243,7 +243,7 @@ function getOverlayText(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push("  R > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                        array.push({text: "  R > " + usageInfo.name, bold: false});
                                     } 
                                 }
                             }else if(type == "sng") {
@@ -255,14 +255,10 @@ function getOverlayText(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push("  S > " + usageInfo.name + " (n=" + usageInfo.count +")");
+                                        array.push({text: " S > " + usageInfo.name, bold: false});
                                     } 
                                 }
                             }
-                            
-                            
-     
-                            
                         }
                     }
                 }
@@ -271,17 +267,23 @@ function getOverlayText(name) {
         } 
     }
     
+    if(array.length == 0) {
+        array.push({text: name, bold: true});
+        array.push({text: "No outgoing connections", bold: false});   
+    }else{
+        array.push("");
+        array.push("bold = required");
+        array.push("S = single value");
+        array.push("R = repeating value");   
+    }
+
     return array;
 }
+/***********************************END OF FUNCTIONS TO PARSE DATA***********************************/
 
 
 
-
-
-
-
-
-
+/*********************************START OF VISUALISATION FUNCIONS************************************/
 /** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
@@ -289,21 +291,22 @@ function log10(val) {
 
 /** Executes the chosen formula with a chosen count & max size */
 function executeFormula(count, maxSize) {
+    //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
-    if(formula == "naturallog") {
-        return Math.log(count) * (maxSize / Math.log(maxCount));
+    if(formula == "naturallog") { // Natural log                                                           
+        return Math.log(count) / Math.log(maxCount) * maxSize;
     }
-    else if(formula == "logbase10") {
-        return log10(count) * (maxSize / log10(maxCount));                                           
-    }else {
-        return maxSize * (count/maxCount); 
+    else if(formula == "logbase10") { // Log base 10
+        return log10(count) / log10(maxCount) * maxSize;                                             
+    }else {  // Linear
+        return (count/maxCount) * maxSize; 
     }       
 }
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
     var maxWidth = getSetting(setting_linewidth);                                                                     
-    return 0.5 + executeFormula(count, maxWidth);
+    return 0.5 + (executeFormula(count, maxWidth) / 2);
 }            
 
 /** Calculates the marker width that should be used */
@@ -320,6 +323,8 @@ function getEntityRadius(count) {
 }
 
 /** Create an overlay based on mouse hover x & y and the name to display */
+var horizontalOffset = 5;
+var verticalOffset = 15;
 function createOverlay(x, y, name) {
     $("#overlay").remove();
     
@@ -336,11 +341,9 @@ function createOverlay(x, y, name) {
                       .attr("y", 0);
 
     // Adding text
-    var horizontalOffset = 5;
-    var verticalOffset = 15;
-    var array = getOverlayText(name);
+    var objects = getOverlayObjects(name);
     var text = overlay.selectAll("text")
-                      .data(array)
+                      .data(objects)
                       .enter()
                       .append("text")
                       .attr("x", horizontalOffset)
@@ -348,25 +351,35 @@ function createOverlay(x, y, name) {
                       .attr("dy", function(d, i) {
                           return i*verticalOffset;
                       })
-                      .text(String);
+                      .text(function(d) {     
+                          return d.text;
+                      })
+                      .attr("font-weight", function(d) {
+                          if(d.bold) {
+                             return "bold";
+                          }
+                      });
   
     // Calculate rectangle size
     var maxWidth = 1;
-    var height = 1;
+    var maxHeight = 1;                              
     for(var i = 0; i < text[0].length; i++) {
         var bbox = text[0][i].getBBox();
+
         // Width
         var width = bbox.width;
         if(width > maxWidth) {
             maxWidth = width;
         }
+        
         // Height
-        if(i == text[0].length-1) {
-            height += bbox.y;
+        var y = bbox.y;
+        if(y > maxHeight) {
+            maxHeight = y;
         }
     }
     rect.attr("width", maxWidth + 2*horizontalOffset)
-        .attr("height", height  + verticalOffset);
+        .attr("height", maxHeight + verticalOffset);
     
 }
 
@@ -399,6 +412,7 @@ function visualizeData() {
     // Gravity settings
     var gravity = getSetting(setting_gravity);
     var attraction = getSetting(setting_attraction);
+    var fisheyeEnabled = getSetting(setting_fisheye);
  
     // Creating D3 force
     var force = d3.layout.force()
@@ -423,13 +437,13 @@ function visualizeData() {
                       .enter()
                       .append("svg:marker")    
                       .attr("id", function(d) {
-                            return "marker" + d.source.id;
+                            return "marker" + d.target.id;
                       })
                       .attr("markerWidth", function(d) {    
-                          return getMarkerWidth(d.source.count);             
+                          return getMarkerWidth(d.target.count);             
                       })
                       .attr("markerHeight", function(d) {
-                          return getMarkerWidth(d.source.count);
+                          return getMarkerWidth(d.target.count);
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
@@ -463,10 +477,10 @@ function visualizeData() {
             return d.pointer;
          })
          .attr("marker-mid", function(d) {
-            return "url(#marker" + d.source.id + ")";
+            return "url(#marker" + d.target.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(d.source.count);
+            return 0.5 + getLineWidth(d.target.count);
          })
          .on("click", function(d) {
              console.log(d3.event.defaultPrevented);
@@ -492,11 +506,23 @@ function visualizeData() {
     /** Called when a dragging event starts */
     function dragstart(d, i) {
         force.stop() // Stop force from auto positioning
+        if(gravity === "touch") {
+            svg.selectAll(".node").attr("fixed", function(d, i) {
+                d.fixed = false;
+                return false;
+            });
+        }
     }
-    
-     /** Handles localstorage + redrawing after a drag event */
-    function handledrag(d, i) {
-        // Get old positions from localstorage
+
+    /** Caled when a dragging move event occurs */
+    function dragmove(d, i) {
+        // Update locations
+        d.px += d3.event.dx;
+        d.py += d3.event.dy;
+        d.x += d3.event.dx;
+        d.y += d3.event.dy;
+        
+        // Update the location in localstorage
         var record = localStorage.getItem(d.name);
         var obj;
         if(record === null) {
@@ -505,54 +531,37 @@ function visualizeData() {
             obj = JSON.parse(record);
         }  
         
-        // Update positions
-        obj.px += d3.event.dx;
-        obj.py += d3.event.dy;
-        obj.x += d3.event.dx;
-        obj.y += d3.event.dy;
-        
-        // Check if valid
-        if(obj.x > 5 && obj.x < width-5 && obj.y > 5 && obj.y < height-5) {
-            // Update node
-            d.px += d3.event.dx;
-            d.py += d3.event.dy;
-            d.x += d3.event.dx;
-            d.y += d3.event.dy;
-            
-            // Store positions in localstorage
-            console.log(obj);
-            localStorage.setItem(d.name, JSON.stringify(obj));
+        // Set attributes 'x' and 'y' and store object
+        obj.px = d.px;
+        obj.py = d.py;
+        obj.x = d.x;
+        obj.y = d.y;
+        localStorage.setItem(d.name, JSON.stringify(obj));
     
-            // Update nodes & lines                                                           
-            if(linetype == "curved") { 
-                 curvedTick();
-            }else{
-                 straightTick();
-            }
-            return true;
+        // Update nodes & lines                                                           
+        if(linetype == "curved") { 
+             curvedTick();
+        }else{
+             straightTick();
         }
-        return false;
-    }
-
-    /** Caled when a dragging move event occurs */
-    function dragmove(d, i) {
-        handledrag(d, i);
     }
     
     /** Called when a dragging event ends */
     function dragend(d, i) {
-         // Handle drag
-         if(handledrag(d, i)) {
-             
-         }
-         svg.selectAll(".node").attr("fixed", false);
          d.fixed = true; // Node may not be auto positioned
          
-
+         // Update nodes & lines 
+         if(linetype == "curved") { 
+             curvedTick();
+         }else{
+             straightTick();
+         } 
+         
          // Check if force may resume
-         if(gravity !== "off") {
+         if(gravity === "touch") {
             force.resume(); 
          }
+ 
     }
          
     // Defining the nodes
@@ -611,7 +620,7 @@ function visualizeData() {
                       // Setting 'fixed' based on localstorage
                       var record = localStorage.getItem(d.name);
                       if(record) {
-                          if(d.x > 5 && d.x < width-5 && d.y > 5 && d.y < height-5 && gravity !== "aggressive") {
+                          if(d.x > 0 && d.x < width && d.y > 0 && d.y < height && gravity !== "aggressive") {
                                 d.fixed = true;
                                 return true;
                           }else{
@@ -633,46 +642,161 @@ function visualizeData() {
                   .call(node_drag);
     
     // Adding the background circles to the nodes
-    node.append("circle")
-        .attr("r", function(d) {
-            return getEntityRadius(d.count);
-        })
-        .attr("class", "background")
-        .attr("fill", countcolor);
+    var bgcircle = node.append("circle")
+                       .attr("r", function(d) {
+                            return getEntityRadius(d.count);
+                       })
+                       .attr("class", "background")
+                       .attr("fill", countcolor);
 
     // Adding the foreground circles to the nodes
-    node.append("circle")
-        .attr("r", circleSize)
-        .attr("class", "around foreground");
+    var fgcircle = node.append("circle")
+                       .attr("r", circleSize)
+                       .attr("class", "around foreground");
    
     // Adding icons to the nodes 
-    node.append("svg:image") 
-        .attr("xlink:href", function(d) {
-            return d.image;
-        })
-        .attr("x", iconSize/-2)
-        .attr("y", iconSize/-2)
-        .attr("height", iconSize)
-        .attr("width", iconSize);
+    var icon = node.append("svg:image") 
+                   .attr("xlink:href", function(d) {
+                        return d.image;
+                   })
+                   .attr("x", iconSize/-2)
+                   .attr("y", iconSize/-2)
+                   .attr("height", iconSize)
+                   .attr("width", iconSize);
 
     // Adding shadow text to the nodes 
-    node.append("text")
-        .attr("x", 0)
-        .attr("y", -iconSize)
-        .attr("class", "center shadow")
-        .text(function(d) { 
-            return d.name; 
-        })
+    var shadowtext = node.append("text")
+                         .attr("x", 0)
+                         .attr("y", -iconSize)
+                         .attr("class", "center shadow")
+                         .text(function(d) { 
+                            return d.name; 
+                         });
         
     // Adding normal text to the nodes 
-    node.append("text")
-        .attr("x", 0)
-        .attr("y", -iconSize)
-        .attr("class", "center namelabel")
-        .attr("fill", textcolor)
-        .text(function(d) { 
-            return d.name; 
-        });
+    var fronttext = node.append("text")
+                        .attr("x", 0)
+                        .attr("y", -iconSize)
+                        .attr("class", "center namelabel")
+                        .attr("fill", textcolor)
+                        .text(function(d) { 
+                           return d.name; 
+                        });
+    
+    // Fish eye check
+    if(fisheyeEnabled == "true") {
+        // Create fish eye
+        var fisheye = d3.fisheye.circular()
+                                .radius(300)
+                                .distortion(2);
+                                
+        // Listen to mouse movements                         
+        svg.on("mousemove", function() {
+            console.log("Mouse move");
+            fisheye.focus(d3.mouse(this));
+            
+            node.each(function(d) { 
+                d.fisheye = fisheye(d); 
+            })
+            .attr("x", function(d) {
+                return d.fisheye.x;
+            })
+            .attr("y", function(d) {
+                return d.fisheye.y;
+            })
+            .attr("transform", function(d) {
+                return "translate(" + d.fisheye.x + "," + d.fisheye.y + ")"; 
+            });
+            
+            // Resize background circles
+            bgcircle.each(function(d) {
+                d.fisheye = fisheye(d);
+            })
+            .attr("r", function(d) {
+                return getEntityRadius(d.count)*d.fisheye.z;
+            });
+            
+            // Resize foreground circles
+            fgcircle.each(function(d) {
+                d.fisheye = fisheye(d);
+            })
+            .attr("r", function(d) {
+                return circleSize*d.fisheye.z;
+            });
+            
+            // Resize icons
+            icon.each(function(d) {
+                d.fisheye = fisheye(d);
+            })
+            .attr("x", function(d) {
+                return (iconSize/-2) * d.fisheye.z;
+            })
+            .attr("y", function(d) {
+                return (iconSize/-2) * d.fisheye.z;
+            })
+            .attr("height", function(d) {
+                return iconSize * d.fisheye.z;
+            })
+            .attr("width", function(d) {
+                return iconSize * d.fisheye.z;
+            });
+            
+            // Shadow text
+            shadowtext.each(function(d) {
+                d.fisheye = fisheye(d);
+            })
+            .attr("y", function(d) {
+                return -iconSize*d.fisheye.z;   
+            })
+            .attr("font-size", function(d) {
+                return 10*d.fisheye.z + "px";
+            });
+            
+            // Front text
+            fronttext.each(function(d) {
+                d.fisheye = fisheye(d);
+            })
+            .attr("y", function(d) {
+                return -iconSize*d.fisheye.z;   
+            })
+            .style("font-size", function(d) {
+                return 10*d.fisheye.z + "px";
+            });
+            
+            // Lines
+            if(linetype == "curved") {
+                // Curved
+                force.stop();
+                lines.each(function(d) {
+                    d.fisheye = fisheye(d);
+                })
+                .attr("d", function(d) {
+                    var dx = d.target.fisheye.x - d.source.fisheye.x,
+                        dy = d.target.fisheye.y - d.source.fisheye.y,
+                        dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+                        mx = d.source.fisheye.x + dx,
+                        my = d.source.fisheye.y + dy;
+                        
+                    return [
+                      "M",d.source.fisheye.x,d.source.fisheye.y,
+                      "A",dr,dr,0,0,1,mx,my,
+                      "A",dr,dr,0,0,1,d.target.fisheye.x,d.target.fisheye.y
+                    ].join(" ");
+                });
+            }else{
+                // Straight
+                lines.attr("points", function(d) {
+                   return d.source.fisheye.x + "," + d.source.fisheye.y + " " +
+                          (d.source.fisheye.x +(d.target.fisheye.x-d.source.fisheye.x)/2) + "," + 
+                          (d.source.fisheye.y +(d.target.fisheye.y-d.source.fisheye.y)/2) + " " +  
+                          d.target.fisheye.x + "," + d.target.fisheye.y;
+                });
+            }
+            
+        }); 
+    }
+    
+                           
     
     /** Tick handler for curved lines */
     function curvedTick() {
@@ -693,9 +817,7 @@ function visualizeData() {
 
         // Update node locations
         node.attr("transform", function(d) { 
-            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
-                return "translate(" + d.x + "," + d.y + ")"; 
-            }
+             return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
     
@@ -704,31 +826,24 @@ function visualizeData() {
         // Calculate the straight points
         lines.attr("points", function(d) {
            return d.source.x + "," + d.source.y + " " +
-                  (d.source.x +(d.target.x-d.source.x)/2) + "," + (d.source.y +(d.target.y-d.source.y)/2) + " " +  
+                  (d.source.x +(d.target.x-d.source.x)/2) + "," + 
+                  (d.source.y +(d.target.y-d.source.y)/2) + " " +  
                   d.target.x + "," + d.target.y;
         });
 
-        // Update node locations
+         // Update node locations
         node.attr("transform", function(d) { 
-            if(d.x > -10 && d.x < width+10 && d.y > -10 && d.y < height+10) {
-                return "translate(" + d.x + "," + d.y + ")"; 
-            }
+             return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
     
 }
+/***********************************END OF VISUALISATION FUNCIONS************************************/
 
 
 
 
-
-
-
-
-
-
-
-
+/*******************************START OF FUNCTIONS TO HANDLE SETTINGS********************************/
 /** SETTING NAMES */
 var setting_linecolor     = "setting_linecolor";
 var setting_markercolor   = "setting_markercolor";
@@ -741,6 +856,7 @@ var setting_entityradius  = "setting_entityradius";
 var setting_formula       = "setting_formula";
 var setting_gravity       = "setting_gravity";
 var setting_attraction    = "setting_attraction";
+var setting_fisheye       = "setting_fisheye";
 
 /** Returns a setting from local storage */
 function getSetting(setting) {
@@ -807,7 +923,7 @@ function checkLocalStorage() {
     // Set entity radius default if needed
     var entityradius = getSetting(setting_entityradius);
     if(entityradius === null) {
-        localStorage.setItem(setting_entityradius, 50);
+        localStorage.setItem(setting_entityradius, 30);
     }
     
     // Set formula default if needed
@@ -826,6 +942,12 @@ function checkLocalStorage() {
     var attraction = getSetting(setting_attraction);
     if(attraction === null) {
         localStorage.setItem(setting_attraction, -700);
+    }
+    
+    // Set fish eye default if needed
+    var fisheye = getSetting(setting_fisheye);
+    if(fisheye === null) {
+        localStorage.setItem(setting_fisheye, false);
     }
 }
 
@@ -979,6 +1101,18 @@ $(document).ready(function() {
         visualizeData();
     });
     
+    /** FISH EYE */
+    // Set fish eye setting in UI
+    if(getSetting(setting_fisheye) === "true") {
+        $("#fisheye").prop("checked", true);
+    }
+    
+    // Listen to fisheye changes
+    $("#fisheye").change(function(e) {
+        localStorage.setItem(setting_fisheye, $(this).is(':checked'));
+        visualizeData();
+    });
+    
     /** RECORD FILTERING */
     // Set filtering settings in UI
     $(".show-record").each(function() {
@@ -1037,3 +1171,5 @@ $(document).ready(function() {
     });
 
 });
+
+/********************************END OF FUNCTIONS TO HANDLE SETTINGS**********************************/
