@@ -104,6 +104,7 @@
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
                     <div class='input-header-cell'><b>Database Description</b></div><div class='input-cell'>
+                        <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                         <input type="text" maxlength="1000" size="80" name="dbDescription">
                         <input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" >
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
@@ -174,7 +175,10 @@
                 //error_log("About to test length");
 
                 if(isset($_POST['dbDescription'])) {
-                    if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1022) {
+                    
+//error_log("About to test length ".strlen($_POST['dbDescription']));
+                    
+                    if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1000) {
                         $dbDescription = $_POST['dbDescription'];
                         echo '<script type="text/javascript">';
                         echo 'document.getElementById("registerDBForm").style.display = "none";';
@@ -182,8 +186,8 @@
                         error_log("About to call registerDatabase");
                         registerDatabase(); // this does all the work of registration
                     } else {
-                        echo "<b>The database description should be an informative description ".
-                        "of the content, of at least 40 characters (max 1000)</b>";
+                        echo "<p style='color:red;font-weight:bold'>The database description should be an informative description ".
+                        "of the content, of at least 40 characters (max 1000)</p>";
                     }
                 }
 

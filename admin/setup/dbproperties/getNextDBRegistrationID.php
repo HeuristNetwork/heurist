@@ -136,7 +136,8 @@
 	if(mysql_num_rows($res) == 0) { // new registration
 		$res = mysql_query("insert into Records
 			(rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility,rec_Popularity)
-			VALUES  ('$serverURL', now(), '$dbTitle', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'viewable', 99)");
+			VALUES  ('".mysql_real_escape_string($serverURL)."', now(), '".mysql_real_escape_string($dbTitle).
+                        "', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'viewable', 99)");
 		if (!$res) { // Unable to allocate a new ID
 			$error = "Cannot write record in Heurist master index database\nThe URL may have been registered with a previous database.\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 			$returnData = $dbID . "," . $error;
@@ -146,8 +147,7 @@
 			$returnData = $dbID;
 
 			//Write the database title into the details, further data will be entered by the Heurist form
-			$res = mysql_query("insert into recDetails
-				(dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', ".DT_NAME.", '$dbTitle')");
+			$res = mysql_query("insert into recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', ".DT_NAME.", '".mysql_real_escape_string($dbTitle)."')");
 
 			//Write db version as detail
 			if($dbVersion){
