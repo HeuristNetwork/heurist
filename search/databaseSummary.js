@@ -79,8 +79,74 @@ function isUnconstrained(record) {
     return false;
 }    
 
-
-/** Converts the raw XML data to D3 usable nodes and links */
+/** Converts the raw XML data to D3 usable nodes and links
+ *  Return example
+ * 
+ * Returns an Object:
+ * Object {nodes: Object, links: Array[19]}
+    * Contains a "nodes" attribute, this is an Object containing more Objects
+    * Contains a "links" attribute, this is an array containg Objects
+ * 
+ * nodes: Object [Each attribute is an Object as well]
+ * Death: Object
+     * count: 232
+     * fixed: true
+     * id: 33
+     * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/33.png"
+     * index: 6
+     * name: "Death"
+     * px: 110.60620663669448
+     * py: 87.9311955887024
+     * type: "usagerecord"
+     * weight: 4
+     * x: 110.60620663669448
+     * y: 87.9311955887024
+     * __proto__: Object
+ * Digital media item: Object
+ * Educational institution: Object
+ * Eventlet: Object
+ * Military award: Object
+ * etc.
+ * 
+ * 
+ * links: Array[19]
+ * 0: Object
+     * pointer: "BOR entry pdf"
+     * source: Object
+         * count: 2575
+         * fixed: true
+         * id: 10
+         * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/10.png"
+         * index: 1
+         * name: "Person"
+         * px: 388.425870681868
+         * py: 76.42969215610094
+         * type: "rootrecord"
+         * weight: 13
+         * x: 388.425870681868
+         * y: 76.42969215610094
+         * __proto__: Object
+     * target: Object
+         * count: 4718
+         * fixed: true
+         * id: 5
+         * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/5.png"
+         * index: 0
+         * name: "Digital media item"
+         * px: 89.0722588084383
+         * py: 201.8612925141735
+         * type: "rootrecord"
+         * weight: 2
+         * x: 89.0722588084383
+         * y: 201.8612925141735
+         * __proto__: Object
+     * __proto__: Object
+ * 1: Object
+ * 2: Object
+ * 3: Object
+ * etc.
+ * 
+ */
 var maxCount = 1;
 function convertData() {
     maxCount = 1;
@@ -197,7 +263,26 @@ function convertData() {
     return obj;
 }
 
-/** Constructs the overlay data for an element in the XML with the name "name"  */
+/** Constructs the overlay data for an element in the XML with the name "name"
+  * Return example
+  * 
+  * Returns an array of Objects
+  * [Object, ....., Object]
+  * 
+  * 0: Object
+      * style: "bold"
+      * text: "Person (n=2575)"
+      * type: "title"
+      * __proto__: Object
+  * 
+  * 1: Object
+      * style: "none"
+      * text: "______________________"
+      * type: "explanation"
+      * __proto__: Object
+  * 
+  * etc.
+  */
 function getOverlayObjects(name) {
     var array = [];
 
@@ -208,9 +293,10 @@ function getOverlayObjects(name) {
         var rootInfo = getInfo(root);
         //console.log(rootInfo);
         
-        if(rootInfo.name == name) {
-            array.push({text: rootInfo.name + " (n=" + rootInfo.count +")", bold: true});
-
+        if(rootInfo.name == name) { 
+            array.push({text: rootInfo.name + " (n=" + rootInfo.count +")", type: "title", style: "bold"});
+            array.push({text: " ", type: "explanation", style: "none"});
+            
             // Going through all linked relation Records with namespace 'relationrecord'
             var relations = root.getElementsByTagNameNS("relationrecord", "Record");
             if(relations && relations.length > 0) {
@@ -219,8 +305,8 @@ function getOverlayObjects(name) {
                     var relation = relations[j];
                     var relationInfo = getInfo(relation);
                     //console.log(relationInfo);
-                    array.push({text: " ", bold: false});
-                    array.push({text: relationInfo.name + " (n=" + relationInfo.count +")", bold: true});
+                    //array.push({text: " ", type: "none", style: "none"});
+                    array.push({text: relationInfo.name/* + " (n=" + relationInfo.count +")"*/, type: "field", style: "bold"});
                     
          
                     // Unconstrained check
@@ -243,7 +329,7 @@ function getOverlayObjects(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push({text: "  R > " + usageInfo.name, bold: false});
+                                        array.push({text: "[R] > " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
                                     } 
                                 }
                             }else if(type == "sng") {
@@ -255,7 +341,7 @@ function getOverlayObjects(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push({text: " S > " + usageInfo.name, bold: false});
+                                        array.push({text: "[S] > " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
                                     } 
                                 }
                             }
@@ -267,23 +353,24 @@ function getOverlayObjects(name) {
         } 
     }
     
+    // Found connections?
     if(array.length == 0) {
-        array.push({text: name, bold: true});
-        array.push({text: "No outgoing connections", bold: false});   
+        array.push({text: name, type: "title", style: "bold"});
+        array.push({text: "No outgoing connections", type: "relation", style: "none"});   
     }else{
-        array.push("");
-        array.push("bold = required");
-        array.push("S = single value");
-        array.push("R = repeating value");   
+        array.push({text: " ", type: "explanation", style: "none"});
+        array.push({text: "bold = required", type: "explanation", style: "bold"});
+        array.push({text: "[S] = single value", type: "explanation", style: "none"});
+        array.push({text: "[R] = repeating value", type: "explanation", style: "none"});   
     }
-
+    
     return array;
 }
 /***********************************END OF FUNCTIONS TO PARSE DATA***********************************/
 
 
 
-/*********************************START OF VISUALISATION FUNCIONS************************************/
+/*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
 /** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
@@ -321,75 +408,11 @@ function getEntityRadius(count) {
     var maxRadius = getSetting(setting_entityradius);
     return circleSize + executeFormula(count, maxRadius);
 }
+/********************************END OF VISUALISATION HELPER FUNCTIONS********************************/
 
-/** Create an overlay based on mouse hover x & y and the name to display */
-var horizontalOffset = 5;
-var verticalOffset = 15;
-function createOverlay(x, y, name) {
-    $("#overlay").remove();
-    
-    // Add overlay container
-    var svg = d3.select("svg");                 
-    var overlay = svg.append("g")
-                     .attr("id", "overlay")      
-                     .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
-    
-    // Draw a semi transparant rectangle       
-    var rect = overlay.append("rect")
-                      .attr("class", "semi-transparant")              
-                      .attr("x", 0)
-                      .attr("y", 0);
 
-    // Adding text
-    var objects = getOverlayObjects(name);
-    var text = overlay.selectAll("text")
-                      .data(objects)
-                      .enter()
-                      .append("text")
-                      .attr("x", horizontalOffset)
-                      .attr("y", verticalOffset)
-                      .attr("dy", function(d, i) {
-                          return i*verticalOffset;
-                      })
-                      .text(function(d) {     
-                          return d.text;
-                      })
-                      .attr("font-weight", function(d) {
-                          if(d.bold) {
-                             return "bold";
-                          }
-                      });
-  
-    // Calculate rectangle size
-    var maxWidth = 1;
-    var maxHeight = 1;                              
-    for(var i = 0; i < text[0].length; i++) {
-        var bbox = text[0][i].getBBox();
 
-        // Width
-        var width = bbox.width;
-        if(width > maxWidth) {
-            maxWidth = width;
-        }
-        
-        // Height
-        var y = bbox.y;
-        if(y > maxHeight) {
-            maxHeight = y;
-        }
-    }
-    rect.attr("width", maxWidth + 2*horizontalOffset)
-        .attr("height", maxHeight + verticalOffset);
-    
-}
-
-/** Slight delay, fades away and then removes itself. */
-function removeOverlay() {
-    $("#overlay").delay(500).fadeOut(500, function() {
-         $(this).remove();
-    });
-}
-
+/***********************************START OF VISUALISATION FUNCIONS***********************************/
 /** Visualizes the data */ 
 function visualizeData() {
     // SVG data    
@@ -482,6 +505,11 @@ function visualizeData() {
          .style("stroke-width", function(d) { 
             return 0.5 + getLineWidth(d.target.count);
          })
+         .style("stroke-dasharray", (function(d) {
+             if(d.source.count == 0) {
+                return "3, 3"; 
+             } 
+         }))  // <== This line here!!
          .on("click", function(d) {
              console.log(d3.event.defaultPrevented);
              createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
@@ -794,9 +822,7 @@ function visualizeData() {
             }
             
         }); 
-    }
-    
-                           
+    }                   
     
     /** Tick handler for curved lines */
     function curvedTick() {
@@ -840,6 +866,99 @@ function visualizeData() {
 }
 /***********************************END OF VISUALISATION FUNCIONS************************************/
 
+
+
+/******************************START OF FUNCTIONS TO DISPLAY AN OVERLAY***********************************/
+/** Create an overlay based on mouse hover x & y and the name to display */
+var horizontalOffset = 5;
+var verticalOffset = 12;
+function createOverlay(x, y, name) {
+    $("#overlay").remove();
+    
+    // Add overlay container
+    var svg = d3.select("svg");                 
+    var overlay = svg.append("g")
+                     .attr("id", "overlay")      
+                     .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
+    
+    // Draw a semi transparant rectangle       
+    var rect = overlay.append("rect")
+                      .attr("class", "semi-transparant")              
+                      .attr("x", 0)
+                      .attr("y", 0);
+
+    // Adding text
+    var objects = getOverlayObjects(name);
+    console.log(objects);
+    var text = overlay.selectAll("text")
+                      .data(objects)
+                      .enter()
+                      .append("text")
+                      .attr("x", horizontalOffset)        // Some left padding
+                      .attr("y", function(d, i) {
+                          return (i+0.5)*verticalOffset;      // Position calculation
+                      })
+                      .attr("dx", function(d, i) {
+                          if(d.type == "relation") {
+                              return horizontalOffset;    // Relation text pushed right
+                          }
+                          return 0;
+                      })
+                      .attr("dy", function(d, i) {
+                          if(d.type == "relation") {      // Relation text pushed up
+                              return 2;
+                          }else if(d.type == "explanation") {
+                              return 0;
+                          }                     
+                          return 5; 
+                      })
+                      .text(function(d) {                 // Using text attribute
+                          return d.text;
+                      })
+                      .style("font-weight", function(d) { // Font weight based on style
+                          return d.style;
+                      })
+                      .style("font-size", function(d) {   // Font size based on type
+                          if(d.type == "title") {
+                              return "11px";
+                          }else if(d.type == "field") {
+                              return "10px";
+                          }else if(d.type == "explanation") {
+                              return "8px";
+                          }
+                          return "9px";
+                      }, "important");                               
+  
+    // Calculate rectangle size
+    var maxWidth = 1;
+    var maxHeight = 1;                              
+    for(var i = 0; i < text[0].length; i++) {
+        var bbox = text[0][i].getBBox();
+
+        // Width
+        var width = bbox.width;
+        if(width > maxWidth) {
+            maxWidth = width;
+        }
+        
+        // Height
+        var y = bbox.y;
+        if(y > maxHeight) {
+            maxHeight = y;
+        }
+    }
+    rect.attr("width", maxWidth + 3*horizontalOffset)
+        .attr("height", maxHeight + verticalOffset);
+    
+}
+
+/** Slight delay, fades away and then removes itself. */
+function removeOverlay() {
+    $("#overlay").delay(500).fadeOut(500, function() {
+         $(this).remove();
+    });
+}
+/********************************END OF FUNCTIONS TO DISPLAY AN OVERLAY***********************************/
 
 
 
@@ -950,7 +1069,11 @@ function checkLocalStorage() {
         localStorage.setItem(setting_fisheye, false);
     }
 }
+/********************************END OF FUNCTIONS TO HANDLE SETTINGS**********************************/
 
+
+
+/*********************** START OF FUNCTIONS TO EXECUTE WHEN THE DOCUMENT IS DONE LOADING ********************/
 /** Body is done with loading */
 var xml;
 $(document).ready(function() {
@@ -1069,8 +1192,6 @@ $(document).ready(function() {
         visualizeData();
     });
     
-    
-    
     /** LINE LENGTH SETTING */
     // Set formula setting in UI
     $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
@@ -1169,7 +1290,85 @@ $(document).ready(function() {
         xml = xmlData;
         visualizeData();
     });
+    
+    /** 
+    * XML example data
+ 
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Relationships>
+
+    <!--Heurist Definitions Exchange File, generated: 03 Sep 2014 @ 12:38-->
+    <HeuristBaseURL>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST/h3-jj/</HeuristBaseURL>
+    <HeuristDBName>BoRO_Backup_13Aug14</HeuristDBName>
+    <HeuristProgVersion>3.2.0</HeuristProgVersion>
+    <HeuristDBVersion>1.1.0</HeuristDBVersion>
+
+    <RecordTypes>
+
+    <Record xmlns='rootrecord'>
+        <rec_Name>Record relationship</rec_Name>
+        <rec_ID>1</rec_ID>
+        <rec_Count>0</rec_Count>
+        <rec_Image>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/1.png</rec_Image>
+        <rec_Relations>
+            <Record xmlns='relationrecord'>
+                <rec_Name>Source record</rec_Name>
+                <rec_ID>7</rec_ID>
+                <rec_Count>0</rec_Count>
+                <rec_Image>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/7.png</rec_Image>
+                <rel_Unconstrained>true</rel_Unconstrained>
+                <RelationTypes>
+                <rel_Name>pointer</rel_Name>
+                <rel_Name>req</rel_Name>
+                <rel_Name>sng</rel_Name>
+                </RelationTypes>
+                <Usages>
+                </Usages>
+            </Record>
+    
+            <Record xmlns='relationrecord'>
+                <rec_Name>Target record</rec_Name>
+                <rec_ID>5</rec_ID>
+                <rec_Count>0</rec_Count>
+                <rec_Image>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/5.png</rec_Image>
+                <rel_Unconstrained>true</rel_Unconstrained>
+                <RelationTypes>
+                <rel_Name>pointer</rel_Name>
+                <rel_Name>req</rel_Name>
+                <rel_Name>sng</rel_Name>
+                </RelationTypes>
+                <Usages>
+                </Usages>
+            </Record>
+            
+            <Record xmlns='relationrecord'>
+                <rec_Name>Interpretation/commentary</rec_Name>
+                <rec_ID>8</rec_ID>
+                <rec_Count>0</rec_Count>
+                <rec_Image>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/8.png</rec_Image>
+                <rel_Unconstrained>false</rel_Unconstrained>
+                <RelationTypes>
+                    <rel_Name>pointer</rel_Name>
+                    <rel_Name>opt</rel_Name>
+                    <rel_Name>sng</rel_Name>
+                </RelationTypes>
+                <Usages>
+                    <Record xmlns='usagerecord'>
+                    <rec_Name>Interpretive annotation</rec_Name>
+                    <rec_ID>8</rec_ID>
+                    <rec_Count>0</rec_Count>
+                    <rec_Image>http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/8.png</rec_Image>
+                    </Record>
+                </Usages>
+            </Record>
+            </rec_Relations>
+        </Record>
+        
+         etc.
+         
+    </Relationships>
+    
+    */
 
 });
-
-/********************************END OF FUNCTIONS TO HANDLE SETTINGS**********************************/
+/********************** END OF FUNCTIONS TO EXECUTE WHEN THE DOCUMENT IS DONE LOADING ********************/
