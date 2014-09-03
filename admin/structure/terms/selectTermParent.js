@@ -50,7 +50,8 @@ function SelectTermParent() {
 		_currentDomain,
 		_childTerm,
 		_currentNode,
-		_termTree;
+		_termTree,
+        _target_parent_id = null;
 
 	/**
 	* Initialization of input form
@@ -67,6 +68,7 @@ function SelectTermParent() {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				_childTerm = top.HEURIST.parameters.child;
 				_currentDomain = top.HEURIST.parameters.domain;
+                _target_parent_id = top.HEURIST.parameters.parent;
 
 				if(_childTerm){
 						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+
@@ -125,6 +127,8 @@ function SelectTermParent() {
 			treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
 			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
 			fi = top.HEURIST.terms.fieldNamesToIndex;
+            
+        var node_tomove = null;
 
 		tv.removeChildren(tv_parent); // Reset the the tree
 
@@ -181,7 +185,10 @@ function SelectTermParent() {
 
 					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 
-
+                    if(_target_parent_id == term.id){
+                        node_tomove = childNode;
+                    }
+                    
 					__createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
 					}
 				}
@@ -203,6 +210,14 @@ function SelectTermParent() {
 		tv.render();
 		//first_node.focus();
 		//first_node.toggle();
+        
+        setTimeout(function(){
+            if(node_tomove!=null){
+                node_tomove.focus()
+                node_tomove.toggle();
+            }}, 1000);
+        
+        
 	}
 
 	/**

@@ -53,13 +53,15 @@ function EditTerms() {
     _termTree2, //treeview for relation terms
     _currTreeView,
     _currentNode,
+    _keepCurrentParent = null,
     _vocabulary_toselect,
     _parentNode,
     _currentDomain,
     _db,
     _isWindowMode=false,
     _isSomethingChanged=false,
-    _affectedVocabs = [];
+    _affectedVocabs = [],
+    keep_target_newparent_id = null;
 
     /**
     *	Initialization of tabview with 2 tabs with treeviews
@@ -237,8 +239,15 @@ function EditTerms() {
         //first_node.focus();
         //first_node.toggle();
 
-        if(_currentNode){
-            _findNodeById(_currentNode.data.id);
+        // todo
+        if(_keepCurrentParent!=null){
+            //need some time for render
+            setTimeout(function(){
+                    var node = _findNodeById(_keepCurrentParent);
+                    node.focus();
+                    node.toggle();
+            }, 1000);
+            //_onNodeClick(node);
         }
     }
 
@@ -312,7 +321,8 @@ function EditTerms() {
         if(_currentNode !== node)
         {
             if(!Hul.isnull(_currentNode)){
-                _doSave(true);
+                _keepCurrentParent = null;
+                _doSave(true, false);
             }
             _currentNode = node;
 
@@ -522,7 +532,7 @@ function EditTerms() {
     /**
     * Saves the term on server side
     */
-    function _doSave(needConfirm){
+    function _doSave(needConfirm, noValidation){
 
         var sName = Dom.get('edName').value.trim();
         var sDesc = Dom.get('edDescription').value.trim();
@@ -579,7 +589,7 @@ function EditTerms() {
                 }
             }
 
-            if(_validateDups(_currentNode, sName, sCode)){
+            if(noValidation || _validateDups(_currentNode, sName, sCode)){
 
                 var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
                 
@@ -621,6 +631,21 @@ function EditTerms() {
             }
         }
         return true;
+    }
+    
+    function _getNextSiblingId(node){
+        var sibs = node.getSiblings();
+        if(sibs!=null){
+            var ind, len = sibs.length;
+            for (ind in sibs){
+                if(!Hul.isnull(ind)){
+                    if(sibs[ind].data.id==node.data.id && ind+1<len){
+                        return sibs[ind+1].data.id
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -824,9 +849,20 @@ function EditTerms() {
         if(_currentNode===null) return;
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var nodeid = _currentNode.data.id;
+        
+        //_keepCurrentParent = _getNextSiblingId(_currentNode);
+        //if(_keepCurrentParent==null) 
+        _keepCurrentParent = _currentNode.data.parent_id;
+        
+        
+        var url = top.HEURIST.basePath +
+            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&db="+db;
+        if(keep_target_newparent_id){
+            url = url + "&parent=" + keep_target_newparent_id;
+        }
 
-        Hul.popupURL(top, top.HEURIST.basePath +
-            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+_currentNode.data.id+"&db="+db,
+        Hul.popupURL(top, url,
             {
                 "close-on-blur": false,
                 "no-resize": true,
@@ -839,7 +875,16 @@ function EditTerms() {
                         }else{
                             Dom.get('edParentId').value = newparent_id;
                         }
-                        _doSave(false);
+                        _doSave(false, true);
+                        
+                        keep_target_newparent_id = newparent_id;
+                        
+                        /*//reselct the edited node 
+                        var node = _findNodeById(nodeid, true);
+                        if(!Hul.isnull(node)){
+                            _onNodeClick(node);
+                        }*/
+                        return true;
                     }
                 }
         });
@@ -1227,7 +1272,10 @@ function EditTerms() {
     //
     var that = {
 
-        doSave: function(){ _doSave(false); },
+        doSave: function(){ 
+            _keepCurrentParent = null;
+            _doSave(false, false); 
+        },
         doDelete: function(){ _doDelete(true); },
         doAddChild: function(isRoot){ _doAddChild(isRoot); },
         selectParent: function(){ _selectParent(); },
