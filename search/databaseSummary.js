@@ -207,7 +207,7 @@ function convertData() {
                             
                             // Check if we should filter this record
                             var index = $.inArray(usageInfo.name, filter); 
-                            if(index == -1 && usageInfo.count > 0) {
+                            if(index == -1/* && usageInfo.count > 0*/) {
                                 // Construct a link; add root record info
                                 var link = {};
                                 if(!(rootInfo.name in nodes)) {
@@ -294,6 +294,7 @@ function getOverlayObjects(name) {
         //console.log(rootInfo);
         
         if(rootInfo.name == name) { 
+            var added = false;
             array.push({text: rootInfo.name + " (n=" + rootInfo.count +")", type: "title", style: "bold"});
             array.push({text: " ", type: "explanation", style: "none"});
             
@@ -305,10 +306,7 @@ function getOverlayObjects(name) {
                     var relation = relations[j];
                     var relationInfo = getInfo(relation);
                     //console.log(relationInfo);
-                    //array.push({text: " ", type: "none", style: "none"});
-                    array.push({text: relationInfo.name/* + " (n=" + relationInfo.count +")"*/, type: "field", style: "bold"});
-                    
-         
+     
                     // Unconstrained check
                     var constrained = isUnconstrained(relation);
                     //console.log(constrained);
@@ -329,7 +327,12 @@ function getOverlayObjects(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push({text: "[R] > " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
+                                        
+                                        if(!added) {
+                                            array.push({text: relationInfo.name + " [R]", type: "field", style: "bold"}); 
+                                            added = true;
+                                        }
+                                        array.push({text: "> " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
                                     } 
                                 }
                             }else if(type == "sng") {
@@ -341,7 +344,12 @@ function getOverlayObjects(name) {
                                         var usage = usages[l];
                                         var usageInfo = getInfo(usage);
                                         //console.log(usageInfo);
-                                        array.push({text: "[S] > " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
+                                        
+                                        if(!added) {
+                                            array.push({text: relationInfo.name + " [S]", type: "field", style: "bold"}); 
+                                            added = true;
+                                        }
+                                        array.push({text: "> " + usageInfo.name + " (n=" + usageInfo.count +")", type: "relation", style: "none"});
                                     } 
                                 }
                             }
@@ -364,6 +372,8 @@ function getOverlayObjects(name) {
         array.push({text: "[R] = repeating value", type: "explanation", style: "none"});   
     }
     
+    console.log("Overlay data has been generated:");
+    console.log(array);
     return array;
 }
 /***********************************END OF FUNCTIONS TO PARSE DATA***********************************/
@@ -380,11 +390,15 @@ function log10(val) {
 function executeFormula(count, maxSize) {
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
-    if(formula == "naturallog") { // Natural log                                                           
+    if(formula == "logarithmic") { // Log                                                           
         return Math.log(count) / Math.log(maxCount) * maxSize;
     }
-    else if(formula == "logbase10") { // Log base 10
-        return log10(count) / log10(maxCount) * maxSize;                                             
+    else if(formula == "unweighted") { // Unweighted
+        if(count > 0) {
+            return 2;
+        }else{
+            return 0;
+        }                                            
     }else {  // Linear
         return (count/maxCount) * maxSize; 
     }       
@@ -506,10 +520,10 @@ function visualizeData() {
             return 0.5 + getLineWidth(d.target.count);
          })
          .style("stroke-dasharray", (function(d) {
-             if(d.source.count == 0) {
+             if(d.target.count == 0) {
                 return "3, 3"; 
              } 
-         }))  // <== This line here!!
+         })) 
          .on("click", function(d) {
              console.log(d3.event.defaultPrevented);
              createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
@@ -586,10 +600,9 @@ function visualizeData() {
          } 
          
          // Check if force may resume
-         if(gravity === "touch") {
-            force.resume(); 
-         }
- 
+          if(gravity === "touch") {
+                force.resume(); 
+          } 
     }
          
     // Defining the nodes
@@ -720,7 +733,7 @@ function visualizeData() {
                                 
         // Listen to mouse movements                         
         svg.on("mousemove", function() {
-            console.log("Mouse move");
+            force.stop();
             fisheye.focus(d3.mouse(this));
             
             node.each(function(d) { 
@@ -776,9 +789,9 @@ function visualizeData() {
             .attr("y", function(d) {
                 return -iconSize*d.fisheye.z;   
             })
-            .attr("font-size", function(d) {
+            .style("font-size", function(d) {
                 return 10*d.fisheye.z + "px";
-            });
+            }, "important");
             
             // Front text
             fronttext.each(function(d) {
@@ -789,7 +802,7 @@ function visualizeData() {
             })
             .style("font-size", function(d) {
                 return 10*d.fisheye.z + "px";
-            });
+            }, "important");
             
             // Lines
             if(linetype == "curved") {

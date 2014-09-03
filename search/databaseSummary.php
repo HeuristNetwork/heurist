@@ -336,8 +336,8 @@
                                     <!-- Formula -->
                                     <select class="middle" id="formula">
                                         <option value="linear">linear</option>
-                                        <option value="naturallog">natural log</option>
-                                        <option value="logbase10">log base 10</option>
+                                        <option value="logarithmic">logarithmic</option>
+                                        <option value="unweighted">unweighted</option>
                                     </select>
                                 </div>
                                 
