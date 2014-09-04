@@ -162,6 +162,7 @@
 
     // Retrieve relations
     print "\n\n<RecordTypes>";
+    print "\n<!--Records with relations between them-->";
     foreach ($resrt  as $rt_id=>$rt){
         // Record overview
         print "\n\n<Record xmlns='rootrecord'>";
@@ -252,6 +253,23 @@
         print "\n</rec_Relations>";
         print "\n</Record>";
     }
+    
+    // RECORDS WITH ZERO COUNTS
+    $query = "SELECT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC;";
+    $res = mysql_query($query);
+    print "\n<!--Records without relations between them-->";
+    while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
+        $rt_id = $row[0];
+        $rt_name = $row[1];
+        
+        print "\n\n<Record xmlns='rootrecord'>";
+        print "\n<rec_Name>" .$rt_name. "</rec_Name>";
+        print "\n<rec_ID>" .$rt_id. "</rec_ID>";
+        print "\n<rec_Count>0</rec_Count>";
+        print "\n<rec_Image>" .$image_base_url.$rt_id. ".png</rec_Image>";
+        print "\n</Record>";
+    }
+    
 
     print "\n\n</RecordTypes>";
     print "\n</Relationships>";

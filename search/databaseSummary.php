@@ -34,13 +34,6 @@
     $searchType = BOTH;
     $args = array();
     $publicOnly = false;
-
-    // Building query
-    $query = REQUEST_to_query("select rec_RecTypeID, count(*) as count ", $searchType, $args, null, $publicOnly);
-    $query = substr($query, 0, strpos($query, "order by"));
-    $query .= " group by rec_RecTypeID order by count DESC";
-
-    $rtStructs = getAllRectypeStructures();
 ?>
 
 <html>
@@ -65,7 +58,7 @@
             }
 
             /** Table */
-            #records {
+            .records {
                 overflow: scroll;
                 border: none;
             }
@@ -82,8 +75,12 @@
                 padding: 1px;  
             }
             
-            #records td, #records th {
+            .records td, .records th {
                 border: 1px solid black;
+            }
+            
+            .zerocounts {
+                border-top: 3px solid black;
             }
 
             .row:hover {
@@ -221,7 +218,7 @@
                     <!-- Record count table -->
                     <!-- also provides navigation to search for a record type and on/off controls for record types in visualisation -->
                     <h3> Record types (entities)</h3><br />
-                    <table id="records" cellpadding="4" cellspacing="1">
+                    <table id="records" class="records" cellpadding="4" cellspacing="1">
 
                         <tr>
                             <th width="40">ID</th>
@@ -233,6 +230,13 @@
                         </tr>
 
                         <?php
+                            /** RETRIEVING RECORDS WITH CONNECTIONS */
+                            // Building query
+                            $query = REQUEST_to_query("select rec_RecTypeID, count(*) as count ", $searchType, $args, null, $publicOnly);
+                            $query = substr($query, 0, strpos($query, "order by"));
+                            $query .= " group by rec_RecTypeID order by count DESC";
+                            $rtStructs = getAllRectypeStructures();
+                            
                             // Put record types & counts in the table
                             $res = mysql_query($query);
                             $count = 0;
@@ -272,6 +276,48 @@
                                 $count++;
 
                             }//end while
+
+                            /** RETRIEVING RECORDS WITH NO CONNECTIONS */
+                            $query = "SELECT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC;";
+                            $res = mysql_query($query);
+                            $count = 0;
+                            while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
+                                //print_r($row);
+                                if($count == 0) {
+                                    echo "<tr class='row zerocounts'>";  
+                                }else{
+                                    echo "<tr class='row'>";
+                                }
+            
+                                // ID
+                                $rt_ID = $row[0];
+                                echo "<td align='center'>" .$rt_ID. "</td>";
+                                
+                                // Image  
+                                $title = $row[1];
+                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
+                                $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                                echo "<td align='center'>$img</td>";
+                                
+                                // Type
+                                echo "<td style='padding-left: 5px; padding-right: 5px'>" .$title. "</td>"; 
+                                
+                                // Link
+                                $links =  "<a href='#' title='Open search for this record type in current page'".
+                                "onclick='onrowclick($rt_ID, false)' class='internal-link'>&nbsp;</a>";
+                                $links .= "<a href='#' title='Open search for this record type in new page'".
+                                "onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a>";
+                                echo "<td>$links</td>";
+                                
+                                // Count
+                                echo "<td align='center'>0</td>";
+                                
+                                // Show
+                                echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
+                                
+                                echo "</tr>";
+                                $count++;
+                            }
                         ?>
 
                     </table>

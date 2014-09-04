@@ -172,7 +172,7 @@ function convertData() {
         
         // Check if we should filter this record
         var index = $.inArray(rootInfo.name, filter);
-        if(index == -1 && rootInfo.count > 0) {
+        if(index == -1/* && rootInfo.count > 0*/) {
             // Going through all linked relation Records with namespace 'relationrecord'
             var relations = root.getElementsByTagNameNS("relationrecord", "Record");
             if(relations && relations.length > 0) {
@@ -236,7 +236,7 @@ function convertData() {
                                 }
 
                                 // Add link to array
-                                link["pointer"] = relationInfo.name;
+                                link["relation"] = relationInfo;
                                 links.push(link);
                             }else{
                                 // Display root node anyways
@@ -263,7 +263,7 @@ function convertData() {
     return obj;
 }
 
-/** Constructs the overlay data for an element in the XML with the name "name"
+/** Constructs the overlay data for a root element in the XML
   * Return example
   * 
   * Returns an array of Objects
@@ -283,7 +283,7 @@ function convertData() {
   * 
   * etc.
   */
-function getOverlayObjects(name) {
+function getRecordOverlayInfo(record) {
     var array = [];
 
     var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
@@ -293,7 +293,7 @@ function getOverlayObjects(name) {
         var rootInfo = getInfo(root);
         //console.log(rootInfo);
         
-        if(rootInfo.name == name) { 
+        if(rootInfo.id == record.id) { 
             var added = false;
             array.push({text: rootInfo.name + " (n=" + rootInfo.count +")", type: "title", style: "bold"});
             array.push({text: " ", type: "explanation", style: "none"});
@@ -361,20 +361,22 @@ function getOverlayObjects(name) {
         } 
     }
     
-    // Found connections?
-    if(array.length == 0) {
-        array.push({text: name, type: "title", style: "bold"});
-        array.push({text: "No outgoing connections", type: "relation", style: "none"});   
-    }else{
-        array.push({text: " ", type: "explanation", style: "none"});
-        array.push({text: "bold = required", type: "explanation", style: "bold"});
-        array.push({text: "[S] = single value", type: "explanation", style: "none"});
-        array.push({text: "[R] = repeating value", type: "explanation", style: "none"});   
-    }
+    // Add legend
+    array.push({text: " ", type: "explanation", style: "none"});
+    array.push({text: "bold = required", type: "explanation", style: "bold"});
+    array.push({text: "[S] = single value", type: "explanation", style: "none"});
+    array.push({text: "[R] = repeating value", type: "explanation", style: "none"});   
     
     console.log("Overlay data has been generated:");
     console.log(array);
     return array;
+}
+
+/** Constructs the overlay data for a relation element in the XML */
+function getLineOverlayInfo(record) {
+    var array = [];
+    array.push({text: "LINE OVERLAY = NOT DONE YET!", type: "title", style: "none"});
+    return array;   
 }
 /***********************************END OF FUNCTIONS TO PARSE DATA***********************************/
 
@@ -388,6 +390,11 @@ function log10(val) {
 
 /** Executes the chosen formula with a chosen count & max size */
 function executeFormula(count, maxSize) {
+    // Avoid minus infinity and wrong calculations etc.
+    if(count <= 0) {
+        count = 1;
+    }
+    
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
     var formula = getSetting(setting_formula);
     if(formula == "logarithmic") { // Log                                                           
@@ -474,13 +481,13 @@ function visualizeData() {
                       .enter()
                       .append("svg:marker")    
                       .attr("id", function(d) {
-                            return "marker" + d.target.id;
+                            return "marker" + d.relation.id;
                       })
                       .attr("markerWidth", function(d) {    
-                          return getMarkerWidth(d.target.count);             
+                          return getMarkerWidth(d.relation.count);             
                       })
                       .attr("markerHeight", function(d) {
-                          return getMarkerWidth(d.target.count);
+                          return getMarkerWidth(d.relation.count);
                       })
                       .attr("refX", -1)
                       .attr("refY", 0)
@@ -509,24 +516,23 @@ function visualizeData() {
     }     
     // Adding shared attributes
     lines.attr("class", "link") 
-         .attr("stroke", linecolor)
-         .attr("pointer", function(d, i) {
-            return d.pointer;
-         })
+         .attr("stroke", linecolor) 
          .attr("marker-mid", function(d) {
-            return "url(#marker" + d.target.id + ")";
+            return "url(#marker" + d.relation.id + ")";
          })
          .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(d.target.count);
+            return 0.5 + getLineWidth(d.relation.count);
          })
          .style("stroke-dasharray", (function(d) {
-             if(d.target.count == 0) {
+             if(d.relation.count == 0) {
+                 console.log("D target count == 0, target: " + d.target.name + ", source: " + d.source.name);
+                 console.log(d);
                 return "3, 3"; 
              } 
          })) 
          .on("click", function(d) {
-             console.log(d3.event.defaultPrevented);
-             createOverlay(d3.event.offsetX, d3.event.offsetY, d.pointer)    
+             // Construct line overlay data, then use it to generate the overlay itself
+             createOverlay(d3.event.offsetX, d3.event.offsetY, getLineOverlayInfo(d.relation));    
          })
          .on("mouseout", function(d) {
              removeOverlay();                                 
@@ -565,7 +571,7 @@ function visualizeData() {
         d.y += d3.event.dy;
         
         // Update the location in localstorage
-        var record = localStorage.getItem(d.name);
+        var record = localStorage.getItem(d.id);
         var obj;
         if(record === null) {
             obj = {}; 
@@ -578,7 +584,7 @@ function visualizeData() {
         obj.py = d.py;
         obj.x = d.x;
         obj.y = d.y;
-        localStorage.setItem(d.name, JSON.stringify(obj));
+        localStorage.setItem(d.id, JSON.stringify(obj));
     
         // Update nodes & lines                                                           
         if(linetype == "curved") { 
@@ -615,7 +621,7 @@ function visualizeData() {
                   .attr("transform", "translate(100, 100)")
                   .attr("x", function(d) {
                       // Setting 'x' based on localstorage
-                      var record = localStorage.getItem(d.name);
+                      var record = localStorage.getItem(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("x" in obj) { // Check if attribute is valid
@@ -626,7 +632,7 @@ function visualizeData() {
                   })
                   .attr("y", function(d) {
                       // Setting 'y' based on localstorage
-                      var record = localStorage.getItem(d.name);
+                      var record = localStorage.getItem(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("y" in obj) { // Check if attribute is valid
@@ -637,7 +643,7 @@ function visualizeData() {
                   })
                   .attr("px", function(d) {
                       // Setting 'px' based on localstorage
-                      var record = localStorage.getItem(d.name);
+                      var record = localStorage.getItem(d.id);
                       if(record) {
                          var obj = JSON.parse(record);
                          if("px" in obj) { // Check if attribute is valid
@@ -648,7 +654,7 @@ function visualizeData() {
                   })
                   .attr("py", function(d) {
                       // Setting 'py' based on localstorage
-                      var record = localStorage.getItem(d.name);
+                      var record = localStorage.getItem(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("py" in obj) { // Check if attribute is valid
@@ -659,7 +665,7 @@ function visualizeData() {
                   })
                   .attr("fixed", function(d) {
                       // Setting 'fixed' based on localstorage
-                      var record = localStorage.getItem(d.name);
+                      var record = localStorage.getItem(d.id);
                       if(record) {
                           if(d.x > 0 && d.x < width && d.y > 0 && d.y < height && gravity !== "aggressive") {
                                 d.fixed = true;
@@ -674,7 +680,7 @@ function visualizeData() {
                   .on("click", function(d) {
                        // Check if it's not a click after dragging
                        if(!d3.event.defaultPrevented) {
-                            createOverlay(d3.event.offsetX, d3.event.offsetY, d.name);
+                            createOverlay(d3.event.offsetX, d3.event.offsetY, getRecordOverlayInfo(d));
                        }
                   })
                   .on("mouseout", function(d) {
@@ -685,6 +691,7 @@ function visualizeData() {
     // Adding the background circles to the nodes
     var bgcircle = node.append("circle")
                        .attr("r", function(d) {
+                           console.log("COUNT for " + d.name + ": " + d.count);
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")
@@ -882,10 +889,10 @@ function visualizeData() {
 
 
 /******************************START OF FUNCTIONS TO DISPLAY AN OVERLAY***********************************/
-/** Create an overlay based on mouse hover x & y and the name to display */
+/** Create an overlay based on mouse hover x & y and an array of information to display */
 var horizontalOffset = 5;
 var verticalOffset = 12;
-function createOverlay(x, y, name) {
+function createOverlay(x, y, info) {
     $("#overlay").remove();
     
     // Add overlay container
@@ -901,10 +908,8 @@ function createOverlay(x, y, name) {
                       .attr("y", 0);
 
     // Adding text
-    var objects = getOverlayObjects(name);
-    console.log(objects);
     var text = overlay.selectAll("text")
-                      .data(objects)
+                      .data(info)
                       .enter()
                       .append("text")
                       .attr("x", horizontalOffset)        // Some left padding
@@ -942,7 +947,7 @@ function createOverlay(x, y, name) {
                           return "9px";
                       }, "important");                               
   
-    // Calculate rectangle size
+    // Calculate optimal rectangle size
     var maxWidth = 1;
     var maxHeight = 1;                              
     for(var i = 0; i < text[0].length; i++) {
@@ -960,6 +965,8 @@ function createOverlay(x, y, name) {
             maxHeight = y;
         }
     }
+    
+    // Set optimal width & height
     rect.attr("width", maxWidth + 3*horizontalOffset)
         .attr("height", maxHeight + verticalOffset);
     
