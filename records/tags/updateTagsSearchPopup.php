@@ -117,8 +117,8 @@ if(@$_REQUEST['recid']){
 <div class="prompt" style="padding: 12px 0;">Click the tags above to add them</div>
 <div id="add-remove-buttons" style="display: none;"></div>
 <div class="actionButtons">
-	<span id="more" class="prompt">
-    	<a href="../../context_help/tags.html" onClick="top.HEURIST.util.popupURL(top, href, {'close-on-blur': true,'no-help':true, 'no-close':true}); return false;">More about tags</a></span>
+	<span id="more" class="prompt"><!-- onClick="top.HEURIST.util.popupURL(top, href, {'close-on-blur': true,'no-help':true, 'no-close':true}); return false;" -->
+    	<a href="../../context_help/tags.html" trget="_blank">More about tags</a></span>
 	<input type=button value="add tags" id=add-button>
     <input type=button value="remove tags" id=remove-button>
 </div>

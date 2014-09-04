@@ -132,7 +132,7 @@ window.HEURIST.wgTagEditor = {
 		var kwdDetailsById = top.HEURIST.user.workgroupTags;
 		var kwdOrder = top.HEURIST.user.workgroupTagOrder;
 		if(!HEURIST.wgTagEditor.selectedTags) {
-			HEURIST.wgTagEditor.selectedTags = parent.HEURIST.edit.record? parent.HEURIST.edit.record.workgroupTags : [];
+			HEURIST.wgTagEditor.selectedTags = (parent.HEURIST.edit && parent.HEURIST.edit.record)? parent.HEURIST.edit.record.workgroupTags : [];
 		}
 		var wKwdIds = HEURIST.wgTagEditor.selectedTags;
 
@@ -179,7 +179,7 @@ window.HEURIST.wgTagEditor = {
 		HEURIST.wgTagEditor.currWgTagsElt = currWgTagsElt;
 		HEURIST.wgTagEditor.allWgTagsElt = allWgTagsElt;
 
-		HEURIST.wgTagEditor.selectedTags =  parent.HEURIST.edit.record? parent.HEURIST.edit.record.workgroupTags : [];
+		HEURIST.wgTagEditor.selectedTags =  (parent.HEURIST.edit && parent.HEURIST.edit.record)? parent.HEURIST.edit.record.workgroupTags : [];
 
 		HEURIST.wgTagEditor.reloadTags();
 	}

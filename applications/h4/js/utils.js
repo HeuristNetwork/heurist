@@ -701,6 +701,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
     },
 
+    // buttons - callback function
     showMsgDlg: function(message, buttons, title){
 
         if(!$.isFunction(top.HR)){
@@ -812,9 +813,13 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 //.appendTo( that.document.find('body') )
                 
                 //create new div for dialogue with $(this).uniqueId();                 
-                var $dlg = $('<div>').appendTo( $(opener.document).find('body') );
+                var $dlg = $('<div>')
+                           .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center')
+                           .appendTo( $(opener.document).find('body') );
+                           
                 var $dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 
+                //on close event listener
                 $dosframe[0].close = function() {
                     var rval = true;
                     var closeCallback = options['callback'];
@@ -827,18 +832,25 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     
                     $dlg.dialog('close');
                     return true;
-                };                
+                };             
                 
+                //on load content event listener
                 $dosframe.on('load', function(){
                         var content = $dosframe[0].contentWindow;
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
                         }
                         content.close = $dosframe[0].close;    // make window.close() do what we expect
-                        //content.popupOpener = opener;                        
+                        //content.popupOpener = opener;  
+                        
+                        
+                        var onloadCallback = options['onpopupload'];
+                        if(onloadCallback){
+                                onloadCallback.apply(opener, $dosframe[0]);
+                        }
+                        
+                        $dlg.css('background','none');
                 });
-
-
                 
 //    options['callback']
 

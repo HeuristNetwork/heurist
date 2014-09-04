@@ -511,11 +511,12 @@ $.widget( "heurist.resultList", {
     */
     getSelected: function(){
 
-        var selected = [];
+        var selected = {};
         var that = this;
         this.div_content.find('.selected').each(function(ids, rdiv){
-            var record = that.options.recordset.getById($(rdiv).attr('recid'));
-            selected.push(record);
+            var rec_ID = $(rdiv).attr('recid');
+            var record = that.options.recordset.getById(rec_ID);
+            selected[rec_ID] = record;
         });
 
         return that.options.recordset.getSubSet(selected);

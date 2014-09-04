@@ -86,7 +86,7 @@ options - parameters to init application
 */ 
 var layouts = [
     {id:'l01', name:'h3 classic', theme:'smoothness',
-        north:{size:90, resizable:false,
+        north:{size:100, resizable:false,
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'100%', border:'none', 'background':'none'} },    //top panel
                 
@@ -95,8 +95,8 @@ var layouts = [
         ]},
         west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
-        east:{size:'50%', minsize:300, dropable:true,
-            tabs:[{dockable:true, dragable:true, resizable:true,
+        east:{size:'50%', minsize:300, dropable:false,
+            tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[                                      //or viewRecord or renderRecordData
                     {appid:'ha31'},    //rec_viewer
                     {appid:'ha54'}     //crosstabs

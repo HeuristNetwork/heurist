@@ -383,7 +383,7 @@ function hRecordSet(initdata) {
             var recID, bkmID;
             for(recID in records)
             if(recID){
-                bkmID = _getFieldValue(records[recid], '');
+                bkmID = _getFieldValue(records[recID], 'bkm_ID');
                 if(bkmID>0) aitems.push(bkmID);
             }
             return aitems;

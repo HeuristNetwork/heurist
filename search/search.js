@@ -3850,6 +3850,7 @@ top.HEURIST.search = {
 					}
 		);
 	},
+    
 	addRemoveKeywordsPopup: function() {
 		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 		if (recIDs_list.length == 0) {

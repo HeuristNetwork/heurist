@@ -209,7 +209,7 @@
                 
                 // OLD H3 stuff
                 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-    
+                top.HEURIST.baseURL = window.HAPI4.basePathOld;
                 
             });
             

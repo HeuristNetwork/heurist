@@ -240,14 +240,23 @@ $.widget( "heurist.rec_viewer", {
             var groups = top.HAPI4.currentUser.usr_GroupsList
 
             //groups.unshift(34);
-            groups[top.HAPI4.currentUser.ugr_ID] = [ "admin", top.HR('Personal Tags')];
+            _renderTagsForGroup(top.HAPI4.currentUser.ugr_ID, top.HR('Personal Tags') );
 
             for (var idx in groups)
             {
                 if(idx){
                     var groupID = idx;
                     var groupName = groups[idx][1];
+                    _renderTagsForGroup(groupID, groupName);
 
+                }
+            }
+        }
+
+    },
+    
+    _renderTagsForGroup: function(groupID, groupName){
+        
                     var tags = this.options.user_Tags[groupID]; //top.HAPI4.currentUser.usr_Tags[groupID];
                     var tags_list = "";
 
@@ -272,12 +281,7 @@ $.widget( "heurist.rec_viewer", {
                         .html(tags_list)
                         .appendTo( $d );
                     }
-
-                }
-            }
-        }
-
-    }
+    },
 
     ,_renderFiles: function(title){
 
