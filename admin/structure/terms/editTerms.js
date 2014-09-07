@@ -530,6 +530,49 @@ function EditTerms() {
     }
 
     /**
+    * nodeid - to be merged
+    * retain_nodeid - target
+    */
+    function _doTermMerge(nodeid, retain_nodeid){
+        
+        //@todo show confirmation dialog
+        
+        
+        
+        var _updateResult = function(context){
+                if(!Hul.isnull(context) && !context.error){
+        
+                        top.HEURIST.terms = context.terms;
+
+                        /*_isSomethingChanged = true;
+                        Dom.get('div_btnAddChild').style.display = "inline-block";
+                        Dom.get('btnDelete').value = "Delete";
+                        Dom.get('btnSave').value = "Save";
+                        Dom.get('div_SaveMessage').style.display = "inline-block";
+                        setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);*/
+
+                        var ind = _tabView.get("activeIndex");
+                        _fillTreeView((ind===0)?_termTree1:_termTree2);
+                }
+        };
+        
+        var oTerms = {terms:{
+            colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
+            defs: {}
+        }};
+        //@todo oTerms.terms.defs[retain_nodeid] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
+
+        var str = YAHOO.lang.JSON.stringify(oTerms);
+        
+        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var callback = _updateResult;
+        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+        Hul.getJsonData(baseurl, callback, params);
+        
+    }
+    
+    
+    /**
     * Saves the term on server side
     */
     function _doSave(needConfirm, noValidation){
@@ -774,6 +817,7 @@ function EditTerms() {
             Hul.getJsonData(baseurl, callback, params);
         }
     }
+    
 
     /**
     * new of existing node
@@ -857,7 +901,7 @@ function EditTerms() {
         
         
         var url = top.HEURIST.basePath +
-            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&db="+db;
+            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
         }
@@ -892,6 +936,46 @@ function EditTerms() {
 
 
     }
+    
+    /**
+    * Open popup and select term to be merged
+    */
+    function _mergeTerms(){
+        
+        if(_currentNode===null) return;
+
+        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var nodeid = _currentNode.data.id;
+        
+        //_keepCurrentParent = _getNextSiblingId(_currentNode);
+        //if(_keepCurrentParent==null) 
+        _keepCurrentParent = _currentNode.data.parent_id;
+        
+        
+        var url = top.HEURIST.basePath +
+            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=1&db="+db;
+        /*if(keep_target_newparent_id){
+            url = url + "&parent=" + keep_target_newparent_id;
+        }*/
+
+        Hul.popupURL(top, url,
+            {
+                "close-on-blur": false,
+                "no-resize": true,
+                height: 500,
+                width: 450,
+                callback: function(retain_nodeid) {
+                    if(retain_nodeid && retain_nodeid !== "root") {
+                        
+                        _doTermMerge(nodeid, retain_nodeid);
+                        
+                        return true;
+                    }
+                }
+        });
+        
+    }
+    
 
     /**
     * Adds new child term for current term or adds new root term
@@ -1279,6 +1363,7 @@ function EditTerms() {
         doDelete: function(){ _doDelete(true); },
         doAddChild: function(isRoot){ _doAddChild(isRoot); },
         selectParent: function(){ _selectParent(); },
+        mergeTerms: function(){ _mergeTerms(); },
         onChangeStatus: function(event){ _onChangeStatus(event); },
 
         findNodes: function(sSearch){ return _findNodes(sSearch); },

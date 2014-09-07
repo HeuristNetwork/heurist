@@ -1281,7 +1281,6 @@ error_log("AAAA:".$query);
 
             }
 
-
             //insert, update
 			if(!$ret && $query!=""){
 				if($isInsert){
@@ -1326,6 +1325,54 @@ error_log("AAAA:".$query);
 		return $ret;
 	}
 
+    /**
+    * Merge two terms in defTerms and update recDetails
+    * 
+        1. change parent id for all children terms 
+        2. delete term $merge_id 
+        3. update entries in recDetails for all detail type enum or reltype
+        4. update term $retain_id
+        
+    * @param mixed $retain_id
+    * @param mixed $merge_id
+    */
+    function mergeTerms($retain_id, $merge_id, $colNames, $dt){
+        global $mysqli;
+        
+        $ret = array();
+        
+        //1. change parent id for all children terms 
+        $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            $ret['error'] = "SQL error can not change parent term for $merge_id from defTerms table: ".$mysqli->error;
+            return $ret;
+        }
+        
+        //2. update entries in recDetails for all detail type enum or reltype
+        $query = "update recDetails, defDetailTypes set dtl_Value=".$retain_id
+                    ." where (dty_ID = dtl_DetailTypeID ) and "
+                    ." (dty_Type='enum' or dty_Type='relationtype') and "
+                    ." (dtl_Value=".$merge_id.")";
+            
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            $ret['error'] = "SQL error in mergeTerms updating record details ".$mysqli->error;
+            return $ret;
+        }
+        
+        //3. delete term $merge_id 
+        $query = "delete from defTerms where trm_ID = $merge_id";
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            $ret['error'] = "SQL error deleting term $merge_id from defTerms table: ".$mysqli->error;
+            return $ret;
+        }
+        
+        //4. update term $retain_id
+        return updateTerms( $colNames, $retain_id, $dt, null );
+    }
+    
 	/**
 	* recursive function
 	* @param $ret -- array of child

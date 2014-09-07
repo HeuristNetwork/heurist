@@ -58,6 +58,7 @@
         "saveDT",
         "saveDTG",
         "saveTerms",
+        "mergeTerms",
         "deleteTerms",
         "deleteDT",
         "deleteRT",
@@ -361,6 +362,22 @@ else
                 $rv['terms'] = getTerms();
                 break;
 
+            case 'mergeTerms':    
+            
+                $retain_id = @$_REQUEST['retain'];
+                $merge_id = @$_REQUEST['merge'];
+                if($retain_id==null || $merge_id==null || $retain_id == $merge_id){
+                    error_exit("Invalid data structure sent with mergeTerms method call to saveStructure.php");
+                }
+                
+                $colNames = $data['terms']['colNames'];
+                $dt = @$data['terms']['defs'][$retain_id];
+                
+                $res = mergeTerms($retain_id, $merge_id, $colNames, $dt);
+                
+                $rv['terms'] = getTerms();
+                break;
+                
             case 'deleteTerms':
                 $trmID = @$_REQUEST['trmID'];
 

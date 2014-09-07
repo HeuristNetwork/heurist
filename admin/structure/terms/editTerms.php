@@ -198,12 +198,15 @@
                         <!--
                         NOTE: button labelling is set in the JS file
                         -->
-                        <div style="display:inline-block; margin-top:30px;">
+                        <div style="display:inline-block; margin-top:30px;width:90%">
                             <input id="btnImport" type="button" value="Import"
                                 title=""
                                 onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
                             <input id="btnSetParent" type="button" value="Move"
                                 title="Change the parent" onClick="{editTerms.selectParent()}"/>
+                            <input id="btnMerge" type="button" value="Merge"
+                                title="Merge this term with another term and update all records to reference the new term"
+                                onClick="{editTerms.mergeTerms()}"/>
                             &nbsp;&nbsp;&nbsp;
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
@@ -216,9 +219,10 @@
                                 <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
-
-                        <div style="float:right; text-align: right; width:140px;">
+                                                                   <!--
+                        <div style="float:right; text-align: right;">
                         </div>
+                        -->
 
                     </div>
 
