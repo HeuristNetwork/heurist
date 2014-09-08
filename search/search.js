@@ -45,14 +45,16 @@ var _TAB_RECORDVIEW = 0,
 	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
 	_TAB_TRANSFORM = 3,
+    _TAB_DIAGRAM = 4,
 	_tabView = null;
 
 var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
 						'map':1,'Map':1,'map view':1,'Map View':1,
-						'report':2,'Report':2,'report view':2,'Report View':2,
-						'transform':3,'Transform':3,'transform view':3,'Transform View':3};
+						'report':2,'Report':2,'report view':2,'Report View':2, 
+						'transform':3,'Transform':3,'transform view':3,'Transform View':3,
+                        'diagram':4,'Diagram':4,'diagram view':4,'Diagram View':4};
 
-var tabIDToAppnameMap = ['record','map','report','transform'];
+var tabIDToAppnameMap = ['record','map','report','transform','diagram'];
 
 var appInterface = {};
 
@@ -110,13 +112,14 @@ top.HEURIST.search = {
 
 		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0) {
 			top.HEURIST.registerEvent(window, "load", function(){
-						top.HEURIST.search.currentPage = 0;
-						top.HEURIST.search.clearResultRows();
-						top.HEURIST.search.clearRelatesRows();
-						top.HEURIST.search.renderNavigation();
-						top.HEURIST.search.updateRssFeedLink();
-						top.HEURIST.search.updateRecordView();
-						top.HEURIST.search.updateMapOrSmarty();
+				top.HEURIST.search.currentPage = 0;
+				top.HEURIST.search.clearResultRows();
+				top.HEURIST.search.clearRelatesRows();
+				top.HEURIST.search.renderNavigation();
+				top.HEURIST.search.updateRssFeedLink();
+				top.HEURIST.search.updateRecordView();
+				top.HEURIST.search.updateMapOrSmarty();
+                top.HEURIST.search.updateDiagramView();
 			});
 		}
 //			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
@@ -1730,6 +1733,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.filterRelated(0);
 		top.HEURIST.search.updateRecordView();
 		top.HEURIST.search.updateMapRelated();
+        top.HEURIST.search.updateDiagramView();
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
 		top.HEURIST.registerEvent(window, "load", function() {
@@ -2682,6 +2686,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.setSelectedCount();
 		top.HEURIST.search.updateRecordView(recID);
 		top.HEURIST.search.updateMapOrSmarty();
+        top.HEURIST.search.updateDiagramView(recID);
 
 		return false;
 
@@ -3406,7 +3411,7 @@ top.HEURIST.search = {
 	},
 
 	//
-	//
+	// Updates the record view
 	//
 	updateRecordView: function(recID){
 		//send selectionChange event
@@ -3436,6 +3441,36 @@ top.HEURIST.search = {
 			}
 		}
 	},
+    
+    // JJ
+    // Updates the diagram view
+    //
+    updateDiagramView: function(recID) {
+        console.log("updateDiagramView()");
+        // Diagram check
+        var diagramFrame = document.getElementById("diagram-frame");
+        console.log("Diagram frame: " + diagramFrame);
+        console.log("Tab view: " + _tabView);
+        if (diagramFrame && !top.HEURIST.util.isnull(_tabView)) {
+            // Tab check
+            var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+            console.log("Current tab inside updateDiagramView: " + currentTab);
+            //if(currentTab==_TAB_DIAGRAM){
+            if(currentTab >= 0) {
+                // Get database
+                var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
+                     
+                // Get record ID's
+                var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+                     
+                //diagramFrame.src = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+top.HEURIST.currentRecordID+"&db="+db;
+                // Building URL
+                var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+selectedRecIDs.join(",")+"&db="+db;
+                setTimeout(function(){diagramFrame.src = url;}, 50);
+            }
+        }
+    },
 
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
@@ -3533,7 +3568,7 @@ top.HEURIST.search = {
 					}
 				}else{
 					mapframe.src = top.HEURIST.basePath +
-									"viewers/map/showMap.html"; //+"?"+currentSearchQuery;
+					               "viewers/map/showMap.html"; //+"?"+currentSearchQuery;
 				}
 
 			}else if (currentTab===_TAB_SMARTY){ //smarty
@@ -3550,7 +3585,7 @@ top.HEURIST.search = {
 
 				}else{
 					smartyFrame.src = top.HEURIST.basePath +
-									"viewers/smarty/showReps.html"; //+"?"+currentSearchQuery;
+                                      "viewers/smarty/showReps.html"; //+"?"+currentSearchQuery;
 				}
 			}
 	},
@@ -3718,6 +3753,7 @@ top.HEURIST.search = {
 		if(fireEvent){
 			top.HEURIST.search.updateMapOrSmarty();
 		}
+        top.HEURIST.search.updateDiagramView(null);
 
 		return;
 	},
@@ -5322,6 +5358,7 @@ function layoutAppPanel(isToggle,newWidth){
 
 	var handleActiveTabChange = function(e) {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+        console.log("Current tab: " + currentTab);
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab,null,null,true,true);
 
 		if(currentTab===_TAB_RECORDVIEW){
@@ -5354,7 +5391,11 @@ function layoutAppPanel(isToggle,newWidth){
 						top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty"), false);
 			}
 			top.HEURIST.search.updateMapOrSmarty();
-		}
+		}else if(currentTab===_TAB_DIAGRAM) { // diagram
+            console.log("ABOUT TO UPDATE DIAGRAM VIEW");
+            top.HEURIST.search.updateDiagramView(null);
+            
+        }
 
 	};
 //	_tabView.addListener('activeTabChange', handleActiveTabChange);
