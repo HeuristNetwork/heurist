@@ -37,7 +37,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once('findReplacedRecord.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
+        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL));
         return;
 }
 
