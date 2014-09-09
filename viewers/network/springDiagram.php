@@ -71,7 +71,7 @@
                              // Loop through all properties of the record
                             var record = results.recSet[key].record;
                             for(var id in record) {
-                                html += "<ID: " + id + ", value: " + record[id] + "<br />";
+                                html += "<br />ID: " + id + ", value: " + record[id];
                             }
                             
                             html += "</div>";

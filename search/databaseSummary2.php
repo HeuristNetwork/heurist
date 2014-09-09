@@ -426,7 +426,7 @@
             </tr>
         </table>
 
-        <script type="text/javascript" src="databaseSummary.js"></script>
+        <script type="text/javascript" src="databaseSummary2.js"></script>
 
     </body>
 

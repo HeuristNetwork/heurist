@@ -166,7 +166,7 @@ if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
 $resDepth = 0; // the result records depth with respect to the query
 
 $current_stable_version = "";
-if (HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
+if (false && HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
 
     $current_stable_version = checkVersionOnMainServer(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['current_stable_version']);
 
