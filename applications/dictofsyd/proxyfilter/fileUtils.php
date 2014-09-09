@@ -1,6 +1,6 @@
 <?php
 
-function loadRemoteURLContent($url) {
+function loadRemoteURLContent($url, $timeout=10) {
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
@@ -9,7 +9,7 @@ function loadRemoteURLContent($url) {
 	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);	// timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
 	if (defined("HEURIST_HTTP_PROXY")) {
 		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);

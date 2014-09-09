@@ -48,7 +48,9 @@
 // Code to run on a copy which is checking itself against the reference server
 
 /**
-* return the date of last check if it is less than 7 days, otherwise it returns null
+* Returns the date of last check and version if it is less than 7 days, otherwise it returns null
+* 
+* $date_and_version = 2013-12-16|3.1.6
 *
 * @param mixed $date_and_version
 */
@@ -58,15 +60,22 @@ function getLastCheckedVersion($date_and_version){
 
             $arr = explode("|", $date_and_version);
             if($arr && count($arr)==2){
-                $date_last_check    = $arr[0];
-                $version_last_check = $arr[1];
+                $date_last_check    = $arr[0];   //date
+                $version_last_check = $arr[1];   //version
 
                 //debug  $date_last_check = "2013-02-10";
-                if(strtotime($date_last_check) && checkVersionValid($version_last_check)){
-                    $days =intval((time()-strtotime($date_last_check))/(3600*24));
+                if(strtotime($date_last_check)){
 
-                    if(intval($days)<7){
-                        return $date_and_version;
+                    $days =intval((time()-strtotime($date_last_check))/(3600*24)); //days since last check
+                    
+                    if($version_last_check=="unknown"){  //in case previous check fails - check next 24 hr
+                        if(intval($days)<1){
+                            return $date_and_version;
+                        }
+                    }else if (checkVersionValid($version_last_check)){
+                        if(intval($days)<7){
+                            return $date_and_version;
+                        }
                     }
                 }
             }
@@ -74,6 +83,11 @@ function getLastCheckedVersion($date_and_version){
     return null; //version check is outdated or has never been done
 }
 
+/**
+* verify that version has correct format  like 3.2.x
+* 
+* @param mixed $version
+*/
 function checkVersionValid($version){
 
     $current_version = explode("|", $version);
@@ -101,13 +115,13 @@ function checkVersionOnMainServer($version_in_session)
 
         //check data of last check and last warning email
         $fname = HEURIST_UPLOAD_ROOT."lastAdviceSent.ini";
-        if ($version_last_check==null && file_exists($fname)){
+        if ($version_last_check==null && file_exists($fname)){      //version in session is outdated 
             //last check and version
             $version_in_session = file_get_contents($fname);
-            $version_last_check = getLastCheckedVersion($version_in_session);
+            $version_last_check = getLastCheckedVersion($version_in_session);   //get last version from file
         }
 
-        if ($version_last_check){
+        if ($version_last_check){  //version is valid (not null)
             return $version_in_session;
         }
 
@@ -116,7 +130,7 @@ function checkVersionOnMainServer($version_in_session)
         // TODO: Maybe this should be changed to H3Sandpit?
         $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=H3MasterIndex&check=1";
 
-        $rawdata = loadRemoteURLContent($url);
+        $rawdata = loadRemoteURLContentWithRange($url, null, true, 5);
 
         if($rawdata){
             //parse result
@@ -174,7 +188,14 @@ function checkVersionOnMainServer($version_in_session)
                 }
             }
         }
-
-        return null; //version check fails
+  
+        //can not access server or it returns invalid data - check next 24 hr
+        $version_in_session = date("Y-m-d")."|unknown";
+        if(!saveAsFile($version_in_session, $fname)){
+                    error_log("Can't write file ".$fname);
+        }
+        return $version_in_session;
+            
+        
 }
 ?>

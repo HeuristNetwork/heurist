@@ -179,7 +179,9 @@ if (HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
 <html>
  <head>
   <!--link rel=alternate type="application/rss+xml" title=RSS href="<?= rss_url() ?>" id=rss_rel-->
-
+  <!--
+ <?=$query?>
+   -->
   <script type="text/javascript">
 
 <?php if($isNeedUpdateWorkgroups){ ?>
