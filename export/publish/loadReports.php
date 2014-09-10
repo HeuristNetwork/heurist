@@ -179,7 +179,7 @@ exit();
 			$dir = $row['rps_FilePath'];
 			if(substr($dir,-1)!="/") $dir = $dir."/";
 		}else{
-			$dir = HEURIST_UPLOAD_DIR."generated-reports/";
+			$dir = HEURIST_FILESTORE_DIR."generated-reports/";
 		}
 
 		if(!file_exists($dir)){

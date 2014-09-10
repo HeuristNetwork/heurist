@@ -153,7 +153,7 @@
 
                 $thumbnail_file = "ulf_".$res["nonce"].".png";
                 if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-                    $res["thumbURL"] = HEURIST_THUMB_BASE_URL.$thumbnail_file;
+                    $res["thumbURL"] = HEURIST_THUMB_URL.$thumbnail_file;
                 }else{
                     $res["thumbURL"] = $_pre."php/getMedia.php?id=".$res["nonce"]."&thumb=1";
                     //HEURIST_BASE_URL."common/php/resizeImage.php?".(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];

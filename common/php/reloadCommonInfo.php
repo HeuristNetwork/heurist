@@ -57,7 +57,7 @@ if(@$_REQUEST['action']=='usageCount'){
 	$rv['rectypes'] = getAllRectypeStructures(false);
 	$rv['detailTypes'] = getAllDetailTypeStructures(false);
 	$rv['terms'] = getTerms(false);
-    $rv['icon_url'] = HEURIST_SERVER_URL.HEURIST_ICON_SITE_PATH;
+    $rv['icon_url'] = HEURIST_ICON_URL; //HEURIST_SERVER_URL.
 }
 
 print json_encode($rv);

@@ -71,7 +71,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 	$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$_REQUEST['ulf_ID'].".png";
 	/* if we here we create file. See uploadFile, there we check the existence of file
 	if($standard_thumb && file_exists($thumbnail_file)){
-		header("Location: ".HEURIST_THUMB_BASE_URL."ulf_".$_REQUEST['ulf_ID'].".png");
+		header("Location: ".HEURIST_THUMB_URL."ulf_".$_REQUEST['ulf_ID'].".png");
 		return;
 	}*/
 
@@ -99,7 +99,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		if ($file['ulf_FileName']) {
 			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
 		} else {
-			$filename = HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+			$filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 		}
 		$filename = str_replace('/../', '/', $filename);
 	}
@@ -108,7 +108,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             //add database media storage folder for relative paths
             $path = $filename;
             if( $path && !file_exists($path) ){
-                chdir(HEURIST_UPLOAD_DIR);
+                chdir(HEURIST_FILESTORE_DIR);
                 $path = realpath($path);
                 if(file_exists($path)){
                     $filename = $path;
@@ -121,7 +121,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		/*if ($file['ulf_FileName']) {
 			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
 		} else {
-			$filename = HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+			$filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 		}
 		$filename = str_replace('/../', '/', $filename);*/
 

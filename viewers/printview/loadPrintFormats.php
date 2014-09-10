@@ -36,11 +36,11 @@
 	define("SAVE_URI", "disabled");
 
 
-	if (is_dir(HEURIST_UPLOAD_DIR)) {
-		if (is_dir(HEURIST_UPLOAD_DIR.'xsl-templates')) {
-			define('DIR', HEURIST_UPLOAD_DIR.'xsl-templates');
-		} else if (is_dir(HEURIST_UPLOAD_DIR.'xsl')) {
-			define('DIR', HEURIST_UPLOAD_DIR.'xsl');
+	if (is_dir(HEURIST_FILESTORE_DIR)) {
+		if (is_dir(HEURIST_FILESTORE_DIR.'xsl-templates')) {
+			define('DIR', HEURIST_FILESTORE_DIR.'xsl-templates');
+		} else if (is_dir(HEURIST_FILESTORE_DIR.'xsl')) {
+			define('DIR', HEURIST_FILESTORE_DIR.'xsl');
 		}
 	}else if(is_dir('xsl-templates')) {
 		define('DIR', 'xsl-templates');
@@ -77,7 +77,7 @@
 		$arr_outputs = array();
 
 		//open directory and read in file names
-		// Ian changed 'DIR' below to HEURIST_UPLOAD_DIR.xsl-templates 25/1/12
+		// Ian changed 'DIR' below to HEURIST_FILESTORE_DIR.xsl-templates 25/1/12
 		// TODO: check that the xsl template directory is hardcoded as subdirectory of the
 		// databases's upload directory - I think it is
 		if (is_dir(DIR)) {

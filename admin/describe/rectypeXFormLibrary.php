@@ -114,7 +114,7 @@ function getXFormTypeFromBaseType($sDetailBasetype) {
  * @uses        getTerms()
  * @uses        getAllDetailTypeStructures()
  * @uses        getAllRectypeStructures()
- * @uses        HEURIST_UPLOAD_DIR
+ * @uses        HEURIST_FILESTORE_DIR
  * @uses        HEURIST_BASE_URL
  * @uses        HEURIST_DBNAME
  */

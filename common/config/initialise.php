@@ -71,6 +71,35 @@
     * All URL are to have full protocol
     */
 
+    /*
+HEURIST_SERVER_NAME  - host (domain name) with port  eg. heuristscholar.org:80   
+HEURIST_SERVER_URL   - with protocol  http://heuristscholar.org
+HEURIST_CURRENT_URL  - current url    
+   
+//toremove HEURIST_SERVER_ROOT_DIR - server root         eg. /var/www/html/             @todo - remove
+HEURIST_DIR          - full path to heurist    /var/www/html/h3/
+
+HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h3/        @todo - rename to HEURIST_URL
+HEURIST_SITE_PATH    - /h3/       (@todo - replace to HEURIST_BASE_URL)
+
+HEURIST_UPLOAD_ROOT      - path to root filestore folder
+HEURIST_UPLOAD_ROOT_URL  - url to root filestore folder  
+HEURIST_FILESTORE_DIR    - path to DB filestore folder
+HEURIST_FILESTORE_URL    - url to DB filestore folder   (used in this file only)
+
+HEURIST_ICON_DIR   - path
+HEURIST_ICON_URL   - url
+HEURIST_THUMB_DIR
+HEURIST_THUMB_URL
+HEURIST_SMARTY_TEMPLATES_DIR
+HEURIST_XSL_TEMPLATES_DIR
+HEURIST_HML_DIR
+
+HEURIST_HTML_DIR
+HEURIST_HTML_URL
+
+    */
+    
     require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
@@ -78,33 +107,60 @@
 
     define('HEURIST_VERSION', $version);
     define('HEURIST_MIN_DBVERSION', "1.1.0");
-    // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-    define('HEURIST_TOP_DIRS', "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers");
 
     if (!$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
 
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
-    define('HEURIST_DOCUMENT_ROOT', @$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/html
     $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
     define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
     define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
-
+    
+    // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
+    $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
+    
     // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
-    $installDir = preg_replace("/\/(" . HEURIST_TOP_DIRS . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+    $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
         $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
     }
 
-    if ($installDir != @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
-        define('INSTALL_DIR', $installDir); //the subdir of the server's document directory where heurist is installed
-    } else {
-        define('INSTALL_DIR', ''); //the default is the document root directory
+    //the subdir of the server's document directory where heurist is installed
+    if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
+        $installDir = '';
     }
 
-    define('HEURIST_SITE_PATH', INSTALL_DIR == '' ? '/' : INSTALL_DIR . '/'); // eg. /h3/
-    define('HEURIST_BASE_URL', $serverBaseURL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
+    define('HEURIST_SITE_PATH', $installDir == '' ? '/' : $installDir . '/'); // eg. /h3/
+    define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
+    
+    $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
+    if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+    //define('HEURIST_SERVER_ROOT_DIR', $documentRoot); //  eg. /var/www/html/      @todo - remove
+    define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h3/
+    
+    //@todo: CHANGE TO h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
+    define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/");
+
+    //-------------------------------------------------------------------------- MEMCACHE AND PROXY
+    
+    // set up memcached server(s) connection defines
+    define('MEMCACHED_HOST', isset($memcachedHost) && $memcachedHost ? $memcachedHost : "localhost");
+    define('MEMCACHED_PORT', isset($memcachedPort) && $memcachedPort ? $memcachedPort : "11211");
+    // this was a global already anyway (in getSearchResults.php)
+    $memcache = new Memcache;
+    // with addServer, connection is not established until actually used
+    // the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
+    $memcache->addServer(MEMCACHED_HOST, MEMCACHED_PORT);
+
+    if (@$httpProxy != '') {
+        define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+        if (@$httpProxyAuth != '') {
+            define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+        }
+    }
+    
+    //-------------------------------------------------------------------------- DATABASE
 
     //set up database server connection defines
     if ($dbHost) {
@@ -129,26 +185,7 @@
     define('READONLY_DBUSERPSWD', $dbReadonlyPassword);
     define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix'] ? $_REQUEST['prefix'] : $dbPrefix));
     //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
-
-    // set up memcached server(s) connection defines
-    define('MEMCACHED_HOST', isset($memcachedHost) && $memcachedHost ? $memcachedHost : "localhost");
-    define('MEMCACHED_PORT', isset($memcachedPort) && $memcachedPort ? $memcachedPort : "11211");
-    // this was a global already anyway (in getSearchResults.php)
-    $memcache = new Memcache;
-    // with addServer, connection is not established until actually used
-    // the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
-    $memcache->addServer(MEMCACHED_HOST, MEMCACHED_PORT);
-
-    // Heurist Installation which contains reference structure definitions (registered DB # 3)
-    define('HEURIST_REFERENCE_BASE_URL', "http://heuristscholar.org/h3/");
-
-    //@todo: CHANGE TO h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
-    define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/");
-
-    // ID of Heurist System User Group which has special privileges - deprecated, although more generally
-    // group 1 on every database is the Database Managers group
-    define('HEURIST_SYS_GROUP_ID', 1);
-
+    
     //test db connect valid db
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword)
     or returnErrorMsgPage(1, "Unable to connect to database server with readwrite account, please set passwords in configIni.php. MySQL error: " .
@@ -156,37 +193,6 @@
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword)
     or returnErrorMsgPage(1, "Unable to connect to database server with readonly account, please set passwords in configIni.php. MySQL error: " .
         mysql_error());
-
-    if (@$httpProxy != '') {
-        define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
-        if (@$httpProxyAuth != '') {
-            define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
-        }
-    }
-    // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE
-    if ($defaultRootFileUploadPath) {
-        if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
-            $defaultRootFileUploadPath.= "/"; // append trailing /
-
-        }
-        if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) {
-            //check for leading /
-            $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
-
-        }
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, false, true);
-    }
-    //upload root not defined, default to DocRoot/HEURIST_FILESTORE/
-
-    $DIR_FILESTORE = "/HEURIST_FILESTORE/";
-
-    if (!defined('HEURIST_UPLOAD_ROOT')) {
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE, false, true);
-    }
-
-    if (!defined('HEURIST_UPLOAD_ROOT')) {
-        error_log("No upload root directory defined in configIni.php, or upload root directory is not a writeable directory. ".$talkToSysAdmin);
-    }
 
     if (@$_REQUEST["db"]) { //if uri has DB then use it
         $dbName = $_REQUEST["db"];
@@ -256,63 +262,84 @@
     define('USER_GROUPS_USER_ID_FIELD', 'ugl_UserID');
     define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
     define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
-
-    //define file Upload DirPath
-    $upload = @$sysValues['sys_UploadDirectory'];
-    if ($upload) { //database override for uploading files.
-        if ($upload != "/" && !preg_match("/[^\/]\/$/", $upload)) { //check for trailing /
-            $upload.= "/"; // append trailing /
-
-        }
-        if ($upload != "/" && !preg_match("/^\/[^\/]/", $upload)) { //check for leading /
-            $upload = "/" . $upload; // prepend leading /
+          
+          
+    //-------------------------------------------------------------------------- PATHS AND URLS ---------
+    
+    // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
+    if ($defaultRootFileUploadPath && isset($defaultRootFileUploadURL)) {
+        if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
+            $defaultRootFileUploadPath.= "/"; // append trailing /
 
         }
-        //if value not a subdir of DocRoot, assume it a relative path and prepend DocRoot
-        if (strpos($upload, HEURIST_DOCUMENT_ROOT) === false) {
-            $upload = HEURIST_DOCUMENT_ROOT . $upload;
+        if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) {
+            //check for leading /
+            $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
+
         }
-        testDirWriteableAndDefine('HEURIST_UPLOAD_DIR', $upload, false, true); // upload must be a full path
-
+        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder");
+        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . $defaultRootFileUploadURL);
     }
 
-    if (!defined('HEURIST_UPLOAD_DIR') && defined('HEURIST_UPLOAD_ROOT')) { //default to Upload root/dbname
-        testDirWriteableAndDefine('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', false, true);
+
+    if (!defined('HEURIST_UPLOAD_ROOT')) { //upload root is not defined in config - set it by default
+        
+        $dir_Filestore = "HEURIST/HEURIST_FILESTORE/";
+        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $documentRoot . $dir_Filestore, "File store root folder");
+        
+        define('HEURIST_UPLOAD_ROOT',  );
+        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $dir_Filestore );
     }
 
-    if (!defined('HEURIST_UPLOAD_DIR')) {
-        error_log("The file uploads root directory ".HEURIST_UPLOAD_ROOT . $dbName .
-            " is not a writeable directory. ".$talkToSysAdmin);
+    //File store for this particular instance may be redefined in the database
+    $path = @$sysValues['sys_UploadDirectory'];
+    if ($path) { //database override for uploading files.
+        $path = getRelativeFolder($path);
+        testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', $documentRoot . $path, "File store folder"); // upload must be a full path
+        define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . $path );    //full url to file store folder
     }
-
-    define('HEURIST_URL_BASE_UPLOAD_DIR', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE);
+    if (!defined('HEURIST_FILESTORE_DIR')) { //store folder is not defined in DB - set it by default
+        testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
+        define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder
+    }
 
     // Define the site relative path for rectype icons
-    if (testDirWriteableAndDefine('HEURIST_ICON_SITE_PATH', $DIR_FILESTORE . $dbName . "/rectype-icons/", true, true)) {
-        if (!testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_DOCUMENT_ROOT . HEURIST_ICON_SITE_PATH, false, true)) {
-            error_log("Icons directory " . HEURIST_DOCUMENT_ROOT . HEURIST_ICON_SITE_PATH .
-                " is not writeable or might not exist. ".$talkToSysAdmin);
-        }
-    } else {
-        error_log("Icons site path " . $DIR_FILESTORE . $dbName .
-            "/rectype-icons/ is not writeable or might not exist. ".$talkToSysAdmin);
+    testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . "rectype-icons/", "Icons directory");
+    define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
+
+    testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . "filethumbs/", "Thumbnails directory");
+    define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
+    
+    testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "smarty-templates/", "Smarty Templates directory");
+
+    testDirWriteableAndDefine('HEURIST_XSL_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "xsl-templates/", "XSL templates directory");
+
+    $path = @$sysValues['sys_hmlOutputDirectory'];
+    if ($path) {
+        $path = getRelativeFolder($path);
+        testDirWriteableAndDefine('HEURIST_HML_DIR', $documentRoot . $path, "HML output directory");
+    }
+    if (!defined('HEURIST_HML_DIR')) {
+        testDirWriteableAndDefine('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR . 'hml-output/', "HML output directory");
     }
 
-    if (!testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE . $dbName . "/filethumbs/", false, true)) {
-        error_log("Thumbnails directory " . HEURIST_DOCUMENT_ROOT . $DIR_FILESTORE . $dbName .
-            "/filethumbs/ is not writeable or might not exist. ".$talkToSysAdmin);
-    } else {
-        define('HEURIST_THUMB_BASE_URL', $serverBaseURL . $DIR_FILESTORE . $dbName . "/filethumbs/");
+    $path = @$sysValues['sys_htmlOutputDirectory'];
+    if ($path) {
+        $path = getRelativeFolder($path);
+        testDirWriteableAndDefine('HEURIST_HTML_DIR', $documentRoot . $path, "HTML output directory");
+        define('HEURIST_HTML_URL', HEURIST_SERVER_URL . $path );    
+    }
+    if (!defined('HEURIST_HTML_DIR')) {
+        testDirWriteableAndDefine('HEURIST_HTML_DIR', HEURIST_FILESTORE_DIR . 'html-output/', "HTML output directory");
+        define('HEURIST_HTML_URL', HEURIST_FILESTORE_URL . 'html-output/');
     }
 
-    // smarty template path  - note code now assumes that this is within the fielstore for the database
-    define('HEURIST_SMARTY_TEMPLATES_DIRNAME', "smarty-templates/");
-    if (!testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . HEURIST_SMARTY_TEMPLATES_DIRNAME)) {
-        error_log("Smarty Template Directory is not defined or is not a writeable directory. ".$talkToSysAdmin);
-    }
+//--------------------------------------------------------------------------------------------------------------
+    
+    // ID of Heurist System User Group which has special privileges - deprecated, although more generally
+    // group 1 on every database is the Database Managers group
+    define('HEURIST_SYS_GROUP_ID', 1);
 
-    // xsl templates path  - note code now assumes that this is within the fielstore for the database
-    define('HEURIST_XSL_TEMPLATES_DIR', HEURIST_UPLOAD_DIR . "xsl-templates/"); //TODO: does this need to be URL accessible?
 
     if ($sysValues['sys_AllowRegistration']) {
         define('HEURIST_ALLOW_REGISTRATION', 1);
@@ -346,56 +373,6 @@
 
         returnErrorMsgPage(3, "Heurist Code Version " . HEURIST_VERSION . " requires Database Schema version # " .
             HEURIST_MIN_DBVERSION . " or higher. " . HEURIST_DBNAME . " has version # " . HEURIST_DBVERSION . " - ".$talkToSysAdmin);
-    }
-
-    $path = @$sysValues['sys_hmlOutputDirectory'];
-    if ($path) {
-        if ($path != "/" && !preg_match("/[^\/]\/$/", $path)) { //check for trailing /
-            $path.= "/"; // append trailing /
-
-        }
-        if ($path != "/" && !preg_match("/^\/[^\/]/", $path)) { //check for leading /
-            $path = "/" . $path; // prepend leading /
-
-        }
-
-        if (!testDirWriteableAndDefine('HEURIST_HML_PUBPATH', $path, false, true)) {
-            error_log("HML output directory $path is not a writeable directory, trying default path");
-        }
-    }
-
-    //TODO: place try here for ICON BASE UPLOAD Dir
-    if (!defined('HEURIST_HML_PUBPATH') && defined('HEURIST_UPLOAD_DIR')) {
-        testDirWriteableAndDefine('HEURIST_HML_PUBPATH', HEURIST_UPLOAD_DIR . "hml-output/", false, true);
-    }
-
-    if (!defined('HEURIST_HML_PUBPATH')) {
-        error_log("No HML output directory defined or directory is not writeable. ".$talkToSysAdmin);
-    }
-
-    $path = $sysValues['sys_htmlOutputDirectory'];
-
-    if ($path) {
-        if ($path != "/" && !preg_match("/[^\/]\/$/", $path)) { //check for trailing /
-            $path.= "/"; // append trailing /
-
-        }
-        if ($path != "/" && !preg_match("/^\/[^\/]/", $path)) { //check for leading /
-            $path = "/" . $path; // prepend leading /
-
-        }
-
-        if (!testDirWriteableAndDefine('HEURIST_HTML_PUBPATH', $path, false, true)) {
-            error_log("HMTL output directory $path is not a writeable directory, trying default path");
-        }
-    }
-
-    if (!defined('HEURIST_HTML_PUBPATH') && defined('HEURIST_UPLOAD_DIR')) {
-        testDirWriteableAndDefine('HEURIST_HTML_PUBPATH', HEURIST_UPLOAD_DIR . "html-output/", false, true);
-    }
-
-    if (!defined('HEURIST_HTML_PUBPATH')) {
-        error_log("No HTML output directory defined or directory is not writable. ".$talkToSysAdmin);
     }
 
     // set up email defines
@@ -655,9 +632,10 @@
     * @param    boolean [$tryMakeDir] determines whether or not to attempt to make non existent directory (default false)
     * @return   boolean true if successful define, false otherwise
     */
-    function testDirWriteableAndDefine($defString, $dir, $isDocrootRelative = false, $tryMakeDir = false) {
+    function testDirWriteableAndDefine($defString, $dir, $folderName) {
 
-        $info = new SplFileInfo(($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
+        $info = new SplFileInfo($dir); //($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
+        $tryMakeDir = true;
 
         if ($info->isDir() && $info->isWritable()) {
             define($defString, $dir);
@@ -668,10 +646,30 @@
                 return true;
             }
         }
-        error_log("initialize.php: Failed to create $info folder for defining $defString as $dir");
+        
+        error_log("initialize.php: ".$folderName."  ".$dir."  is wrong or is not a writeable directory. ".$talkToSysAdmin);
         return false;
     }
 
+        
+    function getRelativeFolder($upload){
+            global $documentRoot;
+                
+            if ($upload != "/" && !preg_match("/[^\/]\/$/", $upload)) { //check for trailing /
+                $upload.= "/"; // append trailing /
+
+            }
+            if ($upload != "/" && !preg_match("/^\/[^\/]/", $upload)) { //check for leading /
+                $upload = "/" . $upload; // prepend leading /
+
+            }
+            //if value not a subdir of DocRoot, assume it a relative path and prepend DocRoot
+            if (strpos($upload, $documentRoot) !== false) { // if 
+                $upload = substr($upload, strlen($documentRoot));            
+            }
+            return $upload;
+    }
+        
 
     /**
     * exit to page with error information for the user

@@ -126,7 +126,7 @@
             $thumbfile = 'ulf_'.$fileid.'.png';
 
             if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
-                $thumb_url = HEURIST_THUMB_BASE_URL.$thumbfile;
+                $thumb_url = HEURIST_THUMB_URL.$thumbfile;
             }else{
                 $thumb_url = HEURIST_BASE_URL."file.php?db=".HEURIST_DBNAME."&thumb=".$fileid;
             }

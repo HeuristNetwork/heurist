@@ -129,7 +129,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             
             $tmp_name = $upload["tmp_name"];
             
-            $folder = HEURIST_UPLOAD_DIR."faims/import"; //.;
+            $folder = HEURIST_FILESTORE_DIR."faims/import"; //.;
             $folder_proj = $folder."/module";
 
             //create export folder
@@ -211,8 +211,8 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
         }
 
 
-        //$dbname_faims = HEURIST_UPLOAD_DIR."faims/db2.sqlite3";
-        //$dbname_faims = HEURIST_UPLOAD_DIR."faims/tracklog/db.sqlite3";
+        //$dbname_faims = HEURIST_FILESTORE_DIR."faims/db2.sqlite3";
+        //$dbname_faims = HEURIST_FILESTORE_DIR."faims/tracklog/db.sqlite3";
         // /var/www/HEURIST/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/tracklog/db.sqlite3
         // /var/www/HEURIST/HEURIST_FILESTORE/johns_FAIMS_UAT_test/faims/syncdemo/db.sqlite3
         if(!$dbname_faims){
@@ -232,7 +232,7 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
     }
     
     // $dir_faims.
-    // $dbname_faims = HEURIST_UPLOAD_DIR. "faims/db2.sqlite3";
+    // $dbname_faims = HEURIST_FILESTORE_DIR. "faims/db2.sqlite3";
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
 

@@ -70,7 +70,7 @@ if (@$_REQUEST['inputFilename']){// get a saved XML file
 //		returnXMLErrorMsgPage("Remote inputs are not supported at this time '".$_REQUEST['inputFilename']."'");
 		$inputFilename = $_REQUEST['inputFilename'];
 	}else{//local filename so assume in HML publication directory
-		$inputFilename = "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'];
+		$inputFilename = "".HEURIST_HML_DIR.$_REQUEST['inputFilename'];
 		if ( !file_exists($inputFilename)) {
 			returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 		}
@@ -88,7 +88,7 @@ if (@$_REQUEST['inputFilename']){// get a saved XML file
 								(@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
 								(@$outFullName && $_REQUEST['debug']? "&pathfilename=".$outFullName :"");
 }else if (@$_REQUEST['recID']){//recID so assume that the file has been prepublished to the HML Publish directory
-	$inputFilename = "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$_REQUEST['recID'].".hml";
+	$inputFilename = "".HEURIST_HML_DIR.HEURIST_DBID."-".$_REQUEST['recID'].".hml";
 	if ( !file_exists($inputFilename)) {
 		returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 	}
@@ -103,20 +103,26 @@ if (@$_REQUEST['outputFilename']){//filename supplied so use it
 	if (preg_match("/http/",$_REQUEST['outputFilename'])) {
 		returnXMLErrorMsgPage("Remote outputs are not supported at this time '".$_REQUEST['outputFilename']."'");
 	}
-	$outputFilename = "".HEURIST_HTML_PUBPATH.$_REQUEST['outputFilename'];
+	$outputFilename = "".HEURIST_HTML_DIR.$_REQUEST['outputFilename'];
 }else if (@$_REQUEST['recID']){//recID so use naming algorythm
-	$outputFilename = "".HEURIST_HTML_PUBPATH.HEURIST_DBID.$style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html";
+	$outputFilename = "".HEURIST_HTML_DIR.HEURIST_DBID.$style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html";
 }
 //error_log("output file name = $outputFilename");
 
 //caclulate URI to output.
-$pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
-if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
-	$outputURI = 'http://'.HEURIST_SERVER_NAME.
-						( $pos !== false ? substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)) : HEURIST_HTML_PUBPATH).
+    $outputURI = HEURIST_HTML_URL .
+                            (@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
+                                (@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
+
+/*
+$pos = strpos(HEURIST_HTML_DIR,HEURIST_SERVER_ROOT_DIR);
+if ($pos !== false || file_exists(HEURIST_SERVER_ROOT_DIR.HEURIST_HTML_DIR)){
+	$outputURI = HEURIST_SERVER_URL s.
+						( $pos !== false ? substr(HEURIST_HTML_DIR,$pos + strlen(HEURIST_SERVER_ROOT_DIR)) : HEURIST_HTML_DIR).
 							(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
 								(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
 }
+*/
 //error_log("output UIR = $outputURI");
 
 saveTransformOutput($inputFilename,$styleFilename,@$outputFilename);

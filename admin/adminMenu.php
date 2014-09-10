@@ -140,7 +140,7 @@
 
         <!-- sidebar - lefthand side -->
 
-        <?
+        <?php
             function menuEntry($separator,$action,$actionFile,$actionLabel) {
                 if ($separator == '---') {print '<li class="seperator">';} else {print '<li>';};
                 print '<a href="#" onClick="loadContent(' . "'$actionFile'";
@@ -165,7 +165,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
                                 'List the databases on the current server to which you have access '.
                                 '(you are identified by the email address attached to your current user login)');
@@ -198,7 +198,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
                                 'List the databases on the current server to which you have access '.
                                 '(you are identified by the email address attached to your current user login)');
@@ -243,7 +243,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             menuEntry('---','Record types and fields','structure/rectypes/manageRectypes.php?db='.HEURIST_DBNAME,
                                 'Add new or modify existing record types, including general characteristics '.
                                 'and the data fields and rules which compose a record');
@@ -279,7 +279,7 @@
                                 width="12" height="12" border="0" title="XML Structure"
                                 </a>
                         </li>
-                        <?
+                        <?php
                             menuEntry('','Define mime types','structure/mimetypes/manageMimetypes.php?db='.HEURIST_DBNAME,
                                 'Define the relationship between file extension and mime type for uploaded and externally referenced files');
                             menuEntry('---','Structure (deprecated)','describe/getDBStructureAsSQL.php?db='.HEURIST_DBNAME.'&amp;pretty=1',
@@ -296,7 +296,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             menuEntry('','Manage workgroups','ugrps/manageGroups.php?db='.HEURIST_DBNAME,
                                 'Create new work groups and users and/or assign users to workgroups '.
                                 'and set their roles (admin, member) relative to each workgroup');
@@ -326,7 +326,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             // TITLE MASKS
                             menuEntry('','Verify title masks','verification/checkRectypeTitleMask.php?check=1&amp;db='.HEURIST_DBNAME,
                                 'Check correctness of each Record Type\'s title mask with respect to field definitions');
@@ -363,7 +363,7 @@
                             title="Show records with URLs which point to a non-existant or otherwise faulty address">
                             Verify URLs</a>
                         </li>
-                        <?
+                        <?php
                             // INSTALLATION AND STATS
                             menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
                                 'Verifies that all required JS libraries, other components and directories are in expected locations');
@@ -390,7 +390,7 @@
                 </h3>
                 <div class="adminSection">
                     <ul>
-                        <?
+                        <?php
                             // FAIMS
                             menuEntry('---','About FAIMS','../applications/faims/about.html?db='.HEURIST_DBNAME,
                                 'Information about the FAIMS (Federated Archaeological Information Management System) project');

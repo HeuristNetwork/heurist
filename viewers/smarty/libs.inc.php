@@ -31,7 +31,7 @@
     require_once(SMARTY_DIR.'Smarty.class.php');
     require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
-    /*****DEBUG****///error_log(">>>>".HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/');
+    /*****DEBUG****///error_log(">>>>".HEURIST_SERVER_ROOT_DIR.HEURIST_SITE_PATH.'viewers/smarty/templates/');
 
     $smarty = new Smarty();
 

@@ -40,7 +40,7 @@ w: 370,
 h: 240,
 
 uriBase: "<?= HEURIST_BASE_URL ?>",
-uriHost: "http://<?= HEURIST_SERVER_NAME ?>/",
+uriHost: "<?= HEURIST_SERVER_URL ?>/",
 database:"<?=HEURIST_DBNAME?>",
 init: function () {
 	// toggle display if our div is already present in the DOM

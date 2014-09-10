@@ -41,7 +41,7 @@ $template = file_get_contents('listRectypeDescriptions.html');
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 $body->global_vars['dbname'] = HEURIST_DBNAME;
-$body->global_vars['iconURL'] = HEURIST_ICON_SITE_PATH;
+$body->global_vars['iconURL'] = HEURIST_ICON_URL;
 $body->verify();
 $body->render();
 ?>

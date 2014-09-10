@@ -47,7 +47,7 @@
 		$img = make_file_image($rectypeID, 16, 2);
 		imagepng($img, $filename);
 	}
-	return HEURIST_ICON_SITE_PATH.$name;
+	return HEURIST_ICON_URL.$name;
 }
 
 /**
@@ -68,7 +68,7 @@
 		$img = make_file_image($rectypeID, 75, 48);
 		imagepng($img, $filename);
 	}
-	return HEURIST_ICON_SITE_PATH."thumb/".$name;
+	return HEURIST_ICON_URL."thumb/".$name;
 }
 
 /**

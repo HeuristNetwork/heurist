@@ -42,22 +42,18 @@ mysql_connection_select(DATABASE);
 
 // set parameter defaults
 //input must be relative to HML publish directory
-$inputFilename = (@$_REQUEST['inputFilename'] ? "".HEURIST_HML_PUBPATH.$_REQUEST['inputFilename'] :
-					(@$_REQUEST['recID'] ? "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml":
+$inputFilename = (@$_REQUEST['inputFilename'] ? "".HEURIST_HML_DIR.$_REQUEST['inputFilename'] :
+					(@$_REQUEST['recID'] ? "".HEURIST_HML_DIR.HEURIST_DBID."-".$recID.".hml":
 						null));	// outName returns the hml direct.
 //if no style given then try default, if default doesn't exist we our put raw xml
 $style = @$_REQUEST['style'] ? $_REQUEST['style'] : 'default';
-$outputFilename = (@$_REQUEST['outputFilename'] ? "".HEURIST_HTML_PUBPATH.$_REQUEST['outputFilename'] :
-					(@$_REQUEST['recID'] ? "".HEURIST_HTML_PUBPATH.$style."-".HEURIST_DBID."-".$recID.".html":
+$outputFilename = (@$_REQUEST['outputFilename'] ? "".HEURIST_HTML_DIR.$_REQUEST['outputFilename'] :
+					(@$_REQUEST['recID'] ? "".HEURIST_HTML_DIR.$style."-".HEURIST_DBID."-".$recID.".html":
 						null));	// outName returns the hml direct.
 
-$pos = strpos(HEURIST_HTML_PUBPATH,HEURIST_DOCUMENT_ROOT);
-if ($pos !== false || file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_HTML_PUBPATH)){
-	$outputURI = 'http://'.HEURIST_SERVER_NAME.
-						( $pos !== false ? substr(HEURIST_HTML_PUBPATH,$pos + strlen(HEURIST_DOCUMENT_ROOT)) : HEURIST_HTML_PUBPATH).
-						(@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
-							(@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
-}
+$outputURI = HEURIST_HTML_URL . (@$_REQUEST['outputFilename'] ? $_REQUEST['outputFilename'] :
+                (@$_REQUEST['recID'] ? $style."-".HEURIST_DBID."-".$_REQUEST['recID'].".html" : "unknown.html"));
+
 if (!$inputFilename || !file_exists($inputFilename)) {
 	returnXMLErrorMsgPage("unable to find input file '$inputFilename'");
 }

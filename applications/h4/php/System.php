@@ -37,7 +37,7 @@
     * system constants:
     * 
     * HEURIST_THUMB_DIR
-    * HEURIST_UPLOAD_DIR
+    * HEURIST_FILESTORE_DIR
     */
     class System {
         /*
@@ -107,9 +107,9 @@
                     define('HEURIST_DBNAME',$this->dbname);
                     define('HEURIST_DBNAME_FULL',$this->dbname_full);
                     //@todo  - test upload and thumb folder exist and writeable
-                    define('HEURIST_UPLOAD_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/');
+                    define('HEURIST_FILESTORE_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/');
                     define('HEURIST_THUMB_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/');
-                    define('HEURIST_THUMB_BASE_URL', HEURIST_SERVER_URL .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/' );
+                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL .'/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/' );
 
                 }
                 return true;

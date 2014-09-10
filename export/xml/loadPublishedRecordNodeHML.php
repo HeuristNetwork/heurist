@@ -59,7 +59,7 @@ $rec_owner_id = mysql__select_array("Records","rec_OwnerUGrpID","rec_ID=$recID")
 if ( $row['rec_NonOwnerVisibility'] == 'hidden' && (count($rec_owner_id) < 1 || !in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS))){
 	returnXMLErrorMsgPage(" no access to record id $recID ");
 }
-$inputFilename ="".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml";
+$inputFilename ="".HEURIST_HML_DIR.HEURIST_DBID."-".$recID.".hml";
 
 echo loadRecordHML($inputFilename);
 

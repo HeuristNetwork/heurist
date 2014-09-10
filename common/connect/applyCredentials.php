@@ -305,7 +305,7 @@ function isForAdminOnly($message="", $redirect=true)
         <div id=errorMsg>
             <span>You must be logged in as database owner <?=$message ?></span>
             <p>
-                <a href=<?HEURIST_BASE_URL?>common/connect/login.php?logout=1&amp;db=<?=HEURIST_DBNAME?> target=_top>Log out / log in again</a>
+                <a href="<?=HEURIST_BASE_URL?>common/connect/login.php?logout=1&db=<?=HEURIST_DBNAME?>" target="_top">Log out / log in again</a>
             </p>
         </div>
     </div>

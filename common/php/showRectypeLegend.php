@@ -72,7 +72,7 @@ require_once("dbMySqlWrappers.php");
      	<table><tr>
      	<td width="24px" align="right"><font color="#CCC"><?= $row[0] ?>&nbsp;</font></td>
      	<td width="24px" align="center">
-     		<img class="rft" style="background-image:url(<?=HEURIST_ICON_SITE_PATH.$row[0].".png)"?>" src="<?=HEURIST_SITE_PATH.'common/images/16x16.gif'?>">
+     		<img class="rft" style="background-image:url(<?=HEURIST_ICON_URL.$row[0].".png)"?>" src="<?=HEURIST_SITE_PATH.'common/images/16x16.gif'?>">
      	</td>
      	<td><?= htmlspecialchars($row[1]) ?></td>
      	</tr></table>

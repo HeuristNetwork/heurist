@@ -73,7 +73,7 @@ function generate_thumbnail($sURL, $needConnect){
 	//get picture from service
 	//"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
 	$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
-	$heurist_path = tempnam(HEURIST_UPLOAD_DIR, "_temp_"); // . $file_id;
+	$heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_temp_"); // . $file_id;
 
 	/*****DEBUG****///error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
 

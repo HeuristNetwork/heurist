@@ -432,7 +432,7 @@
 
 				if(is_numeric($file_id)){
 
-					$full_name = HEURIST_UPLOAD_DIR."/ulf_".$file_id."_".$name;
+					$full_name = HEURIST_FILESTORE_DIR."/ulf_".$file_id."_".$name;
 
 					/*****DEBUG****/ //error_log("CCCCC>>>".$full_name);
 

@@ -68,7 +68,7 @@
 
                         $upgrade_success = true;
                         $keep_minver = $src_min;
-                        $dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/setup/dbupgrade/';
+                        $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
                         while ($src_min<$trg_min) {
                             $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
                             if( file_exists($dir.$filename) ){
@@ -120,7 +120,7 @@
                                 $scripts_info = "";
                                 $is_allfind = true;
                                 //DBUpgrade_1.1.0_to_1.2.0.sql etc.
-                                $dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'admin/setup/dbupgrade/';
+                                $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
                                 while ($src_min<$trg_min) {
                                     $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
                                     if( file_exists($dir.$filename) ){

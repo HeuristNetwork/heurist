@@ -62,7 +62,7 @@ if(!$islist){
 			if ($file_data[2]) {
 				$filename = $file_data[1].$file_data[2]; // post 18/11/11 proper file path and name
 			} else {
-				$filename = HEURIST_UPLOAD_DIR."/".$file_data[0]; // pre 18/11/11 - bare numbers as names, just use file ID
+				$filename = HEURIST_FILESTORE_DIR."/".$file_data[0]; // pre 18/11/11 - bare numbers as names, just use file ID
 			}
 
 		print file_get_contents($filename);

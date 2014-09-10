@@ -179,7 +179,7 @@
 /*
 				print "<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
 
-				$filename = HEURIST_UPLOAD_DIR."settings/importfrom_".$sourcedbname.".cfg";
+				$filename = HEURIST_FILESTORE_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
 				if(file_exists($filename)){
 					print "<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";

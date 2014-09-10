@@ -97,12 +97,12 @@
             $mediaExts = null;
             $progress_divid = 0;
             $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_UPLOAD_DIR."/generated-reports/",
-                        HEURIST_HML_PUBPATH,
-                        HEURIST_HTML_PUBPATH,
+                        HEURIST_FILESTORE_DIR."/generated-reports/",
+                        HEURIST_HML_DIR,
+                        HEURIST_HTML_DIR,
                         HEURIST_ICON_DIR,
-                        HEURIST_UPLOAD_DIR."/scratch/",
-                        HEURIST_UPLOAD_DIR."/settings/",
+                        HEURIST_FILESTORE_DIR."/scratch/",
+                        HEURIST_FILESTORE_DIR."/settings/",
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
                         
@@ -244,7 +244,7 @@
 
                     if($dir=="*"){
                         
-                        $dir = HEURIST_UPLOAD_DIR;
+                        $dir = HEURIST_FILESTORE_DIR;
                         
                     }else{
                     
@@ -254,7 +254,7 @@
                         
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
-                            chdir(HEURIST_UPLOAD_DIR);
+                            chdir(HEURIST_FILESTORE_DIR);
                             $dir = realpath($dir);
                             if(!file_exists($dir)){
                                 $dir = $orig; //restore
@@ -286,7 +286,7 @@
                                         array_push($subdirs, $dir.$filename."/");
                                     }else if($isfirst){ //if($filename == "fieldhelper.xml"){
                                         $isfirst = false;
-                                        if($dir == HEURIST_UPLOAD_DIR){
+                                        if($dir == HEURIST_FILESTORE_DIR){
                                             print "<div style=\"color:red\">Files are not scanned in root upload folder $dir</div>";
                                         }else{
                                             $rep_counter = $rep_counter + doHarvestInDir($dir);
@@ -689,13 +689,13 @@ XML;
                                 if(substr($targetPath, -1) != '/'){
                                     $targetPath .= "/";
                                 }
-                                $rel_path = getRelativePath(HEURIST_UPLOAD_DIR, $targetPath); //getRelativePath2($targetPath);
+                                $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath); //getRelativePath2($targetPath);
                                 $details["t:".$key] = array("1"=>  $rel_path);
                                 
-                                /*print "<div>".HEURIST_UPLOAD_DIR."</div>";
+                                /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
                                 print "<div>file path :".$targetPath."</div>";
-                                print "<div>relative path :".strpos($targetPath, HEURIST_UPLOAD_DIR)."--".$rel_path."</div>";
-                                print "<div>relative path old :".getRelativePath(HEURIST_UPLOAD_DIR, $targetPath)."<br><br></div>";*/
+                                print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path."</div>";
+                                print "<div>relative path old :".getRelativePath(HEURIST_FILESTORE_DIR, $targetPath)."<br><br></div>";*/
                                 
                                 
                             }

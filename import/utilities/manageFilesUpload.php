@@ -115,11 +115,11 @@
                 }
                 
                 $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_UPLOAD_DIR."/generated-reports/",
-                        HEURIST_HML_PUBPATH,
-                        HEURIST_HTML_PUBPATH,
+                        HEURIST_FILESTORE_DIR."/generated-reports/",
+                        HEURIST_HML_DIR,
+                        HEURIST_HTML_DIR,
                         HEURIST_ICON_DIR,
-                        HEURIST_UPLOAD_DIR."/settings/",
+                        HEURIST_FILESTORE_DIR."/settings/",
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
                 
@@ -139,7 +139,7 @@
                     
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
-                            chdir(HEURIST_UPLOAD_DIR);
+                            chdir(HEURIST_FILESTORE_DIR);
                             $dir = realpath($dir);
                         }
                         if(file_exists($dir) && is_dir($dir) && !in_array($dir, $system_folders)){

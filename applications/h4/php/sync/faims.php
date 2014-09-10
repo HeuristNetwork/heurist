@@ -68,7 +68,7 @@ if(!$system->is_admin()){
 */
 
     //$dir_faims.
-    $dbname_faims = HEURIST_UPLOAD_DIR. "faims/db.sqlite3";
+    $dbname_faims = HEURIST_FILESTORE_DIR. "faims/db.sqlite3";
 
     print $dbname_faims."<br /><br />";
 

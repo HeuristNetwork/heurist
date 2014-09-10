@@ -148,12 +148,12 @@
 
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_row($res)) { //mysql_fetch_assoc
-			/*****DEBUG****///DEBUG error_log(">>>> ".HEURIST_UPLOAD_DIR."/".$row[0]);
+			/*****DEBUG****///DEBUG error_log(">>>> ".HEURIST_FILESTORE_DIR."/".$row[0]);
 
 			if ($row[6]) {
 				$filename = $row[5].$row[6]; // post 18/11/11 proper file path and name
 			} else {
-				$filename = HEURIST_UPLOAD_DIR."/".$row[0]; // pre 18/11/11 - bare numbers as names, just use file ID
+				$filename = HEURIST_FILESTORE_DIR."/".$row[0]; // pre 18/11/11 - bare numbers as names, just use file ID
 			}
 
 			$geekMail->attach($filename);

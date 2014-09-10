@@ -23,7 +23,7 @@
  * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @package     Heurist academic knowledge management system
  * @subpackage  Viewer/Transforms
- * @uses        HEURIST_UPLOAD_DIR
+ * @uses        HEURIST_FILESTORE_DIR
  */
 
 
@@ -40,11 +40,11 @@ if (preg_match("/(http:\/\/|\/)/", $style)) {
     header('Content-type: text/xml; charset=utf-8');
     echo $contents;
     return;
-} else if (is_dir(HEURIST_UPLOAD_DIR)) {
-    if (is_dir(HEURIST_UPLOAD_DIR . 'xsl-templates')) {
-        define('DIR', HEURIST_UPLOAD_DIR . 'xsl-templates');
-    } else if (is_dir(HEURIST_UPLOAD_DIR . 'xsl')) {
-        define('DIR', HEURIST_UPLOAD_DIR . 'xsl');
+} else if (is_dir(HEURIST_FILESTORE_DIR)) {
+    if (is_dir(HEURIST_FILESTORE_DIR . 'xsl-templates')) {
+        define('DIR', HEURIST_FILESTORE_DIR . 'xsl-templates');
+    } else if (is_dir(HEURIST_FILESTORE_DIR . 'xsl')) {
+        define('DIR', HEURIST_FILESTORE_DIR . 'xsl');
     }
 } else if (is_dir('xsl-templates')) {
     define('DIR', 'xsl-templates');

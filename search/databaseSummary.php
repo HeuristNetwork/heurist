@@ -247,7 +247,7 @@
                                 echo "<td align='center'>$rt_ID</td>";
 
                                 // Image
-                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
+                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
                                 $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
 
@@ -295,7 +295,7 @@
                                 
                                 // Image  
                                 $title = $row[1];
-                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_SITE_PATH.$rt_ID.".png)'";
+                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
                                 $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
                                 

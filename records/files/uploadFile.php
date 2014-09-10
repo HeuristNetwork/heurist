@@ -16,7 +16,7 @@
 
     /**
     set of functions
-    *     upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
+    *     upload_file - copies temp file to HEURIST_FILESTORE_DIR and register in recUploadedFiles
     *     register_file - registger the existing file on the server in recUploadedFiles (used in import)
     *     get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
     *     getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
@@ -42,7 +42,7 @@
     /**
     * Invoked from HAPI.saveFile.php
     *
-    * Copies temp file to HEURIST_UPLOAD_DIR and registger in recUploadedFiles
+    * Copies temp file to HEURIST_FILESTORE_DIR and registger in recUploadedFiles
     *
     * Check that the uploaded file has a sane name / size / no errors etc,
     * enter an appropriate record in the recUploadedFiles table,
@@ -108,7 +108,7 @@
             'ulf_MimeExt ' => $mimetypeExt,
             'ulf_FileSizeKB' => $file_size,
             'ulf_Description' => $description? $description : NULL,
-            'ulf_FilePath' => '', //was HEURIST_UPLOAD_DIR
+            'ulf_FilePath' => '', //was HEURIST_FILESTORE_DIR
             'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
         );
 
@@ -124,19 +124,19 @@
             '", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
         /* nonce is a random value used to download the file */
         /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
-        $pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);   
-        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename) )  //file is already in upload folder
+        $pos = strpos($tmp_name, HEURIST_FILESTORE_DIR);   
+        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_FILESTORE_DIR . "/" . $filename) )  //file is already in upload folder
         {
             unlink($tmp_name);
             return $file_id;
 
-        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename)) {  //move file into upload folder
+        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILESTORE_DIR . "/" . $filename)) {  //move file into upload folder
 
             return $file_id;
         } else {
             /* something messed up ... make a note of it and move on */
             $uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = "
-            . HEURIST_DBNAME." (".HEURIST_UPLOAD_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
+            . HEURIST_DBNAME." (".HEURIST_FILESTORE_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
             error_log($uploadFileError);
             mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
             return $uploadFileError;
@@ -195,12 +195,12 @@
         }
         
         // get relative path
-        $relative_path = getRelativePath(HEURIST_UPLOAD_DIR, $dirname);
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
 
         //check if such file is already registered
         $res = mysql_query('select ulf_ID from recUploadedFiles '
             .'where ulf_FileName = "'.addslashes($filename).'" and '
-            .' (ulf_FilePath = "'.addslashes(HEURIST_UPLOAD_DIR).'" or ulf_FilePath = "'.addslashes($relative_path).'")');
+            .' (ulf_FilePath = "'.addslashes(HEURIST_FILESTORE_DIR).'" or ulf_FilePath = "'.addslashes($relative_path).'")');
 
         if (mysql_num_rows($res) == 1) {
             $row = mysql_fetch_assoc($res);
@@ -296,7 +296,7 @@
                 if ($filedata['fullpath']) {
                     $filename = $filedata['fullpath']; // post 18/11/11 proper file path and name
                 } else {
-                    $filename = HEURIST_UPLOAD_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
+                    $filename = HEURIST_FILESTORE_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
                 }
 
                 $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
@@ -306,7 +306,7 @@
                 $path_parts = pathinfo($filename);
                 $dirname = $path_parts['dirname']."/";
 
-                if( $dirname == HEURIST_UPLOAD_DIR ){
+                if( $dirname == HEURIST_FILESTORE_DIR ){
                     if(file_exists($filename)){
                         unlink($filename);
                     }
@@ -690,7 +690,7 @@
 
             $thumbnail_file = "ulf_".$res["nonce"].".png";
             if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-                $res["thumbURL"] = HEURIST_THUMB_BASE_URL.$thumbnail_file;
+                $res["thumbURL"] = HEURIST_THUMB_URL.$thumbnail_file;
             }else{
                 $res["thumbURL"] =
                 HEURIST_BASE_URL."common/php/resizeImage.php?".
@@ -710,7 +710,7 @@
             //add database media storage folder for relative paths
             $path = @$res['fullpath'];
             if( $path && !file_exists($path) ){
-                chdir(HEURIST_UPLOAD_DIR);
+                chdir(HEURIST_FILESTORE_DIR);
                 $path = realpath($path);
                 if(file_exists($path)){
                     $res['fullpath'] = $path;
@@ -818,7 +818,7 @@
 
                 $thumbnail_file = "ulf_".$file['ulf_ObfuscatedFileID'].".png";
                 if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
-                    $thumb_url = HEURIST_THUMB_BASE_URL.$thumbnail_file;
+                    $thumb_url = HEURIST_THUMB_URL.$thumbnail_file;
                 }else{
                     $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
                 }
@@ -866,11 +866,11 @@
     }
 
     /*function getRelativePath2( $targetPath ){
-        if (HEURIST_UPLOAD_DIR === $targetPath) {
+        if (HEURIST_FILESTORE_DIR === $targetPath) {
             return '';
         }
-        if(strpos($targetPath, HEURIST_UPLOAD_DIR)===0){ //target is subfolder
-            return substr($targetPath, strlen(HEURIST_UPLOAD_DIR));
+        if(strpos($targetPath, HEURIST_FILESTORE_DIR)===0){ //target is subfolder
+            return substr($targetPath, strlen(HEURIST_FILESTORE_DIR));
         }else{ //return absolute path
             return $targetPath;
         }

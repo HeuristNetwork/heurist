@@ -40,7 +40,7 @@
   require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
 
   if (@$_REQUEST['mobcfg']){
-    downloadFile("text/xml", HEURIST_UPLOAD_DIR."settings/mobile-config.xml");
+    downloadFile("text/xml", HEURIST_FILESTORE_DIR."settings/mobile-config.xml");
     return;
   }
 
@@ -122,7 +122,7 @@
     if ($filedata['fullpath']) {
       $filename = $filedata['fullpath']; // post 18/11/11 proper file path and name
     } else {
-      $filename = HEURIST_UPLOAD_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
+      $filename = HEURIST_FILESTORE_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
     }
 
     $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
@@ -156,7 +156,7 @@
 
       $zz=zip_entry_read($zip_entry, $zip_fs);
 
-      $zname = HEURIST_UPLOAD_DIR."/".$zname;
+      $zname = HEURIST_FILESTORE_DIR."/".$zname;
       /*****DEBUG****///error_log(">>>>>>>>>>".$zname);
       /*	       $z=fopen($zname,"w");
       fwrite($z,$zz);
@@ -182,7 +182,7 @@
 
     if($filedata['ext']=="kml"){
       // use proxy
-      downloadViaProxy(HEURIST_UPLOAD_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
+      downloadViaProxy(HEURIST_FILESTORE_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
 
     }else{
       /*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);

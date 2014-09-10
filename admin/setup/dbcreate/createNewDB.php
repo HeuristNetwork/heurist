@@ -282,7 +282,7 @@
                     </div>
                 </form>
             </div> <!-- createDBForm -->
-            <?
+            <?php
             }
 
 

@@ -200,7 +200,7 @@
 
             <?php include("newDBWorkflowDescription.inc");  ?>
 
-            <?
+            <?php
 
                 function registerDatabase() {
                     $heuristDBname = rawurlencode(HEURIST_DBNAME);
@@ -271,7 +271,7 @@
                         <script> // automatically call H3MasterIndix metadata edit form for this database
                             window.open("<?=$url?>",'_blank');
                         </script>
-                        <?
+                        <?php
                         } else {
                             error_log ('Unable to write database identification record, dbID is '.$dbID);
                             $msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>".

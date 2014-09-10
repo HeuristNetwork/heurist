@@ -326,7 +326,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				print "<input type='button' value='Print mapping' onclick='{printMapping();}'>&nbsp;";
                 print "<input type='button' value='Save settings' onclick='{document.getElementById(\"mode\").value=3; document.forms[\"mappings\"].submit();}'>";
 
-				$filename = HEURIST_UPLOAD_DIR."settings/importfrom_".$sourcedbname.".cfg";
+				$filename = HEURIST_FILESTORE_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
 				if(file_exists($filename)){
 					print "&nbsp;<input type='submit' value='Load settings' onclick='{document.getElementById(\"mode\").value=4; document.forms[\"mappings\"].submit();}'>\n";
@@ -727,7 +727,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			function loadSettings(){
 				global $sourcedbname;
 
-				$filename = HEURIST_UPLOAD_DIR."settings/importfrom_".$sourcedbname.".cfg";
+				$filename = HEURIST_FILESTORE_DIR."settings/importfrom_".$sourcedbname.".cfg";
 
 				$str = file_get_contents($filename);
 
@@ -759,7 +759,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					}
 				}
 
-				$folder = HEURIST_UPLOAD_DIR."settings/";
+				$folder = HEURIST_FILESTORE_DIR."settings/";
 
 				if(!file_exists($folder)){
 					if (!mkdir($folder, 0777, true)) {
@@ -1281,7 +1281,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				global $sourcedbname, $dbPrefix, $db_prefix;
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$_src_HEURIST_UPLOAD_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/';
+				$_src_HEURIST_FILESTORE_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/';
 
 
 				$res = mysql_query("select * from $sourcedb.`recUploadedFiles` where ulf_ID=".$src_fileid);
@@ -1297,13 +1297,13 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				if ($file['ulf_FileName']) {
 					$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-					$need_copy = ($file['ulf_FilePath'] == $_src_HEURIST_UPLOAD_DIR);
+					$need_copy = ($file['ulf_FilePath'] == $_src_HEURIST_FILESTORE_DIR);
 				} else if ($file['ulf_ExternalFileReference']) {
 					$filename = $file['ulf_ExternalFileReference']; // post 18/11/11 proper file path and name
 					$need_copy = false;
 					$externalFile = true;
 				} else {
-					$filename = $_src_HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+					$filename = $_src_HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 					$need_copy = true;
 				}
 
@@ -1326,10 +1326,10 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				}
 
 				if($need_copy){
-					$newfilename = HEURIST_UPLOAD_DIR.$file['ulf_OrigFileName'];
+					$newfilename = HEURIST_FILESTORE_DIR.$file['ulf_OrigFileName'];
 					//if file in source upload dirtectiry copy it to destionation upload directory
 					if(!copy($filename, $newfilename)){
-						print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_UPLOAD_DIR."</div>";
+						print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_FILESTORE_DIR."</div>";
 						ob_flush();flush(); // flush to screen
 						return null;
 					}
@@ -1366,8 +1366,8 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				global $sourcedbname, $dbPrefix, $db_prefix;
 				$sourcedb = $db_prefix.$sourcedbname;
 
-				$HEURIST_UPLOAD_ROOT_OLD =	HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/";
-				$_src_HEURIST_UPLOAD_DIR =  $HEURIST_UPLOAD_ROOT_OLD.$sourcedbname.'/';
+				$HEURIST_UPLOAD_ROOT_OLD =	@$_SERVER["DOCUMENT_ROOT"]."/HEURIST_FILESTORE/HEURIST_Vsn2_uploaded-heurist-files/";
+				$_src_HEURIST_FILESTORE_DIR =  $HEURIST_UPLOAD_ROOT_OLD.$sourcedbname.'/';
 
 
 				$res = mysql_query("select * from `$sourcedb`.`files` where `file_id`=".$src_fileid);
@@ -1378,7 +1378,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 				$file = mysql_fetch_assoc($res);
 
-				$filename = $_src_HEURIST_UPLOAD_DIR ."/". $file['file_id'];
+				$filename = $_src_HEURIST_FILESTORE_DIR ."/". $file['file_id'];
 
 				if(!file_exists($filename)){
 					//check if this file is remote
@@ -1387,10 +1387,10 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					return null;
 				}
 
-				$newfilename = HEURIST_UPLOAD_DIR.$file['file_orig_name'];
+				$newfilename = HEURIST_FILESTORE_DIR.$file['file_orig_name'];
 				//if file in source upload dirtectiry copy it to destionation upload directory
 				if(!copy($filename, $newfilename)){
-					print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_UPLOAD_DIR."</div>";
+					print "<div  style='color:red;'>Can't copy file $fielname to ".HEURIST_FILESTORE_DIR."</div>";
 					ob_flush();flush(); // flush to screen
 					return null;
 				}

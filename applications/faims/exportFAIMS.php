@@ -43,7 +43,7 @@ error_log(print_r($maprec_toexport, true));
     $projname = @$_REQUEST['projname'];
     $step = @$_REQUEST['step']; // 1 - define record type  ,   2 - download result
     
-    $arc_filename = HEURIST_UPLOAD_DIR."faims/new/".$projname.".zip";
+    $arc_filename = HEURIST_FILESTORE_DIR."faims/new/".$projname.".zip";
     
     if($step=='2' && $projname && file_exists($arc_filename)){
         downloadFile('application/zip', $arc_filename);
@@ -237,7 +237,7 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
 
     if( $rt_toexport && count($rt_toexport)>0 && !$invalid ){
         
-        $folder = HEURIST_UPLOAD_DIR."faims/new/".$projname;
+        $folder = HEURIST_FILESTORE_DIR."faims/new/".$projname;
 
         //create export folder
         if(!file_exists($folder)){

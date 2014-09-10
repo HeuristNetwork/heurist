@@ -51,8 +51,8 @@ if (!$q) {
 
 $outFullName = @$_REQUEST['outputFullname'] ? $_REQUEST['outputFullname'] : null;	// outName returns the hml direct.
 if (!$outFullName){
-	$outFullName = @$_REQUEST['outputFilename'] ? "".HEURIST_HML_PUBPATH.$_REQUEST['outputFilename'] :
-						($recID ? "".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml" : null);
+	$outFullName = @$_REQUEST['outputFilename'] ? "".HEURIST_HML_DIR.$_REQUEST['outputFilename'] :
+						($recID ? "".HEURIST_HML_DIR.HEURIST_DBID."-".$recID.".hml" : null);
 }
 if (!$outFullName) {
 	returnXMLErrorMsgPage(" Unable to determine output name either supply record id (recID=#) or outFilename=filenameOnlyHere ");

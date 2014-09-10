@@ -164,9 +164,9 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
     }
     
     
-        $folder = HEURIST_UPLOAD_DIR."faims/tdar/".$projectId;
+        $folder = HEURIST_FILESTORE_DIR."faims/tdar/".$projectId;
         $folders = null;
-        $batch = "#!/bin/bash\ncd ".HEURIST_DOCUMENT_ROOT.INSTALL_DIR;
+        $batch = "#!/bin/bash\ncd ".HEURIST_DIR;
         $data_toreg = array();
         $coding_sheet = array();
         $images = array();

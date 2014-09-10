@@ -100,7 +100,7 @@
                 <li><span>Dump the existing database with mysqldump:  mysqldump -u... -p... --routines --triggers hdb_xxxxx > filename</span></li>
                 <li><span>Create database, switch to database: mysql -u... -p... -e 'create database hdb_yyyyy'</span></li>
                 <li><span>Load the dumped database: mysql -u... -p... hdb_yyyyyy < filename </span></li>
-                <li><span>Change to <?HEURIST_UPLOAD_DIR?> and copy the following directories and contents:</span>
+                <li><span>Change to <?HEURIST_FILESTORE_DIR?> and copy the following directories and contents:</span>
                     <ul>
                         <li><span>Copy contents of the directory <?=HEURIST_UPLOAD_ROOT?><?=HEURIST_DBNAME?> to a new directory <br />
                             in the same location, with the name of the new database <i>excluding the <?=HEURIST_DB_PREFIX?> prefix</i></span></li>
@@ -176,11 +176,11 @@
         $newname = HEURIST_DB_PREFIX.$targetdbname;
 
         $dump_command = "mysqldump --routines --triggers -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
-            HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_UPLOAD_DIR."temporary_db_dump.sql";
+            HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_FILESTORE_DIR."temporary_db_dump.sql";
         $create_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e 'create database $newname'";
         $upload_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-            " $newname < '".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql'";
-        $cleanup_command = "rm ".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql"; // cleanup
+            " $newname < '".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql'";
+        $cleanup_command = "rm ".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql"; // cleanup
 
         echo ("<hr>Execution log:<p>");
 

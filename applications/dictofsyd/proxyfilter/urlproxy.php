@@ -39,7 +39,7 @@ How it works.
 4) Replace reference for popup.js, tooltip.js, browse.js to local ones
 5) Inject  tag "base" with reference to our server
 6) Inject script with declaration of 2 variable baseURL and dbname
-7) Saves modified file with prefix "proxyremote_" in HEURIST_UPLOAD_DIR
+7) Saves modified file with prefix "proxyremote_" in HEURIST_FILESTORE_DIR
 8) Returns the content of this file to client
 
 In case  proxyremote_ file exists its content is returned to client at once.

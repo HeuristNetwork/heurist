@@ -746,8 +746,8 @@
 
                 if($res){
                     $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
-                }else if ($intofile && file_exists(HEURIST_HML_PUBPATH.$recID.".xml")){
-                    unlink(HEURIST_HML_PUBPATH.$record['rec_ID'].".xml");
+                }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
+                    unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
                 }
             }
         }
@@ -792,7 +792,7 @@
         // TODO: no error checking on success so silent failure if directory non-writable
         // beware: File is closed in outputRecords function
         if($intofile){
-            $hunifile = fopen( HEURIST_HML_PUBPATH.$record['rec_ID'].".xml", 'w');
+            $hunifile = fopen( HEURIST_HML_DIR.$record['rec_ID'].".xml", 'w');
             output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
         }
 
@@ -1084,7 +1084,7 @@
                     $file = get_uploaded_file_info_internal($file['id'], false);
                     if ($file['fullpath'] && file_exists($file['fullpath'])) {
                         //backup file inot backup/user folder
-                        $folder = HEURIST_UPLOAD_DIR . "backup/" . get_user_username() . "/";
+                        $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/";
                         $path_parts = pathinfo($file['fullpath']);
                         $file['URL'] = $path_parts['basename'];
                         $filename_bk = $folder . $file['URL'];
@@ -1398,7 +1398,7 @@
             $resout = outputRecords($result);
 
             // create HuNI manifest
-            $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
+            $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
             fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
             fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
 
@@ -1414,7 +1414,7 @@
             // add each output file to the manifest
             foreach ($resout as $recID => $recTypeID) {
 
-                $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
+                $resfile = HEURIST_HML_DIR.$recID.".xml";
 
                 if(file_exists($resfile)){
                     $conceptID = getRecTypeConceptID($recTypeID);
@@ -1429,7 +1429,7 @@
             fwrite( $huni_resources, "</resources>");
             fclose( $huni_resources );
 
-            print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_PUBPATH."</b>";
+            print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
         }
 /*    
     
@@ -1438,7 +1438,7 @@
         $total_out_count = 0;
 
         // create HuNI manifest
-        $huni_resources = fopen( HEURIST_HML_PUBPATH."resources.xml","w");
+        $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
         fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
 
         // dbID set at start of script
@@ -1467,7 +1467,7 @@
                 // add each output file to the manifest
                 foreach ($resout as $recID => $recTypeID) {
 
-                    $resfile = HEURIST_HML_PUBPATH.$recID.".xml";
+                    $resfile = HEURIST_HML_DIR.$recID.".xml";
 
                     if(file_exists($resfile)){
                         $conceptID = getRecTypeConceptID($recTypeID);
@@ -1496,7 +1496,7 @@
         fwrite( $huni_resources, "</resources>");
         fclose( $huni_resources );
 
-        print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_PUBPATH."</b>";
+        print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
 */
     }else{ // single output stream
     

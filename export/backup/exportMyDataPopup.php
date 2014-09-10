@@ -36,7 +36,7 @@
     }
 
     $username = get_user_username();
-    $folder = HEURIST_UPLOAD_DIR."backup/".$username;
+    $folder = HEURIST_FILESTORE_DIR."backup/".$username;
 
     $mode = @$_REQUEST['mode'];
 
@@ -232,7 +232,7 @@
                 //copy(dirname(__FILE__)."/../../admin/setup/dbcreate/coreDefinitions.txt", $folder."coreDefinitions.txt");
 
                 //archive folder
-                //zipDirectory($folder, HEURIST_UPLOAD_DIR."backup/".$user."_backup.zip");
+                //zipDirectory($folder, HEURIST_FILESTORE_DIR."backup/".$user."_backup.zip");
 
 
                 // Create a zipfile of the definitions and data which have been dumped to disk

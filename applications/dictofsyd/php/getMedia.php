@@ -55,7 +55,7 @@ if($isthumbnail){
 
         if($filedata['ext']=="kml"){
             // use proxy
-            //downloadViaProxy(HEURIST_UPLOAD_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
+            //downloadViaProxy(HEURIST_FILESTORE_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
         }else{
             header('Location: '.$filedata['URL']);
         }

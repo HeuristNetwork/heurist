@@ -40,7 +40,7 @@ require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 header("Content-type: text/javascript");
 
-$folder = HEURIST_UPLOAD_DIR."settings/";
+$folder = HEURIST_FILESTORE_DIR."settings/";
 
 if(!file_exists($folder)){
 	if (!mkdir($folder, 0777, true)) {

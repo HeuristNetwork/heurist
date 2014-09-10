@@ -39,7 +39,7 @@ How it works.
 4) Replace reference for popup.js, tooltip.js, browse.js to local ones
 5) Inject  tag “base” with reference to our server
 6) Inject script with declaration of 2 variable baseURL and dbname
-7) Saves modified file with prefix “proxyremote_” in HEURIST_UPLOAD_DIR
+7) Saves modified file with prefix “proxyremote_” in HEURIST_FILESTORE_DIR
 8) Returns the content of this file to client
 
 In case  proxyremote_ file exists its content is returned to client at once.
@@ -72,7 +72,7 @@ if(array_key_exists('htm', $_REQUEST)){
 
         $addr = $_REQUEST['htm'];
         $url = $baseURL.$addr;
-        $filename = HEURIST_UPLOAD_DIR."proxyremote_".str_replace("/","_",$addr);
+        $filename = HEURIST_FILESTORE_DIR."proxyremote_".str_replace("/","_",$addr);
         getRemoteFile($filename, null, $url);
         header('Content-Type: text/html');
 
@@ -80,7 +80,7 @@ if(array_key_exists('htm', $_REQUEST)){
 
         $kml = $_REQUEST['kml'];
         $url = $baseURL."kml/full/".$kml;
-        $filename = HEURIST_UPLOAD_DIR."proxyremote_".$kml;
+        $filename = HEURIST_FILESTORE_DIR."proxyremote_".$kml;
         getRemoteFile($filename, null, $url);
 
         header('Content-Type: application/vnd.google-earth.kml+xml');
@@ -98,7 +98,7 @@ if(array_key_exists('htm', $_REQUEST)){
         }else{
             $name = "1.html";
         }
-        $filename = HEURIST_UPLOAD_DIR."proxyremote_".$name;
+        $filename = HEURIST_FILESTORE_DIR."proxyremote_".$name;
 
         if(array_key_exists('js', $_REQUEST)){
             $js_file = $_REQUEST['js'];

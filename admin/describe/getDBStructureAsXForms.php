@@ -135,7 +135,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 		Export in progress....
 
 <?php
-	$folder = HEURIST_UPLOAD_DIR . "xforms/";
+	$folder = HEURIST_FILESTORE_DIR . "xforms/";
 	if (!file_exists($folder)) {
 		if (!mkdir($folder, 0777, true)) {
 			print '<font color="red">Failed to create folder for forms!</font>';
@@ -177,7 +177,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 return;
 
 /**
- * Creates xform for $rtyID, saves it into HEURIST_UPLOAD_DIR/xforms/ folder and adds an entry to the manifest lists
+ * Creates xform for $rtyID, saves it into HEURIST_FILESTORE_DIR/xforms/ folder and adds an entry to the manifest lists
  * @global   string [$folder] path of where to store output form
  * @global   string [$formsList] manifest stream of forms oldstyle ODK
  * @global   string [$xformsList] manifest stream of xforms

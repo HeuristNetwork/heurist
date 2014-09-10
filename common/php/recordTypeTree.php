@@ -127,6 +127,8 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     //add default fields
     $res['recID'] = 'ID';
     $res['recTitle'] = 'RecTitle';
+    $res['recTypeID'] = 'RecTypeID';
+    $res['recTypeLabel'] = 'RecTypeLabel';
     $res['recURL'] = 'URL';
     $res['recModified'] = 'Modified';
     $res['recWootText'] = 'WootText';
