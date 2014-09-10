@@ -159,22 +159,18 @@
     $object->HeuristDBVersion   = HEURIST_DBVERSION;
     
     // ALL RECORD TYPES WITH COUNT ZERO  
-    $nodes = new stdClass();                                
-    $query = "SELECT DISTINCT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC;";
+    $nodes = array();                      
+    $query = "SELECT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC";
     $res = mysql_query($query);
     while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
         $rt_id = $row[0];
+        $record = new stdClass();
         $record->name  = $row[1];
         $record->id    = $rt_id;
         $record->count = 0;
-        $record->image = $image_base_url.$rt_id;
-        
-        $property = strval($record->id);
-        if(!property_exists($record, $property)) {
-            $nodes->$property = $record;
-        }
+        $record->image = $image_base_url.$rt_id;          
     }
-    
+
     // ALL RECORD TYPES WITH CONNECTIONS
     $links = array();
     foreach ($resrt  as $rt_id=>$rt){
@@ -184,11 +180,24 @@
         $rootrecord->id    = $rt_id;
         $rootrecord->count = $rt['count'];
         $rootrecord->image = $image_base_url.$rt_id;
-        $rootrecord->weight = 1;
         
-        $property = strval($rootrecord->id);
-        if(!property_exists($rootrecord, $property)) {
-            $nodes->$property = $rootrecord;
+        // Check if this record is in the array already, and if it is, check the counts
+        $rootindex = 0;
+        $found = false;
+        if(count($nodes) > 0) {
+            for($i = 0; $i < count($nodes); $i++) {
+               if($nodes[$i]->id == $rootrecord->id) {
+                  if($rootrecord->count > $nodes[$i]->count) {
+                      $nodes[$i]->count = $rootrecord->count;
+                  }
+                  $rootindex = $i;
+                  $found = true;
+                  break;
+               }
+            }
+        }
+        if(!$found) {
+            $rootindex = array_push($nodes, $rootrecord);
         }
         
         // Check relations
@@ -254,18 +263,38 @@
                         $usagerecord->terms = $terms;
                     }
                     
+                    // Check if this record is in the array already, and if it is, check the counts
+                    $usageindex = 0;
+                    $found = false;
+                    if(count($nodes) > 0) {
+                        for($i = 0; $i < count($nodes); $i++) {
+                           if($nodes[$i]->id == $usagerecord->id) {
+                              if($usagerecord->count > $nodes[$i]->count) {
+                                  $nodes[$i]->count = $usagerecord->count;
+                              }
+                              $usageindex = $i;
+                              $found = true;
+                              break;
+                           }
+                        }
+                    }
+                    if(!$found) {
+                        $usageindex = array_push($nodes, $usagerecord);
+                    }
+   
                     // Build link
                     $link = new stdClass();
-                    $link->source   = $rootrecord;
+                    $link->source   = $rootindex;
                     $link->relation = $relationrecord;
-                    $link->target   = $usagerecord;
+                    $link->target   = $usageindex;
+                    $link->value    = 1;
                     array_push($links, $link);
                 }
             }
         }
     }
     
-    $object->nodes = $nodes;
+    $object->nodes = (array) $nodes;
     $object->links = $links;      
     
     print json_format($object, true);

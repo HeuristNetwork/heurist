@@ -26,6 +26,59 @@
 */
 
 /*******************************START OF FUNCTIONS TO PARSE DATA**********************************/
+/** Attempts to grab the first value after searching for a tag*/
+function getValue(element, query) {
+    var results = element.getElementsByTagName(query);
+    if(results && results.length > 0) {
+        return results[0];
+    }
+    return null;
+}
+
+/** Returns the ID value of a record */
+function getID(record) {
+    return parseInt(getValue(record, "rec_ID").textContent);               
+}
+
+/** Returns the name value of a record */
+function getName(record) {
+    return getValue(record, "rec_Name").textContent;                
+}
+
+/** Returns the count value of a record */
+function getCount(record) {
+    return parseInt(getValue(record, "rec_Count").textContent);                
+}
+
+/** Returns the image value of a record */
+function getImage(record) {
+    return getValue(record, "rec_Image").textContent;               
+}
+
+/** Returns an object containing the id, name, count and image of a record */
+function getInfo(record) {
+    var id = getID(record);
+    var name = getName(record);
+    var count = getCount(record);
+    var image = getImage(record);
+    var type = record.namespaceURI;
+    return {"id": id, "name": name, "count": count, "image": image, "type": type};
+}
+
+/** Returns the relation value of a record */
+function getRelations(record) {       
+    return getValue(record, "rec_Relations");           
+}
+
+/** Returns the unconstrained value of a record */
+function isUnconstrained(record) {
+    var value = getValue(record, "rel_Unconstrained");
+    if(value && value === "true") {
+        return true;
+    }
+    return false;
+}    
+
 /** Converts the raw XML data to D3 usable nodes and links
  *  Return example
  * 
@@ -96,13 +149,118 @@
  */
 var maxCount = 1;
 function convertData() {
-    maxCount = 76;
-
+    maxCount = 1;
+    
+    // Holds a list of unique nodes
+    // Has attributes 'id', 'name', 'count', 'image' and 'type'
+    var nodes = {};
+    
+    // Relationships between the nodes. 
+    // Has attributes 'source' and 'target'
+    var links = [];
+    
     // A string array containing names of nodes to filter.
     var filter = getFilter();
     
-    // JSON
-    return json;
+    // Going through all Records with namespace 'rootrecord'
+    var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
+    for(var i = 0; i < roots.length; i++) {
+        // Retrieve info about this record
+        var root = roots[i];
+        var rootInfo = getInfo(root);
+        //console.log(rootInfo);
+        
+        // Check if we should filter this record
+        var index = $.inArray(rootInfo.name, filter);
+        if(index == -1/* && rootInfo.count > 0*/) {
+            // Going through all linked relation Records with namespace 'relationrecord'
+            var relations = root.getElementsByTagNameNS("relationrecord", "Record");
+            if(relations && relations.length > 0) {
+                for(var j = 0; j < relations.length; j++ ){
+                    // Get record info 
+                    var relation = relations[j];
+                    var relationInfo = getInfo(relation);
+                    //console.log(relationInfo);
+         
+                    // Unconstrained check
+                    var constrained = isUnconstrained(relation);
+                    //console.log(constrained);
+                    
+                    // Check types
+                    var types = relation.getElementsByTagName("rel_Name");
+                    //console.log(types);
+                    if(types && types.length > 0) {
+                        for(var k = 0; k < types.length; k++) {
+                            var type = types[k].textContent;
+                            //console.log(type);
+                        }
+                    }
+                    
+                    // Going through all linked usage Records with namespace 'usagerecord'
+                    var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
+                    if(usages && usages.length > 0) {
+                        for(var k = 0; k < usages.length; k++) {
+                            // Get record info 
+                            var usage = usages[k];
+                            var usageInfo = getInfo(usage);
+                            //console.log(usageInfo);
+                            
+                            // Check if we should filter this record
+                            var index = $.inArray(usageInfo.name, filter); 
+                            if(index == -1/* && usageInfo.count > 0*/) {
+                                // Construct a link; add root record info
+                                var link = {};
+                                if(!(rootInfo.name in nodes)) {
+                                    nodes[rootInfo.name] = rootInfo;
+                                    link["source"] = rootInfo;
+                                    
+                                     // Count check
+                                    if(rootInfo.count > maxCount) {
+                                        maxCount = rootInfo.count;                                                                     
+                                    }
+                                }else{
+                                    link["source"] = nodes[rootInfo.name];
+                                }
+
+                                // Link construction; add usage record info
+                                if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
+                                    nodes[usageInfo.name] = usageInfo; // It has not; add it to the list of nodes
+                                    link["target"] = usageInfo;    // Set the target of the root link to this reoord
+                                    
+                                     // Count check
+                                    if(usageInfo.count > maxCount) {
+                                        maxCount = usageInfo.count;
+                                    }
+                                }else{ // Node with this name exists already, use that record 
+                                    link["target"] = nodes[usageInfo.name]; 
+                                }
+
+                                // Add link to array
+                                link["relation"] = relationInfo;
+                                links.push(link);
+                            }else{
+                                // Display root node anyways
+                                if(!(rootInfo.name in nodes)) {
+                                    nodes[rootInfo.name] = rootInfo;
+                                    
+                                    // Count check
+                                    if(rootInfo.count > maxCount) {
+                                        maxCount = rootInfo.count;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+             }
+        } 
+    }
+    
+    // Construct a data object and return it.
+    var obj = {"nodes": nodes, "links": links};
+    console.log("Data has been transformed to D3 format:");
+    console.log(obj);
+    return obj;
 }
 
 /** Constructs the overlay data for a root element in the XML
@@ -367,6 +525,8 @@ function visualizeData() {
          })
          .style("stroke-dasharray", (function(d) {
              if(d.relation.count == 0) {
+                 console.log("D target count == 0, target: " + d.target.name + ", source: " + d.source.name);
+                 console.log(d);
                 return "3, 3"; 
              } 
          })) 
@@ -531,6 +691,7 @@ function visualizeData() {
     // Adding the background circles to the nodes
     var bgcircle = node.append("circle")
                        .attr("r", function(d) {
+                           console.log("COUNT for " + d.name + ": " + d.count);
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")
@@ -934,7 +1095,7 @@ function checkLocalStorage() {
 
 /*********************** START OF FUNCTIONS TO EXECUTE WHEN THE DOCUMENT IS DONE LOADING ********************/
 /** Body is done with loading */
-var json;
+var xml;
 $(document).ready(function() {
     // Check localstorage settings
     checkLocalStorage();
@@ -1135,18 +1296,18 @@ $(document).ready(function() {
     });
     
     /** BUILDING THE VISUALISATION */
-    var url = "../admin/describe/getRectypeRelationsAsJSON.php" + window.location.search;
-    console.log("Loading JSON data from: " + url);
-    d3.json(url, function(error, jsonData) {
+    var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
+    console.log("Loading XML data from: " + url);
+    d3.xml(url, "application/xml", function(error, xmlData) {
         // If there is an error, show it to the user
         if(error) {
-            return alert("Unable to load data: " + error.message);
+            return alert("Unable to load data: \"" + error.statusText +"\"");
         }
         
         // Now visualize it.
-        console.log("JSON succesfully loaded from server:");
-        console.log(jsonData);
-        json = jsonData;
+        console.log("XML succesfully loaded from server:");
+        console.log(xmlData);
+        xml = xmlData;
         visualizeData();
     });
     
