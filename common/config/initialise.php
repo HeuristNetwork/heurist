@@ -286,8 +286,6 @@ HEURIST_HTML_URL
         
         $dir_Filestore = "HEURIST/HEURIST_FILESTORE/";
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $documentRoot . $dir_Filestore, "File store root folder");
-        
-        define('HEURIST_UPLOAD_ROOT',  );
         define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $dir_Filestore );
     }
 
