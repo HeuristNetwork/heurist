@@ -28,6 +28,7 @@
     if(isForAdminOnly("to modify database structure")){
         return;
     }
+
 ?>
 
 <html>
@@ -53,21 +54,13 @@
         <!-- TreeView source file -->
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
         <!-- END TREEVIEW DEFS-->
+        
+        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <!--<link rel=stylesheet href="../../common/css/admin.css">-->
         <style type="text/css">
-            .dtyField {
-                padding-bottom: 3px;
-                padding-top: 3px;
-                display: inline-block;
-            }
-            .dtyLabel {
-                display: inline-block;
-                width: 100px;
-                text-align: right;
-                padding-right: 3px;
-            }
         </style>
     </head>
 
@@ -211,7 +204,7 @@
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes" style="margin-left:120px; font-style: bold; colour:black;"
+                            <input id="btnSave" type="button" value="Save changes" style="font-style: bold; colour:black;"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
                             &nbsp;&nbsp;&nbsp;
@@ -276,6 +269,60 @@
             <button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
         </div>
 
+        
+                <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
+       
+                        <div>
+                            <label class="dtyLabel">Term to be retained:</label>
+                            <label id="lblTerm_toRetain"></label>                            
+                        </div>
+                        <div style="padding-top: 4px;">
+                            <label class="dtyLabel">Term to be merged:</label>
+                            <label id="lblTerm_toMerge"></label>                            
+                        </div>
+
+                        <div style="padding-top: 4px;">
+                            <label class="dtyLabel">Label:</label>
+                            <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
+                            <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
+                            <div style='padding-left:106px;'>
+                            <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
+                            <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
+                            </div>
+                        </div>
+                        
+                        <div style="padding-top: 4px;">
+                            <label class="dtyLabel">Code:</label>
+                            <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
+                            <label for="rbMergeCode1" id="lblMergeCode1"></label>
+                            
+                            <div style='padding-left:106px;'>
+                            <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+                            <label for="rbMergeCode2" id="lblMergeCode2"></label>
+                            </div>
+                        </div>
+
+                        <div style="padding-top: 4px;">
+                            <label class="dtyLabel">Description:</label>
+                            <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
+                            <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
+                            <div style='padding-left:106px;'>
+                            <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+                            <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:30px;width:96%;text-align:center;">
+                            <input id="btnMergeOK" type="button" value="Merge"
+                                title=""/>
+                            <input id="btnMergeCancel" type="button" value="Cancel"
+                                title=""/>
+                        </div>
+                </div>
+
+        
+                
+        
 
         <script  type="text/javascript">
 

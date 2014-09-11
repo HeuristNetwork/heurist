@@ -144,6 +144,7 @@ function EditTerms() {
         }
     }
 
+    
     /**
     *	Fills the given treeview with the appropriate content
     */
@@ -533,11 +534,9 @@ function EditTerms() {
     * nodeid - to be merged
     * retain_nodeid - target
     */
-    function _doTermMerge(nodeid, retain_nodeid){
-        
-        //@todo show confirmation dialog
-        
-        
+    function _doTermMerge(retain_nodeid, nodeid){
+
+        var _dialogbox;
         
         var _updateResult = function(context){
                 if(!Hul.isnull(context) && !context.error){
@@ -555,19 +554,68 @@ function EditTerms() {
                         _fillTreeView((ind===0)?_termTree1:_termTree2);
                 }
         };
-        
-        var oTerms = {terms:{
-            colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
-            defs: {}
-        }};
-        //@todo oTerms.terms.defs[retain_nodeid] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
-        var str = YAHOO.lang.JSON.stringify(oTerms);
+        var _updateOnServer = function(){
+
+                        var oTerms = {terms:{
+                            colNames:['trm_Label','trm_Description','trm_Code'],
+                            defs: {}
+                        }};
+                        oTerms.terms.defs[retain_nodeid] = [
+                        $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val(),
+                        $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
+                        $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
+
+                        var str = YAHOO.lang.JSON.stringify(oTerms);
+                        
+                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                        var callback = _updateResult;
+                        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
+                        Hul.getJsonData(baseurl, callback, params);
+            
+            if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
+        };
+
         
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-        var callback = _updateResult;
-        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
-        Hul.getJsonData(baseurl, callback, params);
+        var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+                             fi = top.HEURIST.terms.fieldNamesToIndex;
+
+        var arTerm = termsByDomainLookup[nodeid];
+        $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
+        $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+        $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+
+        var arTerm = termsByDomainLookup[retain_nodeid];
+        $('#lblTerm_toRetain').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
+        $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+        $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+        $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
+        $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
+        $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
+        $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
+        
+        
+        //fill elements of con
+        var ele = document.getElementById('divTermMergeConfirm');
+        
+        $("#btnMergeCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
+        $("#btnMergeOK").click(_updateOnServer);
+
+        
+        //show confirmation dialog
+        _dialogbox = Hul.popupElement(top, ele,
+            {
+                "close-on-blur": false,
+                "no-resize": true,
+                title: 'Select values to be retained',
+                height: 300,
+                width: 400
+        });
+        
         
     }
     
@@ -945,7 +993,7 @@ function EditTerms() {
         if(_currentNode===null) return;
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        var nodeid = _currentNode.data.id;
+        var retain_nodeid = _currentNode.data.id;
         
         //_keepCurrentParent = _getNextSiblingId(_currentNode);
         //if(_keepCurrentParent==null) 
@@ -953,7 +1001,7 @@ function EditTerms() {
         
         
         var url = top.HEURIST.basePath +
-            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=1&db="+db;
+            "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
         }*/
@@ -962,12 +1010,13 @@ function EditTerms() {
             {
                 "close-on-blur": false,
                 "no-resize": true,
+                title: 'Select term to be merged',
                 height: 500,
                 width: 450,
-                callback: function(retain_nodeid) {
-                    if(retain_nodeid && retain_nodeid !== "root") {
+                callback: function(merge_nodeid) {
+                    if(merge_nodeid && merge_nodeid !== "root") {
                         
-                        _doTermMerge(nodeid, retain_nodeid);
+                        _doTermMerge(retain_nodeid, merge_nodeid);
                         
                         return true;
                     }

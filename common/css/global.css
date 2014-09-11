@@ -1075,3 +1075,14 @@ a.bare:hover{
 #menu_boomark.yuimenu .bd a:hover {
 	background:RGBA(150,150,150,1.0);
 }
+.dtyField {
+    padding-bottom: 3px;
+    padding-top: 3px;
+    display: inline-block;
+}
+.dtyLabel {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    padding-right: 3px;
+}

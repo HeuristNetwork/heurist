@@ -70,6 +70,12 @@ function SelectTermParent() {
 				_currentDomain = top.HEURIST.parameters.domain;
                 _target_parent_id = top.HEURIST.parameters.parent;
 
+                if(top.HEURIST.parameters.mode==1){
+                    Dom.get('header1').innerHTML = 'Select the term you want to be merged';
+                    Dom.get('btnSet').innerHTML = 'SELECT';
+                    Dom.get('divParentIsRoot').style.display = 'none';
+                    Dom.get("childTermName").innerHTML = "";
+                }else
 				if(_childTerm){
 						Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+
 									top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm][top.HEURIST.terms.fieldNamesToIndex.trm_Label]+"</h2>";
@@ -78,6 +84,7 @@ function SelectTermParent() {
 				}
 
 		}
+        
 
 		if(Hul.isnull(_currentDomain)) {
 			Dom.get("childTermName").innerHTML = "ERROR: Domain is not defined";
