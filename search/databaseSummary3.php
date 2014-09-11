@@ -22,6 +22,17 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+    require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/parseQueryToSQL.php');
+    require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
+
+    mysql_connection_select(DATABASE);
+
+    $searchType = BOTH;
+    $args = array();
+    $publicOnly = false;
 ?>
 
 <html>
@@ -30,38 +41,14 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Database Summary</title>
         
-        <!-- D3 -->
-        <script type="text/javascript" src="../external/d3/d3.js"></script>
-        <script type="text/javascript" src="../external/d3/fisheye.js"></script>
-        
-        <!-- jQuery -->
-        <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        
-        <!-- Colpick -->
-        <script type="text/javascript" src="../external/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
-        
-        <!-- Plugin -->
-        <script type="text/javascript" src="plugin.js"></script>
-        
+        <!-- Heurist -->
+        <link rel="stylesheet" type="text/css" href="../common/css/global.css">
         <style>
-            /** Heurist table */
-            #container, #settings, #visualisation, svg {
+            #container, #settings {
                 width: 100%;
                 height: 100%;
             }
-
-            h3 {
-                padding: 3px;
-                margin: 0px;
-            }
-
-            /** Table */
-            .records {
-                overflow: scroll;
-                border: none;
-            }
-
+            
             table {
                 table-layout: auto;
                 border-color: black;   
@@ -78,7 +65,7 @@
                 border: 1px solid black;
             }
             
-            .zerocounts {
+            .count-divider {
                 border-top: 3px solid black;
             }
 
@@ -90,470 +77,272 @@
                 text-decoration: none;
                 cursor: pointer;
             }
-
-            /** Settings */
-            .space {
-                padding-left: 5px;
-                padding-right: 5px;     
-            }
             
-            div.settings {
-                display: inline-block;
-            }
-            
-            div.color {
-                cursor: pointer;
-                display: inline-block;
-                width: 10px;
-                height: 10px;
-                border: 1px solid black; 
-                margin-top: 4px;
-            }
-            
-            #linecolor {
-                background-color: #999;
-            }
-
-            #markercolor {
-                background-color: #000;
-            }
-            
-            #countcolor {
-                background-color: #22a;
-            }
-
-            .middle {
-               vertical-align: middle; 
-            }
-            
-            input.small {
-                cursor: pointer;
-                max-width: 40px;
-                text-align: center;
-            }
-
-            
-            /** SVG related */
             #visualisation {
                 border-left: 1px dashed black;
             }
-            
-            svg {
-                border-top: 1px dashed black;
-            }
-            
-            /** Move records around */
-            g:hover {
-                cursor: pointer;
-            }
-
-            /** Lines between records */
-            .link {
-                fill: none;    
-                stroke-opacity: .6;  
-            }
-     
-            .link:hover {
-                cursor: pointer;
-            }
-
-            /** Circle around icon */
-            circle.around {
-                fill: #fff;
-                stroke-width: 2px;
-                stroke: #000;
-            }
-
-            /** Text above circle */
-            text.center {
-                font-weight: bold;
-                text-anchor: middle;   
-            }
-
-            text.shadow {
-                stroke: #fff;
-                stroke-width: 2px;
-                stroke-opacity: .8;
-            }
-            
-            /** Overlay */
-            #overlay {
-                pointer-events: none;
-            }
-            .semi-transparant {
-                fill: #fff;
-                fill-opacity: 0.9;
-                stroke: #000;
-                stroke-width: 1.5;
-                stroke-opacity: 1.0;
-            }
         </style>
+        
+        <!-- jQuery -->
+        <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        
+        <!-- D3 -->
+        <script type="text/javascript" src="../external/d3/d3.js"></script>
+        <script type="text/javascript" src="../external/d3/fisheye.js"></script>
+        
+        <!-- Colpick -->
+        <script type="text/javascript" src="../external/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
+        
+        <!-- Visualize plugin --> 
+        <script type="text/javascript" src="../common/js/visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="../common/css/visualize.css">
     </head>
 
     <body class="popup">
-        <table id="visualisation" cellpadding="4" cellspacing="1">
+        <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
-                <!-- SETTINGS -->
-                <td height="25px" style="vertical-align: middle;">
-                    <!-- COLOR SETTINGS -->
-                    <div class="settings space">
-                         <b>Colours:</b>
-                         <!-- Line color -->
-                         <i>Lines</i>
-                         <div id="linecolor" class="color"></div>
-                         
-                         <!-- Arrow color -->
-                         <i>Arrows</i>
-                         <div id="markercolor" class="color"></div>
+                <td width="350">
+                    <!-- Record count table -->
+                    <!-- also provides navigation to search for a record type and on/off controls for record types in visualisation -->
+                    <h3> Record types (entities)</h3><br />
+                    <table id="records" class="records" cellpadding="4" cellspacing="1">
 
-                          <!-- Record count circle color -->
-                          <i>Frequency</i>
-                          <div id="countcolor" class="color"></div>
+                        <tr>
+                            <th width="40">ID</th>
+                            <th class="space">Icon</th>
+                            <th class="space" width="200">Record&nbsp;type</th>
+                            <th class="space">Link</th>
+                            <th class="space">Count</th>
+                            <th class="space">Show <input type='checkbox' id="show-all"></th>
+                        </tr>
+
+                        <?php
+                            /** RETRIEVING RECORDS WITH CONNECTIONS */
+                            // Building query
+                            $query = REQUEST_to_query("select rec_RecTypeID, count(*) as count ", $searchType, $args, null, $publicOnly);
+                            $query = substr($query, 0, strpos($query, "order by"));
+                            $query .= " group by rec_RecTypeID order by count DESC";
+                            $rtStructs = getAllRectypeStructures();
                             
-                          <!-- Text color -->
-                          <i>Text</i>
-                          <div id="textcolor" class="color"></div>
-                    </div> 
-                    
-                    <!-- LINE SETINGS -->           
-                    <div class="settings space">
-                        <b>Lines:</b>
-                        <!-- Line type -->
-                        <select class="middle" id="linetype">
-                            <option value="straight">straight</option>
-                            <option value="curved">curved</option>
-                        </select>
+                            // Put record types & counts in the table
+                            $res = mysql_query($query);
+                            $count = 0;
+                            while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
+                                // ID
+                                $rt_ID = $row[0];
+                                echo "<tr class='row'>";
+                                echo "<td align='center'>$rt_ID</td>";
 
-                       <!-- Line length --> 
-                        <i>Length</i>
-                        <input id="linelength" class="small" type="number" min="1" value="200"/>
-                        
-                        <i>Max width</i>
-                        <input id="linewidth" class="small" type="number" min="1" value="10"/>
-                    </div>
-                    
-                    <!-- Entity settings -->
-                    <div class="settings space">
-                        <b>Entitity:</b>
-                        
-                        <i>Max radius</i>
-                        <input id="entityradius" class="small" type="number" min="1" value="100"/>
-                    </div>
-                    
-                    <!-- Transform settings -->
-                    <div class="settings space">
-                        <b>Transform:</b>
-                        
-                        <!-- Formula -->
-                        <select class="middle" id="formula">
-                            <option value="linear">linear</option>
-                            <option value="logarithmic">logarithmic</option>
-                            <option value="unweighted">unweighted</option>
-                        </select>
-                    </div>
-                    
-                    <!-- GRAVITY SETTINGS -->
-                    <div class="settings space">
-                        <b>Gravity:</b>
-                        <!-- Gravity setting -->
-                        <select class="middle" id="gravity">
-                            <option value="off">off</option>
-                            <option value="touch">touch</option>
-                            <option value="aggressive">aggressive</option>
-                        </select>
-                        
-                         <!-- Attraction strength -->
-                        <i>Attraction</i>
-                        <input id="attraction" class="small" type="number" value="-700"/>
-                    </div>
-                    
-                    <div class="settings space">
-                        <b>Fisheye:</b>
-                        <input id="fisheye" type="checkbox" name="fisheye">
-                    </div>
+                                // Image
+                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                                $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                                echo "<td align='center'>$img</td>";
 
-                    <!-- HELP INFO -->
-                    <div class="settings space">
-                        <i style="color: #444; font-size: 8px">Click entities or links to get information, drag entities to reposition</i>
-                    </div>
-                 </td> 
-            </tr>
+                                // Title
+                                $rectypeTitle = $rtStructs['names'][$rt_ID];
+                                $title = htmlspecialchars($rectypeTitle);
+                                echo "<td style='padding-left: 5px; padding-right: 5px'>".$title."</td>";
 
-            <tr>
+                                // Links
+                                $links =  "<a href='#' title='Open search for this record type in current page'".
+                                "onclick='onrowclick($rt_ID, false)' class='internal-link'>&nbsp;</a>";
+                                $links .= "<a href='#' title='Open search for this record type in new page'".
+                                "onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a>";
+                                echo "<td>$links</td>";
+
+                                // Count
+                                echo "<td align='center'>" .$row[1]. "</td>";
+
+                                // Show
+                                if($count < 10) {
+                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "' checked></td>";
+                                }else{
+                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
+                                }
+                                echo "</tr>";
+                                $count++;
+
+                            }//end while
+
+                            /** RETRIEVING RECORDS WITH NO CONNECTIONS */
+                            $query = "SELECT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC;";
+                            $res = mysql_query($query);
+                            $count = 0;
+                            while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
+                                //print_r($row);
+                                if($count == 0) {
+                                    echo "<tr class='row count-divider'>";  
+                                }else{
+                                    echo "<tr class='row'>";
+                                }
+            
+                                // ID
+                                $rt_ID = $row[0];
+                                echo "<td align='center'>" .$rt_ID. "</td>";
+                                
+                                // Image  
+                                $title = $row[1];
+                                $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
+                                $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                                echo "<td align='center'>$img</td>";
+                                
+                                // Type
+                                echo "<td style='padding-left: 5px; padding-right: 5px'>" .$title. "</td>"; 
+                                
+                                // Link
+                                $links =  "<a href='#' title='Open search for this record type in current page'".
+                                "onclick='onrowclick($rt_ID, false)' class='internal-link'>&nbsp;</a>";
+                                $links .= "<a href='#' title='Open search for this record type in new page'".
+                                "onclick='onrowclick($rt_ID, true)' class='external-link'>&nbsp;</a>";
+                                echo "<td>$links</td>";
+                                
+                                // Count
+                                echo "<td align='center'>0</td>";
+                                
+                                // Show
+                                echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
+                                
+                                echo "</tr>";
+                                $count++;
+                            }
+                        ?>
+
+                    </table>
+
+                </td>
+
+                <!-- D3 visualisation -->
                 <td>
-                    <!-- SVG -->
-                    <svg></svg>
+                    <?php include "../common/html/visualize.html"; ?>
                 </td>
             </tr>
         </table>
-
-        
-        
+    
         <script>
-           
-            var url = "../admin/describe/getRectypeRelationsAsXML.php" + window.location.search;
+            var url = "../admin/describe/getRectypeRelationsAsJSON.php" + window.location.search;
             console.log("Loading data from: " + url);
-            d3.xml(url, "application/xml", function(error, xml) {
+            d3.json(url, function(error, json) {
                 // Error check
                 if(error) {
-                    console.log("Error loading data: " + error.message);
                     return alert("Error loading data: " + error.message);
                 }
                
                 // Data loaded successfully!
-                console.log("XML Loaded!");
-                console.log(xml);
+                console.log("JSON Loaded");
+                console.log(json);   
                 
-                /** Attempts to grab the first value after searching for a tag*/
-                function getValue(element, query) {
-                    var results = element.getElementsByTagName(query);
-                    if(results && results.length > 0) {
-                        return results[0];
+                /** RECORD FILTERING */
+                // Set filtering settings in UI
+                $(".show-record").each(function() {
+                    var name = $(this).attr("name");
+                    var record = localStorage.getItem(name);
+                    if(record) {
+                        // Update checked attribute
+                        var obj = JSON.parse(record);
+                        if("checked" in obj) {
+                            $(this).prop("checked", obj.checked);
+                        }
                     }
-                    return null;
-                }
-
-                /** Returns the ID value of a record */
-                function getID(record) {
-                    return parseInt(getValue(record, "rec_ID").textContent);               
-                }
-
-                /** Returns the name value of a record */
-                function getName(record) {
-                    return getValue(record, "rec_Name").textContent;                
-                }
-
-                /** Returns the count value of a record */
-                function getCount(record) {
-                    return parseInt(getValue(record, "rec_Count").textContent);                
-                }
-
-                /** Returns the image value of a record */
-                function getImage(record) {
-                    return getValue(record, "rec_Image").textContent;               
-                }
-
-                /** Returns an object containing the id, name, count and image of a record */
-                function getInfo(record) {
-                    var id = getID(record);
-                    var name = getName(record);
-                    var count = getCount(record);
-                    var image = getImage(record);
-                    var type = record.namespaceURI;
-                    return {"id": id, "name": name, "count": count, "image": image, "type": type};
-                }
-
-                /** Returns the relation value of a record */
-                function getRelations(record) {       
-                    return getValue(record, "rec_Relations");           
-                }
-
-                /** Returns the unconstrained value of a record */
-                function isUnconstrained(record) {
-                    var value = getValue(record, "rel_Unconstrained");
-                    if(value && value === "true") {
-                        return true;
+                });
+                
+                // Listen to 'show-record' checkbox changes  
+                $(".show-record").change(function(e) {
+                    // Update record field 'checked' value in localstorage
+                    var name = $(this).attr("name");
+                    var record = localStorage.getItem(name);
+                    var obj;
+                    if(record === null) {
+                        obj = {};  
+                    }else{                                   
+                        obj = JSON.parse(record);
                     }
-                    return false;
-                }    
+                    
+                    // Set 'checked' attribute and store it
+                    obj.checked = $(this).is(':checked');
+                    localStorage.setItem(name, JSON.stringify(obj));
+                    
+                    // Update visualisation
+                    visualizeData();
+                });
 
-                /** Converts the raw XML data to D3 usable nodes and links
-                 *  Return example
-                 * 
-                 * Returns an Object:
-                 * Object {nodes: Object, links: Array[19]}
-                    * Contains a "nodes" attribute, this is an Object containing more Objects
-                    * Contains a "links" attribute, this is an array containg Objects
-                 * 
-                 * nodes: Object [Each attribute is an Object as well]
-                 * Death: Object
-                     * count: 232
-                     * fixed: true
-                     * id: 33
-                     * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/33.png"
-                     * index: 6
-                     * name: "Death"
-                     * px: 110.60620663669448
-                     * py: 87.9311955887024
-                     * type: "usagerecord"
-                     * weight: 4
-                     * x: 110.60620663669448
-                     * y: 87.9311955887024
-                     * __proto__: Object
-                 * Digital media item: Object
-                 * Educational institution: Object
-                 * Eventlet: Object
-                 * Military award: Object
-                 * etc.
-                 * 
-                 * 
-                 * links: Array[19]
-                 * 0: Object
-                     * pointer: "BOR entry pdf"
-                     * source: Object
-                         * count: 2575
-                         * fixed: true
-                         * id: 10
-                         * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/10.png"
-                         * index: 1
-                         * name: "Person"
-                         * px: 388.425870681868
-                         * py: 76.42969215610094
-                         * type: "rootrecord"
-                         * weight: 13
-                         * x: 388.425870681868
-                         * y: 76.42969215610094
-                         * __proto__: Object
-                     * target: Object
-                         * count: 4718
-                         * fixed: true
-                         * id: 5
-                         * image: "http://heur-db-pro-1.ucc.usyd.edu.au/HEURIST_FILESTORE/BoRO_Backup_13Aug14/rectype-icons/5.png"
-                         * index: 0
-                         * name: "Digital media item"
-                         * px: 89.0722588084383
-                         * py: 201.8612925141735
-                         * type: "rootrecord"
-                         * weight: 2
-                         * x: 89.0722588084383
-                         * y: 201.8612925141735
-                         * __proto__: Object
-                     * __proto__: Object
-                 * 1: Object
-                 * 2: Object
-                 * 3: Object
-                 * etc.
-                 * 
-                 */
-                 function getFilter() {
-                     return [];
-                 }
-                var maxCount = 1;
-                function getData(xml) {
-                    maxCount = 1;
+                // Listen to the 'show-all' checkbox 
+                $("#show-all").change(function() {
+                    // Change all check boxes
+                    var checked = $(this).is(':checked');  
+                    $(".show-record").prop("checked", checked);
                     
-                    // Holds a list of unique nodes
-                    // Has attributes 'id', 'name', 'count', 'image' and 'type'
-                    var nodes = {};
-                    
-                    // Relationships between the nodes. 
-                    // Has attributes 'source' and 'target'
-                    var links = [];
-                    
-                    // A string array containing names of nodes to filter.
-                    var filter = getFilter();
-                    
-                    // Going through all Records with namespace 'rootrecord'
-                    var roots = xml.documentElement.getElementsByTagNameNS("rootrecord", "Record");
-                    for(var i = 0; i < roots.length; i++) {
-                        // Retrieve info about this record
-                        var root = roots[i];
-                        var rootInfo = getInfo(root);
-                        //console.log(rootInfo);
+                    // Update localstorage
+                    $(".show-record").each(function(e) {
+                        var name = $(this).attr("name");
+                        var record = localStorage.getItem(name);
+                        var obj;
+                        if(record === null) {
+                            obj = {};  
+                        }else{                                   
+                            obj = JSON.parse(record);
+                        }
                         
-                        // Check if we should filter this record
-                        var index = $.inArray(rootInfo.name, filter);
-                        if(index == -1/* && rootInfo.count > 0*/) {
-                            // Going through all linked relation Records with namespace 'relationrecord'
-                            var relations = root.getElementsByTagNameNS("relationrecord", "Record");
-                            if(relations && relations.length > 0) {
-                                for(var j = 0; j < relations.length; j++ ){
-                                    // Get record info 
-                                    var relation = relations[j];
-                                    var relationInfo = getInfo(relation);
-                                    //console.log(relationInfo);
-                         
-                                    // Unconstrained check
-                                    var constrained = isUnconstrained(relation);
-                                    //console.log(constrained);
-                                    
-                                    // Check types
-                                    var types = relation.getElementsByTagName("rel_Name");
-                                    //console.log(types);
-                                    if(types && types.length > 0) {
-                                        for(var k = 0; k < types.length; k++) {
-                                            var type = types[k].textContent;
-                                            //console.log(type);
-                                        }
-                                    }
-                                    
-                                    // Going through all linked usage Records with namespace 'usagerecord'
-                                    var usages = relation.getElementsByTagNameNS("usagerecord", "Record");
-                                    if(usages && usages.length > 0) {
-                                        for(var k = 0; k < usages.length; k++) {
-                                            // Get record info 
-                                            var usage = usages[k];
-                                            var usageInfo = getInfo(usage);
-                                            //console.log(usageInfo);
-                                            
-                                            // Check if we should filter this record
-                                            var index = $.inArray(usageInfo.name, filter); 
-                                            if(index == -1/* && usageInfo.count > 0*/) {
-                                                // Construct a link; add root record info
-                                                var link = {};
-                                                if(!(rootInfo.name in nodes)) {
-                                                    nodes[rootInfo.name] = rootInfo;
-                                                    link["source"] = rootInfo;
-                                                    
-                                                     // Count check
-                                                    if(rootInfo.count > maxCount) {
-                                                        maxCount = rootInfo.count;                                                                     
-                                                    }
-                                                }else{
-                                                    link["source"] = nodes[rootInfo.name];
-                                                }
-
-                                                // Link construction; add usage record info
-                                                if(!(usageInfo.name in nodes)) { // Check if a node with this name has been added already 
-                                                    nodes[usageInfo.name] = usageInfo; // It has not; add it to the list of nodes
-                                                    link["target"] = usageInfo;    // Set the target of the root link to this reoord
-                                                    
-                                                     // Count check
-                                                    if(usageInfo.count > maxCount) {
-                                                        maxCount = usageInfo.count;
-                                                    }
-                                                }else{ // Node with this name exists already, use that record 
-                                                    link["target"] = nodes[usageInfo.name]; 
-                                                }
-
-                                                // Add link to array
-                                                link["relation"] = relationInfo;
-                                                links.push(link);
-                                            }else{
-                                                // Display root node anyways
-                                                if(!(rootInfo.name in nodes)) {
-                                                    nodes[rootInfo.name] = rootInfo;
-                                                    
-                                                    // Count check
-                                                    if(rootInfo.count > maxCount) {
-                                                        maxCount = rootInfo.count;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                             }
-                        } 
-                    }
+                        // Set 'checked' attribute and store it
+                        obj.checked = checked;
+                        localStorage.setItem(name, JSON.stringify(obj));
+                    });
                     
-                    // Construct a data object and return it.
-                    var obj = {"nodes": nodes, "links": links};
-                    console.log("Data has been transformed to D3 format:");
-                    console.log(obj);
-                    return obj;
+                    visualizeData();
+                });
+                
+                
+                /** VISUALIZING */
+                // Parses the data
+                function getData(data) {
+                    // Build name filter
+                    var names = [];   
+                    $(".show-record").each(function() {
+                        var checked = $(this).is(':checked'); 
+                        if(!checked) {
+                            var name = $(this).attr("name");
+                            names.push(name);
+                        }
+                    });    
+                    
+                    // Filter nodes
+                    var map = {};
+                    var size = 0;
+                    var nodes = data.nodes.filter(function(d, i) {
+                        if($.inArray(d.name, names) == -1) {
+                            map[i] = d;
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    // Filter links
+                    var links = [];
+                    data.links.filter(function(d) {
+                        if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
+                            var link = {source: map[d.source], target: map[d.target], relation: d.relation};
+                            links.push(link);
+                        }
+                    })
+                
+                    // Return filtered data             
+                    return {nodes: nodes, links: links}
                 }
                 
-                console.log("Calling plugin!");
-                $("svg").visualize({
-                    color: "Orange",
-                    data: xml,
-                    getData: function(data) { return getData(data); }
-                });   
+                // Visualizes the data
+                function visualizeData() {
+                    // Call plugin
+                    console.log("Calling plugin!");
+                    $("#visualisation").visualize({
+                        data: json,
+                        getData: function(data) { return getData(data); }
+                    });   
+                }
+                
+                visualizeData();
+  
             });
-            
-            
-             
+      
         </script>
     </body>
 

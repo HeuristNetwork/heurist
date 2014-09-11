@@ -1,0 +1,99 @@
+/** Visualisation CSS */
+.fullscreen {
+    width: 100%;
+    height: 100%;
+}
+
+/** Settings */
+.settings {
+    display: inline-block;
+}       
+
+.space {
+    padding-left: 5px;
+    padding-right: 5px;     
+}
+
+.middle {
+   vertical-align: middle; 
+}
+
+.colorblock {
+    cursor: pointer;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid black; 
+    margin-top: 4px;
+}
+
+.settings select:hover {
+    cursor: pointer;
+}
+
+.small-input {
+    cursor: pointer;
+    max-width: 40px;
+    text-align: center;
+}
+
+.settings input:hover {
+    cursor: pointer;
+}
+
+.explanation {
+    color: #444;
+    font-size: 10px
+}
+
+/** SVG */
+#d3svg {
+    border-top: 1px dashed black;
+}
+
+/** Record hover */
+g:hover {
+    cursor: pointer;
+}
+
+/** Lines between records */
+.link {
+    fill: none;    
+    stroke-opacity: .6;  
+}
+
+.link:hover {
+    cursor: pointer;
+}
+
+/** Circle around icon */
+circle.around {
+    fill: #fff;
+    stroke-width: 2px;
+    stroke: #000;
+}
+
+/** Text above circle */
+text.center {
+    font-weight: bold;
+    text-anchor: middle;   
+}
+
+text.shadow {
+    stroke: #fff;
+    stroke-width: 2px;
+    stroke-opacity: .8;
+}
+
+/** Overlay */
+#overlay {
+    pointer-events: none;
+}
+
+.semi-transparant {
+    fill: #fff;
+    fill-opacity: 0.9;
+    stroke: #000;
+    stroke-width: 1.5;
+    stroke-opacity: 1.0;
+}

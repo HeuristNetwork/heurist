@@ -691,7 +691,7 @@ function visualizeData() {
     // Adding the background circles to the nodes
     var bgcircle = node.append("circle")
                        .attr("r", function(d) {
-                           console.log("COUNT for " + d.name + ": " + d.count);
+                            //console.log("COUNT for " + d.name + ": " + d.count);
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")

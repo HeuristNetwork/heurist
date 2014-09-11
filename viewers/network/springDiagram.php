@@ -34,50 +34,98 @@
         <style>
             html, body {
                 background-color: #fff;
-                overflow: scroll;
-                
+                overflow-x: scroll;
             }
         </style>
         
+         <!-- jQuery -->
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        
+        <!-- D3 -->
+        <script type="text/javascript" src="../../external/d3/d3.js"></script>
+        <script type="text/javascript" src="../../external/d3/fisheye.js"></script>
+        
+        <!-- Colpick -->
+        <script type="text/javascript" src="../../external/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../external/colpick/colpick.css">
+        
+        <!-- Visualize plugin --> 
+        <script type="text/javascript" src="../../common/js/visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../common/css/visualize.css">                            
     </head>
     
     <body>
-        <?php echo "Spring diagram"; ?>
-        <br /><br />
-        
-        <?php echo "Database" . DATABASE ?>
-        <br /><br />
-        
-        <?php echo $_SERVER['QUERY_STRING']; ?>
-        <br /><br />
-        
-        <?php echo "Current time: " . time(); ?>
-        <br /><br />
+        <!-- Visualize HTML -->
+        <?php include "../../common/html/visualize.html"; ?>
         
         <script>
             $(document).ready(function() {
-                $("body").append("<h2>RESULTS</h2>");
-                try {
+                try {    
                     var results = top.HEURIST.search.results;
                     if(results) {
-                        console.log(results);  
+                        console.log(results);
+                        console.log(results.recSet);  
                         
-                        for(var key in results.recSet) {
-                            // Display ID and depth
-                            var depth = results.recSet[key].depth;
-                            var html = "<div><h3>Key: " + key + ", depth: " + depth + "</h3>";
+                        var data = {};
+                        var nodes = [];
+                        var links = [];
+ 
+                        
+                        // Building nodes
+                        for(var id in results.recSet) {
+                            // Get details
+                            var record = results.recSet[id].record;
+                            var depth = results.recSet[id].depth;
+                            var name = record["5"];
+                            var count = 1;
                             
-                             // Loop through all properties of the record
-                            var record = results.recSet[key].record;
-                            for(var id in record) {
-                                html += "<br />ID: " + id + ", value: " + record[id];
+                            // Construct node
+                            var node = {id: id, name: name, count: count, depth: depth};
+                            console.log(node);
+                            nodes.push(node);        
+                        }
+                        
+                        // Building links
+                        /*
+                        for(var id in results.recSet) {
+                            console.log("RESULT SET");
+
+                            var ptr = results.recSet[id].revPtrLinks;
+                            console.log("PTR");
+                            console.log(ptr);
+                            if(ptr !== undefined) {
+                                var ids = ptr.byRecIDs;
+                                if(ids.lenth > 0) {
+                                    for(var i = 0; i < ids.length; i++) {
+                                        var link = {source: id, target: ids[i]};
+                                        console.log("LINK");
+                                        console.log(link);
+                                    }
+                                }
                             }
                             
-                            html += "</div>";
-                            $("body").append(html);           
-                            
+                            var rev = results.recSet[id].revRelLinks;
+                            console.log(rev);   
                         }
+                        */
+                        
+                        // Time to visualize
+                        console.log(nodes);
+                        var data = {nodes: nodes, links: links};
+                        
+                        // Parses the data
+                        function getData(data) {
+                            console.log("GET DATA");
+                            return data;
+                        }
+                        
+                        // Call plugin
+                        console.log("Calling plugin!");
+                        $("#visualisation").visualize({
+                            data: data,
+                            getData: function(data) { return getData(data); }
+                        });  
+                      
                     }   
                 } catch(error) {
                     $("body").append("<h3>Error occured</h3><br /><i>" + error.message + "</i>");        

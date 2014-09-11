@@ -1,0 +1,96 @@
+<!-- Visualisation HTML -->
+<table id="visualisation" class="fullscreen" cellpadding="4" cellspacing="1">
+    <tr>
+        <!-- SETTINGS -->
+        <td height="25px" style="vertical-align: middle;">
+            <!-- COLOR SETTINGS -->
+            <div class="settings space">
+                 <b>Colours:</b>
+                 <!-- Line color -->
+                 <i>Lines</i>
+                 <div id="linecolor" class="colorblock"></div>
+                 
+                 <!-- Arrow color -->
+                 <i>Arrows</i>
+                 <div id="markercolor" class="colorblock"></div>
+
+                  <!-- Record count circle color -->
+                  <i>Frequency</i>
+                  <div id="countcolor" class="colorblock"></div>
+                    
+                  <!-- Text color -->
+                  <i>Text</i>
+                  <div id="textcolor" class="colorblock"></div>
+            </div> 
+            
+            <!-- LINE SETINGS -->           
+            <div class="settings space">
+                <b>Lines:</b>
+                <!-- Line type -->
+                <select class="middle" id="linetype">
+                    <option value="straight">straight</option>
+                    <option value="curved">curved</option>
+                </select>
+
+               <!-- Line length --> 
+                <i>Length</i>
+                <input id="linelength" class="small-input" type="number" min="1"/>
+                
+                <i>Max width</i>
+                <input id="linewidth" class="small-input" type="number" min="1"/>
+            </div>
+            
+            <!-- Entity settings -->
+            <div class="settings space">
+                <b>Entitity:</b>
+                
+                <i>Max radius</i>
+                <input id="entityradius" class="small-input" type="number" min="1"/>
+            </div>
+            
+            <!-- Transform settings -->
+            <div class="settings space">
+                <b>Transform:</b>
+                
+                <!-- Formula -->
+                <select class="middle" id="formula">
+                    <option value="linear">linear</option>
+                    <option value="logarithmic">logarithmic</option>
+                    <option value="unweighted">unweighted</option>
+                </select>
+            </div>
+            
+            <!-- GRAVITY SETTINGS -->
+            <div class="settings space">
+                <b>Gravity:</b>
+                <!-- Gravity setting -->
+                <select class="middle" id="gravity">
+                    <option value="off">off</option>
+                    <option value="touch">touch</option>
+                    <option value="aggressive">aggressive</option>
+                </select>
+                
+                 <!-- Attraction strength -->
+                <i>Attraction</i>
+                <input id="attraction" class="small-input" type="number"/>
+            </div>
+            
+            <div class="settings space">
+                <b>Fisheye:</b>
+                <input id="fisheye" type="checkbox" name="fisheye">
+            </div>
+
+            <!-- HELP INFO -->
+            <div class="settings space">
+                <i class="explanation">Click entities or links to get information, drag entities to reposition</i>
+            </div>
+         </td> 
+    </tr>
+
+    <tr>
+        <td>
+            <!-- SVG -->
+            <svg id="d3svg" class="fullscreen"></svg>
+        </td>
+    </tr>
+</table>

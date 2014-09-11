@@ -1,17 +1,44 @@
-(function ( $ ) {
+/**
+* Visualisation plugin
+* Requires:
+* - jQuery          http://jquery.com/
+* - D3              http://d3js.org/
+* - D3 fisheye      https://github.com/d3/d3-plugins/tree/master/fisheye
+* - Colpick         http://colpick.com/plugin
+*
+* Objects must have at least the following properties:
+* - id
+* - name
+* - image
+* - count
+* 
+* Available settings:
+* - color
+* - backgroundColor
+* - query
+* etc.
+* 
 
-    /** PLUGIN */
-    var settings;
+* 
+* 
+* 
+*/
+(function ( $ ) {
+    var settings;   // Plugin settings object
+    var svg;        // The SVG where the visualisation will be executed on
+
+    /**
+    * jQuery plugin hook, this is where the magic happens
+    * @param options Custom options given when this function is called
+    */
     $.fn.visualize = function( options ) {
+        svg = d3.select("#d3svg");
         
         // Default plugin settings
         settings = $.extend({
-            // These are the defaults.
-            color: "#556b2f",
-            backgroundColor: "white",
-            query: "svg",
+            // Custom functions
             getData: $.noop(),
-            // Default settings
+            // User settings
             linecolor: "#22a",
             markercolor: "#000",
             countcolor: "#262",
@@ -26,26 +53,19 @@
             fisheye: false
         }, options );
  
-        // Greenify the collection based on the settings variable.
-        this.css({
-            color: settings.color,
-            backgroundColor: settings.backgroundColor
-        });
-        
         // Handle settings
         checkStoredSettings();
         handleSettingsInUI();
-        
-       
+
         // Transform
-        var svg = d3.select("svg");
-        visualizeData(svg);
+        visualizeData();
         
         return this;
- 
     };
     
-      /*********************************** START OF SETTING FUNCTIONS **************************************/
+    
+    
+    /*********************************** START OF SETTING FUNCTIONS **************************************/
     /** SETTING NAMES */
     var setting_linecolor     = "setting_linecolor";
     var setting_markercolor   = "setting_markercolor";
@@ -316,15 +336,14 @@
     /***********************************START OF VISUALISATION FUNCIONS***********************************/
     /** Visualizes the data */ 
     function visualizeData() {
-        // SVG data
-        var svg = d3.select(settings.query);   
+        // SVG data  
         var width = parseInt(svg.style("width"));
         var height = parseInt(svg.style("height"));
         svg.selectAll("*").remove();
         
         // Record data
         var data = settings.getData.call(this, settings.data); 
-        console.log("DATA");
+        console.log("RECORD DATA");
         console.log(data);  
         
         // Color settings
@@ -409,14 +428,12 @@
              })
              .style("stroke-dasharray", (function(d) {
                  if(d.relation.count == 0) {
-                     console.log("D target count == 0, target: " + d.target.name + ", source: " + d.source.name);
-                     console.log(d);
                     return "3, 3"; 
                  } 
              })) 
              .on("click", function(d) {
                  // Construct line overlay data, then use it to generate the overlay itself
-                 createOverlay(d3.event.offsetX, d3.event.offsetY, getLineOverlayInfo(d.relation));    
+                 createOverlay(d3.event.offsetX, d3.event.offsetY, d.relation);    
              })
              .on("mouseout", function(d) {
                  removeOverlay();                                 
@@ -564,7 +581,7 @@
                       .on("click", function(d) {
                            // Check if it's not a click after dragging
                            if(!d3.event.defaultPrevented) {
-                                createOverlay(d3.event.offsetX, d3.event.offsetY, getRecordOverlayInfo(d));
+                                createOverlay(d3.event.offsetX, d3.event.offsetY, d);
                            }
                       })
                       .on("mouseout", function(d) {
@@ -575,7 +592,7 @@
         // Adding the background circles to the nodes
         var bgcircle = node.append("circle")
                            .attr("r", function(d) {
-                               console.log("COUNT for " + d.name + ": " + d.count);
+                                //console.log("COUNT for " + d.name + ": " + d.count);
                                 return getEntityRadius(d.count);
                            })
                            .attr("class", "background")
@@ -766,7 +783,61 @@
                  return "translate(" + d.x + "," + d.y + ")"; 
             });
         }
+    }
+    
+    /*************************************** OVERLAY ****************************************/
+    /**
+    * Creates an overlay on the location that the user has clicked on.
+    * @param x Coord-x
+    * @param y Coord-y
+    * @param record Record info
+    */
+    function createOverlay(x, y, record) {
+        var horizontalOffset = 5;
+        var verticalOffset = 12;
+        console.log("CREATE OVERLAY");
+        console.log(record);
         
+        $("#overlay").remove();
+    
+        // Add overlay container                 
+        var overlay = svg.append("g")
+                         .attr("id", "overlay")      
+                         .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
+        
+        // Draw a semi transparant rectangle       
+        var rect = overlay.append("rect")
+                          .attr("class", "semi-transparant")              
+                          .attr("x", 0)
+                          .attr("y", 0);
+                          
+        // Adding text  
+        var info = [record.name];  
+        var text = overlay.selectAll("text")
+                          .data(info)
+                          .enter()
+                          .append("text")
+                          .text(String)
+                          .attr("x", horizontalOffset)        // Some left padding
+                          .attr("y", function(d, i) {
+                              return (i+0.5)*verticalOffset;      // Position calculation
+                          });
+                      
+        // Calculate optimal rectangle size
+        var maxWidth = 100;
+        var maxHeight = 100;                              
+        
+        // Set optimal width & height
+        rect.attr("width", maxWidth + 3*horizontalOffset)
+            .attr("height", maxHeight + verticalOffset);
+    }
+    
+    
+    /** Slight delay, fades away and then removes itself. */
+    function removeOverlay() {
+        $("#overlay").delay(500).fadeOut(500, function() {
+             $(this).remove();
+        });
     }
  
 }( jQuery ));

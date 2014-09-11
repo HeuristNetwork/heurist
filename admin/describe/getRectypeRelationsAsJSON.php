@@ -151,7 +151,8 @@
         $res = mysql__select_array("Records","count(*)","rec_RecTypeID=".$rt_id);
         return $res[0];
     }
-    // FILE HEADERS
+    
+    // OBJECT
     $object = new stdClass();
     $object->HeuristBaseURL     = HEURIST_BASE_URL;
     $object->HeuristDBName      = HEURIST_DBNAME;
@@ -197,18 +198,17 @@
             }
         }
         if(!$found) {
-            $rootindex = array_push($nodes, $rootrecord);
+            $rootindex = array_push($nodes, $rootrecord) - 1;
         }
         
         // Check relations
         foreach ($rt['details'] as $details) {
             // Relation record
             $relationrecord = new stdClass();
-            $dt_id = $details['dt_id'];
             $relationrecord->name  = $details['dt_name'];
-            $relationrecord->id    = $dt_id;
+            $relationrecord->id    = $details['dt_id'];
             $relationrecord->count = $details['count'];
-            $relationrecord->image = $image_base_url.$dt_id;
+            $relationrecord->image = $image_base_url.$details['dt_id'];
             $relationrecord->unconstrained = $details['isconstrained'] < 1;
 
             // Relation types
@@ -279,7 +279,7 @@
                         }
                     }
                     if(!$found) {
-                        $usageindex = array_push($nodes, $usagerecord);
+                        $usageindex = array_push($nodes, $usagerecord) - 1;
                     }
    
                     // Build link
@@ -294,7 +294,7 @@
         }
     }
     
-    $object->nodes = (array) $nodes;
+    $object->nodes = $nodes;
     $object->links = $links;      
     
     print json_format($object, true);
