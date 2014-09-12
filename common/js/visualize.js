@@ -360,7 +360,21 @@
         var gravity = getSetting(setting_gravity);
         var attraction = getSetting(setting_attraction);
         var fisheyeEnabled = getSetting(setting_fisheye);
-     
+        
+        console.log("SETTINGS HAVE BEEN SET");
+        
+        // Container
+        var zoom = d3.behavior.zoom()
+                     .scaleExtent([-10, 10])
+                     .on("zoom", zoomed);  
+                     
+        function zoomed() {
+            container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        }             
+        
+        svg.call(zoom);
+        var container = svg.append("g");
+
         // Creating D3 force
         var force = d3.layout.force()
                              .nodes(d3.values(data.nodes))
@@ -376,46 +390,50 @@
                                  }
                              })
                              .size([width, height])
-                             .start();   
+                             .start();
+        console.log("FORCE STARTED");   
                        
         // Adding marker definitions
-        svg.append("defs").selectAll("marker")
-                          .data(force.links())
-                          .enter()
-                          .append("svg:marker")    
-                          .attr("id", function(d) {
-                                return "marker" + d.relation.id;
-                          })
-                          .attr("markerWidth", function(d) {    
-                              return getMarkerWidth(d.relation.count);             
-                          })
-                          .attr("markerHeight", function(d) {
-                              return getMarkerWidth(d.relation.count);
-                          })
-                          .attr("refX", -1)
-                          .attr("refY", 0)
-                          .attr("viewBox", "0 -5 10 10")
-                          .attr("markerUnits", "userSpaceOnUse")
-                          .attr("orient", "auto")
-                          .attr("fill", markercolor) // Using the markercolor setting
-                          .attr("opacity", "0.6")
-                          .append("path")
-                          .attr("d", "M0,-5L10,0L0,5");
+        container.append("defs")
+                 .selectAll("marker")
+                 .data(force.links())
+                 .enter()
+                 .append("svg:marker")    
+                 .attr("id", function(d) {
+                    return "marker" + d.relation.id;
+                 })
+                 .attr("markerWidth", function(d) {    
+                    return getMarkerWidth(d.relation.count);             
+                 })
+                 .attr("markerHeight", function(d) {
+                    return getMarkerWidth(d.relation.count);
+                 })
+                 .attr("refX", -1)
+                 .attr("refY", 0)
+                 .attr("viewBox", "0 -5 10 10")
+                 .attr("markerUnits", "userSpaceOnUse")
+                 .attr("orient", "auto")
+                 .attr("fill", markercolor) // Using the markercolor setting
+                 .attr("opacity", "0.6")
+                 .append("path")
+                 .attr("d", "M0,-5L10,0L0,5");
 
         // Add the chosen lines [using the linetype setting]  
         var lines;
         if(linetype == "curved") {
             // Add curved lines
-             lines = svg.append("svg:g").selectAll("path")
-                                        .data(force.links())
-                                        .enter()
-                                        .append("svg:path");
+             lines = container.append("svg:g")
+                              .selectAll("path")
+                              .data(force.links())
+                              .enter()
+                              .append("svg:path");
         }else{
             // Add straight lines
-            lines = svg.append("svg:g").selectAll("polyline.link")
-                                       .data(force.links())
-                                       .enter()
-                                       .append("svg:polyline");
+            lines = container.append("svg:g")
+                             .selectAll("polyline.link")
+                             .data(force.links())
+                             .enter()
+                             .append("svg:polyline");
         }     
         // Adding shared attributes
         lines.attr("class", "link") 
@@ -513,7 +531,7 @@
         }
              
         // Defining the nodes
-        var node = svg.selectAll(".node")
+        var node = container.selectAll(".node")
                       .data(force.nodes())
                       .enter().append("g")
                       .attr("class", function(d, i) {
@@ -743,8 +761,8 @@
                 }
                 
             }); 
-        }                   
-        
+        }    
+  
         /** Tick handler for curved lines */
         function curvedTick() {
             // Calculate the curved segments

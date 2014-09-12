@@ -44,17 +44,17 @@ String.prototype.htmlEscape = function() {
 var _TAB_RECORDVIEW = 0,
 	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
-	_TAB_TRANSFORM = 3,
-    _TAB_DIAGRAM = 4,
+    _TAB_DIAGRAM = 3,
+    _TAB_TRANSFORM = 4,
 	_tabView = null;
 
 var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
 						'map':1,'Map':1,'map view':1,'Map View':1,
-						'report':2,'Report':2,'report view':2,'Report View':2, 
-						'transform':3,'Transform':3,'transform view':3,'Transform View':3,
-                        'diagram':4,'Diagram':4,'diagram view':4,'Diagram View':4};
+						'report':2,'Report':2,'report view':2,'Report View':2,
+                        'diagram':3,'Diagram':3,'diagram view':3,'Diagram View':3, 
+						'transform':4,'Transform':4,'transform view':4,'Transform View':4};
 
-var tabIDToAppnameMap = ['record','map','report','transform','diagram'];
+var tabIDToAppnameMap = ['record','map','report','diagram','transform'];
 
 var appInterface = {};
 
@@ -3456,17 +3456,18 @@ top.HEURIST.search = {
             var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
             console.log("Current tab inside updateDiagramView: " + currentTab);
             //if(currentTab==_TAB_DIAGRAM){
-            if(currentTab >= 0) {
-                // Get database
+            if(currentTab == _TAB_DIAGRAM) {
+                // Get database parameter
                 var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                          (top.HEURIST.database.name?top.HEURIST.database.name:''));
                      
                 // Get record ID's
-                var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+                //var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
                      
                 //diagramFrame.src = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+top.HEURIST.currentRecordID+"&db="+db;
                 // Building URL
-                var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+selectedRecIDs.join(",")+"&db="+db;
+               // var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+selectedRecIDs.join(",")+"&db="+db;
+                var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?db="+db;
                 setTimeout(function(){diagramFrame.src = url;}, 50);
             }
         }
@@ -4792,7 +4793,7 @@ top.HEURIST.search = {
 
 	},
 
-	recMenuTags:null,
+	recMenuTags: null,
 
 	buildMenuForTagSearchs: function() {
 
@@ -5348,8 +5349,13 @@ function layoutAppPanel(isToggle,newWidth){
 		top.HEURIST.fireEvent(window, "heurist-search-layout-loaded");
 	});
 
-
+    // ViewerTab null check    
+    if(top.HEURIST.util.isnull(viewerTabIndex) || viewerTabIndex === undefined || viewerTabIndex === null) {
+        viewerTabIndex = 0;
+    }
+    console.log("viewerTabIndex: " + viewerTabIndex);
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
+    console.log("Initialised tabview: " + _tabView);
 	//if (viewerTabIndex == _TAB_MAP){top.HEURIST.search.mapSelected()} //initialises map
 	/*
 	if (Number(viewerTabIndex) === _TAB_MAP){top.HEURIST.search.mapSelected3()} //initialises new map
@@ -5374,7 +5380,7 @@ function layoutAppPanel(isToggle,newWidth){
 				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 			}
 
-		}else  if(currentTab===_TAB_MAP){ //map
+		}else if(currentTab===_TAB_MAP){ //map
 
 			var mapFrame3 = document.getElementById("map-frame3");
 			if(mapFrame3.src && mapFrame3.contentWindow.showMap){

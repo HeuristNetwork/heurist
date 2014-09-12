@@ -59,60 +59,143 @@
         <?php include "../../common/html/visualize.html"; ?>
         
         <script>
+            /**
+            * Explaning top.HEURIST.search.results
+            * This is the object itself:
+            * 
+            * Object {recSet: Object, infoByDepth: Array[3], recSetCount: 227, totalQueryResultRecordCount: "203", querySid: ""…}
+            * infoByDepth: Array[3]
+            * params: Object
+            * querySid: ""
+            * recSet: Object
+            * recSetCount: 227    
+            * totalQueryResultRecordCount: "203"
+            * __proto__: Object
+            * 
+            * 
+            * springDiagram.php uses the recSet object:
+            * recSet: Object
+            * 1: Object
+            * 2: Object
+            * 5: Object
+            * 
+            * We then loop through all the recSet keys.
+            * 
+            * Details of an object inside the recSet:
+            * 1: Object
+            * depth: 0
+            * record: Array[12]
+            * relLinks: Object
+            * revPtrLinks: Object
+            * revRelLinks: Object
+            * __proto__: Object
+            * 
+            * We use the record array to construct nodes.
+            * 
+            * We use the revPtrLinks to construct the links. Details:
+            * 
+            * revPtrLinks: Object
+            * byInvDtlType: Object
+            * byRecIDs: Object
+            * __proto__: Object
+            * 
+            * We use the byRecIDs object. Details:
+            * byRecIDs: Object
+            * 10: Array[1]
+            * 48: Array[1] 
+            * 
+            * We then loop through all the byRecIDs keys.
+            * 10: Array[1]
+            * 0: "5"
+            * length: 1
+            * 
+            * This data is used to construct the links.
+            * 
+            */
             $(document).ready(function() {
                 try {    
                     var results = top.HEURIST.search.results;
                     if(results) {
-                        console.log(results);
-                        console.log(results.recSet);  
-                        
-                        var data = {};
-                        var nodes = [];
+                        console.log("RESULTS");
+                        console.log(results);      
+
+                        var nodes = {};
                         var links = [];
- 
-                        
+  
                         // Building nodes
                         for(var id in results.recSet) {
                             // Get details
                             var record = results.recSet[id].record;
                             var depth = results.recSet[id].depth;
                             var name = record["5"];
+                            if(name !== undefined && name.length > 15) {
+                                name = name.substr(0, 14) + "...";
+                            }     
+                            var group = record["4"];
+                            var image = top.HEURIST.iconBaseURL + group + ".png";
                             var count = 1;
                             
                             // Construct node
-                            var node = {id: id, name: name, count: count, depth: depth};
-                            console.log(node);
-                            nodes.push(node);        
+                            var node = {id: parseInt(id), name: name, image: image, count: count, depth: depth};
+                            nodes[id] = node;        
                         }
                         
-                        // Building links
-                        /*
-                        for(var id in results.recSet) {
-                            console.log("RESULT SET");
-
-                            var ptr = results.recSet[id].revPtrLinks;
-                            console.log("PTR");
-                            console.log(ptr);
-                            if(ptr !== undefined) {
-                                var ids = ptr.byRecIDs;
-                                if(ids.lenth > 0) {
-                                    for(var i = 0; i < ids.length; i++) {
-                                        var link = {source: id, target: ids[i]};
-                                        console.log("LINK");
-                                        console.log(link);
+                        /**
+                        * Finds links in a revPtrLinks or revRelLinks object
+                        */
+                        function findLinks(source, object) {
+                            if(object !== undefined) {
+                                // Get recIDs
+                                var recIDs = object.byRecIDs;
+                                if(recIDs !== undefined) {
+                                    // Loop through all recID's
+                                    for(var recID in recIDs) {
+                                        // Get node ID's
+                                        var ids = recIDs[recID];   
+                                        if(ids !== undefined && ids.length > 0) {
+                                            // Loop through al node ID's
+                                            for(var i = 0; i < ids.length; i++) {
+                                                // Construct a link
+                                                var target = nodes[ids[i]];
+                                                if(source !== undefined && target !== undefined) {
+                                                    var link = {source: source, relation: target, target: target};
+                                                    //console.log("LINK");
+                                                    //console.log(link);   
+                                                    links.push(link);
+                                                }
+                                            }
+                                        } 
                                     }
                                 }
                             }
-                            
-                            var rev = results.recSet[id].revRelLinks;
-                            console.log(rev);   
                         }
-                        */
-                        
+
+                        // Building links
+                        for(var id in results.recSet) {
+                            var source = nodes[id];
+                            
+                            // Get revPtr links
+                            var revptr = results.recSet[id].revPtrLinks;
+                            findLinks(source, revptr);
+                            
+                            // Get revRel links
+                            var revrel = results.recSet[id].revRelLinks;
+                            findLinks(source, revrel);
+                            
+                             // get ptrLinks
+                            var ptr = results.recSet[id].ptrLinks;
+                            findLinks(source, ptr);
+                            
+                            // Get relLinks
+                            var rel = results.recSet[id].relLinks;
+                            findLinks(source, rel);
+                        }
+   
                         // Time to visualize
-                        console.log(nodes);
                         var data = {nodes: nodes, links: links};
-                        
+                        console.log("DATA");
+                        console.log(data);
+
                         // Parses the data
                         function getData(data) {
                             console.log("GET DATA");
@@ -134,6 +217,7 @@
                                        
               
         </script>
+
     </body>
     
 </html>
