@@ -173,7 +173,7 @@ function EditTerms() {
                 term.parent_id = null;
                 term.conceptid = arTerm[fi.trm_ConceptID];
                 term.domain = _currentDomain;
-                term.label = arTerm[fi.trm_Label];
+                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
                 term.description = arTerm[fi.trm_Description];
                 term.termcode  = arTerm[fi.trm_Code];
                 term.inverseid = arTerm[fi.trm_InverseTermID];
@@ -203,7 +203,7 @@ function EditTerms() {
                                 term.parent_id = parent_id;
                                 term.conceptid = arTerm[fi.trm_ConceptID];
                                 term.domain = _currentDomain;
-                                term.label = arTerm[fi.trm_Label];
+                                term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode  =  arTerm[fi.trm_Code];
                                 term.inverseid = arTerm[fi.trm_InverseTermID];
@@ -556,13 +556,20 @@ function EditTerms() {
         };
 
         var _updateOnServer = function(){
+            
+                        var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
+                        
+                        if(Hul.iempty(trmLabel)){
+                            alert('Trm label can not be empty');
+                            return;
+                        }
 
                         var oTerms = {terms:{
                             colNames:['trm_Label','trm_Description','trm_Code'],
                             defs: {}
                         }};
                         oTerms.terms.defs[retain_nodeid] = [
-                        $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val(),
+                        trmLabel,
                         $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
                         $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
 
@@ -582,22 +589,57 @@ function EditTerms() {
 
         var arTerm = termsByDomainLookup[nodeid];
         $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
-        $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
-        $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
-        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-
-        var arTerm = termsByDomainLookup[retain_nodeid];
-        $('#lblTerm_toRetain').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
-        $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-        $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
-        $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
-        $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
-        $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
         
+        if(Hul.isempty(arTerm[fi.trm_Label])){
+            $('#mergeLabel2').hide();
+        }else{
+            $('#mergeLabel2').show();
+            $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
+            $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
+        }
+        if(Hul.isempty(arTerm[fi.trm_Code])){
+            $('#mergeCode2').hide();
+        }else{
+            $('#mergeCode2').show();
+            $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
+        }
+        if(Hul.isempty(arTerm[fi.trm_Description])){
+            $('#mergeDescr2').hide();
+        }else{
+            $('#mergeDescr2').show();
+            $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+            $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
+        }
+        
+
+        var arTerm2 = termsByDomainLookup[retain_nodeid];
+        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['+arTerm2[fi.trm_ConceptID]+']');
+        
+        if(Hul.isempty(arTerm2[fi.trm_Label])){
+            $('#mergeLabel2').hide();
+            $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
+            $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
+        }else{
+            $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
+            $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
+        }
+        if(Hul.isempty(arTerm2[fi.trm_Code])){
+            $('#mergeCode2').hide();
+            $('#lblMergeCode1').html(arTerm[fi.trm_Code]);
+            $('#rbMergeCode1').val(arTerm[fi.trm_Code]);
+        }else{
+            $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+            $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
+        }
+        if(Hul.isempty(arTerm2[fi.trm_Description])){
+            $('#mergeDescr2').hide();
+            $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
+            $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
+        }else{
+            $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+            $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
+        }
         
         //fill elements of con
         var ele = document.getElementById('divTermMergeConfirm');

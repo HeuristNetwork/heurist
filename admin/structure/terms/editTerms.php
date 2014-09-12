@@ -61,6 +61,17 @@
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <!--<link rel=stylesheet href="../../common/css/admin.css">-->
         <style type="text/css">
+            .dtyField {
+                padding-bottom: 3px;
+                padding-top: 3px;
+                display: inline-block;
+            }
+            .dtyLabel {
+                display: inline-block;
+                width: 100px;
+                text-align: right;
+                padding-right: 3px;
+            }
         </style>
     </head>
 
@@ -271,7 +282,67 @@
 
         
                 <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
-       
+
+                        <table border="0" cellpadding="2px;">
+                            <tr>
+                                <td width="100">Term to be retained:</td>
+                                <td id="lblTerm_toRetain"></td>
+                            </tr>
+                            <tr>
+                                <td>Term to be merged:</td>
+                                <td id="lblTerm_toMerge"></td>
+                            </tr>
+                            
+                            <tr>
+                                <td>Label:</td>
+                                <td>
+                                    <input id="rbMergeLabel1" type="radio" name="rbMergeLabel" checked="checked"/>
+                                    <label for="rbMergeLabel1" id="lblMergeLabel1"></label>
+                                </td>
+                            </tr>
+                            <tr id="mergeLabel2">
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input id="rbMergeLabel2" type="radio" name="rbMergeLabel"/>
+                                    <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Code:</td>
+                                <td>
+                                    <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
+                                    <label for="rbMergeCode1" id="lblMergeCode1"></label>
+                                </td>
+                            </tr>
+                            <tr id="mergeCode2">
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
+                                    <label for="rbMergeCode2" id="lblMergeCode2"></label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Description:</td>
+                                <td>
+                                    <input id="rbMergeDescr1" type="radio" name="rbMergeDescr" checked="checked"/>
+                                    <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
+                                </td>
+                            </tr>
+                            <tr id="mergeDescr2">
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input id="rbMergeDescr2" type="radio" name="rbMergeDescr"/>
+                                    <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
+                                </td>
+                            </tr>
+                            
+                        </table>
+                        
+                        
+                        
+<!--                        
                         <div>
                             <label class="dtyLabel">Term to be retained:</label>
                             <label id="lblTerm_toRetain"></label>                            
@@ -311,7 +382,7 @@
                             <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
                             </div>
                         </div>
-
+-->
                         <div style="margin-top:30px;width:96%;text-align:center;">
                             <input id="btnMergeOK" type="button" value="Merge"
                                 title=""/>

@@ -152,7 +152,7 @@ function SelectTermParent() {
 			term.id = termid;
 			term.parent_id = null;
 			term.domain = _currentDomain;
-			term.label = arTerm[fi.trm_Label];
+			term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
 			term.description = arTerm[fi.trm_Description];
 			term.inverseid = arTerm[fi.trm_InverseTermID];
             term.status = arTerm[fi.trm_Status];
@@ -180,7 +180,7 @@ function SelectTermParent() {
 					term.id = child;
 					term.parent_id = parent_id;
 					term.domain = _currentDomain;
-					term.label = arTerm[fi.trm_Label];
+					term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
 					term.description = arTerm[fi.trm_Description];
 					term.inverseid = arTerm[fi.trm_InverseTermID];
                     term.status = arTerm[fi.trm_Status];
