@@ -38,15 +38,17 @@
         settings = $.extend({
             // Custom functions
             getData: $.noop(),
-            // User settings
-            linecolor: "#22a",
-            markercolor: "#000",
-            countcolor: "#262",
-            textcolor: "#b22",
+            
+            // UI settings
             linetype: "straight",
             linelength: 300,
             linewidth: 15,
+            linecolor: "#22a",
+            markercolor: "#000",
             entityradius: 30,
+            entitycolor: "#262",
+            fontsize: "11px",
+            textcolor: "#b22",
             formula: "linear",
             gravity: "touch",
             attraction: -700,
@@ -67,14 +69,15 @@
     
     /*********************************** START OF SETTING FUNCTIONS **************************************/
     /** SETTING NAMES */
-    var setting_linecolor     = "setting_linecolor";
-    var setting_markercolor   = "setting_markercolor";
-    var setting_countcolor    = "setting_countcolor";
-    var setting_textcolor     = "setting_textcolor";
     var setting_linetype      = "setting_linetype";
     var setting_linelength    = "setting_linelength";
     var setting_linewidth     = "setting_linewidth";
+    var setting_linecolor     = "setting_linecolor";
+    var setting_markercolor   = "setting_markercolor";
     var setting_entityradius  = "setting_entityradius";
+    var setting_entitycolor   = "setting_entitycolor";
+    var setting_fontsize      = "setting_fontsize";
+    var setting_textcolor     = "setting_textcolor";
     var setting_formula       = "setting_formula";
     var setting_gravity       = "setting_gravity";
     var setting_attraction    = "setting_attraction";
@@ -105,14 +108,15 @@
      * @param settings The plugin settings object
      */
     function checkStoredSettings() {
-        checkSetting(   setting_linecolor,     settings.linecolor   );
-        checkSetting(   setting_markercolor,   settings.markercolor );
-        checkSetting(   setting_countcolor,    settings.countcolor  );
-        checkSetting(   setting_textcolor,     settings.textcolor   );
         checkSetting(   setting_linetype,      settings.linetype    );
         checkSetting(   setting_linelength,    settings.linelength  );
         checkSetting(   setting_linewidth,     settings.linewidth   );
+        checkSetting(   setting_linecolor,     settings.linecolor   );
+        checkSetting(   setting_markercolor,   settings.markercolor );
         checkSetting(   setting_entityradius,  settings.entityradius);
+        checkSetting(   setting_entitycolor,   settings.entitycolor );
+        checkSetting(   setting_fontsize,      settings.fontsize    );
+        checkSetting(   setting_textcolor,     settings.textcolor   );
         checkSetting(   setting_formula,       settings.formula     );
         checkSetting(   setting_gravity,       settings.gravity     );
         checkSetting(   setting_attraction,    settings.attraction  );
@@ -123,6 +127,36 @@
     * This function sets the settings in the UI
     */
     function handleSettingsInUI() {
+        /** LINE TYPE SETTING */
+        // Set line type setting in UI
+        $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
+        
+        // Listens to linetype selection changes
+        $("#linetype").change(function(e) {
+            localStorage.setItem(setting_linetype, $("#linetype").val());
+            visualizeData();
+        });
+        
+        /** LINE LENGTH SETTING */
+        // Set line length setting in UI
+        $("#linelength").val(getSetting(setting_linelength));
+        
+        // Listen to line length changes
+        $("#linelength").change(function() {
+            localStorage.setItem(setting_linelength, $(this).val());
+            visualizeData();
+        });
+        
+        /** LINE WIDTH SETTING */
+        // Set line width setting in UI
+        $("#linewidth").val(getSetting(setting_linewidth));
+        
+        // Listen to line width changes
+        $("#linewidth").change(function() {
+            localStorage.setItem(setting_linewidth, $(this).val());
+            visualizeData();
+        });
+        
         /** LINE COLOR SETTING */
         // Set line color setting in UI
         $("#linecolor").css("background-color", getSetting(setting_linecolor));
@@ -159,22 +193,48 @@
             }
         });
         
+        
+        /**  MAX RADIUS SETTING */
+        // Set entity radius setting in UI
+        $("#entityradius").val(getSetting(setting_entityradius));
+        
+        // Listen to line width changes
+        $("#entityradius").change(function() {
+            localStorage.setItem(setting_entityradius, $(this).val());
+            visualizeData();
+        });
+        
         /** COUNT COLOR SETTING */
         // Set count color in UI
-        $("#countcolor").css("background-color", getSetting(setting_countcolor));
+        $("#entitycolor").css("background-color", getSetting(setting_entitycolor));
 
         // Listen to 'count color' selection changes
-        $('#countcolor').colpick({
+        $('#entitycolor').colpick({
             layout: 'hex',
             onSubmit: function(hsb, hex, rgb, el) {
                 var color = "#"+hex; 
                 
-                localStorage.setItem(setting_countcolor, color);
+                localStorage.setItem(setting_entitycolor, color);
                 $(".background").attr("fill", color);
                 
                 $(el).css('background-color', color);
                 $(el).colpickHide();
             }
+        });
+        
+        
+        /** TEXT FONT SIZE SETTING */
+        // Set font size setting in UI
+        $("#fontsize").val(parseInt(getSetting(setting_fontsize)));
+        
+        // Listen to font size changes
+        $("#fontsize").change(function() {
+            localStorage.setItem(setting_fontsize, $(this).val()+"px");
+            $(".node text").css("font-size", getSetting(setting_fontsize), "important");
+            $(".node text").each(function() {
+                this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
+            });
+      
         });
         
         /** TEXT COLOR SETTING */
@@ -195,45 +255,6 @@
             }
         });
         
-        /** LINE TYPE SETTING */
-        // Set line type setting in UI
-        $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
-        
-        // Listens to linetype selection changes
-        $("#linetype").change(function(e) {
-            localStorage.setItem(setting_linetype, $("#linetype").val());
-            visualizeData();
-        });
-        
-        /** LINE LENGTH SETTING */
-        // Set line length setting in UI
-        $("#linelength").val(getSetting(setting_linelength));
-        
-        // Listen to line length changes
-        $("#linelength").change(function() {
-            localStorage.setItem(setting_linelength, $(this).val());
-            visualizeData();
-        });
-        
-        /** LINE WIDTH SETTING */
-        // Set line width setting in UI
-        $("#linewidth").val(getSetting(setting_linewidth));
-        
-        // Listen to line width changes
-        $("#linewidth").change(function() {
-            localStorage.setItem(setting_linewidth, $(this).val());
-            visualizeData();
-        });
-        
-        /**  MAX RADIUS SETTING */
-        // Set entity radius setting in UI
-        $("#entityradius").val(getSetting(setting_entityradius));
-        
-        // Listen to line width changes
-        $("#entityradius").change(function() {
-            localStorage.setItem(setting_entityradius, $(this).val());
-            visualizeData();
-        });
         
         /** LINE LENGTH SETTING */
         // Set formula setting in UI
@@ -346,34 +367,37 @@
         console.log("RECORD DATA");
         console.log(data);  
         
-        // Color settings
-        var linecolor = getSetting(setting_linecolor);
-        var markercolor = getSetting(setting_markercolor);
-        var countcolor = getSetting(setting_countcolor);
-        var textcolor = getSetting(setting_textcolor);
-        
         // Line settings
         var linetype = getSetting(setting_linetype);
         var linelength = getSetting(setting_linelength);
+        var linecolor = getSetting(setting_linecolor);
+        var markercolor = getSetting(setting_markercolor);
+        
+        // Entity
+        var entitycolor = getSetting(setting_entitycolor);
+        
+        // Text
+        var fontsize = getSetting(setting_fontsize);
+        var textcolor = getSetting(setting_textcolor);
 
         // Gravity settings
         var gravity = getSetting(setting_gravity);
         var attraction = getSetting(setting_attraction);
         var fisheyeEnabled = getSetting(setting_fisheye);
+
         
-        console.log("SETTINGS HAVE BEEN SET");
-        
-        // Container
+        // Container       
+        var container = svg.append("g")
+                           .attr("id", "the-container");
+                           //.attr("transform", "scale(0.5)");
+        // Adding zoom
         var zoom = d3.behavior.zoom()
-                     .scaleExtent([-10, 10])
-                     .on("zoom", zoomed);  
-                     
+                     .scaleExtent([0.1, 5])
+                     .on("zoom", zoomed); 
         function zoomed() {
             container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        }             
-        
-        svg.call(zoom);
-        var container = svg.append("g");
+        }   
+        svg.call(zoom);   
 
         // Creating D3 force
         var force = d3.layout.force()
@@ -458,31 +482,28 @@
              });
              
         // Check what methods to call on drag
-         var node_drag;
-         if(gravity === "aggressive") {
-             // Default method
-             node_drag = force.drag;
-         }else{
-             // Custom methods
-             node_drag = d3.behavior.drag()
-                                    .on("dragstart", dragstart)
-                                    .on("drag", dragmove)
-                                    .on("dragend", dragend);
-         }
-                                   
+        var node_drag = d3.behavior.drag()
+                                   .on("dragstart", dragstart)
+                                   .on("drag", dragmove)
+                                   .on("dragend", dragend);
+                               
         /** Called when a dragging event starts */
         function dragstart(d, i) {
-            force.stop() // Stop force from auto positioning
-            if(gravity === "touch") {
-                svg.selectAll(".node").attr("fixed", function(d, i) {
-                    d.fixed = false;
-                    return false;
-                });
+            d3.event.sourceEvent.stopPropagation();
+                
+            if(gravity !== "aggressive") {    
+                force.stop() // Stop force from auto positioning
+                if(gravity === "touch") {
+                    svg.selectAll(".node").attr("fixed", function(d, i) {
+                        d.fixed = false;
+                        return false;
+                    });
+                }
             }
         }
 
         /** Caled when a dragging move event occurs */
-        function dragmove(d, i) {
+        function dragmove(d, i) {  
             // Update locations
             d.px += d3.event.dx;
             d.py += d3.event.dy;
@@ -515,19 +536,21 @@
         
         /** Called when a dragging event ends */
         function dragend(d, i) {
-             d.fixed = true; // Node may not be auto positioned
-             
-             // Update nodes & lines 
-             if(linetype == "curved") { 
-                 curvedTick();
-             }else{
-                 straightTick();
-             } 
-             
-             // Check if force may resume
-              if(gravity === "touch") {
-                    force.resume(); 
-              } 
+             if(gravity !== "aggressive") { 
+                d.fixed = true; // Node may not be auto positioned
+            }
+            
+            // Update nodes & lines 
+            if(linetype == "curved") { 
+                curvedTick();
+            }else{
+                straightTick();
+            } 
+            
+            // Check if force may resume
+            if(gravity !== "off") {    
+                force.resume(); 
+            } 
         }
              
         // Defining the nodes
@@ -614,7 +637,7 @@
                                 return getEntityRadius(d.count);
                            })
                            .attr("class", "background")
-                           .attr("fill", countcolor);
+                           .attr("fill", entitycolor);
 
         // Adding the foreground circles to the nodes
         var fgcircle = node.append("circle")
@@ -636,7 +659,11 @@
                              .attr("x", 0)
                              .attr("y", -iconSize)
                              .attr("class", "center shadow")
-                             .text(function(d) { 
+                             .style("font-size", fontsize, "important")
+                             .text(function(d) {
+                                if(d.name.length > 15) {
+                                    return d.name.substring(0, 14) + "...";
+                                }  
                                 return d.name; 
                              });
             
@@ -646,8 +673,12 @@
                             .attr("y", -iconSize)
                             .attr("class", "center namelabel")
                             .attr("fill", textcolor)
-                            .text(function(d) { 
-                               return d.name; 
+                            .style("font-size", fontsize, "important")
+                            .text(function(d) {
+                                if(d.name.length > 15) {
+                                    return d.name.substring(0, 14) + "...";
+                                } 
+                                return d.name; 
                             });
         
         // Fish eye check
@@ -804,6 +835,121 @@
     }
     
     /*************************************** OVERLAY ****************************************/
+    /** Constructs overlay data based on the clicked record */
+    function getOverlayData(record) {
+        console.log(record);
+        var result = [];
+        result.push({text: record.name + " (n="+record.count+")", style: "bold", size: "13px"});
+
+        // Going through the current displayed data
+        var data = settings.getData.call(this, settings.data); 
+        if(data && data.links.length > 0) {
+            for(var i = 0; i < data.links.length; i++) {
+                var link = data.links[i];
+                console.log(link);
+                  
+                // Does our record point to this link?
+                if(link.source.id == record.id) {
+                    /*
+                    var obj2 = {text: "↔ " + link.relation.name + " (n=" + link.relation.count + ")", size: "9px"};
+                    result.push(obj2);
+                    
+                    var obj = {text: "→ " + link.target.name + " (n=" + link.target.count + ")", size: "9px"};    
+                    if(obj && result.indexOf(obj) == -1) {
+                        result.push(obj);
+                    }
+                    */
+                    
+                    var obj3 = {text: "↔ " + link.relation.name + " → " + link.target.name + "(n=" + link.relation.count + ")", size: "9px"};
+                    result.push(obj3);
+                    
+                    
+                }
+                
+                // Does this link point to our record?
+                if(link.target.id == record.id) {
+                    /*
+                    var obj2 = {text: "↔ " + link.relation.name + " (n=" + link.relation.count + ")", size: "9px"};
+                    result.push(obj2);
+                    
+                    var obj = {text: "← " + link.source.name + " (n=" + link.source.count + ")", size: "9px"};
+                    if(obj && result.indexOf(obj) == -1) {
+                        result.push(obj);
+                    }
+                    */
+                    
+                    var obj3 = {text: "↔ " + link.relation.name + " ← " + link.source.name  + "(n=" + link.relation.count + ")", size: "9px"};
+                    result.push(obj3);
+                    
+                }
+                
+                // Is our record a relation?
+                if(link.relation.id == record.id) {
+                    var obj = {text: link.source.name + " ↔ " + link.target.name + " (n=" + link.relation.count + ")", size: "9px"};
+                    if(obj && result.indexOf(obj) == -1) {
+                        result.push(obj);
+                    }
+                }
+                
+                
+            }
+            
+            
+            
+            /*
+            // Mapping data to an object to find relations, etc.
+            var map = {Incoming:  {field: "target",   icon: "← ", name: "source"  },
+                       Relations: {field: "relation", icon: "↔ ", name: "relation"},
+                       Outgoing:  {field: "source",   icon: "→ ", name: "target"  }};
+            
+            for(var key in map) {
+                // Append header label
+                result.push({}, {text: key, style: "bold", size: "11px"});
+                 
+                // Going through all links
+                var array = [];
+                for(var i = 0; i < data.links.length; i++) {
+                   var link = data.links[i];
+
+                   // Grab object
+                   var obj = link[map[key].field];
+                   if(obj && obj.id == record.id) {
+                       record = link[map[key].name];
+                       obj = {text: map[key].icon + record.name + " (n=" + obj.count + ")", size: "9px"};
+                       
+                       
+                       // Check if unique
+                       var index = -1;
+                       if(array.length > 0) {
+                           for(var j = 0; j < array.length; j++) {
+                                if(array[j].text == obj.text) {
+                                    index = j;
+                                    break;
+                                }
+                           } 
+                       }  
+                       
+                       
+                       // Add if unique
+                       if(index == -1) {
+                           array.push(obj);
+                       }
+                   }
+                }
+                
+                // Adding found links, or showing we found none
+                if(array.length > 0) {
+                    result = result.concat(array);
+                }else{
+                    result.push({text: "None"});
+                }
+            }
+            */
+        }
+        
+        return result;
+    }
+    
     /**
     * Creates an overlay on the location that the user has clicked on.
     * @param x Coord-x
@@ -811,14 +957,13 @@
     * @param record Record info
     */
     function createOverlay(x, y, record) {
+        $("#overlay").remove();
         var horizontalOffset = 5;
         var verticalOffset = 12;
         console.log("CREATE OVERLAY");
         console.log(record);
         
-        $("#overlay").remove();
-    
-        // Add overlay container                 
+        // Add overlay container            
         var overlay = svg.append("g")
                          .attr("id", "overlay")      
                          .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
@@ -830,24 +975,48 @@
                           .attr("y", 0);
                           
         // Adding text  
-        var info = [record.name];  
+        var info = getOverlayData(record);  
         var text = overlay.selectAll("text")
                           .data(info)
                           .enter()
                           .append("text")
-                          .text(String)
+                          .text(function(d) {
+                              return d.text;
+                          })
                           .attr("x", horizontalOffset)        // Some left padding
                           .attr("y", function(d, i) {
-                              return (i+0.5)*verticalOffset;      // Position calculation
-                          });
+                              return ++i*verticalOffset;      // Position calculation
+                          })
+                          .attr("font-weight", function(d) {  // Font weight based on style property
+                              return d.style;
+                          })
+                          .style("font-size", function(d) {   // Font size based on size property
+                              return d.size;
+                          }, "important");
+                          
                       
         // Calculate optimal rectangle size
-        var maxWidth = 100;
-        var maxHeight = 100;                              
+        var maxWidth = 1;
+        var maxHeight = 1;                              
+        for(var i = 0; i < text[0].length; i++) {
+            var bbox = text[0][i].getBBox();
+
+            // Width
+            var width = bbox.width;
+            if(width > maxWidth) {
+                maxWidth = width;
+            }
+            
+            // Height
+            var y = bbox.y;
+            if(y > maxHeight) {
+                maxHeight = y;
+            }
+        }
         
         // Set optimal width & height
         rect.attr("width", maxWidth + 3*horizontalOffset)
-            .attr("height", maxHeight + verticalOffset);
+            .attr("height", maxHeight + 1.25*verticalOffset);
     }
     
     

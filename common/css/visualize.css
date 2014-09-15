@@ -24,7 +24,6 @@
     width: 10px;
     height: 10px;
     border: 1px solid black; 
-    margin-top: 4px;
 }
 
 .settings select:hover {
@@ -32,13 +31,9 @@
 }
 
 .small-input {
-    cursor: pointer;
+    cursor: text;
     max-width: 40px;
     text-align: center;
-}
-
-.settings input:hover {
-    cursor: pointer;
 }
 
 .explanation {
@@ -92,7 +87,7 @@ text.shadow {
 
 .semi-transparant {
     fill: #fff;
-    fill-opacity: 0.9;
+    fill-opacity: 0.95;
     stroke: #000;
     stroke-width: 1.5;
     stroke-opacity: 1.0;

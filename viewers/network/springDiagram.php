@@ -127,10 +127,7 @@
                             // Get details
                             var record = results.recSet[id].record;
                             var depth = results.recSet[id].depth;
-                            var name = record["5"];
-                            if(name !== undefined && name.length > 15) {
-                                name = name.substr(0, 14) + "...";
-                            }     
+                            var name = record["5"];  
                             var group = record["4"];
                             var image = top.HEURIST.iconBaseURL + group + ".png";
                             var count = 1;
