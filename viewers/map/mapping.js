@@ -554,7 +554,7 @@ if (typeof mxn.LatLonPoint == "function") {
 							"' target='_blank' title='Open in new window' class='externalLink'>&nbsp;</a></div>"
 
 			//info window template for map (for timeline we use default window with small modifications)
-			var template = '<div style="max-width: 300px;padding-top:5px;">'+
+			var template = '<div style="max-width: 300px;padding-top:5px;overflow:hidden">'+
 '<div style="position: static;"><img src="{{thumb}}" class="timeline-event-bubble-image">'+
 '<div class="timeline-event-bubble-title"><a href={{url}}>{{title}}</a></div>'+
 '<div class="popup_body">{{description}}</div>'+
