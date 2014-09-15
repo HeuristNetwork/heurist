@@ -248,7 +248,7 @@ function GroupEditor() {
 				var ss = (_recID < 0)?"added":"updated";
 
 				// this alert is a pain  alert("Group with ID " + report + " was succesfully "+ss);
-				top.HEURIST.closeThisWindow(context); //send back new HEURIST strcuture
+				window.close(context); //send back new HEURIST strcuture
 			}
 		}
 	}
@@ -307,7 +307,7 @@ function GroupEditor() {
 			var params = "method=saveGroup&db=" + _db + "&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
-			top.HEURIST.closeThisWindow(null);
+			window.close(null);
 		}
 	}
 
@@ -350,10 +350,10 @@ function GroupEditor() {
 				if(_updatedFields.length > 0) {
 					var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
 					if(areYouSure) {
-						top.HEURIST.closeThisWindow(null);
+						window.close(null);
 					}
 				}else{
-					top.HEURIST.closeThisWindow(null);
+					window.close(null);
 				}
 			},
 
