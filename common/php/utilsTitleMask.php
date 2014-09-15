@@ -358,7 +358,7 @@ function _titlemask__get_record_value($rec_id, $reset=false) {
 
        $ret = null;
 
-       $query = 'SELECT rec_ID, rec_Title, rec_Modified, rec_RecTypeID FROM Records where rec_ID='.$rec_id;
+       $query = 'SELECT rec_ID, rec_Title, rec_Modified, rec_RecTypeID, rty_Name FROM Records, defRecTypes where rec_RecTypeID=rty_ID and rec_ID='.$rec_id;
        $res = mysql_query($query);
        if($res){
            $row = mysql_fetch_assoc($res);
@@ -428,6 +428,10 @@ function _titlemask__get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_param_
             return $rec_values['rec_ID'];
         }else if (strcasecmp($rdt_id,'rectitle')==0) {
             return $rec_values['rec_Title'];
+        }else if (strcasecmp($rdt_id,'rectypeid')==0) {
+            return $rec_values['rec_RecTypeID'];
+        }else if (strcasecmp($rdt_id,'rectypename')==0) {
+            return $rec_values['rty_Name'];
         }else if (strcasecmp($rdt_id,'modified')==0) {
             return $rec_values['rec_Modified'];
         }
@@ -529,7 +533,9 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if (strcasecmp($field_name,'id')==0 ||
         strcasecmp($field_name,'rectitle')==0 ||
-        strcasecmp($field_name,'modified')==0)
+        strcasecmp($field_name,'modified')==0 ||
+        strcasecmp($field_name,'rectypeid')==0 ||
+        strcasecmp($field_name,'rectypename')==0)
     {
         $field_val = _titlemask__get_field_value( $field_name, $rt, $mode, $rec_id );
         return $field_val;
