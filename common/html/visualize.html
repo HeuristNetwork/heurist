@@ -3,26 +3,6 @@
     <tr>
         <!-- SETTINGS -->
         <td height="25px" style="vertical-align: middle;">
-            <!-- COLOR SETTINGS -->
-            <div class="settings space">
-                 <b>Colours:</b>
-                 <!-- Line color -->
-                 <i>Lines</i>
-                 <div id="linecolor" class="colorblock"></div>
-                 
-                 <!-- Arrow color -->
-                 <i>Arrows</i>
-                 <div id="markercolor" class="colorblock"></div>
-
-                  <!-- Record count circle color -->
-                  <i>Frequency</i>
-                  <div id="countcolor" class="colorblock"></div>
-                    
-                  <!-- Text color -->
-                  <i>Text</i>
-                  <div id="textcolor" class="colorblock"></div>
-            </div> 
-            
             <!-- LINE SETINGS -->           
             <div class="settings space">
                 <b>Lines:</b>
@@ -38,6 +18,14 @@
                 
                 <i>Max width</i>
                 <input id="linewidth" class="small-input" type="number" min="1"/>
+                
+                <!-- Line color -->
+                <i>Line color</i>
+                <div id="linecolor" class="colorblock"></div>
+                
+                <!-- Arrow color -->
+                <i>Arrow color</i>
+                <div id="markercolor" class="colorblock"></div>
             </div>
             
             <!-- Entity settings -->
@@ -46,6 +34,23 @@
                 
                 <i>Max radius</i>
                 <input id="entityradius" class="small-input" type="number" min="1"/>
+                
+                <!-- Entity circle color -->
+                <i>Color</i>
+                <div id="entitycolor" class="colorblock"></div>
+            </div>
+            
+            <!-- Text settings -->
+            <div class="settings space">
+                <b>Text:</b>
+                
+                <!-- Text size -->
+                <i>Font-size</i>
+                <input id="fontsize" class="small-input" type="number" min="1"/>
+                
+                <!-- Text color -->
+                <i>Color</i>
+                <div id="textcolor" class="colorblock"></div>
             </div>
             
             <!-- Transform settings -->
@@ -82,7 +87,7 @@
 
             <!-- HELP INFO -->
             <div class="settings space">
-                <i class="explanation">Click entities or links to get information, drag entities to reposition</i>
+                <i class="explanation">Click entities or links to get information, drag entities to reposition.</i>
             </div>
          </td> 
     </tr>
