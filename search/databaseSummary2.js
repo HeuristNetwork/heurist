@@ -695,7 +695,13 @@ function visualizeData() {
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")
-                       .attr("fill", countcolor);
+                       .attr("fill", countcolor)
+                       .style("stroke", function(d) {
+                           if(d.selected == true) {
+                                return "#aa0";
+                           }
+                           return "#000";
+                       });
 
     // Adding the foreground circles to the nodes
     var fgcircle = node.append("circle")

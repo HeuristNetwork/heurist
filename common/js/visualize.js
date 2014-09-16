@@ -642,7 +642,15 @@
         // Adding the foreground circles to the nodes
         var fgcircle = node.append("circle")
                            .attr("r", circleSize)
-                           .attr("class", "around foreground");
+                           .attr("class", "around foreground")
+                           .style("stroke", function(d) {
+                               console.log("STROKE CHECK");
+                               console.log(d);
+                               if(d.selected == true) {
+                                    return "#ee0";
+                               }
+                               return "#000";
+                           });
        
         // Adding icons to the nodes 
         var icon = node.append("svg:image") 
@@ -838,116 +846,110 @@
     /** Constructs overlay data based on the clicked record */
     function getOverlayData(record) {
         console.log(record);
-        var result = [];
-        result.push({text: record.name + " (n="+record.count+")", style: "bold", size: "13px"});
+        var array = [];
+        array.push({text: record.name + " (n="+record.count+")", size: "13px", style: "bold"})
 
         // Going through the current displayed data
         var data = settings.getData.call(this, settings.data); 
         if(data && data.links.length > 0) {
+            /*
+            var map = {};
             for(var i = 0; i < data.links.length; i++) {
                 var link = data.links[i];
                 console.log(link);
                   
                 // Does our record point to this link?
                 if(link.source.id == record.id) {
-                    /*
-                    var obj2 = {text: "↔ " + link.relation.name + " (n=" + link.relation.count + ")", size: "9px"};
-                    result.push(obj2);
-                    
-                    var obj = {text: "→ " + link.target.name + " (n=" + link.target.count + ")", size: "9px"};    
-                    if(obj && result.indexOf(obj) == -1) {
-                        result.push(obj);
+                    // Relation check
+                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
+                    if(!map.hasOwnProperty(relation)) {
+                        map[relation] = [];
                     }
-                    */
                     
-                    var obj3 = {text: "↔ " + link.relation.name + " → " + link.target.name + "(n=" + link.relation.count + ")", size: "9px"};
-                    result.push(obj3);
-                    
-                    
+                    // Connection check
+                    var connection = {text: "→ " + link.target.name + "(n=" + link.target.count + ")", size: "9px"};
+                    if(map[relation].indexOf(connection) == -1) {
+                        map[relation].push(connection);
+                    }
                 }
                 
                 // Does this link point to our record?
                 if(link.target.id == record.id) {
-                    /*
-                    var obj2 = {text: "↔ " + link.relation.name + " (n=" + link.relation.count + ")", size: "9px"};
-                    result.push(obj2);
-                    
-                    var obj = {text: "← " + link.source.name + " (n=" + link.source.count + ")", size: "9px"};
-                    if(obj && result.indexOf(obj) == -1) {
-                        result.push(obj);
+                    // Relation check
+                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
+                    if(!map.hasOwnProperty(relation)) {
+                        map[relation] = [];
                     }
-                    */
                     
-                    var obj3 = {text: "↔ " + link.relation.name + " ← " + link.source.name  + "(n=" + link.relation.count + ")", size: "9px"};
-                    result.push(obj3);
-                    
+                    // Connection check
+                    var connection = {text: "← " + link.source.name  + " (n=" + link.source.count + ")", size: "9px"};
+                    if(map[relation].indexOf(connection) == -1) {
+                        map[relation].push(connection);
+                    }
                 }
                 
                 // Is our record a relation?
                 if(link.relation.id == record.id) {
-                    var obj = {text: link.source.name + " ↔ " + link.target.name + " (n=" + link.relation.count + ")", size: "9px"};
-                    if(obj && result.indexOf(obj) == -1) {
-                        result.push(obj);
+                    // Relation check
+                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
+                    if(!map.hasOwnProperty(relation)) {
+                        map[relation] = [];
+                    }
+                }
+            }
+            
+            console.log("MAP");
+            console.log(map);
+            
+            // Convert map to array
+            for(key in map) {
+                //array.push({text: "", size: "1px"}, {text: key, size: "11px", style: "oblique"});
+                array = array.concat(map[key]); 
+            }
+            */
+            
+            var map = {};
+            for(var i = 0; i < data.links.length; i++) {
+                var link = data.links[i];
+                console.log(link);
+                  
+                // Does our record point to this link?
+                if(link.source.id == record.id) {
+                    // Connection check
+                    if(!map.hasOwnProperty(link.target.name)) {
+                        map[link.target.name] = {text: "→ " + link.target.name + "(n=" + link.target.count + ")", size: "9px"};
                     }
                 }
                 
-                
-            }
-            
-            
-            
-            /*
-            // Mapping data to an object to find relations, etc.
-            var map = {Incoming:  {field: "target",   icon: "← ", name: "source"  },
-                       Relations: {field: "relation", icon: "↔ ", name: "relation"},
-                       Outgoing:  {field: "source",   icon: "→ ", name: "target"  }};
-            
-            for(var key in map) {
-                // Append header label
-                result.push({}, {text: key, style: "bold", size: "11px"});
-                 
-                // Going through all links
-                var array = [];
-                for(var i = 0; i < data.links.length; i++) {
-                   var link = data.links[i];
-
-                   // Grab object
-                   var obj = link[map[key].field];
-                   if(obj && obj.id == record.id) {
-                       record = link[map[key].name];
-                       obj = {text: map[key].icon + record.name + " (n=" + obj.count + ")", size: "9px"};
-                       
-                       
-                       // Check if unique
-                       var index = -1;
-                       if(array.length > 0) {
-                           for(var j = 0; j < array.length; j++) {
-                                if(array[j].text == obj.text) {
-                                    index = j;
-                                    break;
-                                }
-                           } 
-                       }  
-                       
-                       
-                       // Add if unique
-                       if(index == -1) {
-                           array.push(obj);
-                       }
-                   }
+                // Does this link point to our record?
+                if(link.target.id == record.id) {
+                    // Connection check
+                    if(!map.hasOwnProperty(link.source.name)) {
+                        map[link.source.name] = {text: "← " + link.source.name  + " (n=" + link.source.count + ")", size: "9px"};
+                    }
                 }
                 
-                // Adding found links, or showing we found none
-                if(array.length > 0) {
-                    result = result.concat(array);
-                }else{
-                    result.push({text: "None"});
+                // Is our record a relation?
+                if(link.relation.id == record.id) {
+                    // Relation check
+                    if(!map.hasOwnProperty(link.target.name)) {
+                        map[link.target.name] = {text: "↔ " + link.target.name + " (n=" + link.relation.count + ")", size: "9px"}; 
+                    }
                 }
             }
-            */
+            
+            console.log("MAP");
+            console.log(map);
+            
+            // Convert map to array
+            for(key in map) {
+                array.push(map[key]); 
+            }
         }
         
-        return result;
+        console.log("ARRAY");
+        console.log(array);
+        return array;
     }
     
     /**

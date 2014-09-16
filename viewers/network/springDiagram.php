@@ -114,6 +114,20 @@
             */
             $(document).ready(function() {
                 try {    
+                    // Determinating selected ID's
+                    var selectedIDs = [];
+                    var recIDs = top.HEURIST.search.getSelectedRecIDs(); 
+                    if(recIDs) {
+                        for(var key in recIDs) {
+                            if(!isNaN(key)) {
+                                selectedIDs.push(recIDs[key]);       
+                            }
+                        }
+                    }
+                    console.log("SELECTED IDs");
+                    console.log(selectedIDs);
+ 
+                    // Results
                     var results = top.HEURIST.search.results;
                     if(results) {
                         console.log("RESULTS");
@@ -131,9 +145,11 @@
                             var group = record["4"];
                             var image = top.HEURIST.iconBaseURL + group + ".png";
                             var count = 1;
+                            var selected = selectedIDs.indexOf(id.toString()) > -1;
+                            console.log("ID " + id + " selected: " + selected);
                             
                             // Construct node
-                            var node = {id: parseInt(id), name: name, image: image, count: count, depth: depth};
+                            var node = {id: parseInt(id), name: name, image: image, count: count, depth: depth, selected: selected};
                             nodes[id] = node;        
                         }
                         
