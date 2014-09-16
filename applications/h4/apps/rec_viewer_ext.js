@@ -48,7 +48,9 @@ $.widget( "heurist.rec_viewer_ext", {
             function(e, data) {
 
                 var _recID;
-                if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                if(data) data = data.selection;
+
+                if( data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
                     if(data.length()>0){
                         var _rec = data.getFirstRecord();
                         _recID = _rec[2];

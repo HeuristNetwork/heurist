@@ -67,6 +67,8 @@ $.widget( "heurist.resultListMenu", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
+                    if(data) data = data.selection;
+                
                    if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
                        that._selection = data;
                    }else{
@@ -210,7 +212,18 @@ $.widget( "heurist.resultListMenu", {
                 if(app && app.widget){
                     $(app.widget).search_links('editSavedSearch', null, 'all');
                 }
+
+          }else if(action == "menu-selected-select-all"){  
+          
+                this.selectAll();                
               
+          }else if(action == "menu-selected-select-none"){                  
+
+                this.selectNone();                
+              
+          }else if(action == "menu-selected-select-show"){  //show selection as separate search
+
+                this.selectShow();                
               
           }else if(action == "menu-selected-tag"){                  
               
@@ -584,6 +597,25 @@ $.widget( "heurist.resultListMenu", {
                     }
             });
     },
+    
+    selectAll: function(){
+         $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
+    },
+
+    selectNone: function(){
+         //this._selection = null;
+         $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:null, source:this.element.attr('id')} );
+    },
+
+    selectShow: function(){
+        if(this._selection!=null){
+            var recIDs_list = this._selection.getIds();    
+            if (recIDs_list.length > 0) {
+                var url = top.HAPI4.basePath + "?db=" + top.HAPI4.database + "&q=ids:"+recIDs_list.join(',');        
+                window.open(url, "_blank");
+            }
+        }
+    }
     
     
 });

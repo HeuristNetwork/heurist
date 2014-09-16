@@ -143,6 +143,8 @@ $.widget( "heurist.rec_list", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
+                   if(data) data = data.selection;
+                
                    //update rec_actions
                    if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
                         if(data.length()>0){
@@ -491,12 +493,10 @@ $.widget( "heurist.rec_list", {
 
         var selected = this.getSelected();
 
-        if(selected.length()>0){
-            if(this.options.isapplication){
-                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, [ selected, this.element.attr('id') ]);
-            }
-            this._trigger( "onselect", event, selected );
+        if(this.options.isapplication){
+                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
         }
+        this._trigger( "onselect", event, selected );
     },
 
     /**

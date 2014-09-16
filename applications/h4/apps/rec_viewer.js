@@ -73,19 +73,17 @@ $.widget( "heurist.rec_viewer", {
         $(this.document).on(top.HAPI4.Event.ON_REC_SELECT,
             function(e, data) {
 
-                var _recID;
-                if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                    if(data.length()>0){
-                        var _recdata = data;
+                var _recID = null,
+                    _recdata = null;
+                    
+                if(data) data = data.selection;
+                
+                if( data && (typeof data.isA == "function") && data.isA("hRecordSet") && (data.length()>0)){
+
+                        _recdata = data;
                         var _rec = _recdata.getFirstRecord();
                         _recID = _recdata.fld(_rec, 'rec_ID'); //_rec[2];
-                        that.options.recID = _recID;
-                        that.options.recdata = _recdata;
-                        that._refresh();
-
-                        that.action_buttons.rec_actions('option','record_ids',[_recID]);
                         //that.option("recdata", _recdata);
-                    }
                     /*
                     }else if( $.isArray(data) ) {
                     _recID = data[0];
@@ -93,6 +91,11 @@ $.widget( "heurist.rec_viewer", {
                     _recID = data;
                     */
                 }
+                
+                that.options.recID = _recID;
+                that.options.recdata = _recdata;
+                that._refresh();
+                that.action_buttons.rec_actions('option','record_ids', (_recID!=null)?[_recID]:[] );
 
 
                 //that.options("recID", _recID);
@@ -240,22 +243,22 @@ $.widget( "heurist.rec_viewer", {
             var groups = top.HAPI4.currentUser.usr_GroupsList
 
             //groups.unshift(34);
-            _renderTagsForGroup(top.HAPI4.currentUser.ugr_ID, top.HR('Personal Tags') );
+            this._renderTagsForGroup(top.HAPI4.currentUser.ugr_ID, top.HR('Personal Tags') );
 
             for (var idx in groups)
             {
                 if(idx){
                     var groupID = idx;
                     var groupName = groups[idx][1];
-                    _renderTagsForGroup(groupID, groupName);
+                    this._renderTagsForGroup(groupID, groupName);
 
                 }
             }
         }
 
-    },
+    }
     
-    _renderTagsForGroup: function(groupID, groupName){
+    ,_renderTagsForGroup: function(groupID, groupName){
         
                     var tags = this.options.user_Tags[groupID]; //top.HAPI4.currentUser.usr_Tags[groupID];
                     var tags_list = "";
@@ -267,6 +270,8 @@ $.widget( "heurist.rec_viewer", {
                             tags_list = tags_list + "<a href='#' "+(top.HEURIST4.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
                         }
                     }
+                    
+                    var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
 
                     if(tags_list)
                     {
@@ -281,7 +286,7 @@ $.widget( "heurist.rec_viewer", {
                         .html(tags_list)
                         .appendTo( $d );
                     }
-    },
+    }
 
     ,_renderFiles: function(title){
 
