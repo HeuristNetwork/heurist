@@ -149,18 +149,18 @@ $.widget( "heurist.search", {
 
         // bind click events
         this._on( this.btn_search_as_user, {
-            click: "doSearch"
+            click: "_doSearch"
         });
 
         this._on( this.btn_search_as_guest, {
-            click: "doSearch"
+            click: "_doSearch"
         });
 
         this._on( this.input_search, {
             keypress: function(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
-                    that.doSearch();
+                    that._doSearch();
                 }
             }
         });
@@ -188,7 +188,8 @@ $.widget( "heurist.search", {
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
 
             that.query_request = data; //keep for search in current result
-            if(data.orig != 'main'){
+
+            if(data && data.source!=that.element.attr('id')){
                 that.input_search.val(data.q);
                 that.options.search_domain = data.w;
                 that._refresh();
@@ -243,7 +244,7 @@ $.widget( "heurist.search", {
     _handleKeyPress: function(e){
     var code = (e.keyCode ? e.keyCode : e.which);
     if (code == 13) {
-    this.doSearch();
+    this._doSearch();
     }
     },
     */
@@ -257,11 +258,11 @@ $.widget( "heurist.search", {
         return lbl;
     },
 
-    doSearch: function(search_query){
+    _doSearch: function(){
 
-        if(!top.HEURIST4.util.isempty(search_query)){
-            this.input_search.val(search_query);
-        }
+        //if(!top.HEURIST4.util.isempty(search_query)){
+        //    this.input_search.val(search_query);
+        //}
         
         var qsearch = this.input_search.val();
         if( this.select_rectype && this.select_rectype.val()){
@@ -281,7 +282,7 @@ $.widget( "heurist.search", {
                 qsearch = this.query_request.q + ' AND ' + qsearch;
             }
 
-            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, orig:'main'};
+            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails, source:this.element.attr('id') };
 
             //that._trigger( "onsearch"); //this widget event
             //that._trigger( "onresult", null, resdata ); //this widget event

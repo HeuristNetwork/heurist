@@ -267,7 +267,7 @@ HEURIST_HTML_URL
     //-------------------------------------------------------------------------- PATHS AND URLS ---------
     
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
-    if ($defaultRootFileUploadPath && isset($defaultRootFileUploadURL)) {
+    if (isset($defaultRootFileUploadURL) && $defaultRootFileUploadPath) {
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 

@@ -69,7 +69,7 @@
 
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
-        <script type="text/javascript" src="apps/rec_viewer.js"></script>
+        <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>

@@ -716,7 +716,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             $dlg.append('<span>'+top.HR(message)+'</span>');
         }
 
-        if(!title) title ='Info';
+        if(!title) title = 'Info';
         if (typeof buttons === "function"){
 
             var titleYes = top.HR('Yes'),
@@ -752,6 +752,42 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
     },
 
+    showMsgFlash: function(message, timeout, title){
+
+        if(!$.isFunction(top.HR)){
+            alert(message);
+            return;
+        }
+        
+        $dlg = top.HEURIST4.util.getMsgDlg();
+
+        if(message!=null){
+            $dlg.empty();
+            $dlg.append('<span>'+top.HR(message)+'</span>');
+        }
+
+        if(!title) title = 'Info';
+        
+        $dlg.dialog({
+            title: top.HR(title),
+            resizable: false,
+            //height:140,
+            width: 'auto',
+            modal: false,
+            buttons: {}
+        });
+        $dlg.dialog("option", "buttons", null);
+        
+        if (!(timeout>200)) {
+            timeout = 1000;
+        }
+    
+        setTimeout(function(){
+            $dlg.dialog('close');    
+        }, timeout);
+        
+    },
+        
     //@todo - redirect to error page
     redirectToError: function(message){
         top.HEURIST4.util.showMsgDlg(message, null, 'Error');

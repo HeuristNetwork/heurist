@@ -289,7 +289,7 @@ $.widget( "heurist.pagination", {
             var limit = this.limit;
             this.query_request.l = limit;
             this.query_request.o = this.current_page * limit;
-            this.query_request.orig = "paginator";
+            this.query_request.source = this.element.attr('id'); // "paginator";
 
             top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
 

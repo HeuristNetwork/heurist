@@ -541,7 +541,7 @@ $.widget( "heurist.rec_list", {
         if ( this._query_request ) {
 
             this._query_request.w = 'a';
-            this._query_request.orig = 'rec_list';
+            this._query_request.source = this.element.attr('id');//'rec_list';
 
             top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
         }

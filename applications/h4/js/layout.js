@@ -335,9 +335,9 @@ function appAddContent($container, app, options){
 
         //this is debug mode to init widgets 
         // app javascript are loaded in index.php header
-        if(app.widgetname=='rec_viewer'){
+        if(app.widgetname=='recordDetails'){
             //DEBUG
-            widget = $content.rec_viewer();
+            widget = $content.recordDetails();
         }else if(app.widgetname=='mainMenu'){
             //DEBUG
             widget = $content.mainMenu();

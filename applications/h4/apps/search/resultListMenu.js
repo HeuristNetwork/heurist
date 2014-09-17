@@ -201,7 +201,7 @@ $.widget( "heurist.resultListMenu", {
                         if(!top.HEURIST4.util.isempty(q)) {
                             that._query_request.q = q;
                             //that._query_request.w = 'a';
-                            that._query_request.orig = 'rec_list';
+                            that._query_request.source = that.element.attr('id');
                             top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
                         }
                     }});
@@ -279,7 +279,7 @@ $.widget( "heurist.resultListMenu", {
                     if(context.problem){
                         top.HEURIST4.util.showMsgErr(context.problem);
                     }else if(context.none){
-                        top.HEURIST4.util.showMsgErr(context.none);
+                        top.HEURIST4.util.showMsgFlash(context.none);
                     }else if(context.execute){
                         var fname = context.execute.shift();
                         var args = context.execute;
@@ -299,14 +299,18 @@ $.widget( "heurist.resultListMenu", {
                         //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
                     }else if(context.ok){
                         
-                        top.HEURIST4.util.showMsgDlg(context.ok+
+                        top.HEURIST4.util.showMsgFlash(context.ok);
+                        that._query_request.source = that.element.attr('id');
+                        top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                        
+                        /*top.HEURIST4.util.showMsgDlg(context.ok+
                         "<br><br>Information changes will be visible on re-run the current search."+
                         "<br>Reloading will reset filters and selection."+
                         "<br>'Yes' to re-run, 'No' to leave display as-is", 
                             function(){
-                                 that._query_request.orig = 'rec_list';
+                                 that._query_request.source = this.element.attr('id');
                                  top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            });
+                            });*/
                     }
                 }
             }
@@ -543,7 +547,7 @@ $.widget( "heurist.resultListMenu", {
                         },
                     callback: function(context) {
                             if (context==="reload") { //something was deleted
-                                 that._query_request.orig = 'rec_list';
+                                 that._query_request.source = that.element.attr('id');
                                  top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
                             }
                         }

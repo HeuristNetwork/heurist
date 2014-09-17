@@ -534,7 +534,7 @@ $.widget( "heurist.search_links", {
 
                 var that = this;
 
-                var request = {q: qsearch, w: domain, f: this.options.searchdetails, orig:'saved', qname:qname};
+                var request = {q: qsearch, w: domain, f: this.options.searchdetails, source:this.element.attr('id'), qname:qname};
 
                 //that._trigger( "onsearch"); //this widget event
                 //that._trigger( "onresult", null, resdata ); //this widget event

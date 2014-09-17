@@ -629,7 +629,7 @@ $.widget( "heurist.search_faceted", {
             var domain = this.options.params.domain;
 
             //this.options.searchdetails
-            var request = {q: qsearch, w: domain, f: "map", orig:'saved', qname:qname};
+            var request = {q: qsearch, w: domain, f: "map", source:this.element.attr('id'), qname:qname};
             //get hapi and perform search
             top.HAPI4.RecordMgr.search(request, $(this.document));
 

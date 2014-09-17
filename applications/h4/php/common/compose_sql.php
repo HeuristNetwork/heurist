@@ -31,6 +31,7 @@
     define('SORT_ADDED', 'a');
     define('SORT_TITLE', 't');
 
+    $mysqli = null;
 
     /**
     * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
@@ -68,9 +69,9 @@
     *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
     * @param mixed $publicOnly
     */
-    function compose_sql_query($select_clause, $params, $currentUser=null, $publicOnly=false) {
+    function compose_sql_query($db, $select_clause, $params, $currentUser=null, $publicOnly=false) {
 
-        $query = get_sql_query_clauses($params, $currentUser=null, $publicOnly=false);
+        $query = get_sql_query_clauses($db, $params, $currentUser=null, $publicOnly=false);
 
         $res_query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
         /*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
@@ -112,7 +113,11 @@
     *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
     * @param mixed $publicOnly
     */
-    function get_sql_query_clauses($params, $currentUser=null, $publicOnly=false) {
+    function get_sql_query_clauses($db, $params, $currentUser=null, $publicOnly=false) {
+        
+        global $mysqli;
+        
+        $mysqli = $db;
 
         /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
         if (! $params) $params = array();//$_REQUEST;
@@ -695,6 +700,8 @@
         }
         // return list of  sql Phrase, signature, from clause for sort
         function makeSQL() {
+            global $mysqli;
+            
             $colon_pos = strpos($this->value, ':');
             $text = substr($this->value, $colon_pos+1);
 
@@ -751,8 +758,9 @@
 
                     if (preg_match('/^(?:f|field):(\\d+)(:m)?/i', $text, $matches)) {
                         @list($_, $field_id, $show_multiples) = $matches;
-                        $res = mysql_query("select dty_Type from defDetailTypes where dty_ID = $field_id");
-                        $baseType = mysql_fetch_row($res);  $baseType = @$baseType[0];
+                        $res = $mysqli->query("select dty_Type from defDetailTypes where dty_ID = $field_id");
+                        $baseType = $res->fetch_row();
+                        $baseType = @$baseType[0];
 
                         if ($show_multiples) {    // "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
                             $bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
@@ -772,23 +780,24 @@
                         }
                     } else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
                         @list($_, $field_name, $show_multiples) = $matches;
-                        $res = mysql_query("select dty_Type from defDetailTypes where dty_Name = '$field_name'");
-                        $baseType = mysql_fetch_row($res);  $baseType = @$baseType[0];
+                        $res = $mysqli->query("select dty_Type from defDetailTypes where dty_Name = '$field_name'");
+                        $baseType = $res->fetch_row();
+                        $baseType = @$baseType[0];
 
                         if ($show_multiples) {    // "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
                             $bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
                             return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
-                                "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".mysql_real_escape_string($field_name)."' "
+                                "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".$mysqli->real_escape_string($field_name)."' "
                                 ."left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and $bd_name.dtl_DetailTypeID=bdt$bd_name.dty_ID ");
                         } else if ($baseType == "integer"){//sort field is an integer so need to cast in order to get numeric sorting
                             return array(" cast(dtl_Value as unsigned)","dtl_Value is integer",
-                                "left join defDetailTypes bdtInt on bdtInt.dty_Name='".mysql_real_escape_string($field_name)."' "
+                                "left join defDetailTypes bdtInt on bdtInt.dty_Name='".$mysqli->real_escape_string($field_name)."' "
                                 ."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
                         } else {
                             return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
                                 "if(dty_Type='date',getTemporalDateString(dtl_Value),dtl_Value)) ".
                                 "from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID ".
-                                "where dty_Name='".mysql_real_escape_string($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID ".
+                                "where dty_Name='".$mysqli->real_escape_string($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID ".
                                 "order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
                                 "dtl_DetailTypeID=$field_id", NULL);
                         }
@@ -888,10 +897,12 @@
 
     class TitlePredicate extends Predicate {
         function makeSQL($isTopRec=true) {
+            global $mysqli;
+            
             $not = ($this->parent->negate)? 'not ' : '';
 
             $query = &$this->getQuery();
-            $evalue = mysql_real_escape_string($this->value);
+            $evalue = $mysqli->real_escape_string($this->value);
 
             if($isTopRec){
                 $topbiblio = "TOPBIBLIO.";
@@ -917,6 +928,8 @@
 
     class TypePredicate extends Predicate {
         function makeSQL($isTopRec=true) {
+            global $mysqli;
+            
             $eq = ($this->parent->negate)? '!=' : '=';
             if (is_numeric($this->value)) {
                 $res = "rec_RecTypeID $eq ".intval($this->value);
@@ -927,7 +940,7 @@
                 $res = "rec_RecTypeID $in (" . $this->value . ")";
             }
             else {
-                $res = "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
+                $res = "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".$mysqli->real_escape_string($this->value)."' limit 1)";
             }
 
             if($isTopRec){
@@ -940,29 +953,35 @@
 
     class URLPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $not = ($this->parent->negate)? 'not ' : '';
 
             $query = &$this->getQuery();
-            return 'TOPBIBLIO.rec_URL ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
+            return 'TOPBIBLIO.rec_URL ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
         }
     }
 
 
     class NotesPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $not = ($this->parent->negate)? 'not ' : '';
 
             $query = &$this->getQuery();
             if ($query->search_domain == BOOKMARK)    // saw TODO change this to check for woot match or full text search
                 return '';
             else
-                return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.mysql_real_escape_string($this->value).'%"';
+                return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
         }
     }
 
 
     class UserPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $not = ($this->parent->negate)? 'not ' : '';
             if (is_numeric($this->value)) {
                 return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
@@ -975,12 +994,13 @@
             else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){    // saw MODIFIED: 16/11/2010 since Realname field was removed.
                 return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
                 . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
-                . ' and (usr.ugr_FirstName = "' . mysql_real_escape_string($matches[1]) . '" and usr.ugr_LastName = "' . mysql_real_escape_string($matches[2]) . '"))';
+                . ' and (usr.ugr_FirstName = "' . $mysqli->real_escape_string($matches[1]) 
+                . '" and usr.ugr_LastName = "' . $mysqli->real_escape_string($matches[2]) . '"))';
             }
             else {
                 return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
                 . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
-                . ' and usr.ugr_Name = "' . mysql_real_escape_string($this->value) . '"))';
+                . ' and usr.ugr_Name = "' . $mysqli->real_escape_string($this->value) . '"))';
             }
         }
     }
@@ -988,6 +1008,8 @@
 
     class AddedByPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $eq = ($this->parent->negate)? '!=' : '=';
             if (is_numeric($this->value)) {
                 return "TOPBIBLIO.rec_AddedByUGrpID $eq " . intval($this->value);
@@ -998,22 +1020,25 @@
             }
             else {
                 $not = ($this->parent->negate)? "not" : "";
-                return "TOPBIBLIO.rec_AddedByUGrpID $not in (select usr.ugr_ID from sysUGrps usr where usr.ugr_Name = '" . mysql_real_escape_string($this->value) . "')";
+                return "TOPBIBLIO.rec_AddedByUGrpID $not in (select usr.ugr_ID from sysUGrps usr where usr.ugr_Name = '" 
+                . $mysqli->real_escape_string($this->value) . "')";
             }
         }
     }
 
     class AnyPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $not = ($this->parent->negate)? 'not ' : '';
             return $not . ' (exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
             . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . '  and if(dty_Type != "resource", '
-            .'rd.dtl_Value like "%'.mysql_real_escape_string($this->value).'%", '
-            .'link.rec_Title like "%'.mysql_real_escape_string($this->value).'%"))'
-            .' or TOPBIBLIO.rec_Title like "%'.mysql_real_escape_string($this->value).'%") ';
+            .'rd.dtl_Value like "%'.$mysqli->real_escape_string($this->value).'%", '
+            .'link.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%"))'
+            .' or TOPBIBLIO.rec_Title like "%'.$mysqli->real_escape_string($this->value).'%") ';
         }
     }
 
@@ -1292,6 +1317,8 @@
         }
 
         function get_field_type_clause(){
+            global $mysqli;
+            
             if (preg_match('/^\\d+$/', $this->field_type)) {
                 /* handle the easy case: user has specified a (single) specific numeric type */
                 $rd_type_clause = '= ' . intval($this->field_type);
@@ -1302,14 +1329,14 @@
             }
             else {
                 /* user has specified the field name */
-                $rd_type_clause = 'like "' . mysql_real_escape_string($this->field_type) . '%"';
+                $rd_type_clause = 'like "' . $mysqli->real_escape_string($this->field_type) . '%"';
             }
             return  $rd_type_clause;       
         }
 
         //
         function get_field_value(){
-
+            global $mysqli;
 
             if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
@@ -1324,7 +1351,7 @@
                 $isin = false;
                 $isnumericvalue = is_numeric($this->value);
 
-                $match_value = '"' . ( $isnumericvalue? floatval($this->value) : mysql_real_escape_string($this->value) ) . '"';
+                $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
 
                 if ($this->parent->exact  ||  $this->value === "") {    // SC100
                     $match_pred = ' = "$match_value"'; //for unknown reason comparison with numeric takes ages
@@ -1336,9 +1363,9 @@
                     if($isnumericvalue){
                         $match_pred = " = $match_value";
                     }else if(strpos($this->value,"%")===false){
-                        $match_pred = " like '%".mysql_real_escape_string($this->value)."%'";
+                        $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
                     }else{
-                        $match_pred = " like '".mysql_real_escape_string($this->value)."'";
+                        $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
                     }
                 }
             }
@@ -1378,6 +1405,8 @@
         }
 
         function makeSQL() {
+            global $mysqli;
+            
             $query = &$this->getQuery();
             $not = ($this->parent->negate)? 'not ' : '';
             if ($query->search_domain == BOOKMARK) {
@@ -1393,8 +1422,9 @@
                         if (is_numeric($value)) {
                             $query .= 'rtl_TagID='.intval($value).' ';
                         } else {
-                            $query .=     ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
+                            $query .=     ($this->parent->exact
+                                ? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                         }
                         $first_value = false;
                     }
@@ -1410,12 +1440,12 @@
 
                         if ($wg_value) {
                             $query .= '(';
-                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
-                            $query .=      ' and ugr_Name = "'.mysql_real_escape_string($wg_value).'") ';
+                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                            $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                         } else {
-                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
+                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                         }
                     }
                     $query .= ')) ';
@@ -1430,8 +1460,8 @@
                         if (is_numeric($value)) {
                             $query .= "kwd.tag_ID=$value ";
                         } else {
-                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
+                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                         }
                         $first_value = false;
                     }
@@ -1447,16 +1477,16 @@
 
                         if ($wg_value) {
                             $query .= '(';
-                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
-                            $query .= ' and ugr_Name = "'.mysql_real_escape_string($wg_value).'") ';
+                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                            $query .= ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                         } else {
                             if (is_numeric($value)) {
                                 $query .= "kwd.tag_ID=$value ";
                             } else {
                                 $query .= '(';
-                                $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.mysql_real_escape_string($value).'" '
-                                    : 'kwd.tag_Text like "'.mysql_real_escape_string($value).'%" ');
+                                $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
+                                    : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                                 $query .= ' and ugr_ID is null) ';
                             }
                         }
@@ -1525,6 +1555,7 @@
 
     class RelationsForPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
             $ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
             /*
             return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
@@ -1546,9 +1577,11 @@
             * Fastest is to do a SEPARATE QUERY to get the record IDs out of the bib_relationship table, then pass it back encoded in the predicate.
             * Certainly not the most elegant way to do it, but the numbers don't lie.
             */
-            $res = mysql_query("select group_concat( distinct rec_ID ) from Records, recRelationshipsCache where (rrc_RecID=rec_ID or rrc_TargetRecID=rec_ID or rrc_SourceRecID=rec_ID)
+            $res = $mysqli->query("select group_concat( distinct rec_ID ) from Records, recRelationshipsCache where (rrc_RecID=rec_ID or rrc_TargetRecID=rec_ID or rrc_SourceRecID=rec_ID)
                 and (rrc_SourceRecID in $ids or rrc_TargetRecID in $ids) and rec_ID not in $ids");
-            $ids = mysql_fetch_row($res);  $ids = $ids[0];
+            $ids = $res->fetch_row();  
+            $ids = $ids[0];
+            
             if (! $ids) return "0";
             else return "TOPBIBLIO.rec_ID in ($ids)";
         }
@@ -1620,6 +1653,8 @@
 
     class WorkgroupPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $eq = ($this->parent->negate)? '!=' : '=';
             if (is_numeric($this->value)) {
                 return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
@@ -1629,7 +1664,7 @@
                 return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
             }
             else {
-                return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '".mysql_real_escape_string($this->value)."' limit 1)";
+                return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '".$mysqli->real_escape_string($this->value)."' limit 1)";
             }
         }
     }
@@ -1717,14 +1752,16 @@
 
     class HHashPredicate extends Predicate {
         function makeSQL() {
+            global $mysqli;
+            
             $op = '';
             if ($this->parent->exact) {
                 $op = $this->parent->negate? "!=" : "=";
-                return "TOPBIBLIO.rec_Hash $op '" . mysql_real_escape_string($this->value) . "'";
+                return "TOPBIBLIO.rec_Hash $op '" . $mysqli->real_escape_string($this->value) . "'";
             }
             else {
                 $op = $this->parent->negate? " not like " : " like ";
-                return "TOPBIBLIO.rec_Hash $op '" . mysql_real_escape_string($this->value) . "%'";
+                return "TOPBIBLIO.rec_Hash $op '" . $mysqli->real_escape_string($this->value) . "%'";
             }
         }
     }

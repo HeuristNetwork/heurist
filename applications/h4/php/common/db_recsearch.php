@@ -109,7 +109,7 @@
             $step_level = @$params['step'];
 
             //get SQL clauses for current query
-            $qclauses = get_sql_query_clauses($params, $currentUser);
+            $qclauses = get_sql_query_clauses($mysqli, $params, $currentUser);
 
             if($dt_type=="rectype"){
 
@@ -624,7 +624,7 @@
         .'rec_URLErrorMessage,'
         .'bkm_PwdReminder ';*/
 
-        $query = get_sql_query_clauses($params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        $query = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
 
         $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
