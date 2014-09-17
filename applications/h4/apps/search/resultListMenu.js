@@ -27,12 +27,16 @@ $.widget( "heurist.resultListMenu", {
     
     _query_request: {}, //keep current query request
     _selection: null,     //current set of selected records
+    _collection:null,
+    _collectionURL:null,
 
     // the widget's constructor
     _create: function() {
 
         var that = this;
 
+        this._collectionURL = top.HAPI4.basePathOld + "search/saved/manageCollection.php";
+        
         this.element
         .css('font-size', '0.9em')
         // prevent double click to select text
@@ -69,7 +73,7 @@ $.widget( "heurist.resultListMenu", {
                 
                     if(data) data = data.selection;
                 
-                   if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                   if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
                        that._selection = data;
                    }else{
                        that._selection = null
@@ -80,6 +84,10 @@ $.widget( "heurist.resultListMenu", {
         });        
         
         this._refresh();
+        
+        //this.collectionRender();
+        //setTimeout(function(){that.collectionRender();}, 2500);
+        
 
     }, //end _create
 
@@ -105,7 +113,6 @@ $.widget( "heurist.resultListMenu", {
         }else{
             $(this.element).find('.logged-in-only').css('visibility','hidden');
         }
-                
     },
     // 
     // custom, widget-specific, cleanup.
@@ -117,7 +124,7 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Selected.remove();
         this.btn_Collected.remove();
         this.menu_Collected.remove();
-        this.btn_Layout.remove();
+        this.btn_Layout.reSmove();
         this.menu_Layout.remove();
         this.divMainMenuItems.remove();
     },
@@ -141,8 +148,12 @@ $.widget( "heurist.resultListMenu", {
             };
             
         var link = $('<a>',{
-            text: name, href:'#'
+            text: top.HR(name), href:'#'
         });
+        
+        if(name=='Collected'){
+            this.menu_Collected_link = link;
+        }
         
         this['btn_'+name] = $('<li>').append(link)
         .appendTo( this.divMainMenuItems );
@@ -158,7 +169,7 @@ $.widget( "heurist.resultListMenu", {
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();
         
-        {select: that._menuActionHandler}
+        //{select: that._menuActionHandler}
         
         this._on( this['btn_'+name], {
             mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
@@ -256,7 +267,28 @@ $.widget( "heurist.resultListMenu", {
           }else if(action == "menu-selected-notify"){                  
               
                 this.notificationPopup();
+
+          }else if(action == "menu-collected-add"){                  
+              
+              this.collectionAdd();
                 
+          }else if(action == "menu-collected-del"){                  
+
+              this.collectionDel();
+
+              
+          }else if(action == "menu-collected-clear"){                  
+
+              this.collectionClear();
+              
+          }else if(action == "menu-collected-show"){                  
+
+              this.collectionShow();
+              
+          }else if(action == "menu-collected-save"){                  
+              
+              this.collectionSave();
+              
           }
           
           
@@ -393,15 +425,10 @@ $.widget( "heurist.resultListMenu", {
     */
     addRemoveKeywordsPopup: function() {
         
-        var recIDs_list = [],
-            that = this;
-        if (that._selection!=null) {
-            recIDs_list = that._selection.getIds();
-        }
-        if (recIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg("Select at least one record to add / remove workgroup tags");
-            return;
-        }
+        var recIDs_list = this.getSelectionIds("Select at least one record to add / remove workgroup tags");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+
+        var that = this;
         
         this.convertGroupsForH3();
         
@@ -420,11 +447,11 @@ $.widget( "heurist.resultListMenu", {
             });
     },
 
-    selectBookmarkMessage: function(operation) {
-        top.HEURIST4.util.showMsgDlg("Select at least one bookmark " + operation
+    getBookmarkMessage: function(operation) {
+            return "Select at least one bookmark " + operation
             + (this._query_request.w=="all"
                 ? "<br>(operation can only be carried out on bookmarked records, shown by a red star )"
-                : ""));
+                : "");
     },
 
     convertGroupsForH3: function() {
@@ -461,7 +488,7 @@ $.widget( "heurist.resultListMenu", {
         }
 
         if (bkmkIDs_list.length == 0) {
-            this.selectBookmarkMessage("to set ratings");
+            top.HEURIST4.util.showMsgDlg(this.getBookmarkMessage("to set ratings"));
             return;
         }
 
@@ -479,19 +506,10 @@ $.widget( "heurist.resultListMenu", {
         
     },
     
-    addBookmarks: function(recID) {
+    addBookmarks: function() {
         
-        var recIDs_list = [];
-            
-        if(recID){
-            recIDs_list = [recID];
-        }else if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-        if (recIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg("Select at least one record to bookmark");
-            return;
-        }
+        var recIDs_list = this.getSelectionIds("Select at least one record to bookmark");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
 
         this.executeAction( "bookmark_reference", {rec_ids: recIDs_list} );
     },
@@ -522,21 +540,12 @@ $.widget( "heurist.resultListMenu", {
         })
     },
 
-    deleteRecords: function(recID) {
+    deleteRecords: function() {
         
-        var recIDs_list = [],
-            that = this;
-            
-        if(recID){
-            recIDs_list = [recID];
-        }else if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-        if (recIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg("Select at least one record to delete");
-            return;
-        }
+        var recIDs_list = this.getSelectionIds("Select at least one record to delete");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
         
+        var that = this;        
         var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.util.showDialog(url, { 
@@ -556,15 +565,9 @@ $.widget( "heurist.resultListMenu", {
 
     notificationPopup: function() {
         
-        var recIDs_list = [];
-            
-        if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-        if (recIDs_list.length == 0) {
-            this.selectBookmarkMessage("for notification");
-            return;
-        }
+        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"));
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+
         recIDs_list = recIDs_list.join(",");
         url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
@@ -572,18 +575,12 @@ $.widget( "heurist.resultListMenu", {
     },
         
     setWorkgroupPopup: function() {
+
+        var recIDs_list = this.getSelectionIds("Select at least one record to set workgroup ownership and visibility");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
         
-        var recIDs_list = [],
-            that = this;
+        var that = this;
             
-        if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-        if (recIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg("Select at least one record to set workgroup ownership and visibility");
-            return;
-        }
-        
         this.convertGroupsForH3();
         
         var url = top.HAPI4.basePathOld+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
@@ -619,7 +616,90 @@ $.widget( "heurist.resultListMenu", {
                 window.open(url, "_blank");
             }
         }
-    }
+    },
     
+    getSelectionIds: function(msg){
+        
+        var recIDs_list = [];
+        if (this._selection!=null) {
+            recIDs_list = this._selection.getIds();
+        }
+
+        if (recIDs_list.length == 0 ) {
+            top.HEURIST4.util.showMsgDlg(msg);
+            return null;
+        }else{
+            return recIDs_list;
+        }
+        
+    },
+    
+    collectionAdd: function(){
+
+        var recIDs_list = this.getSelectionIds("Select at least one record to add to collection basket");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        
+        var params = {db:top.HAPI4.database, fetch:1, add:recIDs_list.join(",")};
+        
+        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+
+        this.selectNone();
+    },
+    
+    collectionDel: function(){
+        
+        var recIDs_list = this.getSelectionIds("Select at least one record to remove from collection basket");
+        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        
+        var params = {db:top.HAPI4.database, fetch:1, remove:recIDs_list.join(",")};
+        
+        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+
+        this.selectNone();
+    },
+    
+    collectionClear: function(){
+
+        var params = {db:top.HAPI4.database, clear:1};
+        
+        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+    },
+    
+    collectionShow: function(){
+
+        if(!top.HEURIST4.util.isempty(this._collection)){
+            this._query_request.w = 'all';
+            this._query_request.q =  'ids:'+this._collection.join(",");
+            this._query_request.source = this.element.attr('id');
+            top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+        }
+        
+    },
+    collectionSave: function(){
+        
+    },
+    collectionOnUpdate: function(that, results) {
+        if(!top.HEURIST4.util.isnull(results)){
+            if(results.status == top.HAPI4.ResponseStatus.UNKNOWN_ERROR){
+                top.HEURIST4.util.showMsgErr(results.message);        
+            }else{
+                that._collection = results.ids;
+                that.collectionRender();
+                //top.HEURIST.search.collectCount = results.count;
+                //top.HEURIST.search.collection = results.ids;
+            }
+        }
+    },
+
+    collectionRender: function() {
+        if(top.HEURIST4.util.isempty(this._collection))
+        {
+            var params = {db:top.HAPI4.database, fetch:1};
+            top.HEURIST4.util.sendRequest(this.collectionURL, params, this, this.collectionOnUpdate);
+        }else{
+            //top.HR('Collected')
+            this.menu_Collected_link.html( 'Collected' + (this._collection.length>0?':'+this._collection.length:''));
+        }
+    },
     
 });

@@ -838,6 +838,34 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             return true;
         }
     },
+    
+    sendRequest: function(url, request, caller, callback){
+
+        if(!request.db){
+            request.db = top.HAPI4.database;
+        }
+
+        //note jQuery ajax does not properly in the loop - success callback does not work often   
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: request,
+            dataType: "json",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+                if(callback){
+                    callback(caller, {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                        message: jqXHR.responseText });
+                }
+                //message:'Error connecting server '+textStatus});
+            },
+            success: function( response, textStatus, jqXHR ){
+                if(callback){
+                    callback(caller, response);
+                }
+            }
+        });
+    },
 
     showDialog: function(url, options){
     
