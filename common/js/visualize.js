@@ -25,7 +25,7 @@
 */
 (function ( $ ) {
     var settings;   // Plugin settings object
-    var svg;        // The SVG where the visualisation will be executed on
+    var svg;        // The SVG where the visualisation will be executed on   
 
     /**
     * jQuery plugin hook, this is where the magic happens
@@ -474,11 +474,8 @@
                  } 
              })) 
              .on("click", function(d) {
-                 // Construct line overlay data, then use it to generate the overlay itself
+                 // Construct line overlay data, then use it to generate the overlay itself  
                  createOverlay(d3.event.offsetX, d3.event.offsetY, d.relation);    
-             })
-             .on("mouseout", function(d) {
-                 removeOverlay();                                 
              });
              
         // Check what methods to call on drag
@@ -625,9 +622,6 @@
                                 createOverlay(d3.event.offsetX, d3.event.offsetY, d);
                            }
                       })
-                      .on("mouseout", function(d) {
-                         removeOverlay();                                 
-                      })
                       .call(node_drag);
         
         // Adding the background circles to the nodes
@@ -644,8 +638,6 @@
                            .attr("r", circleSize)
                            .attr("class", "around foreground")
                            .style("stroke", function(d) {
-                               console.log("STROKE CHECK");
-                               console.log(d);
                                if(d.selected == true) {
                                     return "#ee0";
                                }
@@ -908,6 +900,8 @@
             }
             */
             
+            /*
+            console.log("FINDING LINKS");
             var map = {};
             for(var i = 0; i < data.links.length; i++) {
                 var link = data.links[i];
@@ -915,6 +909,7 @@
                   
                 // Does our record point to this link?
                 if(link.source.id == record.id) {
+                    console.log(link);
                     // Connection check
                     if(!map.hasOwnProperty(link.target.name)) {
                         map[link.target.name] = {text: "→ " + link.target.name + "(n=" + link.target.count + ")", size: "9px"};
@@ -923,6 +918,7 @@
                 
                 // Does this link point to our record?
                 if(link.target.id == record.id) {
+                    console.log(link);
                     // Connection check
                     if(!map.hasOwnProperty(link.source.name)) {
                         map[link.source.name] = {text: "← " + link.source.name  + " (n=" + link.source.count + ")", size: "9px"};
@@ -931,19 +927,65 @@
                 
                 // Is our record a relation?
                 if(link.relation.id == record.id) {
+                    console.log(link);
                     // Relation check
                     if(!map.hasOwnProperty(link.target.name)) {
                         map[link.target.name] = {text: "↔ " + link.target.name + " (n=" + link.relation.count + ")", size: "9px"}; 
                     }
                 }
             }
+            */
+            
+            console.log("FINDING LINKS");
+            var map = {};
+            for(var i = 0; i < data.links.length; i++) {
+                var link = data.links[i];
+                console.log(link);
+                  
+                // Does our record point to this link?
+                if(link.source.id == record.id) {
+                    if(!map.hasOwnProperty(link.relation.name)) {
+                        map[link.relation.name] = [];
+                    }
+                    
+                    var obj = {text: "➜ " + link.target.name/* + "(n=" + link.target.count + ")"*/, size: "9px"}; 
+                    map[link.relation.name].push(obj);
+                }
+                
+                // Does this link point to our record?
+                /*
+                if(link.target.id == record.id) {
+                    if(!map.hasOwnProperty(link.relation.name)) {
+                        map[link.relation.name] = [];
+                    }
+
+                    var obj = {text: "← " + link.source.name + " (n=" + link.source.count + ")", size: "9px"};
+                    map[link.relation.name].push(obj);
+                }
+                */
+                
+                // Is our record a relation?
+                if(link.relation.id == record.id) {
+                    if(!map.hasOwnProperty(link.relation.name)) {
+                        map[link.relation.name] = [];
+                    }
+                    
+                    var obj = {text: link.source.name + " ↔ " + link.target.name/* + " (n=" + link.relation.count + ")"*/, size: "9px"};
+                    map[link.relation.name].push(obj);
+                    
+                }
+            }
+            
             
             console.log("MAP");
             console.log(map);
             
             // Convert map to array
             for(key in map) {
-                array.push(map[key]); 
+                array.push({text: key, size: "11px"});
+                if(map[key].length > 0) {
+                    array = array.concat(map[key]);
+                }
             }
         }
         
@@ -959,25 +1001,24 @@
     * @param record Record info
     */
     function createOverlay(x, y, record) {
-        $("#overlay").remove();
-        var horizontalOffset = 5;
-        var verticalOffset = 12;
-        console.log("CREATE OVERLAY");
-        console.log(record);
-        
+        svg.select(".overlay.id"+record.id).remove();
+    
         // Add overlay container            
         var overlay = svg.append("g")
-                         .attr("id", "overlay")      
-                         .attr("transform", "translate(" +x+ "," +(y+20)+ ")");
-        
+                         .attr("class", "overlay id"+record.id)      
+                         .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
+                         
         // Draw a semi transparant rectangle       
         var rect = overlay.append("rect")
                           .attr("class", "semi-transparant")              
                           .attr("x", 0)
-                          .attr("y", 0);
-                          
+                          .attr("y", 0)
+                          .on("drag", overlayDrag);
+                
         // Adding text  
-        var info = getOverlayData(record);  
+        var info = getOverlayData(record);
+        var horizontalOffset = 10;
+        var verticalOffset = 12;  
         var text = overlay.selectAll("text")
                           .data(info)
                           .enter()
@@ -987,7 +1028,7 @@
                           })
                           .attr("x", horizontalOffset)        // Some left padding
                           .attr("y", function(d, i) {
-                              return ++i*verticalOffset;      // Position calculation
+                              return (i+1.5)*verticalOffset;      // Position calculation
                           })
                           .attr("font-weight", function(d) {  // Font weight based on style property
                               return d.style;
@@ -1015,18 +1056,45 @@
                 maxHeight = y;
             }
         }
+        maxWidth  += 3.5*horizontalOffset;
+        maxHeight += 1.5*verticalOffset; 
         
         // Set optimal width & height
-        rect.attr("width", maxWidth + 3*horizontalOffset)
-            .attr("height", maxHeight + 1.25*verticalOffset);
+        rect.attr("width", maxWidth)
+            .attr("height", maxHeight);
+      
+        // Close button
+        var buttonSize = 15;
+        var close = overlay.append("g")
+                           .attr("class", "close")
+                           .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
+                           .on("click", function(d) {
+                               $(".overlay.id"+record.id).fadeOut(300, function() {
+                                    $(this).remove();
+                               });                               
+                           });
+                           
+        // Close rectangle                                                                     
+        close.append("rect")
+               .attr("class", "close-button")
+               .attr("width", buttonSize)
+               .attr("height", buttonSize)
+  
+        // Close text        
+        close.append("text")
+             .attr("class", "close-text")
+             .text("X")
+             .attr("x", buttonSize/4)
+             .attr("y", buttonSize*0.75);
+             
+        /** Handles dragging events on overlay */
+        function overlayDrag(d) {
+            console.log("DRAGGED");
+            overlay.attr("transform", "translate("+d.x+","+d.y+")");
+        }
+             
+                           
     }
     
-    
-    /** Slight delay, fades away and then removes itself. */
-    function removeOverlay() {
-        $("#overlay").delay(500).fadeOut(500, function() {
-             $(this).remove();
-        });
-    }
  
 }( jQuery ));

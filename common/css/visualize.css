@@ -81,9 +81,10 @@ text.shadow {
 }
 
 /** Overlay */
-#overlay {
+.overlay:hover {   
+    cursor: default;
     pointer-events: none;
-}
+}                 
 
 .semi-transparant {
     fill: #fff;
@@ -91,4 +92,18 @@ text.shadow {
     stroke: #000;
     stroke-width: 1.5;
     stroke-opacity: 1.0;
+}
+
+.close-button {
+    fill: #b00;
+    stroke: #000;
+    stroke-width: 1.5; 
+    pointer-events: all; 
+    cursor: pointer;
+}
+
+.close-text {
+    fill: #fff;
+    font-size: 20px;
+    font-weight: bold;
 }
