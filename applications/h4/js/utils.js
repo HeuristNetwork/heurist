@@ -747,6 +747,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             //height:140,
             width: 'auto',
             modal: true,
+            closeOnEscape: true,
             buttons: buttons
         });
 

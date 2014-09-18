@@ -46,8 +46,8 @@ $.widget( "heurist.search", {
 
         var that = this;
 
-        this.input_search = $( "<input>", {width:'30%'} )
-        .css('margin-right','0.2em')
+        this.input_search = $( "<input>", {width: this.options.has_paginator?'30%':'60%'} )
+        .css({'margin-right':'0.2em'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.element );
 

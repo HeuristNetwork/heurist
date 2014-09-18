@@ -65,7 +65,7 @@ $.widget( "heurist.resultList", {
 
         //-----------------------
         this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'0 2em 0 2em'}).appendTo( this.div_toolbar ));
+            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'3px 2em 0 2em'}).appendTo( this.div_toolbar ));
 
 
         //-----------------------

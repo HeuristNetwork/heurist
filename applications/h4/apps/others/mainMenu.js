@@ -36,7 +36,7 @@ $.widget( "heurist.mainMenu", {
 
         this.div_logo = $( "<div>")
         .addClass('logo')
-        .css('width','150px')
+        .css('width','160px')
         .css('float','left')
         .appendTo( this.element )
         .button();
@@ -66,6 +66,32 @@ $.widget( "heurist.mainMenu", {
         this._initMenu('Export');
         this._initMenu('Help');
         this.divMainMenuItems.menu();
+        
+        // SECOND LINE --------------------------------------------------
+        this.div_BottomRow = $("<div>").css({ 'position':'absolute', top:46, left: '2px', right:0, 'padding-right': '2em' }).appendTo( this.element );
+        
+        this.btn_switch_to_design = $( "<button>", {
+            text: top.HR("go to designer view")
+        })
+        .css('width','160px')
+        .appendTo( this.div_BottomRow )
+        .button()
+        .click(function( event ) {
+            var url = top.HAPI4.basePathOld + "admin/adminMenu.php?db=" + top.HAPI4.database;        
+            window.open(url, "_blank");
+        });
+        
+        this.btn_add_record = $( "<button>", {
+            text: top.HR("add new record")
+        })
+        .css('float','right')
+        .addClass('logged-in-only')
+        .appendTo( this.div_BottomRow )
+        .button({icons: {
+            primary: "ui-icon-circle-plus"
+        }})
+        .click( function(){ that._addNewRecord(); });
+        
         
         this._refresh();
 
@@ -237,6 +263,30 @@ $.widget( "heurist.mainMenu", {
             }
         });
     
+    },
+    
+    _addNewRecord: function(){
+        
+        
+        var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
+        
+        Hul.showDialog(url, { height:450, width:700, 
+                    callback:function(responce) {
+/*                        
+                var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+                top.HEURIST.util.getJsonData(
+                    sURL,
+                    function(responce){
+                        if(responce){
+                            top.HEURIST.rectypes.usageCount = responce;
+                            top.HEURIST.search.createUsedRectypeSelector(true);
+                        }
+                    },
+                    "db="+_db+"&action=usageCount");
+*/                        
+                    }
+            });
+            
     }
     
 

@@ -182,9 +182,9 @@ div.input-div > #btn_input_clear {
     display: none;
 }
 
+/* margin-bottom:2px; */
 input.text, select.text {
-    margin-bottom:2px;
-    padding: .2em;
+    padding-bottom: 0.2em;
 }
 
 .readonly {

@@ -268,6 +268,18 @@ $.widget( "heurist.resultListMenu", {
           }else if(action == "menu-selected-notify"){                  
               
                 this.notificationPopup();
+                
+          }else if(action == "menu-selected-value-add"){                  
+              
+                this.addDetailPopup();
+
+          }else if(action == "menu-selected-value-replace"){                  
+              
+                this.replaceDetailPopup();
+
+          }else if(action == "menu-selected-value-delete"){                  
+              
+                this.deleteDetailPopup();
 
           }else if(action == "menu-collected-add"){                  
               
@@ -366,6 +378,25 @@ $.widget( "heurist.resultListMenu", {
             });
             
     },
+
+    getSelectionIds: function(msg){
+        
+        var recIDs_list = [];
+        if (this._selection!=null) {
+            recIDs_list = this._selection.getIds();
+        }
+
+        if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
+            Hul.showMsgDlg(msg);
+            return null;
+        }else{
+            return recIDs_list;
+        }
+        
+    },
+    
+//-------------------------------------- ADD, REMOVE TAGS, BOOKMARKS. RATING -------------------------------    
+    
     
     /**
     * Personal tags
@@ -541,40 +572,6 @@ $.widget( "heurist.resultListMenu", {
         })
     },
 
-    deleteRecords: function() {
-        
-        var recIDs_list = this.getSelectionIds("Select at least one record to delete");
-        if(Hul.isempty(recIDs_list)) return;
-        
-        var that = this;        
-        var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
-
-        Hul.showDialog(url, { 
-                    onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
-                            var ele = frame.contentDocument.getElementById("ids");
-                            ele.value = recIDs_list.join(",");
-                            frame.contentDocument.forms[0].submit();
-                        },
-                    callback: function(context) {
-                            if (context==="reload") { //something was deleted
-                                 that._query_request.source = that.element.attr('id');
-                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            }
-                        }
-            });
-    },
-
-    notificationPopup: function() {
-        
-        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"));
-        if(Hul.isempty(recIDs_list)) return;
-
-        recIDs_list = recIDs_list.join(",");
-        url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
-        
-        Hul.showDialog(url, {height:230});
-    },
-        
     setWorkgroupPopup: function() {
 
         var recIDs_list = this.getSelectionIds("Select at least one record to set workgroup ownership and visibility");
@@ -599,6 +596,8 @@ $.widget( "heurist.resultListMenu", {
                     }
             });
     },
+
+//-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------    
     
     selectAll: function(){
          $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
@@ -619,21 +618,7 @@ $.widget( "heurist.resultListMenu", {
         }
     },
     
-    getSelectionIds: function(msg){
-        
-        var recIDs_list = [];
-        if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-
-        if (recIDs_list.length == 0 ) {
-            Hul.showMsgDlg(msg);
-            return null;
-        }else{
-            return recIDs_list;
-        }
-        
-    },
+//-------------------------------------- COLLECTIONS -------------------------------    
     
     collectionAdd: function(){
 
@@ -712,5 +697,108 @@ $.widget( "heurist.resultListMenu", {
             this.menu_Collected_link.html( 'Collected' + (this._collection.length>0?':'+this._collection.length:''));
         }
     },
+
+//-------------------------------------- VARIOUS: DELETE RECORD, SEND NOTIFICATION -------------------------------    
+
+    deleteRecords: function() {
+        
+        var recIDs_list = this.getSelectionIds("Select at least one record to delete");
+        if(Hul.isempty(recIDs_list)) return;
+        
+        var that = this;        
+        var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
+
+        Hul.showDialog(url, { 
+                    onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
+                            var ele = frame.contentDocument.getElementById("ids");
+                            ele.value = recIDs_list.join(",");
+                            frame.contentDocument.forms[0].submit();
+                        },
+                    callback: function(context) {
+                            if (context==="reload") { //something was deleted
+                                 that._query_request.source = that.element.attr('id');
+                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                            }
+                        }
+            });
+    },
+
+    notificationPopup: function() {
+        
+        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"));
+        if(Hul.isempty(recIDs_list)) return;
+
+        recIDs_list = recIDs_list.join(",");
+        var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
+        
+        Hul.showDialog(url, {height:230});
+    },
+        
+    
+//-------------------------------------- ADD, REPALCE, DELETE FIELD VALUES -------------------------------    
+
+    addDetailPopup: function() {
+ /*       
+        var recIDs_list = this.getSelectionIds();
+        if(Hul.isempty(recIDs_list)){
+            recIDs_list
+        }
+        if(Hul.isempty(recIDs_list)) return;
+
+        var url = top.HAPI4.basePathOld+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
+
+        //fake 
+  resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs;
+  selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
+  allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
+  top.HEURIST.search.results.infoByDepth[0].rectypes
+  
+  top.HEURIST.search.results.recSet[recID].record[4]  //rectype id
+  top.HEURIST.search.executeQuery
+  top.HEURIST.search.executeAction( "add_detail", _data, cbSave )
+
+        
+        Hul.showDialog(url);
+
+        
+        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+        if (recIDs_list.length == 0) {
+            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+        }
+        if (recIDs_list.length == 0) {
+            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            return;
+        }
+        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/addDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+*/        
+    },
+
+    replaceDetailPopup: function() {
+        /*var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+        if (recIDs_list.length == 0) {
+            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+        }
+        if (recIDs_list.length == 0) {
+            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            return;
+        }
+        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/replaceDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+        */
+    },
+
+    deleteDetailPopup: function() {
+        /*
+        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+        if (recIDs_list.length == 0) {
+            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
+        }
+        if (recIDs_list.length == 0) {
+            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            return;
+        }
+        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/deleteDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+        */
+    },
+        
     
 });
