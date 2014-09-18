@@ -17,6 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+var Hul = top.HEURIST4.util;
 
 $.widget( "heurist.search_links", {
 
@@ -115,7 +116,7 @@ $.widget( "heurist.search_links", {
                         that._prepareTags();
                         that._updateAccordeon();
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        Hul.showMsgErr(response);
                     }
             });
 
@@ -238,7 +239,7 @@ $.widget( "heurist.search_links", {
             .button({icons: {primary: "ui-icon-circle-plus"}, text:false})
             .click(function( event ) {
                 event.preventDefault();
-                that.editSavedSearch(null, domain);
+                that.editSavedSearch(null, null, domain);
                 return false;
             })
             .appendTo($header);
@@ -355,7 +356,7 @@ $.widget( "heurist.search_links", {
                 if(ugr_ID==top.HAPI4.currentUser.ugr_ID){  //detect either boomark or all
 
                     if(this.currentMode=='saved'){
-                        var prms = top.HEURIST4.util.getUrlQueryAndDomain(ssearches[svsID][1]);
+                        var prms = Hul.getUrlQueryAndDomain(ssearches[svsID][1]);
                         //var qsearch = prms[0];
                         domain2  = prms[1];
                     }else{
@@ -496,7 +497,7 @@ $.widget( "heurist.search_links", {
                 }
                 catch (err) {
                     // Do something about the exception here
-                    top.HEURIST4.util.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters'), null, "Error");
+                    Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters'), null, "Error");
                 }
 
                 var that = this;
@@ -524,7 +525,7 @@ $.widget( "heurist.search_links", {
 
             }else{
 
-                var prms = top.HEURIST4.util.getUrlQueryAndDomain(qsearch);
+                var prms = Hul.getUrlQueryAndDomain(qsearch);
                 qsearch = prms[0];
                 var domain  = prms[1];
 
@@ -550,9 +551,10 @@ $.widget( "heurist.search_links", {
     /**
     * Assign values to UI input controls
     * 
+    * squery - need for new - otherwise it takes currentSearch
     * domain need for new 
     */
-    _fromDataToUI: function(svsID, domain){
+    _fromDataToUI: function(svsID, squery, domain){
 
         var $dlg = this.edit_dialog;
         if($dlg){
@@ -570,7 +572,7 @@ $.widget( "heurist.search_links", {
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
 
-                var prms = top.HEURIST4.util.getUrlQueryAndDomain(svs[1]);
+                var prms = Hul.getUrlQueryAndDomain(svs[1]);
                 var qsearch = prms[0];
                 domain  = prms[1];
 
@@ -583,8 +585,10 @@ $.widget( "heurist.search_links", {
                 svs_id.val('');
                 svs_name.val('');
                 //var domain = 'all';
-
-                if(top.HEURIST4.util.isnull(this.currentSearch)){
+                
+                if(!Hul.isempty(squery)) {
+                    svs_query.val( squery );
+                }else if(Hul.isnull(this.currentSearch)){
                     svs_query.val( '' );
                 }else{
                     //domain = this.currentSearch.w;
@@ -596,9 +600,9 @@ $.widget( "heurist.search_links", {
                 var selObj = svs_ugrid.get(0);
                 if(domain=="bookmark"){
                     svs_ugrid.empty();
-                    top.HEURIST4.util.addoption(selObj, 'bookmark', top.HR('My Bookmarks'));
+                    Hul.addoption(selObj, 'bookmark', top.HR('My Bookmarks'));
                 }else{
-                    top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+                    Hul.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                         [{key:'all', title:top.HR('All Records')}],
                         function(){
                             svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
@@ -625,7 +629,7 @@ $.widget( "heurist.search_links", {
     * @param svsID
     * @param domain - bookmark or usergroupID
     */
-    , editSavedSearch: function(svsID, domain){
+    , editSavedSearch: function(svsID, squery, domain){
 
         var that = this;
         if( this.currentMode == "faceted") {
@@ -648,7 +652,7 @@ $.widget( "heurist.search_links", {
 
                 var allFields = $dlg.find('input');
 
-                that._fromDataToUI(svsID, domain);
+                that._fromDataToUI(svsID, squery, domain);
 
                 function __doSave(){
 
@@ -660,8 +664,8 @@ $.widget( "heurist.search_links", {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = top.HEURIST4.util.checkLength( svs_name, "Name", message, 3, 25 )
-                    && top.HEURIST4.util.checkLength( svs_query, "Query", message, 1 );
+                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 )
+                    && Hul.checkLength( svs_query, "Query", message, 1 );
 
 
                     if(bValid){
@@ -750,7 +754,7 @@ $.widget( "heurist.search_links", {
             });
         }else{
             //show dialogue
-            this._fromDataToUI(svsID, domain);
+            this._fromDataToUI(svsID, squery, domain);
             this.edit_dialog.dialog("open");
         }
 
@@ -762,7 +766,7 @@ $.widget( "heurist.search_links", {
         var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
         if(!svs) return;
 
-        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
+        Hul.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
 
             top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
@@ -774,7 +778,7 @@ $.widget( "heurist.search_links", {
                         delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        Hul.showMsgErr(response);
                     }
                 }
 

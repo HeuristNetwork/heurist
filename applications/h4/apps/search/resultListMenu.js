@@ -17,6 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+var Hul = top.HEURIST4.util;
 
 $.widget( "heurist.resultListMenu", {
 
@@ -85,7 +86,7 @@ $.widget( "heurist.resultListMenu", {
         
         this._refresh();
         
-        //this.collectionRender();
+        this.collectionRender();
         //setTimeout(function(){that.collectionRender();}, 2500);
         
 
@@ -202,14 +203,14 @@ $.widget( "heurist.resultListMenu", {
                 //call H3 search builder
                 var q = "", 
                     that = this;
-                if(!top.HEURIST4.util.isnull(this._query_request) && !top.HEURIST4.util.isempty(this._query_request.q)){
+                if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
                     q ="&q=" + encodeURIComponent(this._query_request.q);
                 }
                 var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
                 
-                top.HEURIST4.util.showDialog(url, { callback: 
+                Hul.showDialog(url, { callback: 
                     function(q){
-                        if(!top.HEURIST4.util.isempty(q)) {
+                        if(!Hul.isempty(q)) {
                             that._query_request.q = q;
                             //that._query_request.w = 'a';
                             that._query_request.source = that.element.attr('id');
@@ -221,7 +222,7 @@ $.widget( "heurist.resultListMenu", {
               
                 var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links('editSavedSearch', null, 'all');
+                    $(app.widget).search_links('editSavedSearch', null, null, 'all'); //call method editSavedSearch - save current search
                 }
 
           }else if(action == "menu-selected-select-all"){  
@@ -306,12 +307,12 @@ $.widget( "heurist.resultListMenu", {
         
             function _requestCallBack(context) {
 
-                if(!top.HEURIST4.util.isnull(context)){
+                if(!Hul.isnull(context)){
 
                     if(context.problem){
-                        top.HEURIST4.util.showMsgErr(context.problem);
+                        Hul.showMsgErr(context.problem);
                     }else if(context.none){
-                        top.HEURIST4.util.showMsgFlash(context.none);
+                        Hul.showMsgFlash(context.none);
                     }else if(context.execute){
                         var fname = context.execute.shift();
                         var args = context.execute;
@@ -331,11 +332,11 @@ $.widget( "heurist.resultListMenu", {
                         //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
                     }else if(context.ok){
                         
-                        top.HEURIST4.util.showMsgFlash(context.ok);
+                        Hul.showMsgFlash(context.ok);
                         that._query_request.source = that.element.attr('id');
                         top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
                         
-                        /*top.HEURIST4.util.showMsgDlg(context.ok+
+                        /*Hul.showMsgDlg(context.ok+
                         "<br><br>Information changes will be visible on re-run the current search."+
                         "<br>Reloading will reset filters and selection."+
                         "<br>'Yes' to re-run, 'No' to leave display as-is", 
@@ -376,8 +377,8 @@ $.widget( "heurist.resultListMenu", {
         var bkmkIDs_list = [];
 
         if(recID || bkmkID){
-            if(recID) recIDs_list = top.HEURIST4.util.isArray(recID)?recID:[recID];
-            if(bkmkID) bkmkIDs_list = top.HEURIST4.util.isArray(bkmkID)?bkmkID:[bkmkID];
+            if(recID) recIDs_list = Hul.isArray(recID)?recID:[recID];
+            if(bkmkID) bkmkIDs_list = Hul.isArray(bkmkID)?bkmkID:[bkmkID];
         }else if (that._selection!=null) {
             recIDs_list = that._selection.getIds();
             bkmkIDs_list = that._selection.getBookmarkIds();
@@ -390,7 +391,7 @@ $.widget( "heurist.resultListMenu", {
         var hasRecordsNotBkmkd = false;
         if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
             //nothing selected
-            top.HEURIST4.util.showMsgDlg("Select at least one record to add tags");
+            Hul.showMsgDlg("Select at least one record to add tags");
             return;
         }else if (recIDs_list.length > bkmkIDs_list.length) {
             // at least one unbookmarked record selected
@@ -399,7 +400,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + top.HAPI4.database + (recID?"&recid="+recID:"");
         
-        top.HEURIST4.util.showDialog(url, { callback:
+        Hul.showDialog(url, { callback:
          
                         function(add, tags) {//options
                             if (! tags) { //no tags added
@@ -426,7 +427,7 @@ $.widget( "heurist.resultListMenu", {
     addRemoveKeywordsPopup: function() {
         
         var recIDs_list = this.getSelectionIds("Select at least one record to add / remove workgroup tags");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
 
         var that = this;
         
@@ -434,7 +435,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/tags/editUsergroupTagsPopup.html?db=" + top.HAPI4.database;
         
-        top.HEURIST4.util.showDialog(url, { 
+        Hul.showDialog(url, { 
                         width: 800,
                         callback: function(add, wgTag_ids) {//options
                             if (! wgTag_ids) return;
@@ -465,7 +466,7 @@ $.widget( "heurist.resultListMenu", {
                     var groupID = idx;
                     var name = groups[idx][1];
                     
-                    if(!top.HEURIST4.util.isnull(name))
+                    if(!Hul.isnull(name))
                     {
                         workgroups.push(groupID);
                         workgroups2[groupID] = {name: name};
@@ -488,13 +489,13 @@ $.widget( "heurist.resultListMenu", {
         }
 
         if (bkmkIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg(this.getBookmarkMessage("to set ratings"));
+            Hul.showMsgDlg(this.getBookmarkMessage("to set ratings"));
             return;
         }
 
         var url = top.HAPI4.basePathOld+ "search/actions/setRatingsPopup.php?db=" + top.HAPI4.database;
 
-        top.HEURIST4.util.showDialog(url, { 
+        Hul.showDialog(url, { 
                         width:250, height:220,
                         callback: function(value) {//options
                             if(Number(value)>=0){
@@ -509,7 +510,7 @@ $.widget( "heurist.resultListMenu", {
     addBookmarks: function() {
         
         var recIDs_list = this.getSelectionIds("Select at least one record to bookmark");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
 
         this.executeAction( "bookmark_reference", {rec_ids: recIDs_list} );
     },
@@ -527,7 +528,7 @@ $.widget( "heurist.resultListMenu", {
         var sMsg = "";
 
         if (bkmkIDs_list.length == 0) {
-            top.HEURIST4.util.showMsgDlg("Select at least one bookmark to delete");
+            Hul.showMsgDlg("Select at least one bookmark to delete");
             return;
         }else if (bkmkIDs_list.length == 1) {
             sMsg = "Do you want to delete one bookmark?<br>(this ONLY removes the bookmark from your resources,<br>it does not delete the record entry)";
@@ -535,7 +536,7 @@ $.widget( "heurist.resultListMenu", {
             sMsg = "Do you want to delete " + bkmkIDs_list.length + " bookmarks?<br>(this ONLY removes the bookmarks from your resources,<br>it does not delete the record entries)";
         }
         
-        top.HEURIST4.util.showMsgDlg(sMsg, function(){
+        Hul.showMsgDlg(sMsg, function(){
             that.executeAction( "delete_bookmark", {bkmk_ids: bkmkIDs_list} );    
         })
     },
@@ -543,12 +544,12 @@ $.widget( "heurist.resultListMenu", {
     deleteRecords: function() {
         
         var recIDs_list = this.getSelectionIds("Select at least one record to delete");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
         
         var that = this;        
         var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
 
-        top.HEURIST4.util.showDialog(url, { 
+        Hul.showDialog(url, { 
                     onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
                             var ele = frame.contentDocument.getElementById("ids");
                             ele.value = recIDs_list.join(",");
@@ -566,18 +567,18 @@ $.widget( "heurist.resultListMenu", {
     notificationPopup: function() {
         
         var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"));
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
 
         recIDs_list = recIDs_list.join(",");
         url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
-        top.HEURIST4.util.showDialog(url, {height:230});
+        Hul.showDialog(url, {height:230});
     },
         
     setWorkgroupPopup: function() {
 
         var recIDs_list = this.getSelectionIds("Select at least one record to set workgroup ownership and visibility");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
         
         var that = this;
             
@@ -585,7 +586,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
         
-        top.HEURIST4.util.showDialog(url, { height:300, width:650, 
+        Hul.showDialog(url, { height:300, width:650, 
                     callback:function(wg, viewable, hidden, pending) {
                         if (wg === undefined) return;
 
@@ -626,7 +627,7 @@ $.widget( "heurist.resultListMenu", {
         }
 
         if (recIDs_list.length == 0 ) {
-            top.HEURIST4.util.showMsgDlg(msg);
+            Hul.showMsgDlg(msg);
             return null;
         }else{
             return recIDs_list;
@@ -637,11 +638,11 @@ $.widget( "heurist.resultListMenu", {
     collectionAdd: function(){
 
         var recIDs_list = this.getSelectionIds("Select at least one record to add to collection basket");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
         
         var params = {db:top.HAPI4.database, fetch:1, add:recIDs_list.join(",")};
         
-        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
 
         this.selectNone();
     },
@@ -649,11 +650,11 @@ $.widget( "heurist.resultListMenu", {
     collectionDel: function(){
         
         var recIDs_list = this.getSelectionIds("Select at least one record to remove from collection basket");
-        if(top.HEURIST4.util.isempty(recIDs_list)) return;
+        if(Hul.isempty(recIDs_list)) return;
         
         var params = {db:top.HAPI4.database, fetch:1, remove:recIDs_list.join(",")};
         
-        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
 
         this.selectNone();
     },
@@ -662,12 +663,12 @@ $.widget( "heurist.resultListMenu", {
 
         var params = {db:top.HAPI4.database, clear:1};
         
-        top.HEURIST4.util.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
+        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
     },
     
     collectionShow: function(){
 
-        if(!top.HEURIST4.util.isempty(this._collection)){
+        if(!Hul.isempty(this._collection)){
             this._query_request.w = 'all';
             this._query_request.q =  'ids:'+this._collection.join(",");
             this._query_request.source = this.element.attr('id');
@@ -675,15 +676,25 @@ $.widget( "heurist.resultListMenu", {
         }
         
     },
+    
     collectionSave: function(){
+
+        if(!Hul.isempty(this._collection)){
+            
+            var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+            if(app && app.widget){
+                //call method editSavedSearch - save collection as search
+                $(app.widget).search_links('editSavedSearch', null, 'ids:'+this._collection.join(","), 'all');
+            }
+        }
         
     },
     collectionOnUpdate: function(that, results) {
-        if(!top.HEURIST4.util.isnull(results)){
+        if(!Hul.isnull(results)){
             if(results.status == top.HAPI4.ResponseStatus.UNKNOWN_ERROR){
-                top.HEURIST4.util.showMsgErr(results.message);        
+                Hul.showMsgErr(results.message);        
             }else{
-                that._collection = results.ids;
+                that._collection = Hul.isempty(results.ids)?[]:results.ids;
                 that.collectionRender();
                 //top.HEURIST.search.collectCount = results.count;
                 //top.HEURIST.search.collection = results.ids;
@@ -692,10 +703,10 @@ $.widget( "heurist.resultListMenu", {
     },
 
     collectionRender: function() {
-        if(top.HEURIST4.util.isempty(this._collection))
+        if(Hul.isnull(this._collection))
         {
             var params = {db:top.HAPI4.database, fetch:1};
-            top.HEURIST4.util.sendRequest(this.collectionURL, params, this, this.collectionOnUpdate);
+            Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
         }else{
             //top.HR('Collected')
             this.menu_Collected_link.html( 'Collected' + (this._collection.length>0?':'+this._collection.length:''));

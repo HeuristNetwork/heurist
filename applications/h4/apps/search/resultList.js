@@ -52,7 +52,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':0,'overflow-y':'auto','padding':'0.2em','position':'absolute','top':'5em','bottom':'0'})
+        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em','position':'absolute','top':'3em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
