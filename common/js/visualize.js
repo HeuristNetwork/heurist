@@ -39,20 +39,49 @@
             // Custom functions
             getData: $.noop(),
             
-            // UI settings
+            // UI setting controls
+            showLineSettings: true,
+            showLineType: true,
+            showLineLength: true,
+            showLineWidth: true,
+            showLineColor: true,
+            showMarkerColor: true, 
+            
+            showEntitySettings: true, 
+            showEntityRadius: true,
+            showEntityColor: true,
+            
+            showTextSettings: true,
+            showFontSize: true,
+            showTextColor: true,
+            
+            showTransformSettings: true,
+            showFormula: true,
+            showFishEye: true,
+            
+            showGravitySettings: true,
+            showGravity: true,
+            showAttraction: true,
+            
+            
+            // UI default settings
             linetype: "straight",
             linelength: 300,
             linewidth: 15,
             linecolor: "#22a",
             markercolor: "#000",
+            
             entityradius: 30,
             entitycolor: "#262",
+            
             fontsize: "11px",
             textcolor: "#b22",
+            
             formula: "linear",
+            fisheye: false,
+            
             gravity: "touch",
             attraction: -700,
-            fisheye: false
         }, options );
  
         // Handle settings
@@ -127,176 +156,250 @@
     * This function sets the settings in the UI
     */
     function handleSettingsInUI() {
-        /** LINE TYPE SETTING */
-        // Set line type setting in UI
-        $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
-        
-        // Listens to linetype selection changes
-        $("#linetype").change(function(e) {
-            localStorage.setItem(setting_linetype, $("#linetype").val());
-            visualizeData();
-        });
-        
-        /** LINE LENGTH SETTING */
-        // Set line length setting in UI
-        $("#linelength").val(getSetting(setting_linelength));
-        
-        // Listen to line length changes
-        $("#linelength").change(function() {
-            localStorage.setItem(setting_linelength, $(this).val());
-            visualizeData();
-        });
-        
-        /** LINE WIDTH SETTING */
-        // Set line width setting in UI
-        $("#linewidth").val(getSetting(setting_linewidth));
-        
-        // Listen to line width changes
-        $("#linewidth").change(function() {
-            localStorage.setItem(setting_linewidth, $(this).val());
-            visualizeData();
-        });
-        
-        /** LINE COLOR SETTING */
-        // Set line color setting in UI
-        $("#linecolor").css("background-color", getSetting(setting_linecolor));
-
-        // Listen to 'line color' selection changes
-        $('#linecolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
+        // LINE SETTINGS
+        if(settings.showLineSettings) {
+            /** LINE TYPE SETTING */
+            if(settings.showLineType) {
+                // Set line type setting in UI
+                $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
                 
-                localStorage.setItem(setting_linecolor, color);
-                $(".link").attr("stroke", color);
-        
-                $(el).css('background-color', color);
-                $(el).colpickHide();
+                // Listens to linetype selection changes
+                $("#linetype").change(function(e) {
+                    localStorage.setItem(setting_linetype, $("#linetype").val());
+                    visualizeData();
+                });
+            }else{
+                $("#linetypeContainer").remove();
             }
-        });
-        
-        /** MARKER COLOR SETTING */
-        // Set marker color in UI
-        $("#markercolor").css("background-color", getSetting(setting_markercolor));
-        
-        // Listen to 'marker color' selection changes
-        $('#markercolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
+            
+            /** LINE LENGTH SETTING */
+            if(settings.showLineLength) {
+                // Set line length setting in UI
+                $("#linelength").val(getSetting(setting_linelength));
                 
-                localStorage.setItem(setting_markercolor, color);
-                $("marker").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
+                // Listen to line length changes
+                $("#linelength").change(function() {
+                    localStorage.setItem(setting_linelength, $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#linelengthContainer").remove();
             }
-        });
-        
-        
-        /**  MAX RADIUS SETTING */
-        // Set entity radius setting in UI
-        $("#entityradius").val(getSetting(setting_entityradius));
-        
-        // Listen to line width changes
-        $("#entityradius").change(function() {
-            localStorage.setItem(setting_entityradius, $(this).val());
-            visualizeData();
-        });
-        
-        /** COUNT COLOR SETTING */
-        // Set count color in UI
-        $("#entitycolor").css("background-color", getSetting(setting_entitycolor));
-
-        // Listen to 'count color' selection changes
-        $('#entitycolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
+            
+            /** LINE WIDTH SETTING */
+            if(settings.showLineWidth) {
+                // Set line width setting in UI
+                $("#linewidth").val(getSetting(setting_linewidth));
                 
-                localStorage.setItem(setting_entitycolor, color);
-                $(".background").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
+                // Listen to line width changes
+                $("#linewidth").change(function() {
+                    localStorage.setItem(setting_linewidth, $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#linewidthContainer").remove();
             }
-        });
-        
-        
-        /** TEXT FONT SIZE SETTING */
-        // Set font size setting in UI
-        $("#fontsize").val(parseInt(getSetting(setting_fontsize)));
-        
-        // Listen to font size changes
-        $("#fontsize").change(function() {
-            localStorage.setItem(setting_fontsize, $(this).val()+"px");
-            $(".node text").css("font-size", getSetting(setting_fontsize), "important");
-            $(".node text").each(function() {
-                this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
-            });
-      
-        });
-        
-        /** TEXT COLOR SETTING */
-        // Set text color in UI
-        $("#textcolor").css("background-color", getSetting(setting_textcolor));
+            
+            /** LINE COLOR SETTING */
+            if(settings.showLineColor) {
+                // Set line color setting in UI
+                $("#linecolor").css("background-color", getSetting(setting_linecolor));
 
-        // Listen to 'count color' selection changes
-        $('#textcolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
+                // Listen to 'line color' selection changes
+                $('#linecolor').colpick({
+                    layout: 'hex',
+                    onSubmit: function(hsb, hex, rgb, el) {
+                        var color = "#"+hex; 
+                        
+                        localStorage.setItem(setting_linecolor, color);
+                        $(".link").attr("stroke", color);
                 
-                localStorage.setItem(setting_textcolor, color);
-                $(".namelabel").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
+                        $(el).css('background-color', color);
+                        $(el).colpickHide();
+                    }
+                });
+            }else{
+                $("#linecolorContainer").remove();
             }
-        });
-        
-        
-        /** LINE LENGTH SETTING */
-        // Set formula setting in UI
-        $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
-
-        // Listen to formula changes
-        $("#formula").change(function() {
-            localStorage.setItem(setting_formula, $(this).val());
-            visualizeData();
-        });
-        
-        /** GRAVITY SETTING */
-        // Set gravity setting in UI
-        $("#gravity option[value='" +getSetting(setting_gravity)+ "']").attr("selected", true);
-
-        // Listen to gravity changes
-        $("#gravity").change(function() {
-            localStorage.setItem(setting_gravity,  $(this).val());
-            visualizeData();
-        });
-        
-        /** ATTRACTION SETTING */
-        // Set attraction setting in UI
-        $("#attraction").val(getSetting(setting_attraction));
-        
-        // Listen to attraction changes
-        $("#attraction").change(function() {
-            localStorage.setItem(setting_attraction, $(this).val());
-            visualizeData();
-        });
-        
-        /** FISH EYE */
-        // Set fish eye setting in UI
-        if(getSetting(setting_fisheye) === "true") {
-            $("#fisheye").prop("checked", true);
+            
+            /** MARKER COLOR SETTING */
+            if(settings.showMarkerColor) {
+                // Set marker color in UI
+                $("#markercolor").css("background-color", getSetting(setting_markercolor));
+                
+                // Listen to 'marker color' selection changes
+                $('#markercolor').colpick({
+                    layout: 'hex',
+                    onSubmit: function(hsb, hex, rgb, el) {
+                        var color = "#"+hex; 
+                        
+                        localStorage.setItem(setting_markercolor, color);
+                        $("marker").attr("fill", color);
+                        
+                        $(el).css('background-color', color);
+                        $(el).colpickHide();
+                    }
+                });
+            }else{
+                $("#markercolorContainer").remove();
+            }
+        }else{
+            $("#lineSettings").remove();
         }
         
-        // Listen to fisheye changes
-        $("#fisheye").change(function(e) {
-            localStorage.setItem(setting_fisheye, $(this).is(':checked'));
-            visualizeData();
-        });
+        // ENTITY SETTINGS
+        if(settings.showEntitySettings) {
+            /**  MAX RADIUS SETTING */
+            if(settings.showEntityRadius) {
+                // Set entity radius setting in UI
+                $("#entityradius").val(getSetting(setting_entityradius));
+                
+                // Listen to line width changes
+                $("#entityradius").change(function() {
+                    localStorage.setItem(setting_entityradius, $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#entityradiusContainer").remove();
+            }
+            
+            /** COUNT COLOR SETTING */
+            if(settings.showEntityColor) {
+                // Set count color in UI
+                $("#entitycolor").css("background-color", getSetting(setting_entitycolor));
+
+                // Listen to 'count color' selection changes
+                $('#entitycolor').colpick({
+                    layout: 'hex',
+                    onSubmit: function(hsb, hex, rgb, el) {
+                        var color = "#"+hex; 
+                        
+                        localStorage.setItem(setting_entitycolor, color);
+                        $(".background").attr("fill", color);
+                        
+                        $(el).css('background-color', color);
+                        $(el).colpickHide();
+                    }
+                });
+            }else{
+                $("#entitycolorSettings").remove();
+            }
+        }else{
+            $("#entitySettings").remove();
+        }
+        
+        // TEXT SETTINGS
+        if(settings.showTextSettings) {
+            /** TEXT FONT SIZE SETTING */
+            if(settings.showFontSize) {
+                // Set font size setting in UI
+                $("#fontsize").val(parseInt(getSetting(setting_fontsize)));
+                
+                // Listen to font size changes
+                $("#fontsize").change(function() {
+                    localStorage.setItem(setting_fontsize, $(this).val()+"px");
+                    $(".node text").css("font-size", getSetting(setting_fontsize), "important");
+                    $(".node text").each(function() {
+                        this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
+                    });
+              
+                });
+            }else{
+                $("#fontsizeContainer").remove();
+            }
+            
+            /** TEXT COLOR SETTING */
+            if(settings.showTextColor) {
+                // Set text color in UI
+                $("#textcolor").css("background-color", getSetting(setting_textcolor));
+
+                // Listen to 'count color' selection changes
+                $('#textcolor').colpick({
+                    layout: 'hex',
+                    onSubmit: function(hsb, hex, rgb, el) {
+                        var color = "#"+hex; 
+                        
+                        localStorage.setItem(setting_textcolor, color);
+                        $(".namelabel").attr("fill", color);
+                        
+                        $(el).css('background-color', color);
+                        $(el).colpickHide();
+                    }
+                });
+            }else{
+                $("#textcolorContainer").remove();
+            }
+        }else{
+            $("#textSettings").remove();
+        }
+        
+        // TRANSFORM SETTINGS
+        if(settings.showTransformSettings) {
+            /** LINE LENGTH SETTING */
+            if(settings.showFormula) {
+                // Set formula setting in UI
+                $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
+
+                // Listen to formula changes
+                $("#formula").change(function() {
+                    localStorage.setItem(setting_formula, $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#formulaContainer").remove();
+            }
+
+            /** FISH EYE */
+            if(settings.showFishEye) {
+                // Set fish eye setting in UI
+                if(getSetting(setting_fisheye) === "true") {
+                    $("#fisheye").prop("checked", true);
+                }
+                
+                // Listen to fisheye changes
+                $("#fisheye").change(function(e) {
+                    localStorage.setItem(setting_fisheye, $(this).is(':checked'));
+                    visualizeData();
+                });
+            }else{
+                $("#fisheyeContainer").remove();
+            }
+        }else{
+            $("#transformSettings").remove();
+        }
+        
+        // GRAVITY SETTINGS
+        if(settings.showGravitySettings) {
+            /** GRAVITY SETTING */
+            if(settings.showGravity) {
+                // Set gravity setting in UI
+                $("#gravity option[value='" +getSetting(setting_gravity)+ "']").attr("selected", true);
+
+                // Listen to gravity changes
+                $("#gravity").change(function() {
+                    localStorage.setItem(setting_gravity,  $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#gravityContainer").remove();
+            }
+            
+            /** ATTRACTION SETTING */
+            if(settings.showAttraction) {
+                // Set attraction setting in UI
+                $("#attraction").val(getSetting(setting_attraction));
+                
+                // Listen to attraction changes
+                $("#attraction").change(function() {
+                    localStorage.setItem(setting_attraction, $(this).val());
+                    visualizeData();
+                });
+            }else{
+                $("#attractionContainer").remove();
+            }
+        }else{
+            $("#gravitySettings").remove();
+        }
     }
     /************************************ END OF SETTING FUNCTIONS ***************************************/
     
@@ -395,7 +498,27 @@
                      .scaleExtent([0.1, 5])
                      .on("zoom", zoomed); 
         function zoomed() {
+            console.log("ZOOMED");
+            // Zoom container
             container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            
+            // Move overlays
+            $(".overlay").each(function(e) {
+                var clazz = $(this).attr("class");
+                var selector = clazz.replace("overlay ", ".node.");
+                console.log("Selector: " + selector);
+
+                // Update overlay
+                var nodePos = $(selector + " circle").position();
+                var svgPos = $("svg").position();
+                if(nodePos && svgPos) {
+                    var x = nodePos.left - svgPos.left + 10;
+                    var y = nodePos.top - svgPos.top + 10;
+                    
+                    $(this).attr("transform", "translate("+x+","+y+")");   
+                }
+            });            
+            
         }   
         svg.call(zoom);   
 
@@ -529,6 +652,16 @@
             }else{
                  straightTick();
             }
+            
+            // Update overlay
+            var nodePos = $(".node.id"+d.id + " circle").position();
+            var svgPos = $("svg").position();
+            if(nodePos && svgPos) {
+                var x = nodePos.left - svgPos.left + 10;
+                var y = nodePos.top - svgPos.top + 10;
+                
+                $(".overlay.id"+d.id).attr("transform", "translate("+x+","+y+")");   
+            }
         }
         
         /** Called when a dragging event ends */
@@ -555,7 +688,7 @@
                       .data(force.nodes())
                       .enter().append("g")
                       .attr("class", function(d, i) {
-                          return "node " + d.type;
+                          return "node id" + d.id;
                       }) 
                       .attr("transform", "translate(100, 100)")
                       .attr("x", function(d) {

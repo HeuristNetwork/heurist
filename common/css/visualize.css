@@ -7,7 +7,11 @@
 /** Settings */
 .settings {
     display: inline-block;
-}       
+}  
+
+.settings div {
+    display: inline-block;
+}     
 
 .space {
     padding-left: 5px;

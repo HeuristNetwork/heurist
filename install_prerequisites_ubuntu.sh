@@ -27,7 +27,7 @@ echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
 echo "---- Installing Prerequisites for Heurist for Linux/Ubuntu ----"
 echo
 echo
-echo "WARNING 1: BEWARE OF TIMEOUT ON THE MYSQL PASSWORD REQUEST"
+echo "WARNING: BEWARE OF TIMEOUT ON THE MYSQL PASSWORD REQUEST"
 echo
 echo "This installation is fairly radical in upgrading all required software to latest versions."
 echo "We do not recommend using it on servers which depend on old versions of software for"
@@ -40,14 +40,6 @@ echo
 echo "Later you will be asked to supply a root password for MySQL, which sets the root password for your MySQL installation"
 echo
 echo "******* WARNING ********* Do not let your session time out or you will need to start over"
-echo
-echo
-echo "Please do not be concerned by warnings such as:"
-echo "        sudo: unable to resolve host Your-Server-Name"
-echo "If you get these warnings, you will get dozens, but"
-echo "they have no effect on the results of the script"
-echo
-echo
 
 # -------------PRE-REQUISITES---------------------------------------------------------------------------------------------
 
@@ -56,7 +48,8 @@ echo
 # This does not seem to be populating /etc/hosts, removed 30/7/14
 # sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/' /etc/hosts | sudo tee /etc/hosts
 
-sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/w /tmp/hostNew' /etc/hosts
+# removed 6 sep 09 b/c i am very doubtful it works ...
+# sudo sed 's/\(127.0.0.1 *\t*localhost\)/\1 '`cat /etc/hostname`'/w /tmp/hostNew' /etc/hosts
 
 echo "Upgrading package versions from repositories"
 
@@ -69,33 +62,56 @@ sudo apt-get upgrade -y >> heurist_install.log
 # TODO erring on more is better, tasksel not always installed, cleanup later
 sudo apt-get install tasksel software-properties-common python-software-properties -y >> heurist_install.log
 
+
+# ----- LAMP - MySQL  --------------------------------------------
+
 echo "System packages upgraded to latest versions, about to install LAMP stack"
 
+
 sudo tasksel install lamp-server
+
 
 # ----- PHP extensions --------------------------------------------
 
 echo "Installing PHP 5 extensions"
 
-sudo apt-get install php5-curl php5-xsl php5-mysql php5-memcache php5-gd zip unzip -y >> heurist_install.log
+sudo apt-get install php5-curl  -y >> heurist_install.log
+sudo apt-get install php5-xsl -y >> heurist_install.log
+sudo apt-get install php5-mysql -y >> heurist_install.log
+sudo apt-get install php5-memcache -y >> heurist_install.log
+sudo apt-get install php5-gd -y >> heurist_install.log
+sudo apt-get install zip -y >> heurist_install.log
+sudo apt-get install unzip -y >> heurist_install.log
 
 # mbstring - multilingual character handling - appears to be installed by default on Ubuntu
 # pdo appears to be installed by php5-mysql, but may also require pdo_mysql
 
-sudo apt-get install pdo_mysql
-sudo apt-get install php5-pdo
-sudo apt-get install php5-mbstring
+# Ubuntu 14:04  unable to locate any of the below
+sudo apt-get install pdo_mysql -y >> heurist_install.log
+sudo apt-get install php5-pdo -y >> heurist_install.log
+sudo apt-get install php5-mbstring -y >> heurist_install.log
 
-sudo ldconfig
+# This appears to be hangover from recompiling php
+# sudo ldconfig
 
 # ----- PHP Ini ----------------------------------------------------
 
-# If errors are on, errors are output to the browser and stuff up Heurist interface
-sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+# This heap of junk - the first one - tends to delete the php.ini file. Removed Ian 6 sep 2014
+# TODO: we need a more reliable way of updating the php.ini file settings
 
-# increase upload file size from default 2M
-sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
-sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+# If errors are on, errors are output to the browser and stuff up Heurist interface
+# sed 's/^display_errors = .*/display_errors = Off/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+
+# increase upload file size from default 2M to 250M upload / 251M post
+# sed 's/^upload_max_filesize = .*/upload_max_filesize = 250M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+# sed 's/^post_max_size.*/post_max_size = 251M/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+
+# increase session timeout to approx. 1 month
+# sed 's/^session.gc_maxlifetime = .*/session.gc_maxlifetime = 3000000/' < /etc/php5/apache2/php.ini | sudo tee /etc/php5/apache2/php.ini
+
+
+ integer
+
 
 # Why do we need this here? Removed Ian 30/7/14
 # sudo pear config-set php_ini /etc/php5/apache2/php.ini

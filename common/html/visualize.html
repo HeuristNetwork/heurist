@@ -4,85 +4,111 @@
         <!-- SETTINGS -->
         <td height="25px" style="vertical-align: middle;">
             <!-- LINE SETINGS -->           
-            <div class="settings space">
+            <div class="settings space" id="lineSettings">
                 <b>Lines:</b>
                 <!-- Line type -->
-                <select class="middle" id="linetype">
-                    <option value="straight">straight</option>
-                    <option value="curved">curved</option>
-                </select>
+                <div id="linetypeContainer">
+                    <select class="middle" id="linetype">
+                        <option value="straight">straight</option>
+                        <option value="curved">curved</option>
+                    </select>
+                </div>
 
-               <!-- Line length --> 
-                <i>Length</i>
-                <input id="linelength" class="small-input" type="number" min="1"/>
+                <!-- Line length --> 
+                <div id="linelengthContainer">
+                    <i>Length</i>
+                    <input id="linelength" class="small-input" type="number" min="1"/>
+                </div>
                 
-                <i>Max width</i>
-                <input id="linewidth" class="small-input" type="number" min="1"/>
+                <!-- Line width -->
+                <div id="linewidthContainer">
+                    <i>Max width</i>
+                    <input id="linewidth" class="small-input" type="number" min="1"/>
+                </div>
                 
                 <!-- Line color -->
-                <i>Line color</i>
-                <div id="linecolor" class="colorblock"></div>
+                <div id="linecolorContainer">
+                    <i>Line color</i>
+                    <div id="linecolor" class="colorblock"></div>
+                </div>
                 
                 <!-- Arrow color -->
-                <i>Arrow color</i>
-                <div id="markercolor" class="colorblock"></div>
+                <div id="markercolorContainer">
+                    <i>Arrow color</i>
+                    <div id="markercolor" class="colorblock"></div>
+                </div>
             </div>
             
             <!-- Entity settings -->
-            <div class="settings space">
+            <div class="settings space" id="entitySettings">
                 <b>Entitity:</b>
                 
-                <i>Max radius</i>
-                <input id="entityradius" class="small-input" type="number" min="1"/>
+                <div id="entityradiusContainer">
+                    <i>Max radius</i>
+                    <input id="entityradius" class="small-input" type="number" min="1"/>
+                </div>
                 
                 <!-- Entity circle color -->
-                <i>Color</i>
-                <div id="entitycolor" class="colorblock"></div>
+                <div id="entitycolorContainer">
+                    <i>Color</i>
+                    <div id="entitycolor" class="colorblock"></div>
+                </div>
             </div>
             
             <!-- Text settings -->
-            <div class="settings space">
+            <div class="settings space" id="textSettings">
                 <b>Text:</b>
                 
                 <!-- Text size -->
-                <i>Font-size</i>
-                <input id="fontsize" class="small-input" type="number" min="1"/>
+                <div id="fontsizeContainer">
+                    <i>Font-size</i>
+                    <input id="fontsize" class="small-input" type="number" min="1"/>
+                </div>
                 
                 <!-- Text color -->
-                <i>Color</i>
-                <div id="textcolor" class="colorblock"></div>
+                <div id="textcolorContainer">
+                    <i>Color</i>
+                    <div id="textcolor" class="colorblock"></div>
+                </div>
             </div>
             
             <!-- Transform settings -->
-            <div class="settings space">
-                <b>Transform:</b>
+            <div class="settings space" id="transformSettings">
+                <div id="formulaContainer">
+                    <b>Transform:</b>
+                    
+                    <!-- Formula -->
+                    <select class="middle" id="formula">
+                        <option value="linear">linear</option>
+                        <option value="logarithmic">logarithmic</option>
+                        <option value="unweighted">unweighted</option>
+                    </select>
+                </div>
                 
-                <!-- Formula -->
-                <select class="middle" id="formula">
-                    <option value="linear">linear</option>
-                    <option value="logarithmic">logarithmic</option>
-                    <option value="unweighted">unweighted</option>
-                </select>
+                <!-- Fish eye setting -->
+                <div id="fisheyeContainer">
+                    <i>Fisheye:</i>
+                    <input id="fisheye" type="checkbox" name="fisheye">
+                </div>
             </div>
             
             <!-- GRAVITY SETTINGS -->
-            <div class="settings space">
-                <b>Gravity:</b>
+            <div class="settings space" id="gravitySettings">
                 <!-- Gravity setting -->
-                <select class="middle" id="gravity">
-                    <option value="off">off</option>
-                    <option value="touch">touch</option>
-                    <option value="aggressive">aggressive</option>
-                </select>
+                <div id="gravityContainer">
+                    <b>Gravity:</b>
+                    <select class="middle" id="gravity">
+                        <option value="off">off</option>
+                        <option value="touch">touch</option>
+                        <option value="aggressive">aggressive</option>
+                    </select>
+                </div>
                 
-                 <!-- Attraction strength -->
-                <i>Attraction</i>
-                <input id="attraction" class="small-input" type="number"/>
-            </div>
-            
-            <div class="settings space">
-                <b>Fisheye:</b>
-                <input id="fisheye" type="checkbox" name="fisheye">
+                <!-- Attraction strength -->
+                <div id="attractionContainer">
+                    <i>Attraction</i>
+                    <input id="attraction" class="small-input" type="number"/>
+                </div>
             </div>
 
             <!-- HELP INFO -->

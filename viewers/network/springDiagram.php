@@ -219,7 +219,11 @@
                         console.log("Calling plugin!");
                         $("#visualisation").visualize({
                             data: data,
-                            getData: function(data) { return getData(data); }
+                            getData: function(data) { return getData(data); },
+                            
+                            showEntitySettings: false,
+                            showLineWidth: false,
+                            showFormula: false
                         });  
                       
                     }   
@@ -227,8 +231,7 @@
                     $("body").append("<h3>Error occured</h3><br /><i>" + error.message + "</i>");        
                 }
             });
-                                       
-              
+  
         </script>
 
     </body>
