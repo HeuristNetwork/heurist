@@ -438,7 +438,7 @@
     /** Calculates the line width that should be used */
     function getLineWidth(count) {
         var maxWidth = getSetting(setting_linewidth);                                                                     
-        return 0.5 + (executeFormula(count, maxWidth) / 2);
+        return 1.5 + (executeFormula(count, maxWidth) / 2);
     }            
 
     /** Calculates the marker width that should be used */
@@ -451,7 +451,7 @@
     var circleSize = iconSize * 0.75; // Circle around icon size
     function getEntityRadius(count) {
         var maxRadius = getSetting(setting_entityradius);
-        return circleSize + executeFormula(count, maxRadius);
+        return circleSize + executeFormula(count, maxRadius) - 1;
     }
     /********************************END OF VISUALISATION HELPER FUNCTIONS********************************/
 
@@ -498,15 +498,15 @@
                      .scaleExtent([0.1, 5])
                      .on("zoom", zoomed); 
         function zoomed() {
-            console.log("ZOOMED");
             // Zoom container
             container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
             
             // Move overlays
             $(".overlay").each(function(e) {
+                // Determine node selector
                 var clazz = $(this).attr("class");
                 var selector = clazz.replace("overlay ", ".node.");
-                console.log("Selector: " + selector);
+                //console.log("Selector: " + selector);
 
                 // Update overlay
                 var nodePos = $(selector + " circle").position();
@@ -598,7 +598,11 @@
              })) 
              .on("click", function(d) {
                  // Construct line overlay data, then use it to generate the overlay itself  
-                 createOverlay(d3.event.offsetX, d3.event.offsetY, d.relation);    
+                 if($(".overlay.id"+d.relation.id).length > 0) { // Close overlay
+                    removeOverlay(d.relation.id);
+                 }else{ // Display overlay
+                    createOverlay(d3.event.offsetX, d3.event.offsetY, d.relation);  
+                 }
              });
              
         // Check what methods to call on drag
@@ -752,7 +756,11 @@
                       .on("click", function(d) {
                            // Check if it's not a click after dragging
                            if(!d3.event.defaultPrevented) {
-                                createOverlay(d3.event.offsetX, d3.event.offsetY, d);
+                                if($(".overlay.id"+d.id).length > 0) { // Close overlay
+                                    removeOverlay(d.id);
+                                 }else{ // Display overlay
+                                     createOverlay(d3.event.offsetX, d3.event.offsetY, d);  
+                                 }
                            }
                       })
                       .call(node_drag);
@@ -774,8 +782,14 @@
                                if(d.selected == true) {
                                     return "#ee0";
                                }
-                               return "#000";
-                           });
+                               return "#ddd";
+                           })
+                           .style("stroke-opacity", function(d) {
+                               if(d.selected == true) {
+                                   return 1;
+                               }
+                               return .25;
+                           })
        
         // Adding icons to the nodes 
         var icon = node.append("svg:image") 
@@ -972,103 +986,11 @@
     function getOverlayData(record) {
         console.log(record);
         var array = [];
-        array.push({text: record.name + " (n="+record.count+")", size: "13px", style: "bold"})
+        array.push({text: record.name + " (id="+record.id+", n="+record.count+")", size: "13px", style: "bold"})
 
         // Going through the current displayed data
         var data = settings.getData.call(this, settings.data); 
         if(data && data.links.length > 0) {
-            /*
-            var map = {};
-            for(var i = 0; i < data.links.length; i++) {
-                var link = data.links[i];
-                console.log(link);
-                  
-                // Does our record point to this link?
-                if(link.source.id == record.id) {
-                    // Relation check
-                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
-                    if(!map.hasOwnProperty(relation)) {
-                        map[relation] = [];
-                    }
-                    
-                    // Connection check
-                    var connection = {text: "→ " + link.target.name + "(n=" + link.target.count + ")", size: "9px"};
-                    if(map[relation].indexOf(connection) == -1) {
-                        map[relation].push(connection);
-                    }
-                }
-                
-                // Does this link point to our record?
-                if(link.target.id == record.id) {
-                    // Relation check
-                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
-                    if(!map.hasOwnProperty(relation)) {
-                        map[relation] = [];
-                    }
-                    
-                    // Connection check
-                    var connection = {text: "← " + link.source.name  + " (n=" + link.source.count + ")", size: "9px"};
-                    if(map[relation].indexOf(connection) == -1) {
-                        map[relation].push(connection);
-                    }
-                }
-                
-                // Is our record a relation?
-                if(link.relation.id == record.id) {
-                    // Relation check
-                    var relation = "↔ " + link.target.name + " (n=" + link.relation.count + ")";
-                    if(!map.hasOwnProperty(relation)) {
-                        map[relation] = [];
-                    }
-                }
-            }
-            
-            console.log("MAP");
-            console.log(map);
-            
-            // Convert map to array
-            for(key in map) {
-                //array.push({text: "", size: "1px"}, {text: key, size: "11px", style: "oblique"});
-                array = array.concat(map[key]); 
-            }
-            */
-            
-            /*
-            console.log("FINDING LINKS");
-            var map = {};
-            for(var i = 0; i < data.links.length; i++) {
-                var link = data.links[i];
-                console.log(link);
-                  
-                // Does our record point to this link?
-                if(link.source.id == record.id) {
-                    console.log(link);
-                    // Connection check
-                    if(!map.hasOwnProperty(link.target.name)) {
-                        map[link.target.name] = {text: "→ " + link.target.name + "(n=" + link.target.count + ")", size: "9px"};
-                    }
-                }
-                
-                // Does this link point to our record?
-                if(link.target.id == record.id) {
-                    console.log(link);
-                    // Connection check
-                    if(!map.hasOwnProperty(link.source.name)) {
-                        map[link.source.name] = {text: "← " + link.source.name  + " (n=" + link.source.count + ")", size: "9px"};
-                    }
-                }
-                
-                // Is our record a relation?
-                if(link.relation.id == record.id) {
-                    console.log(link);
-                    // Relation check
-                    if(!map.hasOwnProperty(link.target.name)) {
-                        map[link.target.name] = {text: "↔ " + link.target.name + " (n=" + link.relation.count + ")", size: "9px"}; 
-                    }
-                }
-            }
-            */
-            
             console.log("FINDING LINKS");
             var map = {};
             for(var i = 0; i < data.links.length; i++) {
@@ -1078,11 +1000,13 @@
                 // Does our record point to this link?
                 if(link.source.id == record.id) {
                     if(!map.hasOwnProperty(link.relation.name)) {
-                        map[link.relation.name] = [];
+                        map[link.relation.name] = {};
                     }
                     
                     var obj = {text: "➜ " + link.target.name/* + "(n=" + link.target.count + ")"*/, size: "9px"}; 
-                    map[link.relation.name].push(obj);
+                    if(map[link.relation.name][obj.text] == undefined) {
+                        map[link.relation.name][obj.text] = obj;
+                    }
                 }
                 
                 // Does this link point to our record?
@@ -1100,12 +1024,13 @@
                 // Is our record a relation?
                 if(link.relation.id == record.id) {
                     if(!map.hasOwnProperty(link.relation.name)) {
-                        map[link.relation.name] = [];
+                        map[link.relation.name] = {};
                     }
                     
                     var obj = {text: link.source.name + " ↔ " + link.target.name/* + " (n=" + link.relation.count + ")"*/, size: "9px"};
-                    map[link.relation.name].push(obj);
-                    
+                    if(map[link.relation.name][obj.text] == undefined) {
+                        map[link.relation.name][obj.text] = obj;
+                    }
                 }
             }
             
@@ -1116,8 +1041,8 @@
             // Convert map to array
             for(key in map) {
                 array.push({text: key, size: "11px"});
-                if(map[key].length > 0) {
-                    array = array.concat(map[key]);
+                for(text in map[key]) {
+                    array.push(map[key][text]);    
                 }
             }
         }
@@ -1202,9 +1127,7 @@
                            .attr("class", "close")
                            .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
                            .on("click", function(d) {
-                               $(".overlay.id"+record.id).fadeOut(300, function() {
-                                    $(this).remove();
-                               });                               
+                               removeOverlay(record.id);                              
                            });
                            
         // Close rectangle                                                                     
@@ -1222,12 +1145,15 @@
              
         /** Handles dragging events on overlay */
         function overlayDrag(d) {
-            console.log("DRAGGED");
             overlay.attr("transform", "translate("+d.x+","+d.y+")");
-        }
-             
-                           
+        }                 
     }
     
+    /** Removes the overlay with the given ID */
+    function removeOverlay(id) {
+        $(".overlay.id"+id).fadeOut(300, function() {
+            $(this).remove();
+       }); 
+    }
  
 }( jQuery ));

@@ -144,64 +144,71 @@
                             var name = record["5"];  
                             var group = record["4"];
                             var image = top.HEURIST.iconBaseURL + group + ".png";
-                            var count = 1;
                             var selected = selectedIDs.indexOf(id.toString()) > -1;
-                            console.log("ID " + id + " selected: " + selected);
-                            
+   
                             // Construct node
-                            var node = {id: parseInt(id), name: name, image: image, count: count, depth: depth, selected: selected};
-                            nodes[id] = node;        
+                            var node = {id: parseInt(id), name: name, image: image, count: 1, depth: depth, selected: selected};
+                            nodes[id] = node;    
+                            console.log("Node #" + id);    
                         }
                         
                         /**
                         * Finds links in a revPtrLinks or revRelLinks object
                         */
                         function findLinks(source, object) {
-                            if(object !== undefined) {
-                                // Get recIDs
-                                var recIDs = object.byRecIDs;
-                                if(recIDs !== undefined) {
-                                    // Loop through all recID's
-                                    for(var recID in recIDs) {
-                                        // Get node ID's
-                                        var ids = recIDs[recID];   
-                                        if(ids !== undefined && ids.length > 0) {
-                                            // Loop through al node ID's
-                                            for(var i = 0; i < ids.length; i++) {
-                                                // Construct a link
-                                                var target = nodes[ids[i]];
-                                                if(source !== undefined && target !== undefined) {
-                                                    var link = {source: source, relation: target, target: target};
-                                                    //console.log("LINK");
-                                                    //console.log(link);   
-                                                    links.push(link);
-                                                }
+                            var recIDs = object.byRecIDs;
+                            for(var recID in recIDs) {
+                                console.log("ID " +id+ " points to recID: " + recID);
+                                var target = nodes[recID];
+                                if(target !== undefined) {
+                                    var ids = recIDs[recID];
+                                    console.log("RELATION ID's");
+                                    console.log(ids);
+                                    if(ids !== undefined && ids.length > 0) {
+                                        for(var i = 0; i < ids.length; i++) {
+                                            // Define relation    
+                                            console.log("Relation #" + i + " ID: " + ids[i]);        
+                                            var relation = nodes[ids[i]];
+                                            if(relation === undefined) {
+                                                relation = {id: ids[i], name: "Unknown", image: "unknown.png", count: 1};
                                             }
+                                            
+                                            // Construct a link
+                                            var link = {source: source, relation: relation, target: target};
+                                            console.log("LINK");
+                                            console.log(link);   
+                                            links.push(link);  
                                         } 
-                                    }
+                                    }  
                                 }
                             }
                         }
 
-                        // Building links
+                        // Go through all records
                         for(var id in results.recSet) {
+                            console.log("RecSet["+id+"]:");
+                            console.log(results.recSet[id]);
                             var source = nodes[id];
                             
-                            // Get revPtr links
-                            var revptr = results.recSet[id].revPtrLinks;
-                            findLinks(source, revptr);
-                            
-                            // Get revRel links
-                            var revrel = results.recSet[id].revRelLinks;
-                            findLinks(source, revrel);
-                            
-                             // get ptrLinks
-                            var ptr = results.recSet[id].ptrLinks;
-                            findLinks(source, ptr);
-                            
-                            // Get relLinks
-                            var rel = results.recSet[id].relLinks;
-                            findLinks(source, rel);
+                            // Determine links
+                            if(source !== undefined) {
+                                 // Get ptrLinks
+                                var ptr = results.recSet[id].ptrLinks;
+                                console.log("Ptr for recSet["+id+"]");
+                                console.log(ptr);
+                                if(source !== undefined && ptr !== undefined) {
+                                    //var recIDs = ptr.byRecIDs;
+                                    findLinks(source, ptr);
+                                }
+         
+                                // Get relLinks
+                                var rel = results.recSet[id].relLinks;
+                                console.log("Rel for recSet["+id+"]");
+                                console.log(ptr);
+                                if(rel !== undefined) {
+                                    findLinks(source, rel);
+                                }
+                            }
                         }
    
                         // Time to visualize

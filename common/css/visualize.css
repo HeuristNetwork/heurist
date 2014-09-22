@@ -68,8 +68,9 @@ g:hover {
 /** Circle around icon */
 circle.around {
     fill: #fff;
-    stroke-width: 2px;
-    stroke: #000;
+    stroke-width: 1px;
+    stroke: #ddd;
+    stroke-opacity: .25;
 }
 
 /** Text above circle */
