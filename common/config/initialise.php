@@ -278,15 +278,55 @@ HEURIST_HTML_URL
 
         }
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder");
-        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . $defaultRootFileUploadURL);
+        define('HEURIST_UPLOAD_ROOT_URL', (strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false?HEURIST_SERVER_URL:"") . $defaultRootFileUploadURL);
     }
 
 
     if (!defined('HEURIST_UPLOAD_ROOT')) { //upload root is not defined in config - set it by default
+    
+        //try to detect the real installation path
+        // $installDir    /h3/
+        // $documentRoot    /var/www/html/   or /var/www/
+
+        $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
+        if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
         
-        $dir_Filestore = "HEURIST/HEURIST_FILESTORE/";
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $documentRoot . $dir_Filestore, "File store root folder");
-        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $dir_Filestore );
+        $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
+        if($install_path!=""){ //this is simlink
+            //remove code folder - to get real HEURIST installation
+            if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
+            if(strrpos($install_path,"/")>0){
+                $install_path = substr($install_path,0,strrpos($install_path,"/")+1); //remove last folder
+                
+                if(strpos($install_path, $documentRoot)===0){
+                    $install_path = substr($install_path, strlen($documentRoot));
+                }
+            }else{
+                $install_path = "";   
+            }
+        }else {
+        
+            $install_dir = $installDir; //  /html/h3/
+            if($install_dir){
+                if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1); //remove last slash
+                if($install_dir!=""){
+                    if(strrpos($install_dir,"/")>0){
+                        $install_dir = substr($install_dir,0,strrpos($install_dir,"/")+1);  //remove last folder
+                    }else{
+                        $install_dir = "";   
+                    }
+                }
+                //$install_path = $install_dir . $install_path;
+            }
+            $install_path = $install_dir;
+        }
+        if( $install_path && substr($install_path, 0, 1) == '/' ) $install_path = substr($install_path,1); //remove first slash
+    
+// print '<br>'.$install_path;
+        
+        $dir_Filestore = "HEURIST_FILESTORE/";  // HEURIST/
+        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $documentRoot .  $install_path . $dir_Filestore, "File store root folder");
+        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $install_path . $dir_Filestore );
     }
 
     //File store for this particular instance may be redefined in the database
@@ -633,7 +673,7 @@ HEURIST_HTML_URL
     function testDirWriteableAndDefine($defString, $dir, $folderName) {
 
         $info = new SplFileInfo($dir); //($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
-        $tryMakeDir = true;
+        $tryMakeDir = false;
 
         if ($info->isDir() && $info->isWritable()) {
             define($defString, $dir);
