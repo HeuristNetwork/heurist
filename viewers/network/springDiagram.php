@@ -222,11 +222,21 @@
                             return data;
                         }
                         
+                        // Calculates the line length
+                        function getLineLength(record) {
+                            var length = getSetting(setting_linelength);
+                            if(record !== undefined && record.hasOwnProperty("depth")) {
+                                length = length / (record.depth+1);
+                            }
+                            return length;
+                        }
+                        
                         // Call plugin
                         console.log("Calling plugin!");
                         $("#visualisation").visualize({
                             data: data,
                             getData: function(data) { return getData(data); },
+                            getLineLength: function(record) { return getLineLength(record); },
                             
                             showEntitySettings: false,
                             showLineWidth: false,

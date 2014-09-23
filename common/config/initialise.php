@@ -83,7 +83,7 @@ HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h3/        @tod
 HEURIST_SITE_PATH    - /h3/       (@todo - replace to HEURIST_BASE_URL)
 
 HEURIST_UPLOAD_ROOT      - path to root filestore folder
-HEURIST_UPLOAD_ROOT_URL  - url to root filestore folder  
+HEURIST_UPLOAD_ROOT_URL  - url to root filestore folder    (used in this file only)
 HEURIST_FILESTORE_DIR    - path to DB filestore folder
 HEURIST_FILESTORE_URL    - url to DB filestore folder   (used in this file only)
 
@@ -367,7 +367,7 @@ HEURIST_HTML_URL
         testDirWriteableAndDefine('HEURIST_HTML_DIR', $documentRoot . $path, "HTML output directory");
         define('HEURIST_HTML_URL', HEURIST_SERVER_URL . $path );    
     }
-    if (!defined('HEURIST_HTML_DIR')) {
+    if (!defined('HEURIST_HTML_URL')) {
         testDirWriteableAndDefine('HEURIST_HTML_DIR', HEURIST_FILESTORE_DIR . 'html-output/', "HTML output directory");
         define('HEURIST_HTML_URL', HEURIST_FILESTORE_URL . 'html-output/');
     }
@@ -621,6 +621,7 @@ HEURIST_HTML_URL
     * @return    int local rectype ID or null if not found
     */
     function rectypeLocalIDLookup($rtID, $dbID = 2) {
+        global $talkToSysAdmin;
         static $RTIDs;
         if (!$RTIDs) {
             $res = mysql_query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -646,6 +647,7 @@ HEURIST_HTML_URL
     * @return    int local detailtype ID or null if not found
     */
     function detailtypeLocalIDLookup($dtID, $dbID = 2) {
+        global $talkToSysAdmin;
         static $DTIDs;
         if (!$DTIDs) {
             $res = mysql_query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
@@ -671,9 +673,10 @@ HEURIST_HTML_URL
     * @return   boolean true if successful define, false otherwise
     */
     function testDirWriteableAndDefine($defString, $dir, $folderName) {
+        global $talkToSysAdmin;
 
         $info = new SplFileInfo($dir); //($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
-        $tryMakeDir = false;
+        $tryMakeDir = false ;
 
         if ($info->isDir() && $info->isWritable()) {
             define($defString, $dir);
@@ -685,7 +688,7 @@ HEURIST_HTML_URL
             }
         }
         
-        error_log("initialize.php: ".$folderName."  ".$dir."  is wrong or is not a writeable directory. ".$talkToSysAdmin);
+        //error_log("initialize.php: ".$folderName."  ".$dir."  is wrong or is not a writeable directory. ".$talkToSysAdmin);
         return false;
     }
 

@@ -1547,7 +1547,7 @@ function EditRecStructure() {
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
-                if(obj===""){
+                if(obj==="" || obj==="\n"){
                     if(callback){
                         callback.call();
                     }

@@ -469,7 +469,7 @@ function EditRectypeTitle() {
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
-                if(obj===""){
+                if(obj==="" || obj==="\n"){
                     var sel = Dom.get("listRecords");
                     if (sel.selectedIndex>0){
 
@@ -502,7 +502,7 @@ function EditRectypeTitle() {
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
                var obj = xhr.responseText;
-               if(obj===""){
+               if(obj==="" || obj==="\n"){
                     _doSave_Step2_SaveRectype();
                }else{
                     alert(obj);

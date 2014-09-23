@@ -614,6 +614,7 @@ top.HEURIST.search = {
 
 		window.heuristListeners["heurist-related-recordset-loaded"] = [];
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.applyFilterAndLayout);
+        top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView(null));
 
 		top.HEURIST.util.getJsonData(URL,
 				function(related) {	// callback function to process related record results into HEURIST search results

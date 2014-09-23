@@ -172,6 +172,7 @@
     }else{
 
       /*****DEBUG****///error_log(">>>>mineTYPE=".$filedata['mimeType']);
+      /*****DEBUG****///error_log(">>>>filename=".$filename);
 
       // set the mime type, set to binary if mime type unknown
       downloadFile($filedata['mimeType'], $filename);

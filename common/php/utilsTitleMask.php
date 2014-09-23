@@ -66,12 +66,12 @@ function check_title_mask2($mask, $rt, $checkempty) {
         // no substitutions to make
         return $checkempty?'Title mask must have at least one data field ( in [ ] ) to replace':'';
     }
-
+    
     $res = titlemask_make($mask, $rt, 1, null, _ERR_REP_MSG);
     if(is_array($res)){
         return $res[0]; // mask is invalid - this is error message
     }else{
-        return '';
+        return "";
     }
 }
 

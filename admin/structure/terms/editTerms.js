@@ -1,4 +1,4 @@
-    /**
+/**
 * editTerms.js: Support file for editTerms.php
 *
 * @package     Heurist academic knowledge management system
@@ -559,8 +559,8 @@ function EditTerms() {
             
                         var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
                         
-                        if(Hul.iempty(trmLabel)){
-                            alert('Trm label can not be empty');
+                        if(Hul.isempty(trmLabel)){
+                            alert('Term label can not be empty');
                             return;
                         }
 

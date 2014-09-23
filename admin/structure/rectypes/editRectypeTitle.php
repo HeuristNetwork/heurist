@@ -41,29 +41,34 @@
     $rectypeID = @$_REQUEST['rty_id'];
     $mask = @$_REQUEST['mask'];
 
-    if(array_key_exists("check",@$_REQUEST))
+    if(array_key_exists("check", @$_REQUEST))
     {
         if($_REQUEST["check"]==2){ //get coded mask
 
             $res = titlemask_make($mask, $rectypeID, 1, null, _ERR_REP_MSG);
-            echo is_array($res)?$res[0]:$res;
+            print is_array($res)?$res[0]:$res;
 
         }else if($_REQUEST["check"]==3){ //get human readable mask
 
             $res = titlemask_make($mask, $rectypeID, 2, null, _ERR_REP_MSG);
-            echo is_array($res)?$res[0]:$res;
+            print is_array($res)?$res[0]:$res;
 
         }else{ ///verify text title mask
 
             $check = check_title_mask2($mask, $rectypeID, true);
+
             if(!empty($check)){
-                echo $check;
+                print $check;
+            }else{
+                print "";
             }
         }
     }else{
         $recID = @$_REQUEST['rec_id'];
-        echo titlemask_value($mask, $recID);//."<br><br>".fill_title_mask_old($mask, $recID, $rectypeID);
-
+        
+        $res = titlemask_value($mask, $recID);//."<br><br>".fill_title_mask_old($mask, $recID, $rectypeID);
+        print $res;
+        
         //echo fill_title_mask_old($mask, $recID, $rectypeID);
         /* it works - but beforehand verification is already done on client side
         $check = check_title_mask2($mask, $rectypeID, true);

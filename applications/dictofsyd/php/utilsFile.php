@@ -323,12 +323,6 @@
         }else{
             header('Content-type: binary/download');
         }
-
-        /*
-        if($mimeType!="video/mp4"){
-        header('access-control-allow-origin: *');
-        header('access-control-allow-credentials: true');
-        }*/
         readfile($filename);
     }
 
