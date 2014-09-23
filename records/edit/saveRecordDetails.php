@@ -425,7 +425,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
         
-        if (mysql_error()) error_log("error rec update".mysql_error());
+        if (mysql_error()) error_log("error rec update ".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
 
@@ -436,7 +436,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 ++$updatedRowCount;
             }
         }
-        if (mysql_error()) error_log("error detail updates".mysql_error());
+        if (mysql_error()) error_log("error detail updates ".mysql_error());
 
         $insertedRowCount = 0;
         foreach ($bibDetailInserts as $vals) {
@@ -456,7 +456,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 $deletedRowCount = mysql_affected_rows();
             }
         }
-        if (mysql_error()) error_log("error detail deletes".mysql_error());
+        if (mysql_error()) error_log("error detail deletes ".mysql_error());
 
         // eliminate any duplicated lines
         $notesIn = explode("\n", str_replace("\r", "", $_POST["notes"]));
