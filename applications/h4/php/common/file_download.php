@@ -134,16 +134,30 @@
     */
     function downloadFile($mimeType, $filename){
 
-        if ($mimeType) {
-            header('Content-type: ' .$mimeType);
-        }else{
-            header('Content-type: binary/download');
+        if (file_exists($filename)) {        
+        
+                header('Content-Description: File Transfer');
+                if ($mimeType) {
+                  header('Content-type: ' .$mimeType);
+                }else{
+                  header('Content-type: binary/download');
+                }
+                if($mimeType!="video/mp4"){
+                    header('access-control-allow-origin: *');
+                    header('access-control-allow-credentials: true');
+                }
+                //header('Content-Type: application/octet-stream');
+                //force fownload header('Content-Disposition: attachment; filename='.basename($filename));
+                header('Content-Transfer-Encoding: binary');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
+                header('Content-Length: ' . filesize($filename));
+                ob_clean();
+                flush();        
+          
+                readfile($filename);                      
+                
         }
-
-        if($mimeType!="video/mp4"){
-            header('access-control-allow-origin: *');
-            header('access-control-allow-credentials: true');
-        }
-        readfile($filename);
     }
 ?>

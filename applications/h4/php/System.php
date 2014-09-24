@@ -104,17 +104,87 @@
                     $this->start_my_session();
                     $this->login_verify(); //load user info from session
 
-                    define('HEURIST_DBNAME',$this->dbname);
+                    define('HEURIST_DBNAME', $this->dbname);
                     define('HEURIST_DBNAME_FULL',$this->dbname_full);
                     //@todo  - test upload and thumb folder exist and writeable
-                    define('HEURIST_FILESTORE_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST/HEURIST_FILESTORE/' . $this->dbname . '/');
-                    define('HEURIST_THUMB_DIR', @$_SERVER["DOCUMENT_ROOT"] .'/HEURIST/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/');
-                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL .'/HEURIST/HEURIST_FILESTORE/' . $this->dbname . '/filethumbs/' );
-
+                    
+                    
+                    $this->initPathConstants();
+                    
                 }
                 return true;
             }
 
+        }
+        
+        public function initPathConstants($dbname=null){
+            
+                    if(!$dbname) $dbname = HEURIST_DBNAME;
+
+                    $install_path = $this->getInstallPath();
+                    $dir_Filestore = "HEURIST_FILESTORE/";
+                    $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
+                    if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+                    
+                    define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+                    define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
+                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/' );
+
+                    define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/' );
+        
+        }
+        
+        private function getInstallPath(){
+            
+            $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
+            if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+            
+            $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
+            $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+            if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
+                $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
+            }
+
+            //the subdir of the server's document directory where heurist is installed
+            if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
+                $installDir = '';
+            }
+            
+            $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
+            if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
+            
+            $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
+            if($install_path!=""){ //this is simlink
+                //remove code folder - to get real HEURIST installation
+                if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
+                if(strrpos($install_path,"/")>0){
+                    $install_path = substr($install_path,0,strrpos($install_path,"/")+1); //remove last folder
+                    
+                    if(strpos($install_path, $documentRoot)===0){
+                        $install_path = substr($install_path, strlen($documentRoot));
+                    }
+                }else{
+                    $install_path = "";   
+                }
+            }else {
+            
+                $install_dir = $installDir; //  /html/h3/
+                if($install_dir){
+                    if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1); //remove last slash
+                    if($install_dir!=""){
+                        if(strrpos($install_dir,"/")>0){
+                            $install_dir = substr($install_dir,0,strrpos($install_dir,"/")+1);  //remove last folder
+                        }else{
+                            $install_dir = "";   
+                        }
+                    }
+                    //$install_path = $install_dir . $install_path;
+                }
+                $install_path = $install_dir;
+            }
+            if( $install_path && substr($install_path, 0, 1) == '/' ) $install_path = substr($install_path,1); //remove first slash
+            
+            return $install_path; 
         }
 
         /**
