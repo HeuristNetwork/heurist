@@ -86,12 +86,6 @@
         <script src="../../external/js/codemirror-3.20/mode/smarty/smarty.js"></script>
         <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
 
-        <!-- link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload.css" -->
-
-        <!--
-        <link rel="stylesheet" href="../../external/js/codemirror-2.35/lib/codemirror.css">
-        <script src="../../external/js/codemirror-2.35/mode/smarty/smarty.js"></script>
-        -->
 
         <style type="text/css">
             /* hide header in top layout */
@@ -113,10 +107,7 @@
                 right: 0;
                 bottom: 0;
                 left: 0;
-                /*   	border: 1px solid #7D9AAA;
-                height: 100%;
-                width: 100%;
-            */}
+            }
             .CodeMirror *{
                 font-family: Courier, Monospace !important;
                 font-size: 14px;
@@ -156,11 +147,29 @@
 
         <div id="insert-popup" style="display:none;">
             <div style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;">
-                <!-- we probably need this test later
-                <div class="ins_isloop">Is the field or test you are inserting inside a repeat loop
-                (either a repeat for child records or a repeat for a repeating field)?</div><br />
-                -->
+
                 <table border="0">
+                    <tr>
+                        <td colspan="2">
+                            <select id="selInsertPattern" style="width:200px">
+                                <option value="1">Heading for record type</option>
+                                <option value="2">Simple table</option>
+                                <option value="3">Information on first element of a loop</option>
+                                <option value="4">Information on last element of a loop</option>
+                                <option value="99">Outer records loop</option>
+                            </select>
+                            <button onclick="showReps.insertPattern()">
+                                Insert pattern
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <hr>
+                        </td>
+                    </tr>
+
                     <tr>
                         <td>
                             <select id="selInsertMode" style="width:120px">
@@ -198,24 +207,25 @@
                     </tr>
 
 
-                    <!-- shows in all cases -->
+                    <!-- shows buttons in all cases, plus message if within loop -->
                     <tr>
-                        <!-- this instruction only confuses if there are no within-loop buttons &nbsp; forces row spacing -->
-                        <td colspan="2">&nbsp;<div class="ins_isloop">Use the buttons below for normal insertion</div>
+                        <td colspan="2"><div class="ins_isloop">Use these buttons for normal insertion</div>
                         </td>
                     </tr>
                     <tr>
                         <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, false )">
                             Insert field</button>
                         </td>
-                        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, true )">
-                            Insert test (If)</button>
+                        <td>
+                            <button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, true )">
+                                Insert test (If)</button>
+
                         </td>
                     </tr>
 
                     <!-- only shows if there is a within-loop option -->
                     <tr>
-                        <td colspan="2"><div class="ins_isloop">Use the buttons below if the field is being inserted inside a repeat loop</div>
+                        <td colspan="2"><div class="ins_isloop">Use these buttons if inserting within a repeat loop</div>
                         </td>
                     </tr>
                     <tr class="ins_isloop">
@@ -231,10 +241,10 @@
 
                 <br />
                 <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
-                    by clicking "repeat" next to the name of the field, then place further field specifications
-                    inside the {foreach}...{/foreach} loop that is inserted.
-                    <div class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</div>
-                    </div>
+                by clicking "repeat" next to the name of the field, then place further field specifications
+                inside the {foreach}...{/foreach} loop that is inserted.
+                <div class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</div>
+            </div>
         </div>
 
 
@@ -272,10 +282,7 @@
                 <div>
                     <a href="../../context_help/smarty_reports.html" title="Read full documentation on the Smarty templating language"
                         target="_blank"><b>Help on using this function</b></a><br />
-                    Position cursor in text on left before selecting actions below<br/>
-                    <label>Insert</label>
-                    <a href="javascript:void(0)" title="ForEach repeat to loop through all records in the current query or selection"
-                        onClick="showReps.insertRootForEach()">Records loop</a>
+                    Position cursor in text on left before selecting actions below
 
                     <!-- what does this do? -->
                     <div style="float:right;display:none">in popup&nbsp;
@@ -283,11 +290,13 @@
                     </div>
 
                 </div>
+
                 <div id="treeContainer">
                     <div id="varsTree" class="ygtv"></div>
-                    <!-- was ygtv-checkbox -highlight -->
                 </div>
+
             </div>
+
             <div class="actionButtons">
                 <button onClick="doExecuteFromEditor()" title="Test your template" style="font-size:1.1em;">TEST</button>
                 &nbsp;

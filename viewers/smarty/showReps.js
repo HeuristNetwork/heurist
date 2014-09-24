@@ -297,10 +297,14 @@ function ShowReps() {
                     var text = [
 
 
+                        '<html>',
                         '{* This is a very simple Smarty report template which you can edit into something more sophisticated.',
-                        '   Enter html for web pages or other text format. Use tree on right to insert fields.',
-                        '   Use this format to include comments in your file, use <!-- --> for output of html comments.',
-                        '   Smarty help describes many functions you can apply, loop counting/summing, custom fucntions etc.*}',
+                        '   Enter html for web pages or simple text for plain text formats. Use tree on right to insert fields',
+                        '   and templates for commonly used patterns. Use <!-- --> for output of html comments.',
+                        '',
+                        '{* Text like this, enclosed in matching braces + asterisk, is a comment. We suggest you start by removing',
+                        ' our comments and adding your own - plentiful comments will help with ongoing maintenance of your templates.*}',
+                        '',
                         '',
                         '<h2>Title for report</h2> {* Text here appears at start of report *}',
                         '<hr>',
@@ -310,15 +314,17 @@ function ShowReps() {
                         '{*------------------------------------------------------------*}',
                         '',
                         '',
+                        '  {* We STRONGLY advise visiting the Help link above - it will show you how to *}',
+                        '  {* use this function, as well as access all its sophisticated capabilities. *}',
                         '',
                         '',
-                        '  {* put the data you want output for each record here - insert the *}',
-                        '  {* fields using the tree of record types and fields on the right *}',
+                        '  {* Put the data you want output for each record here - insert the *}',
+                        '  {* fields using the tree of record types and fields on the right. *}',
+                        '  {* Use the pulldown of templates to insert commonly used patterns.*}',
                         '',
-                        '  {* Examples: *}',
+                        '  {* Examples - delete and replace with the fields you want to output: *}',
                         '     {$r.recID}  {* the unique record ID *}',
                         '     {$r.f1}     {* the name / title field - may or may not be present *}  ',
-                        '',
                         '',
                         '',
                         '<br/> {* line break between each record *}',
@@ -328,7 +334,8 @@ function ShowReps() {
                         '{*------------------------------------------------------------*}',
                         '',
                         '<hr/>',
-                        '<h2>End of report</h2> {* Text here appears at end of report *}'];
+                        '<h2>End of report</h2> {* Text here appears at end of report *} ',
+                        '</html>'];
 
 
                     var k;
@@ -951,7 +958,7 @@ function ShowReps() {
                             '</b>&nbsp;(<a href="javascript:void(0)" '+
                             'title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" '+
                             'onClick="showReps.insertRectypeIf(\''+term.id+'\',' + child[k].rt_id +
-                             ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</a>)';
+                            ', \'' + (child[k].rt_name?child[k].rt_name.replace("'", "\\'"):'') + '\')">if</a>)';
 
                             //'onClick="showReps.insertRectypeIf(\''+term.this_id+'\', \'' + child[k].rt_name.replace("'", "\\'") + '\')">if</a>)';
 
@@ -1035,6 +1042,7 @@ function ShowReps() {
         var remark = "{* "+ parname + _getVariableName(nodedata.id) + " *}"; //was this_id
         return "\n{if ($"+varname+")}"+remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+remark+" {* you can also add {/else} before {/if}} *}\n";
     }
+
     //
     //
     //
@@ -1077,15 +1085,114 @@ function ShowReps() {
         return (res+((insertMode==0)?' ':'\n'));
     }
 
+
     //
     // root loop
+    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next fucntion
     //
     function _insertRootForEach(){
         var textedit = Dom.get("edTemplateBody");
-        var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  {elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
+        var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  '+
+            '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
 
         insertAtCursor(textedit, _text, false, -12);
     }
+//
+
+    /*
+    * insertPattern: inserts a pattern/template/example for different actions into the editor text
+    *
+    */
+    function insertPattern() {
+        var _text = text;
+        var textedit = Dom.get("edTemplateBody");
+
+        pattern = Dom.get("selInsertPattern").value;
+
+        // Update these patterns in synch with pulldown in showReps.html
+        switch(pattern) {
+
+            case 1: // Heading for record type
+                _text=  "{* Use a saved search sorted by record type (in this example) *} \n" +
+                    "{* Modify the sorting variable and the test according to your needs *} \n" +
+                    "{* Put the following at top of file: {$lastRecordType = 0}  *} \n\n" +
+
+                    "{* Section heading *} \n" +
+                    "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
+                    "   <hr> \n<p/> \n"+
+                    "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
+                    "{/if} {* section heading *} ";
+                break;
+
+            case 2: // simple table
+                _text='{* Use this as a guideline for creating a simple tabular format *} \n' +
+                '{* Put narrow specified width columns at the start and any long text columns at the end *} \n' +
+                '<table> \n' +
+                '   <tr style="padding-top:10px;"> \n' +
+                '      <td style="width:200px"> \n' +
+                '      </td> \n' +
+                '   </tr> \n' +
+                '</table>';
+                break;
+
+            case 3: // information on first element of a loop
+                _text='{* The information between {if} ... {/if} will be generated before the first element of a loop is output *} \n' +
+                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
+                '{if ?????????} {* Information preceding first element of loop *} \n' +
+                ' \n' +
+                ' \n' +
+                ' \n' +
+                ' \n' +
+                '{/if} {* Information before first element of loop*}';
+                break;
+
+            case 4: // information on last element of a loop
+                _text='{* The information between {if} ... {/if} will be generated after the last element of a loop is output *} \n' +
+                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
+                '{if ?????????} {* Information following last element of loop *} \n' +
+                ' \n' +
+                ' \n' +
+                ' \n' +
+                ' \n' +
+                '{/if} {* Information following last element of loop*}';
+                break;
+
+            case 5: // using a div to control scpacing
+                _text=  '{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
+                '<div style="padding-top:5px; margin-left:10px;"> \n' +
+                '   {* Put content here *} \n' +
+                '</div>';
+                break;
+
+            case 6: //
+                _text='TO DO';
+                break;
+
+
+            case 99: // outer records loop
+                _text=  '{*------------------------------------------------------------*} \n' +
+                    '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
+                    '{*------------------------------------------------------------*} \n' +
+                    ' \n\n' +
+                    '  {* put the data you want output for each record here - insert the *} \n' +
+                    '  {* fields using the tree of record types and fields on the right *} \n' +
+                    ' \n' +
+                    '<br/> {* line break between each record *} \n' +
+                    ' \n' +
+                    '{*------------------------------------------------------------*} \n' +
+                    '{/foreach} {* end records loop, do not remove *} \n' +
+                    '{*------------------------------------------------------------*}';
+                break;
+
+            default:
+                _text = 'It appears that this choice has not been implemented. Please ask the Heurist team to add the required pattern';
+        }
+
+    insertAtCursor(null, _text, false, 0); // insert text into text buffer
+
+    } // insertPattern
+
+
     //
     // if for root rectypes
     //
@@ -1101,7 +1208,9 @@ function ShowReps() {
         insertAtCursor(textedit, _text, false, -7);
     }
 
+
     var insertPopupID, insert_ID;
+
 
     function _showInsertPopup( varid, isloop, elt ){
 
@@ -1112,6 +1221,7 @@ function ShowReps() {
         }else{
             $(".ins_isloop").hide();
         }
+
 
         function __shownewpopup(){
             var pos = top.HEURIST.getPosition(elt);
@@ -1274,6 +1384,7 @@ function ShowReps() {
 
     /**
     * myField, isApplyBreaks, cursorIndent - not used
+    * TODO: What do the parameters do?
     */
     function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
         if(_isAceEditor){
@@ -1318,8 +1429,11 @@ function ShowReps() {
             setTimeout(function(){codeEditor.focus();},200);
         }
     }
+
+
     //
     // utility function - move to HEURIST.utils
+    // TODO: What is the difference btween this and the one above. What do the parameters do?
     //
     function insertAtCursor_fortextarea(myField, myValue, isApplyBreaks, cursorIndent) {
 
