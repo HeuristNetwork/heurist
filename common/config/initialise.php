@@ -277,7 +277,7 @@ HEURIST_HTML_URL
             $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
 
         }
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder");
+        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
         define('HEURIST_UPLOAD_ROOT_URL', (strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false?HEURIST_SERVER_URL:"") . $defaultRootFileUploadURL);
     }
 
@@ -325,11 +325,17 @@ HEURIST_HTML_URL
 // print '<br>'.$install_path;
         
         $dir_Filestore = "HEURIST_FILESTORE/";  // HEURIST/
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $documentRoot .  $install_path . $dir_Filestore, "File store root folder");
+        $defaultRootFileUploadPath = $documentRoot .  $install_path . $dir_Filestore;
+        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
         define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $install_path . $dir_Filestore );
+    }
+    
+    if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
+        returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". $defaultRootFileUploadPath .". It is either not found or not writable.");
     }
 
     //File store for this particular instance may be redefined in the database
+    /* DO NOT use path defined in database
     $path = @$sysValues['sys_UploadDirectory'];
     if ($path) { //database override for uploading files.
         $path = getRelativeFolder($path);
@@ -337,9 +343,10 @@ HEURIST_HTML_URL
         define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . $path );    //full url to file store folder
     }
     if (!defined('HEURIST_FILESTORE_DIR')) { //store folder is not defined in DB - set it by default
-        testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
-        define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder
-    }
+    */
+    
+    testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
+    define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder
 
     // Define the site relative path for rectype icons
     testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . "rectype-icons/", "Icons directory");
@@ -672,11 +679,10 @@ HEURIST_HTML_URL
     * @param    boolean [$tryMakeDir] determines whether or not to attempt to make non existent directory (default false)
     * @return   boolean true if successful define, false otherwise
     */
-    function testDirWriteableAndDefine($defString, $dir, $folderName) {
+    function testDirWriteableAndDefine($defString, $dir, $folderName, $tryMakeDir=true) {
         global $talkToSysAdmin;
 
         $info = new SplFileInfo($dir); //($isDocrootRelative ? HEURIST_DOCUMENT_ROOT . $dir : $dir));
-        $tryMakeDir = false ;
 
         if ($info->isDir() && $info->isWritable()) {
             define($defString, $dir);

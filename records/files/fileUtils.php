@@ -188,9 +188,10 @@
                 header('Content-Length: ' . filesize($filename));
                 ob_clean();
                 flush();        
-                                
-                readfile($filename);
-//$res = @        
+          
+                readfile($filename);                      
+  
+//$res = @
 //error_log(">>>".$res);        
         }
     
