@@ -869,8 +869,10 @@ function ShowReps() {
                     if(vartype=='f' && Hul.isNumber(dtid) ){
                         term.dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[idx_dtype];
 
-                        var maxval = top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
-                        is_single = (Number(maxval)===1);
+                        if(top.HEURIST.rectypes.typedefs[rectype_id] && top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid]){
+                            var maxval = top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
+                            is_single = (Number(maxval)===1);
+                        }
                     }else if (term.this_id=="Relationship") {
                         is_single = false;
                     }
