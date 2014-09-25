@@ -179,7 +179,7 @@
         $rootrecord = new stdClass();
         $rootrecord->name  = $rt['name'];
         $rootrecord->id    = $rt_id;
-        $rootrecord->count = $rt['count'];
+        $rootrecord->count = intval($rt['count']);
         $rootrecord->image = $image_base_url.$rt_id;
         
         // Check if this record is in the array already, and if it is, check the counts
@@ -207,7 +207,7 @@
             $relationrecord = new stdClass();
             $relationrecord->name  = $details['dt_name'];
             $relationrecord->id    = $details['dt_id'];
-            $relationrecord->count = $details['count'];
+            $relationrecord->count = intval($details['count']);
             $relationrecord->image = $image_base_url.$details['dt_id'];
             $relationrecord->unconstrained = $details['isconstrained'] < 1;
 
@@ -243,7 +243,7 @@
                     $usagerecord = new stdClass();
                     $usagerecord->name  = $rtStructs['names'][$pt_rt_id];
                     $usagerecord->id    = $pt_rt_id;
-                    $usagerecord->count = $data[1];
+                    $usagerecord->count = intval($data[1]);
                     $usagerecord->image = $image_base_url.$pt_rt_id;
                     
                     $property = strval($usagerecord->id);
