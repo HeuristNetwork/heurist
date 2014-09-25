@@ -1,14 +1,17 @@
 <?php
 
 /**
-* configIni.php: configuration file for this Heurist instance
+* configIni.php: configuration file for this Heurist instance.
+*
+* Note: This file is overriden by heuristConfigIni.php in the parent directory, if present, allowing a single config file for all instances
+*       Program version number, however, is always specified by thius file and should not be changed
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Stephen White
+* @author      Tom Murtagh, Kim Jackson, Stephen White
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.2
 */
@@ -60,7 +63,9 @@ $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 // --------------------------------------------------------------------------------------------
 
 // Set the version number of the Heurist program
+
 // *** DO NOT CHANGE ***
+
 $version = "3.2.0"; // sets current program version number
                     // 3.2.0 alpha 8th July 2014, beta 21st July 2014
 
@@ -94,23 +99,29 @@ $indexServerPort="9200"; // default for Elastic Search
 $passwordForDatabaseCreation=""; // blank = any logged in user can create
 
 // [folders]
+
+// NOTE:
+// needs to be web accessible b/c record type icons and thumbnails in these directories are accessed directly to allow caching
+// Protect files in other directories with apache directrves in /etc/apache2/security or .htaccess file in the root of the filestore directory
+
 // The default root pathname of a directory where Heurist can store uploaded files eg. images, pdfs, as well as record type icons, templates,
 // output files, scratch space and so forth. This directory need not be web accessible - leaving it off the web protects the uploaded data,
-// although filenames are obfuscated when uploaded.
-// Correction: Dec 2013 and @todo: needs to be web accessible b/c record type icons in these directories are accessed directly
+// although filenames are obfuscated when uploaded to avoid sequential download by replication.
 // PHP must have permissions to be able to create subdirectories of this directory for each Heurist database and write files within them.
 // For instance, if you set $defaultRootFileUploadPath = "/srv/HeuristUploadDir/"; then, when running Heurist with db=xyz, uploaded files
 // will be loaded into /srv/HeuristUploadDir/xyz/, and new databases will be created with a subdirectory in /srv/HeuristUploadDir
 // $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
 // $defaultRootFileUploadURL = "HEURIST/HEURIST_FILESTORE/";
 // recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
+$defaultRootFileUploadPath ="/var/www/html/HEURIST/HEURIST_FILESTORE/";
+$defaultRootFileUploadURL = "";
 
 // [email]
 
 // email address for the system administrator/installer of Heurist
 // where you would like Heurist to deliver system alerts.
 // Leaving this blank will suppress system alert emails
-$sysAdminEmail = ""; // strongly recommended
+$sysAdminEmail = ""; // STRONGLY recommended
 
 // email address to which info@<installation server> will be redirected.
 // Leaving this blank will suppress info inquiry emails

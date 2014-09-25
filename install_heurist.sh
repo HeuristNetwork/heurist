@@ -63,26 +63,26 @@ echo "Changing to /var/www/html and creating HEURIST directory"
 # not accessible at hte web root address. Relatively easy for sysadmin to fix.
 cd /var/www
 # will do nothing if already exists
-sudo mkdir /var/www/html
+mkdir /var/www/html
 cd /var/www/html
 
 # mkdirs will do nothing if directory already exists
-sudo mkdir HEURIST
-sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
-sudo chown -R www-data:www-data /var/www/html/HEURIST/
+mkdir HEURIST
+mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
+chown -R www-data:www-data /var/www/html/HEURIST/
 
 echo -e "Fetching Heurist code from HeuristScholar.org"
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
-sudo tar -xjf $1.tar.bz2
-sudo rm $1.tar.bz2
+wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
+tar -xjf $1.tar.bz2
+rm $1.tar.bz2
 # this will fail if h3 already exists, use update script in this case
-sudo mv $1/ /var/www/html/HEURIST/h3
+mv $1/ /var/www/html/HEURIST/h3
 
 # Simlink Heurist as heurist and as h3 from the root web directory
 # do both /var/www and /var/www/html for good measure
 cd /var/www
-sudo ln -s html/HEURIST/h3 h3
-sudo ln -s html/HEURIST/h3 heurist
+ln -s html/HEURIST/h3 h3
+ln -s html/HEURIST/h3 heurist
 cd /var/www/html
 sudo ln -s HEURIST/h3 h3
 sudo ln -s HEURIST/h3 heurist
@@ -94,6 +94,10 @@ cd /var/www/html/HEURIST/HEURIST_SUPPORT
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 sudo tar -xjf external.tar.bz2
 sudo rm external.tar.bz2
+
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external-h4.tar.bz2
+sudo tar -xjf external-h4.tar.bz2
+sudo rm external-h4.tar.bz2
 
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 sudo tar -xjf help.tar.bz2
@@ -127,7 +131,7 @@ sudo mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
 sudo mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 
 sudo chown -R www-data:www-data /var/www/html/HEURIST/HEURIST_FILESTORE
-sudo chmod -R 755  /var/www/html/HEURIST/HEURIST_FILESTORE
+sudo chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE
 
 # ------------------------------------------------------------------------------------------
 

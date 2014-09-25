@@ -64,6 +64,10 @@ sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/externa
 sudo tar -xjf external.tar.bz2
 sudo rm external.tar.bz2
 
+sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external-h4.tar.bz2
+sudo tar -xjf external-h4.tar.bz2
+sudo rm external-h4.tar.bz2
+
 sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 sudo tar -xjf help.tar.bz2
 sudo rm help.tar.bz2
@@ -74,12 +78,14 @@ sudo rm exemplars.tar.bz2
 
 echo "Heurist unpacked"
 
-sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
-sudo tar -zxvf elasticsearch-1.3.2.tar.gz
-cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
-./bin/elasticsearch -d
+# This installation of elaastic search generated a number of security holes rated HIGH RISK
+# We are therefore ewmoving it peding investigation. Sept 2014
+# sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+# cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+# sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+# sudo tar -zxvf elasticsearch-1.3.2.tar.gz
+# cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
+# ./bin/elasticsearch -d
 
 
 # ------------------------------------------------------------------------------------------
