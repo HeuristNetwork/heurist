@@ -635,7 +635,7 @@ function ShowMap() {
 
 				if( (_sQueryMode=="all" && HRST.currentQuery_all_waslimited) ||
 					(_sQueryMode=="selected" && HRST.currentQuery_sel_waslimited) ||
-					(_sQueryMode=="main" && limit<HRST.search.results.totalQueryResultRecordCount))
+					(_sQueryMode=="main" && limit<HRST.totalQueryResultRecordCount))
 				{
 					msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
 				}

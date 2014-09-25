@@ -338,12 +338,12 @@ function appAddContent($container, app, options){
         if(app.widgetname=='recordDetails'){
             //DEBUG
             widget = $content.recordDetails();
-        }else if(app.widgetname=='mainMenu'){
+        }else if(app.widgetname=='recordListExt'){
             //DEBUG
-            widget = $content.mainMenu();
-        }else if(app.widgetname=='resultList'){
+            widget = $content.recordListExt( options );
+        /*}else if(app.widgetname=='resultList'){
             //DEBUG
-            widget = $content.resultList();
+            widget = $content.resultList(); */
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options

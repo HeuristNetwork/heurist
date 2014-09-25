@@ -82,6 +82,7 @@ $.widget( "heurist.pagination", {
         '<li id="search-limit-50"><a href="#">50</a></li>'+
         '<li id="search-limit-100"><a href="#">100</a></li>'+
         '<li id="search-limit-200"><a href="#">200</a></li>';                
+        '<li id="search-limit-1000"><a href="#">1000</a></li>';                
 
         this.menu_search_limit = $('<ul>'+smenu+'</ul>')   //<a href="#">
         .zIndex(9999)

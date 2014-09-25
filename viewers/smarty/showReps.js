@@ -1105,11 +1105,11 @@ function ShowReps() {
     * insertPattern: inserts a pattern/template/example for different actions into the editor text
     *
     */
-    function insertPattern() {
-        var _text = text;
+    function _insertPattern(pattern) {
+        var _text = '';
         var textedit = Dom.get("edTemplateBody");
 
-        pattern = Dom.get("selInsertPattern").value;
+        //pattern = Dom.get("selInsertPattern").value;
 
         // Update these patterns in synch with pulldown in showReps.html
         switch(pattern) {
@@ -1190,9 +1190,9 @@ function ShowReps() {
                 _text = 'It appears that this choice has not been implemented. Please ask the Heurist team to add the required pattern';
         }
 
-    insertAtCursor(null, _text, false, 0); // insert text into text buffer
+        insertAtCursor(null, _text, false, 0); // insert text into text buffer
 
-    } // insertPattern
+    } // _insertPattern
 
 
     //
@@ -1213,11 +1213,13 @@ function ShowReps() {
 
     var insertPopupID, insert_ID;
 
-
     function _showInsertPopup( varid, isloop, elt ){
 
-        var ele = document.getElementById("insert-popup");
-
+        top.HEURIST.insertVar = _insertSelectedVars; 
+        top.HEURIST.insertPattern = _insertPattern;
+        top.HEURIST.insertModifier = _insertModifier;
+        
+        
         if(isloop){
             $(".ins_isloop").show();
         }else{
@@ -1226,6 +1228,9 @@ function ShowReps() {
 
 
         function __shownewpopup(){
+            
+            var ele = document.getElementById("insert-popup");
+            
             var pos = top.HEURIST.getPosition(elt);
             var scroll = document.getElementById("treeContainer").scrollTop;
             insert_ID = varid;
@@ -1267,7 +1272,7 @@ function ShowReps() {
             varid = insert_ID;
         }
 
-        var textedit = Dom.get("edTemplateBody"),
+        var textedit = document.getElementById("edTemplateBody"),
         _text = "",
         _varid = varid,
         _inloop = inloop;
@@ -1587,11 +1592,11 @@ function ShowReps() {
 
         if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
             (_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
-            (_sQueryMode=="main" && limit<top.HEURIST.search.results.totalQueryResultRecordCount))
+            (_sQueryMode=="main" && limit<top.HEURIST.totalQueryResultRecordCount))
         {
             msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
         }else if(_sQueryMode=="main"){
-            msg = "&nbsp;&nbsp;total records: "+top.HEURIST.search.results.totalQueryResultRecordCount;
+            msg = "&nbsp;&nbsp;total records: "+top.HEURIST.totalQueryResultRecordCount;
         }
 
         document.getElementById('recordCount').innerHTML = msg;
@@ -1717,6 +1722,7 @@ function ShowReps() {
 
         showInsertPopup:function(varid, isloop, elt){
             _showInsertPopup(varid, isloop, elt);
+            return false;
         },
 
         //inserts selected variables

@@ -3553,13 +3553,15 @@ top.HEURIST.search = {
 			if (top.HEURIST.currentQuery_all_waslimited) {
 				//alert("Selected record count is great than 500, opening the first 500 records!");
 				recIDs = recIDs.slice(0,limit);
-				top.HEURIST.currentQuery_all_limited = true;
+				top.HEURIST.currentQuery_all_waslimited = true;
 			}
 			top.HEURIST.currentQuery_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-
 			top.HEURIST.currentQuery_sel = query_string_sel;
 
+            top.HEURIST.totalQueryResultRecordCount = top.HEURIST.search.results.totalQueryResultRecordCount;
+            
+            
 			if(currentTab===_TAB_MAP){ //map
 
 				var mapframe = document.getElementById("map-frame3");
@@ -3578,13 +3580,13 @@ top.HEURIST.search = {
 			}else if (currentTab===_TAB_SMARTY){ //smarty
 				var smartyFrame = document.getElementById("smarty-frame");
 
-				if(smartyFrame.src){ //do not reload map frame
+				if(smartyFrame.src){ //do not reload smarty frame
 
 					var showReps = smartyFrame.contentWindow.showReps;
 					if(showReps){
 						showReps.processTemplate();
 					}else{
-						//alert('not inited 2');
+                        //alert('not inited 2');
 					}
 
 				}else{

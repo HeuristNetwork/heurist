@@ -485,7 +485,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else{
             options["element"] = element;
         }
-        return top.HEURIST.util.popupWindow(parentWindow, options);
+        
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+            return top.HEURIST.util.popupWindow(parentWindow, options);
+        }else{
+            return top.HEURIST4.util.showElementAsDialog(options);
+        }
     },
     /**
      * Convenience wrapper for popup using element with no chrome, resizing, and close-on-blur
@@ -505,7 +510,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if (options["close-on-blur"] === undefined) options["close-on-blur"] = true;
         if (options["no-resize"] === undefined) options["no-resize"] = true;
 
-        return top.HEURIST.util.popupWindow(parentWindow, options);
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+            return top.HEURIST.util.popupWindow(parentWindow, options);
+        }else{
+            return top.HEURIST4.util.showElementAsDialog(options);
+        }
     },
 
     coverall: null,

@@ -158,7 +158,7 @@
                                 <option value="4">Information on last element of a loop</option>
                                 <option value="99">Outer records loop</option>
                             </select>
-                            <button onclick="showReps.insertPattern()">
+                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
                                 Insert pattern
                             </button>
                         </td>
@@ -179,7 +179,9 @@
                             </select>
                         </td>
                         <td>
-                            <select id="selInsertModifiers" onChange="onSelectModifier()" style="width:120px">
+                            <select id="selInsertModifiers" 
+                                    onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}" 
+                                    style="width:120px">
                                 <option>choose modifier</option>
                                 <option>capitalize</option>
                                 <option>cat</option>
@@ -213,13 +215,12 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, false )">
+                        <td><button onclick="top.HEURIST.insertVar(null, false, false )">
                             Insert field</button>
                         </td>
                         <td>
-                            <button onclick="$('#smarty-frame')[0].contentWindow.insertVar( false, true )">
+                            <button onclick="top.HEURIST.insertVar(null,  false, true )">
                                 Insert test (If)</button>
-
                         </td>
                     </tr>
 
@@ -229,10 +230,10 @@
                         </td>
                     </tr>
                     <tr class="ins_isloop">
-                        <td><div class="ins_isloop"><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, false )">
+                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, false )">
                             Insert field</button></div>
                         </td>
-                        <td><div class="ins_isloop"><button onclick="$('#smarty-frame')[0].contentWindow.insertVar( true, true )">
+                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, true )">
                             Insert test (If)</button></div>
                         </td>
                     </tr>
@@ -562,6 +563,10 @@
                 elem.innerHTML = s;
             }
 
+            if(!top.HEURIST.rectypes){
+                top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php")
+            }
+            
             YAHOO.util.Event.addListener(window, "load", loadHandler );
 
 

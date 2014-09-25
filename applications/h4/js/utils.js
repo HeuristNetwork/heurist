@@ -868,6 +868,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         });
     },
 
+    /**
+    * show url in iframe within popup dialog
+    */
     showDialog: function(url, options){
     
                 if(!options) options = {};
@@ -936,7 +939,43 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                         };
                         $dosframe.attr('src', url);
                         $dlg.dialog(opts);
-    }                        
+    },
+    
+    showElementAsDialog: function(options){
+        
+            var opener = options['window']?options['window'] :window;
+        
+            var $dlg = $('<div>')
+               .appendTo( $(opener.document).find('body') );
+               
+            var element = options['element'];
+            var originalParentNode = element.parentNode;
+            element.parentNode.removeChild(element);
+               
+            $(element).show().appendTo($dlg);
+
+            var opts = {
+                    autoOpen: true,
+                    width : (options.width>0?options.width+20:690),
+                    height: (options.height>0?options.height+20:690),
+                    modal: true,
+                    resizable: (options['no-resize']==true),
+                    //draggable: false,
+                    title: options["title"],
+                    close: function(event, ui){
+                        
+                        //var element = popup.element.parentNode.removeChild(popup.element);
+                        element.style.display = "none";
+                        originalParentNode.appendChild(element);
+                        
+                        $dlg.remove();
+                    }
+            };
+            $dlg.dialog(opts);
+        
+            return {id:0};
+    }
+                        
 
 
     }//end util

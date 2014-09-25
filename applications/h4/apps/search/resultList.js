@@ -39,6 +39,7 @@ $.widget( "heurist.resultList", {
     },
 
     _query_request: null, //keep current query request
+    _events: null,
 
     // the constructor
     _create: function() {
@@ -112,12 +113,12 @@ $.widget( "heurist.resultList", {
 
 
         //-----------------------     listener of global events
-        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
+        this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
-            sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+            this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
         }
 
-        $(this.document).on(sevents, function(e, data) {
+        $(this.document).on(this._events, function(e, data) {
 
             if(e.type == top.HAPI4.Event.LOGIN){
 
@@ -230,7 +231,7 @@ $.widget( "heurist.resultList", {
     // revert other modifications here
     _destroy: function() {
 
-        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT);
+        $(this.document).off(this._events);
 
         var that = this;
         /*$.each(this._allbuttons, function(index, value){

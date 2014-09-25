@@ -64,7 +64,8 @@ var widgets = [
 
     {id:'h3_mainMenu', name:'Main Menu Panel', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
-    {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'}
+    {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
+    {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'}
     
     
 ];
@@ -99,9 +100,12 @@ var layouts = [
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
-                apps:[                                      //or viewRecord or renderRecordData
-                    {appid:'h3_recordDetails'},    //rec_viewer
-                    {appid:'ha54'}     //crosstabs
+                apps:[                                      
+                    {appid:'h3_recordDetails'},    //H4 record viewer
+
+                    {appid:'h3_recordListExt', options:{title:'Record H3', url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+                    {appid:'h3_recordListExt', options:{title:'Map', url: 'viewers/map/showMap.html'}},    //H3 mapper
+                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}}     //H3 smarty
                     /*                ,
                     {appid:'ha51'},
                     {appid:'ha52'},
