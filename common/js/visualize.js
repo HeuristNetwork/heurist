@@ -412,13 +412,28 @@ function handleSettingsInUI() {
 
 
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
+var maxCount; 
+function determineMaxCount(data) {
+    console.log("DETERMINING NEW MAX COUNT");
+    maxCount = 0;
+    if(data && data.nodes.length > 0) {
+        for(var i = 0; i < data.nodes.length; i++) {
+            console.log(data.nodes[i]);
+            if(data.nodes[i].count > maxCount) {
+                maxCount = data.nodes[i].count;
+            } 
+        }
+    }
+    console.log("NEW MAX COUNT: " + maxCount);
+}
+
 /** Calculates log base 10 */
 function log10(val) {
     return Math.log(val) / Math.LN10;
 }
 
 /** Executes the chosen formula with a chosen count & max size */
-var maxCount = 100; 
+
 function executeFormula(count, maxSize) {
     // Avoid minus infinity and wrong calculations etc.
     if(count <= 0) {
@@ -478,10 +493,11 @@ function visualizeData() {
     svg.selectAll("*").remove();
     
     // Record data
-    var data = settings.getData.call(this, settings.data); 
+    var data = settings.getData.call(this, settings.data);
+    determineMaxCount(data); 
     console.log("RECORD DATA");
-    console.log(data);  
-    
+    console.log(data); 
+     
     // Line settings
     var linetype = getSetting(setting_linetype);
     var linelength = getSetting(setting_linelength);
@@ -539,10 +555,8 @@ function visualizeData() {
                          .nodes(d3.values(data.nodes))
                          .links(data.links)
                          .charge(attraction)        // Using the attraction setting
-                         .linkDistance(function(d) {
-                             var length = settings.getLineLength.call(this, d.target); 
-                             console.log("LENGTH RETURN IN LINK DISTANCE: " + length);
-                             return length;
+                         .linkDistance(function(d) {         
+                             return settings.getLineLength.call(this, d.target);
                          })  // Using the linelength setting 
                          .on("tick", function(d, i) {
                              // Determine what function to call on force.drag

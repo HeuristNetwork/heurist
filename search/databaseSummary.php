@@ -22,8 +22,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-
+    
     require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/parseQueryToSQL.php');
@@ -39,30 +38,17 @@
 <html>
 
     <head>
-
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Database Summary</title>
-
+        
+        <!-- Heurist -->
         <link rel="stylesheet" type="text/css" href="../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
         <style>
-            /** Heurist table */
-            #container, #settings, #visualisation, svg {
+            #container, #settings {
                 width: 100%;
                 height: 100%;
             }
-
-            h3 {
-                padding: 3px;
-                margin: 0px;
-            }
-
-            /** Table */
-            .records {
-                overflow: scroll;
-                border: none;
-            }
-
+            
             table {
                 table-layout: auto;
                 border-color: black;   
@@ -79,7 +65,7 @@
                 border: 1px solid black;
             }
             
-            .zerocounts {
+            .count-divider {
                 border-top: 3px solid black;
             }
 
@@ -91,127 +77,29 @@
                 text-decoration: none;
                 cursor: pointer;
             }
-
-            /** Settings */
-            .space {
-                padding-left: 5px;
-                padding-right: 5px;     
-            }
             
-            div.settings {
-                display: inline-block;
-            }
-            
-            div.color {
-                cursor: pointer;
-                display: inline-block;
-                width: 10px;
-                height: 10px;
-                border: 1px solid black; 
-                margin-top: 4px;
-            }
-            
-            #linecolor {
-                background-color: #999;
-            }
-
-            #markercolor {
-                background-color: #000;
-            }
-            
-            #countcolor {
-                background-color: #22a;
-            }
-
-            .middle {
-               vertical-align: middle; 
-            }
-            
-            input.small {
-                cursor: pointer;
-                max-width: 40px;
-                text-align: center;
-            }
-
-            
-            /** SVG related */
             #visualisation {
                 border-left: 1px dashed black;
             }
-            
-            svg {
-                border-top: 1px dashed black;
-            }
-            
-            /** Move records around */
-            g:hover {
-                cursor: pointer;
-            }
-
-            /** Lines between records */
-            .link {
-                fill: none;    
-                stroke-opacity: .6;  
-            }
-     
-            .link:hover {
-                cursor: pointer;
-            }
-
-            /** Circle around icon */
-            circle.around {
-                fill: #fff;
-                stroke-width: 2px;
-                stroke: #000;
-            }
-
-            /** Text above circle */
-            text.center {
-                font-weight: bold;
-                text-anchor: middle;   
-            }
-
-            text.shadow {
-                stroke: #fff;
-                stroke-width: 2px;
-                stroke-opacity: .8;
-            }
-            
-            /** Overlay */
-            #overlay {
-                pointer-events: none;
-            }
-            .semi-transparant {
-                fill: #fff;
-                fill-opacity: 0.9;
-                stroke: #000;
-                stroke-width: 1.5;
-                stroke-opacity: 1.0;
-            }
         </style>
-
+        
+        <!-- jQuery -->
         <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        
+        <!-- D3 -->
         <script type="text/javascript" src="../external/d3/d3.js"></script>
         <script type="text/javascript" src="../external/d3/fisheye.js"></script>
+        
+        <!-- Colpick -->
         <script type="text/javascript" src="../external/colpick/colpick.js"></script>
-        <script>
-            function onrowclick(rt_ID, innewtab){
-                var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
-                if(innewtab){
-                    window.open("search.html?"+query, "_blank");
-                    return false;
-                }else{
-                    top.HEURIST.search.executeQuery(query);
-                    window.close();
-                }
-            }
-        </script>
-
+        <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
+        
+        <!-- Visualize plugin --> 
+        <script type="text/javascript" src="../common/js/visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="../common/css/visualize.css">
     </head>
 
     <body class="popup">
-        <!-- Holds the record count table left (as small as possible), and the SVG visualisation on the right (as big as possible) -->
-
         <table id="container" width="100%" border="0" cellspacing="0" cellpadding="2">
             <tr>
                 <td width="350">
@@ -284,7 +172,7 @@
                             while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
                                 //print_r($row);
                                 if($count == 0) {
-                                    echo "<tr class='row zerocounts'>";  
+                                    echo "<tr class='row count-divider'>";  
                                 }else{
                                     echo "<tr class='row'>";
                                 }
@@ -326,108 +214,136 @@
 
                 <!-- D3 visualisation -->
                 <td>
-                    <table id="visualisation" cellpadding="4" cellspacing="1">
-                        <tr>
-                            <!-- SETTINGS -->
-                            <td height="25px" style="vertical-align: middle;">
-                                <!-- COLOR SETTINGS -->
-                                <div class="settings space">
-                                     <b>Colours:</b>
-                                     <!-- Line color -->
-                                     <i>Lines</i>
-                                     <div id="linecolor" class="color"></div>
-                                     
-                                     <!-- Arrow color -->
-                                     <i>Arrows</i>
-                                     <div id="markercolor" class="color"></div>
-              
-                                      <!-- Record count circle color -->
-                                      <i>Frequency</i>
-                                      <div id="countcolor" class="color"></div>
-                                        
-                                      <!-- Text color -->
-                                      <i>Text</i>
-                                      <div id="textcolor" class="color"></div>
-                                </div> 
-                                
-                                <!-- LINE SETINGS -->           
-                                <div class="settings space">
-                                    <b>Lines:</b>
-                                    <!-- Line type -->
-                                    <select class="middle" id="linetype">
-                                        <option value="straight">straight</option>
-                                        <option value="curved">curved</option>
-                                    </select>
-  
-                                   <!-- Line length --> 
-                                    <i>Length</i>
-                                    <input id="linelength" class="small" type="number" min="1" value="200"/>
-                                    
-                                    <i>Max width</i>
-                                    <input id="linewidth" class="small" type="number" min="1" value="10"/>
-                                </div>
-                                
-                                <!-- Entity settings -->
-                                <div class="settings space">
-                                    <b>Entitity:</b>
-                                    
-                                    <i>Max radius</i>
-                                    <input id="entityradius" class="small" type="number" min="1" value="100"/>
-                                </div>
-                                
-                                <!-- Transform settings -->
-                                <div class="settings space">
-                                    <b>Transform:</b>
-                                    
-                                    <!-- Formula -->
-                                    <select class="middle" id="formula">
-                                        <option value="linear">linear</option>
-                                        <option value="logarithmic">logarithmic</option>
-                                        <option value="unweighted">unweighted</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- GRAVITY SETTINGS -->
-                                <div class="settings space">
-                                    <b>Gravity:</b>
-                                    <!-- Gravity setting -->
-                                    <select class="middle" id="gravity">
-                                        <option value="off">off</option>
-                                        <option value="touch">touch</option>
-                                        <option value="aggressive">aggressive</option>
-                                    </select>
-                                    
-                                     <!-- Attraction strength -->
-                                    <i>Attraction</i>
-                                    <input id="attraction" class="small" type="number" value="-700"/>
-                                </div>
-                                
-                                <div class="settings space">
-                                    <b>Fisheye:</b>
-                                    <input id="fisheye" type="checkbox" name="fisheye">
-                                </div>
-  
-                                <!-- HELP INFO -->
-                                <div class="settings space">
-                                    <i style="color: #444; font-size: 8px">Click entities or links to get information, drag entities to reposition</i>
-                                </div>
-                             </td> 
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <!-- SVG -->
-                                <svg></svg>
-                            </td>
-                        </tr>
-                    </table>
-
+                    <?php include "../common/html/visualize.html"; ?>
                 </td>
             </tr>
         </table>
+    
+        <script>
+            var url = "../admin/describe/getRectypeRelationsAsJSON.php" + window.location.search;
+            console.log("Loading data from: " + url);
+            d3.json(url, function(error, json) {
+                // Error check
+                if(error) {
+                    return alert("Error loading data: " + error.message);
+                }
+               
+                // Data loaded successfully!
+                console.log("JSON Loaded");
+                console.log(json);   
+                
+                /** RECORD FILTERING */
+                // Set filtering settings in UI
+                $(".show-record").each(function() {
+                    var name = $(this).attr("name");
+                    var record = localStorage.getItem(name);
+                    if(record) {
+                        // Update checked attribute
+                        var obj = JSON.parse(record);
+                        if("checked" in obj) {
+                            $(this).prop("checked", obj.checked);
+                        }
+                    }
+                });
+                
+                // Listen to 'show-record' checkbox changes  
+                $(".show-record").change(function(e) {
+                    // Update record field 'checked' value in localstorage
+                    var name = $(this).attr("name");
+                    var record = localStorage.getItem(name);
+                    var obj;
+                    if(record === null) {
+                        obj = {};  
+                    }else{                                   
+                        obj = JSON.parse(record);
+                    }
+                    
+                    // Set 'checked' attribute and store it
+                    obj.checked = $(this).is(':checked');
+                    localStorage.setItem(name, JSON.stringify(obj));
+                    
+                    // Update visualisation
+                    visualizeData();
+                });
 
-        <script type="text/javascript" src="databaseSummary.js"></script>
+                // Listen to the 'show-all' checkbox 
+                $("#show-all").change(function() {
+                    // Change all check boxes
+                    var checked = $(this).is(':checked');  
+                    $(".show-record").prop("checked", checked);
+                    
+                    // Update localstorage
+                    $(".show-record").each(function(e) {
+                        var name = $(this).attr("name");
+                        var record = localStorage.getItem(name);
+                        var obj;
+                        if(record === null) {
+                            obj = {};  
+                        }else{                                   
+                            obj = JSON.parse(record);
+                        }
+                        
+                        // Set 'checked' attribute and store it
+                        obj.checked = checked;
+                        localStorage.setItem(name, JSON.stringify(obj));
+                    });
+                    
+                    visualizeData();
+                });
+                
+                
+                /** VISUALIZING */
+                // Parses the data
+                function getData(data) {
+                    // Build name filter
+                    var names = [];   
+                    $(".show-record").each(function() {
+                        var checked = $(this).is(':checked'); 
+                        if(!checked) {
+                            var name = $(this).attr("name");
+                            names.push(name);
+                        }
+                    });    
+                    
+                    // Filter nodes
+                    var map = {};
+                    var size = 0;
+                    var nodes = data.nodes.filter(function(d, i) {
+                        if($.inArray(d.name, names) == -1) {
+                            map[i] = d;
+                            return true;
+                        }
+                        return false;
+                    });
 
+                    // Filter links
+                    var links = [];
+                    data.links.filter(function(d) {
+                        if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
+                            var link = {source: map[d.source], target: map[d.target], relation: d.relation};
+                            links.push(link);
+                        }
+                    })
+                
+                    // Return filtered data             
+                    return {nodes: nodes, links: links}
+                }
+                
+                // Visualizes the data
+                function visualizeData() {
+                    // Call plugin
+                    console.log("Calling plugin!");
+                    $("#visualisation").visualize({
+                        data: json,
+                        getData: function(data) { return getData(data); }
+                    });   
+                }
+                
+                visualizeData();
+  
+            });
+      
+        </script>
     </body>
 
 </html>

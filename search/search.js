@@ -613,6 +613,7 @@ top.HEURIST.search = {
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 
 		window.heuristListeners["heurist-related-recordset-loaded"] = [];
+        console.log("HEURIST_RELATED_RECORDSET_LOADED");
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.applyFilterAndLayout);
         top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView(null));
 
@@ -1000,6 +1001,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.filterRelated(level);
 		}
 		top.HEURIST.search.updateMapRelated();
+        top.HEURIST.search.updateDiagramView(null);
 	},
 
     getLink_toggleOff_loadRelatedRecords: function(level){
@@ -3447,7 +3449,7 @@ top.HEURIST.search = {
     // Updates the diagram view
     //
     updateDiagramView: function(recID) {
-        console.log("updateDiagramView()");
+        console.log("updateDiagramView() called!");
         // Diagram check
         var diagramFrame = document.getElementById("diagram-frame");
         console.log("Diagram frame: " + diagramFrame);
