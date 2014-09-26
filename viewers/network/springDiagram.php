@@ -46,7 +46,10 @@
         
         <!-- Visualize plugin --> 
         <script type="text/javascript" src="../../common/js/visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../common/css/visualize.css">                            
+        <link rel="stylesheet" type="text/css" href="../../common/css/visualize.css">   
+        
+        <!-- Script to parse data and create the visualisation -->
+        <script type="text/javascript" src="springDiagram.js"></script>                         
     </head>
     
     <body>
@@ -66,8 +69,37 @@
         <!-- Visualize HTML -->
         <?php include "../../common/html/visualize.html"; ?>
         
-        <!-- Script to parse data and create the visualisation -->
-        <script type="text/javascript" src="springDiagram.js"></script>
+        <!-- Visualize data -->
+        <script>
+            $(document).ready(function() {
+            try {    
+                // Get parameters
+                var parameters = {};
+                location.search.substr(1).split("&").forEach(function(item) {parameters[item.split("=")[0]] = decodeURIComponent(item.split("=")[1])});
+                
+                // Check if the "data" parameter exists
+                if(parameters !== undefined && parameters.hasOwnProperty("ids")) { 
+                    // Used as embed, use window.location parameters
+                    console.log("Parsing ids from parameters");
+                    var ids = parameters.ids;
+                    console.log("ID's: " + ids);
+                    
+                    // Construct data from ID's..
+                    alert("Passing ID's in URL is still in development...");
+                      
+                }else{ 
+                     // Used inside search results, use top.HEURIST.search
+                    console.log("Parsing recSet from top.HEURIST.search");
+                    var data = parseRecSet();  // Parse the Javascript data
+                    visualize(data);           // Visualize the data
+                }
+
+            } catch(error) {
+                $("body").append("<h3>Error occured</h3><br /><i>" + error.message + "</i>");        
+            }
+
+        });
+        </script>
     </body>
     
 </html>

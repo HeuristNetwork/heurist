@@ -20,6 +20,7 @@
                 height: 60px;
             }
         </style>
+        <script type="text/javascript" src="springDiagram.js"></script>
     </head>
 
     <body>
@@ -38,8 +39,10 @@
         </blockquote>
         
         <script>
+            // Show in textbox
+            var url = getCustomURL();
             var box = document.getElementById("code-textbox");
-            box.innerHTML = "Overridden";
+            box.innerHTML = "<iframe src='"+url+"'></iframe>";
         </script>
     </body>
 </html>
