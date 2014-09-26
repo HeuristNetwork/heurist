@@ -58,7 +58,7 @@ $.widget( "heurist.resultListMenu", {
         if(this.options.isapplication){
             sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
         }*/
-
+        
         $(this.document).on(sevents, function(e, data) {
 
             if(e.type == top.HAPI4.Event.LOGIN || e.type == top.HAPI4.Event.LOGOUT){
@@ -118,6 +118,9 @@ $.widget( "heurist.resultListMenu", {
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
+        
+        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
+        
         // remove generated elements
         this.btn_Search.remove();
         this.menu_Search.remove();

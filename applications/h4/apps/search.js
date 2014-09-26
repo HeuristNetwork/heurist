@@ -181,13 +181,13 @@ $.widget( "heurist.search", {
 
 
         //global listener
-
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
 
             that.query_request = data; //keep for search in current result
+            top.HEURIST4.current_query_request = data;
 
             if(data && data.source!=that.element.attr('id')){
                 that.input_search.val(data.q);
@@ -482,6 +482,11 @@ $.widget( "heurist.search", {
     // events bound via _on are removed automatically
     // revert other modifications here
     ,_destroy: function() {
+        
+        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
+        $(this.document).off(top.HAPI4.ON_REC_SEARCHSTART);
+        
+        
         // remove generated elements
         this.btn_search_as_guest.remove();
         this.btn_search_as_user.remove();

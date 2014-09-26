@@ -24,6 +24,8 @@ $.widget( "heurist.mainMenu", {
     options: {
         // callbacks
     },
+    
+    _selection:null,
 
     // the widget's constructor
     _create: function() {
@@ -93,6 +95,15 @@ $.widget( "heurist.mainMenu", {
         .click( function(){ that._addNewRecord(); });
         
         
+        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT, function(e, data) {
+                   if(data) data = data.selection;
+                   if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                       that._selection = data;
+                   }else{
+                       that._selection = null
+                   }
+        });        
+        
         this._refresh();
 
     }, //end _create
@@ -129,8 +140,11 @@ $.widget( "heurist.mainMenu", {
         
     },
     // 
-    // custom, widget-specific, cleanup.
+    // custom, widget-pecific, cleanup.
     _destroy: function() {
+        
+        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
+        
         // remove generated elements
         this.btn_Profile.remove();
         this.menu_Profile.remove();
@@ -175,7 +189,7 @@ $.widget( "heurist.mainMenu", {
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
-            .menu();
+            .menu({select: function(event, ui){ that._menuActionHandler(event, ui.item.attr('id')); return false; }});
             
             that._initLinks(that['menu_'+name]);
         })
@@ -265,6 +279,28 @@ $.widget( "heurist.mainMenu", {
     
     },
     
+    _menuActionHandler: function(event, action){
+    
+          var that = this;
+          if(action == "menu-export-hml-0"){ 
+                this.exportHML(true,false,false);
+          }else if(action == "menu-export-hml-1"){ 
+                this.exportHML(false,false,false);
+          }else if(action == "menu-export-hml-2"){ 
+                this.exportHML(true,true,false);
+          }else if(action == "menu-export-hml-3"){ 
+                this.exportHML(true,false,true);
+          }else if(action == "menu-export-kml"){ 
+                this.exportKML(true);
+          }else if(action == "menu-export-rss"){ 
+                this.exportFeed('rss');
+          }else if(action == "menu-export-atom"){ 
+                this.exportFeed('atom');
+          }
+              
+          event.preventDefault();
+    },
+    
     _addNewRecord: function(){
         
         
@@ -287,7 +323,136 @@ $.widget( "heurist.mainMenu", {
                     }
             });
             
+    },
+    
+    exportHML: function(isAll, includeRelated, ishuni){
+
+        var q = "",
+            layoutString,rtFilter,relFilter,ptrFilter,
+            depth = 0;
+            
+        if(isAll){
+            
+            if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
+                  q = encodeURIComponent(top.HEURIST4.current_query_request.q);
+            }
+            
+        }else{
+            
+            var recIDs_list = [];
+            if (this._selection!=null) {
+                recIDs_list = this._selection.getIds();
+            }
+            if (recIDs_list.length == 0) {
+                Hul.showMsgDlg("Select at least one record to export");
+                return false;
+            }
+            q = "ids:"+recIDs_list.join(",");
+            
+        }
+        
+        if (includeRelated){
+            
+            depth = 1;
+            
+            /*
+            var rtFilter = top.HEURIST.search.getPushDownFilter('rectype');
+            if (rtFilter[0] > depth){ // if filter max depth is greater than depth -> adjust depth
+                depth = rtFilter[0];
+            }
+            rtFilter = rtFilter[1];
+            var relFilter = top.HEURIST.search.getPushDownFilter('reltype');
+            if (relFilter[0] > depth){
+                depth = relFilter[0];
+            }
+            relFilter = relFilter[1];
+            var ptrFilter = top.HEURIST.search.getPushDownFilter('ptrtype');
+            if (ptrFilter[0] > depth){
+                depth = ptrFilter[0];
+            }
+            ptrFilter = ptrFilter[1];
+            var layoutString = top.HEURIST.search.getLayoutString();
+            if (layoutString[0] > depth){
+                depth = layoutString[0];
+            }
+            layoutString = layoutString[1];
+            var selFilter = top.HEURIST.search.getSelectedString();
+            if (selFilter[0] > depth){
+                depth = selFilter[0];
+            }
+            selFilter = selFilter[1];
+            */
+        }
+        
+        if(q!=''){
+        
+            var url = top.HAPI4.basePathOld + "export/xml/flathml.php?"+
+                        "w=all"+
+                        "&a=1"+
+                        "&depth="+depth +
+                        "&q=" + q +
+                        /*(layoutString ? "&" + layoutString : "") +
+                        (selFilter ? "&" + selFilter : "") +
+                        (rtFilter ? "&" + rtFilter : "") +
+                        (relFilter ? "&" + relFilter : "") +
+                        (ptrFilter ? "&" + ptrFilter : "") +*/
+                        "&db=" + top.HAPI4.database +
+                        (ishuni?'&file=1':'');
+
+            window.open(url, '_blank');
+        }
+        
+        return false;
+    },
+
+    exportKML: function(isAll){
+
+        var q = "";
+        if(false && isAll){
+            if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
+                  q = encodeURIComponent(top.HEURIST4.current_query_request.q);
+            }
+        }else{
+            
+            var recIDs_list = [];
+            if (this._selection!=null) {
+                recIDs_list = this._selection.getIds();
+            }
+            if (recIDs_list.length == 0) {
+                Hul.showMsgDlg("Select at least one record to export");
+                return false;
+            }
+            q = "ids:"+recIDs_list.join(",");
+        }
+
+        if(q!=''){
+            var url = top.HAPI4.basePathOld + "export/xml/kml.php?w=all&a=1&depth=1&q=" + q + "&db=" + top.HAPI4.database;
+            window.open(url, '_blank');
+        }
+        
+        return false;
+    },
+    
+    exportFeed: function(mode){
+        
+        if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
+            var q = encodeURIComponent(top.HEURIST4.current_query_request.q);
+                  
+            if(!top.HEURIST4.util.isempty(q)){
+                    var w = top.HEURIST4.current_query_request.w;
+                    if(top.HEURIST4.util.isempty(w)) w = 'a';
+                    if(mode=='rss') {
+                        mode = ''; 
+                    }else{
+                        mode = '&feed='+mode;  
+                    } 
+                    var url = top.HAPI4.basePathOld + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode;
+                    window.open(url, '_blank');
+            }
+        }
     }
+    
+    
     
 
 });
