@@ -1243,9 +1243,12 @@ function ShowReps() {
                 title = 'Insert variable';
             }
 
+            
+            var topWindowDims = top.HEURIST.util.innerDimensions(window);
+            var xpos = topWindowDims.w - 400;
 
-            var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: pos.x + elt.offsetWidth,
-                "no-close": false, y: pos.y-scroll, width: 400, height: 200});
+            var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
+                "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
             //
             insertPopupID = w.id;
         }
