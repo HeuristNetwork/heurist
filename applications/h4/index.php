@@ -75,9 +75,9 @@
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/search.js"></script>
+        <script type="text/javascript" src="apps/search/resultList.js"></script>
         <!--
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
-        <script type="text/javascript" src="apps/search/resultList.js"></script>
          script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/profile.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>

@@ -299,7 +299,7 @@ $.widget( "heurist.search", {
     * @returns {Boolean}
     */
     , showSearchAssistant: function() {
-                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other  
                 $('.menu-or-popup').hide(); //hide other
 
                 if(this.search_assistant){ //inited already
@@ -310,7 +310,7 @@ $.widget( "heurist.search", {
                     //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
 
                     function _hidethispopup(event) {
-                        if($(event.target).closest(popup).length==0){
+                        if($(event.target).closest(popup).length==0 && $(event.target).attr('id')!='menu-search-quick-link'){
                             popup.hide();
                         }else{
                             $( document ).one( "click", _hidethispopup);
@@ -318,7 +318,7 @@ $.widget( "heurist.search", {
                         }
                     }
 
-                    $( document ).one( "click", _hidethispopup);  //hide itself on click outside
+                    $( document ).one( "click", _hidethispopup);//hide itself on click outside
                 }else{ //not inited yet
                     this._initSearchAssistant();
                 }
@@ -329,7 +329,7 @@ $.widget( "heurist.search", {
     ,_initSearchAssistant: function(){
 
         var $dlg = this.search_assistant = $( "<div>" )
-        .addClass('menu-or-popup text ui-corner-all ui-widget-content')
+        .addClass('text ui-corner-all ui-widget-content')  // menu-or-popup
         .zIndex(9999)
         .css('position','absolute')
         .appendTo( this.document.find('body') )

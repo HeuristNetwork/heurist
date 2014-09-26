@@ -101,7 +101,7 @@ top.HEURIST.search = {
 			recSet: {},
 			infoByDepth: [ {
 				count : 0,
-				recIdToIndexMap : {}, //????? artem:what's this
+				recIdToIndexMap : {}, 
 				recIDs : [],
 				rectypes : {}
 				}],

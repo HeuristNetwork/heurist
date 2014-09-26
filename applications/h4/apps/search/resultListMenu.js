@@ -165,7 +165,7 @@ $.widget( "heurist.resultListMenu", {
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
-            .menu({select: function(event, ui){ that._menuActionHandler(ui.item.attr('id')); }})
+            .menu({select: function(event, ui){ event.preventDefault(); that._menuActionHandler(ui.item.attr('id')); return false; }})
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();

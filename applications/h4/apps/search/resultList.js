@@ -40,6 +40,7 @@ $.widget( "heurist.resultList", {
 
     _query_request: null, //keep current query request
     _events: null,
+    _lastSelectedIndex: -1,
 
     // the constructor
     _create: function() {
@@ -470,6 +471,8 @@ $.widget( "heurist.resultList", {
             $rdiv = $rdiv.parents('.recordDiv');
         }
 
+        var selected_rec_ID = $rdiv.attr('recid');
+
         if(this.options.multiselect && event.ctrlKey){
 
             if($rdiv.hasClass('selected')){
@@ -479,10 +482,44 @@ $.widget( "heurist.resultList", {
                 $rdiv.addClass('selected');
                 //$rdiv.addClass('ui-state-highlight');
             }
+            lastSelectedIndex = selected_rec_ID;
+            
+        }else if(this.options.multiselect && event.shiftKey){
+            
+            if(Number(lastSelectedIndex)>0){
+                var nowSelectedIndex = selected_rec_ID;
+                
+                this.div_content.find('.selected').removeClass('selected');
+                
+                var isstarted = false;
+                
+                this.div_content.find('.recordDiv').each(function(ids, rdiv){
+                        var rec_id = $(rdiv).attr('recid');
+                        
+                        if(rec_id == lastSelectedIndex || rec_id==nowSelectedIndex){
+                              if(isstarted){
+                                  $(rdiv).addClass('selected');
+                                  return false;
+                              }
+                              isstarted = true;
+                        }
+                        if(isstarted) {
+                            $(rdiv).addClass('selected');
+                        }
+                });
+                
+                
+                
+            }else{
+                lastSelectedIndex = selected_rec_ID;    
+            }
+            
+            
         }else{
             //remove seletion from all recordDiv
             this.div_content.find('.selected').removeClass('selected');
             $rdiv.addClass('selected');
+            lastSelectedIndex = selected_rec_ID;
 
             //var record = this.options.recordset.getById($rdiv.attr('recID'));
         }

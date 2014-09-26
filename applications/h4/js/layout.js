@@ -338,9 +338,9 @@ function appAddContent($container, app, options){
         if(app.widgetname=='recordDetails'){
             //DEBUG
             widget = $content.recordDetails();
-        }else if(app.widgetname=='recordListExt'){
+        }else if(app.widgetname=='resultList'){
             //DEBUG
-            widget = $content.recordListExt( options );
+            widget = $content.resultList( options );
         /*}else if(app.widgetname=='resultList'){
             //DEBUG
             widget = $content.resultList(); */
