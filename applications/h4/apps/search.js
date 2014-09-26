@@ -196,9 +196,17 @@ $.widget( "heurist.search", {
             }
         });
 
-
         this._refresh();
 
+
+        /* search on load
+        if(!top.HEURIST4.util.isnull(top.HEURIST4.query_request)){
+              this.input_search.val(top.HEURIST4.query_request.q);
+              this.options.search_domain = top.HEURIST4.query_request.w;
+        }
+        if(!top.HEURIST4.util.isnull(top.HEURIST4.query_request)){
+            this._doSearch()
+        }*/
 
     }, //end _create
 

@@ -654,10 +654,16 @@ $.widget( "heurist.resultListMenu", {
     collectionShow: function(){
 
         if(!Hul.isempty(this._collection)){
-            this._query_request.w = 'all';
-            this._query_request.q =  'ids:'+this._collection.join(",");
-            this._query_request.source = this.element.attr('id');
-            top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+      
+            if(true){      
+                var url = top.HAPI4.basePath + "?db=" + top.HAPI4.database + "&q=ids:"+this._collection.join(',');        
+                window.open(url, "_blank");
+            }else{
+                this._query_request.w = 'all';
+                this._query_request.q =  'ids:'+this._collection.join(",");
+                this._query_request.source = this.element.attr('id');
+                top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+            }
         }
         
     },

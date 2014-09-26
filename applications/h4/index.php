@@ -47,6 +47,7 @@
         header('Location: php/databases.php');
         exit();
     }
+    
 ?>
 <html>
     <head>
@@ -174,6 +175,17 @@
                                     }
                                     });
                                     */
+                                    
+                                    //perform search in case parameter "q" is defined
+                                    var qsearch = '<?=@$_REQUEST['q']?>';
+                                    if(!top.HEURIST4.util.isempty(qsearch)){
+                                        var qdomain = '<?=@$_REQUEST['w']?>';
+                                        if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
+                                        var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
+                                        //top.HEURIST4.query_request = request;
+                                        setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
+                                    }
+                                    
                                 }else{
                                     top.HEURIST4.util.redirectToError(response.message);
                                 }
