@@ -320,7 +320,7 @@
                     var links = [];
                     data.links.filter(function(d) {
                         if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
-                            var link = {source: map[d.source], target: map[d.target], relation: d.relation};
+                            var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
                             links.push(link);
                         }
                     })

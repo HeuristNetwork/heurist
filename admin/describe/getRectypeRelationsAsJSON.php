@@ -159,48 +159,56 @@
     $object->HeuristProgVersion = HEURIST_VERSION;
     $object->HeuristDBVersion   = HEURIST_DBVERSION;
     
-    // ALL RECORD TYPES WITH COUNT ZERO  
-    $nodes = array();                      
+    // ALL ROOT RECORDS
+    $nodes = array(); 
+    foreach ($resrt  as $rt_id=>$rt){
+        // Root record
+        $record = new stdClass();
+        $record->name  = $rt['name'];
+        $record->id    = $rt_id;
+        $record->count = intval($rt['count']);
+        $record->image = $image_base_url.$rt_id;
+        array_push($nodes, $record);
+    }
+    
+    // ALL RECORD TYPES WITH COUNT ZERO                  
     $query = "SELECT * FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC";
     $res = mysql_query($query);
     while ($row = mysql_fetch_row($res)) { // each loop is a complete table row
+        // Zero record
         $rt_id = $row[0];
         $record = new stdClass();
         $record->name  = $row[1];
         $record->id    = $rt_id;
         $record->count = 0;
-        $record->image = $image_base_url.$rt_id;          
+        $record->image = $image_base_url.$rt_id; 
+       
+        // Duplicate check
+        $found = false;
+        for($i = 0; $i < count($nodes); $i++){ 
+            if($nodes[$i]->id == $record->id) {
+                $found = true;
+                break;
+            }
+        }
+        if(!$found) {
+            array_push($nodes, $record);   
+        }
     }
 
     // ALL RECORD TYPES WITH CONNECTIONS
     $links = array();
     foreach ($resrt  as $rt_id=>$rt){
-        // Root record
-        $rootrecord = new stdClass();
-        $rootrecord->name  = $rt['name'];
-        $rootrecord->id    = $rt_id;
-        $rootrecord->count = intval($rt['count']);
-        $rootrecord->image = $image_base_url.$rt_id;
-        
-        // Check if this record is in the array already, and if it is, check the counts
-        $rootindex = 0;
-        $found = false;
-        if(count($nodes) > 0) {
-            for($i = 0; $i < count($nodes); $i++) {
-               if($nodes[$i]->id == $rootrecord->id) {
-                  if($rootrecord->count > $nodes[$i]->count) {
-                      $nodes[$i]->count = $rootrecord->count;
-                  }
-                  $rootindex = $i;
-                  $found = true;
-                  break;
-               }
-            }
+        // Find index in $nodes array
+        $rootindex = 0; 
+        for($i = 0; $i < count($nodes); $i++) {
+           if($nodes[$i]->id == $rt_id) {
+              $rootindex = $i;
+              $found = true;
+              break;
+           }
         }
-        if(!$found) {
-            $rootindex = array_push($nodes, $rootrecord) - 1;
-        }
-        
+
         // Check relations
         foreach ($rt['details'] as $details) {
             // Relation record
@@ -238,55 +246,22 @@
             
             // Check usages
             foreach ($details['rels']  as $pt_rt_id=>$data){
-                if(@$rtStructs['names'][$pt_rt_id]){
-                    // Record overview
-                    $usagerecord = new stdClass();
-                    $usagerecord->name  = $rtStructs['names'][$pt_rt_id];
-                    $usagerecord->id    = $pt_rt_id;
-                    $usagerecord->count = intval($data[1]);
-                    $usagerecord->image = $image_base_url.$pt_rt_id;
-                    
-                    $property = strval($usagerecord->id);
-                    if(!property_exists($usagerecord, $property)) {
-                        $nodes->$property = $usagerecord;
-                    }
-
-                    // Terms
-                    if(@$data[2]){
-                        $terms = array();
-                        foreach ($data[2] as $term_id=>$cnt){
-                            $term = new stdClass();
-                            $term->name  = $rtTerms[$term_id][0];
-                            $term->count = $cnt;
-                            array_push($terms, $term);
-                        }
-                        $usagerecord->terms = $terms;
-                    }
-                    
-                    // Check if this record is in the array already, and if it is, check the counts
+                if(@$rtStructs['names'][$pt_rt_id]){   
+                    // Find index in $nodes array
                     $usageindex = 0;
-                    $found = false;
-                    if(count($nodes) > 0) {
-                        for($i = 0; $i < count($nodes); $i++) {
-                           if($nodes[$i]->id == $usagerecord->id) {
-                              if($usagerecord->count > $nodes[$i]->count) {
-                                  $nodes[$i]->count = $usagerecord->count;
-                              }
-                              $usageindex = $i;
-                              $found = true;
-                              break;
-                           }
-                        }
-                    }
-                    if(!$found) {
-                        $usageindex = array_push($nodes, $usagerecord) - 1;
-                    }
+                    for($i = 0; $i < count($nodes); $i++) {
+                       if($nodes[$i]->id == $pt_rt_id) {
+                          $usageindex = $i; 
+                          break;
+                       }
+                    }    
    
-                    // Build link
+                    // Build link                   
                     $link = new stdClass();
                     $link->source   = $rootindex;
                     $link->relation = $relationrecord;
-                    $link->target   = $usageindex;
+                    $link->target   = $usageindex;  
+                    $link->targetcount = intval($data[1]);
                     $link->value    = 1;
                     array_push($links, $link);
                 }

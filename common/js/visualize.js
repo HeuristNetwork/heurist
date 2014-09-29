@@ -77,7 +77,7 @@ var svg;        // The SVG where the visualisation will be executed on
             entitycolor: "#262",
             
             fontsize: "11px",
-            textcolor: "#b22",
+            textcolor: "#000",
             
             formula: "linear",
             fisheye: false,
@@ -521,10 +521,12 @@ function visualizeData() {
     var container = svg.append("g")
                        .attr("id", "the-container");
                        //.attr("transform", "scale(0.5)");
+
     // Adding zoom
     var zoom = d3.behavior.zoom()
                  .scaleExtent([0.1, 5])
-                 .on("zoom", zoomed); 
+                 .on("zoom", zoomed);
+                  
     function zoomed() {
         // Zoom container
         container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -532,23 +534,14 @@ function visualizeData() {
         // Move overlays
         $(".overlay").each(function(e) {
             // Determine node selector
-            var clazz = $(this).attr("class");
-            var selector = clazz.replace("overlay ", ".node.");
-            //console.log("Selector: " + selector);
-
-            // Update overlay
-            var nodePos = $(selector + " circle").position();
-            var svgPos = $("svg").position();
-            if(nodePos && svgPos) {
-                var x = nodePos.left - svgPos.left + 10;
-                var y = nodePos.top - svgPos.top + 10;
-                
-                $(this).attr("transform", "translate("+x+","+y+")");   
-            }
+            var clazz = $(this).attr("class"); 
+            var id = clazz.match(/\d+/)[0];
+            updateOverlay(id);
         });            
         
     }   
-    svg.call(zoom);   
+    svg.call(zoom);  
+     
 
     // Creating D3 force
     var force = d3.layout.force()
@@ -567,8 +560,7 @@ function visualizeData() {
                              }
                          })
                          .size([width, height])
-                         .start();
-    console.log("FORCE STARTED");   
+                         .start();  
                    
     // Adding marker definitions
     container.append("defs")
@@ -613,7 +605,9 @@ function visualizeData() {
                          .append("svg:polyline");
     }     
     // Adding shared attributes
-    lines.attr("class", "link") 
+    lines.attr("class", function(d) {
+            return "link id" + d.relation.id
+         }) 
          .attr("stroke", linecolor) 
          .attr("marker-mid", function(d) {
             return "url(#marker" + d.relation.id + ")";
@@ -631,7 +625,7 @@ function visualizeData() {
              if($(".overlay.id"+d.relation.id).length > 0) { // Close overlay
                 removeOverlay(d.relation.id);
              }else{ // Display overlay
-                createOverlay(d3.event.offsetX, d3.event.offsetY, d.relation);  
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", d.relation);  
              }
          });
          
@@ -688,14 +682,7 @@ function visualizeData() {
         }
         
         // Update overlay
-        var nodePos = $(".node.id"+d.id + " circle").position();
-        var svgPos = $("svg").position();
-        if(nodePos && svgPos) {
-            var x = nodePos.left - svgPos.left + 10;
-            var y = nodePos.top - svgPos.top + 10;
-            
-            $(".overlay.id"+d.id).attr("transform", "translate("+x+","+y+")");   
-        }
+        updateOverlay(d.id); 
     }
     
     /** Called when a dragging event ends */
@@ -721,9 +708,7 @@ function visualizeData() {
     var node = container.selectAll(".node")
                   .data(force.nodes())
                   .enter().append("g")
-                  .attr("class", function(d, i) {
-                      return "node id" + d.id;
-                  }) 
+                  .attr("class", "node") 
                   .attr("transform", "translate(100, 100)")
                   .attr("x", function(d) {
                       // Setting 'x' based on localstorage
@@ -789,7 +774,7 @@ function visualizeData() {
                             if($(".overlay.id"+d.id).length > 0) { // Close overlay
                                 removeOverlay(d.id);
                              }else{ // Display overlay
-                                 createOverlay(d3.event.offsetX, d3.event.offsetY, d);  
+                                 createOverlay(d3.event.offsetX, d3.event.offsetY, "record", d);  
                              }
                        }
                   })
@@ -822,7 +807,10 @@ function visualizeData() {
                        })
    
     // Adding icons to the nodes 
-    var icon = node.append("svg:image") 
+    var icon = node.append("svg:image")
+                   .attr("class", function(d) {
+                       return "icon id"+d.id;
+                   }) 
                    .attr("xlink:href", function(d) {
                         return d.image;
                    })
@@ -1009,6 +997,17 @@ function visualizeData() {
              return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
+    
+    /** Repositions the overlay */
+    function updateOverlay(id) {
+        var pos = $(".icon.id"+id).position();
+        var svgPos = $("svg").position();
+        if(pos && svgPos) {
+            var x = pos.left - svgPos.left;
+            var y = pos.top - svgPos.top;
+            $(".overlay.id"+id).attr("transform", "translate("+x+","+y+")");   
+        }
+    }
 }
 
 /*************************************** OVERLAY ****************************************/
@@ -1016,7 +1015,7 @@ function visualizeData() {
 function getOverlayData(record) {
     console.log(record);
     var array = [];
-    array.push({text: record.name + " (id="+record.id+", n="+record.count+")", size: "13px", style: "bold"})
+    array.push({text: record.name + ", n="+record.count, size: "13px", style: "bold", enter: true})
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1024,7 +1023,7 @@ function getOverlayData(record) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            console.log(link);
+            //console.log(link);
               
             // Does our record point to this link?
             if(link.source.id == record.id) {
@@ -1032,7 +1031,7 @@ function getOverlayData(record) {
                     map[link.relation.name] = {};
                 }
                 
-                var obj = {text: "➜ " + link.target.name/* + "(n=" + link.target.count + ")"*/, size: "9px"}; 
+                var obj = {text: "➜ " + link.target.name + ", n=" + link.targetcount, size: "9px", indent: true}; 
                 if(map[link.relation.name][obj.text] == undefined) {
                     map[link.relation.name][obj.text] = obj;
                 }
@@ -1051,12 +1050,12 @@ function getOverlayData(record) {
             */
             
             // Is our record a relation?
-            if(link.relation.id == record.id) {
+            if(link.relation.id == record.id && link.relation.name == record.name) {
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {};
                 }
                 
-                var obj = {text: link.source.name + " ↔ " + link.target.name/* + " (n=" + link.relation.count + ")"*/, size: "9px"};
+                var obj = {text: link.source.name + " ↔ " + link.target.name + ", n=" + link.relation.count, size: "9px", indent: true};
                 if(map[link.relation.name][obj.text] == undefined) {
                     map[link.relation.name][obj.text] = obj;
                 }
@@ -1067,8 +1066,8 @@ function getOverlayData(record) {
         //console.log(map);
         
         // Convert map to array
-        for(key in map) {
-            array.push({text: key, size: "11px"});
+        for(key in map) {                                   
+            array.push({text: key, size: "11px", enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -1084,12 +1083,12 @@ function getOverlayData(record) {
 * @param y Coord-y
 * @param record Record info
 */
-function createOverlay(x, y, record) {
+function createOverlay(x, y, type, record) {
     svg.select(".overlay.id"+record.id).remove();
 
     // Add overlay container            
     var overlay = svg.append("g")
-                     .attr("class", "overlay id"+record.id)      
+                     .attr("class", "overlay " + type + " id"+record.id)      
                      .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
                      
     // Draw a semi transparant rectangle       
@@ -1101,8 +1100,9 @@ function createOverlay(x, y, record) {
             
     // Adding text  
     var info = getOverlayData(record);
-    var horizontalOffset = 10;
-    var verticalOffset = 12;  
+    var offset = 11; 
+    var indent = 5;
+    var position = 0;
     var text = overlay.selectAll("text")
                       .data(info)
                       .enter()
@@ -1110,9 +1110,20 @@ function createOverlay(x, y, record) {
                       .text(function(d) {
                           return d.text;
                       })
-                      .attr("x", horizontalOffset)        // Some left padding
+                      .attr("x", function(d, i) {
+                          // Indent check
+                          if(d.indent) {
+                            return offset+indent;
+                          }
+                          return offset;
+                      })        // Some left padding
                       .attr("y", function(d, i) {
-                          return (i+1.5)*verticalOffset;      // Position calculation
+                          position += offset; 
+                          // Enter check
+                          if(d.enter) {
+                            position += indent;
+                          }  
+                          return position;      // Position calculation
                       })
                       .attr("font-weight", function(d) {  // Font weight based on style property
                           return d.style;
@@ -1140,8 +1151,8 @@ function createOverlay(x, y, record) {
             maxHeight = y;
         }
     }
-    maxWidth  += 3.5*horizontalOffset;
-    maxHeight += 1.5*verticalOffset; 
+    maxWidth  += 3.5*offset;
+    maxHeight += 1.5*offset; 
     
     // Set optimal width & height
     rect.attr("width", maxWidth)

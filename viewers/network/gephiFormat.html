@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Diagram URL</title>
+        <title>Gephi format</title>
         <style>
             blockquote {
                 font-size: 11px;
@@ -17,7 +17,7 @@
                 font-family: times; 
                 font-size: 10px; 
                 width: 100%; 
-                height: 125px;
+                height: 12px;
             }
         </style>
         <script type="text/javascript" src="springDiagram.js"></script>
@@ -25,17 +25,17 @@
 
     <body>
         <blockquote>
-            Access this diagram directly by its url:
+            Gephi output:
         </blockquote>
 
         <textarea readonly="" id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);">
-            Url
+            Output;
         </textarea>
   
         <script>
-            var url = getCustomURL();
+            var output = getGephiFormat();
             var box = document.getElementById("code-textbox");
-            box.innerHTML = url;
+            box.innerHTML = output;
         </script>
     </body>
 </html>

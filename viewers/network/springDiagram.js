@@ -1,11 +1,16 @@
 /** Displays the diagram URL */
-function getDiagramUrl() {
+function showDiagramUrl() {
    top.HEURIST.util.popupURL(this, '../viewers/network/diagramUrl.html', null);
 }
 
 /** Displays the diagram embed code */
-function getDiagramCode() {
+function showDiagramCode() {
    top.HEURIST.util.popupURL(this, '../viewers/network/diagramCode.html', null);
+}
+
+/** Displays the visualisation in Gephi format */ 
+function showGephiFormat() {
+    top.HEURIST.util.popupURL(this, '../viewers/network/gephiFormat.html', null);
 }
 
 /** Constructs an URL that shows the results independently */
@@ -32,6 +37,11 @@ function getCustomURL() {
                                     "&ids=" + json;
     console.log("URL: " + url);
     return url;
+}
+
+/** Transforms the visualisation into Gephi format */
+function getGephiFormat() {
+    return "GEPHI FORMAT TEST"; 
 }
 
 /** Gets the selected IDs from top.HEURIST.search */
@@ -96,7 +106,7 @@ function parseRecSet() {
                         }
                         
                         // Construct a link
-                        var link = {source: source, relation: relation, target: target};
+                        var link = {source: source, relation: relation, target: target, targetcount: target.count};
                         //console.log("LINK");
                         //console.log(link);   
                         links.push(link);  

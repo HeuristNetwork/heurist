@@ -59,8 +59,9 @@
                 <li>
                     <span id="menuButton" class="button">Menu</span>
                     <ul id="toolMenuItems">
-                        <li class="yuimenuitemlabel"><a href="#" onClick="getDiagramUrl();">Get URL for diagram</a></li>
-                        <li class="yuimenuitemlabel"><a href="#" onClick="getDiagramCode();">Embed diagram code</a></li>
+                        <li class="yuimenuitemlabel"><a href="#" onClick="showDiagramUrl();">Get URL for diagram</a></li>
+                        <li class="yuimenuitemlabel"><a href="#" onClick="showDiagramCode();">Embed diagram code</a></li>
+                        <li class="yuimenuitemlabel"><a href="#" onClick="showGephiFormat();">Output in Gephi format</a></li>
                     </ul>
                 </li>
             </ul>
