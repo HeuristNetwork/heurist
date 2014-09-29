@@ -115,26 +115,31 @@ By default, Heurist hides data directories by including an index.html file which
 of the directory.  However this does not stop files in the directory being downloaded. To protect files from
 download, edit the /etc/apache2/conf.d/security  file as follows (modify if HEURIST_FILESTORE has been moved):
 
-            <Directory /var/www/html/HEURIST/HEURIST_FILESTORE>
-                Options Includes FollowSymLinks MultiViews
-                Order Allow,Deny
-                Deny from all
-            </Directory>
-            <Directory /var/www/html/HEURIST/HEURIST_FILESTORE/*/rectype-icons>
-                Order Allow,Deny
-                Allow from all
-            </Directory>
-            <Directory /var/www/html/HEURIST/HEURIST_FILESTORE/*/filethumbs>
-                Order Allow,Deny
-                Allow from all
-            </Directory>
-            <Directory /var/www/html/HEURIST/HEURIST_FILESTORE/*/html-output>
-                Order Allow,Deny
-            </Directory>
-            <Directory /var/www/html/HEURIST/HEURIST_FILESTORE/*/hml-output>
-                Order Allow,Deny
-            </Directory>
+    <Directory ~ /HEURIST_FILESTORE>
+    Options Includes FollowSymLinks MultiViews
+    Order Allow,Deny
+    Deny from all
+    </Directory>
 
+    <Directory ~ /HEURIST_FILESTORE/\w*/rectype-icons>
+    Order Allow,Deny
+    Allow from all
+    </Directory>
+
+    <Directory ~ /HEURIST_FILESTORE/\w*/filethumbs>
+    Order Allow,Deny
+    Allow from all
+    </Directory>
+
+    <Directory ~ /HEURIST_FILESTORE/\w*/html-output>
+    Order Allow,Deny
+    Allow from all
+    </Directory>
+
+    <Directory ~ /HEURIST_FILESTORE/\w*/hml-output>
+    Order Allow,Deny
+    Allow from all
+    </Directory>
 
 -----------------------------------------------------------------------------------------------------------------
 
