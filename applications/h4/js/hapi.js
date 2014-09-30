@@ -26,7 +26,7 @@
 function hAPI(_db, _oninit) { //, _currentUser
     var _className = "HAPI",
     _version   = "0.4",
-    _database = null, //same as public property  @toremove
+    _database = null, //same as public property  @toremove      s
     _region = 'en',
     _regional = null, //localization resources
     _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
@@ -51,7 +51,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         // 
-        var installDir = top.location.pathname.replace(/(((\?|admin|common|js|php)\/.*)|(index.*))/, "");
+        var installDir = top.location.pathname.replace(/(((\?|admin|common|js|php|page)\/.*)|(index.*))/, "");
         that.basePath = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = that.basePath + 'php/common/rt_icon.php?db='+_database+'&id=';
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!

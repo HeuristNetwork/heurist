@@ -299,7 +299,7 @@
         if($q){ //sort defined in separate request param
             $query->sort_clause = ' ORDER BY '.$q;
         }
-        /*****DEBUG****///error_log("QUERY after parse ".print_r($q,true));
+        /*****DEBUG****///print ("QUERY after parse ".print_r($q,true));
         return $query;
     }
 
@@ -626,9 +626,9 @@
                     return new LinkToPredicate($this, $pred_val);
                 case 'linkedto':    // linkedto:XXX matches records that are referenced in one of XXX's bib_details
                     return new LinkedToPredicate($this, $pred_val);
-                case 'relatedto':    // relatedto:XXX matches records that are related (via a type-52 record) to XXX
+                case 'relatedto':    // relatedto:XXX matches records that are related (via a type-1 record) to XXX
                     return new RelatedToPredicate($this, $pred_val);
-                case 'relationsfor':    // relatedto:XXX matches records that are related (via a type-52 record) to XXX, and the relationships themselves
+                case 'relationsfor':    // relatedto:XXX matches records that are related (via a type-1 record) to XXX, and the relationships themselves
                     return new RelationsForPredicate($this, $pred_val);
 
                 case 'after':
@@ -1507,7 +1507,9 @@
         }
     }
 
-
+    //
+    // find records that have pointed records
+    // 
     class LinkToPredicate extends Predicate {
         function makeSQL() {
             if ($this->value) {
@@ -1522,7 +1524,10 @@
         }
     }
 
-
+    //
+    // find records that are pointed (targets)
+    // search if parents(source) records exist
+    //
     class LinkedToPredicate extends Predicate {
         function makeSQL() {
             if ($this->value) {

@@ -48,7 +48,7 @@ $.widget( "heurist.resultListMenu", {
         this._initMenu('Search');
         this._initMenu('Selected');
         this._initMenu('Collected');
-        this._initMenu('Layout');
+        //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
         

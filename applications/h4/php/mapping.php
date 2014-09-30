@@ -1,7 +1,7 @@
 <?php
 
     /** 
-    * Standalone mapping page (for development purposes
+    * Standalone mapping page (for development purposes )
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -21,7 +21,7 @@
 
 
     require_once(dirname(__FILE__)."/System.php");
-
+       
     $system = new System();
 
     if(@$_REQUEST['db']){
@@ -35,7 +35,6 @@
         exit();
     }
 ?>
-
 <html>
     <head>
         <title><?=HEURIST_TITLE ?></title>

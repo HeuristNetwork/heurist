@@ -32,6 +32,7 @@ $.widget( "heurist.resultList", {
         multiselect: true,
         isapplication: true,
         showcounter: true,
+        showmenu: true,
 
         recordset: null
         // callbacks
@@ -47,10 +48,12 @@ $.widget( "heurist.resultList", {
 
         var that = this;
         
-        this.div_actions = $('<div>')
-            .css('width','100%')
-            .resultListMenu()
-            .appendTo(this.element);
+        if(this.options.showmenu){
+            this.div_actions = $('<div>')
+                .css('width','100%')
+                .resultListMenu()
+                .appendTo(this.element);
+        }
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
         this.div_content = $( "<div>" )
@@ -241,7 +244,7 @@ $.widget( "heurist.resultList", {
         });*/
 
         // remove generated elements
-        this.div_actions.remove();
+        if(this.div_actions) this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
 

@@ -103,7 +103,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             // for IE earlier than version 8
             sel.add(option, sel.options[null]);
         }catch (ex2){
-            sel.add(option,null);
+            sel.add(option, null);
         }
         return option;
     },
@@ -202,9 +202,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     *
     * datatype enum|relation
     * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from top.HEURIST4.terms.treesByDomain
-    * headerTermIDsList - json string or array
+    * headerTermIDsList - json string or array (disabled terms)
     * defaultTermID - term to be selected
-    * sFirstEmptyItem - text for first empty value item
+    * topOptions - text or array for top most item(s)
     * needArray  return array tree if terms (instead of select element)
     * 
     */
@@ -240,20 +240,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             headerTerms[temp[id]] = temp[id];
         }
 
-        //prepare tree
         //
-        if(top.HEURIST4.util.isNumber(termIDTree)){
-            //this is vocabulary id - show list of all terms for this vocab
-            var tree = terms.treesByDomain[datatype];
-            termIDTree = tree[termIDTree];
-        }else{
-            termIDTree = (typeof termIDTree == "string") ? $.parseJSON(termIDTree) : null;
-            if(termIDTree==null){
-                termIDTree =terms.treesByDomain[datatype];
-            }
-        }
-
-
+        //
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
         function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
@@ -372,12 +360,48 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             return reslist2;
         }//end internal function
 
-        var reslist = createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
+        //
+        //
+        //
+        var toparray = [];
+        if(top.HEURIST4.util.isArray(termIDTree)){
+            toparray = termIDTree;
+        }else{
+            toparray = [ termIDTree ];
+        }
+        
+        var m, lenn = toparray.length;
+        var reslist_final = [];
+        
+        for(m=0;m<lenn;m++){
+            
+            var termTree = toparray[m];
+            
+            //
+            //prepare tree
+            //
+            if(top.HEURIST4.util.isNumber(termTree)){
+                //this is vocabulary id - show list of all terms for this vocab
+                var tree = terms.treesByDomain[datatype];
+                termTree = tree[termTree];
+            }else{
+                termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
+                if(termTree==null){
+                    termTree = terms.treesByDomain[datatype];
+                }
+            }
+            
+            var reslist = createSubTreeOptions(null, 0, termTree, termLookup, defaultTermID);
+            if(selObj){
+                reslist_final = reslist_final.concat( reslist);
+            }
+        }
+        
         if(selObj){
             if (!defaultTermID) selObj.selectedIndex = 0;
             return selObj;
         }else{
-            return reslist;
+            return reslist_final;
         }
     }
 
@@ -451,7 +475,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     /**
     * create/fill SELECT for rectypes
     *
-    * rectypeList - constraint options to this list
+    * rectypeList - constraint options to this list, otherwise show entire list of rectypes
     */
     , createRectypeSelect: function(selObj, rectypeList, topOptions) {
 
