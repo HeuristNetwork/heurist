@@ -114,7 +114,7 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // $defaultRootFileUploadURL = "HEURIST/HEURIST_FILESTORE/";
 // recommended, defaults to <web root>/HEURIST_FILESTORE/ ideally would be non-web location but see todo note above
 $defaultRootFileUploadPath ="/var/www/html/HEURIST/HEURIST_FILESTORE/";
-$defaultRootFileUploadURL = "";
+//$defaultRootFileUploadURL = "";
 
 // [email]
 

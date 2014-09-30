@@ -267,7 +267,7 @@ HEURIST_HTML_URL
     //-------------------------------------------------------------------------- PATHS AND URLS ---------
     
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
-    if (isset($defaultRootFileUploadURL) && $defaultRootFileUploadPath) {
+    if (isset($defaultRootFileUploadURL) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 
@@ -278,7 +278,13 @@ HEURIST_HTML_URL
 
         }
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
-        define('HEURIST_UPLOAD_ROOT_URL', (strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false?HEURIST_SERVER_URL:"") . $defaultRootFileUploadURL);
+        
+        if(strpos($defaultRootFileUploadURL,"http://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
+                if( substr($defaultRootFileUploadURL, 0, 1) != '/' ) $defaultRootFileUploadURL = "/" . $defaultRootFileUploadURL;
+                $defaultRootFileUploadURL =  HEURIST_SERVER_URL . $defaultRootFileUploadURL; 
+        }
+        
+        define('HEURIST_UPLOAD_ROOT_URL', $defaultRootFileUploadURL);
     }
 
 
