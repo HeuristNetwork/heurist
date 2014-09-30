@@ -3,117 +3,134 @@
     <tr>
         <!-- SETTINGS -->
         <td height="25px" style="vertical-align: middle;">
-            <!-- LINE SETINGS -->           
-            <div class="settings space" id="lineSettings">
-                <b>Lines:</b>
-                <!-- Line type -->
-                <div id="linetypeContainer">
-                    <select class="middle" id="linetype">
-                        <option value="straight">straight</option>
-                        <option value="curved">curved</option>
-                    </select>
-                </div>
+            <!-- Settings -->
+            <div id="visualisation-settings">
+                <!-- LINE SETINGS -->          
+                <div class="settings space" id="lineSettings">
+                    <b>Lines:</b>
+                    <!-- Line type -->
+                    <div id="linetypeContainer">
+                        <select class="middle" id="linetype">
+                            <option value="straight">straight</option>
+                            <option value="curved">curved</option>
+                        </select>
+                    </div>
 
-                <!-- Line length --> 
-                <div id="linelengthContainer">
-                    <i>Length</i>
-                    <input id="linelength" class="small-input" type="number" min="1"/>
-                </div>
-                
-                <!-- Line width -->
-                <div id="linewidthContainer">
-                    <i>Max width</i>
-                    <input id="linewidth" class="small-input" type="number" min="1"/>
-                </div>
-                
-                <!-- Line color -->
-                <div id="linecolorContainer">
-                    <i>Line color</i>
-                    <div id="linecolor" class="colorblock"></div>
-                </div>
-                
-                <!-- Arrow color -->
-                <div id="markercolorContainer">
-                    <i>Arrow color</i>
-                    <div id="markercolor" class="colorblock"></div>
-                </div>
-            </div>
-            
-            <!-- Entity settings -->
-            <div class="settings space" id="entitySettings">
-                <b>Entitity:</b>
-                
-                <div id="entityradiusContainer">
-                    <i>Max radius</i>
-                    <input id="entityradius" class="small-input" type="number" min="1"/>
-                </div>
-                
-                <!-- Entity circle color -->
-                <div id="entitycolorContainer">
-                    <i>Color</i>
-                    <div id="entitycolor" class="colorblock"></div>
-                </div>
-            </div>
-            
-            <!-- Text settings -->
-            <div class="settings space" id="textSettings">
-                <b>Text:</b>
-                
-                <!-- Text size -->
-                <div id="fontsizeContainer">
-                    <i>Font-size</i>
-                    <input id="fontsize" class="small-input" type="number" min="1"/>
-                </div>
-                
-                <!-- Text color -->
-                <div id="textcolorContainer">
-                    <i>Color</i>
-                    <div id="textcolor" class="colorblock"></div>
-                </div>
-            </div>
-            
-            <!-- Transform settings -->
-            <div class="settings space" id="transformSettings">
-                <div id="formulaContainer">
-                    <b>Transform:</b>
+                    <!-- Line length --> 
+                    <div id="linelengthContainer">
+                        <i>Length</i>
+                        <input id="linelength" class="small-input" type="number" min="1"/>
+                    </div>
                     
-                    <!-- Formula -->
-                    <select class="middle" id="formula">
-                        <option value="linear">linear</option>
-                        <option value="logarithmic">logarithmic</option>
-                        <option value="unweighted">unweighted</option>
-                    </select>
+                    <!-- Line width -->
+                    <div id="linewidthContainer">
+                        <i>Max width</i>
+                        <input id="linewidth" class="small-input" type="number" min="1"/>
+                    </div>
+                    
+                    <!-- Line color -->
+                    <div id="linecolorContainer">
+                        <i>Line color</i>
+                        <div id="linecolor" class="colorblock"></div>
+                    </div>
+                    
+                    <!-- Arrow color -->
+                    <div id="markercolorContainer">
+                        <i>Arrow color</i>
+                        <div id="markercolor" class="colorblock"></div>
+                    </div>
                 </div>
                 
-                <!-- Fish eye setting -->
-                <div id="fisheyeContainer">
-                    <i>Fisheye:</i>
-                    <input id="fisheye" type="checkbox" name="fisheye">
+                <!-- Entity settings -->
+                <div class="settings space" id="entitySettings">
+                    <b>Entitity:</b>
+                    
+                    <div id="entityradiusContainer">
+                        <i>Max radius</i>
+                        <input id="entityradius" class="small-input" type="number" min="1"/>
+                    </div>
+                    
+                    <!-- Entity circle color -->
+                    <div id="entitycolorContainer">
+                        <i>Color</i>
+                        <div id="entitycolor" class="colorblock"></div>
+                    </div>
+                </div>
+                
+                <!-- Text settings -->
+                <div class="settings space" id="textSettings">
+                    <b>Text:</b>
+                    
+                    <!-- Text size -->
+                    <div id="fontsizeContainer">
+                        <i>Font-size</i>
+                        <input id="fontsize" class="small-input" type="number" min="1"/>
+                    </div>
+                    
+                    <!-- Text color -->
+                    <div id="textcolorContainer">
+                        <i>Color</i>
+                        <div id="textcolor" class="colorblock"></div>
+                    </div>
+                </div>
+                
+                <!-- Transform settings -->
+                <div class="settings space" id="transformSettings">
+                    <div id="formulaContainer">
+                        <b>Transform:</b>
+                        
+                        <!-- Formula -->
+                        <select class="middle" id="formula">
+                            <option value="linear">linear</option>
+                            <option value="logarithmic">logarithmic</option>
+                            <option value="unweighted">unweighted</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Fish eye setting -->
+                    <div id="fisheyeContainer">
+                        <i>Fisheye:</i>
+                        <input id="fisheye" type="checkbox" name="fisheye">
+                    </div>
+                </div>
+                
+                <!-- GRAVITY SETTINGS -->
+                <div class="settings space" id="gravitySettings">
+                    <!-- Gravity setting -->
+                    <div id="gravityContainer">
+                        <b>Gravity:</b>
+                        <select class="middle" id="gravity">
+                            <option value="off">off</option>
+                            <option value="touch">touch</option>
+                            <option value="aggressive">aggressive</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Attraction strength -->
+                    <div id="attractionContainer">
+                        <i>Attraction</i>
+                        <input id="attraction" class="small-input" type="number"/>
+                    </div>
+                </div>
+
+                <!-- HELP INFO -->
+                <div class="settings space">
+                    <i class="explanation">Click entities or links to get information, drag entities to reposition.</i>
                 </div>
             </div>
             
-            <!-- GRAVITY SETTINGS -->
-            <div class="settings space" id="gravitySettings">
-                <!-- Gravity setting -->
-                <div id="gravityContainer">
-                    <b>Gravity:</b>
-                    <select class="middle" id="gravity">
-                        <option value="off">off</option>
-                        <option value="touch">touch</option>
-                        <option value="aggressive">aggressive</option>
-                    </select>
-                </div>
-                
-                <!-- Attraction strength -->
-                <div id="attractionContainer">
-                    <i>Attraction</i>
-                    <input id="attraction" class="small-input" type="number"/>
-                </div>
-            </div>
-
-            <!-- HELP INFO -->
-            <div class="settings space">
-                <i class="explanation">Click entities or links to get information, drag entities to reposition.</i>
+            <!-- Menu -->
+            <div id="visualisation-menu">
+                <ul class="menu-items">
+                    <li class="menu-button">Menu</li>
+                    <li class="menu-item">
+                        <ul class="menu-items">
+                            <li class="menu-item padding"><a href="#" onClick="showDiagramUrl();">Get URL for diagram</a></li>
+                            <li class="menu-item padding"><a href="#" onClick="showDiagramCode();">Embed diagram code</a></li>
+                            <li class="menu-item padding"><a href="#" onClick="showGephiFormat();">Output in Gephi format</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
          </td> 
     </tr>

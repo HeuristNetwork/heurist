@@ -4,7 +4,12 @@
     height: 100%;
 }
 
-/** Settings */
+/** Visualisation settings */
+#visualisation-settings {
+    max-width: 90%;
+    float: left; 
+}
+
 .settings {
     display: inline-block;
 }  
@@ -44,6 +49,61 @@
     color: #444;
     font-size: 10px
 }
+
+/** Visualisation menu */
+#visualisation-menu {
+    max-width: 10%;
+    float: right;
+}
+
+.menu-items {
+    padding: 0px;
+    margin: 0px;
+    list-style-type: none; 
+}
+ 
+.menu-item {  
+    display: block;
+    list-style-type: none; 
+    background: #111; 
+}
+.menu-item:hover {
+    cursor: pointer;
+    background: #444;
+}
+.menu-item.padding {
+    padding: 3px;
+}
+.menu-item .menu-item {
+    display: none;
+}
+
+.menu-item a {
+    color: #eee;
+}
+.menu-item a:hover {
+    color: #fff;    
+}
+
+.menu-button {
+    list-style-type: none;
+    cursor: pointer;
+    background: #ddd;
+    padding: 3px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.menu-button:hover {
+    background: #eee;
+}
+.menu-button:hover > li {
+    display: block;
+    background: red;
+}
+
+
+
+
 
 /** SVG */
 #d3svg {

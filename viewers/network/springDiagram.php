@@ -53,20 +53,6 @@
     </head>
     
     <body>
-        <!-- Toolbar -->
-        <div id="toolbardiv" style="width:100%;height:30px;">
-            <ul id="diagram_list" class="horizontal menu">
-                <li>
-                    <span id="menuButton" class="button">Menu</span>
-                    <ul id="toolMenuItems">
-                        <li class="yuimenuitemlabel"><a href="#" onClick="showDiagramUrl();">Get URL for diagram</a></li>
-                        <li class="yuimenuitemlabel"><a href="#" onClick="showDiagramCode();">Embed diagram code</a></li>
-                        <li class="yuimenuitemlabel"><a href="#" onClick="showGephiFormat();">Output in Gephi format</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
         <!-- Visualize HTML -->
         <?php include "../../common/html/visualize.html"; ?>
         
