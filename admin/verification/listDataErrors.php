@@ -1,7 +1,10 @@
 <?php
 
     /**
-    * listRecordPointerErrors.php: Lists records for which pointer fields point to non-existent records or records of the wrong type
+    * listDataErrors.php: Lists records with errors:
+    *   pointer fields point to non-existent records or records of the wrong type
+    *   single value fields with multiple values
+    *   required fields with no value
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -150,7 +153,7 @@
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB');">(show selected as search)</a>
                     </span>
                     <div>To fix the inconsistencies, please click here:
-                        <button onclick="window.open('listRecordPointerErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
+                        <button onclick="window.open('listDataErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
                             Delete ALL faulty pointers</button>
                     </div>
                 </div>
@@ -276,7 +279,7 @@
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB1');">(show selected as search)</a>
                     </span>
                     <div>To fix the inconsistencies, please click here:
-                        <button onclick="window.open('listRecordPointerErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
+                        <button onclick="window.open('listDataErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
                             Delete ALL faulty term values</button>
                     </div>
                 </div>
