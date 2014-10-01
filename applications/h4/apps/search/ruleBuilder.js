@@ -61,15 +61,21 @@ $.widget( "heurist.ruleBuilder", {
                 .appendTo(this.element);
 
         this.debug_label = $( "<label>" ).appendTo(this.element);
+        this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
         
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
         
         this._on( this.select_fields, { change: this._onSelectFieldtype });
 
+        this._on( this.select_target_rectype, { change: this._generateQuery });
+        this._on( this.select_reltype, { change: this._generateQuery });
+        
+        this._on( this.debug_search, { click: this._debugSearch });
+        
         
         //-----------------------     listener of global events
-        /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT; 
+        /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT; 
         
         $(this.document).on(sevents, function(e, data) {
 
@@ -90,6 +96,13 @@ $.widget( "heurist.ruleBuilder", {
             }
             //that._refresh();
         });*/        
+        
+        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+
+            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+                  //that.option("recordset", data); //hRecordSet
+            }
+        });
         
         this._refresh();
         
@@ -119,14 +132,14 @@ $.widget( "heurist.ruleBuilder", {
             $(this.element).find('.logged-in-only').css('visibility','hidden');
         }*/
         
-        
-        this.debug_label.html(this.options.queries.join(' xxx '));
+        this.debug_label.html(this.options.queries.join(' OR '));
     },
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
         
         //$(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHRESULT);
         
         // remove generated elements
         this.select_source_rectype.remove();
@@ -224,13 +237,13 @@ $.widget( "heurist.ruleBuilder", {
             }else{
                 this.select_target_rectype.hide();
             }
-            
+            */
             if(arr_fields.length>1){
                arr_fields.unshift({key:'', title:'any'});
                //this.select_fields.show();
             }else{
                //this.select_fields.hide();
-            }*/
+            }
             
             top.HEURIST4.util.createSelector(this.select_fields.get(0), arr_fields);
             
@@ -286,48 +299,64 @@ $.widget( "heurist.ruleBuilder", {
     
     _generateQuery: function(){
         
-        var rt_target = '';
-        
         this.options.queries = [];
             
-        if(this.select_target_rectype.val()!=''){
-              rt_target = this.select_target_rectype.val();
-        }else{
-            var opts = this.select_target_rectype.find("option");
-            if(opts.length==2){
-                rt_target = $(opts[1]).attr('value');
-            }
-        }
-        if(rt_target!='') rt_target = 'rt:'+rt_target+' ';
-
-        var rt_source = this.select_source_rectype.val();
-        
-        var dt_ID = this.select_fields.val();
-        
-        if(dt_ID!=''){ //particular field is selected
-        
-            if(this.select_reltype.is(":visible")){
-                
-                var rel_type = this.select_reltype.val();
-                if(rel_type!='') rel_type = ':'+rel_type;
-                
-                this.options.queries.push(rt_target + 'relatedfrom:'+rt_source+':'+rel_type);    
+        //query is possible if there is at least on resourse or relmarker field    
+        if(this._arr_fields.length>0) {
+            
+            var rt_target = '';
+            
+            if(this.select_target_rectype.val()!=''){
+                rt_target = this.select_target_rectype.val();
             }else{
-                this.options.queries.push(rt_target + 'linkedfrom:'+rt_source+':'+dt_ID);    
+                var opts = this.select_target_rectype.find("option");
+                if(opts.length==2){
+                    rt_target = $(opts[1]).attr('value');
+                }
+            }
+            if(rt_target!='') rt_target = 't:'+rt_target+' ';
+
+            var rt_source = this.select_source_rectype.val();
+            
+            var dt_ID = this.select_fields.val();
+            
+            if(dt_ID!=''){ //particular field is selected
+            
+                if(this.select_reltype.is(":visible")){
+                    
+                    var rel_type = this.select_reltype.val();
+                    if(rel_type!='') rel_type = ':'+rel_type;
+                    
+                    this.options.queries.push(rt_target + 'relatedfrom:'+rt_source+rel_type);    
+                }else{
+                    this.options.queries.push(rt_target + 'linkedfrom:'+rt_source+':'+dt_ID);    
+                }
+                
+            }else{
+                if(this._has_relation){
+                     this.options.queries.push(rt_target + 'relatedfrom:'+rt_source);
+                }
+                if(this._has_pointers){
+                     this.options.queries.push(rt_target + 'linkedfrom:'+rt_source);
+                }
             }
             
-        }else{
-            if(this._has_relation){
-                 this.options.queries.push(rt_target + 'relatedfrom:'+rt_source);
-            }
-            if(this._has_pointers){
-                 this.options.queries.push(rt_target + 'linkedfrom:'+rt_source);
-            }
         }
         
         this._refresh();
     },
     
+    _debugSearch: function(){
+            //alert(this.options.queries.join(' OR '));
+            var qsearch = this.options.queries.join(' OR ');
+            var request = {q: qsearch, w: 'a', source:this.element.attr('id') };  //f: this.options.searchdetails, 
 
+            //that._trigger( "onsearch"); //this widget event
+            //that._trigger( "onresult", null, resdata ); //this widget event
+
+            //perform search
+            top.HAPI4.RecordMgr.search(request, $(this.document));
+        
+    },
     
 });

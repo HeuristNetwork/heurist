@@ -389,7 +389,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  w - a|b - domain all or bookmarks
             *  f - none or cs list detail,map,structure,tags,relations,(backward)links,text,comments - details of output
             *  l - limit
-            * o - offset
+            *  o - offset
             * 
             *  callback - callback function or  $document we have trigger the event
             */

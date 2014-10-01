@@ -51,7 +51,7 @@
         $need_structure = (@$_REQUEST['f']=='structure');
         $need_details = (@$_REQUEST['f']=='map' || $need_structure);
 
-        $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);
+        $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);    
     }
 
     header('Content-type: application/json'); //'text/javascript');
