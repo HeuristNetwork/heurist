@@ -229,7 +229,7 @@ HEURIST_HTML_URL
             returnErrorMsgPage(2, "Unable to open database: " . mysql_error());
         }
     }
-
+    
     // using the database so let's get the configuration data from it's sys table
     $res = mysql_query('select * from sysIdentification');
     if (!$res) returnErrorMsgPage(0, "Unable to read database description from sysIdentification table. ".

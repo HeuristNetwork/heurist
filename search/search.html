@@ -100,6 +100,10 @@
                 ( HeuristBaseURL ? HeuristBaseURL : ""));
             var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
+            top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
+        
+//alert(database);                        // + '  ' +top.HEURIST.database.name
+            
             var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
             // was hBase, but ../ seems to work jsut as well
 
@@ -1313,8 +1317,6 @@
             */
             /*_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
             */
-            top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
-
 //alert('icon path:'+top.HEURIST.iconBaseURL);
             
             //removed by Ian's request 2012-11-21 top.HEURIST.loadScript("searchTypes.js");
