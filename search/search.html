@@ -102,8 +102,6 @@
 
             top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
         
-//alert(database);                        // + '  ' +top.HEURIST.database.name
-            
             var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
             // was hBase, but ../ seems to work jsut as well
 
@@ -116,7 +114,7 @@
                 //	and simplifies management of saved searches
                 top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
                     if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
-                        var preferMyBookmarks = (top.HEURIST.displayPreferences.defaultMyBookmarksSearch !== "false");
+                        var preferMyBookmarks = (top.HEURIST.displayPreferences && top.HEURIST.displayPreferences.defaultMyBookmarksSearch !== "false");
                         if (preferMyBookmarks) {
                             document.body.className = "w-bookmark";
                             document.getElementById("w-input").value = "bookmark";
@@ -126,7 +124,8 @@
                             document.getElementById("w-input").value = "all";
                             top.HEURIST.parameters["w"] = "all";
                         }
-                        top.HEURIST.parameters["q"] = top.HEURIST.displayPreferences.defaultSearch;
+                        if(top.HEURIST.displayPreferences)
+                            top.HEURIST.parameters["q"] = top.HEURIST.displayPreferences.defaultSearch;
 
                         top.HEURIST.parameters["db"] = database;
                     }
