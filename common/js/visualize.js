@@ -608,12 +608,12 @@ function visualizeData() {
     lines.attr("class", function(d) {
             return "link id" + d.relation.id
          }) 
-         .attr("stroke", linecolor) 
-         .attr("marker-mid", function(d) {
-            return "url(#marker" + d.relation.id + ")";
-         })
+         .attr("stroke", linecolor)
          .style("stroke-width", function(d) { 
             return 0.5 + getLineWidth(d.relation.count);
+         }) 
+         .attr("marker-mid", function(d) {
+            return "url(#marker" + d.relation.id + ")";
          })
          .style("stroke-dasharray", (function(d) {
              if(d.relation.count == 0) {
@@ -625,7 +625,7 @@ function visualizeData() {
              if($(".overlay.id"+d.relation.id).length > 0) { // Close overlay
                 removeOverlay(d.relation.id);
              }else{ // Display overlay
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", d.relation);  
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", d.relation, getOverlayData(d.relation));  
              }
          });
          
@@ -774,7 +774,7 @@ function visualizeData() {
                             if($(".overlay.id"+d.id).length > 0) { // Close overlay
                                 removeOverlay(d.id);
                              }else{ // Display overlay
-                                 createOverlay(d3.event.offsetX, d3.event.offsetY, "record", d);  
+                                 createOverlay(d3.event.offsetX, d3.event.offsetY, "record", d, getOverlayData(d));  
                              }
                        }
                   })
@@ -1083,7 +1083,7 @@ function getOverlayData(record) {
 * @param y Coord-y
 * @param record Record info
 */
-function createOverlay(x, y, type, record) {
+function createOverlay(x, y, type, record, info) {
     svg.select(".overlay.id"+record.id).remove();
 
     // Add overlay container            
@@ -1099,7 +1099,6 @@ function createOverlay(x, y, type, record) {
                       .on("drag", overlayDrag);
             
     // Adding text  
-    var info = getOverlayData(record);
     var offset = 11; 
     var indent = 5;
     var position = 0;

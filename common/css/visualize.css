@@ -52,8 +52,9 @@
 
 /** Visualisation menu */
 #visualisation-menu {
-    max-width: 10%;
-    float: right;
+    max-width: 150px;
+    position: absolute;
+    right: 5px;
 }
 
 .menu-items {
@@ -61,11 +62,15 @@
     margin: 0px;
     list-style-type: none; 
 }
+.menu-items.level2 .menu-item {
+    text-align: left;
+    display: none;
+}
  
 .menu-item {  
     display: block;
     list-style-type: none; 
-    background: #111; 
+    background: rgba(0, 0, 0, .75);                           
 }
 .menu-item:hover {
     cursor: pointer;
@@ -73,9 +78,6 @@
 }
 .menu-item.padding {
     padding: 3px;
-}
-.menu-item .menu-item {
-    display: none;
 }
 
 .menu-item a {
@@ -86,19 +88,18 @@
 }
 
 .menu-button {
+    text-align: right;
     list-style-type: none;
-    cursor: pointer;
     background: #ddd;
     padding: 3px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 .menu-button:hover {
-    background: #eee;
+    background: #eee;                             
 }
-.menu-button:hover > li {
-    display: block;
-    background: red;
+.menu-button:hover .menu-item {
+    display: block;                                             
 }
 
 
