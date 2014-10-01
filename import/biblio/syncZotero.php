@@ -77,6 +77,9 @@
     
     $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
 
+//print  HEURIST_ZOTEROSYNC."<br>";
+//print  count($lib_keys)."   ".print_r($lib_keys, true)."<br>";
+    
     if(!$step){
         if(count($lib_keys)>1){ //select key
 ?>
@@ -101,6 +104,7 @@
             exit();
         }else{
             $lib_key_idx = 0;            
+            $step = "1";
         }
     }else{
         $lib_key_idx = @$_REQUEST['lib_key'];
@@ -114,7 +118,7 @@
     $api_Key  = @$vals[3];
     
     if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-        print "<div style='color:red'><br />Connection parameters are not defined properly (".$key."). Please go to Admin/Database/Advanced Properties and correct it</div></body></html>";
+        print "<div style='color:red'><br />Current settings: (".$key."). Please go to Admin/Database/Advanced Properties and correct it</div></body></html>";
         exit;
     }
     
@@ -126,6 +130,8 @@
     if($fh_data==null || is_string($fh_data)){
         die("Sorry, mapping/configuration file for Zotero sync is corrupted");
     }
+    
+//print "<div>config has been loaded</div>";
 
     // 2) verify heurist codes in mapping and create mapping array
     foreach ($fh_data->children() as $f_gen){
@@ -198,6 +204,9 @@
     
 
    $zotero = new phpZotero($api_Key);
+
+print "<div>zotero component has been inited with api key $api_Key   step:$step</div>";
+
     
 if($step=="1"){  //first step - info about current status
 
@@ -207,12 +216,12 @@ if($step=="1"){  //first step - info about current status
     }else{
         $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
     }
-    
+
     $code = $zotero->getResponseStatus();
     
     if($code>499 ){
         print "<div style='color:red'><br />Zotero Server Side Error. It returns response code: $code.<br /><br />"
-            ."Try this operatiobn later</div>";   
+            ."Try this operation later</div>";   
     }else if($code>399){
         $msg = "<div style='color:red'><br />Error. Can not connect to Zotero API. It returns response code: $code.<br /><br />";
         if($code==401 || $code==403){
