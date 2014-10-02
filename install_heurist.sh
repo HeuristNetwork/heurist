@@ -48,18 +48,16 @@ echo
 echo
 echo "----------------------- Installing Heurist Version 3 ---------------------------"
 echo
-echo "Progress and errors go to terminal, other messages to heurist_install.log in the current directory"
 echo
-echo "--------------------------------------------------------------------------------"
 
 # Everything lives in /var/www/html/HEURIST with appropriate simlinks
 
-echo "Changing to /var/www/html and creating HEURIST directory"
+echo "Changing to /var/www/html and creating html (if required) and HEURIST directory"
 
 # apache on Ubuntu used to install at /var/www, now it installs at /var/www/html
 
 # ensure html directory exists - if this is not apache web root, Heurist will be installed but
-# not accessible at the web root address. Relatively easy for sysadmin to fix.
+# not accessible at the web root address so we make simlinks.
 
 cd /var/www
 # will do nothing if already exists
@@ -71,42 +69,46 @@ mkdir HEURIST
 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
 echo -e "Fetching Heurist code from HeuristScholar.org"
-wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
+wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2
 tar -xjf $1.tar.bz2
 rm $1.tar.bz2
 # this will fail if h3 already exists, use update script in this case
-mv $1/ /var/www/html/HEURIST/h3
+mkdir /var/www/html/HEURIST/h3
+cp $1/ /var/www/html/HEURIST/h3/
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 tar -xjf external.tar.bz2
 rm external.tar.bz2
-ln -s /var/www/html/HEURIST/h3/external external
 
-wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external-h4.tar.bz2
-tar -xjf external-h4.tar.bz2
-rm external-h4.tar.bz2
-ln -s /var/www/html/HEURIST/h3/applications/h4/ext external_h4
+wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
+tar -xjf external_h4.tar.bz2
+rm external_h4.tar.bz2
 
-wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 tar -xjf help.tar.bz2
 rm help.tar.bz2
-ln -s /var/www/html/HEURIST/h3/help help
 
-wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
+wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
 tar -xjf exemplars.tar.bz2
 rm exemplars.tar.bz2
-ln -s /var/www/html/HEURIST/h3/exemplars exemplars
+
+cd /var/www/html/HEURIST/h3
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 external_h4
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
 
 echo "Heurist unpacked"
 
-cd /var/www/html/h3/
-
 echo -e "\n\n"
-echo "Creating directories and setting permissions"
+echo "Creating directories, sandpit database and setting permissions"
 
 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
+echo "Sorry, index of this directory is not available" > /var/www/html/HEURIST
+echo "Sorry, index of this directory is not available" > /var/www/html/HEURIST/HEURIST_FILESTORE
+
 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
@@ -125,25 +127,22 @@ mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 mv /var/www/html/HEURIST/h3/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
 mv /var/www/html/HEURIST/h3/parentDirectory_index.html /var/www/html/HEURIST/index.html
 
-
 # one or other of these will fail harmlessly
+echo Trying both www-data and apache as owner:group for data directories, one will succeed
 chown -R apache:apache /var/www/html/HEURIST/
-chown -R apache:apache /var/www/html/HEURIST/HEURIST_FILESTORE/
 chown -R www-data:www-data /var/www/html/HEURIST/
-chown -R www-data:www-data /var/www/html/HEURIST/HEURIST_FILESTORE/
 
 chmod -R 775  /var/www/html/HEURIST/
 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
-# Simlink Heurist as heurist and as h3 from the root web directory
+# Simlink Heurist root as heurist and codebase as h3 from the root web directory
 # do both /var/www and /var/www/html for good measure
 cd /var/www
-ln -s html/HEURIST/h3 h3
-ln -s html/HEURIST/h3 heurist
+ln -s /var/www/html/HEURIST/h3/ h3
+ln -s /var/wwwhtml/HEURIST/ heurist
 cd /var/www/html
-ln -s HEURIST/h3 h3
-ln -s HEURIST/h3 heurist
-
+ln -s /var/www/html/HEURIST/h3/ h3
+ln -s /var/www/html/HEURIST/ heurist
 
 # TODO: NEED TO ADD .htaccess file to the filestore
 
@@ -167,5 +166,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to h3 on your web site eg. myserver.com/h3"
+echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/heurist"
 echo

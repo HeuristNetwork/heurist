@@ -22,9 +22,8 @@ if [ -z $1 ]
 
 # copy_distribution_files.sh
 # --------------------------
-# This file copies all necessary Heurist vsn 3 distribution files and support files
-# from the current directory (any Heurist h3-xx program directory) to a temporary directory in the
-# h3-build directory in /var/www/html/HEURIST.
+# This file copies all necessary Heurist vsn 3 distribution files and support files from the current directory
+# (any Heurist h3-xx program directory) to a temporary directory in the h3-build directory in /var/www/html/HEURIST.
 # Make sure the current directory is the up-to-date version you want to package.
 # The script is set up for the HeuristScholar server and may require modification for other directory layouts
 
@@ -69,12 +68,7 @@ cp -r records /var/www/html/HEURIST/h3-build/$1
 cp -r search /var/www/html/HEURIST/h3-build/$1
 cp -r viewers /var/www/html/HEURIST/h3-build/$1
 
-# copy the installation functions to DISTRIBUTION
-cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp xtras_utilities/*.sh /var/www/html/HEURIST/DISTRIBUTION
-
 # remove any superfluous files - add others as appropriate
-rm -f /var/www/html/HEURIST/h3-build/$1/xtras_utilities/
 rm -f /var/www/html/HEURIST/h3-build/$1/*.sh
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
@@ -83,32 +77,39 @@ echo
 echo creating tarball /var/www/html/HEURIST/h3-build/$1.tar.bz2
 rm -f /var/www/html/HEURIST/h3-build/$1.tar.bz2
 tar -cjf /var/www/html/HEURIST/h3-build/$1.tar.bz2 -C /var/www/html/HEURIST/h3-build/ $1/
-# ??? had -C (=directory) before source files. It doesn't work with this, but does without
+rm -rf /var/www/html/HEURIST/h3-build/$1/
 
 # show what we have got in the directory
 echo
 ls -alt /var/www/html/HEURIST/h3-build
 
+
 echo
-echo creating tarballs for /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, exemplars and help
+echo Copying installer shellscripts from current instance of code
+cp *.sh /var/www/html/HEURIST/DISTRIBUTION
+cp xtras_utilities/*.sh /var/www/html/HEURIST/DISTRIBUTION
+
+
+echo
+echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, exemplars and help
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ exemplars/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
-echo Copying installer shellscripts from current instance of code
-cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp xtras_utilities/*.sh /var/www/html/HEURIST/DISTRIBUTION
+chown -R www-data:www-data /var/www/html/HEURIST/DISTRIBUTION
 
 echo
-echo "Now copy  /var/www/html/HEURIST/h3-build/$1.tar.bz2 to /var/www/html/HEURIST/DISTRIBUTION"
+echo
+echo ----------------------------------------------------------------------------------------------
+echo
+echo "Now complete distribution (if code ready) with:"
+echo
+echo "    cp /var/www/html/HEURIST/h3-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
 echo
 echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
 echo and the installation is dependant on the filename parameter to find this folder
 echo
-echo Use:   cd /var/www/html/HEURIST/h3-build
-echo then:  sudo rm /var/www/html/HEURIST/DISTRIBUTION/$1.tar.bz2
-echo then:  sudo mv $1.tar.bz2 ../DISTRIBUTION
 echo
 
