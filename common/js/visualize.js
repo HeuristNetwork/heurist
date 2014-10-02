@@ -528,16 +528,9 @@ function visualizeData() {
                  .on("zoom", zoomed);
                   
     function zoomed() {
-        // Zoom container
+        // Zoom container & update overlays
         container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        
-        // Move overlays
-        $(".overlay").each(function(e) {
-            // Determine node selector
-            var clazz = $(this).attr("class"); 
-            var id = clazz.match(/\d+/)[0];
-            updateOverlay(id);
-        });            
+        updateOverlays();           
         
     }   
     svg.call(zoom);  
@@ -606,7 +599,7 @@ function visualizeData() {
     }     
     // Adding shared attributes
     lines.attr("class", function(d) {
-            return "link id" + d.relation.id
+            return "link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
          }) 
          .attr("stroke", linecolor)
          .style("stroke-width", function(d) { 
@@ -621,11 +614,13 @@ function visualizeData() {
              } 
          })) 
          .on("click", function(d) {
+             var id = d.relation.id;
              // Construct line overlay data, then use it to generate the overlay itself  
-             if($(".overlay.id"+d.relation.id).length > 0) { // Close overlay
-                removeOverlay(d.relation.id);
+             if($(".overlay.id"+id).length > 0) { // Close overlay
+                removeOverlay(id);
              }else{ // Display overlay
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", d.relation, getOverlayData(d.relation));  
+                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
              }
          });
          
@@ -682,7 +677,7 @@ function visualizeData() {
         }
         
         // Update overlay
-        updateOverlay(d.id); 
+        updateOverlays();
     }
     
     /** Called when a dragging event ends */
@@ -771,11 +766,12 @@ function visualizeData() {
                   .on("click", function(d) {
                        // Check if it's not a click after dragging
                        if(!d3.event.defaultPrevented) {
-                            if($(".overlay.id"+d.id).length > 0) { // Close overlay
-                                removeOverlay(d.id);
-                             }else{ // Display overlay
-                                 createOverlay(d3.event.offsetX, d3.event.offsetY, "record", d, getOverlayData(d));  
-                             }
+                           var id = d.id;
+                           if($(".overlay.id"+id).length > 0) { // Close overlay
+                               removeOverlay(id);
+                           }else{ // Display overlay
+                                createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+id, getRecordOverlayData(d));  
+                           }
                        }
                   })
                   .call(node_drag);
@@ -998,24 +994,14 @@ function visualizeData() {
         });
     }
     
-    /** Repositions the overlay */
-    function updateOverlay(id) {
-        var pos = $(".icon.id"+id).position();
-        var svgPos = $("svg").position();
-        if(pos && svgPos) {
-            var x = pos.left - svgPos.left;
-            var y = pos.top - svgPos.top;
-            $(".overlay.id"+id).attr("transform", "translate("+x+","+y+")");   
-        }
-    }
 }
 
 /*************************************** OVERLAY ****************************************/
-/** Constructs overlay data based on the clicked record */
-function getOverlayData(record) {
+/** Finds all outgoing links from a clicked record */
+function getRecordOverlayData(record) {
     console.log(record);
     var array = [];
-    array.push({text: record.name + ", n="+record.count, size: "13px", style: "bold", enter: true})
+    array.push({text: record.name + ", n="+record.count, size: "13px", style: "bold", enter: true});
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1077,18 +1063,42 @@ function getOverlayData(record) {
     return array;
 }
 
+/** Finds all relationships between the source and target */
+function getRelationOverlayData(line) {
+    console.log(line);
+    var array = [];
+    array.push({text: line.source.name + " ↔ " + line.target.name, size: "11px", style: "bold", enter: true});
+    // array.push({text: line.relation.name + ", n=" + line.relation.count, size: "13px", style: "bold", enter: true});
+    
+    // Going through the current displayed data
+    var data = settings.getData.call(this, settings.data); 
+    if(data && data.links.length > 0) {
+        var map = {};
+        for(var i = 0; i < data.links.length; i++) {
+            var link = data.links[i];
+            if(link.source.id == line.source.id && link.target.id == line.target.id) {
+                console.log("FOUND RELATION");
+                console.log(link);
+                array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"});  
+            }
+        }
+    }
+    
+    return array;
+}
+
 /**
 * Creates an overlay on the location that the user has clicked on.
 * @param x Coord-x
 * @param y Coord-y
 * @param record Record info
 */
-function createOverlay(x, y, type, record, info) {
-    svg.select(".overlay.id"+record.id).remove();
+function createOverlay(x, y, type, selector, info) {
+    svg.select(".overlay."+selector).remove();
 
     // Add overlay container            
     var overlay = svg.append("g")
-                     .attr("class", "overlay " + type + " id"+record.id)      
+                     .attr("class", "overlay "+type+ " " + selector)      
                      .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
                      
     // Draw a semi transparant rectangle       
@@ -1163,7 +1173,7 @@ function createOverlay(x, y, type, record, info) {
                        .attr("class", "close")
                        .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
                        .on("click", function(d) {
-                           removeOverlay(record.id);                              
+                           removeOverlay(id);                              
                        });
                        
     // Close rectangle                                                                     
@@ -1183,6 +1193,44 @@ function createOverlay(x, y, type, record, info) {
     function overlayDrag(d) {
         overlay.attr("transform", "translate("+d.x+","+d.y+")");
     }                 
+}
+
+
+/** Repositions all overlays */
+function updateOverlays() {
+    $(".overlay").each(function() {
+        // Get information
+        var pieces = $(this).attr("class").split(" ");
+        var type = pieces[1];
+        var id = pieces[2];
+        console.log("Type: " + type + ", id:" + id);
+        
+        // Select element to align to
+        var bbox;
+        if(type == "record") {
+            bbox = $(".icon."+id)[0].getBoundingClientRect();
+        }else{
+            bbox = $(".link."+id)[0].getBoundingClientRect();
+        }
+        console.log(bbox);
+        
+        // Update position 
+        var svgPos = $("svg").position();
+        x = bbox.left + bbox.width/2 - svgPos.left
+        y = bbox.top + bbox.height/2 - svgPos.top;
+        console.log("NewX: " + x+ ", newY: " + y);
+        $(this).attr("transform", "translate("+x+","+y+")");
+    });
+    
+    /*
+    
+    
+    if(pos && svgPos) {
+        var x = pos.left - svgPos.left;
+        var y = pos.top - svgPos.top;
+        $(".overlay.id"+id).attr("transform", "translate("+x+","+y+")");   
+    }
+    */
 }
 
 /** Removes the overlay with the given ID */
