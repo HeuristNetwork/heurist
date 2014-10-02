@@ -1,6 +1,5 @@
 <?php
 
-/
 /**
 * Override configuration file for a Heurist installation - place in parent of the individual codebases,
 * obviating the need to set these parameters for each version, avoiding redundancy and ensuring consistency

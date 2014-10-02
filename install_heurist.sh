@@ -27,7 +27,10 @@ if [ -z $1 ]
    then
       echo -e "\n\n"
       echo "Please supply version eg. h3.x.x-alpha or h3-alpha, h3-beta, h3-latest (this MUST exist as a tar.bz2 file "
-      echo "on HeuristScholar.org/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
+      echo "on HeuristScholar.org/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
+      echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
+      echo
+      echo "       ./install_heurist.sh h3.2.0-beta sudo"
       exit
    fi
 
@@ -50,6 +53,7 @@ echo "----------------------- Installing Heurist Version 3 ---------------------
 echo
 echo
 
+
 # Everything lives in /var/www/html/HEURIST with appropriate simlinks
 
 echo "Changing to /var/www/html and creating html (if required) and HEURIST directory"
@@ -61,88 +65,86 @@ echo "Changing to /var/www/html and creating html (if required) and HEURIST dire
 
 cd /var/www
 # will do nothing if already exists
-mkdir /var/www/html
+$2 mkdir /var/www/html
 
 cd /var/www/html
 # mkdirs will do nothing if directory already exists
-mkdir HEURIST
-mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
+$2 mkdir HEURIST
+$2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
 echo -e "Fetching Heurist code from HeuristScholar.org"
-wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2
-tar -xjf $1.tar.bz2
-rm $1.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 tar -xjf $1.tar.bz2
+$2 rm $1.tar.bz2
 # this will fail if h3 already exists, use update script in this case
-mkdir /var/www/html/HEURIST/h3
-cp $1/ /var/www/html/HEURIST/h3/
+$2 mkdir /var/www/html/HEURIST/h3
+$2 cp -R $1/* /var/www/html/HEURIST/h3/
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
-tar -xjf external.tar.bz2
-rm external.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+$2 tar -xjf external.tar.bz2
+$2 rm external.tar.bz2
 
-wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
-tar -xjf external_h4.tar.bz2
-rm external_h4.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
+$2 tar -xjf external_h4.tar.bz2
+$2 rm external_h4.tar.bz2
 
-wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
-tar -xjf help.tar.bz2
-rm help.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 tar -xjf help.tar.bz2
+$2 rm help.tar.bz2
 
-wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
-tar -xjf exemplars.tar.bz2
-rm exemplars.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
+$2 tar -xjf exemplars.tar.bz2
+$2 rm exemplars.tar.bz2
 
 cd /var/www/html/HEURIST/h3
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 external_h4
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 external_h4
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
 
 echo "Heurist unpacked"
 
 echo -e "\n\n"
 echo "Creating directories, sandpit database and setting permissions"
 
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
-echo "Sorry, index of this directory is not available" > /var/www/html/HEURIST
-echo "Sorry, index of this directory is not available" > /var/www/html/HEURIST/HEURIST_FILESTORE
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
 
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
-cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
-mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 
 # set up override configIni files
-mv /var/www/html/HEURIST/h3/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
-mv /var/www/html/HEURIST/h3/parentDirectory_index.html /var/www/html/HEURIST/index.html
+$2 mv /var/www/html/HEURIST/h3/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
+$2 mv /var/www/html/HEURIST/h3/parentDirectory_index.html /var/www/html/HEURIST/index.html
 
 # one or other of these will fail harmlessly
 echo Trying both www-data and apache as owner:group for data directories, one will succeed
-chown -R apache:apache /var/www/html/HEURIST/
-chown -R www-data:www-data /var/www/html/HEURIST/
+$2 chown -R apache:apache /var/www/html/HEURIST/
+$2 chown -R www-data:www-data /var/www/html/HEURIST/
 
-chmod -R 775  /var/www/html/HEURIST/
-chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
+$2 chmod -R 775  /var/www/html/HEURIST/
+$2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
 # Simlink Heurist root as heurist and codebase as h3 from the root web directory
 # do both /var/www and /var/www/html for good measure
 cd /var/www
-ln -s /var/www/html/HEURIST/h3/ h3
-ln -s /var/wwwhtml/HEURIST/ heurist
+$2 ln -s /var/www/html/HEURIST/h3/ h3
+$2 ln -s /var/www/html/HEURIST/ heurist
 cd /var/www/html
-ln -s /var/www/html/HEURIST/h3/ h3
-ln -s /var/www/html/HEURIST/ heurist
+$2 ln -s /var/www/html/HEURIST/h3/ h3
+$2 ln -s /var/www/html/HEURIST/ heurist
 
 # TODO: NEED TO ADD .htaccess file to the filestore
 
