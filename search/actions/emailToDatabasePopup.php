@@ -63,6 +63,8 @@ if ($_REQUEST['send_notification']) {
 ?>
 <html>
  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+ 
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
 
   <title>Email records to database</title>

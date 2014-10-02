@@ -34,6 +34,8 @@
 <html>
     <head>
 
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
         <script type=text/javascript>
             function open_selected(sname) {
                 var cbs = document.getElementsByName(sname);

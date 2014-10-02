@@ -39,6 +39,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 ?>
 <html>
 	<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 	    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">

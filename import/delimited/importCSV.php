@@ -59,6 +59,7 @@
     <head>
         <title>Normalising importer for comma or tab delimited text files</title>
 
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" href="../../applications/h4/ext/jquery-ui-1.10.2/themes/base/jquery-ui.css">

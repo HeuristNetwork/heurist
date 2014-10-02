@@ -48,6 +48,7 @@ if(!is_admin()){
 
 <head>
 	<title>Import Records from Email</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 
 	<script type="text/javascript">

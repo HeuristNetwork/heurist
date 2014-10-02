@@ -62,6 +62,7 @@
 
     <head>
         <title>Heurist - <?=HEURIST_DBNAME?> Designer View</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="icon" href="../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="../common/css/global.css">

@@ -581,6 +581,7 @@
 
         <head>
             <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+            <meta http-equiv="content-type" content="text/html; charset=utf-8">
         </head>
 
         <body class="popup">
@@ -696,6 +697,7 @@
         <html>
             <head>
                 <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+                <meta http-equiv="content-type" content="text/html; charset=utf-8">
             </head>
             <body>
                 <div class="error" style="text-align:left;padding:40px;">ERROR: <?=$msg?></div>
@@ -1174,6 +1176,7 @@
         <head>
             <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
             <title>Importing <?=$title?></title>
+            <meta http-equiv="content-type" content="text/html; charset=utf-8">
         </head>
         <body class="popup">
 

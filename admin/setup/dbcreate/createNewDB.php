@@ -53,8 +53,8 @@
 ?>
 <html>
     <head>
-        <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
         <title>Create New Heurist Database</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">

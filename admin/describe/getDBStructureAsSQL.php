@@ -58,7 +58,9 @@
 	// File headers to explain what the listing represents
     // HTML is a fudge to make it readable in a browser, very useful for debug and cut/paste to coreDefinitions.txt
     // rather inelegant from an IT perspective. Should probably be replaced with a more secure format
-	print "<html><head></head><body>\n";
+	print "<html><head>";
+    print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
+    print "</head><body>\n";
 	print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
 	print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
     print "-- Database = " . HEURIST_DBNAME . "<br>\n";

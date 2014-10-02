@@ -37,7 +37,8 @@
 
     if(!array_key_exists('mode', $_REQUEST)) {
         print "<html>";
-        print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
+        print "<head>";
+        print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         print "<title>Delete Current Heurist Database</title>";
         print "<link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>";
         print "<link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>";

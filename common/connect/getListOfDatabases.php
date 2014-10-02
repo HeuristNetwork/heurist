@@ -47,6 +47,7 @@
 	<title>Open Database</title>
 	<link rel=stylesheet href='../../common/css/global.css'>
 	<link rel=stylesheet href='../../common/css/admin.css'>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 </head>
 
 <body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">

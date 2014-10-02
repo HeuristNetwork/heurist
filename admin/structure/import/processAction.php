@@ -816,7 +816,9 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 // Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
 
-	echo "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head>";
+	echo "<html><head>";
+    echo '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+    echo "<link rel=stylesheet href='../../../common/css/global.css'></head>";
 	echo "<body class='popup'><div style='text-align:center;font-weight:bold;font-size:1.3em;padding-top:10px'>";
 
 	$message = "";

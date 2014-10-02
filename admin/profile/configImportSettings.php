@@ -90,6 +90,7 @@ function _issel($val){
 
     <head>
         <title>Configuration</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	    <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 	    <style type="text/css">
 		    #ignored_hyperlinks {

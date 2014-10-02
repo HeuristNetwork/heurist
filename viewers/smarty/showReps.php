@@ -328,6 +328,7 @@ function save_report_output2($tpl_source){
 ?>
 <html>
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 </head>
 <body style="margin: 25px;">

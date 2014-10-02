@@ -51,7 +51,9 @@ if (@$bibID  &&  @$bdtID) {
 ?>
 <html>
 <head>
-<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+</head>    
 <body style="padding: 0; margin: 0;">
 <form method=post enctype=multipart/form-data style="display: inline; padding: 0; margin: 0;">
 <input type=hidden name=recID value=<?= $bibID ?>>
@@ -71,6 +73,8 @@ if (! ($bibID && $bdtID)) { print "<html><body style='color: blue;'></body></htm
 ?>
 <html>
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
 <script>
 function fireParentSubmitFunction() {
 	var parentFrames = parent.document.getElementsByTagName("iframe");

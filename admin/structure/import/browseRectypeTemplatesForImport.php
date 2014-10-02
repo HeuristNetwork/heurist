@@ -32,7 +32,8 @@
 	<head>
 		<title>Browse documented record type templates for import</title>
 
-		
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
 		<link rel=stylesheet href="../../../common/css/global.css">
 		<link rel=stylesheet href="../../../common/css/admin.css">
 

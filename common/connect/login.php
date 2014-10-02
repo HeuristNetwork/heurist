@@ -128,12 +128,13 @@ if (@$_REQUEST['logout']) {
 ?>
 <html>
 <head>
-<title>Heurist Login</title>
-<link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
-<link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
+    <title>Heurist Login</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
+    <link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 
-<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
-<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/login.css'>
+    <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
+    <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/login.css'>
 
 
 

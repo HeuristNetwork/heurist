@@ -58,6 +58,7 @@
 
 <html>
     <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <script type="text/javascript">
             function update_counts(processed, blank, repair, changed) {
                 if(changed==null || changed==undefined){

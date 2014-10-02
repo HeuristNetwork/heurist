@@ -42,6 +42,7 @@ require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 <html>
     <head>
         <title>Heurist Password Reset</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
     </head>
     

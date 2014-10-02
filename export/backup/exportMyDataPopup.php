@@ -51,6 +51,7 @@
 <html>
     <head>
         <title>Export My Data</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel=stylesheet href="../../common/css/global.css">
         <link rel=stylesheet href="../../common/css/edit.css">
         <link rel=stylesheet href="../../common/css/admin.css">

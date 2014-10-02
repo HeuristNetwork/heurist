@@ -299,6 +299,7 @@ function isForAdminOnly($message="", $redirect=true)
 <html>
 <head>
     <link rel=stylesheet href='../../common/css/global.css'>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 </head>
 <body>
     <div class=wrap>

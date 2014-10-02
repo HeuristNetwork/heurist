@@ -47,6 +47,7 @@ mysql_connection_overwrite(DATABASE);
 <html>
 <head>
   <title>HEURIST: Delete records</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 
   <style type=text/css>

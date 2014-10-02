@@ -38,6 +38,7 @@
 <html>
     <head>
         <title><?=HEURIST_TITLE ?></title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../style.css">

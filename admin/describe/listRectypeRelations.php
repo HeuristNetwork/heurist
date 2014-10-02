@@ -181,6 +181,8 @@
 
         <title>Heurist record type schema (simple fields, pointers and relationship markers)</title>
 
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="icon" href="../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">

@@ -146,6 +146,8 @@ function print_common_header($fileName) {
  <head>
   <title>Import Records <?=(@$_REQUEST['format']=="GEO"?"from KML":@$_REQUEST['format']=="BIB"?"from Bibliography":"") ?></title>
 
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 

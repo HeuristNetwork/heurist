@@ -76,6 +76,7 @@ $rec_id = intval(@$_REQUEST['recID']);
 ?>
 <html>
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
     <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 	<!-- <script src="../../external/jquery/jquery-1.6.min.js"></script> -->

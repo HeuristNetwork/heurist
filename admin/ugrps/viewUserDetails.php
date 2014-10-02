@@ -91,6 +91,7 @@ $tags .= "</span>\n";
     <head>
       <title>HEURIST - User Profile</title>
 
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
       <link rel="icon" href="../../favicon.ico" type="image/x-icon">
       <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
       <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">

@@ -43,6 +43,7 @@
 <html>
 
     <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <script src="../../common/js/utilsUI.js"></script>
         <script type=text/javascript>
 

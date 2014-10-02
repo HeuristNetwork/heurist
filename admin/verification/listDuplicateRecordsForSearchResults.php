@@ -65,6 +65,7 @@
 	<html>
 		<head>
 			<title>Heurist duplicate records for search results set</title>
+            <meta http-equiv="content-type" content="text/html; charset=utf-8">
 			<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
 			<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
 
@@ -183,6 +184,7 @@
 ?><html>
 	<head>
 		<title>Heurist duplicate records for search results set</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
 		<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
 

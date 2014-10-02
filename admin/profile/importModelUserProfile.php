@@ -60,6 +60,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <html>
     <head>
      <title>Update settings from model user</title>
+     <meta http-equiv="content-type" content="text/html; charset=utf-8">
      <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
     <style type="text/css">
     <!--

@@ -45,6 +45,7 @@
 
 <html>
     <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
         <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
         <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/admin.css">

@@ -46,7 +46,7 @@
 <html>
     <head>
         <title>Heurist database version upgrade</title>
-
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel=stylesheet type='text/css' href='../../../common/css/global.css'>
         <link rel=stylesheet type='text/css' href='../../../common/css/admin.css'>
         <link rel=stylesheet type='text/css' href='../../../common/css/login.css'>

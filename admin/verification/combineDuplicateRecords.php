@@ -72,6 +72,8 @@
 
 <html>
     <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
 	    <style type="text/css">
 		    * { font-size: 100%; font-family: verdana;}
 		    body { font-size: 0.7em; }

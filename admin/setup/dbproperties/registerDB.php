@@ -71,7 +71,10 @@
     }
 
     if($sError){
-        print "<html><head><link rel=stylesheet href='../../../common/css/global.css'></head>".
+        print "<html>";
+        print "<head>";
+        print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
         "<body><div class=wrap><div id=errorMsg><span>$sError</span>".
         "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
         " target='_top'>Log out</a></p></div></div></body></html>";
@@ -86,8 +89,9 @@
 
 <html>
     <head>
-        <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Register Database with Heurist Master Index at HeuristScholar.org</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
     </head>
 
     <script type="text/javascript">

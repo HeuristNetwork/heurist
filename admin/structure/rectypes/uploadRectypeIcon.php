@@ -86,6 +86,7 @@
     <head>
 
         <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">

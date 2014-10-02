@@ -302,6 +302,8 @@ if (@$urls) {
 <html>
 <head>
 	<title>Import Hyperlinks</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
    	<!-- link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css" -->

@@ -37,7 +37,7 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Legend & Reference Types</title>
 <link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>common/css/global.css">
 <style type=text/css>

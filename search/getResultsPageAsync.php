@@ -182,6 +182,7 @@ if (false && HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
   <!--
  <?=$query?>
    -->
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <script type="text/javascript">
 
 <?php if($isNeedUpdateWorkgroups){ ?>
