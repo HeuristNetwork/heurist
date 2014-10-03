@@ -34,6 +34,8 @@ $.widget( "heurist.resultList", {
         showcounter: true,
         showmenu: true,
 
+        //searchsource: null,
+        
         recordset: null
         // callbacks
         //onselect: null
@@ -47,6 +49,8 @@ $.widget( "heurist.resultList", {
     _create: function() {
 
         var that = this;
+
+        //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
         
         if(this.options.showmenu){
             this.div_actions = $('<div>')
@@ -55,7 +59,7 @@ $.widget( "heurist.resultList", {
                 .appendTo(this.element);
         }
 
-        this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
+        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.8em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
         .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em','position':'absolute','top':'3em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })

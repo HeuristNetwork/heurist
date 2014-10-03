@@ -32,6 +32,7 @@ function hRecordSet(initdata) {
     //limit = 1000, use length()
     fields = [],       //array of field names
     records = [],      //array of values
+    rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
 
     /**
@@ -42,6 +43,7 @@ function hRecordSet(initdata) {
         count_total = Number(response.count);
         offset = Number(response.offset);
         fields = response.fields;
+        rectypes = response.rectypes;
         if ($.isArray(records)) { records = response.records };
         structures = response.structures;
         //@todo - merging
@@ -404,6 +406,7 @@ function hRecordSet(initdata) {
                 count_total: Object.keys(records).length, //$(_records).length,
                 offset: 0,
                 fields: fields,
+                rectypes: rectypes,
                 structures: structures,
                 records: _records
             });
@@ -452,6 +455,10 @@ function hRecordSet(initdata) {
         */
         getStructures: function(){
             return structures;
+        },
+        
+        getRectypes: function(){
+            return rectypes;
         },
 
         /* record - hRecord or rectypeID

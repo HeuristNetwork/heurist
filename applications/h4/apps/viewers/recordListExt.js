@@ -128,9 +128,11 @@ $.widget( "heurist.recordListExt", {
     /* private function */
     _refresh: function(){
 
-        var id = this.element.attr('id');
-        $(".header"+id).html(this.options.title);
-        $('a[href="#'+id+'"]').html(this.options.title);
+        if(this.options.title!=''){
+            var id = this.element.attr('id');
+            $(".header"+id).html(this.options.title);
+            $('a[href="#'+id+'"]').html(this.options.title);
+        }
         
         //refesh if element is visible only - otherwise it costs much resources        
         if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
@@ -157,7 +159,7 @@ $.widget( "heurist.recordListExt", {
             
         }else if(this.dosframe.attr('src')!==this.options.url){
             
-            this.options.url = top.HAPI4.basePathOld +  this.options.url;
+            this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
              
             this.dosframe.attr('src', this.options.url);
              
@@ -210,6 +212,8 @@ $.widget( "heurist.recordListExt", {
                 var showMap = this.dosframe[0].contentWindow.showMap;
                 if(showMap){
                     showMap.processMap();
+                }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
+                    this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes());
                 }
             }
             

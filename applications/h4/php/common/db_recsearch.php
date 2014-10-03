@@ -623,12 +623,31 @@
         /*.'rec_URLLastVerified,'
         .'rec_URLErrorMessage,'
         .'bkm_PwdReminder ';*/
+        
+        if(@$params['tq']){        
+            // if params has "TQ" parameter this is search for linked/related records
+            // tsort, tlimit and toffset are parameters for top(parent) query
+            // besides to simplify query, instead of these 4 parameters we may have "TIDS" - comma separated list of parent IDS
+            
+            //1. define query parts for top/parent query
+            $params_top = $params;
+            $params_top['q'] = @$params['tq'];
+            $params_top['s'] = @$params['ts']; //sortby
+            $params_top['l'] = @$params['tl']; //limit
+            $params_top['o'] = @$params['to']; //offset
 
+            $query_top = get_sql_query_clauses($mysqli, $params, $currentUser);
+            
+            //2. define current query - set one of paremters as a reference to the parent query
+            
+            $params['parentquery'] = $query_top;
+        
+        }
         $query = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
-
         $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
-        //DEGUG error_log("AAA ".$query);
+        //DEGUG 
+error_log("AAA ".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

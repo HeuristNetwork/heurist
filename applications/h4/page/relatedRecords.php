@@ -56,6 +56,7 @@
         <script type="text/javascript" src="../js/hapi.js"></script>
 
         <script type="text/javascript" src="../apps/search/ruleBuilder.js"></script>
+        <script type="text/javascript" src="../apps/search/resultList.js"></script>
         
         <script type="text/javascript">
             if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
@@ -66,26 +67,53 @@
             ?>
             }
 
-            var relatedRecords;
+            var relatedRecords, ruleBuilder;
 
+            function onLoadHAPI(success) //callback function of hAPI initialization
+            {
+                        if(success)  //system is inited
+                        {
+                            if(!top.HR){
+                                var prefs = top.HAPI4.get_prefs();
+                                //loads localization
+                                top.HR = window.HAPI4.setLocale(prefs['layout_language']); 
+                            }
+                            
+                            ruleBuilder = $("<div>").appendTo($("body"));
+                            var options = {};
+                            
+                            //add rule builder
+                            ruleBuilder.ruleBuilder( options );
+                            
+                            //add record list widget
+                            options = { showmenu: false };
+                            var $container = $("<div>").appendTo($("body"));
+                            $container.resultList( options );
+
+                            //relatedRecords = new hRelatedRecords($container);
+                        }
+            }
+            
+            //
+            //
+            //
+            function updateRuleBuilder(rectypes){
+                
+                if(ruleBuilder && rectypes){
+                    ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
+                } 
+            }
+            
             $(document).ready(function() {
 
                 if(!top.HAPI4){
-                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');//, < ?=json_encode($system->getCurrentUser())? > );
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onLoadHAPI);//, < ?=json_encode($system->getCurrentUser())? > );
+                }else{
+                    onLoadHAPI(true);
                 }
 
-                var $container = $("<div>").appendTo($("body"));
-                var options = {};
-                
-                //add rule builder
-                $container.ruleBuilder( options );
-                
-                //add record list widget
-                
-
-                //relatedRecords = new hRelatedRecords($container);
-
             });
+            
         </script>
 
     </head>

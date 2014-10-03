@@ -22,11 +22,13 @@ $.widget( "heurist.ruleBuilder", {
     // default options
     options: {
         // callbacks
-        queries:[]
+        queries:[],
+        recordtypes: []  //array or record types from current main search result
+        
     },
     
-    _query_request: {}, //keep current query request
-    _selection: null,     //current set of selected records
+    _query_request: {},   // keep current query request
+    _selection: null,     // current set of selected records
     _arr_fields:[],
     _arr_rectypes:[],
     _has_relation:false,
@@ -39,6 +41,7 @@ $.widget( "heurist.ruleBuilder", {
         
         
         //create list/combobox of source record types
+        this.label_1 = $("<label>").html('Source: ').appendTo(this.element);
         this.select_source_rectype = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .appendTo(this.element);
@@ -46,22 +49,26 @@ $.widget( "heurist.ruleBuilder", {
         top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), null, false);
 
         //create list/combobox of pointer/relmarker fields
+        this.label_2 = $("<label>").html('Field: ').css('padding-left','5px').appendTo(this.element);
         this.select_fields = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .appendTo(this.element);
         
         //create list/combobox of relation types
+        this.label_3 = $("<label>").html('Reltype: ').css('padding-left','5px').appendTo(this.element);
         this.select_reltype = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .appendTo(this.element).hide();
         
         //create list/combobox of target record types
+        this.label_4 = $("<label>").html('Target: ').css('padding-left','5px').appendTo(this.element);
         this.select_target_rectype = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .appendTo(this.element);
 
-        this.debug_label = $( "<label>" ).appendTo(this.element);
-        this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
+        this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
+        this.debug_filter = $( "<input>" ).appendTo(this.element);
+        this.debug_search = $( "<button>", {text:' Search'} ).appendTo(this.element);
         
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
@@ -96,14 +103,19 @@ $.widget( "heurist.ruleBuilder", {
             }
             //that._refresh();
         });*/        
-        
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+
+        /*if(parent.document)        
+        $(parent.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
                   //that.option("recordset", data); //hRecordSet
+                  alert('!!!!');s
             }
-        });
+        });*/
         
+        
+        
+        this._onSelectRectype();
         this._refresh();
         
 
@@ -119,6 +131,16 @@ $.widget( "heurist.ruleBuilder", {
     /*_setOptions: function( ) {
         this._superApply( arguments );
     },*/
+    
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        if ( key === "recordtypes" ) {
+
+            top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+            this._onSelectRectype();
+            this._refresh();
+        }
+    },    
 
     /* 
     * private function 
@@ -139,13 +161,19 @@ $.widget( "heurist.ruleBuilder", {
     _destroy: function() {
         
         //$(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHRESULT);
+        if(parent && parent.document)        
+            $(parent.document).off(top.HAPI4.Event.ON_REC_SEARCHRESULT);
         
         // remove generated elements
         this.select_source_rectype.remove();
         this.select_target_rectype.remove();
         this.select_fields.remove();
         this.select_reltype.remove();
+        
+        this.label_1.remove();
+        this.label_2.remove();
+        this.label_3.remove();
+        this.label_4.remove();
         
         if(this.debug_label) this.debug_label.remove();
     },
@@ -154,7 +182,7 @@ $.widget( "heurist.ruleBuilder", {
     //update relation and target selectors
     _onSelectRectype: function(event){
         
-            var rt_ID = event.target.value;
+            var rt_ID = this.select_source_rectype.val(); //event.target.value;
             
             //find all relation types
             // a. pointer fields
@@ -270,6 +298,7 @@ $.widget( "heurist.ruleBuilder", {
                     if(arr_field.key == dt_ID){
                         if(arr_field.terms){
                             is_not_relation = false;
+                            this.label_3.show();
                             this.select_reltype.show();
                             top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'any', false);
                         }
@@ -281,6 +310,7 @@ $.widget( "heurist.ruleBuilder", {
                 }
             }
             if(is_not_relation){
+                this.label_3.hide();
                 this.select_reltype.hide();    
             }
             if(is_not_selected){
@@ -289,14 +319,19 @@ $.widget( "heurist.ruleBuilder", {
             }
             
             if(this.select_target_rectype.find("option").length>2){
+                this.label_4.show();
                 this.select_target_rectype.show();
             }else{
+                this.label_4.hide();
                 this.select_target_rectype.hide();
             }
             
             this._generateQuery();
     },
     
+    //
+    //
+    //
     _generateQuery: function(){
         
         this.options.queries = [];
@@ -325,11 +360,11 @@ $.widget( "heurist.ruleBuilder", {
                 if(this.select_reltype.is(":visible")){
                     
                     var rel_type = this.select_reltype.val();
-                    if(rel_type!='') rel_type = ':'+rel_type;
+                    if(rel_type!='') rel_type = '-'+rel_type;
                     
                     this.options.queries.push(rt_target + 'relatedfrom:'+rt_source+rel_type);    
                 }else{
-                    this.options.queries.push(rt_target + 'linkedfrom:'+rt_source+':'+dt_ID);    
+                    this.options.queries.push(rt_target + 'linkedfrom:'+rt_source+'-'+dt_ID);    
                 }
                 
             }else{
@@ -347,15 +382,21 @@ $.widget( "heurist.ruleBuilder", {
     },
     
     _debugSearch: function(){
-            //alert(this.options.queries.join(' OR '));
-            var qsearch = this.options.queries.join(' OR ');
-            var request = {q: qsearch, w: 'a', source:this.element.attr('id') };  //f: this.options.searchdetails, 
+        
+        var qsearch;
+        if(this.debug_filter.val()!=''){
+            qsearch = this.debug_filter.val();
+        } else {
+            return;
+        }
+        
+        var request = {q: qsearch, w: 'a', source:this.element.attr('id') };  //f: this.options.searchdetails, 
 
             //that._trigger( "onsearch"); //this widget event
             //that._trigger( "onresult", null, resdata ); //this widget event
 
             //perform search
-            top.HAPI4.RecordMgr.search(request, $(this.document));
+        top.HAPI4.RecordMgr.search(request, $(this.document));
         
     },
     

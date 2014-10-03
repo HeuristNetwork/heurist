@@ -68,6 +68,7 @@
     * @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
     *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
     * @param mixed $publicOnly
+    * 
     */
     function compose_sql_query($db, $select_clause, $params, $currentUser=null, $publicOnly=false) {
 
@@ -149,7 +150,7 @@
 
         // 4. QUERY MAY BE SIMPLE or full expressiveness ----------------------------------------------------------------------
 
-        $query = parse_query($search_domain, @$params['q'], @$params['s'], $currUserID);
+        $query = parse_query($search_domain, @$params['q'], @$params['s'], @$params['parentquery'], $currUserID);
 
         $where_clause = $query->where_clause;
 
@@ -224,11 +225,12 @@
     * @param mixed $search_domain -   bookmark - searcch my bookmarks, otherwise all records
     * @param mixed $text     - query string
     * @param mixed $sort_order
+    * $parentquery - array of SQL clauses of parent/top query - it is needed for linked and relation queries that are depended on source/top query
     * @$currUserID
     * NOTUSED @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
     * NOTUSED @param mixed $publicOnly
     */
-    function parse_query($search_domain, $text, $sort_order='', $currUserID) { //$currUserID, $wg_ids=null, $publicOnly=false
+    function parse_query($search_domain, $text, $sort_order='', $parentquery, $currUserID) { //$currUserID, $wg_ids=null, $publicOnly=false
 
 
         // remove any  lone dashes outside matched quotes.
@@ -254,7 +256,7 @@
             /*****DEBUG****///error_log("preprocessed query = ".print_r($preProcessedQuery,true));
         }
 
-        $query = new Query($search_domain, $preProcessedQuery, $currUserID);
+        $query = new Query($search_domain, $preProcessedQuery, $currUserID, $parentquery);
         $query->makeSQL();
 
         $q = null;
@@ -310,18 +312,20 @@
         var $where_clause = '';
         var $sort_clause = '';
         var $recVisibilityType;
+        var $parentquery = null;
 
         var $top_limbs;
         var $sort_phrases;
         var $sort_tables;
 
 
-        function Query($search_domain, $text, $currUserID, $absoluteStrQuery = false) {
+        function Query($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
 
             $this->search_domain = $search_domain;
             $this->recVisibilityType = null;
             $this->currUserID = $currUserID;
             $this->absoluteStrQuery = $absoluteStrQuery;
+            $this->parentquery = $parentquery;
 
             $this->top_limbs = array();
             $this->sort_phrases = array();
@@ -622,6 +626,10 @@
                             return new FieldPredicate($this, $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos)),
                                 $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1)));
 
+                case 'linkedfrom': 
+                                
+                    return new LinkedFromParentPredicate($this, $pred_val);                                            
+                                
                 case 'linkto':    // linkto:XXX matches records that have a recDetails reference to XXX
                     return new LinkToPredicate($this, $pred_val);
                 case 'linkedto':    // linkedto:XXX matches records that are referenced in one of XXX's bib_details
@@ -828,18 +836,20 @@
         function makeSQL() { return '1'; }
 
 
+        //get the top most parent - the Query
         var $query;
         function &getQuery() {
             if (! $this->query) {
                 $c = &$this->parent;
-                while ($c  &&  strtolower(get_class($c)) != 'query')
+                //loop up to top-most parent "Query"
+                while ($c  &&  strtolower(get_class($c)) != 'query') 
                     $c = &$c->parent;
 
                 $this->query = &$c;
             }
             return $this->query;
         }
-
+        
         function isDateTime() {
 
             if (strpos($this->value,"<>")>0) {
@@ -1056,7 +1066,7 @@
                 $value = substr($value, 1);
             }
 
-            //inside parentheses 
+            //nests are inside parentheses 
             preg_match('/\((.+?)(?:\((.+)\))?\)/', $this->value, $matches);
             if(count($matches)>0 && $matches[0]==$this->value){
 
@@ -1507,6 +1517,92 @@
         }
     }
 
+    
+    //
+    // this is special case 
+    // find records that are linked from parent/top query 
+    // 
+    // 1. take parent query from parent object
+    //
+    class LinkedFromParentPredicate extends Predicate {
+        function makeSQL() {
+            
+            $source_rty_ID = null;
+            //if value is specified we search linked from specific source type and field
+            if($this->value){
+                $vals = explode('-', $this->value);
+                if(count($vals)>1){
+                    $source_rty_ID = $vals[0];
+                    $source_dty_ID = $vals[1];
+                }else{
+                    $source_rty_ID = $vals[0];
+                    $source_dty_ID = '';
+                }
+            }
+
+            //additions for FROM and WHERE 
+            if($source_rty_ID){
+            
+                if($source_dty_ID){ 
+                    //linked from specific record and fields
+                    $add_from =  'recDetails bd ';
+                    $add_where =  'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and bd.dtl_DetailTypeID='.$source_dty_ID;
+                }else{ 
+                    //linked from specific record type (by any field)
+                    $add_from =  'defDetailTypes, recDetails bd ';
+                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")'; 
+                }
+            }else{ //any linked from
+                    $add_from =  'defDetailTypes, recDetails bd ';
+                    $add_where = 'bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource"';
+            }
+            
+           $select = 'exists (select bd.rec_ID  ';
+            
+            $query = &$this->getQuery();
+            if ($query->parentquery){
+                
+                $query = $query->parentquery;
+                $query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+                
+                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                
+                $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+                
+            }else{
+                
+               $select = $select.' FROM '.(($source_rty_ID)?'Records,':'').$add_from.' WHERE '.$add_where.')';
+                /*
+                if($source_rty_ID){
+                
+                    if($source_dty_ID){ //linked from specific record and fields
+                        
+                        return ' exists (select bd.rec_ID from Records rd, recDetails bd '
+                            . 'where bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and bd.dtl_DetailTypeID='.$source_dty_ID.')';
+                        
+                    }else{ //linked from specific record type (by any field)
+                        
+                        return ' exists (select bd.rec_ID from Records rd, defDetailTypes, recDetails bd '
+                            . 'where bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")';
+                        
+                    }
+                }else{ //any linked from
+                    
+                    return ' exists (select bd.rec_ID from defDetailTypes, recDetails bd '
+                        . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")';
+                    
+                }
+               */
+            }
+            
+            return $select; 
+        }
+    }
+    
+    
     //
     // find records that have pointed records
     // 

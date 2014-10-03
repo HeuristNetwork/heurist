@@ -341,6 +341,9 @@ function appAddContent($container, app, options){
         }else if(app.widgetname=='resultList'){
             //DEBUG
             widget = $content.resultList( options );
+        }else if(app.widgetname=='recordListExt'){
+            //DEBUG
+            widget = $content.recordListExt( options );
         /*}else if(app.widgetname=='resultList'){
             //DEBUG
             widget = $content.resultList(); */

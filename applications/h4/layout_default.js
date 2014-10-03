@@ -103,9 +103,10 @@ var layouts = [
                 apps:[                                      
                     {appid:'h3_recordDetails'},    //H4 record viewer
 
-                    {appid:'h3_recordListExt', options:{title:'Record H3', url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+                    {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'h3_recordListExt', options:{title:'Map', url: 'viewers/map/showMap.html'}},    //H3 mapper
-                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}}     //H3 smarty
+                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
+                    {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }}
                     /*                ,
                     {appid:'ha51'},
                     {appid:'ha52'},
