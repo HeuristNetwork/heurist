@@ -69,22 +69,17 @@
  
 .menu-item {  
     display: block;
-    list-style-type: none; 
-    background: rgba(0, 0, 0, .75);                           
+    list-style-type: none;                                   
 }
 .menu-item:hover {
-    cursor: pointer;
-    background: #444;
+    cursor: pointer;  
 }
 .menu-item.padding {
     padding: 3px;
 }
 
-.menu-item a {
-    color: #eee;
-}
 .menu-item a:hover {
-    color: #fff;    
+    text-decoration: underline;
 }
 
 .menu-button {
@@ -94,9 +89,6 @@
     padding: 3px;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-.menu-button:hover {
-    background: #eee;                             
 }
 .menu-button:hover .menu-item {
     display: block;                                             

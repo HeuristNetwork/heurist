@@ -76,7 +76,7 @@ var svg;        // The SVG where the visualisation will be executed on
             entityradius: 30,
             entitycolor: "#262",
             
-            fontsize: "11px",
+            fontsize: "8px",
             textcolor: "#000",
             
             formula: "linear",
@@ -415,7 +415,7 @@ function handleSettingsInUI() {
 var maxCount; 
 function determineMaxCount(data) {
     console.log("DETERMINING NEW MAX COUNT");
-    maxCount = 0;
+    maxCount = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
             console.log(data.nodes[i]);
@@ -446,11 +446,7 @@ function executeFormula(count, maxSize) {
         return Math.log(count) / Math.log(maxCount) * maxSize;
     }
     else if(formula == "unweighted") { // Unweighted
-        if(count > 0) {
-            return 2;
-        }else{
-            return 0;
-        }                                            
+        return 2;                                          
     }else {  // Linear
         return (count/maxCount) * maxSize; 
     }       
@@ -562,7 +558,7 @@ function visualizeData() {
              .enter()
              .append("svg:marker")    
              .attr("id", function(d) {
-                return "marker" + d.relation.id;
+                return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              })
              .attr("markerWidth", function(d) {    
                 return getMarkerWidth(d.relation.count);             
@@ -570,7 +566,12 @@ function visualizeData() {
              .attr("markerHeight", function(d) {
                 return getMarkerWidth(d.relation.count);
              })
-             .attr("refX", -1)
+             .attr("refX", function(d) {
+                 if(d.relation.pointer) {
+                     return linelength*-0.3;
+                 }
+                 return -1;
+             })
              .attr("refY", 0)
              .attr("viewBox", "0 -5 10 10")
              .attr("markerUnits", "userSpaceOnUse")
@@ -606,7 +607,7 @@ function visualizeData() {
             return 0.5 + getLineWidth(d.relation.count);
          }) 
          .attr("marker-mid", function(d) {
-            return "url(#marker" + d.relation.id + ")";
+            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
          })
          .style("stroke-dasharray", (function(d) {
              if(d.relation.count == 0) {
@@ -822,8 +823,8 @@ function visualizeData() {
                          .attr("class", "center shadow")
                          .style("font-size", fontsize, "important")
                          .text(function(d) {
-                            if(d.name.length > 15) {
-                                return d.name.substring(0, 14) + "...";
+                            if(d.name.length > 30) {
+                                return d.name.substring(0, 29) + "...";
                             }  
                             return d.name; 
                          });
@@ -836,8 +837,8 @@ function visualizeData() {
                         .attr("fill", textcolor)
                         .style("font-size", fontsize, "important")
                         .text(function(d) {
-                            if(d.name.length > 15) {
-                                return d.name.substring(0, 14) + "...";
+                            if(d.name.length > 30) {
+                                return d.name.substring(0, 29) + "...";
                             } 
                             return d.name; 
                         });
@@ -1077,9 +1078,10 @@ function getRelationOverlayData(line) {
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
             if(link.source.id == line.source.id && link.target.id == line.target.id) {
-                console.log("FOUND RELATION");
-                console.log(link);
+                //console.log(link);
                 array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"});  
+            }else if(link.source.id == line.target.id && link.target.id == line.source.id) {
+                array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"}); 
             }
         }
     }
@@ -1173,7 +1175,7 @@ function createOverlay(x, y, type, selector, info) {
                        .attr("class", "close")
                        .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
                        .on("click", function(d) {
-                           removeOverlay(id);                              
+                           removeOverlay(selector);                              
                        });
                        
     // Close rectangle                                                                     
@@ -1203,7 +1205,7 @@ function updateOverlays() {
         var pieces = $(this).attr("class").split(" ");
         var type = pieces[1];
         var id = pieces[2];
-        console.log("Type: " + type + ", id:" + id);
+        //console.log("Type: " + type + ", id:" + id);
         
         // Select element to align to
         var bbox;
@@ -1212,13 +1214,12 @@ function updateOverlays() {
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
-        console.log(bbox);
+        //console.log(bbox);
         
         // Update position 
         var svgPos = $("svg").position();
         x = bbox.left + bbox.width/2 - svgPos.left
-        y = bbox.top + bbox.height/2 - svgPos.top;
-        console.log("NewX: " + x+ ", newY: " + y);
+        y = bbox.top + bbox.height/2 - svgPos.top;  
         $(this).attr("transform", "translate("+x+","+y+")");
     });
     
@@ -1234,9 +1235,49 @@ function updateOverlays() {
 }
 
 /** Removes the overlay with the given ID */
-function removeOverlay(id) {
-    $(".overlay.id"+id).fadeOut(300, function() {
+function removeOverlay(selector) {
+    $(".overlay."+selector).fadeOut(300, function() {
         $(this).remove();
    }); 
 }
  
+/********************************* MENU ***********************************/
+$(document).ready(function() {
+    // Menu popup link click
+    $(".popup-link").click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var width = $(window).width() / 1.5;
+        var height = $(window).height() / 1.5;
+        
+        var url = $(this).attr("href");
+        top.HEURIST.util.popupURL(top, url, {height:height, width:width});
+    });
+});
+
+/** Constructs an URL that shows the results independently */
+function getCustomURL() {
+    // Get search data
+    var data = settings.getData.call(this, settings.data);
+    console.log(data);
+    
+    // Construct ID's
+    var ids = [];
+    for(var key in data.nodes) {
+        ids.push(data.nodes[key].id);
+    }
+
+    // Construct url
+    var json = JSON.stringify(ids);
+    var url = location.protocol + "//" + location.host + location.pathname + 
+              "?db=" + top.HEURIST.database.name + "&ids=" + json;
+              
+    console.log("URL: " + url);
+    return url;
+}
+
+/** Transforms the visualisation into Gephi format */
+function getGephiFormat() {
+    return "GEPHI FORMAT TEST"; 
+}

@@ -1,49 +1,3 @@
-/** Displays the diagram URL */
-function showDiagramUrl() {
-   top.HEURIST.util.popupURL(this, '../viewers/network/diagramUrl.html', null);
-}
-
-/** Displays the diagram embed code */
-function showDiagramCode() {
-   top.HEURIST.util.popupURL(this, '../viewers/network/diagramCode.html', null);
-}
-
-/** Displays the visualisation in Gephi format */ 
-function showGephiFormat() {
-    top.HEURIST.util.popupURL(this, '../viewers/network/gephiFormat.html', null);
-}
-
-/** Constructs an URL that shows the results independently */
-function getCustomURL() {
-    // Get search data
-    var data = parseRecSet();
-    console.log(data);
-    
-    // Construct ID's
-    var ids = [];
-    for(var key in data.nodes) {
-        ids.push(data.nodes[key].id);
-    }
-    console.log("IDS:");
-    console.log(ids);
-    
-    // Convert data to JSON
-    var json = JSON.stringify(ids);
-    console.log("JSON: " + json);
-
-    // Construct url
-    var url = top.HEURIST.baseURL + "/viewers/network/springDiagram.php" +
-                                    "?db=" + top.HEURIST.database.name + 
-                                    "&ids=" + json;
-    console.log("URL: " + url);
-    return url;
-}
-
-/** Transforms the visualisation into Gephi format */
-function getGephiFormat() {
-    return "GEPHI FORMAT TEST"; 
-}
-
 /** Gets the selected IDs from top.HEURIST.search */
 function getSelectedIDs() {
     var selectedIDs = [];
@@ -87,7 +41,7 @@ function parseRecSet() {
     /**
     * Finds links in a revPtrLinks or revRelLinks object
     */
-    function findLinks(source, object) {
+    function findLinks(source, object, type) {
         var recIDs = object.byRecIDs;
         for(var recID in recIDs) {
             //console.log("ID " +id+ " points to recID: " + recID);
@@ -102,7 +56,7 @@ function parseRecSet() {
                         console.log("Relation #" + i + " ID: " + ids[i]);        
                         var relation = nodes[ids[i]];
                         if(relation === undefined) {
-                            relation = {id: ids[i], name: "Unknown", image: "unknown.png", count: 1};
+                            relation = {id: ids[i], name: type, image: "unknown.png", count: 1, pointer: type.indexOf("ointer")>0};
                         }
                         
                         // Construct a link
@@ -124,20 +78,16 @@ function parseRecSet() {
         
         // Determine links
         if(source !== undefined) {
-             // Get ptrLinks
-            var ptr = results.recSet[id].ptrLinks;
-            //console.log("Ptr for recSet["+id+"]");
-            //console.log(ptr);
-            if(source !== undefined && ptr !== undefined) {
-                findLinks(source, ptr);
-            }
-
-            // Get relLinks
-            var rel = results.recSet[id].relLinks;
-            //console.log("Rel for recSet["+id+"]");
-            //console.log(ptr);
-            if(rel !== undefined) {
-                findLinks(source, rel);
+            var map = {"ptr": "Pointer", "revPtr": "Reverse Pointer", "revPtrLinks": "Reverse pointer link",
+                       "rel": "Relationship", "relLinks": "Relationship marker", "revRelLinks": "Reverse relationship marker"};
+                       
+            for(var key in map) {
+                var object = results.recSet[id][key];
+                console.log(key + " for recSet["+id+"]");
+                console.log(object);
+                if(object !== undefined) {
+                    findLinks(source, object, map[key]);
+                }
             }
         }
     }
@@ -168,6 +118,8 @@ function visualize(data) {
     
     // Call plugin
     console.log("Calling plugin!");
+    localStorage.setItem(setting_entityradius, 1);
+    localStorage.setItem(setting_linewidth, 1);
     $("#visualisation").visualize({
         data: data,
         getData: function(data) { return getData(data); },

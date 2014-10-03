@@ -30,9 +30,14 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Spring Diagram</title>
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">    
-        <link rel="stylesheet" type="text/css" href="../../common/css/diagram.css">
-
+        <!-- Styles -->
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">  
+        <style>
+            body, html {
+                background-color: #fff;
+            }
+        </style>
+        
          <!-- jQuery -->
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         

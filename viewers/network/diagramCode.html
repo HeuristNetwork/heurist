@@ -17,10 +17,9 @@
                 font-family: times; 
                 font-size: 10px; 
                 width: 100%; 
-                height: 60px;
+                height: 150px;
             }
-        </style>
-        <script type="text/javascript" src="springDiagram.js"></script>
+        </style>                                                                   
     </head>
 
     <body>
@@ -40,7 +39,7 @@
         
         <script>
             // Show in textbox
-            var url = getCustomURL();
+            var url = window.parent.getCustomURL();
             var box = document.getElementById("code-textbox");
             box.innerHTML = "<iframe src='"+url+"'></iframe>";
         </script>
