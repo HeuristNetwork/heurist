@@ -119,11 +119,35 @@ var setting_attraction    = "setting_attraction";
 var setting_fisheye       = "setting_fisheye";
 
 /**
+* Returns a URL parameter
+* @param name Name of the parameter
+*/
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+/**
+* Returns the database name from the search query string
+*/
+function getDatabaseName() {
+    return getParameterByName("db");
+}
+/**
  * Returns a setting from the localStorage
  * @param setting The setting to retrieve
  */
 function getSetting(setting) {
-    return localStorage.getItem(setting);
+    return localStorage.getItem(getDatabaseName()+setting);
+}
+
+/**
+* Stores a value in the localStorage
+*/
+function putSetting(key, value) {
+    localStorage.setItem(getDatabaseName()+key, value);
 }
 
 /**
@@ -134,7 +158,7 @@ function getSetting(setting) {
 function checkSetting(key, value) {
     var obj = getSetting(key);
     if(obj === null) {
-        localStorage.setItem(key, value);
+        putSetting(key, value);
     }
 }
 
@@ -171,7 +195,7 @@ function handleSettingsInUI() {
             
             // Listens to linetype selection changes
             $("#linetype").change(function(e) {
-                localStorage.setItem(setting_linetype, $("#linetype").val());
+                putSetting(setting_linetype, $("#linetype").val());
                 visualizeData();
             });
         }else{
@@ -185,7 +209,7 @@ function handleSettingsInUI() {
             
             // Listen to line length changes
             $("#linelength").change(function() {
-                localStorage.setItem(setting_linelength, $(this).val());
+                putSetting(setting_linelength, $(this).val());
                 visualizeData();
             });
         }else{
@@ -199,7 +223,7 @@ function handleSettingsInUI() {
             
             // Listen to line width changes
             $("#linewidth").change(function() {
-                localStorage.setItem(setting_linewidth, $(this).val());
+                putSetting(setting_linewidth, $(this).val());
                 visualizeData();
             });
         }else{
@@ -217,7 +241,7 @@ function handleSettingsInUI() {
                 onSubmit: function(hsb, hex, rgb, el) {
                     var color = "#"+hex; 
                     
-                    localStorage.setItem(setting_linecolor, color);
+                    putSetting(setting_linecolor, color);
                     $(".link").attr("stroke", color);
             
                     $(el).css('background-color', color);
@@ -239,7 +263,7 @@ function handleSettingsInUI() {
                 onSubmit: function(hsb, hex, rgb, el) {
                     var color = "#"+hex; 
                     
-                    localStorage.setItem(setting_markercolor, color);
+                    putSetting(setting_markercolor, color);
                     $("marker").attr("fill", color);
                     
                     $(el).css('background-color', color);
@@ -262,7 +286,7 @@ function handleSettingsInUI() {
             
             // Listen to line width changes
             $("#entityradius").change(function() {
-                localStorage.setItem(setting_entityradius, $(this).val());
+                putSetting(setting_entityradius, $(this).val());
                 visualizeData();
             });
         }else{
@@ -280,7 +304,7 @@ function handleSettingsInUI() {
                 onSubmit: function(hsb, hex, rgb, el) {
                     var color = "#"+hex; 
                     
-                    localStorage.setItem(setting_entitycolor, color);
+                    putSetting(setting_entitycolor, color);
                     $(".background").attr("fill", color);
                     
                     $(el).css('background-color', color);
@@ -303,7 +327,7 @@ function handleSettingsInUI() {
             
             // Listen to font size changes
             $("#fontsize").change(function() {
-                localStorage.setItem(setting_fontsize, $(this).val()+"px");
+                putSetting(setting_fontsize, $(this).val()+"px");
                 $(".node text").css("font-size", getSetting(setting_fontsize), "important");
                 $(".node text").each(function() {
                     this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
@@ -325,7 +349,7 @@ function handleSettingsInUI() {
                 onSubmit: function(hsb, hex, rgb, el) {
                     var color = "#"+hex; 
                     
-                    localStorage.setItem(setting_textcolor, color);
+                    putSetting(setting_textcolor, color);
                     $(".namelabel").attr("fill", color);
                     
                     $(el).css('background-color', color);
@@ -348,7 +372,7 @@ function handleSettingsInUI() {
 
             // Listen to formula changes
             $("#formula").change(function() {
-                localStorage.setItem(setting_formula, $(this).val());
+                putSetting(setting_formula, $(this).val());
                 visualizeData();
             });
         }else{
@@ -364,7 +388,7 @@ function handleSettingsInUI() {
             
             // Listen to fisheye changes
             $("#fisheye").change(function(e) {
-                localStorage.setItem(setting_fisheye, $(this).is(':checked'));
+                putSetting(setting_fisheye, $(this).is(':checked'));
                 visualizeData();
             });
         }else{
@@ -383,7 +407,7 @@ function handleSettingsInUI() {
 
             // Listen to gravity changes
             $("#gravity").change(function() {
-                localStorage.setItem(setting_gravity,  $(this).val());
+                putSetting(setting_gravity,  $(this).val());
                 visualizeData();
             });
         }else{
@@ -397,7 +421,7 @@ function handleSettingsInUI() {
             
             // Listen to attraction changes
             $("#attraction").change(function() {
-                localStorage.setItem(setting_attraction, $(this).val());
+                putSetting(setting_attraction, $(this).val());
                 visualizeData();
             });
         }else{
@@ -668,7 +692,7 @@ function visualizeData() {
         obj.py = d.py;
         obj.x = d.x;
         obj.y = d.y;
-        localStorage.setItem(d.id, JSON.stringify(obj));
+        putSetting(d.id, JSON.stringify(obj));
     
         // Update nodes & lines                                                           
         if(linetype == "curved") { 
@@ -998,11 +1022,33 @@ function visualizeData() {
 }
 
 /*************************************** OVERLAY ****************************************/
+
+/**
+* Splits the header into smaller pieces
+* @param header Full header String
+* @returns {Array} An array containing pieces
+*/
+function splitHeader(header) {
+    console.log("Header: " + header);
+    var array = [];
+    
+    var index = 40;
+    while(index < header.length) {
+        array.push({text: header.substr(index-40, index), size: "11px", style: "bold", multiline: index>40});
+        index += 40;
+    } 
+    array.push({text: header.substr(index-40, header.length) , size: "11px", style: "bold"}); 
+    
+    return array; 
+}
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
     console.log(record);
     var array = [];
-    array.push({text: record.name + ", n="+record.count, size: "13px", style: "bold", enter: true});
+    
+    // Header
+    var header = record.name + ", n=" + record.count;
+    array = array.concat(splitHeader(header));            
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1068,9 +1114,11 @@ function getRecordOverlayData(record) {
 function getRelationOverlayData(line) {
     console.log(line);
     var array = [];
-    array.push({text: line.source.name + " ↔ " + line.target.name, size: "11px", style: "bold", enter: true});
-    // array.push({text: line.relation.name + ", n=" + line.relation.count, size: "13px", style: "bold", enter: true});
     
+    // Header
+    var header = line.source.name + " ↔ " + line.target.name;
+    array = array.concat(splitHeader(header));
+
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
     if(data && data.links.length > 0) {
@@ -1129,11 +1177,10 @@ function createOverlay(x, y, type, selector, info) {
                           return offset;
                       })        // Some left padding
                       .attr("y", function(d, i) {
-                          position += offset; 
-                          // Enter check
-                          if(d.enter) {
-                            position += indent;
-                          }  
+                          // Multiline check
+                          if(!d.multiline) { 
+                              position += offset;
+                          }
                           return position;      // Position calculation
                       })
                       .attr("font-weight", function(d) {  // Font weight based on style property
@@ -1240,6 +1287,8 @@ function removeOverlay(selector) {
         $(this).remove();
    }); 
 }
+
+
  
 /********************************* MENU ***********************************/
 $(document).ready(function() {
@@ -1271,7 +1320,7 @@ function getCustomURL() {
     // Construct url
     var json = JSON.stringify(ids);
     var url = location.protocol + "//" + location.host + location.pathname + 
-              "?db=" + top.HEURIST.database.name + "&ids=" + json;
+              "?db=" + getDatabaseName() + "&ids=" + json;
               
     console.log("URL: " + url);
     return url;

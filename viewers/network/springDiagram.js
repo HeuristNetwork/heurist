@@ -118,8 +118,8 @@ function visualize(data) {
     
     // Call plugin
     console.log("Calling plugin!");
-    localStorage.setItem(setting_entityradius, 1);
-    localStorage.setItem(setting_linewidth, 1);
+    putSetting(setting_entityradius, 1);
+    putSetting(setting_linewidth, 1);
     $("#visualisation").visualize({
         data: data,
         getData: function(data) { return getData(data); },
