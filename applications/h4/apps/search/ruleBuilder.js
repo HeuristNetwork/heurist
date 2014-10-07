@@ -23,11 +23,10 @@ $.widget( "heurist.ruleBuilder", {
     options: {
         // callbacks
         queries:[],
-        recordtypes: []  //array or record types from current main search result
-        
+        recordtypes: [],  //array or record types from current main search result
+        query_request: {}   // keep current query request
     },
     
-    _query_request: {},   // keep current query request
     _selection: null,     // current set of selected records
     _arr_fields:[],
     _arr_rectypes:[],
@@ -104,16 +103,24 @@ $.widget( "heurist.ruleBuilder", {
             //that._refresh();
         });*/        
 
-        /*if(parent.document)        
-        $(parent.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+        /* can not bind event handler for parent document - need to be triggered directly
+        if(top && top.document)        
+        $(top.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
                   //that.option("recordset", data); //hRecordSet
-                  alert('!!!!');s
+                  alert('1111');s
             }
-        });*/
+        });
         
-        
+        $(top.parent.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
+
+            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+                  //that.option("recordset", data); //hRecordSet
+                  alert('22222');s
+            }
+        });
+        */
         
         this._onSelectRectype();
         this._refresh();
@@ -303,7 +310,7 @@ $.widget( "heurist.ruleBuilder", {
                             top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'any', false);
                         }
                         //reduced list of constraints
-                        top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, 'any');
+                        top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, arr_field.rectypes.length>1?'any':null);
                         is_not_selected = false;
                         break;
                     }
@@ -315,22 +322,22 @@ $.widget( "heurist.ruleBuilder", {
             }
             if(is_not_selected){
                 //show all constraints
-                top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes, 'any');
+                top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes, this._arr_rectypes.length>1?'any':null);
             }
             
-            if(this.select_target_rectype.find("option").length>2){
+            /*if(this.select_target_rectype.find("option").length>2){
                 this.label_4.show();
                 this.select_target_rectype.show();
             }else{
                 this.label_4.hide();
                 this.select_target_rectype.hide();
-            }
+            }*/
             
             this._generateQuery();
     },
     
     //
-    //
+    // compose search query
     //
     _generateQuery: function(){
         
@@ -383,19 +390,29 @@ $.widget( "heurist.ruleBuilder", {
     
     _debugSearch: function(){
         
-        var qsearch;
+        var qsearch = '';
         if(this.debug_filter.val()!=''){
             qsearch = this.debug_filter.val();
         } else {
-            return;
+            //return;
         }
         
+        if(!top.HEURIST4.util.isempty(this.options.queries)){
+            qsearch = this.options.queries[0] + ' ' + qsearch;
+        }
+        //to do this.options.queries.join(' OR ')
+
         var request = {q: qsearch, w: 'a', source:this.element.attr('id') };  //f: this.options.searchdetails, 
+        
+        
+        if(this.options.query_request && this.options.query_request.q){
+            request.tq = this.options.query_request.q;
+            if(this.options.query_request.s) request.ts = this.options.query_request.s;
+            if(this.options.query_request.l) request.tl = this.options.query_request.l;
+            if(this.options.query_request.o) request.to = this.options.query_request.o;
+        }
 
-            //that._trigger( "onsearch"); //this widget event
-            //that._trigger( "onresult", null, resdata ); //this widget event
-
-            //perform search
+        // perform search
         top.HAPI4.RecordMgr.search(request, $(this.document));
         
     },

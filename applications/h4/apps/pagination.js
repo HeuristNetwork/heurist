@@ -32,7 +32,7 @@ $.widget( "heurist.pagination", {
     max_page: 0,
     count_total: null,
     query_request: null,  //current search request
-    limit: 200,
+    limit: 1000,
 
     // the constructor
     _create: function() {
@@ -81,7 +81,7 @@ $.widget( "heurist.pagination", {
         var smenu = '<li id="search-limit-10"><a href="#">10</a></li>'+
         '<li id="search-limit-50"><a href="#">50</a></li>'+
         '<li id="search-limit-100"><a href="#">100</a></li>'+
-        '<li id="search-limit-200"><a href="#">200</a></li>';                
+        '<li id="search-limit-200"><a href="#">200</a></li>'+                
         '<li id="search-limit-1000"><a href="#">1000</a></li>';                
 
         this.menu_search_limit = $('<ul>'+smenu+'</ul>')   //<a href="#">

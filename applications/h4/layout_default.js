@@ -101,7 +101,7 @@ var layouts = [
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[                                      
-                    {appid:'h3_recordDetails'},    //H4 record viewer
+                    // {appid:'h3_recordDetails'},    //H4 record viewer
 
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'h3_recordListExt', options:{title:'Map', url: 'viewers/map/showMap.html'}},    //H3 mapper

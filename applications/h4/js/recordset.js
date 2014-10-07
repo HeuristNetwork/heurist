@@ -31,7 +31,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
-    records = [],      //array of values
+    records = null,      //list of records objects
     rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
 
@@ -44,7 +44,7 @@ function hRecordSet(initdata) {
         offset = Number(response.offset);
         fields = response.fields;
         rectypes = response.rectypes;
-        if ($.isArray(records)) { records = response.records };
+        records = response.records;  //$.isArray(records)
         structures = response.structures;
         //@todo - merging
     }
@@ -350,7 +350,7 @@ function hRecordSet(initdata) {
         */
         getById: function(recID){
 
-            if ($.inArray(recID, records)) {
+            if (true || $.inArray(recID, records)) {
                 return records[recID];
             }
             /*
@@ -394,13 +394,13 @@ function hRecordSet(initdata) {
         /**
         * Returns recordSet with the same field and structure definitions
         * 
-        * @param {Array} _records - array of records
+        * @param  _records - list of objects/records
         * 
         * @returns {hRecordSet}
         */
         getSubSet: function(_records){
             if(_records==null){
-                _records = [];
+                _records = {};
             }
             return new hRecordSet({
                 count_total: Object.keys(records).length, //$(_records).length,
@@ -412,6 +412,51 @@ function hRecordSet(initdata) {
             });
         },
 
+        /**
+        * Returns new recordSet that is the join from current and given recordset
+        */
+        doUnite: function(recordset2){
+            if(recordset2==null){
+                return that;
+            }
+            
+            //join records
+            var records2 = recordset2.getRecords();
+            for (recid in records){
+                if(recid && !records2[recid]){
+                    records2[recid] = records[recid];
+                }
+            }
+            //join structures
+            var structures2 = recordset2.getRecords();
+            /* @todo
+            for (rt_id in structures){
+                if(rt_id && !structures2[rt_id]){
+                    structures2[rt_id] = structures[rt_id];
+                }
+            }
+            typedefs, names, pluralNames
+            */
+            
+            
+            var fields2 = recordset2.getFields();
+            jQuery.merge( fields2, fields );
+            fields2 = jQuery.unique( fields2 );
+
+            var rectypes2 = recordset2.getFields();
+            jQuery.merge( rectypes2, rectypes );
+            rectypes2 = jQuery.unique( rectypes2 );
+            
+            return new hRecordSet({
+                count_total: Object.keys(records2).length, //$(_records).length,
+                offset: 0,
+                fields: fields2,
+                rectypes: rectypes,
+                structures: structures2,
+                records: records2
+            });
+        },
+        
         /**
         * Returns the actual number of records 
         * 
@@ -459,6 +504,10 @@ function hRecordSet(initdata) {
         
         getRectypes: function(){
             return rectypes;
+        },
+        
+        getFields: function(){
+            return fields;
         },
 
         /* record - hRecord or rectypeID

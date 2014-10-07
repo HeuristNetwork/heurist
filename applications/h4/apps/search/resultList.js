@@ -143,14 +143,17 @@ $.widget( "heurist.resultList", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                var new_title = top.HR(data.qname || 'Search result');
-                var $header = $(".header"+that.element.attr('id'));
-                $header.html(new_title);
-                $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
+                if(data && data.source!=that.element.attr('id')) {  //new search from outside
+                    
+                    var new_title = top.HR(data.qname || 'Search result');
+                    var $header = $(".header"+that.element.attr('id'));
+                    $header.html(new_title);
+                    $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
 
-                that._query_request = data;  //keep current query request 
-                that.option("recordset", null);
-                that.loadanimation(true);
+                    that._query_request = data;  //keep current query request 
+                    that.option("recordset", null);
+                    that.loadanimation(true);
+                }
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
@@ -598,6 +601,11 @@ $.widget( "heurist.resultList", {
         }
     },
 
+    /**
+    * search with the same criteria for all reocrds (assumed before it was for bookmarks)
+    * 
+    * @returns {Boolean}
+    */
     _doSearch4: function(){
 
         if ( this._query_request ) {

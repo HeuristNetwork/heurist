@@ -361,6 +361,8 @@
 
         function addTopLimb($text) {
 
+
+            
             $or_limbs = array();
             // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
             $or_texts = preg_split('/\\b *OR *\\b/i', $text);
@@ -520,11 +522,14 @@
                 $this->negate = false;
             }
 
+            //create predicate
             $this->pred = $this->createPredicate($text); //was by reference
+            
         }
 
 
         function createPredicate($text) {
+            
             $colon_pos = strpos($text, ':');
             if ($equals_pos = strpos($text, '=')) {
                 if (! $colon_pos  ||  $equals_pos < $colon_pos) {
@@ -555,8 +560,8 @@
                     return new TagPredicate($this, $pred_val);
                 else if (defined('stype')  &&  stype == 'all')
                     return new AnyPredicate($this, $pred_val);
-                    else    // title search is default search
-                        return new TitlePredicate($this, $pred_val);
+                else    // title search is default search
+                    return new TitlePredicate($this, $pred_val);
             }
 
             $pred_type = substr($text, 0, $colon_pos);
@@ -841,9 +846,19 @@
         function &getQuery() {
             if (! $this->query) {
                 $c = &$this->parent;
+                
                 //loop up to top-most parent "Query"
-                while ($c  &&  strtolower(get_class($c)) != 'query') 
+                while ($c  &&  strtolower(get_class($c)) != 'query') {
                     $c = &$c->parent;
+                    /*if(!is_object($c)){
+    error_log(">>>>>2NOT OBJECT ".print_r($c, true));
+    error_log("2IN >>>>>".get_class($this));
+                        return null;
+                    }else{
+    error_log(get_class($c)."    ".(strtolower(get_class($c)) != 'query'));
+                    }*/
+                }
+                    
 
                 $this->query = &$c;
             }
@@ -911,7 +926,7 @@
             
             $not = ($this->parent->negate)? 'not ' : '';
 
-            $query = &$this->getQuery();
+            $query = &$this->getQuery(); //not used 
             $evalue = $mysqli->real_escape_string($this->value);
 
             if($isTopRec){
@@ -1417,9 +1432,9 @@
         function makeSQL() {
             global $mysqli;
             
-            $query = &$this->getQuery();
+            $pquery = &$this->getQuery();
             $not = ($this->parent->negate)? 'not ' : '';
-            if ($query->search_domain == BOOKMARK) {
+            if ($pquery->search_domain == BOOKMARK) {
                 if (is_numeric(join('', $this->value))) {    // if all tag specs are numeric then don't need a join
                     return $not . 'exists (select * from usrRecTagLinks where rtl_RecID=bkm_RecID and rtl_TagID in ('.join(',', $this->value).'))';
                 } else if (! $this->wg_value) {
@@ -1438,7 +1453,7 @@
                         }
                         $first_value = false;
                     }
-                    $query .=              ') and kwd.tag_UGrpID='.$query->currUserID.') ';
+                    $query .=              ') and kwd.tag_UGrpID='.$pquery->currUserID.') ';
                 } else {
                     $query=$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
                     . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
@@ -1550,31 +1565,33 @@
                 }else{ 
                     //linked from specific record type (by any field)
                     $add_from =  'defDetailTypes, recDetails bd ';
-                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")'; 
+                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" '; 
                 }
             }else{ //any linked from
                     $add_from =  'defDetailTypes, recDetails bd ';
-                    $add_where = 'bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource"';
+                    $add_where = 'bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" ';
             }
             
-           $select = 'exists (select bd.rec_ID  ';
+           $select = 'exists (select bd.dtl_RecID  ';
             
-            $query = &$this->getQuery();
-            if ($query->parentquery){
+            $pquery = &$this->getQuery();
+            if ($pquery->parentquery){
                 
-                $query = $query->parentquery;
-                $query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
-                
+                $query = $pquery->parentquery;
+                //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
                 $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
                 $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
-                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
-                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+                $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+//error_log("select: ".$select);                
                 
             }else{
                 
-               $select = $select.' FROM '.(($source_rty_ID)?'Records,':'').$add_from.' WHERE '.$add_where.')';
+               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
                 /*
                 if($source_rty_ID){
                 

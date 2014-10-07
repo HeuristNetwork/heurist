@@ -213,7 +213,9 @@ $.widget( "heurist.recordListExt", {
                 if(showMap){
                     showMap.processMap();
                 }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
-                    this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes());
+                    
+                    //todo - swtich to event trigger????
+                    this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
                 }
             }
             

@@ -611,7 +611,7 @@
         }
 
 
-        $select_clause = 'select SQL_CALC_FOUND_ROWS '
+        $select_clause = 'select SQL_CALC_FOUND_ROWS '   //this function does not pay attention on LIMIT - it returns total number of rows
         .'bkm_ID,'
         .'bkm_UGrpID,'
         .'rec_ID,'
@@ -636,18 +636,19 @@
             $params_top['l'] = @$params['tl']; //limit
             $params_top['o'] = @$params['to']; //offset
 
-            $query_top = get_sql_query_clauses($mysqli, $params, $currentUser);
+            $query_top = get_sql_query_clauses($mysqli, $params_top, $currentUser);
             
             //2. define current query - set one of paremters as a reference to the parent query
             
             $params['parentquery'] = $query_top;
+
+//error_log("parent query ".print_r($query_top, true));
         
         }
-        $query = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
-        $query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+        $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
-        //DEGUG 
-error_log("AAA ".$query);
+        //DEGUG error_log("AAA ".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -678,11 +679,14 @@ error_log("AAA ".$query);
                 while ( ($row = $res->fetch_row()) && (count($records)<1001) ) {
                     array_push( $row, fileGetThumbnailURL($system, $row[2]) );
                     $records[$row[2]] = $row;
-                    array_push($rectypes, $row[4]);
+                    if(!array_key_exists($row[4], $rectypes)){
+                        $rectypes[$row[4]] = 1;
+                    }
                 }
                 $res->close();
 
-                $rectypes = array_unique($rectypes);
+                $rectypes = array_keys($rectypes);
+                //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
 
                 if($need_details){
                     //search for specific details

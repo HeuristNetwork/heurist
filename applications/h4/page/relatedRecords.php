@@ -97,18 +97,21 @@
             //
             //
             //
-            function updateRuleBuilder(rectypes){
+            function updateRuleBuilder(rectypes, query_request){
                 
                 if(ruleBuilder && rectypes){
                     ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
+                    ruleBuilder.ruleBuilder('option', 'query_request', query_request );
                 } 
             }
             
             $(document).ready(function() {
 
                 if(!top.HAPI4){
+                    //this is case of standaloe page
                     top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onLoadHAPI);//, < ?=json_encode($system->getCurrentUser())? > );
                 }else{
+                    //otherwise we take everything from parent window
                     onLoadHAPI(true);
                 }
 
