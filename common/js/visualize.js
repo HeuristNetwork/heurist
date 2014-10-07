@@ -1021,34 +1021,27 @@ function visualizeData() {
     
 }
 
-/*************************************** OVERLAY ****************************************/
+/*************************************** OVERLAY ****************************************/  
 
 /**
-* Splits the header into smaller pieces
-* @param header Full header String
-* @returns {Array} An array containing pieces
+* Truncates text after 80 characaters
+* @param text The text to truncate
 */
-function splitHeader(header) {
-    console.log("Header: " + header);
-    var array = [];
-    
-    var index = 40;
-    while(index < header.length) {
-        array.push({text: header.substr(index-40, index), size: "11px", style: "bold", multiline: index>40});
-        index += 40;
-    } 
-    array.push({text: header.substr(index-40, header.length) , size: "11px", style: "bold"}); 
-    
-    return array; 
+function truncateText(text) {
+    var maxLength = 40;
+    if(text.length > maxLength) {
+        return text.substring(0, maxLength-1) + "...";
+    }
+    return text; 
 }
+
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
     console.log(record);
     var array = [];
     
     // Header
-    var header = record.name + ", n=" + record.count;
-    array = array.concat(splitHeader(header));            
+    array.push({text: truncateText(record.name) + ", n=" + record.count, size: "12px", style: "bold", enter: true});        
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1064,7 +1057,7 @@ function getRecordOverlayData(record) {
                     map[link.relation.name] = {};
                 }
                 
-                var obj = {text: "➜ " + link.target.name + ", n=" + link.targetcount, size: "9px", indent: true}; 
+                var obj = {text: "➜ " + truncateText(link.target.name) + ", n=" + link.targetcount, size: "9px", indent: true}; 
                 if(map[link.relation.name][obj.text] == undefined) {
                     map[link.relation.name][obj.text] = obj;
                 }
@@ -1088,7 +1081,7 @@ function getRecordOverlayData(record) {
                     map[link.relation.name] = {};
                 }
                 
-                var obj = {text: link.source.name + " ↔ " + link.target.name + ", n=" + link.relation.count, size: "9px", indent: true};
+                var obj = {text: truncateText(link.source.name) + " ↔ " + truncateText(link.target.name) + ", n=" + link.relation.count, size: "9px", indent: true};
                 if(map[link.relation.name][obj.text] == undefined) {
                     map[link.relation.name][obj.text] = obj;
                 }
@@ -1100,7 +1093,7 @@ function getRecordOverlayData(record) {
         
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: key, size: "11px", enter: true}); // Heading
+            array.push({text: truncateText(key), size: "11px", enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
