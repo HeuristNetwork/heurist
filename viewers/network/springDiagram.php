@@ -63,7 +63,7 @@
         
         <!-- Visualize data -->
         <script>
-            $(document).ready(function() {
+            $(document).ready(function() { 
             try {    
                 // Get parameters
                 var parameters = {};
@@ -85,12 +85,12 @@
                     var data = parseRecSet();  // Parse the Javascript data
                     visualize(data);           // Visualize the data
                 }
-
+   
             } catch(error) {
                 $("body").append("<h3>Error occured</h3><br /><i>" + error.message + "</i>");        
             }
-
-        });
+ 
+        }); 
         </script>
     </body>
     

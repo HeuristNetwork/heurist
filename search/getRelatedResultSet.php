@@ -746,6 +746,6 @@ function getRelationStructure() {
 //  Output
 //----------------------------------------------------------------------------//
 
-echo json_format( getRelationStructure(), true);
+echo json_encode( getRelationStructure(), true);
 
 ?>

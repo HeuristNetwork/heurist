@@ -69,7 +69,7 @@ var svg;        // The SVG where the visualisation will be executed on
             
             // UI default settings
             linetype: "straight",
-            linelength: 300,
+            linelength: 100,
             linewidth: 15,
             linecolor: "#22a",
             markercolor: "#000",
@@ -524,10 +524,25 @@ function visualizeData() {
     
     // Record data
     var data = settings.getData.call(this, settings.data);
-    determineMaxCount(data); 
     console.log("RECORD DATA");
     console.log(data); 
-     
+      
+    // Limit check
+    if(Object.keys(data.nodes).length > 2000) {
+        svg.selectAll("text")
+           .data(["Sorry, there are too many records to render.", "The limit is set at 2000 records."])
+           .enter()
+           .append("text")
+           .text(function(d) {
+               return d;
+           })
+           .attr("x", width/2-100)
+           .attr("y", function(d,i) {
+               return height/2 + i*15;
+           });             
+        return false;
+    }    
+   
     // Line settings
     var linetype = getSetting(setting_linetype);
     var linelength = getSetting(setting_linelength);
@@ -556,8 +571,8 @@ function visualizeData() {
                                                     console.log("TRANSLATE Y: " + translateY);
     // Append zoomable container       
     var container = svg.append("g")
-                       .attr("id", "the-container");                   
-
+                       .attr("id", "the-container");    
+    
     // Adding zoom
     var zoomBehaviour = d3.behavior.zoom()
                           .scale(scale)
@@ -570,7 +585,7 @@ function visualizeData() {
     /** Updates the container after a zoom event */             
     function zoomed() {      
         // Translate
-        console.log(d3.event.translate);
+        //console.log(d3.event.translate);
         if(d3.event.translate !== undefined) {
             if(!isNaN(d3.event.translate[0])) {
                 putSetting(setting_translatex, d3.event.translate[0]);
@@ -580,20 +595,20 @@ function visualizeData() {
             }
         }
         // Scale
-        console.log(d3.event.scale);
+        //console.log(d3.event.scale);
         if(!isNaN(d3.event.scale)) {
             putSetting(setting_scale, d3.event.scale);
         }
         // Transform         
         var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
-        console.log("ZOOMED --> " + transform);
+        //console.log("ZOOMED --> " + transform);
         container.attr("transform", transform);
         updateOverlays();           
-        
-    }   
+    }  
     svg.call(zoomBehaviour); 
 
     // Creating D3 force
+    determineMaxCount(data);
     var force = d3.layout.force()
                          .nodes(d3.values(data.nodes))
                          .links(data.links)
@@ -829,8 +844,8 @@ function visualizeData() {
                        // Check if it's not a click after dragging
                        if(!d3.event.defaultPrevented) {
                            var id = d.id;
-                           if($(".overlay.id"+id).length > 0) { // Close overlay
-                               removeOverlay(id);
+                           if($(".overlay.id"+id).length > 0) { // Close overlay           
+                                removeOverlay(id);
                            }else{ // Display overlay
                                 createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+id, getRecordOverlayData(d));  
                            }
@@ -1167,8 +1182,8 @@ function getRelationOverlayData(line) {
     var array = [];
     
     // Header
-    var header = line.source.name + " ↔ " + line.target.name;
-    array = array.concat(splitHeader(header));
+    var header = {text: truncateText(line.source.name) + " ↔ " + truncateText(line.target.name), size: "12px", style: "bold", enter: true};
+    array.push(header);
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1176,10 +1191,16 @@ function getRelationOverlayData(line) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
+            
+            // Check if this line is between the source & target.
             if(link.source.id == line.source.id && link.target.id == line.target.id ||
                link.source.id == line.target.id && link.target.id == line.source.id) {
                 //console.log(link);
-                array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"});  
+                var relation = {text: truncateText(link.relation.name), size: "9px"}; 
+                if(settings.showCounts) {
+                    relation.text += ", n=" + link.relation.count
+                }
+                array.push(relation);  
             }
         }
     }

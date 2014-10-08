@@ -1,6 +1,6 @@
 /** Gets the selected IDs from top.HEURIST.search */
 function getSelectedIDs() {
-    var selectedIDs = [];
+    var selectedIDs = [];  
     var recIDs = top.HEURIST.search.getSelectedRecIDs(); 
     if(recIDs) {
         for(var key in recIDs) {
@@ -8,15 +8,15 @@ function getSelectedIDs() {
                 selectedIDs.push(recIDs[key]);       
             }
         }
-    }
+    } 
     console.log("SELECTED IDs");
     console.log(selectedIDs);
     return selectedIDs;
 }
 
-/** Parses a recSet into usable data */
+/** Parses a recSet into usable data */ 
 function parseRecSet() {
-    var selectedIDs = getSelectedIDs();
+    var selectedIDs = getSelectedIDs();    
     var results = top.HEURIST.search.results;
     var nodes = {};
     var links = [];
